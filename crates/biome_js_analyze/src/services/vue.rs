@@ -7,6 +7,8 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueReference`] runs the rule once per use of a name. Use it when the
+//!   rule judges what a use refers to.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -25,7 +27,8 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
+    Component, Prop, Reference, SnippetId, Symbol, VueSemanticModel, component_model,
+    vue_model_from_source,
 };
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -93,10 +96,15 @@ impl VueSemanticService {
     fn declares(&self, symbol: &Symbol) -> bool {
         symbol.snippet().map(|snippet| snippet.id()) == self.snippet
     }
+
+    /// Returns `true` when `reference` is written in the analyzed tree.
+    fn contains(&self, reference: &Reference) -> bool {
+        reference.snippet().map(|snippet| snippet.id()) == self.snippet
+    }
 }
 
-/// Builds the Vue semantic model and emits a query match for each component
-/// and each declaration written in the analyzed tree.
+/// Builds the Vue semantic model and emits a query match for each component,
+/// each declaration and each reference written in the analyzed tree.
 pub(crate) struct VueSemanticVisitor;
 
 impl Visitor for VueSemanticVisitor {
@@ -126,6 +134,13 @@ impl Visitor for VueSemanticVisitor {
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
             }
+        }
+        for reference in service
+            .model
+            .references()
+            .filter(|reference| service.contains(reference))
+        {
+            ctx.match_query(VueReferenceMatch(reference));
         }
     }
 }
@@ -172,4 +187,11 @@ define_vue_query!(
     VueProp,
     VuePropMatch,
     Prop
+);
+define_vue_query!(
+    /// Matches each use of a name written in the analyzed tree, whatever it
+    /// resolves to.
+    VueReference,
+    VueReferenceMatch,
+    Reference
 );

@@ -1,0 +1,147 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-watch.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  data() {
+    return {
+      count: 0,
+      items: [],
+      user: { name: "" },
+    };
+  },
+  methods: {
+    onCount() {},
+  },
+  watch: {
+    count: "onCount",
+    total: "onCount",
+    "user.nmae": "onCount",
+    "user.name": "onNameChange",
+    items: ["onCount", { handler: "onItemsChange", deep: true }],
+  },
+  expose: ["count", "reset"],
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-watch.vue:16:5 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × total isn't declared by this component.
+  
+    14 │   watch: {
+    15 │     count: "onCount",
+  > 16 │     total: "onCount",
+       │     ^^^^^
+    17 │     "user.nmae": "onCount",
+    18 │     "user.name": "onNameChange",
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-watch.vue:17:5 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × user.nmae isn't declared by this component.
+  
+    15 │     count: "onCount",
+    16 │     total: "onCount",
+  > 17 │     "user.nmae": "onCount",
+       │     ^^^^^^^^^^^
+    18 │     "user.name": "onNameChange",
+    19 │     items: ["onCount", { handler: "onItemsChange", deep: true }],
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-watch.vue:18:18 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onNameChange isn't declared by this component.
+  
+    16 │     total: "onCount",
+    17 │     "user.nmae": "onCount",
+  > 18 │     "user.name": "onNameChange",
+       │                  ^^^^^^^^^^^^^^
+    19 │     items: ["onCount", { handler: "onItemsChange", deep: true }],
+    20 │   },
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-watch.vue:19:35 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × onItemsChange isn't declared by this component.
+  
+    17 │     "user.nmae": "onCount",
+    18 │     "user.name": "onNameChange",
+  > 19 │     items: ["onCount", { handler: "onItemsChange", deep: true }],
+       │                                   ^^^^^^^^^^^^^^^
+    20 │   },
+    21 │   expose: ["count", "reset"],
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-watch.vue:21:21 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × reset isn't declared by this component.
+  
+    19 │     items: ["onCount", { handler: "onItemsChange", deep: true }],
+    20 │   },
+  > 21 │   expose: ["count", "reset"],
+       │                     ^^^^^^^
+    22 │ };
+    23 │ </script>
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

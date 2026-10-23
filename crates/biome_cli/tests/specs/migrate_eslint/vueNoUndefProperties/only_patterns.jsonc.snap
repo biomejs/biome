@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: only_patterns.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"vue/no-undef-properties": ["warn", { "ignores": ["/^\\$/", "/^_/"] }]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": { "noVueUndeclaredProperties": "warn" }
+		}
+	}
+}
+
+```

@@ -1862,6 +1862,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noVueUndeclaredProperties",
+        TypeId::of::<
+            biome_rule_options::no_vue_undeclared_properties::NoVueUndeclaredPropertiesOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noVueUnusedEmitDeclarations",
         TypeId::of::<
             biome_rule_options::no_vue_unused_emit_declarations::NoVueUnusedEmitDeclarationsOptions,

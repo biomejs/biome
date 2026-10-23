@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-style-v-bind.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const color = "red";
+</script>
+
+<template>
+  <p>Text</p>
+</template>
+
+<style>
+p {
+  color: v-bind(color);
+  background: v-bind(background);
+}
+</style>
+
+```
+
+# Diagnostics
+```
+invalid-style-v-bind.vue:13:22 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × background isn't declared by this component.
+  
+    11 │ p {
+    12 │   color: v-bind(color);
+  > 13 │   background: v-bind(background);
+       │                      ^^^^^^^^^^
+    14 │ }
+    15 │ </style>
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

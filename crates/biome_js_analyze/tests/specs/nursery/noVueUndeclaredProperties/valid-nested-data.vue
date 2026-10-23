@@ -1,0 +1,34 @@
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  data() {
+    return {
+      user: { name: "", address: { city: "" } },
+      settings: { ...defaults, theme: "dark" },
+      items: [],
+      config: null,
+    };
+  },
+  methods: {
+    update() {
+      this.user.age = 30;
+      this.user.address.zip = "12345";
+      return (
+        this.user.hasOwnProperty("name") +
+        this.settings.language +
+        this.items.length +
+        this.config.debug
+      );
+    },
+  },
+  watch: {
+    "user.address.city": "update",
+    "$route.query": "update",
+  },
+  expose: ["update"],
+};
+</script>
+
+<template>
+  <p>{{ user.name }} {{ user.address.city.length }} {{ user.toString() }} {{ settings.mode }}</p>
+</template>
