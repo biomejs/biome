@@ -27,8 +27,9 @@ pub(super) struct StackFrame {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(super) struct PrintElementArgs {
     mode: PrintMode,
-    /// Whether the element is inside [crate::builders::skip_fits_check]
-    /// content. Only the fits check sets and reads it; printing ignores it.
+    /// Whether the element is excluded from the fits check. `FitsMeasurer` sets
+    /// it inside [crate::builders::skip_fits_check] content. `Printer` never
+    /// sets or reads it.
     skip_fits_check: bool,
 }
 

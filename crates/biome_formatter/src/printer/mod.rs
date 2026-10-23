@@ -1244,7 +1244,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         }
                         LineMode::Soft => {}
                         LineMode::Literal { .. } => {
-                            if self.skips_fits_check(&args) {
+                            if args.skips_fits_check() {
                                 self.start_new_line(true);
                             } else {
                                 // Literal is a forced fit boundary without parent propagation.
@@ -1293,14 +1293,14 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                             // is known to break and _not_ fit already because the check is performed
                             // on the group. But within the group itself, the content with hardlines
                             // (the `\n<Foo />\n`) _does_ fit, for the same logic in the first case.
-                            if self.skips_fits_check(&args) {
+                            if args.skips_fits_check() {
                                 self.start_new_line(false);
                             } else {
                                 return Ok(Fits::Yes);
                             }
                         }
                     }
-                } else if self.skips_fits_check(&args) {
+                } else if args.skips_fits_check() {
                     self.start_new_line(line_mode.is_literal());
                 } else {
                     // Reachable if the restQueue contains an element with mode expanded because Expanded
@@ -1462,7 +1462,14 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 self.stack.push(tag.kind(), args);
             }
             FormatElement::Tag(tag @ StartSkipFitsCheck) => {
-                self.stack.push(tag.kind(), args.with_skip_fits_check());
+                // Fits checks of fill entries never exclude content, because an
+                // entry must fit on one line.
+                let args = if self.must_be_flat {
+                    args
+                } else {
+                    args.with_skip_fits_check()
+                };
+                self.stack.push(tag.kind(), args);
             }
             FormatElement::Tag(
                 tag @ (EndLabelled
@@ -1529,15 +1536,18 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         let char_width = match c {
                             '\t' => self.options().indent_width.value() as usize,
                             '\n' => {
-                                if self.must_be_flat || self.exceeds_print_width() {
+                                if self.must_be_flat {
                                     return Fits::No;
                                 }
-                                if self.skips_fits_check(&self.stack.top()) {
+                                if self.stack.top().skips_fits_check() {
                                     // Unlike a line break element, a newline in text doesn't
                                     // flush pending line suffixes when printed, so the line
                                     // suffix state stays as it is.
                                     self.state.line_width = 0;
                                     continue;
+                                }
+                                if self.state.line_width > self.options().print_width.into() {
+                                    return Fits::No;
                                 }
                                 return Fits::Yes;
                             }
@@ -1560,14 +1570,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
     fn exceeds_print_width(&self) -> bool {
         self.state.line_width > self.options().print_width.into()
-            && !self.skips_fits_check(&self.stack.top())
-    }
-
-    /// Returns `true` if the content that `args` belong to is excluded from the
-    /// fits check. Fits checks of fill entries never exclude content, because
-    /// an entry must fit on one line.
-    fn skips_fits_check(&self, args: &PrintElementArgs) -> bool {
-        args.skips_fits_check() && !self.must_be_flat
+            && !self.stack.top().skips_fits_check()
     }
 
     /// Continues the fits check at the start of the next line, which is
