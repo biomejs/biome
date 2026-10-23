@@ -1573,8 +1573,12 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             && !self.stack.top().skips_fits_check()
     }
 
-    /// Continues the fits check at the start of the next line, which is
-    /// indented unless the line break is a literal line break.
+    /// Updates the measured line as the printer does when it prints a line
+    /// break, so the next line starts empty at the current indentation, or at
+    /// column zero if `is_literal` is `true`.
+    ///
+    /// Called only where the measured content prints a line break. Elsewhere,
+    /// it would discard the width of the current line.
     fn start_new_line(&mut self, is_literal: bool) {
         // The printer flushes pending line suffixes before printing a line break.
         self.state.has_line_suffix = false;
