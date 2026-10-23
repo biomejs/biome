@@ -3748,6 +3748,11 @@ export interface Nursery {
 	 */
 	noVueExcessiveProps?: NoVueExcessivePropsConfiguration;
 	/**
+	 * Disallow export in \<script setup>.
+	 * See https://biomejs.dev/linter/rules/no-vue-export-in-script-setup
+	 */
+	noVueExportInScriptSetup?: NoVueExportInScriptSetupConfiguration;
+	/**
 	 * Disallow calling expose() or defineExpose() after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-expose-after-await
 	 */
@@ -7208,6 +7213,9 @@ export type NoVueDeprecatedVOnNativeModifierConfiguration =
 export type NoVueExcessivePropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueExcessivePropsOptions;
+export type NoVueExportInScriptSetupConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueExportInScriptSetupOptions;
 export type NoVueExposeAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueExposeAfterAwaitOptions;
@@ -10613,6 +10621,10 @@ export interface RuleWithNoVueExcessivePropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueExcessivePropsOptions;
 }
+export interface RuleWithNoVueExportInScriptSetupOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueExportInScriptSetupOptions;
+}
 export interface RuleWithNoVueExposeAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueExposeAfterAwaitOptions;
@@ -13921,6 +13933,7 @@ export interface NoVueExcessivePropsOptions {
 	 */
 	maxProps?: number;
 }
+export type NoVueExportInScriptSetupOptions = {};
 export type NoVueExposeAfterAwaitOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export interface NoVueLoneTemplateOptions {
@@ -16153,6 +16166,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedVIs"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueExcessiveProps"
+	| "lint/nursery/noVueExportInScriptSetup"
 	| "lint/nursery/noVueExposeAfterAwait"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
