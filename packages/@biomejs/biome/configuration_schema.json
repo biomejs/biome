@@ -9919,6 +9919,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentVForDelimiter": {
+					"description": "Enforce a consistent delimiter between the item and the list in v-for directives.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-v-for-delimiter",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVForDelimiterConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefaultProp": {
 					"description": "Require a default value for optional props in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-default-prop",
 					"anyOf": [
@@ -18000,6 +18007,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentVForDelimiterOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVForDelimiterOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentVOnStyleOptions": {
 			"type": "object",
 			"properties": {
@@ -23674,6 +23694,22 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueConsistentVForDelimiterConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVForDelimiterOptions" }
+			]
+		},
+		"UseVueConsistentVForDelimiterOptions": {
+			"type": "object",
+			"properties": {
+				"delimiter": {
+					"description": "The word to use between the item and the list in `v-for` directives:\n`\"in\"` or `\"of\"`. Defaults to `\"in\"`.",
+					"anyOf": [{ "$ref": "#/$defs/VueVForDelimiter" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueConsistentVOnStyleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24240,6 +24276,7 @@
 			"type": "string",
 			"enum": ["shorthand", "longhand"]
 		},
+		"VueVForDelimiter": { "type": "string", "enum": ["in", "of"] },
 		"WhitespaceSensitivity": {
 			"description": "Controls how the formatter treats whitespace around text and child elements in HTML, Vue,\nSvelte, and Astro markup.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    |\n| -------------- | :------------: | :----------: |\n| with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 |\n| without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):\n```html\n<span>really long content</span>\n```\nas this, where the content hugs the tags:\n```html\n<span\n   >really long content</span\n>\n```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
 			"oneOf": [
