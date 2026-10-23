@@ -1,0 +1,38 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: use_across_files.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+
+// Functions declared in a file loaded via `@use` are not resolved; the rule only
+// knows about functions declared in the same file. See https://github.com/biomejs/biome/issues/10800.
+@use 'fns' as *;
+
+.a {
+  width: bpx(1);
+}
+
+```
+
+# Diagnostics
+```
+use_across_files.scss:8:10 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: bpx
+  
+     7 │ .a {
+   > 8 │   width: bpx(1);
+       │          ^^^
+     9 │ }
+    10 │ 
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
