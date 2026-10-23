@@ -607,9 +607,9 @@ impl Format<JsFormatContext> for MemberChain {
 /// `MemberChain::fmt` (see the conditions in
 /// [MemberChain::can_hug_last_argument]).
 ///
-/// The fits test skips the head and the leading groups because they print the
-/// same as in `format_expanded`. Only the line of the last group decides
-/// whether this variant fits.
+/// The head and the leading groups are excluded from the fits check because
+/// they print the same as in `format_expanded`. Only the line of the last
+/// group decides whether this variant fits.
 struct FormatExpandedLastLine<'a>(&'a MemberChain);
 
 impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {

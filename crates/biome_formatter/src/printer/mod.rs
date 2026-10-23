@@ -1563,15 +1563,15 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             && !self.skips_fits_check(&self.stack.top())
     }
 
-    /// Returns `true` if the fits test skips the content that `args` belong to.
-    /// Fits tests of fill entries never skip content, because an entry must fit
-    /// on one line.
+    /// Returns `true` if the content that `args` belong to is excluded from the
+    /// fits check. Fits checks of fill entries never exclude content, because
+    /// an entry must fit on one line.
     fn skips_fits_check(&self, args: &PrintElementArgs) -> bool {
         args.skips_fits_check() && !self.must_be_flat
     }
 
-    /// Continues the fits test at the start of the next line, which is indented
-    /// unless the line break is a literal line break.
+    /// Continues the fits check at the start of the next line, which is
+    /// indented unless the line break is a literal line break.
     fn start_new_line(&mut self, is_literal: bool) {
         // The printer flushes pending line suffixes before printing a line break.
         self.state.has_line_suffix = false;

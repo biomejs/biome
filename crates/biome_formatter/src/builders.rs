@@ -712,7 +712,7 @@ impl<Context> Format<Context> for LineSuffixBoundary {
     }
 }
 
-/// Excludes `content` from the fits test that decides whether something fits.
+/// Excludes `content` from the fits check.
 ///
 /// Use it in a [`best_fitting!`](crate::best_fitting) variant for lines that
 /// print the same as in the fallback variant, so that only the other lines
@@ -721,22 +721,24 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// fallback variant, so only the line of `.d({ x })` should decide whether this
 /// variant fits.
 ///
-/// The printer runs the fits test by adding up the width of the current line.
-/// The test fails if the line gets wider than the print width, and succeeds at
-/// the first line break. Inside `content`, no line fails the test and line
-/// breaks don't end it. After `content`, the test continues on the line where
-/// `content` ends, including the width that `content` adds to it.
+/// Before deciding how to print some content, such as a group or a best fitting
+/// variant, the printer measures whether it fits on the line. This measurement
+/// is called the fits check. It adds up the width of the current line, fails
+/// if the line gets wider than the print width, and passes at the first line
+/// break. Inside `content`, no line fails the check, and line breaks don't end
+/// it. After `content`, the check continues on the line where `content` ends,
+/// including the width that `content` adds to it.
 ///
-/// Fits tests that start inside `content` are unaffected, so `content` prints
+/// Fits checks that start inside `content` are unaffected, so `content` prints
 /// the same as without `skip_fits_check`. Content before it can print
 /// differently: for example, a group before it expands if the line where
-/// `content` ends doesn't fit. Fits tests of [`fill`](Formatter::fill) entries
+/// `content` ends doesn't fit. Fits checks of [`fill`](Formatter::fill) entries
 /// ignore `skip_fits_check`, because an entry must fit on one line.
 ///
 /// # Examples
 ///
 /// The first variant is printed. Its first line exceeds the print width, but
-/// the fits test skips that line and only checks `b`.
+/// that line is excluded from the fits check, so only `b` is checked.
 ///
 /// ```
 /// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};

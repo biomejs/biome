@@ -77,8 +77,7 @@ pub enum Tag {
     /// Entry inside of a [crate::FormatElement::BestFitting]
     StartBestFittingEntry,
     EndBestFittingEntry,
-
-    /// Content that the fits test skips.
+    /// Content excluded from the fits check.
     ///
     /// See [crate::builders::skip_fits_check] for documentation.
     StartSkipFitsCheck,
