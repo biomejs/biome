@@ -44,8 +44,12 @@ impl JsModuleVisitor {
     pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
 
-        let iter = self.root.syntax().preorder();
-        for event in iter {
+        let kinds = AnyJsImportLike::KIND_SET
+            .union(JsExport::KIND_SET)
+            .union(JsxAttribute::KIND_SET)
+            .union(JsModuleInfoCollector::LEAVE_NODE_KINDS);
+        let root = self.root.syntax().clone();
+        for event in root.preorder_of_kinds(kinds) {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {

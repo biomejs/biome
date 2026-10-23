@@ -214,7 +214,8 @@ impl Rule for NoFallthroughSwitchClause {
 }
 
 fn has_switch_statement(control_flow_root: &JsSyntaxNode) -> bool {
-    let mut iter = control_flow_root.preorder();
+    let mut iter = control_flow_root
+        .preorder_of_kinds(JsSwitchStatement::KIND_SET.union(AnyJsControlFlowRoot::KIND_SET));
     while let Some(node) = iter.next() {
         if let WalkEvent::Enter(node) = node {
             if JsSwitchStatement::can_cast(node.kind()) {

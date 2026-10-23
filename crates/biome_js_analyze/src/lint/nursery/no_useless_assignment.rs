@@ -217,7 +217,9 @@ fn declared_bindings(
     root: &AnyJsControlFlowRoot,
     model: &SemanticModel,
 ) -> impl Iterator<Item = Binding> {
-    let mut events = root.syntax().preorder();
+    let mut events = root
+        .syntax()
+        .preorder_of_kinds(AnyJsControlFlowRoot::KIND_SET.union(JsIdentifierBinding::KIND_SET));
     std::iter::from_fn(move || {
         loop {
             let WalkEvent::Enter(node) = events.next()? else {

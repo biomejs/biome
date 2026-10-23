@@ -1,11 +1,11 @@
 use super::*;
 use biome_js_syntax::{
     AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsExport, JsIdentifierAssignment,
-    JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement, TsTypeParameterName,
-    unescape_js_identifier,
+    JsLanguage, JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement,
+    TsTypeParameterName, unescape_js_identifier,
 };
 use biome_jsdoc_comment::JsdocComment;
-use biome_rowan::SyntaxNodePtr;
+use biome_rowan::{SyntaxKindSet, SyntaxNodePtr};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::hash_map::Entry;
 
@@ -64,9 +64,16 @@ impl SemanticModelBuilder {
         self.flavor = flavor;
     }
 
+    /// The kinds of the nodes that [Self::push_node] reads: the ones that
+    /// [SemanticEventExtractor] reads, and [JsExport].
+    pub const VISITED_KINDS: SyntaxKindSet<JsLanguage> =
+        SemanticEventExtractor::VISITED_KINDS.union(JsExport::KIND_SET);
+
     #[inline]
     pub fn push_node(&mut self, node: &JsSyntaxNode) {
         use JsSyntaxKind::*;
+        // If you read a node kind that `SemanticEventExtractor::VISITED_KINDS`
+        // doesn't contain, add it to [Self::VISITED_KINDS].
         match node.kind() {
             // Accessible from bindings and references
             JS_IDENTIFIER_BINDING

@@ -109,9 +109,9 @@ use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::TokenText;
-#[cfg(feature = "type_inference")]
-use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
+#[cfg(feature = "type_inference")]
+use biome_rowan::{SyntaxKindSet, WalkEvent};
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
@@ -1057,6 +1057,14 @@ fn debug_formatter_ir(
     Ok(root_element.to_string())
 }
 
+/// The kinds of the nodes that [debug_type_info] and [debug_registered_types]
+/// read types from.
+#[cfg(feature = "type_inference")]
+const DEBUG_TYPE_KINDS: SyntaxKindSet<JsLanguage> = JsVariableDeclarator::KIND_SET
+    .union(JsFunctionDeclaration::KIND_SET)
+    .union(JsClassDeclaration::KIND_SET)
+    .union(JsClassExpression::KIND_SET);
+
 fn debug_type_info(
     parse: AnyParsedSource,
     workspace_db: WorkspaceDb,
@@ -1065,7 +1073,7 @@ fn debug_type_info(
     {
         let tree: AnyJsRoot = parse.tree(&workspace_db);
         let mut result = String::new();
-        let preorder = tree.syntax().preorder();
+        let preorder = tree.syntax().preorder_of_kinds(DEBUG_TYPE_KINDS);
 
         let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
@@ -1131,7 +1139,7 @@ fn debug_registered_types(
     {
         let tree: AnyJsRoot = parse.tree(&workspace_db);
         let mut result = String::new();
-        let preorder = tree.syntax().preorder();
+        let preorder = tree.syntax().preorder_of_kinds(DEBUG_TYPE_KINDS);
 
         let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;

@@ -102,7 +102,9 @@ impl Rule for NoReturnInFinally {
             _ => return None,
         };
 
-        let mut preorder = body.syntax().preorder();
+        let mut preorder = body
+            .syntax()
+            .preorder_of_kinds(AnyJsControlFlowRoot::KIND_SET.union(JsReturnStatement::KIND_SET));
         while let Some(event) = preorder.next() {
             let WalkEvent::Enter(node) = event else {
                 continue;

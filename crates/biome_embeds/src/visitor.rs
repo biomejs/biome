@@ -737,9 +737,13 @@ impl EmbeddedBindingsBuilder {
         self.is_vue_source = host_file_source.is_vue();
         self.is_vue_setup = self.is_vue_source && js_file_source.as_embedding_kind().is_vue_setup();
 
-        let preorder = root.syntax().preorder();
+        let kinds = JsModuleItemList::KIND_SET
+            .union(JsCallExpression::KIND_SET)
+            .union(JsAssignmentExpression::KIND_SET)
+            .union(JsSvelteSnippetRoot::KIND_SET)
+            .union(JsSvelteDeclarationRoot::KIND_SET);
 
-        for event in preorder {
+        for event in root.syntax().preorder_of_kinds(kinds) {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(module_item) = JsModuleItemList::cast_ref(&node) {
@@ -1699,9 +1703,12 @@ impl EmbeddedReferencesBuilder {
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {
-        let preorder = root.syntax().preorder();
+        let kinds = JsxReferenceIdentifier::KIND_SET
+            .union(JsReferenceIdentifier::KIND_SET)
+            .union(JsIdentifierAssignment::KIND_SET)
+            .union(JsStaticMemberExpression::KIND_SET);
 
-        for event in preorder {
+        for event in root.syntax().preorder_of_kinds(kinds) {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(reference) = JsxReferenceIdentifier::cast_ref(&node) {
