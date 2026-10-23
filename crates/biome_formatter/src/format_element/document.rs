@@ -729,6 +729,10 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         StartEmbedded(_) => {
                             write!(f, [token("embedded(")])?;
                         }
+
+                        StartSkipFitsCheck => {
+                            write!(f, [token("skip_fits_check(")])?;
+                        }
                         StartEntry | StartBestFittingEntry => {
                             // handled after the match for all start tags
                         }
@@ -744,7 +748,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         | EndLineSuffix
                         | EndDedent(_)
                         | EndVerbatim
-                        | EndEmbedded => {
+                        | EndEmbedded
+                        | EndSkipFitsCheck => {
                             write!(f, [ContentArrayEnd, token(")")])?;
                         }
                     };

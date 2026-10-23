@@ -712,6 +712,126 @@ impl<Context> Format<Context> for LineSuffixBoundary {
     }
 }
 
+/// Excludes `content` from the fits check.
+///
+/// Before deciding how to print some content, such as a group or a best fitting
+/// variant, the printer measures whether it fits on the line. This measurement
+/// is called the fits check. It adds up the width of the current line, fails
+/// if the line gets wider than the print width, and passes at the first line
+/// break. Inside `content`, a line wider than the print width doesn't fail
+/// the check, and line breaks don't end it. A line suffix boundary with a
+/// pending line suffix still fails it. After `content`, the check continues on
+/// the line where `content` ends, including the width that `content` adds to
+/// it.
+///
+/// Fits checks that start inside `content` are unaffected, but groups around
+/// and before `content` can print differently. A group before it expands if
+/// the line where `content` ends doesn't fit. A group around it can print flat
+/// even if `content` is wider than the print width, and groups inside
+/// `content` then print flat too, unless they must expand. Fits checks of
+/// [`fill`](Formatter::fill) entries ignore `skip_fits_check`, because an entry
+/// must fit on one line.
+///
+/// In a [`best_fitting!`](crate::best_fitting) variant, use it for lines that
+/// print the same as in the most expanded variant, which the printer prints
+/// when no other variant fits. Only the other lines then decide whether this
+/// variant fits. The variant is then picked over every later variant, even if
+/// the excluded lines don't fit. If a later variant other than the most
+/// expanded one can fit, make sure the excluded lines fit whenever it does.
+///
+/// # Examples
+///
+/// The group expands because the line where `content` ends doesn't fit.
+/// Without `skip_fits_check`, the fits check of the group passes at the line
+/// break and the group stays on one line.
+///
+/// ```
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let context = SimpleFormatContext::new(SimpleFormatOptions {
+///     line_width: LineWidth::try_from(10).unwrap(),
+///     ..SimpleFormatOptions::default()
+/// });
+///
+/// let formatted = format!(context, [
+///     group(&format_args![
+///         token("a"),
+///         soft_line_break_or_space(),
+///         token("b")
+///     ]),
+///     skip_fits_check(&format_args![hard_line_break(), token("cccccccccc")]),
+///     token("d")
+/// ])?;
+///
+/// assert_eq!("a\nb\nccccccccccd", formatted.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+///
+/// In a best fitting variant, the first line exceeds the print width, but it
+/// is excluded from the fits check, so only `b` is checked and the first
+/// variant is printed.
+///
+/// ```
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let context = SimpleFormatContext::new(SimpleFormatOptions {
+///     line_width: LineWidth::try_from(10).unwrap(),
+///     ..SimpleFormatOptions::default()
+/// });
+///
+/// let formatted = format!(context, [
+///     best_fitting!(
+///         format_args![
+///             skip_fits_check(&format_args![
+///                 token("aaaaaaaaaaaaaaa"),
+///                 hard_line_break()
+///             ]),
+///             token("b")
+///         ],
+///         token("c")
+///     )
+/// ])?;
+///
+/// assert_eq!("aaaaaaaaaaaaaaa\nb", formatted.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+#[inline]
+pub fn skip_fits_check<Content, Context>(content: &Content) -> SkipFitsCheck<'_, Context>
+where
+    Content: Format<Context>,
+{
+    SkipFitsCheck {
+        content: Argument::new(content),
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct SkipFitsCheck<'a, Context> {
+    content: Argument<'a, Context>,
+}
+
+impl<Context> Format<Context> for SkipFitsCheck<'_, Context> {
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        f.write_element(FormatElement::Tag(StartSkipFitsCheck))?;
+        Arguments::from(&self.content).fmt(f)?;
+        f.write_element(FormatElement::Tag(EndSkipFitsCheck))
+    }
+}
+
+impl<Context> std::fmt::Debug for SkipFitsCheck<'_, Context> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("SkipFitsCheck")
+            .field(&"{{content}}")
+            .finish()
+    }
+}
+
 /// Marks some content with a label.
 ///
 /// This does not directly influence how this content will be printed, but some
