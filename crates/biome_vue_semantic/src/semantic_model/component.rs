@@ -967,8 +967,9 @@ impl Collector<'_, '_> {
         }
     }
 
-    /// Reads emits written as a type: `defineEmits<{ change: [id: number] }>()`
-    /// or `defineEmits<{ (e: 'change', id: number): void }>()`.
+    /// Reads emits written as a type: `defineEmits<{ change: [id: number] }>()`,
+    /// `defineEmits<{ change(id: number): void }>()` or
+    /// `defineEmits<{ (e: 'change', id: number): void }>()`.
     fn collect_type_emits(&mut self, ty: &AnyTsType, component: ComponentId) {
         let Some(members) = self.resolve_type_members(ty) else {
             self.builder
@@ -1044,6 +1045,31 @@ impl Collector<'_, '_> {
                             form: EmitForm::CallSignature,
                         };
                     }
+                }
+                AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
+                    let Some(name) = method.name().ok().and_then(|name| name.name()) else {
+                        continue;
+                    };
+                    let payload_params = method
+                        .parameters()
+                        .ok()
+                        .map(|parameters| parameters.items().len() as u8);
+                    let id = self.add_instance_symbol(
+                        component,
+                        name,
+                        method
+                            .name()
+                            .ok()
+                            .map(|name| name.syntax().text_trimmed_range()),
+                        method.syntax().text_trimmed_range(),
+                        Namespace::Emit,
+                        SymbolKind::Emit,
+                    );
+                    self.builder.symbol_mut(id).detail = Detail::Emit {
+                        payload_params,
+                        validator: None,
+                        form: EmitForm::TypeMember,
+                    };
                 }
                 _ => {}
             }

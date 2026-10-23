@@ -1,0 +1,89 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noVueUndeclaredEmits file.vue
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script>
+export default {
+  emits: ["change"],
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+  },
+};
+</script>
+
+<template>
+  <button @click="$emit('open')">Open</button>
+  <button @click="$emit('change')">Change</button>
+</template>
+
+```
+
+# Emitted Messages
+
+```block
+file.vue:6:18 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    4 │   methods: {
+    5 │     close() {
+  > 6 │       this.$emit("close");
+      │                  ^^^^^^^
+    7 │     },
+    8 │   },
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+file.vue:13:25 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event open is emitted, but the component doesn't declare it.
+  
+    12 │ <template>
+  > 13 │   <button @click="$emit('open')">Open</button>
+       │                         ^^^^^^
+    14 │   <button @click="$emit('change')">Change</button>
+    15 │ </template>
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add open to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 warnings.
+```

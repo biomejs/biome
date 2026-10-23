@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <button @click="emit('open')">Open</button>
+  <button @click="$emit('toggle')">Toggle</button>
+</template>
+
+<script setup>
+const emit = defineEmits(["change"]);
+
+function close() {
+  emit("close");
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup.vue:11:8 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    10 │ function close() {
+  > 11 │   emit("close");
+       │        ^^^^^^^
+    12 │ }
+    13 │ </script>
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:3:24 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event open is emitted, but the component doesn't declare it.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <button @click="emit('open')">Open</button>
+      │                        ^^^^^^
+    4 │   <button @click="$emit('toggle')">Toggle</button>
+    5 │ </template>
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add open to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:4:25 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event toggle is emitted, but the component doesn't declare it.
+  
+    2 │ <template>
+    3 │   <button @click="emit('open')">Open</button>
+  > 4 │   <button @click="$emit('toggle')">Toggle</button>
+      │                         ^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add toggle to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
