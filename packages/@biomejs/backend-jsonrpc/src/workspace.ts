@@ -3778,6 +3778,11 @@ export interface Nursery {
 	 */
 	useVueVOnExact?: UseVueVOnExactConfiguration;
 	/**
+	 * Enforce valid defineProps() calls in Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-props
+	 */
+	useVueValidDefineProps?: UseVueValidDefinePropsConfiguration;
+	/**
 	 * Enforce valid v-is Vue directives.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-is
 	 */
@@ -6446,6 +6451,9 @@ export type UseVueTypedRefConfiguration =
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
+export type UseVueValidDefinePropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidDefinePropsOptions;
 export type UseVueValidVIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVIsOptions;
@@ -9425,6 +9433,10 @@ export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
 }
+export interface RuleWithUseVueValidDefinePropsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidDefinePropsOptions;
+}
 export interface RuleWithUseVueValidVIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVIsOptions;
@@ -11837,6 +11849,7 @@ export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
+export type UseVueValidDefinePropsOptions = {};
 export type UseVueValidVIsOptions = {};
 export type UseVueValidVModelOptions = {};
 export type UseVueValidVShowOptions = {};
@@ -13455,6 +13468,7 @@ export type Category =
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVModel"

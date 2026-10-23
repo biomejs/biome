@@ -247,8 +247,11 @@ impl Collector<'_, '_> {
                 continue;
             };
             match name.text() {
-                "props" | "emits" => {
-                    self.builder.component_mut(target).macro_conflict = true;
+                "props" => {
+                    self.builder.component_mut(target).macro_options |= MacroOption::Props;
+                }
+                "emits" => {
+                    self.builder.component_mut(target).macro_options |= MacroOption::Emits;
                 }
                 // `defineOptions()` in the setup block wins over the plain
                 // block, so only fill in what it left unset.

@@ -136,6 +136,23 @@ pub enum OpenReason {
 /// Why a component's declarations in a namespace may be incomplete.
 pub type OpenReasons = BitFlags<OpenReason>;
 
+/// An option of the default export of the plain `<script>` block that the
+/// `<script setup>` block of the same file can also declare with a compiler
+/// macro.
+#[bitflags]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MacroOption {
+    /// The `props` option, which `defineProps()` also declares.
+    Props = 1 << 0,
+    /// The `emits` option, which `defineEmits()` also declares.
+    Emits = 1 << 1,
+}
+
+/// The options of the default export of the plain `<script>` block that the
+/// `<script setup>` block of the same file can also declare with a macro.
+pub type MacroOptions = BitFlags<MacroOption>;
+
 /// The kind of a top-level block.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BlockKind {
@@ -703,7 +720,7 @@ pub(crate) struct ComponentData {
     pub(crate) inherit_attrs: Tri,
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
-    pub(crate) macro_conflict: bool,
+    pub(crate) macro_options: MacroOptions,
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
@@ -1891,7 +1908,14 @@ impl Component {
     /// Whether the plain `<script>` block declares props or emits that the
     /// `<script setup>` block also declares with a macro.
     pub fn has_macro_conflict(&self) -> bool {
-        self.row().macro_conflict
+        !self.macro_options().is_empty()
+    }
+
+    /// For a `<script setup>` component, the options among `props` and
+    /// `emits` that the default export of the plain `<script>` block of the
+    /// same file writes, whatever their value.
+    pub fn macro_options(&self) -> MacroOptions {
+        self.row().macro_options
     }
 
     /// For a `<script setup>` component, the component defined by the default
