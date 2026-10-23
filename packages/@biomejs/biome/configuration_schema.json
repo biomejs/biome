@@ -8835,6 +8835,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSlotsAsFunctions": {
+					"description": "Require the slots in this.$slots to be called as functions.\nSee https://biomejs.dev/linter/rules/use-vue-slots-as-functions",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSlotsAsFunctionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTypedRef": {
 					"description": "Require a type for refs created with ref() or shallowRef() in TypeScript.\nSee https://biomejs.dev/linter/rules/use-vue-typed-ref",
 					"anyOf": [
@@ -16105,6 +16112,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSlotsAsFunctionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSlotsAsFunctionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTypedRefOptions": {
 			"type": "object",
 			"properties": {
@@ -21425,6 +21441,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueSlotsAsFunctionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSlotsAsFunctionsOptions" }
+			]
+		},
+		"UseVueSlotsAsFunctionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

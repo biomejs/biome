@@ -2933,6 +2933,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueSlotsAsFunctions",
+        TypeId::of::<biome_rule_options::use_vue_slots_as_functions::UseVueSlotsAsFunctionsOptions>(
+        ),
+    ));
+    result.push((
+        "nursery",
         "useVueTypedRef",
         TypeId::of::<biome_rule_options::use_vue_typed_ref::UseVueTypedRefOptions>(),
     ));
