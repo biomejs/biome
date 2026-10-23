@@ -3563,6 +3563,11 @@ export interface Nursery {
 	 */
 	noVueUnusedRefs?: NoVueUnusedRefsConfiguration;
 	/**
+	 * Disallow v-bind directives whose value is a fixed string.
+	 * See https://biomejs.dev/linter/rules/no-vue-useless-v-bind
+	 */
+	noVueUselessVBind?: NoVueUselessVBindConfiguration;
+	/**
 	 * Disallow placing the key of a \<template v-for> on its child elements.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-for-template-key-on-child
 	 */
@@ -6567,6 +6572,9 @@ export type NoVueUnusedEmitDeclarationsConfiguration =
 export type NoVueUnusedRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedRefsOptions;
+export type NoVueUselessVBindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUselessVBindOptions;
 export type NoVueVForTemplateKeyOnChildConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVForTemplateKeyOnChildOptions;
@@ -9541,6 +9549,14 @@ export interface RuleWithNoVueUnusedRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedRefsOptions;
 }
+export interface RuleWithNoVueUselessVBindOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueUselessVBindOptions;
+}
 export interface RuleWithNoVueVForTemplateKeyOnChildOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVForTemplateKeyOnChildOptions;
@@ -12278,6 +12294,19 @@ export type NoVueUndeclaredEmitsOptions = {};
 export type NoVueUndeclaredSlotsOptions = {};
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueUnusedRefsOptions = {};
+export interface NoVueUselessVBindOptions {
+	/**
+	 * Doesn't report a `v-bind` directive whose value contains a comment, such
+	 * as `:id="'foo' /* note *\/"`. Disabled by default.
+	 */
+	ignoreComments?: boolean;
+	/**
+	 * Doesn't report a `v-bind` directive whose string contains an escape
+	 * sequence for a special character, such as `:title="'Line 1\nLine 2'"`.
+	 * Disabled by default.
+	 */
+	ignoreStringEscapes?: boolean;
+}
 export type NoVueVForTemplateKeyOnChildOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
@@ -14163,6 +14192,7 @@ export type Category =
 	| "lint/nursery/noVueUndeclaredSlots"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"
+	| "lint/nursery/noVueUselessVBind"
 	| "lint/nursery/noVueVForTemplateKeyOnChild"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"

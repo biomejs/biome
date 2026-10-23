@@ -1,0 +1,90 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidIgnoreStringEscapes.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div :id="'foo'" />
+  <div :id="'\\'" />
+  <div :id="' \'foo\' '" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidIgnoreStringEscapes.vue:3:8 lint/nursery/noVueUselessVBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive binds a fixed string.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :id="'foo'" />
+      │        ^^^^^^^^^^^
+    4 │   <div :id="'\\'" />
+    5 │   <div :id="' \'foo\' '" />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace the directive with a plain attribute.
+  
+    3 │ ··<div·:id="'foo'"·/>
+      │        -    -   -    
+
+```
+
+```
+invalidIgnoreStringEscapes.vue:4:8 lint/nursery/noVueUselessVBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive binds a fixed string.
+  
+    2 │ <template>
+    3 │   <div :id="'foo'" />
+  > 4 │   <div :id="'\\'" />
+      │        ^^^^^^^^^^
+    5 │   <div :id="' \'foo\' '" />
+    6 │ </template>
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace the directive with a plain attribute.
+  
+    4 │ ··<div·:id="'\\'"·/>
+      │        -    - --    
+
+```
+
+```
+invalidIgnoreStringEscapes.vue:5:8 lint/nursery/noVueUselessVBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind directive binds a fixed string.
+  
+    3 │   <div :id="'foo'" />
+    4 │   <div :id="'\\'" />
+  > 5 │   <div :id="' \'foo\' '" />
+      │        ^^^^^^^^^^^^^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace the directive with a plain attribute.
+  
+    5 │ ··<div·:id="'·\'foo\'·'"·/>
+      │        -    - -    -  -    
+
+```
