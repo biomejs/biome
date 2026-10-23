@@ -7710,6 +7710,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedFunctionalTemplateConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedFunctionalTemplateOptions" }
+			]
+		},
+		"NoVueDeprecatedFunctionalTemplateOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedHtmlElementIsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8925,6 +8935,15 @@
 					"anyOf": [
 						{
 							"$ref": "#/$defs/NoVueDeprecatedDestroyedLifecycleConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedFunctionalTemplate": {
+					"description": "Disallow the deprecated functional attribute on the \\<template> of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-functional-template",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoVueDeprecatedFunctionalTemplateConfiguration"
 						},
 						{ "type": "null" }
 					]
@@ -14711,6 +14730,17 @@
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": {
 					"$ref": "#/$defs/NoVueDeprecatedDestroyedLifecycleOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedFunctionalTemplateOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoVueDeprecatedFunctionalTemplateOptions"
 				}
 			},
 			"additionalProperties": false,
