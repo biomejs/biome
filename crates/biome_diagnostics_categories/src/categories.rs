@@ -417,6 +417,7 @@ define_categories! {
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
     "lint/nursery/useVueToggleInsideTransition": "https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
+    "lint/nursery/useVueValidDefineOptions": "https://biomejs.dev/linter/rules/use-vue-valid-define-options",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
     "lint/nursery/useVueValidVModel": "https://biomejs.dev/linter/rules/use-vue-valid-v-model",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",

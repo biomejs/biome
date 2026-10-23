@@ -1,0 +1,4 @@
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineOptions<{ name: "Foo" }>();
+</script>
