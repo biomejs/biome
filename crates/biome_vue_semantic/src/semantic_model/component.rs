@@ -752,6 +752,31 @@ impl Collector<'_, '_> {
         detail
     }
 
+    /// Reads the prop that `defineModel()` declares from its options object
+    /// and its type argument. The `type` option, when present, gives the
+    /// prop's types instead of the type argument, as it does in Vue.
+    fn model_detail(&self, options: Option<AnyJsExpression>, ty: Option<AnyTsType>) -> PropDetail {
+        let mut detail = match options.and_then(|options| options.inner_expression()) {
+            Some(options @ AnyJsExpression::JsObjectExpression(_)) => {
+                self.runtime_prop_detail(Some(options))
+            }
+            _ => PropDetail {
+                types: TypeSet::empty(),
+                required: Tri::No,
+                defaults: Box::default(),
+                validator: None,
+                form: PropForm::Options,
+            },
+        };
+        if detail.types.is_empty()
+            && let Some(ty) = ty
+        {
+            detail.types = type_set_of(&ty);
+            detail.form = PropForm::TypeMember;
+        }
+        detail
+    }
+
     /// Reads the type of a prop written as a constructor (`Boolean`) or an
     /// array of constructors (`[Boolean, String]`).
     fn constructor_types(&self, expression: &AnyJsExpression) -> TypeSet {
@@ -1587,8 +1612,19 @@ impl Collector<'_, '_> {
                     .map(|name| (name, Some(literal.syntax().text_trimmed_range()))),
                 _ => None,
             };
+            // `defineModel("count", { ... })` names the model before its
+            // options, `defineModel({ ... })` takes the options first.
+            let options = if name.is_some() {
+                call.arguments()
+                    .ok()
+                    .and_then(|arguments| arguments.args().iter().nth(1)?.ok())
+                    .and_then(|argument| argument.as_any_js_expression().cloned())
+            } else {
+                first_argument(&call)
+            };
             let (name, range) = name.unwrap_or_else(|| (synthetic_name("modelValue"), None));
-            self.add_instance_symbol(
+            let detail = self.model_detail(options, first_type_argument(&call));
+            let id = self.add_instance_symbol(
                 component,
                 name,
                 range,
@@ -1596,6 +1632,7 @@ impl Collector<'_, '_> {
                 Namespace::Binding,
                 SymbolKind::Model,
             );
+            self.builder.symbol_mut(id).detail = Detail::Prop(detail);
             if let Some(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
                 binding,
             ))) = pattern
@@ -2129,7 +2166,20 @@ fn type_set_of(ty: &AnyTsType) -> TypeSet {
         AnyTsType::TsSymbolType(_) => types.insert(PropType::Symbol),
         AnyTsType::TsArrayType(_) | AnyTsType::TsTupleType(_) => types.insert(PropType::Array),
         AnyTsType::TsFunctionType(_) => types.insert(PropType::Function),
-        AnyTsType::TsObjectType(_) => types.insert(PropType::Object),
+        // A call or construct signature makes the value callable, as in
+        // `{ (): void }`. Any other member describes a plain object.
+        AnyTsType::TsObjectType(object) => {
+            for member in object.members().iter() {
+                types.insert(match member {
+                    AnyTsTypeMember::TsCallSignatureTypeMember(_)
+                    | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => PropType::Function,
+                    _ => PropType::Object,
+                });
+            }
+            if types.is_empty() {
+                types.insert(PropType::Object);
+            }
+        }
         AnyTsType::TsParenthesizedType(parenthesized) => match parenthesized.ty() {
             Ok(ty) => types |= type_set_of(&ty),
             Err(_) => types.insert(PropType::Unknown),

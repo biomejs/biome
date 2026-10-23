@@ -501,9 +501,9 @@ pub enum PropForm {
     ArrayString,
     /// `props: { name: String }`
     Constructor,
-    /// `props: { name: { type: String } }`
+    /// `props: { name: { type: String } }` or `defineModel({ type: String })`
     Options,
-    /// `defineProps<{ name: string }>()`
+    /// `defineProps<{ name: string }>()` or `defineModel<string>()`
     TypeMember,
 }
 
@@ -1933,8 +1933,9 @@ impl Component {
         self.of_kind(SymbolKind::Prop).map(Prop)
     }
 
-    pub fn models(&self) -> impl Iterator<Item = Symbol> + '_ {
-        self.of_kind(SymbolKind::Model)
+    /// The props that `defineModel()` declares, one per call.
+    pub fn models(&self) -> impl Iterator<Item = Prop> + '_ {
+        self.of_kind(SymbolKind::Model).map(Prop)
     }
 
     pub fn emits(&self) -> impl Iterator<Item = Emit> + '_ {
