@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-shadowed-constructor.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+function Number() {
+  return "not a number";
+}
+
+export default {
+  props: {
+    foo: { type: String, default: Number() },
+  },
+};
+</script>
+
+```
