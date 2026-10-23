@@ -4,18 +4,13 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsObjectMember, JsAwaitExpression, JsCallExpression,
-    JsForOfStatement, WalkEvent,
-};
+use biome_js_syntax::JsCallExpression;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::no_vue_lifecycle_after_await::NoVueLifecycleAfterAwaitOptions;
 
 use crate::frameworks::vue::vue_call::vue_api_name;
-use crate::frameworks::vue::vue_component::{
-    AnyVueComponent, VueComponent, VueComponentQuery, VueOptionsApiBasedComponent,
-};
-use crate::services::control_flow::AnyJsControlFlowRoot;
+use crate::frameworks::vue::vue_component::{VueComponent, VueComponentQuery};
+use crate::frameworks::vue::vue_setup::{CallsAfterAwait, setup_function_body};
 
 declare_lint_rule! {
     /// Disallow registering Vue lifecycle hooks after an `await` in `setup()`.
@@ -94,18 +89,14 @@ impl Rule for NoVueLifecycleAfterAwait {
         ) else {
             return [].into();
         };
-
-        let setup_body = match component.kind() {
-            AnyVueComponent::OptionsApi(component) => setup_function_body(component),
-            AnyVueComponent::CreateApp(component) => setup_function_body(component),
-            AnyVueComponent::DefineComponent(component) => setup_function_body(component),
-            AnyVueComponent::Setup(_) => None,
+        let Some(body) = setup_function_body(component.kind()) else {
+            return [].into();
         };
 
-        match setup_body {
-            Some(body) => find_hooks_after_await(&body, ctx.model()),
-            None => [].into(),
-        }
+        CallsAfterAwait::new(&body)
+            .filter(|(call, _)| is_lifecycle_hook_call(call, ctx.model()))
+            .map(|(hook, first_await)| LifecycleHookAfterAwait { hook, first_await })
+            .collect()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -134,76 +125,6 @@ pub struct LifecycleHookAfterAwait {
     hook: JsCallExpression,
     /// The range of the first `await` keyword in `setup()` that pauses before the hook is called.
     first_await: TextRange,
-}
-
-/// Returns the body of the function in the `setup` property of the component's options object.
-fn setup_function_body(component: &impl VueOptionsApiBasedComponent) -> Option<AnyJsFunctionBody> {
-    let (_, member) = component
-        .iter_declaration_groups()
-        .find(|(name, _)| name.text() == "setup")?;
-    match member {
-        AnyJsObjectMember::JsMethodObjectMember(method) => {
-            method.body().ok().map(AnyJsFunctionBody::JsFunctionBody)
-        }
-        AnyJsObjectMember::JsPropertyObjectMember(property) => {
-            match property.value().ok()?.omit_parentheses() {
-                AnyJsExpression::JsFunctionExpression(function) => {
-                    function.body().ok().map(AnyJsFunctionBody::JsFunctionBody)
-                }
-                AnyJsExpression::JsArrowFunctionExpression(function) => function.body().ok(),
-                _ => None,
-            }
-        }
-        _ => None,
-    }
-}
-
-/// Finds the lifecycle hook calls in `body` that run after `setup()` pauses at an `await`.
-///
-/// Code inside nested functions is ignored, because it runs when that function is called, not as
-/// part of `setup()`.
-fn find_hooks_after_await(
-    body: &AnyJsFunctionBody,
-    model: &SemanticModel,
-) -> Box<[LifecycleHookAfterAwait]> {
-    let mut first_await = None;
-    let mut hooks = Vec::new();
-    let mut preorder = body.syntax().preorder();
-    while let Some(event) = preorder.next() {
-        match event {
-            WalkEvent::Enter(node) => {
-                if AnyJsControlFlowRoot::KIND_SET.matches(node.kind()) {
-                    preorder.skip_subtree();
-                } else if first_await.is_none()
-                    && let Some(for_of) = JsForOfStatement::cast(node)
-                {
-                    first_await = for_of.await_token().map(|token| token.text_trimmed_range());
-                }
-            }
-            // Leave events come after the node's children, which matches evaluation order:
-            // `setup()` pauses only once the awaited value has been computed, and a function is
-            // called only once its arguments have been computed. So `await onMounted()` registers
-            // the hook before pausing, while `onMounted(await callback())` registers it after.
-            WalkEvent::Leave(node) => {
-                if let Some(first_await) = first_await {
-                    if let Some(call) = JsCallExpression::cast(node)
-                        && is_lifecycle_hook_call(&call, model)
-                    {
-                        hooks.push(LifecycleHookAfterAwait {
-                            hook: call,
-                            first_await,
-                        });
-                    }
-                } else if let Some(await_expression) = JsAwaitExpression::cast(node) {
-                    first_await = await_expression
-                        .await_token()
-                        .ok()
-                        .map(|token| token.text_trimmed_range());
-                }
-            }
-        }
-    }
-    hooks.into_boxed_slice()
 }
 
 /// Returns `true` if `call` registers a lifecycle hook for the component that is currently being

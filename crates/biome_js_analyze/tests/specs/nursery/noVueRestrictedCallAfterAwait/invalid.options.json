@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noVueRestrictedCallAfterAwait": {
+          "level": "error",
+          "options": {
+            "functions": [
+              { "module": "vue-i18n", "path": "useI18n" },
+              { "module": "foo", "path": ["bar", "baz"] },
+              { "module": "default-export" },
+              { "module": "explicit-default", "path": "default" },
+              { "module": "./local", "path": "useLocal" },
+              {
+                "module": "with-message",
+                "path": "useThing",
+                "message": "Call useThing() before the first await."
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

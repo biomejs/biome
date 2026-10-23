@@ -3338,6 +3338,11 @@ export interface Nursery {
 	 */
 	noVueRequiredPropWithDefault?: NoVueRequiredPropWithDefaultConfiguration;
 	/**
+	 * Disallow calling configured functions after an await in setup().
+	 * See https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await
+	 */
+	noVueRestrictedCallAfterAwait?: NoVueRestrictedCallAfterAwaitConfiguration;
+	/**
 	 * Disallow v-if on the root element of a Vue component template.
 	 * See https://biomejs.dev/linter/rules/no-vue-root-v-if
 	 */
@@ -6062,6 +6067,9 @@ export type NoVueLifecycleAfterAwaitConfiguration =
 export type NoVueRequiredPropWithDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRequiredPropWithDefaultOptions;
+export type NoVueRestrictedCallAfterAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRestrictedCallAfterAwaitOptions;
 export type NoVueRootVIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRootVIfOptions;
@@ -8729,6 +8737,10 @@ export interface RuleWithNoVueRequiredPropWithDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRequiredPropWithDefaultOptions;
 }
+export interface RuleWithNoVueRestrictedCallAfterAwaitOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRestrictedCallAfterAwaitOptions;
+}
 export interface RuleWithNoVueRootVIfOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRootVIfOptions;
@@ -11243,6 +11255,12 @@ export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
+export interface NoVueRestrictedCallAfterAwaitOptions {
+	/**
+	 * Functions that must not be called after an `await` in `setup()`. Defaults to an empty list.
+	 */
+	functions?: RestrictedFunction[];
+}
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
@@ -12377,6 +12395,21 @@ export interface TailwindComponentAllowance {
 	 */
 	components: TailwindAllowedComponents;
 }
+export interface RestrictedFunction {
+	/**
+	 * The message to show in place of the default message.
+	 */
+	message?: string;
+	/**
+	 * The module that exports the function, written as it appears in the `import` statement.
+	 */
+	module: string;
+	/**
+	 * The name the function is exported as, or a list of names that leads to the function
+	 * through the module's exports. Defaults to `"default"`, the module's default export.
+	 */
+	path?: RestrictedFunctionPath;
+}
 /**
  * The checks for one top-level block.
  */
@@ -12503,6 +12536,7 @@ export type AvailabilityTarget = AvailabilityNamed | number;
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
 export type TailwindAllowedComponents = string | string[];
+export type RestrictedFunctionPath = string | string[];
 export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -12909,14 +12943,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -12959,8 +12993,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13005,11 +13039,12 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRestrictedCallAfterAwait"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
@@ -13081,8 +13116,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
