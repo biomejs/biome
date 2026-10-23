@@ -1,16 +1,18 @@
+use std::collections::BTreeMap;
+
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, Specificity};
+use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity};
 use biome_css_syntax::{
-    AnyCssRoot, AnyCssSelector, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule,
-    CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule,
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, ScssAtRootAtRule, ScssEachAtRule,
     ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
     ScssMixinAtRule, ScssWhileAtRule,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange, TokenText};
 use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
@@ -165,7 +167,7 @@ impl Rule for NoDescendingSpecificity {
         let root = ctx.root();
         let mut visited_rules = FxHashSet::default();
         let mut visited_selectors = SelectorContexts::default();
-        let mut descending_selectors = Vec::new();
+        let mut descending_selectors = BTreeMap::new();
 
         let mut rules = model
             .rules()
@@ -211,7 +213,10 @@ impl Rule for NoDescendingSpecificity {
                 }
             }
         }
-        descending_selectors.into_boxed_slice()
+        descending_selectors
+            .into_values()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
@@ -249,36 +254,37 @@ struct SelectorContext {
     scss: Option<TextRange>,
 }
 
-type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
-/// find tail selector
-/// ```css
-/// a b:hover {
-///   ^^^^^^^
-/// }
-/// ```
-fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
-    match selector {
-        AnyCssSelector::CssCompoundSelector(s) => {
-            let mut result = String::new();
-            if let Some(simple) = s.simple_selector() {
-                simple.syntax().text_trimmed().for_each_chunk(|chunk| {
-                    result.push_str(chunk);
-                });
+type TailSelector = Vec<(CssSyntaxKind, TokenText)>;
+type SelectorContexts =
+    FxHashMap<SelectorContext, FxHashMap<TailSelector, (TextRange, Specificity)>>;
+
+/// Returns the last top-level compound selector from a resolved selector.
+///
+/// Combinators inside functional pseudo-classes, such as `>` in `:has(.a > .b)`, remain part of
+/// the compound selector.
+fn tail_selector(selector: &ResolvedSelector) -> Option<TailSelector> {
+    let mut delimiter_depth = 0usize;
+    let mut tail_start = 0;
+
+    for (index, (kind, _)) in selector.tokens().enumerate() {
+        match kind {
+            CssSyntaxKind::L_PAREN | CssSyntaxKind::L_BRACK => delimiter_depth += 1,
+            CssSyntaxKind::R_PAREN | CssSyntaxKind::R_BRACK => {
+                delimiter_depth = delimiter_depth.saturating_sub(1);
             }
-
-            s.sub_selectors()
-                .syntax()
-                .text_trimmed()
-                .for_each_chunk(|chunk| result.push_str(chunk));
-
-            Some(result)
+            _ if delimiter_depth == 0 && ResolvedSelector::is_combinator(*kind) => {
+                tail_start = index + 1;
+            }
+            _ => {}
         }
-        AnyCssSelector::CssComplexSelector(s) => {
-            // negligible recursion
-            s.right().as_ref().ok().and_then(find_tail_selector_str)
-        }
-        _ => None,
     }
+
+    let tail = selector
+        .tokens()
+        .skip(tail_start)
+        .cloned()
+        .collect::<Vec<_>>();
+    (!tail.is_empty()).then_some(tail)
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
@@ -287,37 +293,45 @@ fn find_descending_selector(
     rule: &CssSemanticRule,
     context: SelectorContext,
     visited_selectors: &mut SelectorContexts,
-    descending_selectors: &mut Vec<DescendingSelector>,
+    descending_selectors: &mut BTreeMap<TextRange, DescendingSelector>,
 ) {
     let visited_selectors = visited_selectors.entry(context).or_default();
 
     for selector in rule.selectors() {
-        let resolved_selector = selector.resolved().to_string();
+        let resolved_selector = selector.resolved();
+        let resolved_selector_text = resolved_selector.to_string();
         // SCSS placeholders may not emit CSS, and interpolation prevents static specificity.
-        if resolved_selector.contains('%') || resolved_selector.contains("#{") {
+        if resolved_selector_text.contains('%') || resolved_selector_text.contains("#{") {
             continue;
         }
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
-            continue;
-        };
-        let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
+        let Some(tail_selector) = tail_selector(resolved_selector) else {
             continue;
         };
 
-        if let Some(seen) = visited_selectors.get_mut(&tail_selector_str) {
+        if let Some(seen) = visited_selectors.get_mut(&tail_selector) {
             let (last_text_range, last_specificity) = *seen;
             let specificity = selector.specificity();
             if last_specificity > specificity {
-                descending_selectors.push(DescendingSelector {
-                    high: (last_text_range, last_specificity),
-                    low: (selector.range(), specificity),
-                });
+                let selector_range = selector.range();
+                if let Some(descending_selector) = descending_selectors.get_mut(&selector_range) {
+                    if last_specificity > descending_selector.high.1 {
+                        descending_selector.high = (last_text_range, last_specificity);
+                    }
+                } else {
+                    descending_selectors.insert(
+                        selector_range,
+                        DescendingSelector {
+                            high: (last_text_range, last_specificity),
+                            low: (selector_range, specificity),
+                        },
+                    );
+                }
             } else if specificity > last_specificity {
                 *seen = (selector.range(), specificity);
             }
         } else {
             visited_selectors.insert(
-                tail_selector_str,
+                tail_selector,
                 (selector.range(), selector.specificity()),
             );
         }
