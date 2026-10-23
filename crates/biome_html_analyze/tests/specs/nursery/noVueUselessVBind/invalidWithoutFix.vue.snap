@@ -1,0 +1,216 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidWithoutFix.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div :id="'comment'/*comment*/" />
+  <div :id="'comment'//comment
+  " />
+  <div :id="'\n'" />
+  <div :id="'\r'" />
+  <div :id="'\x41'" />
+  <div :id="'\u0041'" />
+  <div :id="'\0'" />
+  <div :id="'\
+'" />
+  <div class="foo" :class="'bar'" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidWithoutFix.vue:3:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :id="'comment'/*comment*/" />
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   <div :id="'comment'//comment
+    5 │   " />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:4:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+    2 │ <template>
+    3 │   <div :id="'comment'/*comment*/" />
+  > 4 │   <div :id="'comment'//comment
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+  > 5 │   " />
+      │   ^
+    6 │   <div :id="'\n'" />
+    7 │   <div :id="'\r'" />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:6:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+    4 │   <div :id="'comment'//comment
+    5 │   " />
+  > 6 │   <div :id="'\n'" />
+      │        ^^^^^^^^^^
+    7 │   <div :id="'\r'" />
+    8 │   <div :id="'\x41'" />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:7:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+    5 │   " />
+    6 │   <div :id="'\n'" />
+  > 7 │   <div :id="'\r'" />
+      │        ^^^^^^^^^^
+    8 │   <div :id="'\x41'" />
+    9 │   <div :id="'\u0041'" />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:8:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+     6 │   <div :id="'\n'" />
+     7 │   <div :id="'\r'" />
+   > 8 │   <div :id="'\x41'" />
+       │        ^^^^^^^^^^^^
+     9 │   <div :id="'\u0041'" />
+    10 │   <div :id="'\0'" />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:9:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+     7 │   <div :id="'\r'" />
+     8 │   <div :id="'\x41'" />
+   > 9 │   <div :id="'\u0041'" />
+       │        ^^^^^^^^^^^^^^
+    10 │   <div :id="'\0'" />
+    11 │   <div :id="'\
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:10:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+     8 │   <div :id="'\x41'" />
+     9 │   <div :id="'\u0041'" />
+  > 10 │   <div :id="'\0'" />
+       │        ^^^^^^^^^^
+    11 │   <div :id="'\
+    12 │ '" />
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:11:8 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+     9 │   <div :id="'\u0041'" />
+    10 │   <div :id="'\0'" />
+  > 11 │   <div :id="'\
+       │        ^^^^^^^
+  > 12 │ '" />
+       │ ^^
+    13 │   <div class="foo" :class="'bar'" />
+    14 │ </template>
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:13:20 lint/nursery/noVueUselessVBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-bind directive binds a fixed string.
+  
+    11 │   <div :id="'\
+    12 │ '" />
+  > 13 │   <div class="foo" :class="'bar'" />
+       │                    ^^^^^^^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i A plain attribute gives the same result without v-bind, and is easier to read.
+  
+  i Remove v-bind and write the string as the attribute value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -3,6 +3,7 @@ use crate::{
     Access, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue, Namespace, Origin,
     RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
+use biome_rowan::{TextRange, TextSize};
 
 const LIST: &str = r#"<script setup lang="ts">
 import Card from './Card.vue'
@@ -629,4 +630,60 @@ fn ranges_are_local_to_the_declaring_tree() {
     assert_eq!(&code[host], "'a'");
     assert_eq!(prop.range() + snippet.offset(), host);
     assert!(u32::from(prop.range().start()) < u32::from(host.start()));
+}
+
+#[test]
+fn string_values_and_comments() {
+    let code = r#"<template>
+  <div :a="'foo'" :b="`foo`" :c="'it\'s'" :d="'a\\b'" :e="'\n'" :f="'\x41'" :g="'\0'" :h="`${x}`" :i="'foo' /* note */" :j="x" />
+</template>
+"#;
+    let model = sfc(code);
+    let div = model
+        .elements()
+        .find(|element| element.tag() == "div")
+        .unwrap();
+    let values: Vec<_> = div
+        .attrs()
+        .map(|attr| {
+            let snippet = attr.value_snippet().unwrap();
+            (
+                attr.static_arg().unwrap().to_string(),
+                snippet.string_value().map(|value| value.into_owned()),
+                snippet.has_comments(),
+            )
+        })
+        .collect();
+    let expected: Vec<_> = [
+        ("a", Some("foo"), false),
+        ("b", Some("foo"), false),
+        ("c", Some("it's"), false),
+        ("d", Some("a\\b"), false),
+        ("e", None, false),
+        ("f", None, false),
+        ("g", None, false),
+        ("h", None, false),
+        ("i", Some("foo"), true),
+        ("j", None, false),
+    ]
+    .into_iter()
+    .map(|(arg, value, comments)| (arg.to_string(), value.map(str::to_string), comments))
+    .collect();
+    assert_eq!(values, expected);
+}
+
+#[test]
+fn attr_at_finds_the_attribute_with_the_exact_range() {
+    let code = "<template>\n  <div id=\"x\" :title=\"'y'\" />\n</template>\n";
+    let model = sfc(code);
+    let start = code.find(":title").unwrap();
+    let end = start + ":title=\"'y'\"".len();
+    let range = TextRange::new(TextSize::from(start as u32), TextSize::from(end as u32));
+    let attr = model.attr_at(range).unwrap();
+    assert_eq!(attr.static_arg(), Some("title"));
+    assert!(
+        model
+            .attr_at(TextRange::at(range.start(), 1.into()))
+            .is_none()
+    );
 }
