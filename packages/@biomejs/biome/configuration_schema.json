@@ -7522,6 +7522,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueAsyncComputedConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueAsyncComputedOptions" }
+			]
+		},
+		"NoVueAsyncComputedOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreObjects": {
+					"description": "Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as\nasynchronous, such as `z` from the Zod validation library.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueBooleanDefaultConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8368,6 +8385,13 @@
 					"description": "Disallow type conversions that do not change the type of an expression.\nSee https://biomejs.dev/linter/rules/no-useless-type-conversion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessTypeConversionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueAsyncComputed": {
+					"description": "Disallow asynchronous code in Vue computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-async-computed",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueAsyncComputedConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13568,6 +13592,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueArrowFuncInWatchOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueAsyncComputedOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueAsyncComputedOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
