@@ -7639,6 +7639,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueTemplateShadowConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueTemplateShadowOptions" }
+			]
+		},
+		"NoVueTemplateShadowOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8366,6 +8376,13 @@
 					"description": "Disallow Vue component events named after built-in browser events.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueShadowNativeEventsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueTemplateShadow": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-vue-template-shadow",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueTemplateShadowConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13605,6 +13622,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueShadowNativeEventsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueTemplateShadowOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueTemplateShadowOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
