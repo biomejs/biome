@@ -8828,6 +8828,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentVSlotStyle": {
+					"description": "Enforce a consistent style for v-slot in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVSlotStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueMatchingComponentFileName": {
 					"description": "Enforce that the name of a Vue component matches its file name.\nSee https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
 					"anyOf": [
@@ -16062,6 +16069,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentVSlotStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVSlotStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -21380,6 +21400,30 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueConsistentVSlotStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVSlotStyleOptions" }
+			]
+		},
+		"UseVueConsistentVSlotStyleOptions": {
+			"type": "object",
+			"properties": {
+				"atComponent": {
+					"description": "Preferred style for the default slot when `v-slot` is placed directly on a component,\nas in `<MyComponent v-slot=\"props\">`.\nIf omitted, `\"v-slot\"` is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueSlotStyle" }, { "type": "null" }]
+				},
+				"default": {
+					"description": "Preferred style for the default slot on a `<template>` element,\nas in `<template #default>`.\nIf omitted, `\"shorthand\"` is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueSlotStyle" }, { "type": "null" }]
+				},
+				"named": {
+					"description": "Preferred style for named slots, as in `<template #header>`.\nIf omitted, `\"shorthand\"` is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueNamedSlotStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueDefineMacrosOrderConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -21693,6 +21737,33 @@
 		"VueDirectiveStyle2": {
 			"type": "string",
 			"enum": ["shorthand", "longhand"]
+		},
+		"VueNamedSlotStyle": {
+			"description": "How a named slot is written.",
+			"oneOf": [
+				{ "description": "`#name`", "type": "string", "const": "shorthand" },
+				{
+					"description": "`v-slot:name`",
+					"type": "string",
+					"const": "longhand"
+				}
+			]
+		},
+		"VueSlotStyle": {
+			"description": "How a default slot is written.",
+			"oneOf": [
+				{ "description": "`#default`", "type": "string", "const": "shorthand" },
+				{
+					"description": "`v-slot:default`",
+					"type": "string",
+					"const": "longhand"
+				},
+				{
+					"description": "`v-slot`, without a slot name.",
+					"type": "string",
+					"const": "v-slot"
+				}
+			]
 		},
 		"WhitespaceSensitivity": {
 			"description": "Controls how the formatter treats whitespace around text and child elements in HTML, Vue,\nSvelte, and Astro markup.\n\nThe following two cases won't produce the same output:\n\n|                |      html      |    output    |\n| -------------- | :------------: | :----------: |\n| with spaces    | `1<b> 2 </b>3` | 1<b> 2 </b>3 |\n| without spaces |  `1<b>2</b>3`  |  1<b>2</b>3  |\n\nThis happens because whitespace is significant in inline elements.\n\nAs a consequence of this, the formatter must format blocks that look like this (assume a small line width, <20):\n```html\n<span>really long content</span>\n```\nas this, where the content hugs the tags:\n```html\n<span\n   >really long content</span\n>\n```\n\nNote that this is only necessary for inline elements. Block elements do not have this restriction.",
