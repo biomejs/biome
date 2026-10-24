@@ -1903,6 +1903,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_vue_deprecated_scoped_slots::NoVueDeprecatedScopedSlotsOptions,
         >(),
     ));
+    result.push(("nursery", "noVueDeprecatedSlotAttribute", TypeId::of::<biome_rule_options::no_vue_deprecated_slot_attribute::NoVueDeprecatedSlotAttributeOptions>()));
     result.push((
         "nursery",
         "noVueDeprecatedSlotScope",

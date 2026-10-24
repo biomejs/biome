@@ -1,0 +1,1 @@
+{"linter":{"rules":{"nursery":{"noVueDeprecatedSlotAttribute":{"level":"error","options":{"ignoreParents":["LinkList","my-web-component"]}}}}}}
