@@ -251,9 +251,10 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.parent().map(Self::from)
     }
 
-    /// Returns the grandparent.
+    /// Returns the parent of this node's parent, or [None] if this node has no
+    /// grandparent.
     pub fn grand_parent(&self) -> Option<Self> {
-        self.parent().and_then(|parent| parent.parent())
+        self.raw.grand_parent().map(Self::from)
     }
 
     /// Returns the index of this node inside of its parent

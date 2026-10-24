@@ -196,6 +196,11 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn grand_parent(&self) -> Option<Self> {
+        self.data().parent()?.parent_node()
+    }
+
+    #[inline]
     pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
         iter::successors(Some(self.clone()), Self::parent)
     }
