@@ -73,7 +73,7 @@ fn write_symbol(f: &mut Formatter<'_>, indent: &str, symbol: &Symbol) -> fmt::Re
         write!(f, " in={}", parent.name())?;
     }
     match symbol.kind() {
-        SymbolKind::Prop => {
+        SymbolKind::Prop | SymbolKind::Model => {
             let prop = Prop(symbol.clone());
             if let Some(form) = prop.form() {
                 write!(f, " form={form:?}")?;
