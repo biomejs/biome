@@ -116,6 +116,19 @@ watch(count, () => {});
 }
 
 #[test]
+fn mixins_option_range() {
+    let source = "export default { name: 'A', mixins: [m] }";
+    let model = js_model(source, JsFileSource::vue());
+    let component = model.components().next().unwrap();
+    let range = component.mixins_range().unwrap();
+    assert_eq!(&source[range], "mixins: [m]");
+
+    let model = js_model("export default { extends: m }", JsFileSource::vue());
+    let component = model.components().next().unwrap();
+    assert_eq!(component.mixins_range(), None);
+}
+
+#[test]
 fn unreadable_declarations_open_the_namespace() {
     let spread = js_model(
         "export default { props: { ...shared, a: String }, mixins: [m] }",

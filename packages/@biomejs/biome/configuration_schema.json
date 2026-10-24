@@ -7562,6 +7562,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueMixinConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueMixinOptions" }
+			]
+		},
+		"NoVueMixinOptions": { "type": "object", "additionalProperties": false },
 		"NoVueOptionsApiConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8345,6 +8352,13 @@
 					"description": "Disallow registering Vue lifecycle hooks after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueLifecycleAfterAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueMixin": {
+					"description": "Disallow the mixins option in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-mixin",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueMixinConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13529,6 +13543,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueLifecycleAfterAwaitOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueMixinOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueMixinOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
