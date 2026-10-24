@@ -5217,6 +5217,16 @@
 			]
 		},
 		"NoLoopFuncOptions": { "type": "object", "additionalProperties": false },
+		"NoLoopIterableMutationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLoopIterableMutationOptions" }
+			]
+		},
+		"NoLoopIterableMutationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7990,6 +8000,13 @@
 					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLoopIterableMutation": {
+					"description": "Disallow changing a collection while a for...of loop iterates over it.\nSee https://biomejs.dev/linter/rules/no-loop-iterable-mutation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLoopIterableMutationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11423,6 +11440,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLoopFuncOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLoopIterableMutationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLoopIterableMutationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

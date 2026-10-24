@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+for (const item of (items as string[])) {
+	(items as string[]).push(item);
+}
+
+function deleteEntries(set: Set<[string]>) {
+	for (const [value] of set) {
+		set.delete(value);
+	}
+}
+
+function reinsert(set: Set<string>) {
+	for (const value of set!) {
+		set!.delete(value);
+		set!.add(value);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:22 lint/nursery/noLoopIterableMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes items while a loop is iterating over it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ for (const item of (items as string[])) {
+  > 3 │ 	(items as string[]).push(item);
+      │ 	                    ^^^^
+    4 │ }
+    5 │ 
+  
+  i The loop iterates over it here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ for (const item of (items as string[])) {
+      │                    ^^^^^^^^^^^^^^^^^^^
+    3 │ 	(items as string[]).push(item);
+    4 │ }
+  
+  i Adding, removing, or reordering items during the loop can make it skip items, visit items more than once, or never end.
+  
+  i Loop over a copy, such as [...(items as string[])], or make the changes after the loop.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:7 lint/nursery/noLoopIterableMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes set while a loop is iterating over it.
+  
+     6 │ function deleteEntries(set: Set<[string]>) {
+     7 │ 	for (const [value] of set) {
+   > 8 │ 		set.delete(value);
+       │ 		    ^^^^^^
+     9 │ 	}
+    10 │ }
+  
+  i The loop iterates over it here.
+  
+    6 │ function deleteEntries(set: Set<[string]>) {
+  > 7 │ 	for (const [value] of set) {
+      │ 	                      ^^^
+    8 │ 		set.delete(value);
+    9 │ 	}
+  
+  i Adding, removing, or reordering items during the loop can make it skip items, visit items more than once, or never end.
+  
+  i Loop over a copy, such as [...set], or make the changes after the loop.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:8 lint/nursery/noLoopIterableMutation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes set while a loop is iterating over it.
+  
+    13 │ 	for (const value of set!) {
+    14 │ 		set!.delete(value);
+  > 15 │ 		set!.add(value);
+       │ 		     ^^^
+    16 │ 	}
+    17 │ }
+  
+  i The loop iterates over it here.
+  
+    12 │ function reinsert(set: Set<string>) {
+  > 13 │ 	for (const value of set!) {
+       │ 	                    ^^^^
+    14 │ 		set!.delete(value);
+    15 │ 		set!.add(value);
+  
+  i Adding, removing, or reordering items during the loop can make it skip items, visit items more than once, or never end.
+  
+  i Loop over a copy, such as [...set!], or make the changes after the loop.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

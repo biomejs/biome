@@ -3053,6 +3053,11 @@ export interface Nursery {
 	 */
 	noJsonUnsafeValues?: NoJsonUnsafeValuesConfiguration;
 	/**
+	 * Disallow changing a collection while a for...of loop iterates over it.
+	 * See https://biomejs.dev/linter/rules/no-loop-iterable-mutation
+	 */
+	noLoopIterableMutation?: NoLoopIterableMutationConfiguration;
+	/**
 	 * Disallow void when it does not discard a call's return value or a thenable.
 	 * See https://biomejs.dev/linter/rules/no-meaningless-void-operator
 	 */
@@ -5936,6 +5941,9 @@ export type NoJsRestrictedPropertiesConfiguration =
 export type NoJsonUnsafeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsonUnsafeValuesOptions;
+export type NoLoopIterableMutationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLoopIterableMutationOptions;
 export type NoMeaninglessVoidOperatorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMeaninglessVoidOperatorOptions;
@@ -8520,6 +8528,10 @@ export interface RuleWithNoJsRestrictedPropertiesOptions {
 export interface RuleWithNoJsonUnsafeValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsonUnsafeValuesOptions;
+}
+export interface RuleWithNoLoopIterableMutationOptions {
+	level: RulePlainConfiguration;
+	options?: NoLoopIterableMutationOptions;
 }
 export interface RuleWithNoMeaninglessVoidOperatorOptions {
 	/**
@@ -11272,6 +11284,7 @@ export interface NoJsRestrictedPropertiesOptions {
 	entries?: RestrictedPropertyEntry[];
 }
 export type NoJsonUnsafeValuesOptions = {};
+export type NoLoopIterableMutationOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
@@ -13067,6 +13080,7 @@ export type Category =
 	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
+	| "lint/nursery/noLoopIterableMutation"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMisplacedListElements"
