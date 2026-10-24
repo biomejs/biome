@@ -325,6 +325,7 @@ define_categories! {
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
     "lint/nursery/noVueDeprecatedScopedSlots": "https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
     "lint/nursery/noVueLifecycleAfterAwait": "https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
+    "lint/nursery/noVueMutatingProps": "https://biomejs.dev/linter/rules/no-vue-mutating-props",
     "lint/nursery/noVueRootVIf": "https://biomejs.dev/linter/rules/no-vue-root-v-if",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",

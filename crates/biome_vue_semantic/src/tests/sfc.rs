@@ -630,3 +630,68 @@ fn ranges_are_local_to_the_declaring_tree() {
     assert_eq!(prop.range() + snippet.offset(), host);
     assert!(u32::from(prop.range().start()) < u32::from(host.start()));
 }
+
+#[test]
+fn mutating_method_call_points_at_the_member_it_changes() {
+    let code = "<script setup lang=\"ts\">\nconst props = defineProps(['list'])\nprops.list.push(1);\n(props.list!).sort();\n</script>\n";
+    let model = sfc(code);
+    let list = model.template_component().unwrap().props().next().unwrap();
+    let mutations: Vec<_> = list
+        .uses()
+        .filter(|reference| reference.access() == Access::Mutate)
+        .map(|reference| &code[reference.host_range()])
+        .collect();
+    assert_eq!(mutations, ["list", "list"]);
+}
+
+#[test]
+fn write_through_computed_member_is_a_write() {
+    let code = "<script setup>\nconst props = defineProps(['list'])\nprops.list[index].done = true;\nprops.list[index].push(1);\nprops.list[index];\n</script>\n";
+    let model = sfc(code);
+    let list = model.template_component().unwrap().props().next().unwrap();
+    let uses: Vec<_> = list
+        .uses()
+        .map(|reference| {
+            (
+                &code[reference.host_range()],
+                reference.access(),
+                reference.has_open_path(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        uses,
+        [
+            ("list", Access::Write, true),
+            ("list", Access::Mutate, true),
+            ("list", Access::Read, true),
+        ]
+    );
+}
+
+#[test]
+fn v_model_through_computed_member_is_a_write() {
+    let model = sfc(r#"<script setup>
+defineProps(['list'])
+</script>
+<template>
+  <input v-model="list[0].name">
+</template>
+"#);
+    let list = model.template_component().unwrap().props().next().unwrap();
+    let accesses: Vec<_> = list.uses().map(|reference| reference.access()).collect();
+    assert_eq!(accesses, [Access::Write]);
+}
+
+#[test]
+fn object_assign_target_is_a_mutation() {
+    let model = sfc(r#"<script setup>
+const props = defineProps(['user'])
+Object.assign(props.user, { name: 'Alice' });
+Object.assign({}, props.user);
+</script>
+"#);
+    let user = model.template_component().unwrap().props().next().unwrap();
+    let accesses: Vec<_> = user.uses().map(|reference| reference.access()).collect();
+    assert_eq!(accesses, [Access::Mutate, Access::Escape]);
+}
