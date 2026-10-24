@@ -19,11 +19,7 @@ use biome_css_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
-use std::{
-    borrow::Cow,
-    cmp::Ordering,
-    collections::HashSet,
-};
+use std::{borrow::Cow, cmp::Ordering, collections::HashSet};
 
 declare_source_rule! {
     /// Sort CSS properties into a consistent order.
@@ -66,11 +62,9 @@ declare_source_rule! {
     ///
     /// ```css,expect_diff
     /// p {
+    ///   span { color: blue; }
     ///   color: red;
     ///   display: block;
-    ///   span { color: blue; }
-    ///   color: green;
-    ///   display: flex;
     /// }
     /// ```
     ///
@@ -99,8 +93,9 @@ declare_source_rule! {
     ///
     /// ```css
     /// p {
-    ///   color: red;
     ///   span { color: blue; }
+    ///   display: block;
+    ///   color: red;
     /// }
     /// ```
     ///
