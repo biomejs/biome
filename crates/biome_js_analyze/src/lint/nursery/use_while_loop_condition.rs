@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseWhileLoopCondition {
-        version: "next",
+        version: "2.6.4",
         name: "useWhileLoopCondition",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-while-loop-condition").same()],
