@@ -35,6 +35,20 @@ pub struct BindingTypeInput<'db> {
     pub range: TextRange,
 }
 
+/// Identifies a binding's incoming state within one execution root.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowBindingTypeInput<'db> {
+    #[returns(copy)]
+    pub binding: BindingTypeInput<'db>,
+    /// Index of the execution root in the binding module's collected flow.
+    #[returns(copy)]
+    pub root: usize,
+    /// Node index in that root's flow graph.
+    #[returns(copy)]
+    pub point: usize,
+}
+
 /// Interned input for [`super::infer_local_type`].
 #[salsa::interned]
 #[derive(Debug)]
