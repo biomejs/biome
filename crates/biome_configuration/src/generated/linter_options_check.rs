@@ -1811,6 +1811,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noVueDeprecatedEventsApi",
+        TypeId::of::<
+            biome_rule_options::no_vue_deprecated_events_api::NoVueDeprecatedEventsApiOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noVueDeprecatedScopedSlots",
         TypeId::of::<
             biome_rule_options::no_vue_deprecated_scoped_slots::NoVueDeprecatedScopedSlotsOptions,
