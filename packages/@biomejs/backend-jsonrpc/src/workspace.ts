@@ -3328,6 +3328,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
+	 * Disallow the deprecated slot attribute in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-slot-attribute
+	 */
+	noVueDeprecatedSlotAttribute?: NoVueDeprecatedSlotAttributeConfiguration;
+	/**
 	 * Disallow registering Vue lifecycle hooks after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
@@ -6061,6 +6066,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
+export type NoVueDeprecatedSlotAttributeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedSlotAttributeOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
@@ -8725,6 +8733,10 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedScopedSlotsOptions;
 }
+export interface RuleWithNoVueDeprecatedSlotAttributeOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedSlotAttributeOptions;
+}
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
@@ -11253,6 +11265,20 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
+export interface NoVueDeprecatedSlotAttributeOptions {
+	/**
+	 * Names of elements that can use the `slot` attribute.
+	 *
+	 * Case and hyphens are ignored, so `my-component` also matches `MyComponent`.
+	 */
+	ignore?: string[];
+	/**
+	 * Names of elements whose direct children can use the `slot` attribute.
+	 *
+	 * Case and hyphens are ignored, so `my-web-component` also matches `MyWebComponent`.
+	 */
+	ignoreParents?: string[];
+}
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
@@ -13018,6 +13044,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueDeprecatedSlotAttribute"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"

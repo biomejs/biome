@@ -1,0 +1,19 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-ignore.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <LinkList>
+    <one slot="one" />
+    <two slot="two" />
+    <my-component slot="my-component-slot" />
+    <myComponent slot="myComponent-slot" />
+    <MyComponent slot="MyComponent-slot" />
+    <MyComponent :slot="name" />
+  </LinkList>
+</template>
+
+```
