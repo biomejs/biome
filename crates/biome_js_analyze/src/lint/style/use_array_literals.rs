@@ -124,6 +124,14 @@ impl Rule for UseArrayLiterals {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
+        if node.arguments().is_some_and(|args| {
+            args.args()
+                .iter()
+                .any(|arg| matches!(arg, Ok(AnyJsCallArgument::JsSpread(_))))
+        }) {
+            // A spread can expand to a single numeric argument, which the Array constructor treats as a length.
+            return None;
+        }
         if node
             .syntax()
             .parent()
