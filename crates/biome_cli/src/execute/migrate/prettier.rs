@@ -359,6 +359,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             || options.use_tabs.is_some()
             || options.tab_width.is_some()
             || options.end_of_line.is_some()
+            || options.bracket_spacing.is_some()
         {
             // are global options are set
             let line_width = if let Some(print_width) = options.print_width {
@@ -384,6 +385,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 line_width,
                 indent_style,
                 line_ending: options.end_of_line.map(|end_of_line| end_of_line.into()),
+                bracket_spacing: options.bracket_spacing.map(Into::into),
                 ..Default::default()
             };
             result.formatter = Some(formatter);
@@ -396,7 +398,6 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             && options.arrow_parens.is_none()
             && options.trailing_comma.is_none()
             && options.quote_props.is_none()
-            && options.bracket_spacing.is_none()
         {
             // no js option are set
             return Ok(result);
