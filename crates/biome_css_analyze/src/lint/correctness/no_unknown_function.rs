@@ -18,9 +18,9 @@ declare_lint_rule! {
     ///
     /// ## SCSS limitations
     ///
-    /// The rule resolves SCSS functions declared in the same file only. Functions made available
-    /// from other files, whether by legacy SCSS `@import` or by `@use`, are not resolved.
-    /// Configure the `ignore` option for imported functions that cannot be resolved locally.
+    /// The rule does not resolve functions made available from other files, whether by legacy SCSS
+    /// `@import` or by `@use`. Configure the `ignore` option for imported functions that cannot be
+    /// resolved locally.
     ///
     /// Data sources of known CSS value functions are:
     /// - MDN reference on [CSS value functions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions)
