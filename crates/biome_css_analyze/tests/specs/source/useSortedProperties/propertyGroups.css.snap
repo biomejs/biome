@@ -1,0 +1,226 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: propertyGroups.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.nested {
+  color: red;
+  display: block;
+  & { color: blue; }
+  color: green;
+  display: flex;
+}
+
+.conditional {
+  color: red;
+  display: block;
+  @media (width > 100px) { color: blue; }
+  color: green;
+  display: flex;
+}
+
+.consecutive {
+  & { color: blue; }
+  @media (width > 100px) { color: green; }
+  color: red;
+  display: block;
+  & { color: black; }
+}
+
+.shorthand-boundary {
+  margin-top: 1px;
+  display: block;
+  & { color: blue; }
+  margin: 2px;
+  display: flex;
+}
+
+.empty-declaration {
+  color: red;
+  display: block;
+  ;
+  color: blue;
+  display: flex;
+}
+
+```
+
+# Diagnostics
+```
+propertyGroups.css:2:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     1 │ /* should generate diagnostics */
+   > 2 │ .nested {
+       │         ^
+   > 3 │   color: red;
+   > 4 │   display: block;
+   > 5 │   & { color: blue; }
+   > 6 │   color: green;
+   > 7 │   display: flex;
+   > 8 │ }
+       │ ^
+     9 │ 
+    10 │ .conditional {
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   .nested {
+     3    │ - ··color:·red;
+     4    │ - ··display:·block;
+        3 │ + ··display:·block;
+        4 │ + ··color:·red;
+     5  5 │     & { color: blue; }
+     6    │ - ··color:·green;
+     7    │ - ··display:·flex;
+        6 │ + ··display:·flex;
+        7 │ + ··color:·green;
+     8  8 │   }
+     9  9 │   
+  
+
+```
+
+```
+propertyGroups.css:10:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     8 │ }
+     9 │ 
+  > 10 │ .conditional {
+       │              ^
+  > 11 │   color: red;
+        ...
+  > 15 │   display: flex;
+  > 16 │ }
+       │ ^
+    17 │ 
+    18 │ .consecutive {
+  
+  i Safe fix: Sort these properties
+  
+     9  9 │   
+    10 10 │   .conditional {
+    11    │ - ··color:·red;
+    12    │ - ··display:·block;
+       11 │ + ··display:·block;
+       12 │ + ··color:·red;
+    13 13 │     @media (width > 100px) { color: blue; }
+    14    │ - ··color:·green;
+    15    │ - ··display:·flex;
+       14 │ + ··display:·flex;
+       15 │ + ··color:·green;
+    16 16 │   }
+    17 17 │   
+  
+
+```
+
+```
+propertyGroups.css:18:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    16 │ }
+    17 │ 
+  > 18 │ .consecutive {
+       │              ^
+  > 19 │   & { color: blue; }
+        ...
+  > 23 │   & { color: black; }
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ .shorthand-boundary {
+  
+  i Safe fix: Sort these properties
+  
+    19 19 │     & { color: blue; }
+    20 20 │     @media (width > 100px) { color: green; }
+    21    │ - ··color:·red;
+    22    │ - ··display:·block;
+       21 │ + ··display:·block;
+       22 │ + ··color:·red;
+    23 23 │     & { color: black; }
+    24 24 │   }
+  
+
+```
+
+```
+propertyGroups.css:26:21 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    24 │ }
+    25 │ 
+  > 26 │ .shorthand-boundary {
+       │                     ^
+  > 27 │   margin-top: 1px;
+        ...
+  > 31 │   display: flex;
+  > 32 │ }
+       │ ^
+    33 │ 
+    34 │ .empty-declaration {
+  
+  i Safe fix: Sort these properties
+  
+    25 25 │   
+    26 26 │   .shorthand-boundary {
+    27    │ - ··margin-top:·1px;
+    28    │ - ··display:·block;
+       27 │ + ··display:·block;
+       28 │ + ··margin-top:·1px;
+    29 29 │     & { color: blue; }
+    30    │ - ··margin:·2px;
+    31    │ - ··display:·flex;
+       30 │ + ··display:·flex;
+       31 │ + ··margin:·2px;
+    32 32 │   }
+    33 33 │   
+  
+
+```
+
+```
+propertyGroups.css:34:20 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    32 │ }
+    33 │ 
+  > 34 │ .empty-declaration {
+       │                    ^
+  > 35 │   color: red;
+  > 36 │   display: block;
+  > 37 │   ;
+  > 38 │   color: blue;
+  > 39 │   display: flex;
+  > 40 │ }
+       │ ^
+    41 │ 
+  
+  i Safe fix: Sort these properties
+  
+    33 33 │   
+    34 34 │   .empty-declaration {
+    35    │ - ··color:·red;
+    36    │ - ··display:·block;
+       35 │ + ··display:·block;
+       36 │ + ··color:·red;
+    37 37 │     ;
+    38    │ - ··color:·blue;
+    39    │ - ··display:·flex;
+       38 │ + ··display:·flex;
+       39 │ + ··color:·blue;
+    40 40 │   }
+    41 41 │   
+  
+
+```
