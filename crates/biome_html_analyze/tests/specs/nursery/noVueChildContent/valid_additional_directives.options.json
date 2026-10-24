@@ -1,0 +1,1 @@
+{"linter":{"rules":{"nursery":{"noVueChildContent":{"level":"error","options":{"additionalDirectives":["t"]}}}}}}
