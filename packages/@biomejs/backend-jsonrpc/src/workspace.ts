@@ -3098,6 +3098,11 @@ export interface Nursery {
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
+	 * Disallow the use of the null literal.
+	 * See https://biomejs.dev/linter/rules/no-null
+	 */
+	noNull?: NoNullConfiguration;
+	/**
 	 * Disallow calling Object without arguments to create an empty object.
 	 * See https://biomejs.dev/linter/rules/no-object-constructor
 	 */
@@ -5958,6 +5963,9 @@ export type NoNewRequireConfiguration =
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
+export type NoNullConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNullOptions;
 export type NoObjectConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObjectConstructorOptions;
@@ -8560,6 +8568,14 @@ export interface RuleWithNoNewRequireOptions {
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
+}
+export interface RuleWithNoNullOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoNullOptions;
 }
 export interface RuleWithNoObjectConstructorOptions {
 	/**
@@ -11265,6 +11281,7 @@ export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
 export type NoNewRequireOptions = {};
 export type NoNonScalableViewportOptions = {};
+export type NoNullOptions = {};
 export type NoObjectConstructorOptions = {};
 export type NoObsoleteAttributesOptions = {};
 export type NoObsoleteTagsOptions = {};
@@ -13060,6 +13077,7 @@ export type Category =
 	| "lint/nursery/noNestedTemplateLiterals"
 	| "lint/nursery/noNewRequire"
 	| "lint/nursery/noNonScalableViewport"
+	| "lint/nursery/noNull"
 	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObsoleteAttributes"
 	| "lint/nursery/noObsoleteTags"
