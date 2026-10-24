@@ -6,6 +6,16 @@ expression: locator.js
 ```js
 /* should generate diagnostics */
 await page.locator('.my-element');
+await page.locator('button').first();
+await page.locator('button').or(page.locator('input'));
+
+const btn = page.locator('button');
+await btn.first();
+
+async function testLocator(locator) {
+    await locator.first();
+    await locator.or(other);
+}
 
 
 ```
@@ -19,7 +29,8 @@ locator.js:2:1 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━�
     1 │ /* should generate diagnostics */
   > 2 │ await page.locator('.my-element');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
+    3 │ await page.locator('button').first();
+    4 │ await page.locator('button').or(page.locator('input'));
   
   i This method does not return a Promise.
   
@@ -27,5 +38,108 @@ locator.js:2:1 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━�
   
     2 │ await·page.locator('.my-element');
       │ ------                            
+
+```
+
+```
+locator.js:3:1 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    1 │ /* should generate diagnostics */
+    2 │ await page.locator('.my-element');
+  > 3 │ await page.locator('button').first();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ await page.locator('button').or(page.locator('input'));
+    5 │ 
+  
+  i This method does not return a Promise.
+  
+  i Safe fix: Remove unnecessary await
+  
+    3 │ await·page.locator('button').first();
+      │ ------                               
+
+```
+
+```
+locator.js:4:1 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    2 │ await page.locator('.my-element');
+    3 │ await page.locator('button').first();
+  > 4 │ await page.locator('button').or(page.locator('input'));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ const btn = page.locator('button');
+  
+  i This method does not return a Promise.
+  
+  i Safe fix: Remove unnecessary await
+  
+    4 │ await·page.locator('button').or(page.locator('input'));
+      │ ------                                                 
+
+```
+
+```
+locator.js:7:1 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+    6 │ const btn = page.locator('button');
+  > 7 │ await btn.first();
+      │ ^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ async function testLocator(locator) {
+  
+  i This method does not return a Promise.
+  
+  i Safe fix: Remove unnecessary await
+  
+    7 │ await·btn.first();
+      │ ------            
+
+```
+
+```
+locator.js:10:5 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+     9 │ async function testLocator(locator) {
+  > 10 │     await locator.first();
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    11 │     await locator.or(other);
+    12 │ }
+  
+  i This method does not return a Promise.
+  
+  i Safe fix: Remove unnecessary await
+  
+    10 │ ····await·locator.first();
+       │     ------                
+
+```
+
+```
+locator.js:11:5 lint/complexity/noPlaywrightUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary await expression.
+  
+     9 │ async function testLocator(locator) {
+    10 │     await locator.first();
+  > 11 │     await locator.or(other);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i This method does not return a Promise.
+  
+  i Safe fix: Remove unnecessary await
+  
+    11 │ ····await·locator.or(other);
+       │     ------                  
 
 ```
