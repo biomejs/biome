@@ -1,0 +1,40 @@
+<!-- should not generate diagnostics -->
+<template>
+  <LinkList>
+    <a v-slot:name />
+  </LinkList>
+  <LinkList>
+    <a #name />
+  </LinkList>
+  <LinkList>
+    <a v-slot="{ a }" />
+  </LinkList>
+  <LinkList>
+    <a #default="{ a }" />
+  </LinkList>
+  <LinkList>
+    <a slot="name" />
+  </LinkList>
+  <LinkList>
+    <a slot-scope="{ a }" />
+  </LinkList>
+  <LinkList>
+    <template v-slot="props">
+      {{ props.title }}
+    </template>
+  </LinkList>
+  <LinkList>
+    <a scope="props" />
+  </LinkList>
+  <LinkList>
+    <template :scope="props" />
+  </LinkList>
+  <LinkList>
+    <template data-scope="props" />
+  </LinkList>
+  <table>
+    <tr>
+      <th scope="col">Name</th>
+    </tr>
+  </table>
+</template>
