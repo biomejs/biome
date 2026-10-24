@@ -275,6 +275,7 @@ define_categories! {
     "lint/nursery/noPlaywrightNetworkidle": "https://biomejs.dev/linter/rules/no-playwright-networkidle",
     "lint/nursery/noPlaywrightNthMethods": "https://biomejs.dev/linter/rules/no-playwright-nth-methods",
     "lint/nursery/noPlaywrightPagePause": "https://biomejs.dev/linter/rules/no-playwright-page-pause",
+    "lint/nursery/noPlaywrightUnsafeReferences": "https://biomejs.dev/linter/rules/no-playwright-unsafe-references",
     "lint/nursery/noPlaywrightUselessAwait": "https://biomejs.dev/linter/rules/no-playwright-useless-await",
     "lint/nursery/noPlaywrightWaitForNavigation": "https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation",
     "lint/nursery/noPlaywrightWaitForSelector": "https://biomejs.dev/linter/rules/no-playwright-wait-for-selector",
