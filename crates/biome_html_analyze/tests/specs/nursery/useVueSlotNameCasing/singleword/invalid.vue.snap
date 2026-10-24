@@ -1,0 +1,167 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <slot name="foo-bar" />
+  <slot name="fooBar" />
+  <slot name="foo_bar" />
+  <slot name="foo:bar" />
+  <slot name="Foo" />
+  <slot name="header2" />
+  <slot name="ñandú" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo-bar isn't a single word made only of the lowercase letters a to z.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <slot name="foo-bar" />
+      │              ^^^^^^^^^
+    4 │   <slot name="fooBar" />
+    5 │   <slot name="foo_bar" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name fooBar isn't a single word made only of the lowercase letters a to z.
+  
+    2 │ <template>
+    3 │   <slot name="foo-bar" />
+  > 4 │   <slot name="fooBar" />
+      │              ^^^^^^^^
+    5 │   <slot name="foo_bar" />
+    6 │   <slot name="foo:bar" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo_bar isn't a single word made only of the lowercase letters a to z.
+  
+    3 │   <slot name="foo-bar" />
+    4 │   <slot name="fooBar" />
+  > 5 │   <slot name="foo_bar" />
+      │              ^^^^^^^^^
+    6 │   <slot name="foo:bar" />
+    7 │   <slot name="Foo" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo:bar isn't a single word made only of the lowercase letters a to z.
+  
+    4 │   <slot name="fooBar" />
+    5 │   <slot name="foo_bar" />
+  > 6 │   <slot name="foo:bar" />
+      │              ^^^^^^^^^
+    7 │   <slot name="Foo" />
+    8 │   <slot name="header2" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name Foo isn't a single word made only of the lowercase letters a to z.
+  
+    5 │   <slot name="foo_bar" />
+    6 │   <slot name="foo:bar" />
+  > 7 │   <slot name="Foo" />
+      │              ^^^^^
+    8 │   <slot name="header2" />
+    9 │   <slot name="ñandú" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name header2 isn't a single word made only of the lowercase letters a to z.
+  
+     6 │   <slot name="foo:bar" />
+     7 │   <slot name="Foo" />
+   > 8 │   <slot name="header2" />
+       │              ^^^^^^^^^
+     9 │   <slot name="ñandú" />
+    10 │ </template>
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name ñandú isn't a single word made only of the lowercase letters a to z.
+  
+     7 │   <slot name="Foo" />
+     8 │   <slot name="header2" />
+   > 9 │   <slot name="ñandú" />
+       │              ^^^^^^^
+    10 │ </template>
+    11 │ 
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is a single word made only of the lowercase letters a to z, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

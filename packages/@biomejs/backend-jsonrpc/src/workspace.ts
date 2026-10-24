@@ -3838,6 +3838,11 @@ export interface Nursery {
 	 */
 	useVueRenderReturn?: UseVueRenderReturnConfiguration;
 	/**
+	 * Enforce a consistent casing for the names of Vue slots.
+	 * See https://biomejs.dev/linter/rules/use-vue-slot-name-casing
+	 */
+	useVueSlotNameCasing?: UseVueSlotNameCasingConfiguration;
+	/**
 	 * Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.
 	 * See https://biomejs.dev/linter/rules/use-vue-template-ref
 	 */
@@ -6592,6 +6597,9 @@ export type UseVueMatchingComponentFileNameConfiguration =
 export type UseVueRenderReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueRenderReturnOptions;
+export type UseVueSlotNameCasingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueSlotNameCasingOptions;
 export type UseVueTemplateRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTemplateRefOptions;
@@ -9661,6 +9669,10 @@ export interface RuleWithUseVueRenderReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueRenderReturnOptions;
 }
+export interface RuleWithUseVueSlotNameCasingOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueSlotNameCasingOptions;
+}
 export interface RuleWithUseVueTemplateRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTemplateRefOptions;
@@ -12150,6 +12162,12 @@ export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueRenderReturnOptions = {};
+export interface UseVueSlotNameCasingOptions {
+	/**
+	 * The casing that slot names must follow. If omitted, slot names must be in camelCase.
+	 */
+	casing?: SlotNameCasing;
+}
 export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedPropsOptions = {};
@@ -13088,6 +13106,7 @@ export type ComponentDefinitionStyle =
 	| "arrowFunction";
 export type DefineEmitsDeclarationStyle = "type" | "typeLiteral" | "runtime";
 export type EventHyphenation = "always" | "never";
+export type SlotNameCasing = "camelCase" | "kebab-case" | "singleword";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -13793,6 +13812,7 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueTemplateRef"
+	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
