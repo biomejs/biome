@@ -20,7 +20,7 @@ biome_rowan = { workspace = true, optional = true }
 caseless    = "0.2.2"
 
 [dev-dependencies]
-divan = { package = "codspeed-divan-compat", version = "=5.0.1" }
+divan = { package = "codspeed-divan-compat", version = "=6.0.0" }
 
 [features]
 biome_rowan = ["dep:biome_rowan"]
