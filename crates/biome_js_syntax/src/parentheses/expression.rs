@@ -1059,7 +1059,8 @@ fn is_first_in_statement(node: &JsSyntaxNode, mode: FirstInStatementMode) -> boo
             | JsSyntaxKind::JS_NEW_EXPRESSION
             | JsSyntaxKind::TS_AS_EXPRESSION
             | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => parent,
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION => parent,
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
                 let expr = JsSequenceExpression::unwrap_cast(parent);
                 let is_left = expr
