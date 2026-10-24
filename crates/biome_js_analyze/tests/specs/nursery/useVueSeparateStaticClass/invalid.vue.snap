@@ -1,0 +1,547 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-bind:class="'static-class'" />
+  <div :class="'static-class'" />
+  <div :class="`static-class`" />
+  <div :class="`form-item input ${isDisabled ? 'disabled' : ''}`" />
+  <div :class="`${dynamicClass} static-class`" />
+  <div :class="`${start} static-class ${end}`" />
+  <div :class='"static-class"' />
+  <div :class="('static-class')" />
+  <div :class="['static-class']" />
+  <div :class="{'static-class': true}" />
+  <div :class="{foo: true}" />
+  <div :class="{default: true}" />
+  <div :class="{['static-class']: true}" />
+  <div :class="{[`static-class`]: true}" />
+  <div :class="['static-class', dynamicClass]" />
+  <div :class="[dynamicClass, otherDynamicClass, 'static-class']" />
+  <div :class="{'static-class': true, 'dynamic-class': foo}" />
+  <div :class="[{'dynamic-class': foo, 'static-class': true}]" />
+  <div :class="[dynamicClass, {staticClass: true}]" />
+  <div :class="[['nested-static-class']]" />
+  <div :class="['static-a static-b']" />
+  <div :class="`a ${foo}-b c`" />
+  <div
+    class="other-class"
+    other-attribute
+    :class="[
+      'static-class-a',
+      {'static-class-b': true, 'dynamic-class-a': foo},
+      dynamicClassB,
+    ]" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:22 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-bind:class="'static-class'" />
+      │                      ^^^^^^^^^^^^^^
+    4 │   <div :class="'static-class'" />
+    5 │   <div :class="`static-class`" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:16 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    2 │ <template>
+    3 │   <div v-bind:class="'static-class'" />
+  > 4 │   <div :class="'static-class'" />
+      │                ^^^^^^^^^^^^^^
+    5 │   <div :class="`static-class`" />
+    6 │   <div :class="`form-item input ${isDisabled ? 'disabled' : ''}`" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    3 │   <div v-bind:class="'static-class'" />
+    4 │   <div :class="'static-class'" />
+  > 5 │   <div :class="`static-class`" />
+      │                 ^^^^^^^^^^^^
+    6 │   <div :class="`form-item input ${isDisabled ? 'disabled' : ''}`" />
+    7 │   <div :class="`${dynamicClass} static-class`" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static classes form-item input are in a :class binding.
+  
+    4 │   <div :class="'static-class'" />
+    5 │   <div :class="`static-class`" />
+  > 6 │   <div :class="`form-item input ${isDisabled ? 'disabled' : ''}`" />
+      │                 ^^^^^^^^^^^^^^^
+    7 │   <div :class="`${dynamicClass} static-class`" />
+    8 │   <div :class="`${start} static-class ${end}`" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:33 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    5 │   <div :class="`static-class`" />
+    6 │   <div :class="`form-item input ${isDisabled ? 'disabled' : ''}`" />
+  > 7 │   <div :class="`${dynamicClass} static-class`" />
+      │                                 ^^^^^^^^^^^^
+    8 │   <div :class="`${start} static-class ${end}`" />
+    9 │   <div :class='"static-class"' />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:26 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+     6 │   <div :class="`form-item input ${isDisabled ? 'disabled' : ''}`" />
+     7 │   <div :class="`${dynamicClass} static-class`" />
+   > 8 │   <div :class="`${start} static-class ${end}`" />
+       │                          ^^^^^^^^^^^^
+     9 │   <div :class='"static-class"' />
+    10 │   <div :class="('static-class')" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:16 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+     7 │   <div :class="`${dynamicClass} static-class`" />
+     8 │   <div :class="`${start} static-class ${end}`" />
+   > 9 │   <div :class='"static-class"' />
+       │                ^^^^^^^^^^^^^^
+    10 │   <div :class="('static-class')" />
+    11 │   <div :class="['static-class']" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+     8 │   <div :class="`${start} static-class ${end}`" />
+     9 │   <div :class='"static-class"' />
+  > 10 │   <div :class="('static-class')" />
+       │                 ^^^^^^^^^^^^^^
+    11 │   <div :class="['static-class']" />
+    12 │   <div :class="{'static-class': true}" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+     9 │   <div :class='"static-class"' />
+    10 │   <div :class="('static-class')" />
+  > 11 │   <div :class="['static-class']" />
+       │                 ^^^^^^^^^^^^^^
+    12 │   <div :class="{'static-class': true}" />
+    13 │   <div :class="{foo: true}" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    10 │   <div :class="('static-class')" />
+    11 │   <div :class="['static-class']" />
+  > 12 │   <div :class="{'static-class': true}" />
+       │                 ^^^^^^^^^^^^^^
+    13 │   <div :class="{foo: true}" />
+    14 │   <div :class="{default: true}" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class foo is in a :class binding.
+  
+    11 │   <div :class="['static-class']" />
+    12 │   <div :class="{'static-class': true}" />
+  > 13 │   <div :class="{foo: true}" />
+       │                 ^^^
+    14 │   <div :class="{default: true}" />
+    15 │   <div :class="{['static-class']: true}" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class default is in a :class binding.
+  
+    12 │   <div :class="{'static-class': true}" />
+    13 │   <div :class="{foo: true}" />
+  > 14 │   <div :class="{default: true}" />
+       │                 ^^^^^^^
+    15 │   <div :class="{['static-class']: true}" />
+    16 │   <div :class="{[`static-class`]: true}" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:18 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    13 │   <div :class="{foo: true}" />
+    14 │   <div :class="{default: true}" />
+  > 15 │   <div :class="{['static-class']: true}" />
+       │                  ^^^^^^^^^^^^^^
+    16 │   <div :class="{[`static-class`]: true}" />
+    17 │   <div :class="['static-class', dynamicClass]" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:19 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    14 │   <div :class="{default: true}" />
+    15 │   <div :class="{['static-class']: true}" />
+  > 16 │   <div :class="{[`static-class`]: true}" />
+       │                   ^^^^^^^^^^^^
+    17 │   <div :class="['static-class', dynamicClass]" />
+    18 │   <div :class="[dynamicClass, otherDynamicClass, 'static-class']" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    15 │   <div :class="{['static-class']: true}" />
+    16 │   <div :class="{[`static-class`]: true}" />
+  > 17 │   <div :class="['static-class', dynamicClass]" />
+       │                 ^^^^^^^^^^^^^^
+    18 │   <div :class="[dynamicClass, otherDynamicClass, 'static-class']" />
+    19 │   <div :class="{'static-class': true, 'dynamic-class': foo}" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:50 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    16 │   <div :class="{[`static-class`]: true}" />
+    17 │   <div :class="['static-class', dynamicClass]" />
+  > 18 │   <div :class="[dynamicClass, otherDynamicClass, 'static-class']" />
+       │                                                  ^^^^^^^^^^^^^^
+    19 │   <div :class="{'static-class': true, 'dynamic-class': foo}" />
+    20 │   <div :class="[{'dynamic-class': foo, 'static-class': true}]" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    17 │   <div :class="['static-class', dynamicClass]" />
+    18 │   <div :class="[dynamicClass, otherDynamicClass, 'static-class']" />
+  > 19 │   <div :class="{'static-class': true, 'dynamic-class': foo}" />
+       │                 ^^^^^^^^^^^^^^
+    20 │   <div :class="[{'dynamic-class': foo, 'static-class': true}]" />
+    21 │   <div :class="[dynamicClass, {staticClass: true}]" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:40 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class is in a :class binding.
+  
+    18 │   <div :class="[dynamicClass, otherDynamicClass, 'static-class']" />
+    19 │   <div :class="{'static-class': true, 'dynamic-class': foo}" />
+  > 20 │   <div :class="[{'dynamic-class': foo, 'static-class': true}]" />
+       │                                        ^^^^^^^^^^^^^^
+    21 │   <div :class="[dynamicClass, {staticClass: true}]" />
+    22 │   <div :class="[['nested-static-class']]" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:21:32 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class staticClass is in a :class binding.
+  
+    19 │   <div :class="{'static-class': true, 'dynamic-class': foo}" />
+    20 │   <div :class="[{'dynamic-class': foo, 'static-class': true}]" />
+  > 21 │   <div :class="[dynamicClass, {staticClass: true}]" />
+       │                                ^^^^^^^^^^^
+    22 │   <div :class="[['nested-static-class']]" />
+    23 │   <div :class="['static-a static-b']" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:18 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class nested-static-class is in a :class binding.
+  
+    20 │   <div :class="[{'dynamic-class': foo, 'static-class': true}]" />
+    21 │   <div :class="[dynamicClass, {staticClass: true}]" />
+  > 22 │   <div :class="[['nested-static-class']]" />
+       │                  ^^^^^^^^^^^^^^^^^^^^^
+    23 │   <div :class="['static-a static-b']" />
+    24 │   <div :class="`a ${foo}-b c`" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:23:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static classes static-a static-b are in a :class binding.
+  
+    21 │   <div :class="[dynamicClass, {staticClass: true}]" />
+    22 │   <div :class="[['nested-static-class']]" />
+  > 23 │   <div :class="['static-a static-b']" />
+       │                 ^^^^^^^^^^^^^^^^^^^
+    24 │   <div :class="`a ${foo}-b c`" />
+    25 │   <div
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:24:17 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class a is in a :class binding.
+  
+    22 │   <div :class="[['nested-static-class']]" />
+    23 │   <div :class="['static-a static-b']" />
+  > 24 │   <div :class="`a ${foo}-b c`" />
+       │                 ^
+    25 │   <div
+    26 │     class="other-class"
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:7 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class-a is in a :class binding.
+  
+    27 │     other-attribute
+    28 │     :class="[
+  > 29 │       'static-class-a',
+       │       ^^^^^^^^^^^^^^^^
+    30 │       {'static-class-b': true, 'dynamic-class-a': foo},
+    31 │       dynamicClassB,
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:30:8 lint/nursery/useVueSeparateStaticClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The static class static-class-b is in a :class binding.
+  
+    28 │     :class="[
+    29 │       'static-class-a',
+  > 30 │       {'static-class-b': true, 'dynamic-class-a': foo},
+       │        ^^^^^^^^^^^^^^^^
+    31 │       dynamicClassB,
+    32 │     ]" />
+  
+  i Classes that always apply don't need a binding. Mixing them with the classes that change makes the template harder to read.
+  
+  i Move the static classes to the class attribute of the element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -10,8 +10,9 @@ use biome_embeds::{EmbeddedSnippet, collect_embedded_data};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::{
-    AnyAstroDirective, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlLanguage, HtmlRoot,
-    HtmlTextExpression, ScriptType,
+    AnyAstroDirective, AnyVueDirectiveArgument, AstroEmbeddedContent, HtmlAttribute, HtmlElement,
+    HtmlLanguage, HtmlRoot, HtmlSyntaxNode, HtmlTextExpression, ScriptType, VueDirective,
+    VueVBindShorthandDirective, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
@@ -648,10 +649,73 @@ fn extract_html_embedded_js<'a>(
                 offset: range.start(),
                 file_source,
             });
+        } else if host_file_source.is_vue()
+            && let Some(snippet) = extract_vue_directive_js(code, &node)
+        {
+            snippets.push(snippet);
         }
     }
 
     snippets
+}
+
+/// Returns the JavaScript in the value of a Vue directive, such as `handler()`
+/// in `@click="handler()"`, with the same embedding flags the workspace sets.
+///
+/// Returns `None` when `node` isn't a directive, or its value isn't a quoted
+/// string.
+fn extract_vue_directive_js<'a>(
+    code: &'a str,
+    node: &HtmlSyntaxNode,
+) -> Option<EmbeddedJsSnippet<'a>> {
+    let is_class_argument = |argument: Option<AnyVueDirectiveArgument>| {
+        argument
+            .and_then(|argument| argument.as_vue_static_argument().cloned())
+            .and_then(|argument| argument.name_token().ok())
+            .is_some_and(|name| name.text_trimmed() == "class")
+    };
+    let (initializer, event_handler, is_class_attribute, slot_props) =
+        if let Some(directive) = VueVOnShorthandDirective::cast_ref(node) {
+            (directive.initializer()?, true, false, false)
+        } else if let Some(directive) = VueVBindShorthandDirective::cast_ref(node) {
+            let is_class = is_class_argument(directive.arg().ok().and_then(|arg| arg.arg()));
+            (directive.initializer()?, false, is_class, false)
+        } else if let Some(directive) = VueVSlotShorthandDirective::cast_ref(node) {
+            (directive.initializer()?, false, false, true)
+        } else {
+            let directive = VueDirective::cast_ref(node)?;
+            let name = directive.name_token().ok()?;
+            let name = name.text_trimmed();
+            let argument = directive.arg().and_then(|arg| arg.arg());
+            let event_handler = name == "v-on" && argument.is_some();
+            let is_class = name == "v-bind" && is_class_argument(argument);
+            (
+                directive.initializer()?,
+                event_handler,
+                is_class,
+                name == "v-slot",
+            )
+        };
+
+    let value = initializer.value().ok()?;
+    let string = value.as_html_string()?;
+    let range = string
+        .inner_string_text()
+        .ok()?
+        .source_range(string.value_token().ok()?.text_range());
+    Some(EmbeddedJsSnippet {
+        text: &code[range],
+        offset: range.start(),
+        file_source: JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Vue {
+            setup: false,
+            is_source: false,
+            event_handler,
+            allow_statements: false,
+            slot_props,
+            generics_list: false,
+            is_class_attribute,
+        }),
+    })
 }
 
 #[cfg(test)]
@@ -1289,5 +1353,40 @@ mod tests {
 
         assert!(!writer.has_parse_error);
         assert_eq!(writer.all_diagnostics.len(), 0);
+    }
+
+    #[test]
+    fn extracts_vue_directive_values() {
+        let code = r#"<template><div :class="a" v-bind:class="b" :title="c" @click="d" v-on:click="e" #item="f" v-slot:other="g" v-if="h" /></template>"#;
+        let file_source = HtmlFileSource::vue();
+        let root: HtmlRoot =
+            biome_html_parser::parse_html(code, HtmlParserOptions::from(&file_source)).tree();
+
+        let snippets: Vec<_> = extract_html_embedded_js(code, &root, &file_source)
+            .into_iter()
+            .map(|snippet| {
+                let kind = *snippet.file_source.as_embedding_kind();
+                (
+                    snippet.text,
+                    kind.is_class_attribute(),
+                    kind.is_vue_event_handler(),
+                    kind.is_vue_slot_props(),
+                )
+            })
+            .collect();
+
+        assert_eq!(
+            snippets,
+            [
+                ("a", true, false, false),
+                ("b", true, false, false),
+                ("c", false, false, false),
+                ("d", false, true, false),
+                ("e", false, true, false),
+                ("f", false, false, true),
+                ("g", false, false, true),
+                ("h", false, false, false),
+            ]
+        );
     }
 }
