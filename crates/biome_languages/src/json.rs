@@ -7,6 +7,7 @@ use directories::ProjectDirs;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -342,9 +343,13 @@ impl JsonFileSource {
             return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
 
-        if zed_global_directory().is_some_and(|dir| path.starts_with(&dir))
-            || vscode_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
-            || cursor_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
+        // Only `.json` files in these directories are JSONC; other files there
+        // are detected by their own extension. Checking the extension first
+        // also skips the costlier path comparison for most paths.
+        if extension == "json"
+            && EDITOR_GLOBAL_DIRECTORIES
+                .iter()
+                .any(|dir| path.starts_with(dir))
         {
             return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
@@ -417,6 +422,27 @@ impl TryFrom<&Utf8Path> for JsonFileSource {
         Self::try_from_extension(&extension.to_ascii_lowercase_cow())
     }
 }
+
+/// The global settings directories of Zed, VS Code, and Cursor. JSON files
+/// inside them allow comments and trailing commas.
+///
+/// Resolving a directory asks the operating system for the user's base
+/// directories, which on Linux means reading several environment variables,
+/// and allocates a path for every kind of project directory. That is too slow
+/// to repeat for each file whose source type Biome detects, so the directories
+/// are resolved once. They depend only on the user's account and on the
+/// environment the process started with, and Biome never modifies its own
+/// environment.
+static EDITOR_GLOBAL_DIRECTORIES: LazyLock<Box<[PathBuf]>> = LazyLock::new(|| {
+    [
+        zed_global_directory(),
+        vscode_global_directory().map(|dirs| dirs.config_dir().to_path_buf()),
+        cursor_global_directory().map(|dirs| dirs.config_dir().to_path_buf()),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
+});
 
 fn cursor_global_directory() -> Option<ProjectDirs> {
     ProjectDirs::from("", "Cursor", "User")
@@ -531,5 +557,39 @@ mod tests {
         let file_source =
             JsonFileSource::try_from_well_known(path).expect("Failed to create JsonFileSource");
         assert!(file_source.allow_comments());
+    }
+
+    #[test]
+    fn test_global_vscode_settings() {
+        let path = vscode_global_directory()
+            .expect("Failed to get config directory")
+            .config_dir()
+            .join("settings.json");
+        let path = Utf8Path::from_path(path.as_path()).expect("Failed to create Utf8Path");
+        let file_source =
+            JsonFileSource::try_from_well_known(path).expect("Failed to create JsonFileSource");
+        assert!(file_source.allow_comments());
+        assert!(file_source.allow_trailing_commas());
+    }
+
+    #[test]
+    fn test_settings_outside_global_directories() {
+        let dir = zed_global_directory().expect("Failed to get config directory");
+        let sibling = dir.with_file_name("not-an-editor").join("settings.json");
+        let path = Utf8Path::from_path(sibling.as_path()).expect("Failed to create Utf8Path");
+        assert!(JsonFileSource::try_from_well_known(path).is_err());
+    }
+
+    #[test]
+    fn test_non_json_files_inside_global_directories() {
+        let dir = zed_global_directory().expect("Failed to get config directory");
+        for file_name in ["script.ts", "style.css", "notes.md"] {
+            let path = dir.join(file_name);
+            let path = Utf8Path::from_path(path.as_path()).expect("Failed to create Utf8Path");
+            assert!(
+                JsonFileSource::try_from_well_known(path).is_err(),
+                "{path} is not a JSON file"
+            );
+        }
     }
 }
