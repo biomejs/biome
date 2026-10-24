@@ -1084,6 +1084,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noPrototypeBuiltins",
         TypeId::of::<biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions>(),
     ));
+    result.push(("nursery", "noPseudoElementInFunctionalPseudoClass", TypeId::of::<biome_rule_options::no_pseudo_element_in_functional_pseudo_class::NoPseudoElementInFunctionalPseudoClassOptions>()));
     result.push((
         "suspicious",
         "noQuickfixBiome",

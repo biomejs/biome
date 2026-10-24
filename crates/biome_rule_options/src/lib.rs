@@ -232,6 +232,7 @@ pub mod no_process_global;
 pub mod no_promise_executor_return;
 pub mod no_proto;
 pub mod no_prototype_builtins;
+pub mod no_pseudo_element_in_functional_pseudo_class;
 pub mod no_quickfix_biome;
 pub mod no_qwik_use_visible_task;
 pub mod no_re_export_all;
