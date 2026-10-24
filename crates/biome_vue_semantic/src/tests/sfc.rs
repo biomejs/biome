@@ -577,6 +577,71 @@ fn equal_expressions_have_equal_fingerprints() {
 }
 
 #[test]
+fn compound_assignments_do_not_store_the_event() {
+    let model = sfc(r#"<template>
+  <Field @update:value="count += $event" />
+  <Field @update:value="v => count += v" />
+</template>
+"#);
+    let shapes: Vec<_> = model
+        .elements()
+        .filter(|element| element.tag() == "Field")
+        .map(|element| {
+            element
+                .attrs()
+                .next()
+                .unwrap()
+                .value_snippet()
+                .unwrap()
+                .root()
+                .clone()
+        })
+        .collect();
+    assert!(matches!(
+        shapes[0],
+        RootShape::Assignment {
+            from_event: false,
+            ..
+        }
+    ));
+    assert_eq!(shapes[1], RootShape::Function { params: 1 });
+}
+
+#[test]
+fn typed_arrow_parameters_store_the_event() {
+    let model = sfc(r#"<script setup lang="ts">
+const count = 0
+</script>
+<template>
+  <Field @update:value="(v: number) => count = v" />
+  <Field @update:value="(v = 0) => count = v" />
+</template>
+"#);
+    let shapes: Vec<_> = model
+        .elements()
+        .filter(|element| element.tag() == "Field")
+        .map(|element| {
+            element
+                .attrs()
+                .next()
+                .unwrap()
+                .value_snippet()
+                .unwrap()
+                .root()
+                .clone()
+        })
+        .collect();
+    assert!(matches!(
+        shapes[0],
+        RootShape::Assignment {
+            from_event: true,
+            ..
+        }
+    ));
+    assert_eq!(shapes[1], RootShape::Function { params: 1 });
+}
+
+#[test]
 fn slot_params_template_refs_and_slots() {
     let model = sfc(r#"<script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'

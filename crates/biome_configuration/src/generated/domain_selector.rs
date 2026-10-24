@@ -251,6 +251,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useVueMatchingComponentFileName"),
         RuleFilter::Rule("nursery", "useVueToggleInsideTransition"),
         RuleFilter::Rule("nursery", "useVueTypedRef"),
+        RuleFilter::Rule("nursery", "useVueVModel"),
         RuleFilter::Rule("nursery", "useVueVOnExact"),
         RuleFilter::Rule("performance", "useVueVapor"),
         RuleFilter::Rule("style", "noVueOptionsApi"),
