@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: markdown/gfm/table-repeated-cell-text.md
+info: markdown/table_cell_whitespace.md
 ---
 
 # Input
@@ -26,40 +26,10 @@ info: markdown/gfm/table-repeated-cell-text.md
 
 | a | b |
 | --- | --- |
-| x | `y` v |
-
-# `p` v `q`
-
-[`p` v `q`](https://example.com)
-
-> `p` v `q`
-
-*`p` v `q`*
-
-| a | b |
-| --- | --- |
-| x | t |
-| t `q` | r |
-
-a | b
---- | ---
-x | `y` u 
-`p` u `q` | r
+| <!-- c --> | x |
 
 ```
 
-
-# Options
-
-```json
-{
-  "markdown": {
-    "parser": {
-      "gfm": true
-    }
-  }
-}
-```
 
 # Formatted
 
@@ -82,26 +52,8 @@ x | `y` u
 | -------- | ------------------------------------ |
 | `routes` | SPA (e.g. fallback to `index.html`). |
 
-| a   | b     |
-| --- | ----- |
-| x   | `y` v |
-
-# `p` v `q`
-
-[`p` v `q`](https://example.com)
-
-> `p` v `q`
-
-_`p` v `q`_
-
-| a     | b   |
-| ----- | --- |
-| x     | t   |
-| t `q` | r   |
-
-| a         | b     |
-| --------- | ----- |
-| x         | `y` u |
-| `p` u `q` | r     |
+| a          | b   |
+| ---------- | --- |
+| <!-- c --> | x   |
 
 ```

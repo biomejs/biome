@@ -85,11 +85,8 @@ impl<'source> MarkdownTokenSource<'source> {
         context: MarkdownLexContext,
         first_token: bool,
     ) {
-        // In a table row, only the whitespace after a pipe is trailing trivia. The
-        // whitespace after a cell's content is leading trivia of the next pipe, newline or
-        // end of file instead. As trailing trivia, it would give the cell's last token a
-        // different trivia split than the same text elsewhere, which the node cache can't
-        // tell apart because it reuses tokens by their text.
+        // GFM trims the spaces between pipes and cell content, so in a table row the
+        // whitespace on either side of a pipe is the pipe's trivia.
         let mut trailing = !first_token && (!TABLE || self.current() == PIPE);
 
         loop {

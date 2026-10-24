@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#12542](https://github.com/biomejs/biome/issues/12542): the Markdown formatter no longer removes the space before an inline element, such as a code span, when an earlier table cell ends with the same text. This affected table cells, links, emphasis, headings and block quotes. Table columns also no longer get an extra space of padding in similar cases or when a cell ends with an HTML comment, which made the formatter change its output on every run.
+Fixed [#12542](https://github.com/biomejs/biome/issues/12542): the Markdown formatter no longer removes a space from a table cell, or adds a space of padding that changed on every run, when the same text appears in the middle of one cell and at the end of another. A cell that ends with an HTML comment also no longer widens its column on every run.
 
 ```diff
 - | a        | b     |
