@@ -422,6 +422,7 @@ pub mod use_arrow_function;
 pub mod use_as_const_assertion;
 pub mod use_astro_client_only_directive_value;
 pub mod use_at_index;
+pub mod use_atomic_updates;
 pub mod use_await;
 pub mod use_await_thenable;
 pub mod use_baseline;
