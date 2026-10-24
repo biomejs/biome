@@ -2562,6 +2562,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "usePackageJsonCpu",
+        TypeId::of::<biome_rule_options::use_package_json_cpu::UsePackageJsonCpuOptions>(),
+    ));
+    result.push((
+        "nursery",
         "usePackageJsonValidCpu",
         TypeId::of::<biome_rule_options::use_package_json_valid_cpu::UsePackageJsonValidCpuOptions>(
         ),
