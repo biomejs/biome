@@ -3179,6 +3179,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "useVueToggleInsideTransition", TypeId::of::<biome_rule_options::use_vue_toggle_inside_transition::UseVueToggleInsideTransitionOptions>()));
     result.push((
         "nursery",
+        "useVueTypedObjectProps",
+        TypeId::of::<biome_rule_options::use_vue_typed_object_props::UseVueTypedObjectPropsOptions>(
+        ),
+    ));
+    result.push((
+        "nursery",
         "useVueTypedProps",
         TypeId::of::<biome_rule_options::use_vue_typed_props::UseVueTypedPropsOptions>(),
     ));

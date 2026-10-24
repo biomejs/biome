@@ -661,6 +661,7 @@ impl Collector<'_, '_> {
                         external_default_sources: DefaultSources::empty(),
                         defaults_complete: true,
                         validator: None,
+                        runtime_type: None,
                         form: PropForm::ArrayString,
                     });
                     props.push(id);
@@ -708,6 +709,7 @@ impl Collector<'_, '_> {
                         external_default_sources: DefaultSources::empty(),
                         defaults_complete: true,
                         validator: None,
+                        runtime_type: None,
                         form: PropForm::Constructor,
                     });
                     let id = self.add_instance_symbol(
@@ -730,6 +732,9 @@ impl Collector<'_, '_> {
     }
 
     fn runtime_prop_detail(&self, value: Option<AnyJsExpression>) -> PropDetail {
+        let runtime_type = value
+            .as_ref()
+            .map(|value| self.host(value.syntax().text_trimmed_range()));
         let value = value.and_then(|value| value.inner_expression());
         let Some(AnyJsExpression::JsObjectExpression(options)) = &value else {
             return PropDetail {
@@ -744,6 +749,7 @@ impl Collector<'_, '_> {
                 external_default_sources: DefaultSources::empty(),
                 defaults_complete: true,
                 validator: None,
+                runtime_type,
                 form: PropForm::Constructor,
             };
         };
@@ -754,6 +760,7 @@ impl Collector<'_, '_> {
             external_default_sources: DefaultSources::empty(),
             defaults_complete: true,
             validator: None,
+            runtime_type: None,
             form: PropForm::Options,
         };
         for member in options.members().iter().flatten() {
@@ -765,11 +772,15 @@ impl Collector<'_, '_> {
             };
             match name.text() {
                 "type" => {
-                    detail.types = match member_value(&member) {
-                        Some(value) => self.constructor_types(&value),
+                    match member_value(&member) {
+                        Some(value) => {
+                            detail.types = self.constructor_types(&value);
+                            detail.runtime_type =
+                                Some(self.host(value.syntax().text_trimmed_range()));
+                        }
                         // `{ type }` holds the type in a variable.
-                        None => TypeSet::from(PropType::Unknown),
-                    };
+                        None => detail.types = TypeSet::from(PropType::Unknown),
+                    }
                 }
                 "required" => {
                     detail.required = match member_value(&member) {
@@ -905,6 +916,7 @@ impl Collector<'_, '_> {
                 external_default_sources: DefaultSources::empty(),
                 defaults_complete: true,
                 validator: None,
+                runtime_type: None,
                 form: PropForm::TypeMember,
             });
             props.push(id);

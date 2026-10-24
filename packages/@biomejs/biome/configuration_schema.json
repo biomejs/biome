@@ -9843,6 +9843,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueTypedObjectProps": {
+					"description": "Require a TypeScript type for Vue props declared with Object or Array.\nSee https://biomejs.dev/linter/rules/use-vue-typed-object-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueTypedObjectPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTypedProps": {
 					"description": "Require a type for every prop of a Vue component.\nSee https://biomejs.dev/linter/rules/use-vue-typed-props",
 					"anyOf": [
@@ -17913,6 +17920,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueTypedObjectPropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueTypedObjectPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTypedPropsOptions": {
 			"type": "object",
 			"properties": {
@@ -23570,6 +23586,16 @@
 			]
 		},
 		"UseVueToggleInsideTransitionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueTypedObjectPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueTypedObjectPropsOptions" }
+			]
+		},
+		"UseVueTypedObjectPropsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
