@@ -329,8 +329,12 @@ impl PreviousBlock {
                 AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html)) if !html.is_html_comment()
             ) || matches!(
                 block,
-                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(_))
-            )
+                AnyMdBlock::AnyMdLeafBlock(
+                    AnyMdLeafBlock::MdParagraph(_) | AnyMdLeafBlock::GfmTable(_)
+                )
+            ) || block
+                .as_any_md_container_block()
+                .is_some_and(|container| container.as_md_quote().is_some())
         })
     }
 }
