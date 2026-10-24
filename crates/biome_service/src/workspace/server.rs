@@ -957,13 +957,30 @@ impl WorkspaceServerWithDb<'_> {
             Err(error) => Some(Err(error)),
             Ok(None) => None,
             Ok(Some(text)) => {
-                parsed_source = Some(self.db_state.update_file_view(
-                    &path,
-                    view,
-                    text,
-                    file_source_index,
-                    inline_config,
-                ));
+                // The project layout and the module resolution of the files
+                // that a scan reads later depend on the manifests and on the
+                // JSON files the resolver reads, such as the TypeScript
+                // configurations that other ones extend. A scanner epoch
+                // publishes them right away instead of deferring them.
+                let can_defer =
+                    !biome_path.is_manifest() && !matches!(source, DocumentFileSource::Json(_));
+                parsed_source = if can_defer {
+                    self.db_state.update_file_view_or_defer(
+                        &path,
+                        view,
+                        text,
+                        file_source_index,
+                        inline_config,
+                    )
+                } else {
+                    Some(self.db_state.update_file_view(
+                        &path,
+                        view,
+                        text,
+                        file_source_index,
+                        inline_config,
+                    ))
+                };
                 Some(Ok(()))
             }
         };
@@ -1008,7 +1025,9 @@ impl WorkspaceServerWithDb<'_> {
             return Ok(InternalOpenFileResult::default());
         }
 
-        // Manifest files need to update the module graph.
+        // Manifest files need to update the module graph. A scanner epoch
+        // defers the update of a file whose inputs need Salsa setters, and the
+        // scan indexes the file again once the epoch ends.
         if is_indexed {
             if let Some(root) = parsed_source {
                 let (dependencies, diagnostics) = self.update_service_data(
@@ -2700,6 +2719,27 @@ impl Workspace for LocalWorkspace {
 }
 
 impl WorkspaceServerWithDb<'_> {
+    /// Runs `scan` with the view of a new scanner epoch. Returns its result,
+    /// and the paths of the files whose inputs the view couldn't update,
+    /// whose content the epoch published when it ended.
+    fn scan_in_epoch<R>(
+        &self,
+        scan: impl FnOnce(&WorkspaceServerWithDb<'_>) -> R,
+    ) -> (R, Vec<Utf8PathBuf>) {
+        let epoch = self.db_state.scanner_epoch();
+        let result = {
+            let scanner_workspace = WorkspaceServerWithDb {
+                server: self.server,
+                db_state: epoch.view(),
+                client: self.client,
+            };
+            scan(&scanner_workspace)
+        };
+        let deferred_paths = epoch.deferred_paths();
+        drop(epoch);
+        (result, deferred_paths)
+    }
+
     /// Performs a project traversal using the database view selected by the caller.
     fn scan_project_inner(
         &self,
@@ -2869,17 +2909,36 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         #[cfg(test)]
         self.scanner_test_state.enter_project_scan();
 
-        let epoch = self.db_state.scanner_epoch();
-        let result = {
-            let scanner_workspace = WorkspaceServerWithDb {
-                server: self.server,
-                db_state: epoch.view(),
-                client: self.client,
-            };
-            scanner_workspace.scan_project_inner(params)
-        };
-        drop(epoch);
-        result
+        let project_key = params.project_key;
+        let watch = params.watch;
+        let (result, deferred_paths) =
+            self.scan_in_epoch(|workspace| workspace.scan_project_inner(params));
+        let mut result = result?;
+        if deferred_paths.is_empty() {
+            return Ok(result);
+        }
+
+        // The epoch published the content of these files when it ended,
+        // because their inputs needed Salsa setters. Indexing them again in
+        // another epoch updates the services that read them. The files that
+        // change again meanwhile have their content published when that epoch
+        // ends, and their services are updated the next time they're indexed.
+        let project_path = self
+            .project_get_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let (diagnostics, _) = self.scan_in_epoch(|workspace| {
+            self.scanner.index_files(
+                workspace,
+                project_key,
+                &project_path,
+                deferred_paths,
+                IndexTrigger::InitialScan,
+                watch,
+            )
+        });
+        result.diagnostics.extend(diagnostics?);
+        let _ = self.notification_tx.send(ServiceNotification::IndexUpdated);
+        Ok(result)
     }
 
     /// Updates the global settings for this workspace.

@@ -185,6 +185,8 @@ use biome_resolver::FsWithResolverProxy;
 use biome_resolver::ResolverPathChanges;
 use camino::{Utf8Path, Utf8PathBuf};
 use parking_lot::{Mutex, MutexGuard};
+#[cfg(feature = "module_graph")]
+use salsa::Setter;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -199,19 +201,39 @@ use tracing::error;
 /// Represents the state of the database in the workspace.
 pub struct DbState {
     storage: DbStorage,
-    /// Set when the shared view of a scanner epoch replaces a project.
-    scanner_projects_replaced: Option<Arc<AtomicBool>>,
-    /// Records module-map changes made by a scanner epoch's shared view.
-    #[cfg(feature = "module_graph")]
-    scanner_module_graph_dirty: Option<Arc<AtomicBool>>,
-    /// Records the resolver path info a scanner epoch's shared view must refresh.
-    #[cfg(feature = "module_graph")]
-    scanner_resolver_changes: Option<ResolverChanges>,
+    /// Records the changes that the shared view of a scanner epoch over Owned
+    /// storage can't publish. Other database states don't record them.
+    scanner_changes: Option<Arc<ScannerEpochChanges>>,
 }
 
-/// Resolver changes accumulated while Salsa setters can't run.
-#[cfg(feature = "module_graph")]
-type ResolverChanges = Arc<Mutex<Vec<(Utf8PathBuf, ResolverPathChanges)>>>;
+/// The changes that the shared view of a scanner epoch makes and that only
+/// Salsa setters can publish. The epoch publishes them when it ends.
+#[derive(Default)]
+struct ScannerEpochChanges {
+    /// Set when the view replaces a project.
+    projects_replaced: AtomicBool,
+    /// Set when the view changes the module map.
+    #[cfg(feature = "module_graph")]
+    module_graph_dirty: AtomicBool,
+    /// The resolver path info to refresh.
+    #[cfg(feature = "module_graph")]
+    resolver_changes: Mutex<Vec<(Utf8PathBuf, ResolverPathChanges)>>,
+    /// The kinds to set on the modules that existed before the epoch.
+    #[cfg(feature = "module_graph")]
+    module_kinds: Mutex<Vec<(ModuleInfo, ModuleInfoKind)>>,
+    /// The views that the view couldn't publish, because the inputs of their
+    /// paths need setters.
+    deferred_views: Mutex<Vec<DeferredView>>,
+}
+
+/// A text to publish as a view of a path. See [WorkspaceDb::update_or_insert_view].
+struct DeferredView {
+    path: Utf8PathBuf,
+    view: ViewId,
+    text: Arc<str>,
+    file_source_index: usize,
+    configuration_index: Option<usize>,
+}
 
 enum DbStorage {
     Shared(SharedWorkspaceDb),
@@ -225,8 +247,14 @@ enum DbStorage {
 /// collections. This keeps individual scanner updates from announcing pending
 /// Salsa writes. Queries that run during the epoch may observe outdated
 /// resolver path info or module associations. Dropping the epoch discards the view
-/// before publishing the accumulated resolver changes and one module graph
-/// invalidation, then releases the setter gate.
+/// before publishing the accumulated resolver changes, the kinds of the
+/// existing modules, and one module graph invalidation, then releases the
+/// setter gate.
+///
+/// The view can't change the inputs that a file already has, because that
+/// needs Salsa setters, so the epoch publishes the content of those files when
+/// it ends. [Self::deferred_paths] returns them: index them again once the
+/// epoch has ended, so that the services that read them are updated.
 /// Shared storage needs no setter gate and reuses its existing update mode.
 pub(crate) struct ScannerDbEpoch<'a> {
     // Struct fields drop in declaration order. The shared view must be gone
@@ -240,6 +268,23 @@ impl ScannerDbEpoch<'_> {
     pub(crate) fn view(&self) -> &DbState {
         &self.view
     }
+
+    /// Returns the paths of the files whose content the epoch publishes when
+    /// it ends, without duplicates. Call this once the scan is done.
+    pub(crate) fn deferred_paths(&self) -> Vec<Utf8PathBuf> {
+        let Some(changes) = &self.view.scanner_changes else {
+            return Vec::new();
+        };
+        let mut paths: Vec<_> = changes
+            .deferred_views
+            .lock()
+            .iter()
+            .map(|deferred| deferred.path.clone())
+            .collect();
+        paths.sort_unstable();
+        paths.dedup();
+        paths
+    }
 }
 
 /// Publishes accumulated scanner changes before releasing the setter gate.
@@ -248,11 +293,7 @@ enum ScannerDbEpochFinalizer<'a> {
     Owned {
         owner: &'a OwnedDb,
         setter_guard: MutexGuard<'a, ()>,
-        projects_replaced: Arc<AtomicBool>,
-        #[cfg(feature = "module_graph")]
-        module_graph_dirty: Arc<AtomicBool>,
-        #[cfg(feature = "module_graph")]
-        resolver_changes: ResolverChanges,
+        changes: Arc<ScannerEpochChanges>,
     },
 }
 
@@ -263,30 +304,45 @@ impl Drop for ScannerDbEpochFinalizer<'_> {
             Self::Owned {
                 owner,
                 setter_guard,
-                projects_replaced,
-                #[cfg(feature = "module_graph")]
-                module_graph_dirty,
-                #[cfg(feature = "module_graph")]
-                resolver_changes,
+                changes,
             } => {
-                let projects_replaced = projects_replaced.load(Ordering::Acquire);
+                let projects_replaced = changes.projects_replaced.load(Ordering::Acquire);
+                let deferred_views = std::mem::take(&mut *changes.deferred_views.lock());
                 #[cfg(feature = "module_graph")]
-                let resolver_changes = std::mem::take(&mut *resolver_changes.lock());
+                let resolver_changes = std::mem::take(&mut *changes.resolver_changes.lock());
                 #[cfg(feature = "module_graph")]
-                let module_graph_dirty = module_graph_dirty.load(Ordering::Acquire);
+                let module_kinds = std::mem::take(&mut *changes.module_kinds.lock());
                 #[cfg(feature = "module_graph")]
-                let needs_setter =
-                    projects_replaced || module_graph_dirty || !resolver_changes.is_empty();
+                let module_graph_dirty = changes.module_graph_dirty.load(Ordering::Acquire);
+                #[cfg(feature = "module_graph")]
+                let needs_setter = projects_replaced
+                    || !deferred_views.is_empty()
+                    || module_graph_dirty
+                    || !resolver_changes.is_empty()
+                    || !module_kinds.is_empty();
                 #[cfg(not(feature = "module_graph"))]
-                let needs_setter = projects_replaced;
+                let needs_setter = projects_replaced || !deferred_views.is_empty();
                 if needs_setter {
                     owner.with_setter_gate_held(setter_guard, |db| {
                         if projects_replaced {
                             db.invalidate_projects();
                         }
+                        for deferred in deferred_views {
+                            db.update_or_insert_view(
+                                &deferred.path,
+                                deferred.view,
+                                deferred.text,
+                                deferred.file_source_index,
+                                deferred.configuration_index,
+                                ParsedSourceUpdateMode::Setters,
+                            );
+                        }
                         #[cfg(feature = "module_graph")]
                         {
                             db.sync_resolver_paths(resolver_changes);
+                            for (module, kind) in module_kinds {
+                                module.set_kind(db).to(kind);
+                            }
                             if module_graph_dirty {
                                 db.invalidate_module_graph();
                             }
@@ -483,11 +539,7 @@ impl DbState {
     pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
             storage: DbStorage::Shared(SharedWorkspaceDb::new(fs)),
-            scanner_projects_replaced: None,
-            #[cfg(feature = "module_graph")]
-            scanner_module_graph_dirty: None,
-            #[cfg(feature = "module_graph")]
-            scanner_resolver_changes: None,
+            scanner_changes: None,
         }
     }
 
@@ -497,11 +549,7 @@ impl DbState {
     pub fn lsp(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
             storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::new(fs))),
-            scanner_projects_replaced: None,
-            #[cfg(feature = "module_graph")]
-            scanner_module_graph_dirty: None,
-            #[cfg(feature = "module_graph")]
-            scanner_resolver_changes: None,
+            scanner_changes: None,
         }
     }
 
@@ -512,21 +560,11 @@ impl DbState {
     /// available while preventing setter-based updates from overlapping the
     /// scan. Shared storage returns an equivalent shared view without locking.
     pub(crate) fn scanner_epoch(&self) -> ScannerDbEpoch<'_> {
-        let projects_replaced = Arc::new(AtomicBool::new(false));
-        #[cfg(feature = "module_graph")]
-        let module_graph_dirty = Arc::new(AtomicBool::new(false));
-        #[cfg(feature = "module_graph")]
-        let resolver_changes = ResolverChanges::default();
-
         match &self.storage {
             DbStorage::Shared(shared_db) => ScannerDbEpoch {
                 view: Self {
                     storage: DbStorage::Shared(shared_db.clone()),
-                    scanner_projects_replaced: None,
-                    #[cfg(feature = "module_graph")]
-                    scanner_module_graph_dirty: None,
-                    #[cfg(feature = "module_graph")]
-                    scanner_resolver_changes: None,
+                    scanner_changes: None,
                 },
                 _finalizer: ScannerDbEpochFinalizer::Shared,
             },
@@ -536,24 +574,17 @@ impl DbState {
                     let db = owner.db.lock();
                     SharedWorkspaceDb::from_workspace_db(db.clone())
                 };
+                let changes = Arc::<ScannerEpochChanges>::default();
 
                 ScannerDbEpoch {
                     view: Self {
                         storage: DbStorage::Shared(shared_db),
-                        scanner_projects_replaced: Some(projects_replaced.clone()),
-                        #[cfg(feature = "module_graph")]
-                        scanner_module_graph_dirty: Some(module_graph_dirty.clone()),
-                        #[cfg(feature = "module_graph")]
-                        scanner_resolver_changes: Some(resolver_changes.clone()),
+                        scanner_changes: Some(changes.clone()),
                     },
                     _finalizer: ScannerDbEpochFinalizer::Owned {
                         owner,
                         setter_guard,
-                        projects_replaced,
-                        #[cfg(feature = "module_graph")]
-                        module_graph_dirty,
-                        #[cfg(feature = "module_graph")]
-                        resolver_changes,
+                        changes,
                     },
                 }
             }
@@ -703,18 +734,82 @@ impl DbState {
         file_source_index: usize,
         inline_configuration: Option<Configuration>,
     ) -> Source {
+        let configuration_index = inline_configuration.map(|configuration| {
+            self.shared_data()
+                .insert_inline_configuration(configuration)
+        });
+        self.publish_file_view(path, view, text, file_source_index, configuration_index)
+    }
+
+    /// Publishes `text` as `view` of `path` like [Self::update_file_view],
+    /// except in the view of a scanner epoch when `path` has inputs that don't
+    /// hold the text yet. Updating them needs Salsa setters, which can't run
+    /// until the epoch ends, so the epoch publishes the text when it ends, and
+    /// `None` is returned. See [ScannerDbEpoch::deferred_paths].
+    pub(crate) fn update_file_view_or_defer(
+        &self,
+        path: &Utf8Path,
+        view: ViewId,
+        text: Arc<str>,
+        file_source_index: usize,
+        inline_configuration: Option<Configuration>,
+    ) -> Option<Source> {
+        let configuration_index = inline_configuration.map(|configuration| {
+            self.shared_data()
+                .insert_inline_configuration(configuration)
+        });
+        if let DbStorage::Shared(shared_db) = &self.storage
+            && let Some(changes) = &self.scanner_changes
+            && shared_db.fork().view_update_needs_setters(
+                path,
+                view,
+                &text,
+                file_source_index,
+                configuration_index,
+            )
+        {
+            changes.deferred_views.lock().push(DeferredView {
+                path: path.to_path_buf(),
+                view,
+                text,
+                file_source_index,
+                configuration_index,
+            });
+            return None;
+        }
+        Some(self.publish_file_view(path, view, text, file_source_index, configuration_index))
+    }
+
+    /// Publishes `text` as `view` of `path`, with the inline configuration at
+    /// `configuration_index`. See [Self::update_file_view].
+    fn publish_file_view(
+        &self,
+        path: &Utf8Path,
+        view: ViewId,
+        text: Arc<str>,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) -> Source {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let file = db.update_or_insert_view(
-                    path,
-                    view,
-                    text,
-                    file_source_index,
-                    inline_configuration,
-                    ParsedSourceUpdateMode::Replace,
-                );
-                // The replacement publishes a new parsed source for `path`.
+                // The view of a scanner epoch over Owned storage reuses the
+                // inputs of the long-lived database. Shared storage lives for
+                // one operation, so it allocates new inputs.
+                let reused = self.scanner_changes.as_ref().and_then(|_| {
+                    db.reuse_view(path, view, &text, file_source_index, configuration_index)
+                });
+                let file = reused.unwrap_or_else(|| {
+                    db.update_or_insert_view(
+                        path,
+                        view,
+                        text,
+                        file_source_index,
+                        configuration_index,
+                        ParsedSourceUpdateMode::Replace,
+                    )
+                });
+                // The update may publish another parsed source for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
                 file
@@ -725,7 +820,7 @@ impl DbState {
                     view,
                     text,
                     file_source_index,
-                    inline_configuration,
+                    configuration_index,
                     ParsedSourceUpdateMode::Setters,
                 )
             }),
@@ -923,6 +1018,14 @@ impl DbState {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let db = shared_db.fork();
+                // A scanner epoch can't run Salsa setters, so the kind of an
+                // existing module is set when the epoch ends.
+                if let Some(changes) = &self.scanner_changes
+                    && let Some(module) = db.get_module(&path)
+                {
+                    changes.module_kinds.lock().push((module, kind));
+                    return module;
+                }
                 let module = ModuleInfo::new(&db, path.clone(), kind);
                 db.data().insert_module(path, module);
                 self.mark_module_graph_dirty();
@@ -950,16 +1053,16 @@ impl DbState {
     /// that looked up a project keep their results until another of their
     /// inputs changes.
     fn record_projects_replaced(&self) {
-        if let Some(replaced) = &self.scanner_projects_replaced {
-            replaced.store(true, Ordering::Release);
+        if let Some(changes) = &self.scanner_changes {
+            changes.projects_replaced.store(true, Ordering::Release);
         }
     }
 
     /// Records that a replacement update changed the external module map.
     #[cfg(feature = "module_graph")]
     fn mark_module_graph_dirty(&self) {
-        if let Some(dirty) = &self.scanner_module_graph_dirty {
-            dirty.store(true, Ordering::Release);
+        if let Some(changes) = &self.scanner_changes {
+            changes.module_graph_dirty.store(true, Ordering::Release);
         }
     }
 
@@ -973,8 +1076,8 @@ impl DbState {
         &self,
         changes: impl IntoIterator<Item = (Utf8PathBuf, ResolverPathChanges)>,
     ) {
-        if let Some(pending) = &self.scanner_resolver_changes {
-            pending.lock().extend(changes);
+        if let Some(scanner_changes) = &self.scanner_changes {
+            scanner_changes.resolver_changes.lock().extend(changes);
         }
     }
 
@@ -1226,6 +1329,30 @@ mod tests {
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
+    }
+
+    /// Shared storage lives for one operation, so publishing a file again
+    /// allocates a new input, even after the file lost its last view.
+    #[test]
+    fn shared_storage_allocates_inputs_of_reopened_file() {
+        let state = DbState::new(test_fs());
+        let path = Utf8PathBuf::from("test.js");
+        let client = ClientId::new(1);
+        let open = || {
+            state.update_file_view(
+                &path,
+                ViewId::Editor(client),
+                "let a = 1;".into(),
+                js(&state),
+                None,
+            )
+        };
+
+        let first = open();
+        state.remove_editor_view(&path, client, false);
+        let second = open();
+
+        assert_ne!(first.as_id(), second.as_id());
     }
 
     #[test]
