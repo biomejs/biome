@@ -336,8 +336,10 @@ pub enum RootShape {
     },
     /// More than one statement, or a statement that is not an expression.
     Statements,
-    /// `target = $event`, or `param => target = param`. `target` is the
-    /// fingerprint of the assigned expression.
+    /// An assignment, such as `target = value` or `target += $event`.
+    /// `target` is the fingerprint of the assigned expression. `from_event`
+    /// is `true` when the assignment stores the event payload unchanged:
+    /// `target = $event`, or `param => target = param`.
     Assignment {
         target: u64,
         from_event: bool,
