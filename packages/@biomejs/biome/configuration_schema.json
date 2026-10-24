@@ -8058,6 +8058,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUndeclaredSlotsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUndeclaredSlotsOptions" }
+			]
+		},
+		"NoVueUndeclaredSlotsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueUnusedEmitDeclarationsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9071,6 +9081,13 @@
 					"description": "Require Vue components to declare the events they emit.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-emits",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredEmitsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUndeclaredSlots": {
+					"description": "Disallow \\<slot> elements whose slot isn't declared in the component's types.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-slots",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUndeclaredSlotsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14945,6 +14962,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUndeclaredEmitsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUndeclaredSlotsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUndeclaredSlotsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

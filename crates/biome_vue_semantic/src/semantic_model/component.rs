@@ -514,6 +514,7 @@ impl Collector<'_, '_> {
                 "methods" => self.collect_methods_option(&member, component),
                 "watch" => self.collect_watch_option(&member, component),
                 "inject" => self.collect_inject_option(&member, component),
+                "slots" => self.collect_slots_option(&member, component),
                 "components" => self.collect_registrations(
                     &member,
                     component,
@@ -1123,6 +1124,72 @@ impl Collector<'_, '_> {
         }
     }
 
+    /// Reads the `slots` option written as `Object as SlotsType<{ ... }>`.
+    ///
+    /// Vue ignores the runtime value of the option, so its type argument is
+    /// the only place slot names are written. Any other form leaves the
+    /// slots of the component open.
+    fn collect_slots_option(&mut self, member: &AnyJsObjectMember, component: ComponentId) {
+        let ty = member_value(member)
+            .and_then(|value| match value.omit_parentheses() {
+                AnyJsExpression::TsAsExpression(expression) => expression.ty().ok(),
+                _ => None,
+            })
+            .and_then(|ty| match ty {
+                AnyTsType::TsReferenceType(reference)
+                    if reference.name().is_ok_and(|name| {
+                        name.as_js_reference_identifier()
+                            .is_some_and(|name| name.has_name("SlotsType"))
+                    }) =>
+                {
+                    reference
+                        .type_arguments()?
+                        .ts_type_argument_list()
+                        .iter()
+                        .next()?
+                        .ok()
+                }
+                _ => None,
+            });
+        self.collect_type_slots(ty.as_ref(), component);
+    }
+
+    /// Reads slots written as a type: `defineSlots<{ default(): any }>()`.
+    ///
+    /// When `ty` is `None` or its members cannot be listed, the slots of the
+    /// component are left open.
+    fn collect_type_slots(&mut self, ty: Option<&AnyTsType>, component: ComponentId) {
+        let Some(members) = ty.and_then(|ty| self.resolve_type_members(ty)) else {
+            self.builder
+                .open(component, Namespace::Slot, OpenReason::UnresolvedType);
+            return;
+        };
+        for member in members.iter() {
+            // Other members, such as index signatures, declare slots whose
+            // names the model cannot list.
+            let name = match &member {
+                AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name().ok(),
+                AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name().ok(),
+                _ => None,
+            };
+            let Some((name, name_range)) =
+                name.and_then(|node| Some((node.name()?, node.syntax().text_trimmed_range())))
+            else {
+                self.builder
+                    .open(component, Namespace::Slot, OpenReason::UnresolvedType);
+                continue;
+            };
+            self.add_instance_symbol(
+                component,
+                name,
+                Some(name_range),
+                member.syntax().text_trimmed_range(),
+                Namespace::Slot,
+                SymbolKind::Slot,
+            );
+        }
+    }
+
     fn collect_data_option(
         &mut self,
         member: &AnyJsObjectMember,
@@ -1701,43 +1768,7 @@ impl Collector<'_, '_> {
                 self.set_role(binding, Origin::DefineModel, component, None);
             }
         } else if self.is_macro_call(&call, "defineSlots") {
-            match first_type_argument(&call).and_then(|ty| self.resolve_type_members(&ty)) {
-                Some(members) => {
-                    for member in members.iter() {
-                        let (name, name_range) = match &member {
-                            AnyTsTypeMember::TsPropertySignatureTypeMember(property) => (
-                                property.name().ok().and_then(|name| name.name()),
-                                property
-                                    .name()
-                                    .ok()
-                                    .map(|name| name.syntax().text_trimmed_range()),
-                            ),
-                            AnyTsTypeMember::TsMethodSignatureTypeMember(method) => (
-                                method.name().ok().and_then(|name| name.name()),
-                                method
-                                    .name()
-                                    .ok()
-                                    .map(|name| name.syntax().text_trimmed_range()),
-                            ),
-                            _ => (None, None),
-                        };
-                        let Some(name) = name else {
-                            continue;
-                        };
-                        self.add_instance_symbol(
-                            component,
-                            name,
-                            name_range,
-                            member.syntax().text_trimmed_range(),
-                            Namespace::Slot,
-                            SymbolKind::Slot,
-                        );
-                    }
-                }
-                None => self
-                    .builder
-                    .open(component, Namespace::Slot, OpenReason::UnresolvedType),
-            }
+            self.collect_type_slots(first_type_argument(&call).as_ref(), component);
             if let Some(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
                 binding,
             ))) = pattern
