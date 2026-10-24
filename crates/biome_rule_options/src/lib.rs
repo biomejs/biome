@@ -17,6 +17,7 @@ pub mod no_array_index_key;
 pub mod no_array_sort_for_min_max;
 pub mod no_assign_in_expressions;
 pub mod no_astro_conflicting_set_directives;
+pub mod no_astro_deprecated_resolve;
 pub mod no_astro_set_html_directive;
 pub mod no_async_promise_executor;
 pub mod no_autofocus;

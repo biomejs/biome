@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+const { animal } = Astro.props;
+const logo = Astro.resolve("../images/logo.png");
+const resolve = Astro.resolve;
+const computed = Astro["resolve"]("../images/logo.png");
+const optional = Astro?.resolve("../images/logo.png");
+const parenthesized = (Astro).resolve("../images/logo.png");
+const viaGlobalThis = globalThis.Astro.resolve("../images/logo.png");
+---
+
+<img src={Astro.resolve(`../images/${animal}.png`)} />
+<link rel="stylesheet" href={Astro.resolve("../styles/main.css")} />
+
+```
+
+# Diagnostics
+```
+invalid.astro:4:14 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+    2 │ // should generate diagnostics
+    3 │ const { animal } = Astro.props;
+  > 4 │ const logo = Astro.resolve("../images/logo.png");
+      │              ^^^^^^^^^^^^^
+    5 │ const resolve = Astro.resolve;
+    6 │ const computed = Astro["resolve"]("../images/logo.png");
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:5:17 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+    3 │ const { animal } = Astro.props;
+    4 │ const logo = Astro.resolve("../images/logo.png");
+  > 5 │ const resolve = Astro.resolve;
+      │                 ^^^^^^^^^^^^^
+    6 │ const computed = Astro["resolve"]("../images/logo.png");
+    7 │ const optional = Astro?.resolve("../images/logo.png");
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:6:18 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+    4 │ const logo = Astro.resolve("../images/logo.png");
+    5 │ const resolve = Astro.resolve;
+  > 6 │ const computed = Astro["resolve"]("../images/logo.png");
+      │                  ^^^^^^^^^^^^^^^^
+    7 │ const optional = Astro?.resolve("../images/logo.png");
+    8 │ const parenthesized = (Astro).resolve("../images/logo.png");
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:7:18 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+    5 │ const resolve = Astro.resolve;
+    6 │ const computed = Astro["resolve"]("../images/logo.png");
+  > 7 │ const optional = Astro?.resolve("../images/logo.png");
+      │                  ^^^^^^^^^^^^^^
+    8 │ const parenthesized = (Astro).resolve("../images/logo.png");
+    9 │ const viaGlobalThis = globalThis.Astro.resolve("../images/logo.png");
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:8:23 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+     6 │ const computed = Astro["resolve"]("../images/logo.png");
+     7 │ const optional = Astro?.resolve("../images/logo.png");
+   > 8 │ const parenthesized = (Astro).resolve("../images/logo.png");
+       │                       ^^^^^^^^^^^^^^^
+     9 │ const viaGlobalThis = globalThis.Astro.resolve("../images/logo.png");
+    10 │ ---
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:9:23 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+     7 │ const optional = Astro?.resolve("../images/logo.png");
+     8 │ const parenthesized = (Astro).resolve("../images/logo.png");
+   > 9 │ const viaGlobalThis = globalThis.Astro.resolve("../images/logo.png");
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ ---
+    11 │ 
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:12:11 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+    10 │ ---
+    11 │ 
+  > 12 │ <img src={Astro.resolve(`../images/${animal}.png`)} />
+       │           ^^^^^^^^^^^^^
+    13 │ <link rel="stylesheet" href={Astro.resolve("../styles/main.css")} />
+    14 │ 
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:13:30 lint/nursery/noAstroDeprecatedResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.resolve() is deprecated.
+  
+    12 │ <img src={Astro.resolve(`../images/${animal}.png`)} />
+  > 13 │ <link rel="stylesheet" href={Astro.resolve("../styles/main.css")} />
+       │                              ^^^^^^^^^^^^^
+    14 │ 
+  
+  i Astro now processes files such as images and stylesheets when it builds the site, so Astro.resolve() no longer returns URLs that work.
+  
+  i Import the file with an import statement, or put it in the public/ directory and refer to it with a path that starts with /.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
