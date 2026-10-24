@@ -654,4 +654,5 @@ pub mod use_vue_valid_v_pre;
 pub mod use_vue_valid_v_text;
 pub mod use_vue_vapor;
 pub mod use_while;
+pub mod use_while_loop_condition;
 pub mod use_yield;

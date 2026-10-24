@@ -730,6 +730,7 @@ pub enum RuleName {
     UseVueValidVText,
     UseVueVapor,
     UseWhile,
+    UseWhileLoopCondition,
     UseYield,
 }
 impl RuleName {
@@ -1382,6 +1383,7 @@ impl RuleName {
             Self::UseVueValidVText => "useVueValidVText",
             Self::UseVueVapor => "useVueVapor",
             Self::UseWhile => "useWhile",
+            Self::UseWhileLoopCondition => "useWhileLoopCondition",
             Self::UseYield => "useYield",
         }
     }
@@ -2026,6 +2028,7 @@ impl RuleName {
             Self::UseVueValidVText => RuleGroup::Correctness,
             Self::UseVueVapor => RuleGroup::Performance,
             Self::UseWhile => RuleGroup::Complexity,
+            Self::UseWhileLoopCondition => RuleGroup::Nursery,
             Self::UseYield => RuleGroup::Correctness,
         }
     }
@@ -2683,6 +2686,7 @@ impl std::str::FromStr for RuleName {
             "useVueValidVText" => Ok(Self::UseVueValidVText),
             "useVueVapor" => Ok(Self::UseVueVapor),
             "useWhile" => Ok(Self::UseWhile),
+            "useWhileLoopCondition" => Ok(Self::UseWhileLoopCondition),
             "useYield" => Ok(Self::UseYield),
             _ => Err("This rule name doesn't exist."),
         }

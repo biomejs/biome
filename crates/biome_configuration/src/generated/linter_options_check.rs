@@ -3041,6 +3041,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_while::UseWhileOptions>(),
     ));
     result.push((
+        "nursery",
+        "useWhileLoopCondition",
+        TypeId::of::<biome_rule_options::use_while_loop_condition::UseWhileLoopConditionOptions>(),
+    ));
+    result.push((
         "correctness",
         "useYield",
         TypeId::of::<biome_rule_options::use_yield::UseYieldOptions>(),
