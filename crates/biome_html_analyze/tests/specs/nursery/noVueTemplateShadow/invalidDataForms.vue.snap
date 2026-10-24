@@ -1,0 +1,121 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidDataForms.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="e in f" />
+  <div v-for="f in c" />
+  <div v-for="g in c" />
+</template>
+
+<script>
+export default {
+  ...a,
+  data: () => ({
+    ...b,
+    c: [1, 2, 3],
+    g: { nested: true },
+  }),
+  computed: {
+    ...d,
+    e,
+    ["f"]: [1, 2],
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalidDataForms.vue:3:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable e hides a variable with the same name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="e in f" />
+      │               ^
+    4 │   <div v-for="f in c" />
+    5 │   <div v-for="g in c" />
+  
+  i The hidden e is declared here.
+  
+    16 │   computed: {
+    17 │     ...d,
+  > 18 │     e,
+       │     ^
+    19 │     ["f"]: [1, 2],
+    20 │   },
+  
+  i Inside this element, e refers to the template variable, so the other e can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDataForms.vue:4:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable f hides a variable with the same name.
+  
+    2 │ <template>
+    3 │   <div v-for="e in f" />
+  > 4 │   <div v-for="f in c" />
+      │               ^
+    5 │   <div v-for="g in c" />
+    6 │ </template>
+  
+  i The hidden f is declared here.
+  
+    17 │     ...d,
+    18 │     e,
+  > 19 │     ["f"]: [1, 2],
+       │     ^^^^^
+    20 │   },
+    21 │ };
+  
+  i Inside this element, f refers to the template variable, so the other f can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDataForms.vue:5:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable g hides a variable with the same name.
+  
+    3 │   <div v-for="e in f" />
+    4 │   <div v-for="f in c" />
+  > 5 │   <div v-for="g in c" />
+      │               ^
+    6 │ </template>
+    7 │ 
+  
+  i The hidden g is declared here.
+  
+    12 │     ...b,
+    13 │     c: [1, 2, 3],
+  > 14 │     g: { nested: true },
+       │     ^
+    15 │   }),
+    16 │   computed: {
+  
+  i Inside this element, g refers to the template variable, so the other g can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
