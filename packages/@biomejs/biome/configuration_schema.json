@@ -7666,6 +7666,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUnusedRefsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUnusedRefsOptions" }
+			]
+		},
+		"NoVueUnusedRefsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueVHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8380,6 +8390,13 @@
 					"description": "Disallow declaring events that a Vue component never emits.\nSee https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUnusedEmitDeclarationsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUnusedRefs": {
+					"description": "Disallow template refs that are never used.\nSee https://biomejs.dev/linter/rules/no-vue-unused-refs",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUnusedRefsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13630,6 +13647,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUnusedEmitDeclarationsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUnusedRefsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUnusedRefsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

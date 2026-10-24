@@ -3358,6 +3358,11 @@ export interface Nursery {
 	 */
 	noVueUnusedEmitDeclarations?: NoVueUnusedEmitDeclarationsConfiguration;
 	/**
+	 * Disallow template refs that are never used.
+	 * See https://biomejs.dev/linter/rules/no-vue-unused-refs
+	 */
+	noVueUnusedRefs?: NoVueUnusedRefsConfiguration;
+	/**
 	 * Disallow the use of Vue's v-html directive.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-html
 	 */
@@ -6084,6 +6089,9 @@ export type NoVueUndeclaredDirectivesConfiguration =
 export type NoVueUnusedEmitDeclarationsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedEmitDeclarationsOptions;
+export type NoVueUnusedRefsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUnusedRefsOptions;
 export type NoVueVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVHtmlOptions;
@@ -8761,6 +8769,10 @@ export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedEmitDeclarationsOptions;
 }
+export interface RuleWithNoVueUnusedRefsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUnusedRefsOptions;
+}
 export interface RuleWithNoVueVHtmlOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVHtmlOptions;
@@ -11278,6 +11290,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	globals?: string[];
 }
 export type NoVueUnusedEmitDeclarationsOptions = {};
+export type NoVueUnusedRefsOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
 export type NoVueVTextVHtmlOnComponentOptions = {};
@@ -12935,14 +12948,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -12985,8 +12998,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13031,14 +13044,15 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
+	| "lint/nursery/noVueUnusedRefs"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"
@@ -13107,8 +13121,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"

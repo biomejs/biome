@@ -143,6 +143,13 @@ pub fn sfc_model(host: &HtmlRoot, snippets: &[SfcSnippet]) -> VueSemanticModel {
         }
         None => builder.has_unread_script = has_external_script,
     }
+    // A script kept in another file may use any template ref.
+    if has_external_script {
+        match template_component {
+            Some(component) => builder.open_uses(component, Namespace::TemplateRef),
+            None => builder.data.template_ref_uses_open = true,
+        }
+    }
     // A template kept in another file, or written in a language other than
     // HTML, is not read, and it may use any declaration.
     let has_unread_template = builder.data.blocks.iter().any(|block| {
