@@ -19,18 +19,14 @@ use biome_css_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
-use std::{
-    borrow::Cow,
-    cmp::Ordering,
-    collections::{BTreeSet, HashSet},
-};
+use std::{borrow::Cow, cmp::Ordering, collections::HashSet};
 
 declare_source_rule! {
-    /// Sort CSS properties and nested rules into a consistent order.
+    /// Sort CSS properties into a consistent order.
     ///
     /// The action uses a predefined order that groups related properties by purpose.
-    /// Custom properties come first, and nested rules or at-rules such as `@media` come after
-    /// declarations.
+    /// Custom properties come first within each group. Nested rules, at-rules, Sass variable
+    /// declarations, and other non-property items stay in place and separate the groups.
     ///
     /// Properties inside CSS and SCSS keyframe steps use the same order.
     ///
@@ -43,7 +39,6 @@ declare_source_rule! {
     /// 5. Interaction properties, including `pointer-events`.
     /// 6. Background and border properties.
     /// 7. Transition and animation properties.
-    /// 8. Nested rules, media queries, and other at-rules.
     ///
     /// Biome skips blocks containing unknown properties because their correct position is not
     /// known. If sorting could change the result of a shorthand and longhand combination, Biome
@@ -69,6 +64,7 @@ declare_source_rule! {
     /// p {
     ///   span { color: blue; }
     ///   color: red;
+    ///   display: block;
     /// }
     /// ```
     ///
@@ -97,8 +93,9 @@ declare_source_rule! {
     ///
     /// ```css
     /// p {
-    ///   color: red;
     ///   span { color: blue; }
+    ///   display: block;
+    ///   color: red;
     /// }
     /// ```
     ///
@@ -154,17 +151,6 @@ impl Rule for UseSortedProperties {
                 .map(|declaration| AnyCssDeclarationOrRule::cast(declaration.into_syntax()))
                 .collect::<Option<Vec<_>>>()?,
         };
-
-        // Template steps can depend on declarations before enclosing controls or content blocks.
-        // Native keyframe lists do not use the declaration-or-rule list alternative.
-        if node.syntax().descendants().any(|descendant| {
-            descendant.kind() == CssSyntaxKind::CSS_KEYFRAMES_ITEM
-                && descendant.parent().is_some_and(|parent| {
-                    parent.kind() == CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
-                })
-        }) {
-            return None;
-        }
 
         if contains_shorthand_after_longhand(&original_properties) {
             // This would be unsafe to sort
@@ -307,16 +293,21 @@ fn with_semicolon(item: AnyCssDeclarationOrRule) -> Option<AnyCssDeclarationOrRu
 /// "Recess order" is a semantic ordering that mimics the behavior of [stylelint-config-recess-order](https://github.com/stormwarning/stylelint-config-recess-order).
 ///
 /// Which in turn mimics the behavior of twitter's [RECESS](https://github.com/twitter-archive/recess/blob/29bccc870b7b4ccaa0a138e504caf608a6606b59/lib/lint/strict-property-order.js).
-pub struct RecessOrderProperties(pub BTreeSet<RecessOrderMember>);
+pub struct RecessOrderProperties(pub Vec<RecessOrderMember>);
 
 impl RecessOrderProperties {
     pub fn new(items: &[AnyCssDeclarationOrRule]) -> Self {
-        Self(
-            items
-                .iter()
-                .map(|item| RecessOrderMember(item.clone()))
-                .collect::<BTreeSet<RecessOrderMember>>(),
-        )
+        let mut members: Vec<_> = items
+            .iter()
+            .map(|item| RecessOrderMember(item.clone()))
+            .collect();
+        for group in members.chunk_by_mut(|a, b| {
+            a.0.as_css_declaration_with_semicolon().is_some()
+                && b.0.as_css_declaration_with_semicolon().is_some()
+        }) {
+            group.sort_unstable();
+        }
+        Self(members)
     }
 
     /// Checks if self's order matches the provided list's order.
@@ -538,6 +529,11 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
     // We have a mapping of shorthand to longhand sub properties, and to make use of that we need to iterate backwards.
     // Starting from the bottom, when we see a shorthand property, record the set of longhand properties that are no longer allowed to appear above it.
     for node in nodes.iter().rev() {
+        if node.as_css_declaration_with_semicolon().is_none() {
+            disallowed_longhand_properties.clear();
+            continue;
+        }
+
         let Some(prop_text) = &node
             .as_css_declaration_with_semicolon()
             .and_then(css_declaration_to_prop_text)

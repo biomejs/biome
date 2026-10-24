@@ -16736,7 +16736,7 @@
 					]
 				},
 				"useSortedProperties": {
-					"description": "Sort CSS properties and nested rules into a consistent order.\nSee https://biomejs.dev/assist/actions/use-sorted-properties",
+					"description": "Sort CSS properties into a consistent order.\nSee https://biomejs.dev/assist/actions/use-sorted-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedPropertiesConfiguration" },
 						{ "type": "null" }
