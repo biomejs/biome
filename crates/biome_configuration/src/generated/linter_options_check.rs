@@ -2924,6 +2924,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueBlockOrder",
+        TypeId::of::<biome_rule_options::use_vue_block_order::UseVueBlockOrderOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueComponentIs",
         TypeId::of::<biome_rule_options::use_vue_component_is::UseVueComponentIsOptions>(),
     ));

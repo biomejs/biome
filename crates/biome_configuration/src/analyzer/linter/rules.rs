@@ -702,6 +702,7 @@ pub enum RuleName {
     UseValidTypeof,
     UseVarsOnTop,
     UseVueBaseImport,
+    UseVueBlockOrder,
     UseVueComponentIs,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
@@ -1353,6 +1354,7 @@ impl RuleName {
             Self::UseValidTypeof => "useValidTypeof",
             Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueBaseImport => "useVueBaseImport",
+            Self::UseVueBlockOrder => "useVueBlockOrder",
             Self::UseVueComponentIs => "useVueComponentIs",
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
@@ -2000,6 +2002,7 @@ impl RuleName {
             Self::UseValidTypeof => RuleGroup::Correctness,
             Self::UseVarsOnTop => RuleGroup::Style,
             Self::UseVueBaseImport => RuleGroup::Nursery,
+            Self::UseVueBlockOrder => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
@@ -2656,6 +2659,7 @@ impl std::str::FromStr for RuleName {
             "useValidTypeof" => Ok(Self::UseValidTypeof),
             "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueBaseImport" => Ok(Self::UseVueBaseImport),
+            "useVueBlockOrder" => Ok(Self::UseVueBlockOrder),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
