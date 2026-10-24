@@ -1,0 +1,447 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<script lang="ts" generics="T extends { selected?: boolean; name?: string }">
+	let { items }: { items: T[] } = $props();
+</script>
+
+<style data-theme="{ dark }">
+	p { color: red; }
+</style>
+
+<div title="{items.length} items"></div>
+
+<svelte:head>
+	<script async src="https://example.com/gtag.js?id={id}"></script>
+	<style data-theme="{theme}"></style>
+</svelte:head>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@1..8 "script" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@8..12 "lang" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@12..13 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@13..18 "\"ts\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@18..26 "generics" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@26..27 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@27..76 "\"T extends { selected?: boolean; name?: string }\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@76..77 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@77..121 "\n\tlet { items }: { items: T[] } = $props();\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@121..122 "<" [] [],
+                slash_token: SLASH@122..123 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SCRIPT_KW@123..129 "script" [] [],
+                },
+                r_angle_token: R_ANGLE@129..130 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@130..133 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: STYLE_KW@133..139 "style" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@139..149 "data-theme" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@149..150 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@150..160 "\"{ dark }\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@160..161 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@161..181 "\n\tp { color: red; }\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@181..182 "<" [] [],
+                slash_token: SLASH@182..183 "/" [] [],
+                name: HtmlTagName {
+                    value_token: STYLE_KW@183..188 "style" [] [],
+                },
+                r_angle_token: R_ANGLE@188..189 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@189..192 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@192..196 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@196..201 "title" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@201..202 "=" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@202..203 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@203..204 "{" [] [],
+                                        expression: HtmlTextExpression {
+                                            html_literal_token: HTML_LITERAL@204..216 "items.length" [] [],
+                                        },
+                                        r_curly_token: R_CURLY@216..217 "}" [] [],
+                                    },
+                                    SvelteTemplateChunkElement {
+                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@217..223 " items" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@223..224 "\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@224..225 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@225..226 "<" [] [],
+                slash_token: SLASH@226..227 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@227..230 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@230..231 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@231..234 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@234..245 "svelte:head" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@245..246 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@246..249 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: SCRIPT_KW@249..256 "script" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@256..262 "async" [] [Whitespace(" ")],
+                                },
+                                initializer: missing (optional),
+                            },
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@262..265 "src" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@265..266 "=" [] [],
+                                    value: SvelteTemplateAttributeValue {
+                                        l_quote: DOUBLE_QUOTE@266..267 "\"" [] [],
+                                        elements: SvelteTemplateElementList [
+                                            SvelteTemplateChunkElement {
+                                                html_template_chunk_token: HTML_TEMPLATE_CHUNK@267..298 "https://example.com/gtag.js?id=" [] [],
+                                            },
+                                            HtmlAttributeSingleTextExpression {
+                                                l_curly_token: L_CURLY@298..299 "{" [] [],
+                                                expression: HtmlTextExpression {
+                                                    html_literal_token: HTML_LITERAL@299..301 "id" [] [],
+                                                },
+                                                r_curly_token: R_CURLY@301..302 "}" [] [],
+                                            },
+                                        ],
+                                        r_quote: DOUBLE_QUOTE@302..303 "\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@303..304 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@304..305 "<" [] [],
+                        slash_token: SLASH@305..306 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: SCRIPT_KW@306..312 "script" [] [],
+                        },
+                        r_angle_token: R_ANGLE@312..313 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@313..316 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: STYLE_KW@316..322 "style" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@322..332 "data-theme" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@332..333 "=" [] [],
+                                    value: SvelteTemplateAttributeValue {
+                                        l_quote: DOUBLE_QUOTE@333..334 "\"" [] [],
+                                        elements: SvelteTemplateElementList [
+                                            HtmlAttributeSingleTextExpression {
+                                                l_curly_token: L_CURLY@334..335 "{" [] [],
+                                                expression: HtmlTextExpression {
+                                                    html_literal_token: HTML_LITERAL@335..340 "theme" [] [],
+                                                },
+                                                r_curly_token: R_CURLY@340..341 "}" [] [],
+                                            },
+                                        ],
+                                        r_quote: DOUBLE_QUOTE@341..342 "\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@342..343 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@343..344 "<" [] [],
+                        slash_token: SLASH@344..345 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: STYLE_KW@345..350 "style" [] [],
+                        },
+                        r_angle_token: R_ANGLE@350..351 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@351..353 "<" [Newline("\n")] [],
+                slash_token: SLASH@353..354 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@354..365 "svelte:head" [] [],
+                },
+                r_angle_token: R_ANGLE@365..366 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@366..367 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..367
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..366
+    0: HTML_ELEMENT@0..130
+      0: HTML_OPENING_ELEMENT@0..77
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..8
+          0: SCRIPT_KW@1..8 "script" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@8..76
+          0: HTML_ATTRIBUTE@8..18
+            0: HTML_ATTRIBUTE_NAME@8..12
+              0: HTML_LITERAL@8..12 "lang" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@12..18
+              0: EQ@12..13 "=" [] []
+              1: HTML_STRING@13..18
+                0: HTML_STRING_LITERAL@13..18 "\"ts\"" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@18..76
+            0: HTML_ATTRIBUTE_NAME@18..26
+              0: HTML_LITERAL@18..26 "generics" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@26..76
+              0: EQ@26..27 "=" [] []
+              1: HTML_STRING@27..76
+                0: HTML_STRING_LITERAL@27..76 "\"T extends { selected?: boolean; name?: string }\"" [] []
+        3: R_ANGLE@76..77 ">" [] []
+      1: HTML_ELEMENT_LIST@77..121
+        0: HTML_EMBEDDED_CONTENT@77..121
+          0: HTML_LITERAL@77..121 "\n\tlet { items }: { items: T[] } = $props();\n" [] []
+      2: HTML_CLOSING_ELEMENT@121..130
+        0: L_ANGLE@121..122 "<" [] []
+        1: SLASH@122..123 "/" [] []
+        2: HTML_TAG_NAME@123..129
+          0: SCRIPT_KW@123..129 "script" [] []
+        3: R_ANGLE@129..130 ">" [] []
+    1: HTML_ELEMENT@130..189
+      0: HTML_OPENING_ELEMENT@130..161
+        0: L_ANGLE@130..133 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@133..139
+          0: STYLE_KW@133..139 "style" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@139..160
+          0: HTML_ATTRIBUTE@139..160
+            0: HTML_ATTRIBUTE_NAME@139..149
+              0: HTML_LITERAL@139..149 "data-theme" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@149..160
+              0: EQ@149..150 "=" [] []
+              1: HTML_STRING@150..160
+                0: HTML_STRING_LITERAL@150..160 "\"{ dark }\"" [] []
+        3: R_ANGLE@160..161 ">" [] []
+      1: HTML_ELEMENT_LIST@161..181
+        0: HTML_EMBEDDED_CONTENT@161..181
+          0: HTML_LITERAL@161..181 "\n\tp { color: red; }\n" [] []
+      2: HTML_CLOSING_ELEMENT@181..189
+        0: L_ANGLE@181..182 "<" [] []
+        1: SLASH@182..183 "/" [] []
+        2: HTML_TAG_NAME@183..188
+          0: STYLE_KW@183..188 "style" [] []
+        3: R_ANGLE@188..189 ">" [] []
+    2: HTML_ELEMENT@189..231
+      0: HTML_OPENING_ELEMENT@189..225
+        0: L_ANGLE@189..192 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@192..196
+          0: DIV_KW@192..196 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@196..224
+          0: HTML_ATTRIBUTE@196..224
+            0: HTML_ATTRIBUTE_NAME@196..201
+              0: HTML_LITERAL@196..201 "title" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@201..224
+              0: EQ@201..202 "=" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@202..224
+                0: DOUBLE_QUOTE@202..203 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@203..223
+                  0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@203..217
+                    0: L_CURLY@203..204 "{" [] []
+                    1: HTML_TEXT_EXPRESSION@204..216
+                      0: HTML_LITERAL@204..216 "items.length" [] []
+                    2: R_CURLY@216..217 "}" [] []
+                  1: SVELTE_TEMPLATE_CHUNK_ELEMENT@217..223
+                    0: HTML_TEMPLATE_CHUNK@217..223 " items" [] []
+                2: DOUBLE_QUOTE@223..224 "\"" [] []
+        3: R_ANGLE@224..225 ">" [] []
+      1: HTML_ELEMENT_LIST@225..225
+      2: HTML_CLOSING_ELEMENT@225..231
+        0: L_ANGLE@225..226 "<" [] []
+        1: SLASH@226..227 "/" [] []
+        2: HTML_TAG_NAME@227..230
+          0: DIV_KW@227..230 "div" [] []
+        3: R_ANGLE@230..231 ">" [] []
+    3: HTML_ELEMENT@231..366
+      0: HTML_OPENING_ELEMENT@231..246
+        0: L_ANGLE@231..234 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@234..245
+          0: HTML_UNKNOWN_TAG@234..245 "svelte:head" [] []
+        2: HTML_ATTRIBUTE_LIST@245..245
+        3: R_ANGLE@245..246 ">" [] []
+      1: HTML_ELEMENT_LIST@246..351
+        0: HTML_ELEMENT@246..313
+          0: HTML_OPENING_ELEMENT@246..304
+            0: L_ANGLE@246..249 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@249..256
+              0: SCRIPT_KW@249..256 "script" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@256..303
+              0: HTML_ATTRIBUTE@256..262
+                0: HTML_ATTRIBUTE_NAME@256..262
+                  0: HTML_LITERAL@256..262 "async" [] [Whitespace(" ")]
+                1: (empty)
+              1: HTML_ATTRIBUTE@262..303
+                0: HTML_ATTRIBUTE_NAME@262..265
+                  0: HTML_LITERAL@262..265 "src" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@265..303
+                  0: EQ@265..266 "=" [] []
+                  1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@266..303
+                    0: DOUBLE_QUOTE@266..267 "\"" [] []
+                    1: SVELTE_TEMPLATE_ELEMENT_LIST@267..302
+                      0: SVELTE_TEMPLATE_CHUNK_ELEMENT@267..298
+                        0: HTML_TEMPLATE_CHUNK@267..298 "https://example.com/gtag.js?id=" [] []
+                      1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@298..302
+                        0: L_CURLY@298..299 "{" [] []
+                        1: HTML_TEXT_EXPRESSION@299..301
+                          0: HTML_LITERAL@299..301 "id" [] []
+                        2: R_CURLY@301..302 "}" [] []
+                    2: DOUBLE_QUOTE@302..303 "\"" [] []
+            3: R_ANGLE@303..304 ">" [] []
+          1: HTML_ELEMENT_LIST@304..304
+          2: HTML_CLOSING_ELEMENT@304..313
+            0: L_ANGLE@304..305 "<" [] []
+            1: SLASH@305..306 "/" [] []
+            2: HTML_TAG_NAME@306..312
+              0: SCRIPT_KW@306..312 "script" [] []
+            3: R_ANGLE@312..313 ">" [] []
+        1: HTML_ELEMENT@313..351
+          0: HTML_OPENING_ELEMENT@313..343
+            0: L_ANGLE@313..316 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@316..322
+              0: STYLE_KW@316..322 "style" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@322..342
+              0: HTML_ATTRIBUTE@322..342
+                0: HTML_ATTRIBUTE_NAME@322..332
+                  0: HTML_LITERAL@322..332 "data-theme" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@332..342
+                  0: EQ@332..333 "=" [] []
+                  1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@333..342
+                    0: DOUBLE_QUOTE@333..334 "\"" [] []
+                    1: SVELTE_TEMPLATE_ELEMENT_LIST@334..341
+                      0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@334..341
+                        0: L_CURLY@334..335 "{" [] []
+                        1: HTML_TEXT_EXPRESSION@335..340
+                          0: HTML_LITERAL@335..340 "theme" [] []
+                        2: R_CURLY@340..341 "}" [] []
+                    2: DOUBLE_QUOTE@341..342 "\"" [] []
+            3: R_ANGLE@342..343 ">" [] []
+          1: HTML_ELEMENT_LIST@343..343
+          2: HTML_CLOSING_ELEMENT@343..351
+            0: L_ANGLE@343..344 "<" [] []
+            1: SLASH@344..345 "/" [] []
+            2: HTML_TAG_NAME@345..350
+              0: STYLE_KW@345..350 "style" [] []
+            3: R_ANGLE@350..351 ">" [] []
+      2: HTML_CLOSING_ELEMENT@351..366
+        0: L_ANGLE@351..353 "<" [Newline("\n")] []
+        1: SLASH@353..354 "/" [] []
+        2: HTML_TAG_NAME@354..365
+          0: HTML_UNKNOWN_TAG@354..365 "svelte:head" [] []
+        3: R_ANGLE@365..366 ">" [] []
+  5: EOF@366..367 "" [Newline("\n")] []
+
+```
