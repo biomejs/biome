@@ -1,4 +1,5 @@
-use super::{document::Document, *};
+use super::document::{Document, DocumentLockGuard, DocumentLocks};
+use super::*;
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::db::{DbReadGuard, DbState, WorkspaceDb};
@@ -126,6 +127,8 @@ pub struct WorkspaceServer {
     /// Stores the document (text content + version number) associated with a URL
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
+    document_locks: DocumentLocks,
+
     search_provider: Arc<dyn SearchQuery>,
 
     /// Node cache for faster parsing of modified documents.
@@ -162,6 +165,9 @@ pub struct WorkspaceServer {
 
     #[cfg(test)]
     scanner_test_state: ScannerTestState,
+
+    #[cfg(test)]
+    before_change_file_publish: Mutex<Option<Box<dyn FnOnce() + Send>>>,
 }
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
@@ -176,6 +182,13 @@ pub struct LocalWorkspace {
 pub struct WorkspaceServerWithDb<'a> {
     server: &'a WorkspaceServer,
     db_state: &'a DbState,
+}
+
+/// Keeps the database gate and document lock alive through publication.
+struct DocumentWriteGuard<'a> {
+    // Fields drop in declaration order, releasing the document before the database gate.
+    _document: DocumentLockGuard,
+    _setter: Option<parking_lot::ReentrantMutexGuard<'a, ()>>,
 }
 
 struct ProcessFileState {
@@ -199,6 +212,10 @@ struct ScannerTestState {
     pause_file_settings_read: AtomicBool,
     /// Number of scanner-driven file commit attempts.
     file_commit_attempts: AtomicUsize,
+    /// Pauses an index update after parsing and before acquiring the publication lock.
+    before_file_commit: Mutex<Option<Box<dyn FnOnce() + Send>>>,
+    /// Pauses an index update after the client-open check and before publication.
+    before_document_publish: Mutex<Option<Box<dyn FnOnce() + Send>>>,
     /// Number of project scan attempts.
     project_scan_attempts: AtomicUsize,
     /// Whether the first project scan should be cancelled before it starts.
@@ -207,6 +224,15 @@ struct ScannerTestState {
 
 #[cfg(test)]
 impl ScannerTestState {
+    fn before_document_publish(&self, reason: OpenFileReason) {
+        if reason.is_index() {
+            let hook = self.before_document_publish.lock().unwrap().take();
+            if let Some(hook) = hook {
+                hook();
+            }
+        }
+    }
+
     /// Records entry into scanner-driven file indexing.
     fn enter_file_indexing(&self, reason: OpenFileReason) {
         if reason.is_index() {
@@ -229,6 +255,10 @@ impl ScannerTestState {
     fn enter_file_commit(&self, reason: OpenFileReason) {
         if reason.is_index() {
             self.file_commit_attempts.fetch_add(1, Ordering::AcqRel);
+            let hook = self.before_file_commit.lock().unwrap().take();
+            if let Some(hook) = hook {
+                hook();
+            }
         }
     }
 
@@ -475,6 +505,7 @@ impl WorkspaceServer {
             #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
             documents: Default::default(),
+            document_locks: Default::default(),
             search_provider,
             node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
@@ -484,6 +515,8 @@ impl WorkspaceServer {
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
             scanner_test_state: ScannerTestState::default(),
+            #[cfg(test)]
+            before_change_file_publish: Mutex::new(None),
         }
     }
 
@@ -840,6 +873,15 @@ impl WorkspaceServerWithDb<'_> {
         let settings =
             self.settings_handle_with_query(&settings, editor_features.unwrap_or_default(), query);
 
+        // Skip disk I/O and parsing when the client's parse is already authoritative.
+        // Otherwise release the locks before that work, then recheck before publication.
+        if matches!(&content, FileContent::FromServer) {
+            let document_lock = self.lock_document(&path);
+            if self.is_open_by_client(&path) {
+                return self.reindex_client_document(project_key, &path, reason, document_lock);
+            }
+        }
+
         let mut source = if let Some(document_file_source) = document_file_source {
             let path_source = DocumentFileSource::from_path(
                 &path,
@@ -992,6 +1034,18 @@ impl WorkspaceServerWithDb<'_> {
         #[cfg(test)]
         self.scanner_test_state.enter_file_commit(reason);
 
+        // Keep the client-open check and both store updates under the same lock.
+        // Otherwise a client can open after the check, and the indexer can overwrite its text and parse.
+        let document_lock = self.lock_document(&path);
+
+        // The early check may have missed a client opening the file while disk content was being parsed.
+        if version.is_none() && self.is_open_by_client(&path) {
+            return self.reindex_client_document(project_key, &path, reason, document_lock);
+        }
+
+        #[cfg(test)]
+        self.scanner_test_state.before_document_publish(reason);
+
         let mut parsed_source = None;
         let syntax = match parsed {
             Err(error) => Some(Err(error)),
@@ -1055,6 +1109,7 @@ impl WorkspaceServerWithDb<'_> {
                     };
 
                     Document {
+                        identity: Arc::default(),
                         content: content.clone(),
                         version,
                         file_source_index,
@@ -1062,6 +1117,7 @@ impl WorkspaceServerWithDb<'_> {
                     }
                 },
                 || Document {
+                    identity: Arc::default(),
                     content: content.clone(),
                     version,
                     file_source_index,
@@ -1073,6 +1129,8 @@ impl WorkspaceServerWithDb<'_> {
             // requests and client requests for files that are already indexed.
             reason.is_index() || self.should_update_service_data(&path)
         };
+
+        drop(document_lock);
 
         // Manifest files need to update the module graph.
         if is_indexed {
@@ -1103,6 +1161,44 @@ impl WorkspaceServerWithDb<'_> {
         // If the document was never opened by the scanner, we don't care
         // about updating service data.
         Ok(InternalOpenFileResult::default())
+    }
+
+    fn is_open_by_client(&self, path: &Utf8Path) -> bool {
+        self.documents
+            .pin()
+            .get(path)
+            .is_some_and(|document| document.version.is_some())
+    }
+
+    /// Reindexes a client-open document using its current parse.
+    /// Consumes the publication guard so the parse is read under the lock, then releases it before updating service data.
+    fn reindex_client_document(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        reason: OpenFileReason,
+        document_lock: DocumentWriteGuard<'_>,
+    ) -> Result<InternalOpenFileResult, WorkspaceError> {
+        // Initial scans and watcher updates open files independently of the client's didOpen/didClose lifecycle.
+        // An external disk write can therefore reindex a document that the client still has open.
+        // Keep its client text and parse so incremental edits and formatting use the editor's content,
+        // which may differ from the file on disk. See https://github.com/biomejs/biome-vscode/issues/923.
+        let Ok(parsed) = self.get_parse(path) else {
+            return Ok(InternalOpenFileResult::default());
+        };
+        drop(document_lock);
+        if !reason.is_index() && !self.should_update_service_data(path) {
+            return Ok(InternalOpenFileResult::default());
+        }
+        let (dependencies, diagnostics) = self.update_service_data(
+            path,
+            UpdateKind::AddedOrChanged(reason, parsed.into()),
+            project_key,
+        )?;
+        Ok(InternalOpenFileResult {
+            dependencies,
+            diagnostics,
+        })
     }
 
     /// Returns whether a client update of `path` must update the service data.
@@ -2319,6 +2415,7 @@ impl WorkspaceServerWithDb<'_> {
         // the client still has it open.
         #[cfg(feature = "module_graph")]
         if matches!(&update_kind, UpdateKind::Removed) && self.is_manifest_for_resolution(&path) {
+            let _document_lock = self.lock_document(&path);
             let documents = self.documents.pin();
             let opened_by_client = documents
                 .get(path.as_path())
@@ -2449,6 +2546,19 @@ impl WorkspaceServerWithDb<'_> {
             }
         }
         Ok(diagnostics)
+    }
+
+    /// Locks document updates after the database gate, matching project scans' lock order.
+    /// A scan holds the gate while acquiring document locks.
+    /// Taking a document lock first could leave the scan waiting for the document and its writer waiting for the gate.
+    /// Release both guards before updating service data, which may index dependencies.
+    fn lock_document(&self, path: &Utf8Path) -> DocumentWriteGuard<'_> {
+        let setter_guard = self.db_state.lock_setter_gate();
+        let document_guard = self.document_locks.lock(path);
+        DocumentWriteGuard {
+            _document: document_guard,
+            _setter: setter_guard,
+        }
     }
 
     // #region DATABASE OPERATIONS
@@ -3086,6 +3196,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             }
         }
 
+        // Document updates acquire the database gate before the node cache.
+        drop(node_cache);
         self.db_unload_path(&project_path);
         self.project_layout.unload_folder(&project_path);
         #[cfg(feature = "plugins")]
@@ -3356,22 +3468,13 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             editor_features,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
-        let is_indexed = self.should_update_service_data(&path);
+        let document_lock = self.lock_document(&path);
         let documents = self.documents.pin();
-        let (index, existing_version, same_content) = documents
+        let document = documents
             .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.version,
-                    document.content == content,
-                )
-            })
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
-        if existing_version.is_some_and(|existing_version| existing_version > version)
-            || existing_version == Some(version) && !same_content
-        {
+        if !document.accepts_change(version, &content) {
             warn!(%version, %path, "outdated_file_change");
             // Safely ignore older versions.
             return Ok(ChangeFileResult {
@@ -3379,14 +3482,24 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             });
         }
 
-        if existing_version == Some(version) {
+        if document.version == Some(version) {
+            // A cancelled request may have already published its text and parse.
+            // Retrying identical content must still finish the service-data updates.
             let parsed = {
                 let db = self.get_db();
                 db.get_parsed_source(path.as_path())
                     .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
             };
+            drop(document_lock);
             return self.finish_change_file(project_key, &path, parsed);
         }
+
+        let index = document.file_source_index;
+        let identity = Arc::clone(&document.identity);
+        // The database gate is shared by every file.
+        // Release it before parsing so a slow parse does not block unrelated document writes.
+        drop(documents);
+        drop(document_lock);
 
         let (_, settings, query) = {
             let db = self.get_db();
@@ -3424,7 +3537,6 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             (index, document_source)
         };
 
-        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
         let mut node_cache = NodeCache::default();
 
         // Second-pass parsing for HTML files with embedded JavaScript and CSS content
@@ -3446,10 +3558,34 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
         .collect();
 
+        #[cfg(test)]
+        {
+            let hook = self.before_change_file_publish.lock().unwrap().take();
+            if let Some(hook) = hook {
+                hook();
+            }
+        }
+
+        let document_lock = self.lock_document(&path);
+        let documents = self.documents.pin();
+        let current = documents
+            .get(path.as_path())
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        // An edit or close/open can complete while parsing, so recheck before updating either store.
+        // Versions reject superseded edits; identity rejects edits from an earlier open,
+        // even when their version is higher than the reopened document's version.
+        if !Arc::ptr_eq(&identity, &current.identity) || !current.accepts_change(version, &content)
+        {
+            return Ok(ChangeFileResult {
+                diagnostics: Vec::new(),
+            });
+        }
+
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
 
         let document = Document {
+            identity,
             content,
             version: Some(version),
             file_source_index: index,
@@ -3466,6 +3602,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        drop(document_lock);
 
         #[cfg(test)]
         if self
@@ -3475,13 +3612,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
-        if is_indexed {
-            self.finish_change_file(project_key, &path, parsed)
-        } else {
-            Ok(ChangeFileResult {
-                diagnostics: Vec::new(),
-            })
-        }
+        // The scanner may have indexed this file while parsing was in progress.
+        // Check whether service data needs updating here, so a newly indexed file receives this edit too.
+        self.finish_change_file(project_key, &path, parsed)
     }
 
     fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError> {
@@ -4342,9 +4475,12 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         let path = params.path.as_path();
 
-        self.documents.pin().remove(path);
-        self.node_cache.lock().unwrap().remove(path);
-        self.db_remove_file(path);
+        {
+            let _document_lock = self.lock_document(path);
+            self.documents.pin().remove(path);
+            self.node_cache.lock().unwrap().remove(path);
+            self.db_remove_file(path);
+        }
 
         // Without the client's content, the resolver reads the manifest from
         // the filesystem again, which may make other dependencies reachable.
@@ -4936,3 +5072,7 @@ mod tests;
 #[cfg(all(test, feature = "md_embeds"))]
 #[path = "md_embeds.tests.rs"]
 mod md_embeds_tests;
+
+#[cfg(test)]
+#[path = "server_document_locks.tests.rs"]
+mod document_locks_tests;

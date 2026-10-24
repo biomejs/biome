@@ -183,7 +183,7 @@ use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
 use biome_resolver::ResolverPathChanges;
 use camino::{Utf8Path, Utf8PathBuf};
-use parking_lot::{Mutex, MutexGuard};
+use parking_lot::{Mutex, ReentrantMutex, ReentrantMutexGuard};
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::ops::Deref;
@@ -246,7 +246,7 @@ enum ScannerDbEpochFinalizer<'a> {
     Owned {
         #[cfg(feature = "module_graph")]
         owner: &'a OwnedDb,
-        setter_guard: MutexGuard<'a, ()>,
+        setter_guard: ReentrantMutexGuard<'a, ()>,
         #[cfg(feature = "module_graph")]
         module_graph_dirty: Arc<AtomicBool>,
         #[cfg(feature = "module_graph")]
@@ -378,7 +378,7 @@ struct OwnedDb {
     db: Mutex<WorkspaceDb>,
     /// Serializes setter intent and keeps setters outside scanner epochs.
     /// Queued setters do not announce pending writes while waiting here.
-    setter_lock: Mutex<()>,
+    setter_lock: ReentrantMutex<()>,
     /// The collections shared between the database and all its clones. See
     /// [WorkspaceDbData].
     data: WorkspaceDbData,
@@ -404,7 +404,7 @@ impl OwnedDb {
         let data = db.data();
         Self {
             db: Mutex::new(db),
-            setter_lock: Mutex::new(()),
+            setter_lock: ReentrantMutex::new(()),
             data,
             pending_setters: AtomicUsize::new(0),
             #[cfg(test)]
@@ -432,6 +432,11 @@ impl OwnedDb {
     }
 
     fn with_setter<R>(&self, f: impl FnOnce(&mut WorkspaceDb) -> R) -> R {
+        let setter_guard = self.lock_setter_gate();
+        self.with_setter_gate_held(&setter_guard, f)
+    }
+
+    fn lock_setter_gate(&self) -> ReentrantMutexGuard<'_, ()> {
         if LIVE_READS.with(|reads| reads.get()) != 0 {
             debug_assert!(
                 false,
@@ -445,8 +450,7 @@ impl OwnedDb {
 
         #[cfg(test)]
         self.setter_gate_attempts.fetch_add(1, Ordering::Release);
-        let setter_guard = self.setter_lock.lock();
-        self.with_setter_gate_held(&setter_guard, f)
+        self.setter_lock.lock()
     }
 
     /// Runs a setter after the caller has acquired this database's setter gate.
@@ -455,7 +459,7 @@ impl OwnedDb {
     /// current operation has completed.
     fn with_setter_gate_held<R>(
         &self,
-        _setter_guard: &MutexGuard<'_, ()>,
+        _setter_guard: &ReentrantMutexGuard<'_, ()>,
         f: impl FnOnce(&mut WorkspaceDb) -> R,
     ) -> R {
         self.pending_setters.fetch_add(1, Ordering::Release);
@@ -542,6 +546,16 @@ impl DbState {
                     },
                 }
             }
+        }
+    }
+
+    /// Excludes scanner epochs before acquiring a document lock in owned storage.
+    /// The gate is reentrant so the protected operation can invoke setters.
+    /// Shared scanner views already run under their owner's gate.
+    pub(crate) fn lock_setter_gate(&self) -> Option<ReentrantMutexGuard<'_, ()>> {
+        match &self.storage {
+            DbStorage::Shared(_) => None,
+            DbStorage::Owned(db) => Some(db.lock_setter_gate()),
         }
     }
 

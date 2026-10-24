@@ -1005,3 +1005,7 @@ mod server_goto;
 #[cfg(test)]
 #[path = "server_type_on_format.tests.rs"]
 mod server_type_on_format;
+
+#[cfg(test)]
+#[path = "server_watcher.tests.rs"]
+mod server_watcher;

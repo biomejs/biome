@@ -24,7 +24,7 @@ use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
 
-fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
+pub(super) fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
     let deadline = Instant::now() + timeout;
     while !predicate() {
         if Instant::now() >= deadline {
@@ -2161,6 +2161,152 @@ fn incremental_index_retries_pending_write() {
             .get_db()
             .get_parsed_source(Utf8Path::new(PATH))
             .is_some()
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn reopening_unindexed_client_document_from_server_keeps_it_unindexed() {
+    const PATH: &str = "/project/a.js";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), "import 'foo';");
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.to_string(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert!(
+        !workspace
+            .get_module_graph(GetModuleGraphParams {})
+            .unwrap()
+            .data
+            .contains_key(PATH)
+    );
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        CLIENT_CONTENT
+    );
+    assert!(
+        !workspace
+            .get_module_graph(GetModuleGraphParams {})
+            .unwrap()
+            .data
+            .contains_key(PATH)
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn index_keeps_document_opened_by_client_during_index() {
+    const PATH: &str = "/project/a.js";
+    const DISK_CONTENT: &str = "import 'foo';";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), DISK_CONTENT);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+    let initial_settings_read_attempts = test_state
+        .file_settings_read_attempts
+        .load(Ordering::Acquire);
+
+    let (index_paused, open_result, index_result) = std::thread::scope(|scope| {
+        let index_workspace = workspace.as_workspace();
+        let index = scope.spawn(move || {
+            WorkspaceScannerBridge::index_file(
+                &index_workspace,
+                project_key,
+                BiomePath::new(PATH),
+                IndexTrigger::Update,
+            )
+        });
+        let index_paused = wait_until(TIMEOUT, || {
+            test_state
+                .file_settings_read_attempts
+                .load(Ordering::Acquire)
+                > initial_settings_read_attempts
+        });
+        let open_result = workspace.open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.to_string(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        });
+        test_state
+            .pause_file_settings_read
+            .store(false, Ordering::Release);
+        (index_paused, open_result, index.join())
+    });
+
+    assert!(index_paused, "indexing did not reach the settings read");
+    assert!(open_result.is_ok());
+    assert!(matches!(index_result, Ok(Ok(_))));
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .expect("can get file content");
+    assert_eq!(content, CLIENT_CONTENT);
+
+    let module_graph = workspace
+        .get_module_graph(crate::workspace::GetModuleGraphParams {})
+        .expect("can get module graph");
+    assert_eq!(
+        module_graph.data.get(PATH).map(|module_info| module_info
+            .as_js_module_info()
+            .unwrap()
+            .static_import_paths
+            .clone()),
+        Some(std::collections::BTreeMap::from([(
+            "bar".to_string(),
+            "bar".to_string()
+        )])),
+        "index should've used the client state"
     );
 }
 

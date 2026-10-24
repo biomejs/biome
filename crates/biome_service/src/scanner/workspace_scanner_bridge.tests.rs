@@ -7,6 +7,7 @@
 //!
 //! No real watcher is instantiated in these tests.
 
+use std::collections::BTreeMap;
 use std::str::FromStr;
 
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
@@ -20,8 +21,8 @@ use crate::scanner::IndexTrigger;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{
-    CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, ScanProjectParams,
-    UpdateSettingsParams,
+    CloseFileParams, FileContent, GetFileContentParams, GetModuleGraphParams, OpenFileParams,
+    ScanProjectParams, UpdateSettingsParams,
 };
 use crate::{Workspace, WorkspaceError};
 
@@ -544,4 +545,64 @@ fn should_index_used_type_definition_of_used_dependency() {
     assert!(workspace.is_indexed(&entry_file_path));
     assert!(workspace.is_indexed(&used_file_path));
     assert!(!workspace.is_indexed(&unused_file_path));
+}
+
+#[test]
+fn initial_scan_of_file_opened_by_client_keeps_client_content() {
+    const FILE_CONTENT: &str = "import 'foo';";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+
+    let file_path = Utf8PathBuf::from("/project/a.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(&file_path),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.to_string(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: true,
+            inline_config: None,
+            editor_features: None,
+        })
+        .expect("can open from client");
+
+    workspace
+        .index_file(project_key, file_path.clone(), IndexTrigger::InitialScan)
+        .expect("can also index file");
+
+    assert!(workspace.is_indexed(&file_path), "file should be indexed");
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(&file_path),
+        })
+        .expect("can get file content");
+
+    assert_eq!(content, CLIENT_CONTENT);
+
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
+
+    assert_eq!(
+        module_graph
+            .data
+            .get(file_path.as_str())
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
+        Some(BTreeMap::from([("bar".to_string(), "bar".to_string())])),
+        "index should've used the client state"
+    );
 }
