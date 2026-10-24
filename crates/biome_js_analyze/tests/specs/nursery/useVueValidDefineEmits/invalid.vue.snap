@@ -1,0 +1,467 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import { imported } from "./events";
+
+const local = { notify: null };
+function validate(payload: string) {
+	return payload.length > 0;
+}
+class Payload {}
+
+defineEmits<(e: "notify") => void>({ submit: null });
+defineEmits(local);
+defineEmits({ ...local });
+defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+defineEmits({ local });
+defineEmits([imported, local.notify]);
+const emit = defineEmits();
+const typed = defineEmits(["notify"]) as (event: "notify") => void;
+(defineEmits(["notify"]));
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:11:1 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits call declares events with both a type and an argument.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue accepts only one of the two, and fails to compile the component when both are present.
+  
+  i Remove either the type between the angle brackets or the argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:1 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    11 │ defineEmits<(e: "notify") => void>({ submit: null });
+  > 12 │ defineEmits(local);
+       │ ^^^^^^^^^^^^^^^^^^
+    13 │ defineEmits({ ...local });
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:13 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    11 │ defineEmits<(e: "notify") => void>({ submit: null });
+  > 12 │ defineEmits(local);
+       │             ^^^^^
+    13 │ defineEmits({ ...local });
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+  
+  i The name is declared here.
+  
+    3 │ import { imported } from "./events";
+    4 │ 
+  > 5 │ const local = { notify: null };
+      │       ^^^^^
+    6 │ function validate(payload: string) {
+    7 │ 	return payload.length > 0;
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:1 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    11 │ defineEmits<(e: "notify") => void>({ submit: null });
+    12 │ defineEmits(local);
+  > 13 │ defineEmits({ ...local });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+    15 │ defineEmits({ local });
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:18 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    11 │ defineEmits<(e: "notify") => void>({ submit: null });
+    12 │ defineEmits(local);
+  > 13 │ defineEmits({ ...local });
+       │                  ^^^^^
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+    15 │ defineEmits({ local });
+  
+  i The name is declared here.
+  
+    3 │ import { imported } from "./events";
+    4 │ 
+  > 5 │ const local = { notify: null };
+      │       ^^^^^
+    6 │ function validate(payload: string) {
+    7 │ 	return payload.length > 0;
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:1 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  > 14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ defineEmits({ local });
+    16 │ defineEmits([imported, local.notify]);
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:23 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  > 14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+       │                       ^^^^^^^^
+    15 │ defineEmits({ local });
+    16 │ defineEmits([imported, local.notify]);
+  
+  i The name is declared here.
+  
+    5 │ const local = { notify: null };
+  > 6 │ function validate(payload: string) {
+      │          ^^^^^^^^
+    7 │ 	return payload.length > 0;
+    8 │ }
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:73 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  > 14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+       │                                                                         ^^^^^^^
+    15 │ defineEmits({ local });
+    16 │ defineEmits([imported, local.notify]);
+  
+  i The name is declared here.
+  
+     7 │ 	return payload.length > 0;
+     8 │ }
+   > 9 │ class Payload {}
+       │       ^^^^^^^
+    10 │ 
+    11 │ defineEmits<(e: "notify") => void>({ submit: null });
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:1 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    13 │ defineEmits({ ...local });
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+  > 15 │ defineEmits({ local });
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    16 │ defineEmits([imported, local.notify]);
+    17 │ const emit = defineEmits();
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:15 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    13 │ defineEmits({ ...local });
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+  > 15 │ defineEmits({ local });
+       │               ^^^^^
+    16 │ defineEmits([imported, local.notify]);
+    17 │ const emit = defineEmits();
+  
+  i The name is declared here.
+  
+    3 │ import { imported } from "./events";
+    4 │ 
+  > 5 │ const local = { notify: null };
+      │       ^^^^^
+    6 │ function validate(payload: string) {
+    7 │ 	return payload.length > 0;
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:1 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+    15 │ defineEmits({ local });
+  > 16 │ defineEmits([imported, local.notify]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ const emit = defineEmits();
+    18 │ const typed = defineEmits(["notify"]) as (event: "notify") => void;
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:24 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits argument uses a name that is declared in the same <script setup> block.
+  
+    14 │ defineEmits({ notify: validate, submit: (payload) => payload instanceof Payload });
+    15 │ defineEmits({ local });
+  > 16 │ defineEmits([imported, local.notify]);
+       │                        ^^^^^
+    17 │ const emit = defineEmits();
+    18 │ const typed = defineEmits(["notify"]) as (event: "notify") => void;
+  
+  i The name is declared here.
+  
+    3 │ import { imported } from "./events";
+    4 │ 
+  > 5 │ const local = { notify: null };
+      │       ^^^^^
+    6 │ function validate(payload: string) {
+    7 │ 	return payload.length > 0;
+  
+  i Vue evaluates the defineEmits argument before the code in <script setup> runs, so this name does not exist yet.
+  
+  i Write the value directly in the argument, import it from another file, or declare it in a separate <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:14 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    15 │ defineEmits({ local });
+    16 │ defineEmits([imported, local.notify]);
+  > 17 │ const emit = defineEmits();
+       │              ^^^^^^^^^^^^^
+    18 │ const typed = defineEmits(["notify"]) as (event: "notify") => void;
+    19 │ (defineEmits(["notify"]));
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:15 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    16 │ defineEmits([imported, local.notify]);
+    17 │ const emit = defineEmits();
+  > 18 │ const typed = defineEmits(["notify"]) as (event: "notify") => void;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ (defineEmits(["notify"]));
+    20 │ </script>
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:2 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineEmits is called more than once in this <script setup> block.
+  
+    17 │ const emit = defineEmits();
+    18 │ const typed = defineEmits(["notify"]) as (event: "notify") => void;
+  > 19 │ (defineEmits(["notify"]));
+       │  ^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ </script>
+    21 │ 
+  
+  i The first call is here.
+  
+     9 │ class Payload {}
+    10 │ 
+  > 11 │ defineEmits<(e: "notify") => void>({ submit: null });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ defineEmits(local);
+    13 │ defineEmits({ ...local });
+  
+  i Vue allows a single defineEmits call per component, and fails to compile the component when there are more.
+  
+  i Declare all the events of the component in one call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
