@@ -3096,6 +3096,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_vue_consistent_v_on_style::UseVueConsistentVOnStyleOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "useVueDefaultProp",
+        TypeId::of::<biome_rule_options::use_vue_default_prop::UseVueDefaultPropOptions>(),
+    ));
     result.push(("style", "useVueDefineMacrosOrder", TypeId::of::<biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions>()));
     result.push((
         "nursery",

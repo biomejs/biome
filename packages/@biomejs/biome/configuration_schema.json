@@ -9631,6 +9631,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueDefaultProp": {
+					"description": "Require a default value for optional props in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-default-prop",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueDefaultPropConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefineOptions": {
 					"description": "Enforce defineOptions() instead of a default export in components that use \\<script setup>.\nSee https://biomejs.dev/linter/rules/use-vue-define-options",
 					"anyOf": [
@@ -17536,6 +17543,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueDefaultPropOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueDefaultPropOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -23140,6 +23156,16 @@
 					]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueDefaultPropConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueDefaultPropOptions" }
+			]
+		},
+		"UseVueDefaultPropOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueDefineMacrosOrderConfiguration": {
