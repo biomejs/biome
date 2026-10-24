@@ -10,8 +10,9 @@ use biome_embeds::{EmbeddedSnippet, collect_embedded_data};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::{
-    AnyAstroDirective, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlLanguage, HtmlRoot,
-    HtmlTextExpression, ScriptType,
+    AnyAstroDirective, AnyVueDirectiveArgument, AstroEmbeddedContent, HtmlAttribute,
+    HtmlAttributeInitializerClause, HtmlElement, HtmlLanguage, HtmlRoot, HtmlSyntaxNode,
+    HtmlTextExpression, ScriptType, VueDirective, VueVBindShorthandDirective,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
@@ -648,10 +649,55 @@ fn extract_html_embedded_js<'a>(
                 offset: range.start(),
                 file_source,
             });
+        } else if host_file_source.is_vue()
+            && let Some((initializer, is_class_attribute)) = vue_v_bind_value(&node)
+            && let Ok(value) = initializer.value()
+            && let Some(string) = value.as_html_string()
+            && let (Ok(token), Ok(text)) = (string.value_token(), string.inner_string_text())
+        {
+            let range = text.source_range(token.text_range());
+            snippets.push(EmbeddedJsSnippet {
+                text: &code[range],
+                offset: range.start(),
+                file_source: JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Vue {
+                    setup: false,
+                    is_source: false,
+                    event_handler: false,
+                    allow_statements: false,
+                    slot_props: false,
+                    generics_list: false,
+                    is_class_attribute,
+                }),
+            });
         }
     }
 
     snippets
+}
+
+/// Returns the value of `node` when it is a Vue `v-bind` directive, written
+/// as `v-bind:name="..."` or `:name="..."`, along with whether it binds the
+/// `class` attribute.
+///
+/// Other directives aren't extracted: `v-on` and `v-slot` values need parser
+/// settings that documentation examples haven't required so far.
+fn vue_v_bind_value(node: &HtmlSyntaxNode) -> Option<(HtmlAttributeInitializerClause, bool)> {
+    let is_class = |argument: Option<AnyVueDirectiveArgument>| {
+        argument
+            .and_then(|argument| argument.as_vue_static_argument().cloned())
+            .and_then(|argument| argument.name_token().ok())
+            .is_some_and(|name| name.text_trimmed() == "class")
+    };
+    if let Some(directive) = VueVBindShorthandDirective::cast_ref(node) {
+        let is_class_attribute = is_class(directive.arg().ok().and_then(|arg| arg.arg()));
+        return Some((directive.initializer()?, is_class_attribute));
+    }
+    let directive = VueDirective::cast_ref(node)?;
+    if directive.name_token().ok()?.text_trimmed() != "v-bind" {
+        return None;
+    }
+    let is_class_attribute = is_class(directive.arg().and_then(|arg| arg.arg()));
+    Some((directive.initializer()?, is_class_attribute))
 }
 
 #[cfg(test)]
@@ -1265,6 +1311,38 @@ mod tests {
 
         assert!(!writer.has_parse_error);
         assert_eq!(writer.all_diagnostics.len(), 0);
+    }
+
+    #[test]
+    fn analyzes_vue_v_bind_values() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("vue").expect("valid code block");
+        let code = "<template>\n  <div :class=\"[{ a: x }, { b: y }]\" />\n  <div v-bind:class=\"[{ c: x }, { d: y }]\" />\n  <div :style=\"[{ e: x }, { f: y }]\" />\n</template>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "nursery",
+            rule: "noVueMultipleObjectsInClass",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        let highlighted: Vec<_> = writer
+            .all_diagnostics
+            .iter()
+            .map(|diagnostic| &code[diagnostic.location().span.expect("span should be present")])
+            .collect();
+        assert_eq!(
+            highlighted,
+            ["[{ a: x }, { b: y }]", "[{ c: x }, { d: y }]"]
+        );
     }
 
     #[test]
