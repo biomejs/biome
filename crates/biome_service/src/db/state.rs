@@ -867,7 +867,7 @@ impl DbState {
     }
 }
 
-fn create_parsed_snippets(
+pub(crate) fn create_parsed_snippets(
     db: &WorkspaceDb,
     snippets: Vec<(AnyParse, EmbedContent, usize)>,
 ) -> Vec<ParsedSnippet> {

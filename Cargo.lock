@@ -1942,7 +1942,6 @@ dependencies = [
  "biome_db",
  "biome_deserialize",
  "biome_diagnostics",
- "biome_embeds",
  "biome_fs",
  "biome_graphql_analyze",
  "biome_graphql_parser",
