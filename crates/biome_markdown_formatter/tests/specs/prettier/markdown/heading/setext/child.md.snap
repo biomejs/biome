@@ -25,18 +25,12 @@ info: markdown/heading/setext/child.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,8 @@
+@@ -1,5 +1,4 @@
  > > > # bar
 -
  - in list
    - in list
      heading
-     =======
--  - in list
--    > > > # heading
-+    - in list
-+      > > > heading
-+      > > > =======
 ```
 
 # Output
@@ -47,7 +41,6 @@ info: markdown/heading/setext/child.md
   - in list
     heading
     =======
-    - in list
-      > > > heading
-      > > > =======
+  - in list
+    > > > # heading
 ```
