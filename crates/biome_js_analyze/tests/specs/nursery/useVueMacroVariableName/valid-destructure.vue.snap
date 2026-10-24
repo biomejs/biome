@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-destructure.vue
+---
+# Input
+```vue
+<script setup>
+/* should not generate diagnostics */
+const { foo = 42, bar = "abc" } = defineProps(["foo", "bar"]);
+defineEmits(["change"]);
+</script>
+
+```

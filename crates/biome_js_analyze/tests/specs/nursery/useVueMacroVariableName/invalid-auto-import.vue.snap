@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-auto-import.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+let slotsWrong = useSlots();
+var attrsWrong = useAttrs();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-auto-import.vue:3:5 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of useSlots() is stored in slotsWrong instead of slots.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ let slotsWrong = useSlots();
+      │     ^^^^^^^^^^
+    4 │ var attrsWrong = useAttrs();
+    5 │ </script>
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to slots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to slots.
+  
+    1 1 │   
+    2 2 │   /* should generate diagnostics */
+    3   │ - let·slotsWrong·=·useSlots();
+      3 │ + let·slots·=·useSlots();
+    4 4 │   var attrsWrong = useAttrs();
+    5 5 │   
+  
+
+```
+
+```
+invalid-auto-import.vue:4:5 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of useAttrs() is stored in attrsWrong instead of attrs.
+  
+    2 │ /* should generate diagnostics */
+    3 │ let slotsWrong = useSlots();
+  > 4 │ var attrsWrong = useAttrs();
+      │     ^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to attrs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to attrs.
+  
+    2 2 │   /* should generate diagnostics */
+    3 3 │   let slotsWrong = useSlots();
+    4   │ - var·attrsWrong·=·useAttrs();
+      4 │ + var·attrs·=·useAttrs();
+    5 5 │   
+  
+
+```

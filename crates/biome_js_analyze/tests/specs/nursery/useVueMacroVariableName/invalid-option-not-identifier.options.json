@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useVueMacroVariableName": {
+          "level": "error",
+          "options": {
+            "defineProps": "my-props",
+            "defineEmits": "class"
+          }
+        }
+      }
+    }
+  }
+}
