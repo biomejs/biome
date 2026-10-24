@@ -373,3 +373,16 @@ fn script_block_read_without_its_file_has_open_uses() {
     let uses = emit_uses(r#"export default { emits: ["a"] }"#, JsFileSource::vue());
     assert_eq!(uses, [("a".into(), 0, false)]);
 }
+
+#[test]
+fn render_option_range_covers_the_member() {
+    let code = "export default { name: 'A', render() { return null; } }";
+    let model = js_model(code, JsFileSource::vue());
+    let component = model.components().next().expect("a component");
+    let range = component.render_range().expect("a render option");
+    assert_eq!(&code[range], "render() { return null; }");
+
+    let model = js_model("export default { name: 'A' }", JsFileSource::vue());
+    let component = model.components().next().expect("a component");
+    assert_eq!(component.render_range(), None);
+}

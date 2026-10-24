@@ -681,6 +681,8 @@ pub(crate) struct ComponentData {
     pub(crate) instance: ScopeId,
     pub(crate) name: Option<(TokenText, TextRange)>,
     pub(crate) inherit_attrs: Tri,
+    /// The range of the `render` option in the host document.
+    pub(crate) render: Option<TextRange>,
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
     pub(crate) macro_conflict: bool,
@@ -1862,6 +1864,14 @@ impl Component {
     /// The value of the `inheritAttrs` option.
     pub fn inherit_attrs(&self) -> Tri {
         self.row().inherit_attrs
+    }
+
+    /// The range of the `render` option, in the coordinates of the tree that
+    /// holds it. The range covers the whole object member, such as
+    /// `render() {}` or `render: h`, whatever its value is.
+    pub fn render_range(&self) -> Option<TextRange> {
+        let range = self.row().render?;
+        Some(self.data.local(range, self.row().snippet))
     }
 
     /// Whether the plain `<script>` block declares props or emits that the
