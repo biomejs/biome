@@ -3708,6 +3708,11 @@ export interface Nursery {
 	 */
 	useVueToggleInsideTransition?: UseVueToggleInsideTransitionConfiguration;
 	/**
+	 * Require a TypeScript type for Vue props declared with Object or Array.
+	 * See https://biomejs.dev/linter/rules/use-vue-typed-object-props
+	 */
+	useVueTypedObjectProps?: UseVueTypedObjectPropsConfiguration;
+	/**
 	 * Require a type for refs created with ref() or shallowRef() in TypeScript.
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
@@ -6324,6 +6329,9 @@ export type UseVueMatchingComponentFileNameConfiguration =
 export type UseVueToggleInsideTransitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueToggleInsideTransitionOptions;
+export type UseVueTypedObjectPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueTypedObjectPropsOptions;
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
@@ -9225,6 +9233,10 @@ export interface RuleWithUseVueToggleInsideTransitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueToggleInsideTransitionOptions;
 }
+export interface RuleWithUseVueTypedObjectPropsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueTypedObjectPropsOptions;
+}
 export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
@@ -11615,6 +11627,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 }
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
+export type UseVueTypedObjectPropsOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseWhileLoopConditionOptions = {};
@@ -13026,14 +13039,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13218,10 +13231,11 @@ export type Category =
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueToggleInsideTransition"
+	| "lint/nursery/useVueTypedObjectProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
