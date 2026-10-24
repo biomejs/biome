@@ -3338,6 +3338,11 @@ export interface Nursery {
 	 */
 	noVueRequiredPropWithDefault?: NoVueRequiredPropWithDefaultConfiguration;
 	/**
+	 * Disallow configured event listeners in v-on directives.
+	 * See https://biomejs.dev/linter/rules/no-vue-restricted-v-on
+	 */
+	noVueRestrictedVOn?: NoVueRestrictedVOnConfiguration;
+	/**
 	 * Disallow v-if on the root element of a Vue component template.
 	 * See https://biomejs.dev/linter/rules/no-vue-root-v-if
 	 */
@@ -6067,6 +6072,9 @@ export type NoVueLifecycleAfterAwaitConfiguration =
 export type NoVueRequiredPropWithDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRequiredPropWithDefaultOptions;
+export type NoVueRestrictedVOnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRestrictedVOnOptions;
 export type NoVueRootVIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRootVIfOptions;
@@ -8737,6 +8745,10 @@ export interface RuleWithNoVueRequiredPropWithDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRequiredPropWithDefaultOptions;
 }
+export interface RuleWithNoVueRestrictedVOnOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRestrictedVOnOptions;
+}
 export interface RuleWithNoVueRootVIfOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRootVIfOptions;
@@ -11255,6 +11267,14 @@ export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
+export interface NoVueRestrictedVOnOptions {
+	/**
+	 * Event listeners to restrict.
+	 *
+	 * A `v-on` directive is reported when it matches every condition of an entry.
+	 */
+	listeners?: RestrictedVOnListener[];
+}
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
@@ -12390,6 +12410,29 @@ export interface TailwindComponentAllowance {
 	 */
 	components: TailwindAllowedComponents;
 }
+export interface RestrictedVOnListener {
+	/**
+	 * The element or component name the entry applies to, such as `"MyButton"`.
+	 * When omitted, the entry applies to all elements.
+	 */
+	element?: string;
+	/**
+	 * The event name to restrict, such as `"click"` for `@click` and `v-on:click`.
+	 *
+	 * When omitted, the entry restricts `v-on` used without an event name, such as
+	 * `v-on="handlers"`.
+	 */
+	event?: string;
+	/**
+	 * A custom message shown in the diagnostic.
+	 */
+	message?: string;
+	/**
+	 * Modifiers that must all be present for the entry to apply, such as `["prevent"]`
+	 * for `@click.prevent`.
+	 */
+	modifiers?: string[];
+}
 /**
  * The checks for one top-level block.
  */
@@ -12922,14 +12965,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -12972,8 +13015,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13018,11 +13061,12 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRestrictedVOn"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
@@ -13094,8 +13138,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
