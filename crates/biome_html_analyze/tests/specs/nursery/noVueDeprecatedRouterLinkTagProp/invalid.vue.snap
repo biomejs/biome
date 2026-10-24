@@ -1,0 +1,192 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <RouterLink tag="div" to="/">Home</RouterLink>
+  <router-link tag="div" to="/">Home</router-link>
+  <RouterLink :tag="someVariable" to="/">Home</RouterLink>
+  <router-link :tag="someVariable" to="/">Home</router-link>
+  <RouterLink v-bind:tag="someVariable" to="/">Home</RouterLink>
+  <RouterLink tag to="/">Home</RouterLink>
+  <RouterLink tag="li" to="/" />
+  <ul>
+    <router-link to="/" tag="li">
+      <span>Home</span>
+    </router-link>
+  </ul>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:15 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on RouterLink.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <RouterLink tag="div" to="/">Home</RouterLink>
+      │               ^^^^^^^^^
+    4 │   <router-link tag="div" to="/">Home</router-link>
+    5 │   <RouterLink :tag="someVariable" to="/">Home</RouterLink>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:16 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on router-link.
+  
+    2 │ <template>
+    3 │   <RouterLink tag="div" to="/">Home</RouterLink>
+  > 4 │   <router-link tag="div" to="/">Home</router-link>
+      │                ^^^^^^^^^
+    5 │   <RouterLink :tag="someVariable" to="/">Home</RouterLink>
+    6 │   <router-link :tag="someVariable" to="/">Home</router-link>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:15 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on RouterLink.
+  
+    3 │   <RouterLink tag="div" to="/">Home</RouterLink>
+    4 │   <router-link tag="div" to="/">Home</router-link>
+  > 5 │   <RouterLink :tag="someVariable" to="/">Home</RouterLink>
+      │               ^^^^^^^^^^^^^^^^^^^
+    6 │   <router-link :tag="someVariable" to="/">Home</router-link>
+    7 │   <RouterLink v-bind:tag="someVariable" to="/">Home</RouterLink>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:16 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on router-link.
+  
+    4 │   <router-link tag="div" to="/">Home</router-link>
+    5 │   <RouterLink :tag="someVariable" to="/">Home</RouterLink>
+  > 6 │   <router-link :tag="someVariable" to="/">Home</router-link>
+      │                ^^^^^^^^^^^^^^^^^^^
+    7 │   <RouterLink v-bind:tag="someVariable" to="/">Home</RouterLink>
+    8 │   <RouterLink tag to="/">Home</RouterLink>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:15 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on RouterLink.
+  
+    5 │   <RouterLink :tag="someVariable" to="/">Home</RouterLink>
+    6 │   <router-link :tag="someVariable" to="/">Home</router-link>
+  > 7 │   <RouterLink v-bind:tag="someVariable" to="/">Home</RouterLink>
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <RouterLink tag to="/">Home</RouterLink>
+    9 │   <RouterLink tag="li" to="/" />
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:15 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on RouterLink.
+  
+     6 │   <router-link :tag="someVariable" to="/">Home</router-link>
+     7 │   <RouterLink v-bind:tag="someVariable" to="/">Home</RouterLink>
+   > 8 │   <RouterLink tag to="/">Home</RouterLink>
+       │               ^^^
+     9 │   <RouterLink tag="li" to="/" />
+    10 │   <ul>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:15 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on RouterLink.
+  
+     7 │   <RouterLink v-bind:tag="someVariable" to="/">Home</RouterLink>
+     8 │   <RouterLink tag to="/">Home</RouterLink>
+   > 9 │   <RouterLink tag="li" to="/" />
+       │               ^^^^^^^^
+    10 │   <ul>
+    11 │     <router-link to="/" tag="li">
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:25 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on router-link.
+  
+     9 │   <RouterLink tag="li" to="/" />
+    10 │   <ul>
+  > 11 │     <router-link to="/" tag="li">
+       │                         ^^^^^^^^
+    12 │       <span>Home</span>
+    13 │     </router-link>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
