@@ -323,6 +323,7 @@ define_categories! {
     "lint/nursery/noUselessSplice": "https://biomejs.dev/linter/rules/no-useless-splice",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
+    "lint/nursery/noVueDeprecatedModelDefinition": "https://biomejs.dev/linter/rules/no-vue-deprecated-model-definition",
     "lint/nursery/noVueDeprecatedScopedSlots": "https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
     "lint/nursery/noVueLifecycleAfterAwait": "https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
     "lint/nursery/noVueRootVIf": "https://biomejs.dev/linter/rules/no-vue-root-v-if",

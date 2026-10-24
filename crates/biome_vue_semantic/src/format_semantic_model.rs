@@ -177,6 +177,9 @@ impl Display for VueSemanticModel {
             if component.inherit_attrs() != Tri::Unknown {
                 write!(f, " inheritAttrs={:?}", component.inherit_attrs())?;
             }
+            if let Some(model_option) = component.model_option_host_range() {
+                write!(f, " model-option={}", range(model_option))?;
+            }
             if component.has_macro_conflict() {
                 f.write_str(" macro-conflict")?;
             }

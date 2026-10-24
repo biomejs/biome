@@ -681,6 +681,8 @@ pub(crate) struct ComponentData {
     pub(crate) instance: ScopeId,
     pub(crate) name: Option<(TokenText, TextRange)>,
     pub(crate) inherit_attrs: Tri,
+    /// The `model` option, when its value is an object.
+    pub(crate) model_option: Option<TextRange>,
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
     pub(crate) macro_conflict: bool,
@@ -1862,6 +1864,21 @@ impl Component {
     /// The value of the `inheritAttrs` option.
     pub fn inherit_attrs(&self) -> Tri {
         self.row().inherit_attrs
+    }
+
+    /// The range of the `model` option, in the coordinates of the tree that
+    /// holds it, when its value is an object such as
+    /// `model: { prop: "checked", event: "change" }`.
+    ///
+    /// Vue 3 ignores this option.
+    pub fn model_option_range(&self) -> Option<TextRange> {
+        let range = self.row().model_option?;
+        Some(self.data.local(range, self.row().snippet))
+    }
+
+    /// The range of the `model` option in the host document.
+    pub fn model_option_host_range(&self) -> Option<TextRange> {
+        self.row().model_option
     }
 
     /// Whether the plain `<script>` block declares props or emits that the
