@@ -1865,6 +1865,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noVueShadowNativeEvents", TypeId::of::<biome_rule_options::no_vue_shadow_native_events::NoVueShadowNativeEventsOptions>()));
     result.push((
         "nursery",
+        "noVueTemplateKey",
+        TypeId::of::<biome_rule_options::no_vue_template_key::NoVueTemplateKeyOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noVueUndeclaredDirectives",
         TypeId::of::<
             biome_rule_options::no_vue_undeclared_directives::NoVueUndeclaredDirectivesOptions,
