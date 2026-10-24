@@ -651,6 +651,7 @@ pub mod use_vue_template_ref;
 pub mod use_vue_toggle_inside_transition;
 pub mod use_vue_typed_ref;
 pub mod use_vue_v_for_key;
+pub mod use_vue_v_model;
 pub mod use_vue_v_on_exact;
 pub mod use_vue_valid_define_props;
 pub mod use_vue_valid_template_root;
