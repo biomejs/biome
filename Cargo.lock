@@ -1182,6 +1182,7 @@ dependencies = [
  "enumflags2",
  "indexmap",
  "insta",
+ "memchr",
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
