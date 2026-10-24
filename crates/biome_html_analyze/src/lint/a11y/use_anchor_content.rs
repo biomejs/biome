@@ -3,14 +3,17 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList, T};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{
+    AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElement, HtmlElementList, T,
+};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
-    get_truthy_aria_hidden_attribute, html_element_has_truthy_aria_hidden,
+    get_truthy_aria_hidden_attribute, has_non_empty_attribute, html_element_has_truthy_aria_hidden,
     html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
@@ -183,10 +186,10 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
-                false
-            } else {
-                has_accessible_content(&element.children(), is_astro)
+                return false;
             }
+
+            html_element_has_accessible_content(element, is_astro).unwrap_or(true)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {
@@ -233,6 +236,40 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         | AnyHtmlElement::HtmlCdataSection(_)
         | AnyHtmlElement::HtmlProcessingInstruction(_) => true,
     })
+}
+
+/// Attributes that give Astro's `Image` an accessible name.
+const IMAGE_NAME_ATTRIBUTES: &[&str] = &["aria-label", "aria-labelledby", "title", "alt"];
+
+/// Checks if an element counts as accessible content.
+///
+/// Custom components may render accessible content, as in the JSX rule.
+/// Astro's `Image` is the exception: it renders an `img` and ignores its children,
+/// so only its accessible name attributes count, as in the self-closing spelling.
+/// Any other element counts when its children do.
+fn html_element_has_accessible_content(element: &HtmlElement, is_astro: bool) -> Option<bool> {
+    let tag_element = AnyHtmlTagElement::from(element.opening_element().ok()?);
+
+    if tag_element.is_custom_component() {
+        let is_astro_image = is_astro
+            && tag_element
+                .name()
+                .ok()?
+                .token_text_trimmed()
+                .is_some_and(|text| text == "Image");
+
+        if is_astro_image {
+            return Some(
+                IMAGE_NAME_ATTRIBUTES
+                    .iter()
+                    .any(|name| has_non_empty_attribute(&tag_element, name)),
+            );
+        }
+
+        return Some(true);
+    }
+
+    Some(has_accessible_content(&element.children(), is_astro))
 }
 
 /// Checks if the content node contains non-empty text.
