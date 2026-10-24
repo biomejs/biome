@@ -3628,6 +3628,11 @@ export interface Nursery {
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	 * Require createEventDispatcher calls to declare the types of their events.
+	 * See https://biomejs.dev/linter/rules/use-svelte-event-dispatcher-types
+	 */
+	useSvelteEventDispatcherTypes?: UseSvelteEventDispatcherTypesConfiguration;
+	/**
 	 * Require internal navigation in SvelteKit apps to use paths built with resolve().
 	 * See https://biomejs.dev/linter/rules/use-svelte-kit-resolve
 	 */
@@ -6276,6 +6281,9 @@ export type UseStrictBooleanExpressionsConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteEventDispatcherTypesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteEventDispatcherTypesOptions;
 export type UseSvelteKitResolveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteKitResolveOptions;
@@ -9129,6 +9137,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseSvelteEventDispatcherTypesOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteEventDispatcherTypesOptions;
+}
 export interface RuleWithUseSvelteKitResolveOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteKitResolveOptions;
@@ -11563,6 +11575,7 @@ export interface UseSingleTopLevelHeadingOptions {
 }
 export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseSvelteEventDispatcherTypesOptions = {};
 export interface UseSvelteKitResolveOptions {
 	/**
 	 * Whether to ignore all `goto()` calls. Default: `false`.
@@ -13195,6 +13208,7 @@ export type Category =
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteEventDispatcherTypes"
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteReactiveClasses"

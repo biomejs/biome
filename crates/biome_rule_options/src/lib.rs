@@ -593,6 +593,7 @@ pub mod use_static_response_methods;
 pub mod use_strict_boolean_expressions;
 pub mod use_strict_mode;
 pub mod use_string_starts_ends_with;
+pub mod use_svelte_event_dispatcher_types;
 pub mod use_svelte_kit_resolve;
 pub mod use_svelte_kit_rune_imports;
 pub mod use_svelte_reactive_classes;
