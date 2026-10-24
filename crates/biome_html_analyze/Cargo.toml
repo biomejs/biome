@@ -56,7 +56,7 @@ biome_db          = { path = "../biome_db" }
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion         = { package = "codspeed-criterion-compat", version = "=6.0.0" }
 insta             = { workspace = true, features = ["glob"] }
 salsa             = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
