@@ -4008,6 +4008,11 @@ export interface Nursery {
 	 */
 	useVueToggleInsideTransition?: UseVueToggleInsideTransitionConfiguration;
 	/**
+	 * Require a TypeScript type for Vue props declared with Object or Array.
+	 * See https://biomejs.dev/linter/rules/use-vue-typed-object-props
+	 */
+	useVueTypedObjectProps?: UseVueTypedObjectPropsConfiguration;
+	/**
 	 * Require a type for every prop of a Vue component.
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-props
 	 */
@@ -6859,6 +6864,9 @@ export type UseVueTemplateRefConfiguration =
 export type UseVueToggleInsideTransitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueToggleInsideTransitionOptions;
+export type UseVueTypedObjectPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueTypedObjectPropsOptions;
 export type UseVueTypedPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedPropsOptions;
@@ -10093,6 +10101,10 @@ export interface RuleWithUseVueToggleInsideTransitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueToggleInsideTransitionOptions;
 }
+export interface RuleWithUseVueTypedObjectPropsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueTypedObjectPropsOptions;
+}
 export interface RuleWithUseVueTypedPropsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedPropsOptions;
@@ -12650,6 +12662,7 @@ export interface UseVueSlotNameCasingOptions {
 }
 export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
+export type UseVueTypedObjectPropsOptions = {};
 export type UseVueTypedPropsOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVModelOptions = {};
@@ -14365,6 +14378,7 @@ export type Category =
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueToggleInsideTransition"
+	| "lint/nursery/useVueTypedObjectProps"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidDefineEmits"
