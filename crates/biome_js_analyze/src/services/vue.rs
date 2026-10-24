@@ -7,6 +7,8 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueEventReference`] runs the rule once per event name passed to an
+//!   emit call. Use it when the rule judges what a component emits.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -25,7 +27,8 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
+    Component, Prop, RefSite, Reference, SnippetId, Symbol, VueSemanticModel, component_model,
+    vue_model_from_source,
 };
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -89,14 +92,19 @@ impl VueSemanticService {
         })
     }
 
+    /// The model of the whole file the analyzed tree belongs to.
+    pub(crate) fn model(&self) -> &VueSemanticModel {
+        &self.model
+    }
+
     /// Returns `true` when `symbol` is declared in the analyzed tree.
     fn declares(&self, symbol: &Symbol) -> bool {
         symbol.snippet().map(|snippet| snippet.id()) == self.snippet
     }
 }
 
-/// Builds the Vue semantic model and emits a query match for each component
-/// and each declaration written in the analyzed tree.
+/// Builds the Vue semantic model and emits a query match for each component,
+/// each declaration and each emitted event name written in the analyzed tree.
 pub(crate) struct VueSemanticVisitor;
 
 impl Visitor for VueSemanticVisitor {
@@ -125,6 +133,13 @@ impl Visitor for VueSemanticVisitor {
             }
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
+            }
+        }
+        for reference in service.model.references() {
+            if reference.site() == RefSite::EventName
+                && reference.snippet().map(|snippet| snippet.id()) == service.snippet
+            {
+                ctx.match_query(VueEventReferenceMatch(reference));
             }
         }
     }
@@ -172,4 +187,11 @@ define_vue_query!(
     VueProp,
     VuePropMatch,
     Prop
+);
+define_vue_query!(
+    /// Matches each event name passed to an emit call, as in `$emit('change')`
+    /// or `emit('change')`.
+    VueEventReference,
+    VueEventReferenceMatch,
+    Reference
 );

@@ -471,15 +471,24 @@ impl Walker<'_> {
         };
         let mut resolution =
             self.resolve_in_component(component, Namespace::Emit, name.text(), &[]);
-        // `defineModel('value')` declares the event `update:value`.
+        // `defineModel('value')` declares the event `update:value`. Like any
+        // event, it is declared for both script blocks of a file.
         if !matches!(resolution, Resolution::Symbol(_))
             && let Some(model) = name.text().strip_prefix("update:")
-            && let Resolution::Symbol(symbol) = self.resolve_in_component(
-                component,
-                Namespace::Binding,
-                model,
-                &[SymbolKind::Model],
-            )
+            && let Some(symbol) = component
+                .into_iter()
+                .chain(component.and_then(|component| self.builder.paired(component)))
+                .find_map(|id| {
+                    match self.resolve_in_component(
+                        Some(id),
+                        Namespace::Binding,
+                        model,
+                        &[SymbolKind::Model],
+                    ) {
+                        Resolution::Symbol(symbol) => Some(symbol),
+                        _ => None,
+                    }
+                })
         {
             resolution = Resolution::Symbol(symbol);
         }

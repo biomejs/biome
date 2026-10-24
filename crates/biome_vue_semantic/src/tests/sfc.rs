@@ -317,6 +317,23 @@ defineEmits(['a'])
 }
 
 #[test]
+fn plain_block_emits_events_the_setup_block_may_declare() {
+    let model = sfc(r#"<script lang="ts">
+export default { methods: { go() { this.$emit('a') } } }
+</script>
+<script setup lang="ts">
+import type { Events } from './events'
+defineEmits<Events>()
+</script>
+"#);
+    let event = model
+        .references()
+        .find(|reference| reference.site() == RefSite::EventName)
+        .unwrap();
+    assert_eq!(event.resolution(), Resolution::Unknowable);
+}
+
+#[test]
 fn both_script_blocks() {
     let model = sfc(r#"<script>
 let nextId = 0

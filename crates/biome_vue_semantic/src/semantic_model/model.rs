@@ -543,7 +543,8 @@ pub enum EmitForm {
     Object,
     /// `defineEmits<{ (e: 'change', id: number): void }>()`
     CallSignature,
-    /// `defineEmits<{ change: [id: number] }>()`
+    /// `defineEmits<{ change: [id: number] }>()` or
+    /// `defineEmits<{ change(id: number): void }>()`
     TypeMember,
 }
 
