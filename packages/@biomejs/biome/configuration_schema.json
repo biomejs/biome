@@ -8848,6 +8848,13 @@
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidVModel": {
+					"description": "Enforce valid v-model directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-model",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVModelConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -16219,6 +16226,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVModelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVModelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVOnOptions": {
 			"type": "object",
 			"properties": {
@@ -21548,6 +21564,16 @@
 			]
 		},
 		"UseVueValidVIfOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVModelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVModelOptions" }
+			]
+		},
+		"UseVueValidVModelOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

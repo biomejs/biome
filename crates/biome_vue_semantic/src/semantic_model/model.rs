@@ -358,6 +358,25 @@ pub enum RootShape {
     Invalid,
 }
 
+/// Whether the outermost expression of a snippet can be assigned to, as the
+/// value of `v-model` must be.
+///
+/// Parentheses and TypeScript wrappers such as `name as string` and `name!`
+/// are looked through.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Assignability {
+    /// A variable or a property: `name`, `user.name`, `list[0]`.
+    Assignable,
+    /// A property read through `?.`: `user?.name`, `user?.address.city`.
+    OptionalChain,
+    /// A property of a value that may be `null` or `undefined`:
+    /// `(user?.address).city`, `(null).name`.
+    MaybeNullObject,
+    /// Anything else, such as a call, an operator or a literal. Also a
+    /// snippet that is empty, failed to parse, or holds statements.
+    NotAssignable,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct SnippetData {
     /// The content range in the host document.
@@ -366,6 +385,7 @@ pub(crate) struct SnippetData {
     pub(crate) offset: TextSize,
     pub(crate) host: SnippetHost,
     pub(crate) root: RootShape,
+    pub(crate) assignability: Assignability,
     pub(crate) fingerprint: u64,
     pub(crate) operands: Range<u32>,
 }
@@ -1410,6 +1430,10 @@ impl Snippet {
 
     pub fn root(&self) -> &RootShape {
         &self.row().root
+    }
+
+    pub fn assignability(&self) -> Assignability {
+        self.row().assignability
     }
 
     /// A hash of the snippet's tokens, ignoring whitespace and comments.

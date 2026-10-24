@@ -3687,6 +3687,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
 	useVueTypedRef?: UseVueTypedRefConfiguration;
+	/**
+	 * Enforce valid v-model directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-model
+	 */
+	useVueValidVModel?: UseVueValidVModelConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -6277,6 +6282,9 @@ export type UseVueToggleInsideTransitionConfiguration =
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
+export type UseVueValidVModelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVModelOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -9145,6 +9153,10 @@ export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
 }
+export interface RuleWithUseVueValidVModelOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVModelOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -11515,6 +11527,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
+export type UseVueValidVModelOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
