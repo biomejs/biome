@@ -447,6 +447,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push(("suspicious", "noDuplicatedSpreadProps", TypeId::of::<biome_rule_options::no_duplicated_spread_props::NoDuplicatedSpreadPropsOptions>()));
+    result.push((
+        "nursery",
+        "noDynamicDelete",
+        TypeId::of::<biome_rule_options::no_dynamic_delete::NoDynamicDeleteOptions>(),
+    ));
     result.push(("performance", "noDynamicNamespaceImportAccess", TypeId::of::<biome_rule_options::no_dynamic_namespace_import_access::NoDynamicNamespaceImportAccessOptions>()));
     result.push((
         "nursery",

@@ -94,6 +94,7 @@ pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_duplicate_test_hooks;
 pub mod no_duplicate_variable_names;
 pub mod no_duplicated_spread_props;
+pub mod no_dynamic_delete;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_eager_array_methods_in_loops;
 pub mod no_empty_block;
