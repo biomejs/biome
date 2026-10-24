@@ -625,6 +625,7 @@ pub mod use_vue_base_import;
 pub mod use_vue_consistent_define_props_declaration;
 pub mod use_vue_consistent_event_hyphenation;
 pub mod use_vue_consistent_v_bind_style;
+pub mod use_vue_consistent_v_for_delimiter;
 pub mod use_vue_consistent_v_on_style;
 pub mod use_vue_define_macros_order;
 pub mod use_vue_hyphenated_attributes;
