@@ -1872,6 +1872,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noVueDeprecatedSlotScope",
+        TypeId::of::<
+            biome_rule_options::no_vue_deprecated_slot_scope::NoVueDeprecatedSlotScopeOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noVueDuplicateKeys",
         TypeId::of::<biome_rule_options::no_vue_duplicate_keys::NoVueDuplicateKeysOptions>(),
