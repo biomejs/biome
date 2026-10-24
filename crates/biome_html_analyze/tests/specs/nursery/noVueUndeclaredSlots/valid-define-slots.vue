@@ -1,0 +1,21 @@
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+defineSlots<{
+    default(props: { msg: string }): any;
+    header: (props: { title: string }) => any;
+    "foo-bar"(props: {}): any;
+    literal(): any;
+    template(): any;
+}>();
+</script>
+
+<template>
+    <div>
+        <slot msg="hello" />
+        <slot name="header" title="hi"></slot>
+        <slot name="foo-bar" />
+        <slot :name="'literal'" />
+        <slot :name="`template`" />
+        <slot name />
+    </div>
+</template>
