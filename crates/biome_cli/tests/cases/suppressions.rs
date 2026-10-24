@@ -1,6 +1,6 @@
 use crate::TestArgs as Args;
 use crate::snap_test::SnapshotPayload;
-use crate::{FORMATTED, assert_cli_snapshot, run_cli};
+use crate::{FORMATTED, assert_cli_snapshot, run_cli, run_cli_with_server_workspace};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use camino::Utf8Path;
@@ -673,6 +673,172 @@ var bar = 33;",
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_emit_diagnostics_for_incorrect_reason",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_plugin_diagnostics() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["noFoo.grit"]
+}
+"#,
+    );
+    fs.insert(
+        "noFoo.grit".into(),
+        br#"language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), *b"debugger;\nfoo(1);\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(
+        buffer,
+        "// biome-ignore lint/suspicious/noDebugger: ignored using `--suppress`\ndebugger;\n// biome-ignore lint/plugin/noFoo: ignored using `--suppress`\nfoo(1);\n"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_plugin_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_plugin_diagnostics_with_reason() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["noFoo.grit", "logBar.grit"]
+}
+"#,
+    );
+    fs.insert(
+        "noFoo.grit".into(),
+        br#"language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+"#,
+    );
+    fs.insert(
+        "logBar.grit".into(),
+        br#"language js
+
+`bar($args)` where {
+    log(message="Found bar", variable=$args)
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), *b"foo(1);\nbar(2);\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--reason=We love Biome",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    // `logBar` only logs, so it doesn't get a suppression comment.
+    assert_eq!(
+        buffer,
+        "// biome-ignore lint/plugin/noFoo: We love Biome\nfoo(1);\nbar(2);\n"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_plugin_diagnostics_with_reason",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_rejects_plugin_name_unusable_in_suppressions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["no foo.grit"]
+}
+"#,
+    );
+    fs.insert(
+        "no foo.grit".into(),
+        br#"language js
+
+`foo($args)` where {
+    register_diagnostic(span=$args, message="Do not call foo", severity="error")
+}
+"#,
+    );
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), *b"foo(1);\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", "--suppress", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_rejects_plugin_name_unusable_in_suppressions",
         fs,
         console,
         result,

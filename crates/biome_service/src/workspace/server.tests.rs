@@ -5918,6 +5918,7 @@ export const useLet = defineRule({
         "const prefix = 'λ';\n/* café */\nvar /* keep */ café = '漢'; // suffix\n";
     const FIXED_CONTENT: &str =
         "const prefix = 'λ';\n/* café */\nlet /* keep */ renamed = '漢'; // suffix\n";
+    const SUPPRESSED_CONTENT: &str = "const prefix = 'λ';\n/* café */\n// biome-ignore lint/plugin/useLet: <explanation>\nvar /* keep */ café = '漢'; // suffix\n";
 
     for (kind, applicability) in [
         ("safe", Applicability::Always),
@@ -5974,8 +5975,21 @@ export const useLet = defineRule({
             &FILE_CONTENT[diagnostic.location().span.unwrap()],
             "var /* keep */ café = '漢'"
         );
-        assert_eq!(actions.len(), 1);
-        let suggestion = actions[0].suggestion.as_ref().unwrap();
+        let [fix, inline_suppression, top_level_suppression] = actions.as_slice() else {
+            panic!("{kind}: {actions:?}");
+        };
+        assert!(fix.category.matches("quickfix.biome.plugin"));
+        assert!(
+            inline_suppression
+                .category
+                .matches("quickfix.suppressRule.inline.biome")
+        );
+        assert!(
+            top_level_suppression
+                .category
+                .matches("quickfix.suppressRule.topLevel.biome")
+        );
+        let suggestion = fix.suggestion.as_ref().unwrap();
         assert_eq!(suggestion.applicability, applicability);
         assert_eq!(suggestion.msg, biome_console::markup!("Use let").to_owned());
         assert_eq!(
@@ -6004,14 +6018,18 @@ export const useLet = defineRule({
                 .unwrap();
             let applies = mode == FixFileMode::SafeAndUnsafeFixes
                 || (mode == FixFileMode::SafeFixes && kind == "safe");
-            assert_eq!(
-                result.code,
-                if applies { FIXED_CONTENT } else { FILE_CONTENT },
-                "{kind}: {mode:?}"
-            );
+            let suppresses = mode == FixFileMode::ApplySuppressions;
+            let expected_code = if applies {
+                FIXED_CONTENT
+            } else if suppresses {
+                SUPPRESSED_CONTENT
+            } else {
+                FILE_CONTENT
+            };
+            assert_eq!(result.code, expected_code, "{kind}: {mode:?}");
             assert_eq!(
                 result.actions.len(),
-                usize::from(applies),
+                usize::from(applies || suppresses),
                 "{kind}: {mode:?}"
             );
             assert_eq!(
