@@ -8,6 +8,7 @@ impl FormatRule<AnyCssIfBranchValue> for FormatAnyCssIfBranchValue {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssIfBranchValue, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssIfBranchValue::CssCustomPropertyValue(node) => node.format().fmt(f),
             AnyCssIfBranchValue::CssGenericComponentValueList(node) => node.format().fmt(f),
             AnyCssIfBranchValue::ScssExpression(node) => node.format().fmt(f),
         }

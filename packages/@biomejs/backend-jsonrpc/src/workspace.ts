@@ -3068,6 +3068,11 @@ export interface Nursery {
 	 */
 	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
 	/**
+	 * Disallow Sass variables and function calls in custom property values without #{} interpolation.
+	 * See https://biomejs.dev/linter/rules/no-missing-scss-interpolation
+	 */
+	noMissingScssInterpolation?: NoMissingScssInterpolationConfiguration;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 * See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
@@ -5940,6 +5945,9 @@ export type NoMisleadingReturnTypeConfiguration =
 export type NoMisplacedListElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisplacedListElementsOptions;
+export type NoMissingScssInterpolationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMissingScssInterpolationOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -8528,6 +8536,14 @@ export interface RuleWithNoMisleadingReturnTypeOptions {
 export interface RuleWithNoMisplacedListElementsOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisplacedListElementsOptions;
+}
+export interface RuleWithNoMissingScssInterpolationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoMissingScssInterpolationOptions;
 }
 export interface RuleWithNoMisusedPromisesOptions {
 	/**
@@ -11259,6 +11275,7 @@ export type NoJsonUnsafeValuesOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
+export type NoMissingScssInterpolationOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
@@ -13054,6 +13071,7 @@ export type Category =
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMissingScssInterpolation"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
