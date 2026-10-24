@@ -510,11 +510,14 @@ fn parse_conditional_expr_consequent(p: &mut JsParser, context: ExpressionContex
     let checkpoint = p.checkpoint();
 
     let arrow_expression = parse_arrow_function_expression(p, context);
-    if arrow_expression.is_present() && p.at(T![:]) {
-        return arrow_expression;
+    if arrow_expression.is_present() {
+        if p.at(T![:]) {
+            return arrow_expression;
+        }
+        p.rewind(checkpoint);
     }
 
-    p.rewind(checkpoint);
+    // An absent arrow function consumed nothing, so there's nothing to rewind.
     parse_assignment_expression_or_higher_base(p, context)
 }
 
@@ -551,7 +554,7 @@ fn parse_binary_or_logical_expression(
         // current operator has the same or a lower precedence than the left-hand side expression. Thus,
         // the algorithm goes at most `count(OperatorPrecedence)` levels deep.
         loop {
-            let op = p.re_lex(JsReLexContext::BinaryOperator);
+            let op = p.re_lex_binary_operator();
 
             if (op == T![as] && p.has_preceding_line_break())
                 || (op == T![satisfies] && p.has_preceding_line_break())

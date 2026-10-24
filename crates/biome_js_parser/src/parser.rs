@@ -24,6 +24,7 @@ pub(crate) use crate::token_source::{
 };
 use crate::*;
 use biome_js_syntax::JsSyntaxKind::{self};
+use biome_js_syntax::T;
 use biome_languages::JsFileSource;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
@@ -97,6 +98,29 @@ impl<'source> JsParser<'source> {
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
     pub fn re_lex(&mut self, context: JsReLexContext) -> JsSyntaxKind {
         self.source_mut().re_lex(context)
+    }
+
+    /// Re-lexes a `>` as the binary operator that starts with it, such as `>>` or `>=`, and returns
+    /// the current token's kind.
+    ///
+    /// The lexer returns `>` on its own so that type arguments can close on it. No other token
+    /// re-lexes differently as a binary operator, so this re-lexes nothing else.
+    pub(crate) fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
+        if self.at(T![>]) {
+            self.re_lex(JsReLexContext::BinaryOperator)
+        } else {
+            self.cur()
+        }
+    }
+
+    /// Re-lexes a `<<` as the `<` that opens type arguments, and returns the current token's
+    /// kind. No other token re-lexes differently there, so this re-lexes nothing else.
+    pub(crate) fn re_lex_type_argument_less_than(&mut self) -> JsSyntaxKind {
+        if self.at(T![<<]) {
+            self.re_lex(JsReLexContext::TypeArgumentLessThan)
+        } else {
+            self.cur()
+        }
     }
 
     /// Stores the parser state and position before calling the function and restores the state

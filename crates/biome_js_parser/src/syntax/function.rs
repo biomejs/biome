@@ -29,6 +29,7 @@ use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T, TextRange};
 use biome_parser::ParserProgress;
 use biome_rowan::SyntaxKind;
+use smallvec::SmallVec;
 
 use super::metavariable::parse_metavariable;
 
@@ -762,7 +763,13 @@ fn is_parenthesized_arrow_function_expression_impl(
                         // * '(a = ': an initializer or a parenthesized assignment expression
                         // * '(a, ': separator to next parameter or a parenthesized sequence expression
                         // * '(a)': a single parameter OR a parenthesized expression
-                        T![=] | T![,] | T![')'] => IsParenthesizedArrowFunctionExpression::Unknown,
+                        // Only parameters are followed by `=>`, or by `:` and a return type.
+                        T![=] | T![,] | T![')'] => match token_after_scannable_group(p, n) {
+                            Some(T![=>] | T![:]) | None => {
+                                IsParenthesizedArrowFunctionExpression::Unknown
+                            }
+                            Some(_) => IsParenthesizedArrowFunctionExpression::False,
+                        },
 
                         T![?] => {
                             // Disambiguate between an optional parameter and a parenthesized conditional expression
@@ -832,6 +839,9 @@ fn is_parenthesized_arrow_function_expression_impl(
                 IsParenthesizedArrowFunctionExpression::True
             } else if !is_nth_at_identifier(p, n + 1) {
                 // <5...
+                IsParenthesizedArrowFunctionExpression::False
+            } else if p.nth_at(n + 2, T![>]) && !p.nth_at(n + 3, T!['(']) {
+                // `<a>` followed by anything but parameters is a type assertion
                 IsParenthesizedArrowFunctionExpression::False
             } else {
                 // <a...
@@ -941,6 +951,50 @@ fn token_after_parenthesized_group(p: &mut JsParser, start_offset: usize) -> JsS
         }
         offset += 1;
     }
+}
+
+/// Returns the token after the parenthesized group that starts at the `(` at `start_offset`,
+/// like [token_after_parenthesized_group], or `None` if the parser may end the group elsewhere.
+///
+/// Returns `None` for a group that contains:
+/// - a `/` that may start a regex, a template, or in JSX a `<` that may start an element, because
+///   lookahead doesn't lex what follows them as the parser will.
+/// - `=>`, because a parameter list that ends early, right after an inner `)` that a `=>` follows,
+///   still makes an arrow function head.
+/// - an error token, because it shows that the group is already malformed.
+/// - a `(`, `{` or `[` that doesn't pair up with its closing token, because syntax such as a
+///   getter or an `if` without its `(` consumes an unmatched `)`.
+/// - `class`, because a class parses its members, getters included, even without its `{`.
+///
+/// Also returns `None` for a group longer than 256 tokens, to bound the scan.
+fn token_after_scannable_group(p: &mut JsParser, start_offset: usize) -> Option<JsSyntaxKind> {
+    const MAX_TOKENS: usize = 256;
+    debug_assert!(p.nth_at(start_offset, T!['(']));
+    let jsx = JsSyntaxFeature::Jsx.is_supported(p);
+    let mut open: SmallVec<[_; 16]> = SmallVec::new();
+    for offset in start_offset..start_offset + MAX_TOKENS {
+        let kind = p.nth(offset);
+        match kind {
+            T!['('] | T!['{'] | T!['['] => open.push(kind),
+            T![')'] | T!['}'] | T![']'] => {
+                let opening = match kind {
+                    T![')'] => T!['('],
+                    T!['}'] => T!['{'],
+                    _ => T!['['],
+                };
+                if open.pop() != Some(opening) {
+                    return None;
+                }
+                if open.is_empty() {
+                    return Some(p.nth(offset + 1));
+                }
+            }
+            T![/] | T![/=] | T![=>] | T![class] | BACKTICK | ERROR_TOKEN | EOF => return None,
+            T![<] if jsx => return None,
+            _ => {}
+        }
+    }
+    None
 }
 
 fn parse_arrow_body(
