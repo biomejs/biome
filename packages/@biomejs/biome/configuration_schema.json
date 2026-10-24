@@ -8143,6 +8143,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueTemplateShadowConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueTemplateShadowOptions" }
+			]
+		},
+		"NoVueTemplateShadowOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Names that template variables may reuse from an outer scope.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueThisInBeforeRouteEnterConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9277,6 +9294,13 @@
 					"description": "Disallow the key attribute on \\<template> elements in Vue.\nSee https://biomejs.dev/linter/rules/no-vue-template-key",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueTemplateKeyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueTemplateShadow": {
+					"description": "Disallow template variables that reuse the name of a variable from an outer scope.\nSee https://biomejs.dev/linter/rules/no-vue-template-shadow",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueTemplateShadowConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15292,6 +15316,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueTemplateKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueTemplateShadowOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueTemplateShadowOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

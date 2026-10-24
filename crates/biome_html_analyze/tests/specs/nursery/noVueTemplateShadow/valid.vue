@@ -1,0 +1,19 @@
+<!-- should not generate diagnostics -->
+<template>
+  <div v-for="i in 5"></div>
+  <div v-for="i in 5"></div>
+  <div v-for="i in 5">
+    <div v-for="j in 5"></div>
+  </div>
+  <ul v-for="i in 5">
+    <li>
+      <span v-for="j in 10">{{ i }},{{ j }}</span>
+    </li>
+  </ul>
+  <div v-for="name in names">
+    <MyList v-slot="{ entry }">{{ name }} {{ entry }}</MyList>
+  </div>
+  <MyList v-slot="{ entry }">{{ entry }}</MyList>
+  <MyList v-slot="{ entry }">{{ entry }}</MyList>
+  <div v-for="{ id, label: text } in rows">{{ id }} {{ text }}</div>
+</template>
