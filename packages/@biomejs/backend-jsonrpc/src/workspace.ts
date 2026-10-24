@@ -3687,6 +3687,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
 	useVueTypedRef?: UseVueTypedRefConfiguration;
+	/**
+	 * Enforce valid v-slot directives in Vue templates.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-slot
+	 */
+	useVueValidVSlot?: UseVueValidVSlotConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -6277,6 +6282,9 @@ export type UseVueToggleInsideTransitionConfiguration =
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
+export type UseVueValidVSlotConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVSlotOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -9145,6 +9153,10 @@ export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
 }
+export interface RuleWithUseVueValidVSlotOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVSlotOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -11515,6 +11527,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
+export type UseVueValidVSlotOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -13113,6 +13126,7 @@ export type Category =
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueValidVSlot"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
