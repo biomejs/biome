@@ -1,0 +1,400 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: outerControlFlow.js
+---
+# Input
+```js
+function sequentialSwitches(x) {
+	switch (x) {
+		case 0:
+			a();
+		default:
+			b();
+	}
+	switch (x) {
+		case 0:
+			a();
+			break;
+		default:
+			b();
+	}
+	switch (x) {
+		default:
+			b();
+		case 0:
+			a();
+	}
+}
+
+function loops(x) {
+	outer: for (const item of x) {
+		switch (item) {
+			case 0:
+				continue outer;
+			case 1:
+				if (item) {
+					continue;
+				}
+			case 2:
+				for (;;) {
+					break outer;
+				}
+			case 3:
+				while (item) {
+					continue outer;
+				}
+			case 4:
+				a();
+			default:
+				b();
+		}
+	}
+	do {
+		switch (x) {
+			case 0:
+				continue;
+			case 1:
+				a();
+			default:
+				break;
+		}
+	} while (x);
+}
+
+function exceptions(x) {
+	try {
+		switch (x) {
+			case 0:
+				throw a();
+			case 1:
+				a();
+			default:
+				b();
+		}
+	} catch {
+		c();
+	}
+	try {
+		switch (x) {
+			case 0:
+				a();
+			case 1:
+				return b();
+			default:
+				c();
+		}
+	} finally {
+		d();
+	}
+	switch (x) {
+		case 0:
+			try {
+				a();
+			} catch {
+				break;
+			}
+		case 1:
+			try {
+				return a();
+			} finally {
+				b();
+			}
+		default:
+			c();
+	}
+}
+
+function nestedSwitches(x, y) {
+	switch (x) {
+		case 0:
+			switch (y) {
+				case 0:
+					a();
+				default:
+					break;
+			}
+		case 1:
+			switch (y) {
+				case 0:
+					break;
+				default:
+					return;
+			}
+		default:
+			b();
+	}
+	label: {
+		switch (x) {
+			case 0:
+				break label;
+			case 1:
+				a();
+			default:
+				b();
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+outerControlFlow.js:3:3 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    1 │ function sequentialSwitches(x) {
+    2 │ 	switch (x) {
+  > 3 │ 		case 0:
+      │ 		^^^^^^^
+  > 4 │ 			a();
+      │ 			^^^^
+    5 │ 		default:
+    6 │ 			b();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:16:3 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    14 │ 	}
+    15 │ 	switch (x) {
+  > 16 │ 		default:
+       │ 		^^^^^^^^
+  > 17 │ 			b();
+       │ 			^^^^
+    18 │ 		case 0:
+    19 │ 			a();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:28:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    26 │ 			case 0:
+    27 │ 				continue outer;
+  > 28 │ 			case 1:
+       │ 			^^^^^^^
+  > 29 │ 				if (item) {
+  > 30 │ 					continue;
+  > 31 │ 				}
+       │ 				^
+    32 │ 			case 2:
+    33 │ 				for (;;) {
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:36:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    34 │ 					break outer;
+    35 │ 				}
+  > 36 │ 			case 3:
+       │ 			^^^^^^^
+  > 37 │ 				while (item) {
+  > 38 │ 					continue outer;
+  > 39 │ 				}
+       │ 				^
+    40 │ 			case 4:
+    41 │ 				a();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:40:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    38 │ 					continue outer;
+    39 │ 				}
+  > 40 │ 			case 4:
+       │ 			^^^^^^^
+  > 41 │ 				a();
+       │ 				^^^^
+    42 │ 			default:
+    43 │ 				b();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:50:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    48 │ 			case 0:
+    49 │ 				continue;
+  > 50 │ 			case 1:
+       │ 			^^^^^^^
+  > 51 │ 				a();
+       │ 				^^^^
+    52 │ 			default:
+    53 │ 				break;
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:63:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    61 │ 			case 0:
+    62 │ 				throw a();
+  > 63 │ 			case 1:
+       │ 			^^^^^^^
+  > 64 │ 				a();
+       │ 				^^^^
+    65 │ 			default:
+    66 │ 				b();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:73:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    71 │ 	try {
+    72 │ 		switch (x) {
+  > 73 │ 			case 0:
+       │ 			^^^^^^^
+  > 74 │ 				a();
+       │ 				^^^^
+    75 │ 			case 1:
+    76 │ 				return b();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:84:3 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    82 │ 	}
+    83 │ 	switch (x) {
+  > 84 │ 		case 0:
+       │ 		^^^^^^^
+  > 85 │ 			try {
+  > 86 │ 				a();
+  > 87 │ 			} catch {
+  > 88 │ 				break;
+  > 89 │ 			}
+       │ 			^
+    90 │ 		case 1:
+    91 │ 			try {
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:103:3 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    101 │ function nestedSwitches(x, y) {
+    102 │ 	switch (x) {
+  > 103 │ 		case 0:
+        │ 		^^^^^^^
+  > 104 │ 			switch (y) {
+         ...
+  > 108 │ 					break;
+  > 109 │ 			}
+        │ 			^
+    110 │ 		case 1:
+    111 │ 			switch (y) {
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:105:5 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    103 │ 		case 0:
+    104 │ 			switch (y) {
+  > 105 │ 				case 0:
+        │ 				^^^^^^^
+  > 106 │ 					a();
+        │ 					^^^^
+    107 │ 				default:
+    108 │ 					break;
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:110:3 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    108 │ 					break;
+    109 │ 			}
+  > 110 │ 		case 1:
+        │ 		^^^^^^^
+  > 111 │ 			switch (y) {
+         ...
+  > 115 │ 					return;
+  > 116 │ 			}
+        │ 			^
+    117 │ 		default:
+    118 │ 			b();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
+
+```
+outerControlFlow.js:124:4 lint/suspicious/noFallthroughSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This case is falling through to the next case.
+  
+    122 │ 			case 0:
+    123 │ 				break label;
+  > 124 │ 			case 1:
+        │ 			^^^^^^^
+  > 125 │ 				a();
+        │ 				^^^^
+    126 │ 			default:
+    127 │ 				b();
+  
+  i Add a `break` or `return` statement to the end of this case to prevent fallthrough.
+  
+
+```
