@@ -7730,6 +7730,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueWatchAfterAwaitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueWatchAfterAwaitOptions" }
+			]
+		},
+		"NoVueWatchAfterAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8435,6 +8445,13 @@
 					"description": "Disallow v-text and v-html on components.\nSee https://biomejs.dev/linter/rules/no-vue-v-text-v-html-on-component",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVTextVHtmlOnComponentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueWatchAfterAwait": {
+					"description": "Disallow creating Vue watchers after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-watch-after-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueWatchAfterAwaitConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13745,6 +13762,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueVTextVHtmlOnComponentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueWatchAfterAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueWatchAfterAwaitOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

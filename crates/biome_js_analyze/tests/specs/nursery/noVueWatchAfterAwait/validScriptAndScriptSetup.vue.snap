@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validScriptAndScriptSetup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+await doSomething();
+</script>
+<script>
+import { watchEffect } from "vue";
+
+await doSomething();
+watchEffect(() => {});
+</script>
+
+```
