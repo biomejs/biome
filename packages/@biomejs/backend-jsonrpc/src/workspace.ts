@@ -3323,6 +3323,11 @@ export interface Nursery {
 	 */
 	noVueBooleanDefault?: NoVueBooleanDefaultConfiguration;
 	/**
+	 * Disallow the $set and $delete functions that Vue 3 removed.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set
+	 */
+	noVueDeprecatedDeleteSet?: NoVueDeprecatedDeleteSetConfiguration;
+	/**
 	 * Disallow the deprecated Vue $scopedSlots API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots
 	 */
@@ -6058,6 +6063,9 @@ export type NoUselessTypeConversionConfiguration =
 export type NoVueBooleanDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueBooleanDefaultOptions;
+export type NoVueDeprecatedDeleteSetConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedDeleteSetOptions;
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
@@ -8717,6 +8725,10 @@ export interface RuleWithNoVueBooleanDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueBooleanDefaultOptions;
 }
+export interface RuleWithNoVueDeprecatedDeleteSetOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedDeleteSetOptions;
+}
 export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11252,6 +11264,7 @@ export type NoUselessDateGetTimeOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
+export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
@@ -13017,6 +13030,7 @@ export type Category =
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
+	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRootVIf"
