@@ -1,21 +1,23 @@
 use crate::parser::TailwindParser;
+use crate::syntax::atoms::{ValueEnd, base, is_at_base, is_at_property, property};
 use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
-use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
-use biome_unicode_table::{Dispatch::WHS, lookup_byte};
 
+mod atoms;
 mod css_value;
-mod parse_error;
+pub(crate) mod parse_error;
 mod value;
 mod variant;
+
+pub(crate) use atoms::css_token;
 
 pub fn parse_root(p: &mut TailwindParser) {
     let m = p.start();
@@ -85,12 +87,10 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     // `!-m-4`).
     let legacy_important = p.eat(T![!]);
 
-    if p.at(T![-]) {
-        p.bump_with_context(T![-], TailwindLexContext::SawNegative);
-    }
+    let negative = p.eat(T![-]);
 
     let candidate = parse_arbitrary_candidate(p)
-        .or_else(|| parse_functional_or_static_candidate(p))
+        .or_else(|| parse_functional_or_static_candidate(p, negative))
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(TW_BOGUS_CANDIDATE, token_set![WHITESPACE]),
@@ -118,15 +118,18 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_FULL_CANDIDATE))
 }
 
-fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(TW_BASE) {
+/// Parses a functional or static candidate. After the `-` of a `negative` candidate, its
+/// basename can't start with `@`.
+fn parse_functional_or_static_candidate(p: &mut TailwindParser, negative: bool) -> ParsedSyntax {
+    if !is_at_base(p.source(), negative) {
         return Absent;
     }
+    let atoms = base(p.source());
 
     let checkpoint = p.checkpoint();
     let m = p.start();
 
-    p.bump(TW_BASE);
+    p.bump_atoms(TW_BASE, atoms);
     if p.at(T![:]) {
         // Oops, this is a Variant!
         m.abandon(p);
@@ -151,8 +154,8 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         }
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
-    p.expect(T![-]);
-    match parse_value(p, true).or_recover_with_token_set(
+    p.bump(T![-]);
+    match parse_value(p, ValueEnd::Candidate).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]]),
         expected_value,
@@ -194,21 +197,20 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['['], TailwindLexContext::ArbitraryCandidate) {
+    p.bump(T!['[']);
+    if !is_at_property(p.source()) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(TW_PROPERTY, TailwindLexContext::ArbitraryCandidate) {
+    let atoms = property(p.source());
+    p.bump_atoms(TW_PROPERTY, atoms);
+    if !p.at(T![:]) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(T![:], TailwindLexContext::CssValue) {
-        m.abandon(p);
-        p.rewind(checkpoint);
-        return Absent;
-    }
+    p.bump_css(T![:]);
     if !parse_css_generic_component_value_list(p) {
         p.error(expected_value(p, p.cur_range()));
     }
@@ -240,16 +242,9 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 ///
 /// Both variant forms end in a `:` (`parse_variant_expression` and
 /// `parse_arbitrary_variant` rewind without one), so a chunk without a
-/// colon can never begin with variants. The scan stops on the same bytes
-/// the lexer classifies as whitespace, keeping the chunk boundary in sync
-/// with tokenization.
+/// colon can never begin with variants.
 fn class_chunk_has_colon(p: &TailwindParser) -> bool {
-    let text = p.source().text().as_bytes();
-    let start = usize::from(p.source().position());
-    text[start..]
-        .iter()
-        .take_while(|&&byte| !matches!(lookup_byte(byte), WHS))
-        .any(|&byte| byte == b':')
+    p.source().has_colon_before_whitespace()
 }
 
 pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
@@ -258,7 +253,7 @@ pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
         m.abandon(p);
         return Absent;
     }
-    match parse_value(p, false).or_recover_with_token_set(
+    match parse_value(p, ValueEnd::Modifier).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, T![!]]),
         expected_value,

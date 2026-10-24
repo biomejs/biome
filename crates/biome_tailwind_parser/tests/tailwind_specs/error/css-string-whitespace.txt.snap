@@ -30,7 +30,13 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_BRACKET@3..4 "[" [] [],
-                        TW_SELECTOR@4..18 "url(\"/img/with" [] [],
+                        URL_KW@4..7 "url" [] [],
+                        L_PAREN@7..8 "(" [] [],
+                        ERROR_TOKEN@8..9 "\"" [] [],
+                        SLASH@9..10 "/" [] [],
+                        IDENT@10..13 "img" [] [],
+                        SLASH@13..14 "/" [] [],
+                        IDENT@14..18 "with" [] [],
                     ],
                 },
                 modifier: missing (optional),
@@ -70,7 +76,13 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_BRACKET@40..41 "[" [] [],
-                        TW_SELECTOR@41..55 "url(\"/img/with" [] [],
+                        URL_KW@41..44 "url" [] [],
+                        L_PAREN@44..45 "(" [] [],
+                        ERROR_TOKEN@45..46 "\"" [] [],
+                        SLASH@46..47 "/" [] [],
+                        IDENT@47..50 "img" [] [],
+                        SLASH@50..51 "/" [] [],
+                        IDENT@51..55 "with" [] [],
                     ],
                 },
                 modifier: missing (optional),
@@ -121,7 +133,13 @@ TwRoot {
         1: DASH@2..3 "-" [] []
         2: TW_BOGUS_VALUE@3..18
           0: L_BRACKET@3..4 "[" [] []
-          1: TW_SELECTOR@4..18 "url(\"/img/with" [] []
+          1: URL_KW@4..7 "url" [] []
+          2: L_PAREN@7..8 "(" [] []
+          3: ERROR_TOKEN@8..9 "\"" [] []
+          4: SLASH@9..10 "/" [] []
+          5: IDENT@10..13 "img" [] []
+          6: SLASH@13..14 "/" [] []
+          7: IDENT@14..18 "with" [] []
         3: (empty)
       4: (empty)
     1: WHITESPACE@18..19 " " [] []
@@ -152,7 +170,13 @@ TwRoot {
         1: DASH@39..40 "-" [] []
         2: TW_BOGUS_VALUE@40..55
           0: L_BRACKET@40..41 "[" [] []
-          1: TW_SELECTOR@41..55 "url(\"/img/with" [] []
+          1: URL_KW@41..44 "url" [] []
+          2: L_PAREN@44..45 "(" [] []
+          3: ERROR_TOKEN@45..46 "\"" [] []
+          4: SLASH@46..47 "/" [] []
+          5: IDENT@47..50 "img" [] []
+          6: SLASH@50..51 "/" [] []
+          7: IDENT@51..55 "with" [] []
         3: (empty)
       4: (empty)
     7: WHITESPACE@55..56 "\n" [] []
