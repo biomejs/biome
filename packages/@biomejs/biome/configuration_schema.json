@@ -5217,6 +5217,16 @@
 			]
 		},
 		"NoLoopFuncOptions": { "type": "object", "additionalProperties": false },
+		"NoMagicArrayFlatDepthConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMagicArrayFlatDepthOptions" }
+			]
+		},
+		"NoMagicArrayFlatDepthOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7983,6 +7993,13 @@
 					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMagicArrayFlatDepth": {
+					"description": "Disallow unexplained numbers as the depth argument of Array.prototype.flat().\nSee https://biomejs.dev/linter/rules/no-magic-array-flat-depth",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMagicArrayFlatDepthConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11409,6 +11426,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLoopFuncOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMagicArrayFlatDepthOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMagicArrayFlatDepthOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
