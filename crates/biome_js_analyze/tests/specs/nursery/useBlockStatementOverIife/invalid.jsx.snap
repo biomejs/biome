@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+(() => {
+	render(<this.Component />);
+})();
+
+(function () {
+	const element = <Component value={value} />;
+	render(element);
+})();
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:1 lint/nursery/useBlockStatementOverIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function is called immediately, and a block statement can replace it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ (() => {
+      │ ^^^^^^^^
+    4 │ 	render(<this.Component />);
+    5 │ })();
+  
+  i A block statement hides let, const, and class declarations from the surrounding code in the same way, with less code and without a function call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a block statement instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+     3    │ - (()·=>·{
+        3 │ + {
+     4  4 │   	render(<this.Component />);
+     5    │ - })();
+        5 │ + }
+     6  6 │   
+     7  7 │   (function () {
+  
+
+```
+
+```
+invalid.jsx:7:1 lint/nursery/useBlockStatementOverIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function is called immediately, and a block statement can replace it.
+  
+    5 │ })();
+    6 │ 
+  > 7 │ (function () {
+      │ ^^^^^^^^^^^^^^
+    8 │ 	const element = <Component value={value} />;
+    9 │ 	render(element);
+  
+  i A block statement hides let, const, and class declarations from the surrounding code in the same way, with less code and without a function call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a block statement instead.
+  
+     5  5 │   })();
+     6  6 │   
+     7    │ - (function·()·{
+        7 │ + {
+     8  8 │   	const element = <Component value={value} />;
+     9  9 │   	render(element);
+    10    │ - })();
+       10 │ + }
+    11 11 │   
+  
+
+```

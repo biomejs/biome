@@ -1999,6 +1999,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_biome_ignore_folder::UseBiomeIgnoreFolderOptions>(),
     ));
     result.push((
+        "nursery",
+        "useBlockStatementOverIife",
+        TypeId::of::<
+            biome_rule_options::use_block_statement_over_iife::UseBlockStatementOverIifeOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useBlockStatements",
         TypeId::of::<biome_rule_options::use_block_statements::UseBlockStatementsOptions>(),
