@@ -7542,6 +7542,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedListenersConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedListenersOptions" }
+			]
+		},
+		"NoVueDeprecatedListenersOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedScopedSlotsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8375,6 +8385,13 @@
 					"description": "Disallow default values for Boolean props in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-boolean-default",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueBooleanDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedListeners": {
+					"description": "Disallow the deprecated Vue $listeners API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-listeners",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedListenersConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13590,6 +13607,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDataObjectDeclarationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedListenersOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedListenersOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
