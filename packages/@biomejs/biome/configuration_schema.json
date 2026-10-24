@@ -7647,6 +7647,13 @@
 		},
 		"NoVueTemplateShadowOptions": {
 			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Names that template variables may reuse from an outer scope.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoVueUndeclaredDirectivesConfiguration": {
@@ -8380,7 +8387,7 @@
 					]
 				},
 				"noVueTemplateShadow": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-vue-template-shadow",
+					"description": "Disallow template variables that reuse the name of a variable from an outer scope.\nSee https://biomejs.dev/linter/rules/no-vue-template-shadow",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueTemplateShadowConfiguration" },
 						{ "type": "null" }

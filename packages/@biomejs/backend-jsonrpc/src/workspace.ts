@@ -3348,7 +3348,7 @@ export interface Nursery {
 	 */
 	noVueShadowNativeEvents?: NoVueShadowNativeEventsConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow template variables that reuse the name of a variable from an outer scope.
 	 * See https://biomejs.dev/linter/rules/no-vue-template-shadow
 	 */
 	noVueTemplateShadow?: NoVueTemplateShadowConfiguration;
@@ -11269,7 +11269,12 @@ export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
-export type NoVueTemplateShadowOptions = {};
+export interface NoVueTemplateShadowOptions {
+	/**
+	 * Names that template variables may reuse from an outer scope.
+	 */
+	allow?: string[];
+}
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
