@@ -119,6 +119,8 @@ pub(crate) struct MarkdownParserState {
     /// The ordered list delimiter of the parent list (`.` or `)`).
     /// Used to detect delimiter changes at blank-line boundaries.
     pub(crate) list_item_ordered_delim: Option<char>,
+    /// Innermost open block quote inside a list, linked to the quotes enclosing it.
+    pub(crate) open_quote: Option<Rc<OpenQuote>>,
     /// Emphasis parsing context for the current inline item list.
     pub(crate) emphasis_context: Option<Rc<EmphasisContext>>,
     /// Link reference definitions accepted while parsing block structure.
@@ -152,6 +154,7 @@ struct MarkdownParserStateCheckpoint {
     list_item_marker_indent: usize,
     list_item_marker_kind: Option<MarkdownSyntaxKind>,
     list_item_ordered_delim: Option<char>,
+    open_quote: Option<Rc<OpenQuote>>,
     emphasis_context: Option<Rc<EmphasisContext>>,
     link_reference_definitions_len: usize,
     deferred_inlines_len: usize,
@@ -175,6 +178,7 @@ impl MarkdownParserState {
             list_item_marker_indent: self.list_item_marker_indent,
             list_item_marker_kind: self.list_item_marker_kind,
             list_item_ordered_delim: self.list_item_ordered_delim,
+            open_quote: self.open_quote.clone(),
             emphasis_context: self.emphasis_context.clone(),
             link_reference_definitions_len: self.link_reference_definitions.len(),
             deferred_inlines_len: self.deferred_inlines.len(),
@@ -197,6 +201,7 @@ impl MarkdownParserState {
         self.list_item_marker_indent = checkpoint.list_item_marker_indent;
         self.list_item_marker_kind = checkpoint.list_item_marker_kind;
         self.list_item_ordered_delim = checkpoint.list_item_ordered_delim;
+        self.open_quote = checkpoint.open_quote;
         self.emphasis_context = checkpoint.emphasis_context;
         self.link_reference_definitions
             .truncate(checkpoint.link_reference_definitions_len);
@@ -213,6 +218,25 @@ impl MarkdownParserState {
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
         self.task_list_item_allowed = checkpoint.task_list_item_allowed;
     }
+}
+
+/// An open block quote and the indentation its `>` markers follow.
+///
+/// A block quote inside a list item repeats its `>` marker on continuation
+/// lines after the item's content indent (CommonMark §5.1, §5.2), so matching
+/// the marker needs that indent for every enclosing quote.
+#[derive(Debug)]
+pub(crate) struct OpenQuote {
+    /// Nesting depth of this quote, starting at 1.
+    pub(crate) depth: usize,
+    /// Columns of list item indentation that precede this quote's `>` marker,
+    /// measured from the content of the enclosing quote or the line start.
+    pub(crate) container_indent: usize,
+    /// List nesting depth when the quote opened. A quote nested directly in
+    /// this one, with no list item opened in between, has no container indent.
+    pub(crate) list_nesting_depth: usize,
+    /// The quote enclosing this one.
+    pub(crate) parent: Option<Rc<Self>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -316,7 +340,7 @@ impl DeferredInline {
     }
 
     pub(crate) fn context(&self) -> InlineContainerContext {
-        self.context
+        self.context.clone()
     }
 
     pub(crate) fn definitions_len(&self) -> usize {
@@ -353,7 +377,7 @@ impl DeferredInline {
 /// the recursive block parser. This snapshot restores the quote, list, and
 /// virtual-line context needed to classify continuation prefixes and indentation
 /// exactly as they appear in the final CST.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub(crate) struct InlineContainerContext {
     /// Active block quote nesting at the start of the inline range.
     block_quote_depth: usize,
@@ -367,6 +391,8 @@ pub(crate) struct InlineContainerContext {
     list_item_marker_kind: Option<MarkdownSyntaxKind>,
     /// Delimiter of the containing ordered list, when present.
     list_item_ordered_delim: Option<char>,
+    /// Innermost open block quote inside a list, linked to the quotes enclosing it.
+    open_quote: Option<Rc<OpenQuote>>,
     /// Logical line start after a container prefix has been consumed.
     virtual_line_start: Option<TextSize>,
 }
@@ -583,6 +609,7 @@ impl<'source> MarkdownParser<'source> {
             list_item_marker_indent: context.list_item_marker_indent,
             list_item_marker_kind: context.list_item_marker_kind,
             list_item_ordered_delim: context.list_item_ordered_delim,
+            open_quote: context.open_quote,
             virtual_line_start: context.virtual_line_start,
             ..MarkdownParserState::default()
         };
@@ -695,6 +722,7 @@ impl<'source> MarkdownParser<'source> {
             list_item_marker_indent: self.state.list_item_marker_indent,
             list_item_marker_kind: self.state.list_item_marker_kind,
             list_item_ordered_delim: self.state.list_item_ordered_delim,
+            open_quote: self.state.open_quote.clone(),
             virtual_line_start: self.state.virtual_line_start,
         }
     }
