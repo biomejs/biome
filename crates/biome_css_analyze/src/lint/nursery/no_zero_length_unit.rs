@@ -80,7 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoZeroLengthUnit {
-        version: "next",
+        version: "2.6.3",
         name: "noZeroLengthUnit",
         language: "css",
         recommended: true,

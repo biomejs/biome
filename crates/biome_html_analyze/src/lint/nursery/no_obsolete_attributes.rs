@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// - To disallow obsolete elements, such as `<font>` and `<center>`, see [`noObsoleteTags`](https://biomejs.dev/linter/rules/no-obsolete-tags/).
     ///
     pub NoObsoleteAttributes {
-        version: "next",
+        version: "2.6.3",
         name: "noObsoleteAttributes",
         language: "html",
         recommended: true,

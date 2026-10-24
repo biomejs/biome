@@ -102,7 +102,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnreadableForOfExpression {
-        version: "next",
+        version: "2.6.3",
         name: "noUnreadableForOfExpression",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-unreadable-for-of-expression").same()],

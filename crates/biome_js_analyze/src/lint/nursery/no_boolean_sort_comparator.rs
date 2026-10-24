@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoBooleanSortComparator {
-        version: "next",
+        version: "2.6.3",
         name: "noBooleanSortComparator",
         language: "js",
         recommended: true,

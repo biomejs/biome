@@ -58,7 +58,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSelfNestedLayer {
-        version: "next",
+        version: "2.6.3",
         name: "noSelfNestedLayer",
         language: "css",
         recommended: false,

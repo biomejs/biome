@@ -77,7 +77,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentLightnessNotation {
-        version: "next",
+        version: "2.6.3",
         name: "useConsistentLightnessNotation",
         language: "css",
         recommended: false,

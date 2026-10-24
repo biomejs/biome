@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// - If you want to disallow `require` entirely, see [`noCommonJs`](https://biomejs.dev/linter/rules/no-common-js/).
     ///
     pub NoNewRequire {
-        version: "next",
+        version: "2.6.3",
         name: "noNewRequire",
         language: "js",
         sources: &[

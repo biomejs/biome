@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseBlockStatementOverIife {
-        version: "next",
+        version: "2.6.3",
         name: "useBlockStatementOverIife",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-block-statement-over-iife").same()],
