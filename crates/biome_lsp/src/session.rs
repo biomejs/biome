@@ -127,6 +127,11 @@ pub(crate) struct Session {
     /// we refresh that project's diagnostics.
     notified_broken_configuration: HashSet<ProjectKey>,
 
+    /// Remembers which warnings we have shown for folders whose documents
+    /// couldn't be opened because their configuration failed to load, so each
+    /// warning is shown once per folder instead of every time a document is opened.
+    notified_broken_configuration_folders: HashSet<(Utf8PathBuf, &'static str)>,
+
     /// Tracks whether the initialized() notification has been received
     initialized: AtomicBool,
 
@@ -267,6 +272,7 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: Default::default(),
+            notified_broken_configuration_folders: Default::default(),
             initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
@@ -1535,6 +1541,33 @@ impl Session {
     }
     fn set_notified_broken_configuration(&self, project_key: ProjectKey) {
         self.notified_broken_configuration.pin().insert(project_key);
+    }
+
+    /// Warns the user that the documents in `folder` aren't processed because its
+    /// configuration failed to load with `status`. Each warning is shown once per folder.
+    pub(crate) async fn notify_broken_configuration_for_folder(
+        &self,
+        folder: &Utf8Path,
+        status: ConfigurationStatus,
+    ) {
+        let message = match status {
+            ConfigurationStatus::Error => {
+                "The configuration file has errors. Biome won't process files until the configuration is fixed."
+            }
+            ConfigurationStatus::EditorConfigError => {
+                "The .editorconfig file has errors. Biome won't process files until the file is fixed or its usage is disabled."
+            }
+            _ => return,
+        };
+        if self
+            .notified_broken_configuration_folders
+            .pin()
+            .insert((folder.to_path_buf(), message))
+        {
+            self.client
+                .show_message(MessageType::WARNING, message)
+                .await;
+        }
     }
 
     pub(crate) fn requires_configuration(&self) -> bool {
