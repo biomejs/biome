@@ -8821,6 +8821,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueComputedPropertyReturn": {
+					"description": "Require computed properties in Vue components to return a value.\nSee https://biomejs.dev/linter/rules/use-vue-computed-property-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueComputedPropertyReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentEventHyphenation": {
 					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
 					"anyOf": [
@@ -16005,6 +16012,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueComputedPropertyReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueComputedPropertyReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -21283,6 +21299,16 @@
 			]
 		},
 		"UseVueBaseImportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueComputedPropertyReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueComputedPropertyReturnOptions" }
+			]
+		},
+		"UseVueComputedPropertyReturnOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

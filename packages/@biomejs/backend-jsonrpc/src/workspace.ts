@@ -3668,6 +3668,11 @@ export interface Nursery {
 	 */
 	useVueBaseImport?: UseVueBaseImportConfiguration;
 	/**
+	 * Require computed properties in Vue components to return a value.
+	 * See https://biomejs.dev/linter/rules/use-vue-computed-property-return
+	 */
+	useVueComputedPropertyReturn?: UseVueComputedPropertyReturnConfiguration;
+	/**
 	 * Enforce a consistent hyphenation style for event names in v-on directives on custom components.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation
 	 */
@@ -6265,6 +6270,9 @@ export type UseValidTestTitleConfiguration =
 export type UseVueBaseImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueBaseImportOptions;
+export type UseVueComputedPropertyReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueComputedPropertyReturnOptions;
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
@@ -9121,6 +9129,10 @@ export interface RuleWithUseVueBaseImportOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueBaseImportOptions;
 }
+export interface RuleWithUseVueComputedPropertyReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueComputedPropertyReturnOptions;
+}
 export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11497,6 +11509,7 @@ export interface UseValidTestTitleOptions {
 	disallowedWords?: string[];
 }
 export type UseVueBaseImportOptions = {};
+export type UseVueComputedPropertyReturnOptions = {};
 export interface UseVueConsistentEventHyphenationOptions {
 	/**
 	 * Whether event names in `v-on` directives must be hyphenated (`"always"`) or must not
@@ -12922,14 +12935,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -12972,8 +12985,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13018,11 +13031,11 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
@@ -13094,8 +13107,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
@@ -13105,6 +13118,7 @@ export type Category =
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
+	| "lint/nursery/useVueComputedPropertyReturn"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueMatchingComponentFileName"
