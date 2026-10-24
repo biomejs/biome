@@ -63,6 +63,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions>(),
     ));
     result.push((
+        "nursery",
+        "noArraySortForMinMax",
+        TypeId::of::<biome_rule_options::no_array_sort_for_min_max::NoArraySortForMinMaxOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
