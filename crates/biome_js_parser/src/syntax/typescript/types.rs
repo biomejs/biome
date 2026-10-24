@@ -3,6 +3,7 @@ use std::ops::{BitOr, Sub};
 use crate::parser::{RecoveryError, RecoveryResult};
 use crate::prelude::*;
 use crate::state::{EnterType, SignatureFlags};
+use crate::syntax::binding::is_nth_at_identifier_binding;
 use crate::syntax::expr::{
     ExpressionContext, is_at_binary_operator, is_at_expression, is_at_identifier,
     is_nth_at_identifier, is_nth_at_identifier_or_keyword, parse_big_int_literal_expression,
@@ -34,7 +35,7 @@ use enumflags2::{BitFlags, bitflags, make_bitflags};
 use smallvec::SmallVec;
 
 use crate::JsSyntaxFeature::TypeScript;
-use crate::lexer::{JsLexContext, JsReLexContext};
+use crate::lexer::JsLexContext;
 use crate::span::Span;
 use crate::syntax::class::parse_decorators;
 use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
@@ -1761,7 +1762,8 @@ fn is_at_constructor_type(p: &mut JsParser) -> bool {
     p.at(T![new]) || (p.at(T![abstract]) && p.nth_at(1, T![new]))
 }
 
-/// Determines if the parser's currently located at a function type. Performs a lookahead of at most a single character.
+/// Determines if the parser's currently located at a function type. Looks ahead at most four tokens,
+/// unless the first parameter is a binding pattern, which it parses speculatively.
 fn is_at_function_type(p: &mut JsParser) -> bool {
     if p.at(T![<]) {
         // <
@@ -1772,14 +1774,21 @@ fn is_at_function_type(p: &mut JsParser) -> bool {
         return false;
     }
 
+    if matches!(p.nth(1), T![')'] | T![...]) {
+        // () not a valid parenthesized type
+        // (... rest parameters are only valid in function types
+        return true;
+    }
+
+    if is_nth_at_identifier_binding(p, 1) || p.nth_at(1, T![this]) {
+        // A name followed by any of these is a parameter rather than a parenthesized type.
+        return matches!(p.nth(2), T![:] | T![=] | T![,] | T![?])
+            || (p.nth_at(2, T![')']) && p.nth_at(3, T![=>]));
+    }
+
+    // Only a binding pattern needs parsing to tell whether it starts a parameter.
     p.lookahead(|p| {
         p.bump(T!['(']);
-
-        if p.at(T![')']) || p.at(T![...]) {
-            // () not a valid parenthesized type
-            // (... rest parameters are only valid in function types
-            return true;
-        }
 
         if skip_parameter_start(p) {
             // We're passed the start of the parameter. Now we can verify if anything indicates that
@@ -2143,10 +2152,34 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
         return Absent;
     }
 
+    // `a < b;` and the like: the type `b` can't continue with the token after it, nor can that
+    // token start another type, so the list ends without a `>`.
+    if p.at(T![<])
+        && matches!(p.nth(1), T![ident] | JS_NUMBER_LITERAL)
+        && matches!(
+            p.nth(2),
+            T![;]
+                | T![')']
+                | T![']']
+                | T!['}']
+                | T![:]
+                | T![=]
+                | T![==]
+                | T![===]
+                | T![!=]
+                | T![!==]
+                | T![&&]
+                | T![||]
+                | EOF
+        )
+    {
+        return Absent;
+    }
+
     // test ts ts_type_arguments_like_expression
     // 0 < (0 >= 1);
     try_parse(p, |p| {
-        p.re_lex(JsReLexContext::TypeArgumentLessThan);
+        p.re_lex_type_argument_less_than();
         let m = p.start();
         p.bump(T![<]);
 
@@ -2154,7 +2187,7 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
             p.error(expected_ts_type_parameter(p, p.cur_range()));
         }
         TypeArgumentsList::new(TypeContext::default(), false).parse_list(p);
-        p.re_lex(JsReLexContext::BinaryOperator);
+        p.re_lex_binary_operator();
         let closed = p.expect(T![>]);
         let arguments = m.complete(p, TS_TYPE_ARGUMENTS);
 
@@ -2190,7 +2223,7 @@ pub(crate) fn parse_ts_type_arguments(p: &mut JsParser, context: TypeContext) ->
     // test ts ts_type_arguments_left_shift
     // type A<T> = T;
     // type B = A<<C>(c: C) => undefined>;
-    let current = p.re_lex(JsReLexContext::TypeArgumentLessThan);
+    let current = p.re_lex_type_argument_less_than();
     if current != T![<] {
         return Absent;
     }

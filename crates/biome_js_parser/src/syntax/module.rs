@@ -737,6 +737,10 @@ pub(super) fn parse_export(p: &mut JsParser, decorators_list: ParsedSyntax) -> P
 }
 
 fn parse_export_named_or_named_from_clause(p: &mut JsParser) -> ParsedSyntax {
+    if is_at_specifiers_before_from(p) {
+        return parse_export_named_from_clause(p);
+    }
+
     let checkpoint = p.checkpoint();
     match parse_export_named_clause(p) {
         Present(_) if p.at(T![from]) => {
@@ -745,6 +749,27 @@ fn parse_export_named_or_named_from_clause(p: &mut JsParser) -> ParsedSyntax {
         }
         t => t,
     }
+}
+
+/// Whether the parser is at `{`, or `type {`, followed by specifiers that only contain names,
+/// strings and commas, a `}`, and `from`.
+///
+/// The named clause would end at that `}` too, so it would be followed by `from` and give way to
+/// the named from clause. Returns `false` for a clause longer than 1024 tokens, which the caller
+/// then parses speculatively.
+fn is_at_specifiers_before_from(p: &mut JsParser) -> bool {
+    const MAX_TOKENS: usize = 1024;
+    let start = usize::from(p.at(T![type]));
+    debug_assert!(p.nth_at(start, T!['{']));
+    for n in start + 1..start + MAX_TOKENS {
+        match p.nth(n) {
+            T!['}'] => return p.nth_at(n + 1, T![from]),
+            T![,] | T![ident] | JS_STRING_LITERAL => {}
+            kind if kind.is_keyword() => {}
+            _ => return false,
+        }
+    }
+    false
 }
 
 // test js export_named_clause
