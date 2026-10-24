@@ -4,7 +4,7 @@ use biome_analyze::{
     ServicesDiagnostic, Visitor, VisitorContext,
 };
 use biome_db::AnyParsedSource;
-use biome_js_control_flow::{control_flow_model, js_control_flow_model};
+use biome_js_control_flow::{ControlFlowModel, control_flow_model, js_control_flow_model};
 use biome_js_syntax::AnyJsRoot;
 use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsSyntaxNode;
@@ -73,16 +73,11 @@ impl Visitor for ControlFlowGraphVisitor {
         if node.parent().is_some() {
             return;
         }
-        let db = ctx.services.get_service::<Rc<dyn LanguageDb>>();
-        let model = if let Some(db) = db
-            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
-        {
-            js_control_flow_model(db.as_ref(), source).clone()
-        } else {
-            // Fix passes and standalone callers can analyze trees that are not stored
-            // in the database. A graph for the file's previous tree would have stale nodes.
-            control_flow_model(ctx.root)
-        };
+        let model = file_control_flow_model(
+            ctx.services.get_service::<Rc<dyn LanguageDb>>(),
+            ctx.services.get_service::<AnyParsedSource>(),
+            ctx.root,
+        );
         // Queue every root together so nested-body diagnostics are sorted by
         // source range before the semantic phase flushes its signals.
         for graph in model.graphs() {
@@ -95,5 +90,25 @@ impl Visitor for ControlFlowGraphVisitor {
         _: Option<SyntaxKindSet<JsLanguage>>,
     ) -> Option<SyntaxKindSet<JsLanguage>> {
         Some(AnyJsRoot::KIND_SET)
+    }
+}
+
+/// Returns the control flow model of the tree rooted at `root`.
+///
+/// The model cached in `db` is used when `source` is available. Otherwise, the model is built
+/// from `root`, which visits the whole tree on every call.
+pub(crate) fn file_control_flow_model(
+    db: Option<&Rc<dyn LanguageDb>>,
+    source: Option<&AnyParsedSource>,
+    root: &AnyJsRoot,
+) -> ControlFlowModel {
+    if let Some(db) = db
+        && let Some(source) = source
+    {
+        js_control_flow_model(db.as_ref(), source).clone()
+    } else {
+        // Fix passes and standalone callers can analyze trees that are not stored
+        // in the database. A graph for the file's previous tree would have stale nodes.
+        control_flow_model(root)
     }
 }
