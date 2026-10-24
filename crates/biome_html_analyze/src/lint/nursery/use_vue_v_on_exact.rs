@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueVOnExact {
-        version: "next",
+        version: "2.6.3",
         name: "useVueVOnExact",
         language: "html",
         recommended: true,

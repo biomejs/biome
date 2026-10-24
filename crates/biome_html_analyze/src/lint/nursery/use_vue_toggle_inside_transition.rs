@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueToggleInsideTransition {
-        version: "next",
+        version: "2.6.3",
         name: "useVueToggleInsideTransition",
         language: "html",
         recommended: true,

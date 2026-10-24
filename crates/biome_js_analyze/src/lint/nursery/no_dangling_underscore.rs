@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDanglingUnderscore {
-        version: "next",
+        version: "2.6.3",
         name: "noDanglingUnderscore",
         language: "js",
         sources: &[RuleSource::Eslint("no-underscore-dangle").inspired()],

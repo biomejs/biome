@@ -84,7 +84,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoEagerArrayMethodsInLoops {
-        version: "next",
+        version: "2.6.3",
         name: "noEagerArrayMethodsInLoops",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-duplicate-loops").same()],

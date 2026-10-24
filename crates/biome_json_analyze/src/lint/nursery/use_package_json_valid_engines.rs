@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// - To report empty property names, including those in `engines`, see [`noEmptyObjectKeys`](https://biomejs.dev/linter/rules/no-empty-object-keys/).
     ///
     pub UsePackageJsonValidEngines {
-        version: "next",
+        version: "2.6.3",
         name: "usePackageJsonValidEngines",
         language: "json",
         recommended: true,

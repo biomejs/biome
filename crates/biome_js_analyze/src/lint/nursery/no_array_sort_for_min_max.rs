@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoArraySortForMinMax {
-        version: "next",
+        version: "2.6.3",
         name: "noArraySortForMinMax",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-array-sort-for-min-max").same()],

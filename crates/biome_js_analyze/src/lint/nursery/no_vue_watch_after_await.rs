@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueWatchAfterAwait {
-        version: "next",
+        version: "2.6.3",
         name: "noVueWatchAfterAwait",
         language: "js",
         recommended: true,

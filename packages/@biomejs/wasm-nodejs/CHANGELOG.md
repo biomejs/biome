@@ -1,5 +1,9 @@
 # @biomejs/wasm-nodejs
 
+## 2.6.3
+
+No changes in this release.
+
 ## 2.6.2
 
 No changes in this release.

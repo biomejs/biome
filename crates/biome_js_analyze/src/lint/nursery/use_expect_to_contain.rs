@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExpectToContain {
-        version: "next",
+        version: "2.6.3",
         name: "useExpectToContain",
         language: "js",
         recommended: false,

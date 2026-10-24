@@ -83,7 +83,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UsePackageJsonValidCpu {
-        version: "next",
+        version: "2.6.3",
         name: "usePackageJsonValidCpu",
         language: "json",
         recommended: true,

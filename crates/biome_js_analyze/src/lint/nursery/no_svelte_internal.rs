@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSvelteInternal {
-        version: "next",
+        version: "2.6.3",
         name: "noSvelteInternal",
         language: "js",
         domains: &[RuleDomain::Svelte],

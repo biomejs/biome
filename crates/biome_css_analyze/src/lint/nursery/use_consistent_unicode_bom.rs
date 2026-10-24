@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// - [`noIrregularWhitespace`](https://biomejs.dev/linter/rules/no-irregular-whitespace/) checks irregular whitespace elsewhere in code.
     ///
     pub UseConsistentUnicodeBom {
-        version: "next",
+        version: "2.6.3",
         name: "useConsistentUnicodeBom",
         language: "css",
         sources: &[RuleSource::Eslint("unicode-bom").same()],

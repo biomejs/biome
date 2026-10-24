@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseMathAbs {
-        version: "next",
+        version: "2.6.3",
         name: "useMathAbs",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-math-abs").same()],
