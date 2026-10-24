@@ -396,6 +396,7 @@ pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_shadow_native_events;
 pub mod no_vue_undeclared_directives;
 pub mod no_vue_unused_emit_declarations;
+pub mod no_vue_useless_v_bind;
 pub mod no_vue_v_html;
 pub mod no_vue_v_if_with_v_for;
 pub mod no_vue_v_on_number_values;

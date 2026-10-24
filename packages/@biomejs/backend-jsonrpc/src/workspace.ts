@@ -3368,6 +3368,11 @@ export interface Nursery {
 	 */
 	noVueUnusedEmitDeclarations?: NoVueUnusedEmitDeclarationsConfiguration;
 	/**
+	 * Disallow v-bind directives whose value is a fixed string.
+	 * See https://biomejs.dev/linter/rules/no-vue-useless-v-bind
+	 */
+	noVueUselessVBind?: NoVueUselessVBindConfiguration;
+	/**
 	 * Disallow the use of Vue's v-html directive.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-html
 	 */
@@ -6120,6 +6125,9 @@ export type NoVueUndeclaredDirectivesConfiguration =
 export type NoVueUnusedEmitDeclarationsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedEmitDeclarationsOptions;
+export type NoVueUselessVBindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUselessVBindOptions;
 export type NoVueVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVHtmlOptions;
@@ -8821,6 +8829,14 @@ export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedEmitDeclarationsOptions;
 }
+export interface RuleWithNoVueUselessVBindOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueUselessVBindOptions;
+}
 export interface RuleWithNoVueVHtmlOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVHtmlOptions;
@@ -11364,6 +11380,19 @@ export interface NoVueUndeclaredDirectivesOptions {
 	globals?: string[];
 }
 export type NoVueUnusedEmitDeclarationsOptions = {};
+export interface NoVueUselessVBindOptions {
+	/**
+	 * Doesn't report a `v-bind` directive whose value contains a comment, such
+	 * as `:id="'foo' /* note *\/"`. Disabled by default.
+	 */
+	ignoreComments?: boolean;
+	/**
+	 * Doesn't report a `v-bind` directive whose string contains an escape
+	 * sequence for a special character, such as `:title="'Line 1\nLine 2'"`.
+	 * Disabled by default.
+	 */
+	ignoreStringEscapes?: boolean;
+}
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
 export type NoVueVTextVHtmlOnComponentOptions = {};
@@ -13026,14 +13055,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13131,6 +13160,7 @@ export type Category =
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
+	| "lint/nursery/noVueUselessVBind"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"

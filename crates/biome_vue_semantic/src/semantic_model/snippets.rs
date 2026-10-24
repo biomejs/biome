@@ -59,6 +59,7 @@ pub(crate) fn collect_snippets(
             root,
             fingerprint: fingerprint(snippet.root.syntax()),
             operands: first_operand..builder.data.operands.len() as u32,
+            has_comments: has_comments(snippet.root.syntax()),
         });
 
         match host {
@@ -151,6 +152,11 @@ pub(crate) fn fingerprint(node: &JsSyntaxNode) -> u64 {
         token.text_trimmed().hash(&mut hasher);
     }
     hasher.finish()
+}
+
+fn has_comments(node: &JsSyntaxNode) -> bool {
+    node.descendants_tokens(biome_rowan::Direction::Next)
+        .any(|token| token.has_leading_comments() || token.has_trailing_comments())
 }
 
 fn root_shape(builder: &mut ModelBuilder, snippet: &SfcSnippet, host: SnippetHost) -> RootShape {
