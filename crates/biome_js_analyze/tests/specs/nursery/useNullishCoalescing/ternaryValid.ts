@@ -34,3 +34,33 @@ const j = m != null ? n : 'default';
 declare const s1: string | null;
 declare const s2: string | null;
 const k = s1 !== null && s2 !== undefined ? s1 : 'default';
+
+// Optional property that also accepts null: `=== null` misses undefined
+interface UserInput { fruits?: string[] | null }
+declare const userInput: UserInput;
+const l = userInput.fruits === null ? [] : userInput.fruits;
+
+// Strict single check that misses a nullish variant of the type
+declare const nu: string | null | undefined;
+const m1 = nu !== null ? nu : 'default';
+const m2 = nu === undefined ? 'default' : nu;
+
+declare const ss1: string | undefined;
+const m3 = ss1 !== null ? ss1 : 'default';
+const m4 = ss1 === null ? 'default' : ss1;
+
+declare const ss2: string | null;
+const m5 = ss2 !== undefined ? ss2 : 'default';
+const m6 = ss2 === undefined ? 'default' : ss2;
+
+// `void` acts as undefined
+declare const ss7: string | void;
+const m7 = ss7 !== null ? ss7 : 'default';
+
+// Compound check that tests the same literal twice still misses `undefined`
+declare const cp1: string | null | undefined;
+const m8 = cp1 !== null && cp1 !== null ? cp1 : 'default';
+
+// Call subject: still not reported, because `=== null` misses `undefined` in the return type
+declare function maybeLater(): string | null | undefined;
+const m9 = maybeLater() === null ? 'default' : maybeLater();

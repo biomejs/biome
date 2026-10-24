@@ -1,11 +1,12 @@
-// Tests for ignoreIfStatements: false (default detection on).
-// An if that only assigns to a nullish variable reports; the ??= fix is offered
-// only when the test catches exactly null/undefined.
+// Tests for `ignoreIfStatements: false`, the default, where `if` statements are checked.
+// The rule reports an `if` that only assigns to a nullish variable. It offers the `??=`
+// fix only when the test matches exactly the nullish values the type can hold. A single
+// strict check that misses one of them is not reported.
 
 declare let obj: { x: number } | null;
 declare function makeObj(): { x: number };
 
-// `!obj` on an object union: truthiness is equivalent to a null check, fix is safe.
+// `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
 if (!obj) {
 	obj = makeObj();
 }
@@ -31,7 +32,7 @@ if (!str) {
 	str = 'default';
 }
 
-// single strict check that misses undefined: report WITHOUT a fix.
+// single strict check that misses undefined: not reported.
 declare let maybe: string | null | undefined;
 if (maybe === null) {
 	maybe = 'default';
@@ -49,7 +50,7 @@ if (onlyUndef === undefined) {
 	onlyUndef = 'default';
 }
 
-// `=== undefined` on a union that also has null: report WITHOUT a fix.
+// `=== undefined` on a union that also has null: not reported.
 declare let undefCheck: string | null | undefined;
 if (undefCheck === undefined) {
 	undefCheck = 'default';
@@ -61,10 +62,16 @@ if (null == reversed) {
 	reversed = 'default';
 }
 
-// vacuous compound (same literal twice) still misses undefined: report WITHOUT a fix.
+// vacuous compound (same literal twice) still misses undefined: not reported.
 declare let vacuous: string | null | undefined;
 if (vacuous === null || vacuous === null) {
 	vacuous = 'default';
+}
+
+// optional property that also accepts null: `=== null` misses undefined, not reported.
+declare let input: { fruits?: string[] | null };
+if (input.fruits === null) {
+	input.fruits = [];
 }
 
 // static member subject: safe to fix.
