@@ -310,7 +310,7 @@ impl NodeData {
     /// Return a clone of this node with the specified range of slots replaced
     /// with the elements of the provided iterator
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
-    fn splice_slots<R, I>(mut self: Rc<Self>, range: R, replace_with: I) -> Rc<Self>
+    fn splice_slots<R, I>(self: Rc<Self>, range: R, replace_with: I) -> Rc<Self>
     where
         R: ops::RangeBounds<usize>,
         I: Iterator<Item = Option<green::GreenElement>>,
@@ -320,6 +320,27 @@ impl NodeData {
             NodeOrToken::Token(_) => panic!("called splice_slots on a token node"),
         };
 
+        self.into_root_with_green(green)
+    }
+
+    /// Return a clone of this node with each slot named in `edits` replaced
+    /// with the elements of its replacement. See [GreenNodeData::splice_many_slots].
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    fn splice_many_slots<E, R>(self: Rc<Self>, edits: E) -> Rc<Self>
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<green::GreenElement>>,
+    {
+        let green = match self.green() {
+            NodeOrToken::Node(green) => green.splice_many_slots(edits).into(),
+            NodeOrToken::Token(_) => panic!("called splice_many_slots on a token node"),
+        };
+
+        self.into_root_with_green(green)
+    }
+
+    /// Returns a root node holding `green`.
+    fn into_root_with_green(mut self: Rc<Self>, green: GreenElement) -> Rc<Self> {
         // Try to reuse the underlying memory allocation if self is the only
         // outstanding reference to this NodeData
         match Rc::get_mut(&mut self) {
