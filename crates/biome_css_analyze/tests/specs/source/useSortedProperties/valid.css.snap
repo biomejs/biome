@@ -357,4 +357,29 @@ expression: valid.css
   display: block;
 }
 
+.overlapping-logical-borders-in-order {
+  border-block-color: blue;
+  border-block-start: 1px solid red;
+}
+
+.overlapping-corner-sides-in-order {
+  corner-top-shape: round;
+  corner-left-shape: bevel;
+}
+
+.logical-before-physical-corner {
+  corner-start-start-shape: round;
+  corner-top-left-shape: bevel;
+}
+
+.logical-before-physical-border {
+  border-block-color: blue;
+  border-top: 1px solid red;
+}
+
+.repeated-all {
+  all: initial;
+  all: unset;
+}
+
 ```

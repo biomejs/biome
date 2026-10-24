@@ -312,3 +312,9 @@
   page: wide;
   will-change: auto;
 }
+
+.all-exempt-properties {
+  direction: rtl;
+  unicode-bidi: isolate;
+  all: initial;
+}

@@ -319,6 +319,12 @@ expression: invalid.css
   will-change: auto;
 }
 
+.all-exempt-properties {
+  direction: rtl;
+  unicode-bidi: isolate;
+  all: initial;
+}
+
 ```
 
 # Diagnostics
@@ -1591,6 +1597,7 @@ invalid.css:310:14 assist/source/useSortedProperties  FIXABLE  ━━━━━�
   > 314 │ }
         │ ^
     315 │ 
+    316 │ .all-exempt-properties {
   
   i Safe fix: Sort these properties
   
@@ -1603,6 +1610,38 @@ invalid.css:310:14 assist/source/useSortedProperties  FIXABLE  ━━━━━�
         313 │ + ··break-before:·page;
     314 314 │   }
     315 315 │   
+  
+
+```
+
+```
+invalid.css:316:24 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    314 │ }
+    315 │ 
+  > 316 │ .all-exempt-properties {
+        │                        ^
+  > 317 │   direction: rtl;
+  > 318 │   unicode-bidi: isolate;
+  > 319 │   all: initial;
+  > 320 │ }
+        │ ^
+    321 │ 
+  
+  i Safe fix: Sort these properties
+  
+    315 315 │   
+    316 316 │   .all-exempt-properties {
+    317     │ - ··direction:·rtl;
+    318     │ - ··unicode-bidi:·isolate;
+    319     │ - ··all:·initial;
+        317 │ + ··all:·initial;
+        318 │ + ··direction:·rtl;
+        319 │ + ··unicode-bidi:·isolate;
+    320 320 │   }
+    321 321 │   
   
 
 ```

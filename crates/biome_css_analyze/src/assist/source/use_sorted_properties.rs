@@ -22,7 +22,7 @@ use biome_string_case::StrOnlyExtension;
 use std::{
     borrow::Cow,
     cmp::Ordering,
-    collections::{BTreeSet, HashSet},
+    collections::{BTreeSet, HashMap},
 };
 
 declare_source_rule! {
@@ -166,7 +166,7 @@ impl Rule for UseSortedProperties {
             return None;
         }
 
-        if contains_shorthand_after_longhand(&original_properties) {
+        if contains_property_conflicts(&original_properties) {
             // This would be unsafe to sort
             return Some(UseSortedPropertiesState {
                 block: node.clone(),
@@ -530,13 +530,10 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
     unprefixed.unwrap_or(prop_lowercase)
 }
 
-/// Check if any shortand property (e.g. margin) appears after any of its longhand sub properties (e.g. margin-top).
-/// Sorting such properties would be unsafe, so we need to bail out. The noShorthandPropertyOverrides rule will catch that case instead.
-fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool {
-    let mut disallowed_longhand_properties = HashSet::<(Option<&str>, &str)>::new();
+/// Returns whether sorting would reverse declarations that can affect the same property.
+fn contains_property_conflicts(nodes: &[AnyCssDeclarationOrRule]) -> bool {
+    let mut later_properties = HashMap::new();
 
-    // We have a mapping of shorthand to longhand sub properties, and to make use of that we need to iterate backwards.
-    // Starting from the bottom, when we see a shorthand property, record the set of longhand properties that are no longer allowed to appear above it.
     for node in nodes.iter().rev() {
         let Some(prop_text) = &node
             .as_css_declaration_with_semicolon()
@@ -547,24 +544,83 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
 
         let prefix = prop_text_to_prefix(prop_text);
         let unprefixed = prop_text_to_unprefixed(prop_text);
+        let Some((&property, &index)) = PROPERTY_ORDER_MAP.get_key_value(unprefixed.as_ref()) else {
+            continue;
+        };
 
-        // Check for disallowed properties
-        for disallowed_property in disallowed_longhand_properties.iter() {
-            if (prefix, unprefixed.as_ref()) == *disallowed_property {
+        if !matches!(property, "all" | "direction" | "unicode-bidi")
+            && later_properties.contains_key(&(None, "all"))
+        {
+            return true;
+        }
+
+        for affected in std::iter::once(property)
+            .chain(get_longhand_sub_properties(property).iter().copied())
+            .chain(get_reset_to_initial_properties(property).iter().copied())
+        {
+            if later_properties
+                .get(&(prefix, affected))
+                .is_some_and(|later_index| index > *later_index)
+            {
                 return true;
             }
-        }
 
-        // Disallow sub properties to appear above this property
-        for longhand_child_property in get_longhand_sub_properties(&unprefixed) {
-            disallowed_longhand_properties.insert((prefix, longhand_child_property));
-        }
-        for longhand_child_property in get_reset_to_initial_properties(&unprefixed) {
-            disallowed_longhand_properties.insert((prefix, longhand_child_property));
+            if let Some((own_group, opposite_group)) = property_alias_groups(affected) {
+                if later_properties
+                    .get(&(prefix, opposite_group))
+                    .is_some_and(|later_index| index > *later_index)
+                {
+                    return true;
+                }
+                later_properties
+                    .entry((prefix, own_group))
+                    .and_modify(|later_index| *later_index = index.min(*later_index))
+                    .or_insert(index);
+            }
+
+            later_properties
+                .entry((prefix, affected))
+                .and_modify(|later_index| *later_index = index.min(*later_index))
+                .or_insert(index);
         }
     }
 
     false
+}
+
+// Physical and logical declarations can overlap under a writing mode inherited from another rule.
+fn property_alias_groups(property: &str) -> Option<(&'static str, &'static str)> {
+    let (logical_group, physical_group) = if property.starts_with("corner-") {
+        (":logical-corner-shape", ":physical-corner-shape")
+    } else if property.starts_with("border-") {
+        if property.ends_with("-color") {
+            (":logical-border-color", ":physical-border-color")
+        } else if property.ends_with("-style") {
+            (":logical-border-style", ":physical-border-style")
+        } else if property.ends_with("-width") {
+            (":logical-border-width", ":physical-border-width")
+        } else {
+            return None;
+        }
+    } else {
+        return None;
+    };
+
+    if property.contains("-block-")
+        || property.contains("-inline-")
+        || property.starts_with("corner-start-")
+        || property.starts_with("corner-end-")
+    {
+        Some((logical_group, physical_group))
+    } else if property.contains("-top-")
+        || property.contains("-right-")
+        || property.contains("-bottom-")
+        || property.contains("-left-")
+    {
+        Some((physical_group, logical_group))
+    } else {
+        None
+    }
 }
 
 /// Check for properties that don't appear in [PROPERTY_ORDER_MAP]. They are likely a mistake.
