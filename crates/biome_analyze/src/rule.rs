@@ -1387,7 +1387,7 @@ impl_group_language!(
     T57, T58, T59, T60, T61, T62, T63, T64, T65, T66, T67, T68, T69, T70, T71, T72, T73, T74, T75,
     T76, T77, T78, T79, T80, T81, T82, T83, T84, T85, T86, T87, T88, T89, T90, T91, T92, T93, T94,
     T95, T96, T97, T98, T99, T100, T101, T102, T103, T104, T105, T106, T107, T108, T109, T110,
-    T111, T112, T113, T114, T115
+    T111, T112, T113, T114, T115, T116, T117, T118, T119, T120, T121, T122, T123, T124
 );
 
 /// Trait implemented by all analysis rules: declares interest to a certain AstNode type,

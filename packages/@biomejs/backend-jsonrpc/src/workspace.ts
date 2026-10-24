@@ -3193,6 +3193,11 @@ export interface Nursery {
 	 */
 	noSvelteInspect?: NoSvelteInspectConfiguration;
 	/**
+	 * Disallow importing from svelte/internal.
+	 * See https://biomejs.dev/linter/rules/no-svelte-internal
+	 */
+	noSvelteInternal?: NoSvelteInternalConfiguration;
+	/**
 	 * Disallow legacy Svelte {@const} tags.
 	 * See https://biomejs.dev/linter/rules/no-svelte-legacy-const
 	 */
@@ -5990,6 +5995,9 @@ export type NoSvelteExportLetConfiguration =
 export type NoSvelteInspectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteInspectOptions;
+export type NoSvelteInternalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteInternalOptions;
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
@@ -8609,6 +8617,10 @@ export interface RuleWithNoSvelteInspectOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteInspectOptions;
 }
+export interface RuleWithNoSvelteInternalOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteInternalOptions;
+}
 export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteLegacyConstOptions;
@@ -11223,6 +11235,7 @@ export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteClassDirectiveOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteInspectOptions = {};
+export type NoSvelteInternalOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export type NoSvelteObjectInTextMustachesOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -13002,8 +13015,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13019,6 +13032,7 @@ export type Category =
 	| "lint/nursery/noSvelteClassDirective"
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteInspect"
+	| "lint/nursery/noSvelteInternal"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteObjectInTextMustaches"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
@@ -13048,11 +13062,11 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
@@ -13125,8 +13139,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
