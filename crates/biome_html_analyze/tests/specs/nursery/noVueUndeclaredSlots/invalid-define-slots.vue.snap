@@ -1,0 +1,133 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-define-slots.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineSlots<{
+    default(props: { msg: string }): any;
+    "item-row": (props: { index: number }) => any;
+}>();
+</script>
+
+<template>
+    <div>
+        <slot name="footer" />
+        <slot name="itemRow" />
+        <slot :name="'literal'" />
+        <slot :name="`template`" />
+        <template v-if="true">
+            <slot name="nested"></slot>
+        </template>
+    </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-define-slots.vue:11:21 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot footer isn't declared.
+  
+     9 │ <template>
+    10 │     <div>
+  > 11 │         <slot name="footer" />
+       │                     ^^^^^^
+    12 │         <slot name="itemRow" />
+    13 │         <slot :name="'literal'" />
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-slots.vue:12:21 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot itemRow isn't declared.
+  
+    10 │     <div>
+    11 │         <slot name="footer" />
+  > 12 │         <slot name="itemRow" />
+       │                     ^^^^^^^
+    13 │         <slot :name="'literal'" />
+    14 │         <slot :name="`template`" />
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-slots.vue:13:22 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot literal isn't declared.
+  
+    11 │         <slot name="footer" />
+    12 │         <slot name="itemRow" />
+  > 13 │         <slot :name="'literal'" />
+       │                      ^^^^^^^^^
+    14 │         <slot :name="`template`" />
+    15 │         <template v-if="true">
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-slots.vue:14:22 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot template isn't declared.
+  
+    12 │         <slot name="itemRow" />
+    13 │         <slot :name="'literal'" />
+  > 14 │         <slot :name="`template`" />
+       │                      ^^^^^^^^^^
+    15 │         <template v-if="true">
+    16 │             <slot name="nested"></slot>
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-slots.vue:16:25 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot nested isn't declared.
+  
+    14 │         <slot :name="`template`" />
+    15 │         <template v-if="true">
+  > 16 │             <slot name="nested"></slot>
+       │                         ^^^^^^
+    17 │         </template>
+    18 │     </div>
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
