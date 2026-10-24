@@ -2,7 +2,6 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_control_flow::{Instruction, InstructionKind, builder::ROOT_BLOCK_ID};
-use biome_db::AnyParsedSource;
 use biome_diagnostics::Severity;
 use biome_js_control_flow::{
     AnyJsControlFlowRoot, JsControlFlowGraph, control_flow_model, js_control_flow_model,
@@ -17,6 +16,7 @@ use biome_js_syntax::{
 };
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{JsFileSource, LanguageDb};
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeOrToken, SyntaxKindSet, WalkEvent};
 use biome_rule_options::no_useless_assignment::NoUselessAssignmentOptions;
 use roaring::RoaringBitmap;
@@ -201,9 +201,10 @@ impl Rule for NoUselessAssignment {
 fn control_flow_graph(ctx: &RuleContext<NoUselessAssignment>) -> Option<JsControlFlowGraph> {
     let root = ctx.query();
     if let Some(db) = ctx.get_service::<Rc<dyn LanguageDb>>()
-        && let Some(source) = ctx.get_service::<AnyParsedSource>()
+        && let Some(source) = ctx.get_service::<AnalyzedSource>()
+        && let Some(model) = js_control_flow_model(db.as_ref(), source)
     {
-        js_control_flow_model(db.as_ref(), source).graph(root)
+        model.graph(root)
     } else {
         // Fix passes and standalone callers analyze trees that are not stored
         // in the database.

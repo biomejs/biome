@@ -36,7 +36,6 @@ use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
-use biome_db::AnyParsedSource;
 use biome_formatter::rowan::Printed;
 use biome_formatter::{
     DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
@@ -44,6 +43,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -535,7 +535,7 @@ fn parse(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: CssSyntaxNode = parse.syntax(&workspace_db);
@@ -549,7 +549,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -564,7 +564,7 @@ fn debug_formatter_ir(
 
 fn debug_semantic_model(
     _path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let tree: AnyCssRoot = parse.tree(&workspace_db);
@@ -594,7 +594,7 @@ fn format(
 fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
@@ -609,7 +609,7 @@ fn format_range(
 fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,
@@ -811,7 +811,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
 
     info!("CSS runs the analyzer");
     let css_services = CssAnalyzerServices {
@@ -1083,7 +1083,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 fn search(
     path: &BiomePath,
     document: &DocumentFileSource,
-    parsed: AnyParsedSource,
+    parsed: AnalyzedSource,
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
