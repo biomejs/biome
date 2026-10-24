@@ -3393,6 +3393,11 @@ export interface Nursery {
 	 */
 	noXorAsExponentiation?: NoXorAsExponentiationConfiguration;
 	/**
+	 * Disallow boolean values as keys in YAML.
+	 * See https://biomejs.dev/linter/rules/no-yaml-boolean-keys
+	 */
+	noYamlBooleanKeys?: NoYamlBooleanKeysConfiguration;
+	/**
 	 * Disallow number literals with zero fractions or dangling dots.
 	 * See https://biomejs.dev/linter/rules/no-zero-fractions
 	 */
@@ -6135,6 +6140,9 @@ export type NoVueWatchAfterAwaitConfiguration =
 export type NoXorAsExponentiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoXorAsExponentiationOptions;
+export type NoYamlBooleanKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoYamlBooleanKeysOptions;
 export type NoZeroFractionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoZeroFractionsOptions;
@@ -8845,6 +8853,10 @@ export interface RuleWithNoXorAsExponentiationOptions {
 	level: RulePlainConfiguration;
 	options?: NoXorAsExponentiationOptions;
 }
+export interface RuleWithNoYamlBooleanKeysOptions {
+	level: RulePlainConfiguration;
+	options?: NoYamlBooleanKeysOptions;
+}
 export interface RuleWithNoZeroFractionsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11369,6 +11381,7 @@ export type NoVueVTextOptions = {};
 export type NoVueVTextVHtmlOnComponentOptions = {};
 export type NoVueWatchAfterAwaitOptions = {};
 export type NoXorAsExponentiationOptions = {};
+export type NoYamlBooleanKeysOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
@@ -13137,6 +13150,7 @@ export type Category =
 	| "lint/nursery/noVueVTextVHtmlOnComponent"
 	| "lint/nursery/noVueWatchAfterAwait"
 	| "lint/nursery/noXorAsExponentiation"
+	| "lint/nursery/noYamlBooleanKeys"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"

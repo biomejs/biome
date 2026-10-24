@@ -340,6 +340,7 @@ define_categories! {
     "lint/nursery/noVueVTextVHtmlOnComponent": "https://biomejs.dev/linter/rules/no-vue-v-text-v-html-on-component",
     "lint/nursery/noVueWatchAfterAwait": "https://biomejs.dev/linter/rules/no-vue-watch-after-await",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
+    "lint/nursery/noYamlBooleanKeys": "https://biomejs.dev/linter/rules/no-yaml-boolean-keys",
     "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
     "lint/nursery/noZeroLengthUnit": "https://biomejs.dev/linter/rules/no-zero-length-unit",
     "lint/nursery/useAstroClientOnlyDirectiveValue": "https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",

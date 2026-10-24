@@ -1,0 +1,25 @@
+# should generate diagnostics
+- true: 1
+- True: 2
+- TRUE: 3
+- false: 4
+- False: 5
+- FALSE: 6
+
+# spaces before the colon
+- true : 7
+
+- nested:
+    true: 8
+    deeper:
+      false: 9
+
+- flow: { true: 10, False: 11 }
+- flow_explicit: { ? true : 12 }
+- flow_pairs: [true: 13, ? FALSE : 14]
+
+- ? true
+  : 15
+
+- true: 16
+  false: 17
