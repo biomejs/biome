@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validBannerAfterShebang.js
+---
+# Input
+```js
+#!/usr/bin/env node
+/* Copyright 2026 Acme */
+// should not generate diagnostics
+const a = 1;
+
+```
