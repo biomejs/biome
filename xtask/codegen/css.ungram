@@ -777,6 +777,7 @@ CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*
 
 AnyCssCustomPropertyComponent =
 	CssCustomIdentifier
+	| ScssHashValue
 	| CssNumber
 	| AnyCssDimension
 	| CssString
@@ -3424,6 +3425,10 @@ AnyScssInterpolatedIdentifierPart =
 	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
 
+// $selector: #app;
+//            ^^^^
+// .theme { --color: #4566a8; --raw: #12unknown; }
+//                   ^^^^^^^         ^^^^^^^^^^
 ScssHashValue =
 	'#'
 	value: 'ident'

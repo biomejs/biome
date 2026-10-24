@@ -1,0 +1,5 @@
+/* should not generate diagnostics */
+.theme {
+  --color: #4566a8;
+  color: #4566a8;
+}

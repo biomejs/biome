@@ -1,0 +1,5 @@
+.broken {
+  --empty-interpolation: #12px#{};
+  color: red;
+}
+.after { --raw: #12unknown; }

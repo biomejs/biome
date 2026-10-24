@@ -992,10 +992,8 @@ CssRoot {
                                         CssNumber {
                                             value_token: CSS_NUMBER_LITERAL@342..344 "10" [] [],
                                         },
-                                        CssCustomPropertyDelimiter {
-                                            value: HASH@344..345 "#" [] [],
-                                        },
-                                        CssCustomIdentifier {
+                                        ScssHashValue {
+                                            hash_token: HASH@344..345 "#" [] [],
                                             value_token: IDENT@345..348 "fff" [] [],
                                         },
                                     ],
@@ -1040,10 +1038,8 @@ CssRoot {
                                         CssCustomIdentifier {
                                             value_token: IDENT@362..363 "v" [] [],
                                         },
-                                        CssCustomPropertyDelimiter {
-                                            value: HASH@363..364 "#" [] [],
-                                        },
-                                        CssCustomIdentifier {
+                                        ScssHashValue {
+                                            hash_token: HASH@363..364 "#" [] [],
                                             value_token: IDENT@364..367 "fff" [] [],
                                         },
                                     ],
@@ -1808,10 +1804,9 @@ CssRoot {
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@342..348
                     0: CSS_NUMBER@342..344
                       0: CSS_NUMBER_LITERAL@342..344 "10" [] []
-                    1: CSS_CUSTOM_PROPERTY_DELIMITER@344..345
+                    1: SCSS_HASH_VALUE@344..348
                       0: HASH@344..345 "#" [] []
-                    2: CSS_CUSTOM_IDENTIFIER@345..348
-                      0: IDENT@345..348 "fff" [] []
+                      1: IDENT@345..348 "fff" [] []
               1: (empty)
             1: SEMICOLON@348..350 ";" [] [Whitespace(" ")]
         2: R_CURLY@350..351 "}" [] []
@@ -1839,10 +1834,9 @@ CssRoot {
                       0: DOLLAR@361..362 "$" [] []
                     1: CSS_CUSTOM_IDENTIFIER@362..363
                       0: IDENT@362..363 "v" [] []
-                    2: CSS_CUSTOM_PROPERTY_DELIMITER@363..364
+                    2: SCSS_HASH_VALUE@363..367
                       0: HASH@363..364 "#" [] []
-                    3: CSS_CUSTOM_IDENTIFIER@364..367
-                      0: IDENT@364..367 "fff" [] []
+                      1: IDENT@364..367 "fff" [] []
               1: (empty)
             1: SEMICOLON@367..369 ";" [] [Whitespace(" ")]
         2: R_CURLY@369..370 "}" [] []

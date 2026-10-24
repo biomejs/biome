@@ -345,10 +345,8 @@ CssRoot {
                                             },
                                             l_paren_token: L_PAREN@246..247 "(" [] [],
                                             components: CssCustomPropertyComponentList [
-                                                CssCustomPropertyDelimiter {
-                                                    value: HASH@247..248 "#" [] [],
-                                                },
-                                                CssCustomIdentifier {
+                                                ScssHashValue {
+                                                    hash_token: HASH@247..248 "#" [] [],
                                                     value_token: IDENT@248..251 "fff" [] [],
                                                 },
                                                 CssCustomPropertyDelimiter {
@@ -1451,19 +1449,18 @@ CssRoot {
                         0: IDENT@240..246 "adjust" [] []
                       1: L_PAREN@246..247 "(" [] []
                       2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@247..265
-                        0: CSS_CUSTOM_PROPERTY_DELIMITER@247..248
+                        0: SCSS_HASH_VALUE@247..251
                           0: HASH@247..248 "#" [] []
-                        1: CSS_CUSTOM_IDENTIFIER@248..251
-                          0: IDENT@248..251 "fff" [] []
-                        2: CSS_CUSTOM_PROPERTY_DELIMITER@251..253
+                          1: IDENT@248..251 "fff" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@251..253
                           0: COMMA@251..253 "," [] [Whitespace(" ")]
-                        3: CSS_CUSTOM_PROPERTY_DELIMITER@253..254
+                        2: CSS_CUSTOM_PROPERTY_DELIMITER@253..254
                           0: DOLLAR@253..254 "$" [] []
-                        4: CSS_CUSTOM_IDENTIFIER@254..259
+                        3: CSS_CUSTOM_IDENTIFIER@254..259
                           0: IDENT@254..259 "alpha" [] []
-                        5: CSS_CUSTOM_PROPERTY_DELIMITER@259..261
+                        4: CSS_CUSTOM_PROPERTY_DELIMITER@259..261
                           0: COLON@259..261 ":" [] [Whitespace(" ")]
-                        6: CSS_NUMBER@261..265
+                        5: CSS_NUMBER@261..265
                           0: CSS_NUMBER_LITERAL@261..265 "-0.2" [] []
                       3: R_PAREN@265..266 ")" [] []
               1: (empty)

@@ -237,6 +237,9 @@ fn parse_custom_property_component(
 
     if is_at_scss_interpolation(p) {
         parse_scss_interpolation_with_context(p, context)
+    } else if p.at(T![#]) && !legacy_filter_recovery {
+        parse_custom_property_hash_value(p, context)
+            .or_else(|| parse_custom_property_delimiter(p, context))
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p, context)
     } else if p.at(CSS_STRING_LITERAL) {
@@ -254,6 +257,27 @@ fn parse_custom_property_component(
     } else {
         parse_custom_property_delimiter(p, context)
     }
+}
+
+/// Parses an adjacent raw hash body, leaving interpolation and delimiters separate.
+///
+/// ```scss
+/// .theme { --color: #4566a8; --raw: #12unknown#{$suffix}; }
+/// ```
+#[inline]
+fn parse_custom_property_hash_value(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
+    if !p.at(T![#]) {
+        return Absent;
+    }
+
+    let Some(scan) = p.source().custom_property_hash_value_scan() else {
+        return Absent;
+    };
+
+    let hash = p.start();
+    p.bump_with_context(T![#], CssLexContext::ScssHashValue(scan));
+    p.bump_with_context(T![ident], context);
+    Present(hash.complete(p, SCSS_HASH_VALUE))
 }
 
 /// Returns whether a source-tight raw function such as `url(` starts here.
