@@ -86,7 +86,7 @@ impl FromStr for WatcherKind {
 }
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum WatcherInstruction {
     /// Watches the specified paths non-recursively.
     WatchFolders(FxHashSet<Utf8PathBuf>),
@@ -96,6 +96,10 @@ pub enum WatcherInstruction {
 
     /// Re-indexes a file after it was closed by a client.
     ReindexFile(Utf8PathBuf),
+
+    /// Sends `()` through the given sender once every instruction sent before
+    /// this one has been handled.
+    Barrier(Sender<()>),
 
     /// Stops the watcher entirely.
     Stop,
@@ -238,6 +242,9 @@ impl Watcher {
                     }
                     Ok(WatcherInstruction::ReindexFile(path)) => {
                         Self::reindex_file(workspace, &path);
+                    }
+                    Ok(WatcherInstruction::Barrier(ack)) => {
+                        let _ = ack.send(());
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {
                         debug!("stop");
