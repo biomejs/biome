@@ -3408,6 +3408,11 @@ export interface Nursery {
 	 */
 	noVueLifecycleAfterAwait?: NoVueLifecycleAfterAwaitConfiguration;
 	/**
+	 * Disallow \<template> elements in a Vue template that don't use v-if, v-else-if, v-else, v-for, or v-slot.
+	 * See https://biomejs.dev/linter/rules/no-vue-lone-template
+	 */
+	noVueLoneTemplate?: NoVueLoneTemplateConfiguration;
+	/**
 	 * Disallow passing more than one argument to a Vue slot.
 	 * See https://biomejs.dev/linter/rules/no-vue-multiple-slot-args
 	 */
@@ -6319,6 +6324,9 @@ export type NoVueDeprecatedScopedSlotsConfiguration =
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
+export type NoVueLoneTemplateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueLoneTemplateOptions;
 export type NoVueMultipleSlotArgsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueMultipleSlotArgsOptions;
@@ -9149,6 +9157,10 @@ export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
 }
+export interface RuleWithNoVueLoneTemplateOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueLoneTemplateOptions;
+}
 export interface RuleWithNoVueMultipleSlotArgsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueMultipleSlotArgsOptions;
@@ -11822,6 +11834,13 @@ export interface NoVueDeprecatedRouterLinkTagPropOptions {
 export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
+export interface NoVueLoneTemplateOptions {
+	/**
+	 * Allows a `<template>` without a directive when it has an `id` or `ref`
+	 * attribute, written plainly or bound with `v-bind`. Disabled by default.
+	 */
+	ignoreAccessible?: boolean;
+}
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
@@ -13636,6 +13655,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueLifecycleAfterAwait"
+	| "lint/nursery/noVueLoneTemplate"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
 	| "lint/nursery/noVueRootVIf"

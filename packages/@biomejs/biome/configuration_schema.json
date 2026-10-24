@@ -7737,6 +7737,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueLoneTemplateConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueLoneTemplateOptions" }
+			]
+		},
+		"NoVueLoneTemplateOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreAccessible": {
+					"description": "Allows a `<template>` without a directive when it has an `id` or `ref`\nattribute, written plainly or bound with `v-bind`. Disabled by default.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueMultipleSlotArgsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8697,6 +8713,13 @@
 					"description": "Disallow registering Vue lifecycle hooks after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueLifecycleAfterAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueLoneTemplate": {
+					"description": "Disallow \\<template> elements in a Vue template that don't use v-if, v-else-if, v-else, v-for, or v-slot.\nSee https://biomejs.dev/linter/rules/no-vue-lone-template",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueLoneTemplateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14233,6 +14256,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueLifecycleAfterAwaitOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueLoneTemplateOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueLoneTemplateOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

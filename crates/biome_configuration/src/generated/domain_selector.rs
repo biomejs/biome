@@ -242,6 +242,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueDeprecatedScopeAttribute"),
         RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
         RuleFilter::Rule("nursery", "noVueLifecycleAfterAwait"),
+        RuleFilter::Rule("nursery", "noVueLoneTemplate"),
         RuleFilter::Rule("nursery", "noVueMultipleSlotArgs"),
         RuleFilter::Rule("nursery", "noVueMutatingProps"),
         RuleFilter::Rule("nursery", "noVueRequiredPropWithDefault"),
