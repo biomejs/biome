@@ -1,0 +1,8 @@
+/* should not generate diagnostics */
+async function describe(cwd: string, shas: string[], wanted: number): Promise<string[]> {
+    return wanted < 1 ? [] : shas.map((sha) => `${cwd}:${sha}`);
+}
+
+export async function sample(cwd: string, shas: string[]): Promise<string[]> {
+    return await describe(cwd, shas, 3);
+}
