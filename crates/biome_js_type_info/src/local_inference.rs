@@ -90,24 +90,26 @@ impl TypeData {
         let reference = collector.reference_to_registered_data(self);
         match elem {
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(elem) => {
+                let field = DestructureField::Index {
+                    index: i,
+                    has_initializer: elem.init().is_some(),
+                };
                 match elem.pattern().ok()? {
                     AnyJsBindingPattern::AnyJsBinding(binding) => Some({
                         let binding = binding.as_js_identifier_binding()?;
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            collector.reference_to_owned_data(Self::destructuring_of(
-                                reference,
-                                DestructureField::Index(i),
-                            )),
+                            collector
+                                .reference_to_owned_data(Self::destructuring_of(reference, field)),
                         )])
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
-                        let data = Self::destructuring_of(reference, DestructureField::Index(i));
+                        let data = Self::destructuring_of(reference, field);
                         data.apply_array_binding_pattern(collector, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
-                        let data = Self::destructuring_of(reference, DestructureField::Index(i));
+                        let data = Self::destructuring_of(reference, field);
                         data.apply_object_binding_pattern(collector, scope_id, &pattern)
                     }),
                 }
@@ -208,41 +210,45 @@ impl TypeData {
         let reference = collector.reference_to_registered_data(self);
         match member {
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
-                let member_name = member_name?;
+                let field = DestructureField::Name {
+                    name: member_name?,
+                    has_initializer: prop.init().is_some(),
+                };
                 match prop.pattern().ok()? {
                     AnyJsBindingPattern::AnyJsBinding(binding) => Some({
                         let binding = binding.as_js_identifier_binding()?;
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            collector.reference_to_owned_data(Self::destructuring_of(
-                                reference,
-                                DestructureField::Name(member_name),
-                            )),
+                            collector
+                                .reference_to_owned_data(Self::destructuring_of(reference, field)),
                         )])
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
-                        let data =
-                            Self::destructuring_of(reference, DestructureField::Name(member_name));
+                        let data = Self::destructuring_of(reference, field);
                         data.apply_array_binding_pattern(collector, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
-                        let data =
-                            Self::destructuring_of(reference, DestructureField::Name(member_name));
+                        let data = Self::destructuring_of(reference, field);
                         data.apply_object_binding_pattern(collector, scope_id, &pattern)
                     }),
                 }
             }
-            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(_) => Some({
-                let member_name = member_name?;
-                Box::new([(
-                    member_name.clone(),
-                    collector.reference_to_owned_data(Self::destructuring_of(
-                        reference,
-                        DestructureField::Name(member_name),
-                    )),
-                )])
-            }),
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(prop) => {
+                Some({
+                    let member_name = member_name?;
+                    Box::new([(
+                        member_name.clone(),
+                        collector.reference_to_owned_data(Self::destructuring_of(
+                            reference,
+                            DestructureField::Name {
+                                name: member_name,
+                                has_initializer: prop.init().is_some(),
+                            },
+                        )),
+                    )])
+                })
+            }
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(rest) => Some({
                 let binding = rest.binding().ok()?;
                 let binding = binding.as_js_identifier_binding()?;

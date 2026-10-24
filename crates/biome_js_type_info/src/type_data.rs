@@ -1442,10 +1442,12 @@ pub struct TypeofDestructureExpression {
     pub destructure_field: DestructureField,
 }
 
+/// `has_initializer` on `Index` and `Name` is set when the binding has a
+/// default value, which replaces a destructured `undefined`.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum DestructureField {
-    Index(usize),
-    Name(Text),
+    Index { index: usize, has_initializer: bool },
+    Name { name: Text, has_initializer: bool },
     RestExcept(Box<[Text]>),
     RestFrom(usize),
 }
