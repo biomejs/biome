@@ -32,6 +32,7 @@ biome_unicode_table = { workspace = true }
 drop_bomb           = "0.1.5"
 enumflags2          = { workspace = true }
 indexmap            = { workspace = true }
+memchr              = { workspace = true, optional = true }
 rustc-hash          = { workspace = true }
 schemars            = { workspace = true, optional = true }
 serde               = { workspace = true, features = ["derive"], optional = true }
@@ -48,6 +49,7 @@ biome_test_utils    = { path = "../biome_test_utils", features = ["lang_js"] }
 camino              = { workspace = true }
 criterion           = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta               = { workspace = true }
+memchr              = { workspace = true }
 quickcheck          = { workspace = true }
 quickcheck_macros   = { workspace = true }
 tests_macros        = { path = "../tests_macros" }
@@ -59,9 +61,11 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = ["dep:schemars", "serde"]
-serde  = ["biome_js_syntax/schema", "dep:serde"]
-tests  = []
+# Parses with the bulk lexer, which lexes the whole source ahead of parsing.
+bulk_lexer = ["dep:memchr"]
+schema     = ["dep:schemars", "serde"]
+serde      = ["biome_js_syntax/schema", "dep:serde"]
+tests      = []
 
 [lints]
 workspace = true

@@ -2272,6 +2272,55 @@ impl<'src> JsLexer<'src> {
     }
 }
 
+/// Positions the lexer anywhere, for the bulk lexer, which lexes single tokens with it.
+#[cfg(any(test, feature = "bulk_lexer"))]
+impl JsLexer<'_> {
+    /// Lexes the token at `position` in `context`, as if the previous tokens had left the
+    /// lexer there with `after_newline` as its line-break state.
+    pub(crate) fn lex_at(
+        &mut self,
+        position: usize,
+        after_newline: bool,
+        context: JsLexContext,
+    ) -> JsSyntaxKind {
+        self.position = position;
+        self.after_newline = after_newline;
+        self.next_token(context)
+    }
+
+    /// Re-lexes the token spanning `range` in `context`, as if the lexer had just returned it as
+    /// a `kind` token with `flags`.
+    pub(crate) fn re_lex_at(
+        &mut self,
+        range: TextRange,
+        kind: JsSyntaxKind,
+        flags: TokenFlags,
+        context: JsReLexContext,
+    ) -> JsSyntaxKind {
+        self.current_start = range.start();
+        self.position = usize::from(range.end());
+        self.current_kind = kind;
+        self.current_flags = flags;
+        self.after_newline = false;
+        self.re_lex(context)
+    }
+
+    /// Whether a line break separates the last non-trivia token from the lexer's position.
+    pub(crate) fn after_newline(&self) -> bool {
+        self.after_newline
+    }
+
+    /// Removes and returns the diagnostics reported after the first `len`.
+    pub(crate) fn take_diagnostics_after(&mut self, len: usize) -> Vec<ParseDiagnostic> {
+        self.diagnostics.split_off(len)
+    }
+
+    /// Returns the number of diagnostics reported so far.
+    pub(crate) fn diagnostics_len(&self) -> usize {
+        self.diagnostics.len()
+    }
+}
+
 /// Check if a char is a JS linebreak
 fn is_linebreak(chr: char) -> bool {
     matches!(chr, '\n' | '\r' | '\u{2028}' | '\u{2029}')
