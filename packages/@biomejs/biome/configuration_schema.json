@@ -7532,6 +7532,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedVIsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedVIsOptions" }
+			]
+		},
+		"NoVueDeprecatedVIsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDuplicateKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8338,6 +8348,13 @@
 					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedVIs": {
+					"description": "Disallow the deprecated Vue v-is directive.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-v-is",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedVIsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13502,6 +13519,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedScopedSlotsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedVIsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedVIsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -381,6 +381,7 @@ pub mod no_vue_arrow_func_in_watch;
 pub mod no_vue_boolean_default;
 pub mod no_vue_data_object_declaration;
 pub mod no_vue_deprecated_scoped_slots;
+pub mod no_vue_deprecated_v_is;
 pub mod no_vue_duplicate_keys;
 pub mod no_vue_import_compiler_macros;
 pub mod no_vue_lifecycle_after_await;
