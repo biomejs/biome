@@ -9030,6 +9030,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueTypedObjectProps": {
+					"description": "Require a TypeScript type for Vue props declared with Object or Array.\nSee https://biomejs.dev/linter/rules/use-vue-typed-object-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueTypedObjectPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTypedRef": {
 					"description": "Require a type for refs created with ref() or shallowRef() in TypeScript.\nSee https://biomejs.dev/linter/rules/use-vue-typed-ref",
 					"anyOf": [
@@ -16464,6 +16471,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueTypedObjectPropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueTypedObjectPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTypedRefOptions": {
 			"type": "object",
 			"properties": {
@@ -21846,6 +21862,16 @@
 			]
 		},
 		"UseVueToggleInsideTransitionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueTypedObjectPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueTypedObjectPropsOptions" }
+			]
+		},
+		"UseVueTypedObjectPropsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
