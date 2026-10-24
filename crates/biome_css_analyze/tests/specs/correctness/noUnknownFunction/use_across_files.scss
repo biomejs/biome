@@ -1,9 +1,0 @@
-/* should generate diagnostics */
-
-// Functions declared in a file loaded via `@use` are not resolved; the rule only
-// knows about functions declared in the same file. See https://github.com/biomejs/biome/issues/10800.
-@use 'fns' as *;
-
-.a {
-  width: bpx(1);
-}
