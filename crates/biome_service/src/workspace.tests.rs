@@ -200,6 +200,22 @@ fn debug_control_flow() {
 }
 
 #[test]
+fn pnpm_lockfiles_are_protected() {
+    for path in ["pnpm-lock.yaml", "/project/packages/app/pnpm-lock.yaml"] {
+        assert!(
+            FileFeaturesResult::is_protected_file(path.as_ref()),
+            "{path}"
+        );
+    }
+    for path in ["pnpm-workspace.yaml", "pnpm-lock.yaml.bak"] {
+        assert!(
+            !FileFeaturesResult::is_protected_file(path.as_ref()),
+            "{path}"
+        );
+    }
+}
+
+#[test]
 fn recognize_typescript_definition_file() {
     let (workspace, project_key) = create_server();
 

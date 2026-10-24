@@ -152,6 +152,41 @@ fn not_process_file_from_cli_verbose() {
 }
 
 #[test]
+fn pnpm_lockfiles_not_processed_from_cli() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    for path in ["pnpm-lock.yaml", "packages/app/pnpm-lock.yaml"] {
+        fs.insert(path.into(), b"lockfileVersion:    '9.0'\n");
+    }
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--verbose",
+                "pnpm-lock.yaml",
+                "packages/app/pnpm-lock.yaml",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "pnpm_lockfiles_not_processed_from_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn not_process_ignored_file_from_cli_verbose() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -249,6 +284,35 @@ fn should_return_the_content_of_protected_files_via_stdin() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_return_the_content_of_protected_files_via_stdin",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn pnpm_lockfile_unchanged_from_stdin() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let source = "lockfileVersion:    '9.0'\n";
+    console.in_buffer.push(source.to_string());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--stdin-file-path=pnpm-lock.yaml"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+    assert_eq!(markup_to_string(markup! { {message.content} }), source);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "pnpm_lockfile_unchanged_from_stdin",
         fs,
         console,
         result,

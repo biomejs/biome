@@ -494,6 +494,8 @@ impl FileFeaturesResult {
         // NPM
         "npm-shrinkwrap.json",
         "package-lock.json",
+        // pnpm
+        "pnpm-lock.yaml",
         // Yarn
         "yarn.lock",
     ];
