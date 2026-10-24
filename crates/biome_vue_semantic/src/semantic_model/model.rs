@@ -684,6 +684,8 @@ pub(crate) struct ComponentData {
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
     pub(crate) macro_conflict: bool,
+    /// The function the `data` option is written as.
+    pub(crate) data_function: Option<TextRange>,
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
@@ -1868,6 +1870,18 @@ impl Component {
     /// `<script setup>` block also declares with a macro.
     pub fn has_macro_conflict(&self) -> bool {
         self.row().macro_conflict
+    }
+
+    /// The range of the function the `data` option is written as, in the
+    /// coordinates of the tree that holds the component: `data() { ... }`,
+    /// `data: function () { ... }` or `data: () => ({ ... })`.
+    ///
+    /// `None` when the component has no `data` option, or when its value is
+    /// not a function written in place, as in `data: { ... }` or
+    /// `data: createData`.
+    pub fn data_function_range(&self) -> Option<TextRange> {
+        let range = self.row().data_function?;
+        Some(self.data.local(range, self.row().snippet))
     }
 
     /// For a `<script setup>` component, the component defined by the default
