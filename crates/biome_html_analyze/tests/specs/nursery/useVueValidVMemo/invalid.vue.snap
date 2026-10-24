@@ -1,0 +1,240 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-memo:aaa="[x]"></div>
+  <div v-memo.aaa="[x]"></div>
+  <div v-memo.aaa.bbb="[x]"></div>
+  <div v-memo></div>
+  <div v-memo=""></div>
+  <div v-memo="  "></div>
+  <div v-for="i in items">
+    <div v-memo="[x]" />
+  </div>
+  <template v-for="i in items">
+    <span>
+      <div v-memo="[i]"></div>
+    </span>
+  </template>
+  <div v-for="i in items">
+    <div v-for="j in i" v-memo="[j]"></div>
+  </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:14 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive doesn't accept an argument.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-memo:aaa="[x]"></div>
+      │              ^^^^
+    4 │   <div v-memo.aaa="[x]"></div>
+    5 │   <div v-memo.aaa.bbb="[x]"></div>
+  
+  i Remove the argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:14 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive doesn't support modifiers.
+  
+    2 │ <template>
+    3 │   <div v-memo:aaa="[x]"></div>
+  > 4 │   <div v-memo.aaa="[x]"></div>
+      │              ^^^^
+    5 │   <div v-memo.aaa.bbb="[x]"></div>
+    6 │   <div v-memo></div>
+  
+  i Remove the modifiers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:14 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive doesn't support modifiers.
+  
+    3 │   <div v-memo:aaa="[x]"></div>
+    4 │   <div v-memo.aaa="[x]"></div>
+  > 5 │   <div v-memo.aaa.bbb="[x]"></div>
+      │              ^^^^^^^^
+    6 │   <div v-memo></div>
+    7 │   <div v-memo=""></div>
+  
+  i Remove the modifiers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:8 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive is missing a value.
+  
+    4 │   <div v-memo.aaa="[x]"></div>
+    5 │   <div v-memo.aaa.bbb="[x]"></div>
+  > 6 │   <div v-memo></div>
+      │        ^^^^^^
+    7 │   <div v-memo=""></div>
+    8 │   <div v-memo="  "></div>
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes.
+  
+  i Add an array of these values, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:8 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive is missing a value.
+  
+    5 │   <div v-memo.aaa.bbb="[x]"></div>
+    6 │   <div v-memo></div>
+  > 7 │   <div v-memo=""></div>
+      │        ^^^^^^^^^
+    8 │   <div v-memo="  "></div>
+    9 │   <div v-for="i in items">
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes.
+  
+  i Add an array of these values, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive is missing a value.
+  
+     6 │   <div v-memo></div>
+     7 │   <div v-memo=""></div>
+   > 8 │   <div v-memo="  "></div>
+       │        ^^^^^^^^^^^
+     9 │   <div v-for="i in items">
+    10 │     <div v-memo="[x]" />
+  
+  i Vue skips updating this element until one of the values in the v-memo array changes.
+  
+  i Add an array of these values, for example v-memo="[item.id, selected]".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:10 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive doesn't work inside an element with v-for.
+  
+     8 │   <div v-memo="  "></div>
+     9 │   <div v-for="i in items">
+  > 10 │     <div v-memo="[x]" />
+       │          ^^^^^^
+    11 │   </div>
+    12 │   <template v-for="i in items">
+  
+  i To use v-memo with v-for, put both directives on the same element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:12 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive doesn't work inside an element with v-for.
+  
+    12 │   <template v-for="i in items">
+    13 │     <span>
+  > 14 │       <div v-memo="[i]"></div>
+       │            ^^^^^^
+    15 │     </span>
+    16 │   </template>
+  
+  i To use v-memo with v-for, put both directives on the same element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:25 lint/nursery/useVueValidVMemo ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-memo directive doesn't work inside an element with v-for.
+  
+    16 │   </template>
+    17 │   <div v-for="i in items">
+  > 18 │     <div v-for="j in i" v-memo="[j]"></div>
+       │                         ^^^^^^
+    19 │   </div>
+    20 │ </template>
+  
+  i To use v-memo with v-for, put both directives on the same element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    5 │   <div v-memo.aaa.bbb="[x]"></div>
+    6 │   <div v-memo></div>
+  > 7 │   <div v-memo=""></div>
+      │                
+    8 │   <div v-memo="  "></div>
+    9 │   <div v-for="i in items">
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:8:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+     6 │   <div v-memo></div>
+     7 │   <div v-memo=""></div>
+   > 8 │   <div v-memo="  "></div>
+       │                  
+     9 │   <div v-for="i in items">
+    10 │     <div v-memo="[x]" />
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
