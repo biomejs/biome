@@ -1051,3 +1051,131 @@ fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc
 
     Arc::new(project_layout)
 }
+
+/// Returns the categories of the diagnostics `filter` lets through on `source`, sorted.
+fn diagnostic_categories(source: &str, filter: AnalysisFilter) -> Vec<&'static str> {
+    let parsed = parse(
+        source,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
+    let options = AnalyzerOptions::default();
+
+    let mut categories = Vec::new();
+    crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
+        if let Some(diagnostic) = signal.diagnostic() {
+            categories.push(diagnostic.category().unwrap().name());
+        }
+        ControlFlow::<Never>::Continue(())
+    });
+    categories.sort_unstable();
+    categories
+}
+
+#[test]
+fn rule_registry_follows_filter_across_runs() {
+    const SOURCE: &str = "debugger;\nlet a = 1;\nif (a == 1) { f(a); }\n";
+
+    let lint = RuleCategoriesBuilder::default().with_lint().build();
+    let syntax = RuleCategoriesBuilder::default().with_syntax().build();
+    let no_debugger = [RuleFilter::Rule("suspicious", "noDebugger")];
+    let use_const = [RuleFilter::Rule("style", "useConst")];
+    let suspicious = [RuleFilter::Group("suspicious")];
+    let filter = |categories, enabled_rules, disabled_rules| AnalysisFilter {
+        categories,
+        enabled_rules,
+        disabled_rules,
+        range: None,
+    };
+
+    // The second pass runs with the registries the first pass built.
+    for _ in 0..2 {
+        assert_eq!(
+            diagnostic_categories(SOURCE, filter(lint, Some(&no_debugger), &[])),
+            ["lint/suspicious/noDebugger"]
+        );
+        assert_eq!(
+            diagnostic_categories(SOURCE, filter(lint, Some(&use_const), &[])),
+            ["lint/style/useConst"]
+        );
+        assert_eq!(
+            diagnostic_categories(SOURCE, filter(lint, Some(&suspicious), &[])),
+            [
+                "lint/suspicious/noDebugger",
+                "lint/suspicious/noDoubleEquals"
+            ]
+        );
+        assert_eq!(
+            diagnostic_categories(SOURCE, filter(lint, Some(&suspicious), &no_debugger)),
+            ["lint/suspicious/noDoubleEquals"]
+        );
+        assert_eq!(
+            diagnostic_categories(SOURCE, filter(syntax, Some(&no_debugger), &[])),
+            [""; 0]
+        );
+        assert_eq!(
+            diagnostic_categories(SOURCE, filter(lint, Some(&[]), &[])),
+            [""; 0]
+        );
+        let all_rules = diagnostic_categories(SOURCE, filter(lint, None, &[]));
+        assert!(all_rules.contains(&"lint/suspicious/noDebugger"));
+        assert!(all_rules.contains(&"lint/style/useConst"));
+    }
+}
+
+#[test]
+fn rule_registry_follows_filter_past_cache_capacity() {
+    const SOURCE: &str = "debugger;\nlet a = 1;\nif (a == 1) { f(a); }\n";
+    const RULES: [(&str, &str, &[&str]); 10] = [
+        ("suspicious", "noDebugger", &["lint/suspicious/noDebugger"]),
+        ("style", "useConst", &["lint/style/useConst"]),
+        (
+            "suspicious",
+            "noDoubleEquals",
+            &["lint/suspicious/noDoubleEquals"],
+        ),
+        ("suspicious", "noEmptyBlockStatements", &[]),
+        ("correctness", "noUnusedVariables", &[]),
+        ("complexity", "noUselessCatch", &[]),
+        ("style", "noVar", &[]),
+        ("suspicious", "noAssignInExpressions", &[]),
+        ("correctness", "noUnreachable", &[]),
+        ("security", "noGlobalEval", &[]),
+    ];
+
+    for _ in 0..2 {
+        for (group, rule, expected) in RULES {
+            let enabled = [RuleFilter::Rule(group, rule)];
+            let filter = AnalysisFilter::from_enabled_rules(&enabled);
+            assert_eq!(
+                diagnostic_categories(SOURCE, filter),
+                expected,
+                "{group}/{rule}"
+            );
+        }
+    }
+}
+
+#[test]
+fn rule_registry_builds_visitors_for_each_root() {
+    let enabled = [RuleFilter::Rule("correctness", "noUnusedVariables")];
+    let unused = "lint/correctness/noUnusedVariables";
+
+    for _ in 0..2 {
+        assert_eq!(
+            diagnostic_categories(
+                "export function f() { let a; }",
+                AnalysisFilter::from_enabled_rules(&enabled)
+            ),
+            [unused]
+        );
+        assert_eq!(
+            diagnostic_categories(
+                "export function f() { let a; let b; }",
+                AnalysisFilter::from_enabled_rules(&enabled)
+            ),
+            [unused, unused]
+        );
+    }
+}

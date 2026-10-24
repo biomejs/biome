@@ -11,7 +11,8 @@ pub use crate::suppression::MarkdownSuppression;
 use crate::suppression_action::MarkdownSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistryCache,
+    SnippetAnalyzer,
 };
 use biome_diagnostics::Error;
 use biome_languages::MdFileSource;
@@ -145,6 +146,10 @@ struct AnalyzerParams<'a, 'guest, 'registry, 'snippets, 'analyzer, B, Output> {
     snippets: Option<&'snippets mut [Box<dyn SnippetAnalyzer<B, Output = Output> + 'analyzer>]>,
 }
 
+thread_local! {
+    static REGISTRY_CACHE: RuleRegistryCache<MarkdownLanguage> = const { RuleRegistryCache::new() };
+}
+
 fn analyze_with_optional_snippets<'a, V, F, B, Output>(
     params: AnalyzerParams<'a, '_, '_, '_, '_, B, Output>,
     inspect_matcher: V,
@@ -163,10 +168,8 @@ where
         snippet_inspector,
         snippets,
     } = params;
-    let mut registry = RuleRegistry::builder(&filter, root);
-    visit_registry(&mut registry);
-
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) =
+        REGISTRY_CACHE.with(|cache| cache.build(&filter, root, visit_registry));
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {

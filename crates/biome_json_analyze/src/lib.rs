@@ -17,7 +17,7 @@ pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, BatchPluginVisitor,
     ControlFlow, EmbeddedSignalInspector, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, RuleAction, RuleRegistry,
+    PluginTargetLanguage, RuleAction, RuleRegistryCache,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
@@ -142,6 +142,10 @@ where
     )
 }
 
+thread_local! {
+    static REGISTRY_CACHE: RuleRegistryCache<JsonLanguage> = const { RuleRegistryCache::new() };
+}
+
 fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
     params: AnalyzerParams<'a, '_, '_>,
     inspect_matcher: V,
@@ -160,10 +164,8 @@ where
         plugins,
         snippet_inspector,
     } = params;
-    let mut registry = RuleRegistry::builder(&filter, root);
-    visit_registry(&mut registry);
-
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) =
+        REGISTRY_CACHE.with(|cache| cache.build(&filter, root, visit_registry));
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
