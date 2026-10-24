@@ -350,6 +350,7 @@ define_categories! {
     "lint/nursery/noVueDeprecatedRouterLinkTagProp": "https://biomejs.dev/linter/rules/no-vue-deprecated-router-link-tag-prop",
     "lint/nursery/noVueDeprecatedScopeAttribute": "https://biomejs.dev/linter/rules/no-vue-deprecated-scope-attribute",
     "lint/nursery/noVueDeprecatedScopedSlots": "https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
+    "lint/nursery/noVueDeprecatedSlotAttribute": "https://biomejs.dev/linter/rules/no-vue-deprecated-slot-attribute",
     "lint/nursery/noVueDeprecatedSlotScope": "https://biomejs.dev/linter/rules/no-vue-deprecated-slot-scope",
     "lint/nursery/noVueDeprecatedVOnNativeModifier": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier",
     "lint/nursery/noVueExcessiveProps": "https://biomejs.dev/linter/rules/no-vue-excessive-props",

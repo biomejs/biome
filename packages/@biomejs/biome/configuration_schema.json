@@ -7817,6 +7817,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedSlotAttributeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedSlotAttributeOptions" }
+			]
+		},
+		"NoVueDeprecatedSlotAttributeOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "Names of elements that can use the `slot` attribute.\n\nCase and hyphens are ignored, so `my-component` also matches `MyComponent`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreParents": {
+					"description": "Names of elements whose direct children can use the `slot` attribute.\n\nCase and hyphens are ignored, so `my-web-component` also matches `MyWebComponent`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedSlotScopeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9067,6 +9089,13 @@
 					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedSlotAttribute": {
+					"description": "Disallow the deprecated slot attribute in Vue templates.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-slot-attribute",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedSlotAttributeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14921,6 +14950,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedScopedSlotsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedSlotAttributeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedSlotAttributeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
