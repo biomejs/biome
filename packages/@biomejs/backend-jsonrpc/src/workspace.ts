@@ -3473,6 +3473,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedVOnNativeModifier?: NoVueDeprecatedVOnNativeModifierConfiguration;
 	/**
+	 * Limit the number of props a Vue component can declare.
+	 * See https://biomejs.dev/linter/rules/no-vue-excessive-props
+	 */
+	noVueExcessiveProps?: NoVueExcessivePropsConfiguration;
+	/**
 	 * Disallow registering Vue lifecycle hooks after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
@@ -6528,6 +6533,9 @@ export type NoVueDeprecatedVBindSyncConfiguration =
 export type NoVueDeprecatedVOnNativeModifierConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedVOnNativeModifierOptions;
+export type NoVueExcessivePropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueExcessivePropsOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
@@ -9489,6 +9497,10 @@ export interface RuleWithNoVueDeprecatedVOnNativeModifierOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedVOnNativeModifierOptions;
 }
+export interface RuleWithNoVueExcessivePropsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueExcessivePropsOptions;
+}
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
@@ -12275,6 +12287,12 @@ export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueDeprecatedVBindSyncOptions = {};
 export type NoVueDeprecatedVOnNativeModifierOptions = {};
+export interface NoVueExcessivePropsOptions {
+	/**
+	 * The maximum number of props a component can declare.
+	 */
+	maxProps?: number;
+}
 export type NoVueLifecycleAfterAwaitOptions = {};
 export interface NoVueLoneTemplateOptions {
 	/**
@@ -14197,6 +14215,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueDeprecatedSlotScope"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
+	| "lint/nursery/noVueExcessiveProps"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueLoneTemplate"
 	| "lint/nursery/noVueMixin"

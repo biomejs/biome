@@ -7857,6 +7857,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueExcessivePropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueExcessivePropsOptions" }
+			]
+		},
+		"NoVueExcessivePropsOptions": {
+			"type": "object",
+			"properties": {
+				"maxProps": {
+					"description": "The maximum number of props a component can declare.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueImportCompilerMacrosConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9069,6 +9088,13 @@
 					"description": "Disallow the .native modifier on Vue's v-on directive.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedVOnNativeModifierConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueExcessiveProps": {
+					"description": "Limit the number of props a Vue component can declare.\nSee https://biomejs.dev/linter/rules/no-vue-excessive-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueExcessivePropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14932,6 +14958,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDuplicateKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueExcessivePropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueExcessivePropsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
