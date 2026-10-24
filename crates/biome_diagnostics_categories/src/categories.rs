@@ -252,6 +252,7 @@ define_categories! {
     "lint/nursery/noIteratorProperty": "https://biomejs.dev/linter/rules/no-iterator-property",
     "lint/nursery/noJsRestrictedProperties": "https://biomejs.dev/linter/rules/no-js-restricted-properties",
     "lint/nursery/noJsonUnsafeValues": "https://biomejs.dev/linter/rules/no-json-unsafe-values",
+    "lint/nursery/noLoopIterableMutation": "https://biomejs.dev/linter/rules/no-loop-iterable-mutation",
     "lint/nursery/noMeaninglessVoidOperator": "https://biomejs.dev/linter/rules/no-meaningless-void-operator",
     "lint/nursery/noMisleadingReturnType": "https://biomejs.dev/linter/rules/no-misleading-return-type",
     "lint/nursery/noMisplacedListElements": "https://biomejs.dev/linter/rules/no-misplaced-list-elements",
