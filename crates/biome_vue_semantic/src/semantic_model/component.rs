@@ -620,6 +620,8 @@ impl Collector<'_, '_> {
                         types: TypeSet::empty(),
                         required: Tri::No,
                         defaults: Box::default(),
+                        external_default_sources: DefaultSources::empty(),
+                        defaults_complete: true,
                         validator: None,
                         form: PropForm::ArrayString,
                     });
@@ -661,6 +663,8 @@ impl Collector<'_, '_> {
                             types: TypeSet::from(PropType::Unknown),
                             required: Tri::Unknown,
                             defaults: Box::default(),
+                            external_default_sources: DefaultSources::empty(),
+                            defaults_complete: true,
                             validator: None,
                             form: PropForm::Constructor,
                         },
@@ -693,6 +697,8 @@ impl Collector<'_, '_> {
                     .map_or_else(TypeSet::empty, |value| self.constructor_types(value)),
                 required: Tri::No,
                 defaults: Box::default(),
+                external_default_sources: DefaultSources::empty(),
+                defaults_complete: true,
                 validator: None,
                 form: PropForm::Constructor,
             };
@@ -701,11 +707,16 @@ impl Collector<'_, '_> {
             types: TypeSet::empty(),
             required: Tri::No,
             defaults: Box::default(),
+            external_default_sources: DefaultSources::empty(),
+            defaults_complete: true,
             validator: None,
             form: PropForm::Options,
         };
         for member in options.members().iter().flatten() {
+            // A spread or a computed key may hold a default the model cannot
+            // read.
             let Some(name) = member.name() else {
+                detail.defaults_complete = false;
                 continue;
             };
             match name.text() {
@@ -845,6 +856,8 @@ impl Collector<'_, '_> {
                 types,
                 required: (!is_optional).into(),
                 defaults: Box::default(),
+                external_default_sources: DefaultSources::empty(),
+                defaults_complete: true,
                 validator: None,
                 form: PropForm::TypeMember,
             });
@@ -1539,24 +1552,11 @@ impl Collector<'_, '_> {
 
         // withDefaults(defineProps<Props>(), { ... })
         let (props_call, with_defaults) = if self.is_macro_call(&call, "withDefaults") {
-            let arguments: Vec<_> = call
-                .arguments()
-                .ok()
-                .into_iter()
-                .flat_map(|arguments| arguments.args().iter().flatten())
-                .collect();
-            let inner = arguments
-                .first()
-                .and_then(AnyJsCallArgument::as_any_js_expression)
+            let inner = first_argument(&call)
                 .and_then(|argument| argument.inner_expression())
                 .and_then(|argument| argument.as_js_call_expression().cloned());
-            let defaults = arguments
-                .get(1)
-                .and_then(AnyJsCallArgument::as_any_js_expression)
-                .and_then(|argument| argument.inner_expression())
-                .and_then(|argument| argument.as_js_object_expression().cloned());
             match inner {
-                Some(inner) if self.is_macro_call(&inner, "defineProps") => (inner, defaults),
+                Some(inner) if self.is_macro_call(&inner, "defineProps") => (inner, Some(&call)),
                 _ => return,
             }
         } else {
@@ -1564,7 +1564,7 @@ impl Collector<'_, '_> {
         };
 
         if self.is_macro_call(&props_call, "defineProps") {
-            self.collect_define_props(&props_call, with_defaults.as_ref(), pattern, component);
+            self.collect_define_props(&props_call, with_defaults, pattern, component);
         } else if self.is_macro_call(&call, "defineEmits") {
             if let Some(argument) = first_argument(&call) {
                 self.collect_runtime_emits(&argument, component);
@@ -1656,10 +1656,12 @@ impl Collector<'_, '_> {
         }
     }
 
+    /// Reads a `defineProps()` call. `with_defaults` is the `withDefaults()`
+    /// call that `call` is passed to, if any.
     fn collect_define_props(
         &mut self,
         call: &JsCallExpression,
-        with_defaults: Option<&JsObjectExpression>,
+        with_defaults: Option<&JsCallExpression>,
         pattern: Option<&AnyJsBindingPattern>,
         component: ComponentId,
     ) {
@@ -1671,27 +1673,68 @@ impl Collector<'_, '_> {
             props.extend(self.collect_type_props(&ty, component));
         }
 
-        if let Some(defaults) = with_defaults {
-            for member in defaults.members().iter().flatten() {
-                let Some(name) = member.name() else {
-                    continue;
-                };
-                let range = match &member {
-                    AnyJsObjectMember::JsPropertyObjectMember(property) => property
-                        .value()
-                        .ok()
-                        .map(|value| value.syntax().text_trimmed_range()),
-                    other => Some(other.syntax().text_trimmed_range()),
-                };
-                if let Some(range) = range {
-                    self.add_prop_default(&props, name.text(), range, DefaultSource::WithDefaults);
+        let mut external_default_sources = DefaultSources::empty();
+        let mut defaults_complete = true;
+        if let Some(with_defaults) = with_defaults {
+            external_default_sources |= DefaultSource::WithDefaults;
+            let defaults = with_defaults
+                .arguments()
+                .ok()
+                .and_then(|arguments| arguments.args().iter().nth(1));
+            match defaults {
+                None => {}
+                Some(Ok(AnyJsCallArgument::AnyJsExpression(defaults))) => {
+                    match defaults.inner_expression() {
+                        Some(AnyJsExpression::JsObjectExpression(defaults)) => {
+                            defaults_complete = self.collect_with_defaults(&defaults, &props);
+                        }
+                        _ => defaults_complete = false,
+                    }
                 }
+                Some(_) => defaults_complete = false,
+            }
+        }
+        if matches!(
+            pattern,
+            Some(AnyJsBindingPattern::JsObjectBindingPattern(_))
+        ) {
+            external_default_sources |= DefaultSource::Destructure;
+        }
+        for &id in &props {
+            if let Detail::Prop(detail) = &mut self.builder.symbol_mut(id).detail {
+                detail.external_default_sources = external_default_sources;
+                detail.defaults_complete &= defaults_complete;
             }
         }
 
         if let Some(pattern) = pattern {
             self.assign_props_role(pattern, component, &props);
         }
+    }
+
+    /// Records the members of the object passed to `withDefaults()` as
+    /// defaults of `props`. Returns `false` when a member does not have a
+    /// static name, such as a spread, so that it may give a default to any
+    /// prop.
+    fn collect_with_defaults(&mut self, defaults: &JsObjectExpression, props: &[SymbolId]) -> bool {
+        let mut complete = true;
+        for member in defaults.members().iter().flatten() {
+            let Some(name) = member.name() else {
+                complete = false;
+                continue;
+            };
+            let range = match &member {
+                AnyJsObjectMember::JsPropertyObjectMember(property) => property
+                    .value()
+                    .ok()
+                    .map(|value| value.syntax().text_trimmed_range()),
+                other => Some(other.syntax().text_trimmed_range()),
+            };
+            if let Some(range) = range {
+                self.add_prop_default(props, name.text(), range, DefaultSource::WithDefaults);
+            }
+        }
+        complete
     }
 
     /// Records what the binding pattern that receives the props object

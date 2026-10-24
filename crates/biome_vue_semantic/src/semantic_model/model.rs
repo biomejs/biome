@@ -508,15 +508,20 @@ pub enum PropForm {
 }
 
 /// Where a prop's default value is written.
+#[bitflags]
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DefaultSource {
     /// `{ type: Boolean, default: true }`
-    Inline,
+    Inline = 1 << 0,
     /// `withDefaults(defineProps<Props>(), { name: true })`
-    WithDefaults,
+    WithDefaults = 1 << 1,
     /// `const { name = true } = defineProps<Props>()`
-    Destructure,
+    Destructure = 1 << 2,
 }
+
+/// A set of places where a prop's default value can be written.
+pub type DefaultSources = BitFlags<DefaultSource>;
 
 /// A default value of a prop.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -530,6 +535,11 @@ pub(crate) struct PropDetail {
     pub(crate) types: TypeSet,
     pub(crate) required: Tri,
     pub(crate) defaults: Box<[PropDefaultData]>,
+    /// The places outside the prop's own declaration where the component
+    /// lets a default value be written for it.
+    pub(crate) external_default_sources: DefaultSources,
+    /// Whether `defaults` lists every default value written for the prop.
+    pub(crate) defaults_complete: bool,
     pub(crate) validator: Option<TextRange>,
     pub(crate) form: PropForm,
 }
@@ -1737,6 +1747,28 @@ impl Prop {
                 host_range: default.range,
                 source: default.source,
             })
+    }
+
+    /// The places outside the prop's own declaration where the component
+    /// lets a default value be written for it:
+    /// [`DefaultSource::WithDefaults`] when the `defineProps()` call is passed
+    /// to `withDefaults()`, and [`DefaultSource::Destructure`] when the props
+    /// object is destructured.
+    pub fn external_default_sources(&self) -> DefaultSources {
+        self.prop_detail()
+            .map(|detail| detail.external_default_sources)
+            .unwrap_or_default()
+    }
+
+    /// Whether [`Self::defaults`] lists every default value of the prop.
+    ///
+    /// It does not when the prop's options object, or the object passed to
+    /// `withDefaults()`, holds members the model cannot read, such as a
+    /// spread, or when `withDefaults()` receives a variable or a function
+    /// call.
+    pub fn has_complete_defaults(&self) -> bool {
+        self.prop_detail()
+            .is_none_or(|detail| detail.defaults_complete)
     }
 
     /// The range of the prop's validator function, in the coordinates of the

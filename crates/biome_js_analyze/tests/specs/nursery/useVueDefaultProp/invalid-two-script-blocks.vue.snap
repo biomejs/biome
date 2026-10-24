@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-two-script-blocks.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: {
+    foo: String,
+  },
+};
+</script>
+
+<script setup lang="ts">
+const { bar } = defineProps<{ bar?: string }>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-two-script-blocks.vue:5:5 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop foo has no default value.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     foo: String,
+      │     ^^^
+    6 │   },
+    7 │ };
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-two-script-blocks.vue:11:31 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop bar has no default value.
+  
+    10 │ <script setup lang="ts">
+  > 11 │ const { bar } = defineProps<{ bar?: string }>();
+       │                               ^^^
+    12 │ </script>
+    13 │ 
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
