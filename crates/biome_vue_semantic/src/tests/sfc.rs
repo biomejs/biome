@@ -630,3 +630,31 @@ fn ranges_are_local_to_the_declaring_tree() {
     assert_eq!(prop.range() + snippet.offset(), host);
     assert!(u32::from(prop.range().start()) < u32::from(host.start()));
 }
+
+#[test]
+fn setup_bindings_record_the_macro_or_composable_they_store() {
+    let model = sfc(r#"<script setup>
+import { useAttrs, useSlots } from 'vue'
+const props = withDefaults(defineProps(['a']), { a: 1 })
+const emit = defineEmits(['change'])
+const typedSlots = defineSlots()
+const slots = useSlots()
+const attrs = useAttrs()
+</script>
+"#);
+    let origins: Vec<_> = model
+        .symbols()
+        .filter(|symbol| symbol.kind() == SymbolKind::Local)
+        .map(|symbol| (symbol.name().to_string(), symbol.origin()))
+        .collect();
+    assert_eq!(
+        origins,
+        [
+            ("props".into(), Origin::DefineProps),
+            ("emit".into(), Origin::DefineEmits),
+            ("typedSlots".into(), Origin::DefineSlots),
+            ("slots".into(), Origin::UseSlots),
+            ("attrs".into(), Origin::UseAttrs),
+        ]
+    );
+}

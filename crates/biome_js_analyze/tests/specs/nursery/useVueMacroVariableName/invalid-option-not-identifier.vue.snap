@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-option-not-identifier.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const properties = defineProps(["foo"]);
+const emits = defineEmits(["change"]);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-option-not-identifier.vue:3:7 lint/nursery/useVueMacroVariableName ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of defineProps() is stored in properties instead of my-props.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const properties = defineProps(["foo"]);
+      │       ^^^^^^^^^^
+    4 │ const emits = defineEmits(["change"]);
+    5 │ </script>
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to my-props.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-option-not-identifier.vue:4:7 lint/nursery/useVueMacroVariableName ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of defineEmits() is stored in emits instead of class.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const properties = defineProps(["foo"]);
+  > 4 │ const emits = defineEmits(["change"]);
+      │       ^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to class.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

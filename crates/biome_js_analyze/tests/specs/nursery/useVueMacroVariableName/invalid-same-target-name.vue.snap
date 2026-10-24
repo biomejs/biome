@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-same-target-name.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+import { useSlots } from "vue";
+
+const typedSlots = defineSlots<{ default(): any }>();
+const componentSlots = useSlots();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-same-target-name.vue:5:7 lint/nursery/useVueMacroVariableName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of defineSlots() is stored in typedSlots instead of slots.
+  
+    3 │ import { useSlots } from "vue";
+    4 │ 
+  > 5 │ const typedSlots = defineSlots<{ default(): any }>();
+      │       ^^^^^^^^^^
+    6 │ const componentSlots = useSlots();
+    7 │ </script>
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to slots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-same-target-name.vue:6:7 lint/nursery/useVueMacroVariableName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of useSlots() is stored in componentSlots instead of slots.
+  
+    5 │ const typedSlots = defineSlots<{ default(): any }>();
+  > 6 │ const componentSlots = useSlots();
+      │       ^^^^^^^^^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to slots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
