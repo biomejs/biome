@@ -1,4 +1,7 @@
 use super::*;
+use crate::db::FileViews;
+#[cfg(feature = "module_graph")]
+use crate::module_graph::ModuleInfo;
 #[cfg(feature = "module_graph")]
 use crate::scanner::WorkspaceWatcherBridge;
 use crate::settings::ModuleGraphResolutionKind;
@@ -14,12 +17,12 @@ use biome_configuration::{
 use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
-use biome_js_syntax::JsLanguage;
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
-use salsa::plumbing::AsId;
+use salsa::plumbing::{AsId, ZalsaDatabase};
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
@@ -2866,16 +2869,16 @@ fn change_file_resumes_module_update_after_cancellation() {
     assert_eq!(diagnostics.diagnostics.len(), 1);
 }
 
-#[test]
-fn owned_scan_uses_replacement_updates() {
-    const PATH: &str = "/project/index.js";
-
-    let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+/// Creates an Owned-mode workspace, which is the mode of the daemon, with a
+/// project at `/project` that resolves its module graph as `resolution_kind`.
+fn lsp_workspace_with_project(
+    fs: &Arc<MemoryFileSystem>,
+    resolution_kind: ModuleGraphResolutionKind,
+) -> (LocalWorkspace, ProjectKey) {
     let (watcher_tx, _) = crossbeam::channel::unbounded();
     let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
     let mut workspace = LocalWorkspace::new(
-        Arc::new(fs),
+        fs.clone(),
         watcher_tx,
         service_tx,
         Arc::new(NoopQueryProvider {}),
@@ -2894,34 +2897,246 @@ fn owned_scan_uses_replacement_updates() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration::default(),
             extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+            module_graph_resolution_kind: resolution_kind,
         })
         .unwrap();
+    (workspace, project_key)
+}
 
-    let scan = || {
-        workspace
-            .scan_project(ScanProjectParams {
-                project_key,
-                watch: false,
-                force: true,
-                scan_kind: ScanKind::Project,
-                verbose: false,
-            })
-            .unwrap();
+/// Scans the whole project without watching it, as each
+/// `biome check --use-server` run does.
+fn scan_without_watching(workspace: &LocalWorkspace, project_key: ProjectKey) {
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: true,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+}
+
+/// Opens `path` from the filesystem, reads its syntax tree, and closes it, as
+/// one `biome check --use-server` run does with a file. Returns the source
+/// that the file was opened as, and the root of its syntax tree.
+fn check_file(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    path: &str,
+) -> (Source, JsSyntaxNode) {
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(path),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let db = workspace.get_db();
+    let source = db.get_parsed_source(Utf8Path::new(path)).unwrap();
+    let root = source.parsed(&db).syntax::<JsLanguage>();
+    drop(db);
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(path),
+        })
+        .unwrap();
+    (source, root)
+}
+
+/// Returns how many [Source] and [FileViews] inputs Salsa allocated.
+fn allocated_file_inputs(workspace: &LocalWorkspace) -> (usize, usize) {
+    let db = workspace.get_db();
+    (
+        Source::ingredient(&db).entries(db.zalsa()).count(),
+        FileViews::ingredient(&db).entries(db.zalsa()).count(),
+    )
+}
+
+/// Returns whether the JavaScript module at `path` exports `name`.
+#[cfg(feature = "module_graph")]
+fn module_exports(workspace: &LocalWorkspace, path: &str, name: &str) -> bool {
+    let db = workspace.get_db();
+    let Some(module) = db.module_for_path(Utf8Path::new(path)) else {
+        return false;
+    };
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        return false;
+    };
+    info.exports.get(name).is_some()
+}
+
+/// Scanning a project again updates the inputs that the previous scan
+/// published for its files, instead of allocating new ones, and the updated
+/// inputs hold the content that the latest scan read.
+#[test]
+fn owned_rescan_updates_existing_inputs() {
+    const PATH: &str = "/project/index.js";
+    const UPDATED: &str = "export const other = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    scan_without_watching(&workspace, project_key);
+    let db = workspace.get_db();
+    let first = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+    #[cfg(feature = "module_graph")]
+    let first_module = db.module_for_path(Utf8Path::new(PATH)).unwrap();
+    drop(db);
+
+    // The first rescan reads changed content, and the second one unchanged
+    // content.
+    fs.insert(Utf8PathBuf::from(PATH), UPDATED.as_bytes());
+    for _ in 0..2 {
+        scan_without_watching(&workspace, project_key);
+
+        let db = workspace.get_db();
+        let rescanned = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+        assert_eq!(first.as_id(), rescanned.as_id());
+        assert_eq!(&**rescanned.text(&db), UPDATED);
+        #[cfg(feature = "module_graph")]
+        {
+            let module = db.module_for_path(Utf8Path::new(PATH)).unwrap();
+            assert_eq!(first_module.as_id(), module.as_id());
+            assert_eq!(ModuleInfo::ingredient(&db).entries(db.zalsa()).count(), 1);
+            drop(db);
+            assert!(module_exports(&workspace, PATH, "other"));
+            assert!(!module_exports(&workspace, PATH, "value"));
+        }
+        assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+    }
+}
+
+/// When a manifest changed since the previous scan, a rescan applies it
+/// before it indexes the files that depend on it.
+#[test]
+fn owned_rescan_applies_changed_manifest_first() {
+    const MANIFEST: &str = "/project/package.json";
+    const PATH: &str = "/project/index.js";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "type": "module" }"#);
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+    let is_script = || {
+        let db = workspace.get_db();
+        let source = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+        matches!(
+            db.source_from_index(source.file_source_index(&db)),
+            Some(DocumentFileSource::Js(js)) if js.is_script()
+        )
     };
 
-    scan();
-    let first = workspace
-        .get_db()
-        .get_parsed_source(Utf8Path::new(PATH))
-        .unwrap();
-    scan();
-    let second = workspace
-        .get_db()
-        .get_parsed_source(Utf8Path::new(PATH))
-        .unwrap();
+    scan_without_watching(&workspace, project_key);
+    assert!(!is_script());
 
-    assert_ne!(first.as_id(), second.as_id());
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "type": "commonjs" }"#);
+    scan_without_watching(&workspace, project_key);
+    assert!(is_script());
+}
+
+/// A file that no client has open and that the scanner doesn't index keeps
+/// its inputs after its last client closes it. Opening the file again updates
+/// those inputs instead of allocating new ones. Opening it sets its text again,
+/// so reading the file after it's opened again parses its text again.
+#[test]
+fn owned_reopened_file_reuses_its_inputs() {
+    const PATH: &str = "/project/index.js";
+    const UPDATED: &str = "export const value = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) = lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::None);
+
+    let (first, first_root) = check_file(&workspace, project_key, PATH);
+    let (second, second_root) = check_file(&workspace, project_key, PATH);
+    assert_eq!(first.as_id(), second.as_id());
+    // The key of a node identifies the allocation of its tree. The first tree
+    // is still alive, so a new parse can't reuse its allocation.
+    assert!(first_root.key() != second_root.key());
+
+    fs.insert(Utf8PathBuf::from(PATH), UPDATED.as_bytes());
+    let (third, _) = check_file(&workspace, project_key, PATH);
+    assert_eq!(first.as_id(), third.as_id());
+    assert_eq!(&**third.text(&workspace.get_db()), UPDATED);
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+}
+
+/// Each `biome check --use-server` run connects as a new client, and opens the
+/// files that the scanner doesn't index with the content it read. The inputs
+/// that a file kept after the previous client closed it are reused by the next
+/// client, and by a scan that publishes the content on disk instead.
+#[cfg(feature = "module_graph")]
+#[test]
+fn owned_new_clients_reuse_inputs_of_closed_file() {
+    const PATH: &str = "/project/index.js";
+    const UPDATED: &str = "export const value = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    for (id, content) in [(1, "export const value = 1;"), (2, UPDATED)] {
+        let client = client(&workspace, id);
+        open_in(&client, project_key, PATH, content);
+        client
+            .close_file(CloseFileParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap();
+    }
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+
+    fs.insert(Utf8PathBuf::from(PATH), UPDATED.as_bytes());
+    scan_without_watching(&workspace, project_key);
+    let db = workspace.get_db();
+    let scanned = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+    assert_eq!(&**scanned.text(&db), UPDATED);
+    drop(db);
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+}
+
+/// A scan publishes again the inputs that a file kept after its last client
+/// closed it, instead of allocating new ones, whether or not the file changed
+/// meanwhile.
+#[test]
+fn owned_scan_reuses_inputs_of_closed_files() {
+    const UNCHANGED_PATH: &str = "/project/unchanged.js";
+    const CHANGED_PATH: &str = "/project/changed.js";
+    const UPDATED: &str = "export const value = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        Utf8PathBuf::from(UNCHANGED_PATH),
+        b"export const value = 1;",
+    );
+    fs.insert(Utf8PathBuf::from(CHANGED_PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    let (unchanged, _) = check_file(&workspace, project_key, UNCHANGED_PATH);
+    let (changed, _) = check_file(&workspace, project_key, CHANGED_PATH);
+    fs.insert(Utf8PathBuf::from(CHANGED_PATH), UPDATED.as_bytes());
+    scan_without_watching(&workspace, project_key);
+
+    let db = workspace.get_db();
+    let scanned_unchanged = db.get_parsed_source(Utf8Path::new(UNCHANGED_PATH)).unwrap();
+    let scanned_changed = db.get_parsed_source(Utf8Path::new(CHANGED_PATH)).unwrap();
+    assert_eq!(unchanged.as_id(), scanned_unchanged.as_id());
+    assert_eq!(changed.as_id(), scanned_changed.as_id());
+    assert_eq!(&**scanned_changed.text(&db), UPDATED);
+    drop(db);
+    assert_eq!(allocated_file_inputs(&workspace), (2, 2));
 }
 
 #[test]

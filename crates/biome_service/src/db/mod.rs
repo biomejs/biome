@@ -214,11 +214,17 @@ pub struct WorkspaceDb {
     /// outside a scanner epoch, adding or removing a view updates the input of
     /// the path through a Salsa setter.
     ///
-    /// Three changes update the map instead: adding the first view of a path,
-    /// removing its last view, and any update during a scanner epoch. Tracked
-    /// queries don't run again after them, except the ones of the resolver,
-    /// which the database notifies.
+    /// The map itself changes when a path gets its first view or loses its
+    /// last one, and when Shared storage replaces the input of a path. Tracked
+    /// queries don't run again after these changes, except the ones of the
+    /// resolver, which the database notifies.
     files: Arc<HashMap<Utf8PathBuf, FileViews>>,
+    /// It maps the path of a file that has no views to the views it had last.
+    ///
+    /// Salsa inputs can't be deleted. Instead of being dropped, the inputs of
+    /// a file that loses its last view are kept here, and the next view of the
+    /// path reuses them. Queries don't read this map.
+    retained_files: Arc<HashMap<Utf8PathBuf, FileViews>>,
     /// Node caches kept between the parses of a path. See
     /// [WorkspaceDbData::retain_node_cache].
     node_caches: NodeCaches,
@@ -260,6 +266,7 @@ pub struct WorkspaceDb {
 #[derive(Clone)]
 pub struct WorkspaceDbData {
     files: Arc<HashMap<Utf8PathBuf, FileViews>>,
+    retained_files: Arc<HashMap<Utf8PathBuf, FileViews>>,
     node_caches: NodeCaches,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
@@ -301,9 +308,14 @@ impl WorkspaceDbData {
         self.projects.pin().remove(&project_key);
     }
 
-    /// Removes the parsed source cached for `path`.
+    /// Removes `path` from the files that queries read. Its inputs are kept,
+    /// so that the next view of the path reuses them.
     pub fn remove_file(&self, path: &Utf8Path) {
-        self.files.pin().remove(path);
+        if let Some(file_views) = self.files.pin().remove(path).copied() {
+            self.retained_files
+                .pin()
+                .insert(path.to_path_buf(), file_views);
+        }
     }
 
     /// Keeps a node cache for `path`, which the parses of its text then
@@ -473,6 +485,7 @@ impl WorkspaceDb {
     ) -> Self {
         let db = Self {
             files: Arc::default(),
+            retained_files: Arc::default(),
             node_caches: Arc::default(),
             #[cfg(feature = "module_graph")]
             modules: Arc::default(),
@@ -570,6 +583,7 @@ impl WorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
             files: self.files.clone(),
+            retained_files: self.retained_files.clone(),
             node_caches: self.node_caches.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
@@ -643,19 +657,23 @@ impl WorkspaceDb {
     /// that the services shared by the clients read.
     ///
     /// The text is parsed as the file source at `file_source_index`, with the
-    /// `inline_configuration` of the client on top of the settings. It isn't
-    /// parsed here: the parse runs the first time a query reads it.
+    /// inline configuration at `configuration_index` on top of the settings.
+    /// It isn't parsed here: the parse runs the first time a query reads it.
+    ///
+    /// With [ParsedSourceUpdateMode::Setters], the inputs of `path` are reused,
+    /// including the ones it had before it lost its last view. The text is
+    /// always set, so the next query that reads the parse parses the text
+    /// again. With [ParsedSourceUpdateMode::Replace], a new input is allocated:
+    /// see [Self::reuse_view] to publish a text without one.
     pub(crate) fn update_or_insert_view(
         &mut self,
         path: &Utf8Path,
         view: ViewId,
         text: Arc<str>,
         file_source_index: usize,
-        inline_configuration: Option<Configuration>,
+        configuration_index: Option<usize>,
         mode: ParsedSourceUpdateMode,
     ) -> Source {
-        let configuration_index = inline_configuration
-            .map(|configuration| self.data().insert_inline_configuration(configuration));
         let new_source = |db: &Self, text| {
             Source::builder(path.to_path_buf(), text, file_source_index)
                 .configuration_index(configuration_index)
@@ -670,17 +688,16 @@ impl WorkspaceDb {
         }
 
         let existing_views = { self.files.pin().get(path).copied() };
+        let retained_views = if existing_views.is_none() {
+            self.retained_files.pin().remove(path).copied()
+        } else {
+            None
+        };
         if let Some(file_views) = existing_views {
             let views = file_views.views(self).clone();
             let views = match views.get(view).copied() {
                 Some(source) => {
-                    source.set_text(self).to(text);
-                    if source.file_source_index(self) != file_source_index {
-                        source.set_file_source_index(self).to(file_source_index);
-                    }
-                    if source.configuration_index(self) != configuration_index {
-                        source.set_configuration_index(self).to(configuration_index);
-                    }
+                    self.set_source_content(source, text, file_source_index, configuration_index);
                     views
                 }
                 None => {
@@ -691,18 +708,180 @@ impl WorkspaceDb {
                 }
             };
             *views.current()
+        } else if let Some(file_views) = retained_views {
+            let source = {
+                let views = file_views.views(self);
+                views.get(view).copied().unwrap_or(*views.current())
+            };
+            self.set_source_content(source, text, file_source_index, configuration_index);
+            let views = Views::new(view, source);
+            if *file_views.views(self) != views {
+                file_views.set_views(self).to(views);
+            }
+            self.publish_file(path, file_views);
+            source
         } else {
             let source = new_source(self, text);
             let file_views = FileViews::new(self, Views::new(view, source));
-            self.files.pin().insert(path.to_path_buf(), file_views);
-            // Manifest queries look up the parsed source of a path outside
-            // Salsa. Publishing a new parsed source must invalidate them.
-            #[cfg(feature = "module_graph")]
-            {
-                let change = self.data().resolver_source_change(path);
-                self.sync_resolver_paths(change);
-            }
+            self.publish_file(path, file_views);
             source
+        }
+    }
+
+    /// Returns whether publishing `text` as `view` of `path` needs Salsa
+    /// setters, because `path` has inputs, or had them before it lost its last
+    /// view, and they don't hold the text yet.
+    ///
+    /// The text is compared with the file source at `file_source_index` and
+    /// the inline configuration at `configuration_index`. Adding `view` to a
+    /// path whose inputs don't have it needs setters too.
+    pub(crate) fn view_update_needs_setters(
+        &self,
+        path: &Utf8Path,
+        view: ViewId,
+        text: &str,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) -> bool {
+        if let Some(file_views) = self.files.pin().get(path).copied() {
+            return !file_views.views(self).get(view).is_some_and(|source| {
+                self.source_holds(*source, text, file_source_index, configuration_index)
+            });
+        }
+        let retained_views = self.retained_files.pin().get(path).copied();
+        retained_views.is_some_and(|file_views| {
+            self.retained_source(
+                file_views,
+                view,
+                text,
+                file_source_index,
+                configuration_index,
+            )
+            .is_none()
+        })
+    }
+
+    /// Returns the view of `path` that the services shared by the clients
+    /// read, when the inputs of `path` already hold `text` as `view`, so that
+    /// publishing it changes nothing. When the inputs were retained after the
+    /// file lost its last view, they're published again.
+    ///
+    /// Returns `None` when the inputs hold other content, or `path` has none.
+    ///
+    /// A reused input keeps the parse it had, even when the project of the
+    /// path was replaced since then: the parse runs again only when the
+    /// [ProjectsGeneration] changes, which Shared storage can't change before
+    /// a scanner epoch ends.
+    pub(crate) fn reuse_view(
+        &self,
+        path: &Utf8Path,
+        view: ViewId,
+        text: &str,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) -> Option<Source> {
+        // This runs in the view of a scanner epoch, where Salsa setters must
+        // not run: a setter waits for exclusive access to the storage, which
+        // never comes while the shared handles are alive. The inputs are
+        // reused only when they don't need a setter.
+        if let Some(file_views) = self.files.pin().get(path).copied() {
+            let views = file_views.views(self);
+            return views
+                .get(view)
+                .is_some_and(|source| {
+                    self.source_holds(*source, text, file_source_index, configuration_index)
+                })
+                .then(|| *views.current());
+        }
+
+        let file_views = self.retained_files.pin().get(path).copied()?;
+        let source = self.retained_source(
+            file_views,
+            view,
+            text,
+            file_source_index,
+            configuration_index,
+        )?;
+        // Another view of the path may have been published meanwhile, and the
+        // retained inputs must not replace it.
+        let files = self.files.pin();
+        let result = files.compute(path.to_path_buf(), |entry| match entry {
+            Some(_) => Operation::Abort(()),
+            None => Operation::Insert(file_views),
+        });
+        match result {
+            Compute::Inserted(..) => {
+                self.retained_files.pin().remove(path);
+                Some(source)
+            }
+            _ => None,
+        }
+    }
+
+    /// Returns the source of the retained `file_views`, when they hold only
+    /// `view`, and it holds `text` parsed as the file source at
+    /// `file_source_index` with the inline configuration at
+    /// `configuration_index`. The views can then be published again as they
+    /// are.
+    fn retained_source(
+        &self,
+        file_views: FileViews,
+        view: ViewId,
+        text: &str,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) -> Option<Source> {
+        let views = file_views.views(self);
+        let source = *views.get(view)?;
+        (*views == Views::new(view, source)
+            && self.source_holds(source, text, file_source_index, configuration_index))
+        .then_some(source)
+    }
+
+    /// Returns whether `source` holds `text` parsed as the file source at
+    /// `file_source_index` with the inline configuration at
+    /// `configuration_index`.
+    fn source_holds(
+        &self,
+        source: Source,
+        text: &str,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) -> bool {
+        &**source.text(self) == text
+            && source.file_source_index(self) == file_source_index
+            && source.configuration_index(self) == configuration_index
+    }
+
+    /// Sets the content of `source` through Salsa setters. The text is set
+    /// even when it's the same, so the next query that reads the parse parses
+    /// the text again.
+    fn set_source_content(
+        &mut self,
+        source: Source,
+        text: Arc<str>,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) {
+        source.set_text(self).to(text);
+        if source.file_source_index(self) != file_source_index {
+            source.set_file_source_index(self).to(file_source_index);
+        }
+        if source.configuration_index(self) != configuration_index {
+            source.set_configuration_index(self).to(configuration_index);
+        }
+    }
+
+    /// Adds `path` to the files that queries read, with the views of
+    /// `file_views`.
+    fn publish_file(&mut self, path: &Utf8Path, file_views: FileViews) {
+        self.files.pin().insert(path.to_path_buf(), file_views);
+        // Manifest queries look up the parsed source of a path outside
+        // Salsa. Publishing a new parsed source must invalidate them.
+        #[cfg(feature = "module_graph")]
+        {
+            let change = self.data().resolver_source_change(path);
+            self.sync_resolver_paths(change);
         }
     }
 
@@ -778,8 +957,9 @@ impl WorkspaceDb {
     }
 
     /// Replaces the views of `path` with the ones `replace` derives from the
-    /// current ones, and removes the file when `replace` returns `None`.
-    /// Returns the views that were published.
+    /// current ones, and removes the file when `replace` returns `None`. The
+    /// inputs of a removed file are kept, so that the next view of the path
+    /// reuses them. Returns the views that were published.
     ///
     /// The change is published only while the map still holds the views it
     /// was derived from. Otherwise, it's derived again from the latest views.
@@ -806,17 +986,28 @@ impl WorkspaceDb {
             });
             match result {
                 Compute::Aborted(actual) if actual != current => current = actual,
+                Compute::Removed(_, file_views) => {
+                    self.retained_files
+                        .pin()
+                        .insert(path.to_path_buf(), *file_views);
+                    return views;
+                }
                 _ => return views,
             }
         }
     }
 
-    /// Removes the parsed source cached for `path`.
+    /// Removes `path` from the files that queries read. Its inputs are kept,
+    /// so that the next view of the path reuses them.
     ///
     /// Use this from the Owned-mode database inside `OwnedDb::with_setter`,
     /// because the resolver is notified through Salsa setters.
     pub fn remove_file(&mut self, path: &Utf8Path) {
-        if self.files.pin().remove(path).is_some() {
+        let removed = self.files.pin().remove(path).copied();
+        if let Some(file_views) = removed {
+            self.retained_files
+                .pin()
+                .insert(path.to_path_buf(), file_views);
             #[cfg(feature = "module_graph")]
             {
                 let change = self.data().resolver_source_change(path);
@@ -1167,6 +1358,7 @@ impl WorkspaceDb {
 #[derive(Clone)]
 pub struct SharedWorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, FileViews>>,
+    retained_files: Arc<HashMap<Utf8PathBuf, FileViews>>,
     node_caches: NodeCaches,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
@@ -1195,6 +1387,7 @@ impl SharedWorkspaceDb {
     pub(crate) fn from_workspace_db(db: WorkspaceDb) -> Self {
         let WorkspaceDb {
             files,
+            retained_files,
             node_caches,
             #[cfg(feature = "module_graph")]
             modules,
@@ -1210,6 +1403,7 @@ impl SharedWorkspaceDb {
         } = db;
         Self {
             files,
+            retained_files,
             node_caches,
             #[cfg(feature = "module_graph")]
             modules,
@@ -1228,6 +1422,7 @@ impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
             files: self.files.clone(),
+            retained_files: self.retained_files.clone(),
             node_caches: self.node_caches.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
@@ -1242,6 +1437,7 @@ impl SharedWorkspaceDb {
     pub fn fork(&self) -> WorkspaceDb {
         WorkspaceDb {
             files: self.files.clone(),
+            retained_files: self.retained_files.clone(),
             node_caches: self.node_caches.clone(),
             file_sources: self.file_sources.clone(),
             inline_configurations: self.inline_configurations.clone(),

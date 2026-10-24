@@ -36,7 +36,6 @@ use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
-use biome_db::AnyParsedSource;
 use biome_formatter::rowan::Printed;
 use biome_formatter::{
     DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
