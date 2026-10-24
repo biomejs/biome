@@ -44,6 +44,17 @@ impl NeedsParentheses for TsConstructorType {
 impl NeedsParentheses for TsFunctionType {
     #[inline]
     fn needs_parentheses(&self) -> bool {
+        // A generic function type right after the `<` of a type assertion would start with
+        // `<<`, which is read as a left shift: `<<T>(x: T) => T>f` doesn't parse.
+        if self.type_parameters().is_some()
+            && self
+                .syntax()
+                .parent()
+                .is_some_and(|parent| parent.kind() == JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION)
+        {
+            return true;
+        }
+
         function_like_type_needs_parentheses(self.syntax())
     }
 }
