@@ -94,6 +94,10 @@ mod tests {
         assert_not_needs_parentheses!(
             "type s = A extends string ? string : (() => string)",
             TsFunctionType
-        )
+        );
+
+        // Without them, a generic function type would start the type assertion with `<<`
+        assert_needs_parentheses!("var a = <(<T>(x: T) => T)>f", TsFunctionType);
+        assert_not_needs_parentheses!("var a = <(() => void)>f", TsFunctionType);
     }
 }
