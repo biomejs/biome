@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validCustomOrder.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template></template>
+<docs></docs>
+<script></script>
+<style></style>
+
+```
