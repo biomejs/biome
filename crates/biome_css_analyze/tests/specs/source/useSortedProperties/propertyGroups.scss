@@ -1,0 +1,68 @@
+/* should generate diagnostics */
+.variables {
+  $color: red;
+  color: $color;
+  display: block;
+  $color: blue;
+  color: $color;
+  display: flex;
+}
+
+.assignments {
+  $size: 10px;
+  width: $size;
+  $size: 20px;
+  height: $size;
+}
+
+.statements {
+  color: red;
+  display: block;
+  @include theme;
+  @if true { color: blue; }
+  color: green;
+  display: flex;
+}
+
+.nesting-declaration {
+  color: red;
+  display: block;
+  font: { size: 12px; }
+  color: green;
+  display: flex;
+}
+
+.shorthand-boundary {
+  margin-top: 1px;
+  display: block;
+  $size: 2px;
+  margin: $size;
+  display: flex;
+}
+
+.line-comment {
+  color: red;
+  display: block; // Display comment.
+  $color: blue;
+  color: $color;
+  display: flex;
+}
+
+@mixin frames {
+  color: red;
+  display: block;
+  0% { opacity: 0; }
+  color: blue;
+  display: flex;
+}
+
+@keyframes variables {
+  to {
+    $color: red;
+    color: $color;
+    display: block;
+    $color: blue;
+    color: $color;
+    display: flex;
+  }
+}
