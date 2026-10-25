@@ -8497,6 +8497,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAtomicUpdates": {
+					"description": "Disallow assignments that can be based on outdated values because of await or yield.\nSee https://biomejs.dev/linter/rules/use-atomic-updates",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAtomicUpdatesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAwaitThenable": {
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
@@ -14022,6 +14029,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAtomicUpdatesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAtomicUpdatesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseAwaitOptions": {
 			"type": "object",
 			"properties": {
@@ -18886,6 +18902,16 @@
 			]
 		},
 		"UseAtIndexOptions": { "type": "object", "additionalProperties": false },
+		"UseAtomicUpdatesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAtomicUpdatesOptions" }
+			]
+		},
+		"UseAtomicUpdatesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseAwaitConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
