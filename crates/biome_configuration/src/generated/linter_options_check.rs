@@ -1919,6 +1919,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_xor_as_exponentiation::NoXorAsExponentiationOptions>(),
     ));
     result.push((
+        "nursery",
+        "noYamlBooleanKeys",
+        TypeId::of::<biome_rule_options::no_yaml_boolean_keys::NoYamlBooleanKeysOptions>(),
+    ));
+    result.push((
         "style",
         "noYodaExpression",
         TypeId::of::<biome_rule_options::no_yoda_expression::NoYodaExpressionOptions>(),
