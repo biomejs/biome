@@ -633,6 +633,7 @@ pub mod use_vue_consistent_event_hyphenation;
 pub mod use_vue_consistent_v_bind_style;
 pub mod use_vue_consistent_v_on_style;
 pub mod use_vue_define_macros_order;
+pub mod use_vue_emit_validator;
 pub mod use_vue_hyphenated_attributes;
 pub mod use_vue_matching_component_file_name;
 pub mod use_vue_multi_word_component_names;
