@@ -7,6 +7,9 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueEvent`] runs the rule once per event name written in an emit
+//!   declaration or an emit call. Use it when the rule judges how one event
+//!   is declared or emitted.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -25,9 +28,11 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
+    Component, Emit, Prop, RefSite, Reference, SnippetId, Symbol, VueSemanticModel,
+    component_model, vue_model_from_source,
 };
 use camino::Utf8PathBuf;
+use either::Either;
 use std::rc::Rc;
 
 /// The Vue semantic model of the analyzed file, and which of its embedded
@@ -93,6 +98,11 @@ impl VueSemanticService {
     fn declares(&self, symbol: &Symbol) -> bool {
         symbol.snippet().map(|snippet| snippet.id()) == self.snippet
     }
+
+    /// Returns `true` when `reference` is written in the analyzed tree.
+    fn writes(&self, reference: &Reference) -> bool {
+        reference.snippet().map(|snippet| snippet.id()) == self.snippet
+    }
 }
 
 /// Builds the Vue semantic model and emits a query match for each component
@@ -126,6 +136,22 @@ impl Visitor for VueSemanticVisitor {
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
             }
+            for emit in component.emits().filter(|emit| service.declares(emit)) {
+                ctx.match_query(VueEventMatch(VueEventSite::Declaration(emit)));
+            }
+        }
+        // A `.vue` file is analyzed once per snippet, so reading only the
+        // references of the analyzed snippet avoids building a handle for
+        // every reference of the file each time.
+        let snippet = service.snippet.map(|id| service.model.snippet(id));
+        let references = match &snippet {
+            Some(snippet) => Either::Left(snippet.references()),
+            None => Either::Right(service.model.references()),
+        };
+        for reference in references
+            .filter(|reference| reference.site() == RefSite::EventName && service.writes(reference))
+        {
+            ctx.match_query(VueEventMatch(VueEventSite::Call(reference)));
         }
     }
 }
@@ -173,3 +199,37 @@ define_vue_query!(
     VuePropMatch,
     Prop
 );
+define_vue_query!(
+    /// Matches each event name written in an emit declaration or an emit call,
+    /// whatever syntax declares or emits the event.
+    VueEvent,
+    VueEventMatch,
+    VueEventSite
+);
+
+/// An event name written in the analyzed tree.
+#[derive(Clone, Debug)]
+pub enum VueEventSite {
+    /// An event a component declares, as in `defineEmits(['change'])`.
+    Declaration(Emit),
+    /// The event name passed to a call that emits the event, as in
+    /// `emit('change', value)`. Only names written as a string are matched.
+    Call(Reference),
+}
+
+impl VueEventSite {
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Declaration(emit) => emit.name(),
+            Self::Call(reference) => reference.name(),
+        }
+    }
+
+    /// The range of the event name, in the coordinates of the analyzed tree.
+    pub fn range(&self) -> TextRange {
+        match self {
+            Self::Declaration(emit) => emit.range(),
+            Self::Call(reference) => reference.range(),
+        }
+    }
+}

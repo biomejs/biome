@@ -8914,6 +8914,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSingleEventPayload": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-vue-single-event-payload",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSingleEventPayloadConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueToggleInsideTransition": {
 					"description": "Require the element inside a Vue \\<Transition> to be shown and hidden with v-if or v-show.\nSee https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
 					"anyOf": [
@@ -16271,6 +16278,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSingleEventPayloadOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSingleEventPayloadOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueToggleInsideTransitionOptions": {
 			"type": "object",
 			"properties": {
@@ -21642,6 +21658,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueSingleEventPayloadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSingleEventPayloadOptions" }
+			]
+		},
+		"UseVueSingleEventPayloadOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
