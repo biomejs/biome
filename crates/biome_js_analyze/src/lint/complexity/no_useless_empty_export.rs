@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_empty_export::NoUselessEmptyExportOptions;
 
@@ -21,6 +22,9 @@ declare_lint_rule! {
     /// > whose contents are available in the global scope.
     ///
     /// However, an `export {}` statement does nothing if there are any other top-level import or export in the file.
+    ///
+    /// Declaration files (`.d.ts`) are ignored. In a declaration file, every declaration is exported implicitly
+    /// unless the file contains an export declaration such as `export {}`, so the empty export is not useless there.
     ///
     /// ## Examples
     ///
@@ -61,6 +65,9 @@ impl Rule for NoUselessEmptyExport {
     type Options = NoUselessEmptyExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx.source_type::<JsFileSource>().language().is_definition_file() {
+            return None;
+        }
         let node = ctx.query();
         if is_empty_export(node) {
             let module_item_list = JsModuleItemList::cast(node.syntax().parent()?)?;

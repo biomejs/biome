@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_definition_file.d.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type { Options } from "./options";
+
+type PrivateType = Options;
+export type PublicType = PrivateType;
+
+// Without this empty export, PrivateType would also be exported.
+export {};
+
+```
