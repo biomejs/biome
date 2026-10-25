@@ -176,17 +176,17 @@ JsModule {
 ```
 object_expr_error_prop_name.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '/'.
+  × Expected a property, a shorthand property, a getter, a setter, or a method but instead found '/: 6, /'.
   
   > 1 │ let a = { /: 6, /: /foo/ }
-      │           ^
+      │           ^^^^^^^
     2 │ let b = {{}}
     3 │ 
   
   i Expected a property, a shorthand property, a getter, a setter, or a method here.
   
   > 1 │ let a = { /: 6, /: /foo/ }
-      │           ^
+      │           ^^^^^^^
     2 │ let b = {{}}
     3 │ 
   

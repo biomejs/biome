@@ -60,7 +60,6 @@
 
 #![deny(clippy::use_self)]
 
-#[cfg(any(test, feature = "bulk_lexer"))]
 mod bulk_lexer;
 mod parser;
 #[macro_use]
@@ -72,8 +71,6 @@ mod rewrite;
 mod span;
 mod state;
 pub mod syntax;
-#[cfg(not(feature = "bulk_lexer"))]
-mod token_source;
 
 pub(crate) use crate::ParsedSyntax::{Absent, Present};
 use crate::prelude::*;
