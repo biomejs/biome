@@ -13,6 +13,7 @@
 
 use biome_rowan::{TextRange, TextSize, TokenText};
 use enumflags2::{BitFlags, bitflags};
+use std::borrow::Cow;
 use std::ops::Range;
 use std::sync::Arc;
 
@@ -324,7 +325,10 @@ pub enum RootShape {
     Identifier,
     MemberChain,
     Call,
-    /// A string literal, or a template literal without substitutions.
+    /// A string literal, or a template literal without substitutions. The
+    /// text is written as in the source, between the quotes, with its escapes
+    /// kept: `'it\'s'` holds `it\'s`. See [`Snippet::string_value`] for the
+    /// value with the escapes resolved.
     String(Box<str>),
     Bool(bool),
     Null,
@@ -368,6 +372,7 @@ pub(crate) struct SnippetData {
     pub(crate) root: RootShape,
     pub(crate) fingerprint: u64,
     pub(crate) operands: Range<u32>,
+    pub(crate) has_comments: bool,
 }
 
 /// One operand of a logical condition. `a || (b && c)` has three operands in
@@ -967,6 +972,23 @@ impl VueSemanticModel {
             .map(|index| self.element(ElementId::new(index)))
     }
 
+    /// Returns the attribute or directive written at `host_range`.
+    ///
+    /// `host_range` must be the whole attribute without its surrounding
+    /// whitespace, such as the range of `:id="'foo'"`.
+    pub fn attr_at(&self, host_range: TextRange) -> Option<Attr> {
+        // Attributes are stored in source order and do not overlap.
+        let index = self
+            .data
+            .attrs
+            .partition_point(|attr| attr.range.start() < host_range.start());
+        let attr = self.data.attrs.get(index)?;
+        (attr.range == host_range).then(|| Attr {
+            data: self.data.clone(),
+            id: AttrId::new(index),
+        })
+    }
+
     /// Returns the reference written at `host_range`.
     pub fn reference_at(&self, host_range: TextRange) -> Option<Reference> {
         self.data
@@ -1420,6 +1442,42 @@ impl Snippet {
         self.row().fingerprint
     }
 
+    /// Whether the snippet contains a comment.
+    pub fn has_comments(&self) -> bool {
+        self.row().has_comments
+    }
+
+    /// Returns the value of the string at the root of the snippet, with its
+    /// escapes resolved: `it's` for `'it\'s'`.
+    ///
+    /// Returns `None` when the root isn't a string, and when the string has an
+    /// escape that stands for another character, such as `\n`, `\x41` or
+    /// `\0`, or a backslash that continues the string on the next line. The
+    /// escapes that remain stand for the escaped character itself, such as
+    /// `\'` and `\\`.
+    pub fn string_value(&self) -> Option<Cow<'_, str>> {
+        let RootShape::String(text) = self.root() else {
+            return None;
+        };
+        let Some(first_escape) = text.find('\\') else {
+            return Some(Cow::Borrowed(text));
+        };
+        let mut value = String::with_capacity(text.len());
+        value.push_str(&text[..first_escape]);
+        let mut chars = text[first_escape..].chars();
+        while let Some(char) = chars.next() {
+            if char != '\\' {
+                value.push(char);
+                continue;
+            }
+            match chars.next() {
+                Some(escaped) if !is_special_escape(escaped) => value.push(escaped),
+                _ => return None,
+            }
+        }
+        Some(Cow::Owned(value))
+    }
+
     /// The operands of the snippet's root, when it is a `||` or `&&`
     /// expression.
     pub fn operands(&self) -> &[Operand] {
@@ -1441,6 +1499,20 @@ impl Snippet {
             })
     }
 }
+
+/// Whether a backslash followed by `char` in a JavaScript string stands for
+/// something other than `char` itself: a control character, a character
+/// code, or nothing at all when the backslash continues the string on the
+/// next line.
+fn is_special_escape(char: char) -> bool {
+    char.is_ascii_digit() || SPECIAL_ESCAPES.binary_search(&char).is_ok()
+}
+
+/// The characters, other than digits, that make an escape special. Sorted, so
+/// [`is_special_escape`] can search it.
+const SPECIAL_ESCAPES: &[char] = &[
+    '\n', '\r', 'b', 'f', 'n', 'r', 't', 'u', 'v', 'x', '\u{2028}', '\u{2029}',
+];
 
 impl Scope {
     pub fn kind(&self) -> ScopeKind {
@@ -1998,5 +2070,22 @@ impl Component {
 
     pub fn registered_directives(&self) -> impl Iterator<Item = Symbol> + '_ {
         self.of_kind(SymbolKind::DirectiveRegistration)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SPECIAL_ESCAPES;
+
+    #[test]
+    fn special_escapes_are_sorted() {
+        for pair in SPECIAL_ESCAPES.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "{:?} must come after {:?}",
+                pair[0],
+                pair[1]
+            );
+        }
     }
 }
