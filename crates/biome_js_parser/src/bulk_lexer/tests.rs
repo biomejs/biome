@@ -32,7 +32,7 @@ fn check_with(source: &str, options: BulkLexOptions) -> BulkTokens {
     let tokens = BulkTokens::new(&mut JsLexer::from_str(source), options);
     let portable = BulkTokens::new_portable(&mut JsLexer::from_str(source), options);
     assert!(
-        tokens.starts == portable.starts && tokens.kinds == portable.kinds,
+        tokens.iter().eq(portable.iter()),
         "the portable passes disagree on {source:?}"
     );
     let mut reference = JsLexer::from_str(source);
@@ -40,14 +40,8 @@ fn check_with(source: &str, options: BulkLexOptions) -> BulkTokens {
 
     let mut expected_start = 0;
     let all: Vec<_> = tokens.iter().collect();
-    let (all, eof) = all.split_at(all.len() - 2);
-    assert_eq!(
-        eof,
-        [
-            (len, len, EOF as u16 | REGULAR),
-            (len, len, EOF as u16 | REGULAR)
-        ]
-    );
+    let (all, eof) = all.split_at(all.len() - 1);
+    assert_eq!(eof, [(len, len, EOF as u16 | REGULAR)]);
 
     for &(start, end, raw) in all {
         let describe = || {

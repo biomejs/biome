@@ -2275,7 +2275,6 @@ impl<'src> JsLexer<'src> {
 }
 
 /// Positions the lexer anywhere, for the bulk lexer, which lexes single tokens with it.
-#[cfg(any(test, feature = "bulk_lexer"))]
 impl JsLexer<'_> {
     /// Lexes the token at `position` in `context`, as if the previous tokens had left the
     /// lexer there with `after_newline` as its line-break state.
@@ -2305,11 +2304,6 @@ impl JsLexer<'_> {
         self.current_flags = flags;
         self.after_newline = false;
         self.re_lex(context)
-    }
-
-    /// Whether a line break separates the last non-trivia token from the lexer's position.
-    pub(crate) fn after_newline(&self) -> bool {
-        self.after_newline
     }
 
     /// Removes and returns the diagnostics reported after the first `len`.
