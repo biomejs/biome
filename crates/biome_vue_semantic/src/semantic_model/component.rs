@@ -1464,6 +1464,10 @@ impl Collector<'_, '_> {
             Origin::Computed
         } else if self.is_composition_call(&call, "useTemplateRef") {
             Origin::UseTemplateRef
+        } else if self.is_composition_call(&call, "useSlots") {
+            Origin::UseSlots
+        } else if self.is_composition_call(&call, "useAttrs") {
+            Origin::UseAttrs
         } else {
             return;
         };

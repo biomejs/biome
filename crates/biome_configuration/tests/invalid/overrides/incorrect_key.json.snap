@@ -16,16 +16,8 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   i Known keys:
   
   - includes
-  - javascript
-  - json
-  - css
-  - graphql
   - grit
-  - html
-  - markdown
-  - yaml
   - formatter
   - linter
   - assist
   - files
-  - plugins

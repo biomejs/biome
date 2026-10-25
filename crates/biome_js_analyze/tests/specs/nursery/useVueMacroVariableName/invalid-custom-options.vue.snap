@@ -1,0 +1,167 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-custom-options.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+import { useAttrs, useSlots } from "vue";
+
+const props = defineProps(["foo"]);
+const emit = defineEmits(["baz"]);
+const slots = defineSlots();
+const useSlotsResult = useSlots();
+const attrs = useAttrs();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-custom-options.vue:5:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of defineProps() is stored in props instead of customProps.
+  
+    3 │ import { useAttrs, useSlots } from "vue";
+    4 │ 
+  > 5 │ const props = defineProps(["foo"]);
+      │       ^^^^^
+    6 │ const emit = defineEmits(["baz"]);
+    7 │ const slots = defineSlots();
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to customProps.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to customProps.
+  
+     3  3 │   import { useAttrs, useSlots } from "vue";
+     4  4 │   
+     5    │ - const·props·=·defineProps(["foo"]);
+        5 │ + const·customProps·=·defineProps(["foo"]);
+     6  6 │   const emit = defineEmits(["baz"]);
+     7  7 │   const slots = defineSlots();
+  
+
+```
+
+```
+invalid-custom-options.vue:6:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of defineEmits() is stored in emit instead of customEmits.
+  
+    5 │ const props = defineProps(["foo"]);
+  > 6 │ const emit = defineEmits(["baz"]);
+      │       ^^^^
+    7 │ const slots = defineSlots();
+    8 │ const useSlotsResult = useSlots();
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to customEmits.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to customEmits.
+  
+     4  4 │   
+     5  5 │   const props = defineProps(["foo"]);
+     6    │ - const·emit·=·defineEmits(["baz"]);
+        6 │ + const·customEmits·=·defineEmits(["baz"]);
+     7  7 │   const slots = defineSlots();
+     8  8 │   const useSlotsResult = useSlots();
+  
+
+```
+
+```
+invalid-custom-options.vue:7:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of defineSlots() is stored in slots instead of customSlots.
+  
+    5 │ const props = defineProps(["foo"]);
+    6 │ const emit = defineEmits(["baz"]);
+  > 7 │ const slots = defineSlots();
+      │       ^^^^^
+    8 │ const useSlotsResult = useSlots();
+    9 │ const attrs = useAttrs();
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to customSlots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to customSlots.
+  
+     5  5 │   const props = defineProps(["foo"]);
+     6  6 │   const emit = defineEmits(["baz"]);
+     7    │ - const·slots·=·defineSlots();
+        7 │ + const·customSlots·=·defineSlots();
+     8  8 │   const useSlotsResult = useSlots();
+     9  9 │   const attrs = useAttrs();
+  
+
+```
+
+```
+invalid-custom-options.vue:8:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of useSlots() is stored in useSlotsResult instead of customUseSlots.
+  
+     6 │ const emit = defineEmits(["baz"]);
+     7 │ const slots = defineSlots();
+   > 8 │ const useSlotsResult = useSlots();
+       │       ^^^^^^^^^^^^^^
+     9 │ const attrs = useAttrs();
+    10 │ </script>
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to customUseSlots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to customUseSlots.
+  
+     6  6 │   const emit = defineEmits(["baz"]);
+     7  7 │   const slots = defineSlots();
+     8    │ - const·useSlotsResult·=·useSlots();
+        8 │ + const·customUseSlots·=·useSlots();
+     9  9 │   const attrs = useAttrs();
+    10 10 │   
+  
+
+```
+
+```
+invalid-custom-options.vue:9:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  × The result of useAttrs() is stored in attrs instead of customUseAttrs.
+  
+     7 │ const slots = defineSlots();
+     8 │ const useSlotsResult = useSlots();
+   > 9 │ const attrs = useAttrs();
+       │       ^^^^^
+    10 │ </script>
+    11 │ 
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to customUseAttrs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to customUseAttrs.
+  
+     7  7 │   const slots = defineSlots();
+     8  8 │   const useSlotsResult = useSlots();
+     9    │ - const·attrs·=·useAttrs();
+        9 │ + const·customUseAttrs·=·useAttrs();
+    10 10 │   
+  
+
+```

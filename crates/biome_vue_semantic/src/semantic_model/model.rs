@@ -459,6 +459,8 @@ pub enum Origin {
     DefineEmits,
     DefineModel,
     DefineSlots,
+    UseSlots,
+    UseAttrs,
     Ref,
     ShallowRef,
     UseTemplateRef,
