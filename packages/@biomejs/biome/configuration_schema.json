@@ -7549,6 +7549,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedConfigKeyCodesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedConfigKeyCodesOptions" }
+			]
+		},
+		"NoVueDeprecatedConfigKeyCodesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedScopedSlotsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8389,6 +8399,13 @@
 					"description": "Disallow default values for Boolean props in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-boolean-default",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueBooleanDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedConfigKeyCodes": {
+					"description": "Disallow the deprecated Vue.config.keyCodes option.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-config-key-codes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedConfigKeyCodesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13617,6 +13634,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDataObjectDeclarationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedConfigKeyCodesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedConfigKeyCodesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
