@@ -327,6 +327,7 @@ pub mod no_unnecessary_template_expression;
 pub mod no_unreachable;
 pub mod no_unreachable_super;
 pub mod no_unreadable_for_of_expression;
+pub mod no_unreadable_iife;
 pub mod no_unresolved_imports;
 pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_finally;

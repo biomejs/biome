@@ -1544,6 +1544,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noUnreadableIife",
+        TypeId::of::<biome_rule_options::no_unreadable_iife::NoUnreadableIifeOptions>(),
+    ));
+    result.push((
         "correctness",
         "noUnresolvedImports",
         TypeId::of::<biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions>(),
