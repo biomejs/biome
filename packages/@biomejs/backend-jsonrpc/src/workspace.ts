@@ -3163,6 +3163,11 @@ export interface Nursery {
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
+	 * Disallow using the return value of Array.prototype.push() and Array.prototype.unshift().
+	 * See https://biomejs.dev/linter/rules/no-return-array-push
+	 */
+	noReturnArrayPush?: NoReturnArrayPushConfiguration;
+	/**
 	 * Disallow return statements in Promise.prototype.finally() callbacks.
 	 * See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
@@ -6032,6 +6037,9 @@ export type NoReactObjectTypeAsDefaultPropConfiguration =
 export type NoRestrictedDependenciesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoRestrictedDependenciesOptions;
+export type NoReturnArrayPushConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReturnArrayPushOptions;
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
@@ -8684,6 +8692,14 @@ export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
 export interface RuleWithNoRestrictedDependenciesOptions {
 	level: RulePlainConfiguration;
 	options?: NoRestrictedDependenciesOptions;
+}
+export interface RuleWithNoReturnArrayPushOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoReturnArrayPushOptions;
 }
 export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
@@ -11374,6 +11390,7 @@ export type NoProcessExitOptions = {};
 export type NoPromiseExecutorReturnOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
+export type NoReturnArrayPushOptions = {};
 export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSelfNestedLayerOptions = {};
@@ -13189,6 +13206,7 @@ export type Category =
 	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactObjectTypeAsDefaultProp"
 	| "lint/nursery/noRestrictedDependencies"
+	| "lint/nursery/noReturnArrayPush"
 	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSelfNestedLayer"

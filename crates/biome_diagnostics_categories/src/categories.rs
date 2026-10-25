@@ -289,6 +289,7 @@ define_categories! {
     "lint/nursery/noReactNativeRawText": "https://biomejs.dev/linter/rules/no-react-native-raw-text",
     "lint/nursery/noReactObjectTypeAsDefaultProp": "https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop",
     "lint/nursery/noRestrictedDependencies": "https://biomejs.dev/linter/rules/no-restricted-dependencies",
+    "lint/nursery/noReturnArrayPush": "https://biomejs.dev/linter/rules/no-return-array-push",
     "lint/nursery/noReturnInFinally": "https://biomejs.dev/linter/rules/no-return-in-finally",
     "lint/nursery/noSelfImport": "https://biomejs.dev/linter/rules/no-self-import",
     "lint/nursery/noSelfNestedLayer": "https://biomejs.dev/linter/rules/no-self-nested-layer",
