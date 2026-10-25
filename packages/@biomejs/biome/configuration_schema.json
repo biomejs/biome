@@ -8843,6 +8843,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteEventDispatcherTypes": {
+					"description": "Require createEventDispatcher calls to declare the types of their events.\nSee https://biomejs.dev/linter/rules/use-svelte-event-dispatcher-types",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteEventDispatcherTypesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSvelteKitResolve": {
 					"description": "Require internal navigation in SvelteKit apps to use paths built with resolve().\nSee https://biomejs.dev/linter/rules/use-svelte-kit-resolve",
 					"anyOf": [
@@ -15858,6 +15865,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteEventDispatcherTypesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteEventDispatcherTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSvelteKitResolveOptions": {
 			"type": "object",
 			"properties": {
@@ -21132,6 +21148,16 @@
 			]
 		},
 		"UseStringStartsEndsWithOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteEventDispatcherTypesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteEventDispatcherTypesOptions" }
+			]
+		},
+		"UseSvelteEventDispatcherTypesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
