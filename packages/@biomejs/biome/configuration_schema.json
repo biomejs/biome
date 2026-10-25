@@ -7666,6 +7666,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueTemplateShadowConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueTemplateShadowOptions" }
+			]
+		},
+		"NoVueTemplateShadowOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Names that template variables may reuse from an outer scope.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8424,6 +8441,13 @@
 					"description": "Disallow Vue component events named after built-in browser events.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueShadowNativeEventsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueTemplateShadow": {
+					"description": "Disallow template variables that reuse the name of a variable from an outer scope.\nSee https://biomejs.dev/linter/rules/no-vue-template-shadow",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueTemplateShadowConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13733,6 +13757,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueShadowNativeEventsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueTemplateShadowOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueTemplateShadowOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
