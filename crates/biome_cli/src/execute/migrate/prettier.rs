@@ -10,9 +10,7 @@ use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
-use biome_formatter::{
-    AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle,
-};
+use biome_formatter::{AttributePosition, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -260,7 +258,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_ending: Some(value.end_of_line.into()),
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
-            bracket_spacing: Some(BracketSpacing::default()),
+            bracket_spacing: Some(value.bracket_spacing.into()),
             delimiter_spacing: None,
             expand: Some(value.object_wrap.into()),
             format_with_errors: Some(false.into()),
