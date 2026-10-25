@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validDefaultOrder.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup></script>
+<script></script>
+<template>
+  <div>
+    <style></style>
+    <script></script>
+  </div>
+</template>
+<docs></docs>
+<style></style>
+<style scoped></style>
+
+```

@@ -1,0 +1,119 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidCustomBlock.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template></template>
+<style>
+.first {}
+</style>
+<i18n locale="en"></i18n>
+<style>
+.second {}
+</style>
+<i18n locale="ja"></i18n>
+
+```
+
+# Diagnostics
+```
+invalidCustomBlock.vue:6:1 lint/nursery/useVueBlockOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The <i18n> block should be above the <style> block.
+  
+    4 │ .first {}
+    5 │ </style>
+  > 6 │ <i18n locale="en"></i18n>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <style>
+    8 │ .second {}
+  
+  i This <style> block should come after it.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template></template>
+  > 3 │ <style>
+      │ ^^^^^^^
+  > 4 │ .first {}
+  > 5 │ </style>
+      │ ^^^^^^^^
+    6 │ <i18n locale="en"></i18n>
+    7 │ <style>
+  
+  i Putting the blocks of every component in the same order makes components easier to read.
+  
+  i This project puts top-level blocks in this order: <template>, then <script>, then <i18n>, then <style>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the <i18n> block above the <style> block.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template></template>
+     3    │ - <style>
+     4    │ - .first·{}
+     5    │ - </style>
+     6    │ - <i18n·locale="en"></i18n>
+        3 │ + <i18n·locale="en"></i18n>
+        4 │ + <style>
+        5 │ + .first·{}
+        6 │ + </style>
+     7  7 │   <style>
+     8  8 │   .second {}
+  
+
+```
+
+```
+invalidCustomBlock.vue:10:1 lint/nursery/useVueBlockOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The <i18n> block should be above the <style> block.
+  
+     8 │ .second {}
+     9 │ </style>
+  > 10 │ <i18n locale="ja"></i18n>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i This <style> block should come after it.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template></template>
+  > 3 │ <style>
+      │ ^^^^^^^
+  > 4 │ .first {}
+  > 5 │ </style>
+      │ ^^^^^^^^
+    6 │ <i18n locale="en"></i18n>
+    7 │ <style>
+  
+  i Putting the blocks of every component in the same order makes components easier to read.
+  
+  i This project puts top-level blocks in this order: <template>, then <script>, then <i18n>, then <style>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the <i18n> block above the <style> block.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template></template>
+     3    │ - <style>
+     4    │ - .first·{}
+     5    │ - </style>
+     6    │ - <i18n·locale="en"></i18n>
+        3 │ + <i18n·locale="en"></i18n>
+        4 │ + <i18n·locale="ja"></i18n>
+     7  5 │   <style>
+     8    │ - .second·{}
+        6 │ + .first·{}
+     9  7 │   </style>
+    10    │ - <i18n·locale="ja"></i18n>
+        8 │ + <style>
+        9 │ + .second·{}
+       10 │ + </style>
+    11 11 │   
+  
+
+```
