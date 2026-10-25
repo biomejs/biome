@@ -1659,6 +1659,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUselessBind",
+        TypeId::of::<biome_rule_options::no_useless_bind::NoUselessBindOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUselessCall",
         TypeId::of::<biome_rule_options::no_useless_call::NoUselessCallOptions>(),
     ));
