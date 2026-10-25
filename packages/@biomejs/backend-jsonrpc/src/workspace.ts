@@ -3703,6 +3703,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Enforce a consistent style for v-slot in Vue templates.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style
+	 */
+	useVueConsistentVSlotStyle?: UseVueConsistentVSlotStyleConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
@@ -6326,6 +6331,9 @@ export type UseVueComponentIsConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueConsistentVSlotStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentVSlotStyleOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
@@ -9229,6 +9237,14 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueConsistentVSlotStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentVSlotStyleOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11630,6 +11646,25 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export interface UseVueConsistentVSlotStyleOptions {
+	/**
+	 * Preferred style for the default slot when `v-slot` is placed directly on a component,
+	 * as in `<MyComponent v-slot="props">`.
+	 * If omitted, `"v-slot"` is preferred.
+	 */
+	atComponent?: VueSlotStyle;
+	/**
+	 * Preferred style for the default slot on a `<template>` element,
+	 * as in `<template #default>`.
+	 * If omitted, `"shorthand"` is preferred.
+	 */
+	default?: VueSlotStyle;
+	/**
+	 * Preferred style for named slots, as in `<template #header>`.
+	 * If omitted, `"shorthand"` is preferred.
+	 */
+	named?: VueNamedSlotStyle;
+}
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
@@ -12558,6 +12593,14 @@ export type ComponentDefinitionStyle =
 	| "arrowFunction";
 export type EventHyphenation = "always" | "never";
 /**
+ * How a default slot is written.
+ */
+export type VueSlotStyle = "shorthand" | "longhand" | "v-slot";
+/**
+ * How a named slot is written.
+ */
+export type VueNamedSlotStyle = "shorthand" | "longhand";
+/**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
 export type PropertyAssignmentMode = "allow" | "deny";
@@ -13043,14 +13086,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13233,6 +13276,7 @@ export type Category =
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueConsistentVSlotStyle"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueToggleInsideTransition"
