@@ -21,6 +21,9 @@ declare_lint_rule! {
     ///
     /// ```astro,expect_diagnostic
     /// <div class={classes}></div>
+    /// ```
+    ///
+    /// ```astro,expect_diagnostic
     /// <div {class}></div>
     /// ```
     ///

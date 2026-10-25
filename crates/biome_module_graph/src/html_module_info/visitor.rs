@@ -137,20 +137,25 @@ impl HtmlModuleVisitor {
                     content_offset,
                     has_errors,
                 } => {
-                collect_css_classes(&css_root, &mut style_classes, &file_source, content_offset);
-                let css_info = CssModuleVisitor::new(css_root.clone()).visit();
-                imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
-                    range: import.range + content_offset,
-                    specifier: import.specifier.clone(),
-                    applicability: file_source.embedding_applicability(),
-                }));
-                collect_astro_style_references(
-                    &css_root,
-                    &file_source,
-                    has_errors,
-                    content_offset,
-                    &mut astro_styles,
-                );
+                    collect_css_classes(
+                        &css_root,
+                        &mut style_classes,
+                        &file_source,
+                        content_offset,
+                    );
+                    let css_info = CssModuleVisitor::new(css_root.clone()).visit();
+                    imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
+                        range: import.range + content_offset,
+                        specifier: import.specifier.clone(),
+                        applicability: file_source.embedding_applicability(),
+                    }));
+                    collect_astro_style_references(
+                        &css_root,
+                        &file_source,
+                        has_errors,
+                        content_offset,
+                        &mut astro_styles,
+                    );
                 }
                 PreparedHtmlSnippet::JavaScript {
                     root: js_root,
@@ -158,31 +163,31 @@ impl HtmlModuleVisitor {
                     content_offset,
                     has_errors,
                 } => {
-                self.collect_js_imports(&js_root, content_offset, &mut import_paths);
-                if file_source.as_embedding_kind().is_class_attribute() {
-                    let Some(root) = js_root.as_js_expression_template_root() else {
-                        has_unknown_astro_class_reference = true;
-                        continue;
-                    };
-                    let Some(expression) = root.expression() else {
-                        has_unknown_astro_class_reference = true;
-                        continue;
-                    };
-                    if !collect_astro_class_expression(
-                        &expression,
-                        file_source.as_embedding_kind().is_class_list_attribute(),
-                        &mut astro_class_references,
-                    ) {
-                        has_unknown_astro_class_reference = true;
+                    self.collect_js_imports(&js_root, content_offset, &mut import_paths);
+                    if file_source.as_embedding_kind().is_class_attribute() {
+                        let Some(root) = js_root.as_js_expression_template_root() else {
+                            has_unknown_astro_class_reference = true;
+                            continue;
+                        };
+                        let Some(expression) = root.expression() else {
+                            has_unknown_astro_class_reference = true;
+                            continue;
+                        };
+                        if !collect_astro_class_expression(
+                            &expression,
+                            file_source.as_embedding_kind().is_class_list_attribute(),
+                            &mut astro_class_references,
+                        ) {
+                            has_unknown_astro_class_reference = true;
+                        }
                     }
-                }
-                collect_astro_style_definitions(
-                    &js_root,
-                    &file_source,
-                    has_errors,
-                    content_offset,
-                    &mut astro_styles,
-                );
+                    collect_astro_style_definitions(
+                        &js_root,
+                        &file_source,
+                        has_errors,
+                        content_offset,
+                        &mut astro_styles,
+                    );
                 }
             }
         }

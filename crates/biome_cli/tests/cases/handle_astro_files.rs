@@ -1496,7 +1496,7 @@ fn astro_class_list_safe_fixes_are_idempotent() {
   "html": { "experimentalFullSupportEnabled": true },
   "linter": {
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "nursery": {
         "useAstroObjectClassList": "error",
         "useAstroSplitClassList": "error"
