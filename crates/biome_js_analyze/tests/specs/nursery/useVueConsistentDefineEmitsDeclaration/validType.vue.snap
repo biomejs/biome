@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: validType.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+const a = defineEmits<{
+	(e: "change", id: number): void;
+}>();
+
+const b = defineEmits<{
+	change: [id: number];
+}>();
+</script>
+
+```

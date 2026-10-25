@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: validNotSetup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script lang="ts">
+export default {
+	emits: ["change"],
+	setup() {
+		defineEmits(["change"]);
+	},
+};
+</script>
+
+```
