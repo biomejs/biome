@@ -531,9 +531,16 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
 }
 
 /// Returns whether sorting would reverse declarations that can affect the same property.
+/// For example, moving `margin` before an earlier `margin-top` would change which value wins.
+/// Such conflicts must prevent the sorting action; `noShorthandPropertyOverrides` reports
+/// shorthands that override earlier longhands, but does not cover every conflict checked here.
 fn contains_property_conflicts(nodes: &[AnyCssDeclarationOrRule]) -> bool {
     let mut later_properties = HashMap::new();
 
+    // Scan backwards so later declarations contribute their affected longhands and alias groups
+    // before earlier declarations are checked. Keep the lowest sort index for each affected
+    // property and vendor prefix: a larger index on an earlier declaration would reverse their
+    // relative order when sorted, potentially changing the cascade.
     for node in nodes.iter().rev() {
         let Some(prop_text) = &node
             .as_css_declaration_with_semicolon()
