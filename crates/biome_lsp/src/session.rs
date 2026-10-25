@@ -130,6 +130,7 @@ pub(crate) struct Session {
     /// Remembers which warnings we have shown for folders whose documents
     /// couldn't be opened because their configuration failed to load, so each
     /// warning is shown once per folder instead of every time a document is opened.
+    /// Cleared whenever the configuration is reloaded.
     notified_broken_configuration_folders: HashSet<(Utf8PathBuf, &'static str)>,
 
     /// Tracks whether the initialized() notification has been received
@@ -1031,6 +1032,9 @@ impl Session {
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
+        // Warn again about configurations that still fail to load after this reload.
+        self.notified_broken_configuration_folders.pin().clear();
+
         if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
             let config_file_path = config_path.to_path_buf();
