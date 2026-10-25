@@ -14,7 +14,8 @@
 //!    and decides from the tokens before a `/` or `<` whether it starts a regex or a JSX element.
 //! 3. `coalesce` merges the bytes of numbers and of operators longer than one byte.
 //! 4. `compress` writes the stream: the non-trivia tokens, keywords included, and the trivia
-//!    between them as the parser's tree takes it.
+//!    between them as the parser's tree takes it. It finds which starts are trivia, and the flags
+//!    that each token takes from the trivia before it, from the bitmaps of a block at once.
 //!
 //! The parser reads the tokens as this lexer decided them, a regex included. Each token records
 //! the lexing contexts in which [JsLexer] would return it as is, so that [BulkTokenSource] can
@@ -28,6 +29,7 @@
 
 mod carve;
 mod classify;
+mod compress;
 mod scan;
 mod stream;
 mod token_source;
@@ -37,16 +39,15 @@ mod tests;
 
 pub(crate) use token_source::{BulkTokenSource, BulkTokenSourceCheckpoint};
 
-use crate::lexer::{JsLexContext, JsLexer, TextRange, TextSize};
+use crate::lexer::{JsLexContext, JsLexer, TextSize};
 use biome_js_syntax::JsSyntaxKind::{self, *};
 use biome_languages::JsFileSource;
 use biome_languages::javascript::LanguageVariant;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::Lexer;
 use biome_parser::token_source::Trivia;
-use biome_rowan::TriviaPieceKind;
 use classify::{Block, classify};
-use scan::{BYTE_TOKENS, KEYWORD_KINDS, keyword, operator, scan_number};
+use scan::{operator, scan_number};
 use stream::Token;
 
 /// Mask of the [JsSyntaxKind] in a token's kind and flags.
@@ -134,10 +135,14 @@ impl BulkTokens {
             && std::arch::is_x86_feature_detected!("lzcnt")
             && std::arch::is_x86_feature_detected!("popcnt")
         {
+            if let Some(extract) = compress::Avx512Extract::new() {
+                // SAFETY: the CPU supports the features, as `extract` exists.
+                return unsafe { Self::new_with_avx512(lexer, options, extract) };
+            }
             // SAFETY: the CPU supports the features.
             return unsafe { Self::new_with_bit_instructions(lexer, options) };
         }
-        Self::new_portable(lexer, options)
+        Self::new_portable(lexer, options, compress::ScalarExtract)
     }
 
     /// [Self::new], compiled with the bit manipulation instructions of x86_64 CPUs since 2013,
@@ -148,17 +153,36 @@ impl BulkTokens {
     #[cfg(target_arch = "x86_64")]
     #[target_feature(enable = "avx2,bmi1,bmi2,lzcnt,popcnt")]
     unsafe fn new_with_bit_instructions(lexer: &mut JsLexer, options: BulkLexOptions) -> Self {
-        Self::new_portable(lexer, options)
+        Self::new_portable(lexer, options, compress::ScalarExtract)
+    }
+
+    /// [Self::new_with_bit_instructions], with AVX-512 too, which finds the offsets of the bits
+    /// of a bitmap without a loop.
+    ///
+    /// # Safety
+    /// The CPU must support AVX2, BMI1, BMI2, LZCNT and POPCNT, and AVX-512 F, BW and VBMI2.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx2,bmi1,bmi2,lzcnt,popcnt,avx512f,avx512bw,avx512vbmi2")]
+    unsafe fn new_with_avx512(
+        lexer: &mut JsLexer,
+        options: BulkLexOptions,
+        extract: compress::Avx512Extract,
+    ) -> Self {
+        Self::new_portable(lexer, options, extract)
     }
 
     #[inline(always)]
-    fn new_portable(lexer: &mut JsLexer, options: BulkLexOptions) -> Self {
+    fn new_portable(
+        lexer: &mut JsLexer,
+        options: BulkLexOptions,
+        extract: impl compress::Extract,
+    ) -> Self {
         let source = lexer.source().as_bytes();
         let blocks = classify(source);
         let mut pass = Pass::new(source, blocks, lexer, options);
         pass.carve();
         pass.coalesce();
-        pass.compress()
+        pass.compress(extract)
     }
 
     /// No tokens, so that [JsLexer] lexes every token.
@@ -207,9 +231,9 @@ impl BulkTokens {
             while let Some(piece) = trivia.next_if(|piece| u32::from(piece.offset()) < token.start)
             {
                 let kind = match piece.kind() {
-                    TriviaPieceKind::Newline => NEWLINE,
-                    TriviaPieceKind::Whitespace => WHITESPACE,
-                    TriviaPieceKind::SingleLineComment => COMMENT,
+                    biome_rowan::TriviaPieceKind::Newline => NEWLINE,
+                    biome_rowan::TriviaPieceKind::Whitespace => WHITESPACE,
+                    biome_rowan::TriviaPieceKind::SingleLineComment => COMMENT,
                     _ => MULTILINE_COMMENT,
                 };
                 let start = u32::from(piece.offset());
@@ -532,146 +556,5 @@ impl<'a, 'src> Pass<'a, 'src> {
             }
             start = end;
         }
-    }
-
-    /// Writes the start and kind of every token.
-    #[inline(always)]
-    fn compress(mut self) -> BulkTokens {
-        let overrides = self.merge_overrides();
-        let count: usize = self
-            .blocks
-            .iter()
-            .map(|block| block.starts.count_ones() as usize)
-            .sum();
-        let mut tokens: Vec<Token> = Vec::with_capacity(count + 1);
-        let mut trivia: Vec<Trivia> = Vec::with_capacity(count);
-        let source = self.source;
-        let mut next_override = 0;
-        // The trivia piece being read, whose end is the start of the next token: its kind and
-        // start, or `None` if the last token read wasn't trivia.
-        let mut piece: Option<(TriviaPieceKind, u32)> = None;
-        // What the trivia read since the last non-trivia token has in common, and its flags.
-        let mut gap = CONTEXTS;
-        let mut gap_flags = 0;
-        // Trivia after a token and before a line break is trailing.
-        let mut trailing = false;
-        for (index, block) in self.blocks.iter().enumerate() {
-            let mut bits = block.starts;
-            while bits != 0 {
-                let bit = bits.trailing_zeros() as usize;
-                bits &= bits - 1;
-                let start = index * 64 + bit;
-                // Pick the override or the kind of the first byte without a branch, as either is
-                // common.
-                let overridden = ((block.overridden >> bit) & 1) as usize;
-                // SAFETY: starts are offsets in the source.
-                let by_byte = BYTE_TOKENS[unsafe { *source.get_unchecked(start) } as usize];
-                // SAFETY: every overridden start has an override, and one more follows them.
-                let by_override = unsafe { *overrides.get_unchecked(next_override) };
-                let mut raw = if overridden != 0 {
-                    by_override
-                } else {
-                    by_byte
-                };
-                next_override += overridden;
-                if overridden == 0 && (block.lower_pair >> bit) & 1 != 0 {
-                    // An identifier, which may be a keyword.
-                    let end = if bits != 0 {
-                        index * 64 + bits.trailing_zeros() as usize
-                    } else {
-                        self.token_end(start)
-                    };
-                    raw = KEYWORD_KINDS[keyword(source, start, end) as usize];
-                }
-
-                let start = start as u32;
-                if let Some((kind, piece_start)) = piece.take() {
-                    trivia.push(Trivia::new(
-                        kind,
-                        TextRange::new(TextSize::from(piece_start), TextSize::from(start)),
-                        trailing,
-                    ));
-                } else if let Some(token) = tokens.last_mut() {
-                    token.end = start;
-                }
-                let trivia_kind = match kind(raw) {
-                    WHITESPACE => TriviaPieceKind::Whitespace,
-                    COMMENT => TriviaPieceKind::SingleLineComment,
-                    NEWLINE => {
-                        gap_flags |= LINE_BREAK;
-                        trailing = false;
-                        TriviaPieceKind::Newline
-                    }
-                    MULTILINE_COMMENT => {
-                        gap_flags |= LINE_BREAK;
-                        TriviaPieceKind::MultiLineComment
-                    }
-                    _ => {
-                        tokens.push(Token {
-                            word: u32::from(raw) | gap_flags | (gap & CONTEXTS) << GAP_SHIFT,
-                            start,
-                            end: start,
-                        });
-                        gap = CONTEXTS;
-                        gap_flags = 0;
-                        trailing = true;
-                        continue;
-                    }
-                };
-                piece = Some((trivia_kind, start));
-                gap &= u32::from(raw);
-                if raw & DIAGNOSTICS != 0 {
-                    gap_flags |= GAP_DIAGNOSTICS;
-                }
-            }
-        }
-
-        let len = self.source.len() as u32;
-        if let Some((kind, piece_start)) = piece {
-            trivia.push(Trivia::new(
-                kind,
-                TextRange::new(TextSize::from(piece_start), TextSize::from(len)),
-                trailing,
-            ));
-        } else if let Some(token) = tokens.last_mut() {
-            token.end = len;
-        }
-        tokens.push(Token {
-            word: EOF as u32 | u32::from(REGULAR) | gap_flags | (gap & CONTEXTS) << GAP_SHIFT,
-            start: len,
-            end: len,
-        });
-        // `carve` and `coalesce` each report in source order.
-        self.diagnostics.sort_by_key(|diagnostic| diagnostic.start);
-        BulkTokens {
-            tokens,
-            trivia,
-            diagnostics: self.diagnostics,
-        }
-    }
-
-    /// Returns the kinds of the carved and coalesced tokens that are still tokens, in source
-    /// order, followed by one extra kind that `compress` may read but never uses.
-    fn merge_overrides(&mut self) -> Vec<u16> {
-        let mut merged = Vec::with_capacity(self.carved.len() + self.coalesced.len() + 1);
-        let (mut carved, mut coalesced) = (0, 0);
-        while carved < self.carved.len() || coalesced < self.coalesced.len() {
-            let take_carved = match (self.carved.get(carved), self.coalesced.get(coalesced)) {
-                (Some(left), Some(right)) => left.start < right.start,
-                (left, _) => left.is_some(),
-            };
-            let token = if take_carved {
-                carved += 1;
-                self.carved[carved - 1]
-            } else {
-                coalesced += 1;
-                self.coalesced[coalesced - 1]
-            };
-            if self.is_start(token.start as usize) {
-                merged.push(token.kind);
-            }
-        }
-        merged.push(0);
-        merged
     }
 }
