@@ -496,6 +496,8 @@ impl FileFeaturesResult {
         "package-lock.json",
         // Yarn
         "yarn.lock",
+        // pnpm
+        "pnpm-lock.yaml",
     ];
 
     /// Checks whether this file is protected.
