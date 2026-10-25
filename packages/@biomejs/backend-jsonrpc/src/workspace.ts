@@ -3338,6 +3338,11 @@ export interface Nursery {
 	 */
 	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
 	/**
+	 * Disallow functions that return a call to themselves when a loop can do the same work.
+	 * See https://biomejs.dev/linter/rules/no-useless-recursion
+	 */
+	noUselessRecursion?: NoUselessRecursionConfiguration;
+	/**
 	 * Disallow splice() calls that have a simpler alternative.
 	 * See https://biomejs.dev/linter/rules/no-useless-splice
 	 */
@@ -6132,6 +6137,9 @@ export type NoUselessCallConfiguration =
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
+export type NoUselessRecursionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessRecursionOptions;
 export type NoUselessSpliceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessSpliceOptions;
@@ -8845,6 +8853,10 @@ export interface RuleWithNoUselessDateGetTimeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessDateGetTimeOptions;
 }
+export interface RuleWithNoUselessRecursionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessRecursionOptions;
+}
 export interface RuleWithNoUselessSpliceOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11435,6 +11447,7 @@ export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
+export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
@@ -13213,6 +13226,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
+	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
