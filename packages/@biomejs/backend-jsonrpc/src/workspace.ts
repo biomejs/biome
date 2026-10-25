@@ -3703,6 +3703,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Require a default value for optional props in Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-default-prop
+	 */
+	useVueDefaultProp?: UseVueDefaultPropConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
@@ -6326,6 +6331,9 @@ export type UseVueComponentIsConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueDefaultPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefaultPropOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
@@ -9229,6 +9237,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueDefaultPropOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefaultPropOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11630,6 +11642,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueDefaultPropOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
@@ -13043,14 +13056,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13233,13 +13246,14 @@ export type Category =
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueDefaultProp"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"

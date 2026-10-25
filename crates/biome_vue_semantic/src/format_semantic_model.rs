@@ -90,6 +90,17 @@ fn write_symbol(f: &mut Formatter<'_>, indent: &str, symbol: &Symbol) -> fmt::Re
                     range(default.host_range())
                 )?;
             }
+            let external = prop.external_default_sources();
+            if !external.is_empty() {
+                let names: Vec<_> = external
+                    .iter()
+                    .map(|source| format!("{source:?}"))
+                    .collect();
+                write!(f, " external-defaults={}", names.join("|"))?;
+            }
+            if !prop.has_complete_defaults() {
+                f.write_str(" defaults-open")?;
+            }
             if prop.validator_range().is_some() {
                 f.write_str(" validator")?;
             }

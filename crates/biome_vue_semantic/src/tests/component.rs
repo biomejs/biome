@@ -1,5 +1,7 @@
 use super::js_model;
-use crate::{ComponentKind, DefaultSource, Namespace, OpenReason, PropForm, PropType, Tri};
+use crate::{
+    ComponentKind, DefaultSource, DefaultSources, Namespace, OpenReason, PropForm, PropType, Tri,
+};
 use biome_languages::JsFileSource;
 
 fn setup_ts() -> JsFileSource {
@@ -92,6 +94,93 @@ fn every_prop_form_has_the_same_shape() {
         let defaults: Vec<_> = prop.defaults().collect();
         assert_eq!(defaults.len(), 1);
         assert_eq!(defaults[0].source(), source);
+    }
+}
+
+#[test]
+fn external_default_sources_follow_the_define_props_call() {
+    for (code, expected) in [
+        ("defineProps<{ a?: string }>()", DefaultSources::empty()),
+        (
+            "const props = defineProps<{ a?: string }>()",
+            DefaultSources::empty(),
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), {})",
+            DefaultSource::WithDefaults.into(),
+        ),
+        (
+            "const { a } = defineProps<{ a?: string }>()",
+            DefaultSource::Destructure.into(),
+        ),
+        (
+            "const { a } = withDefaults(defineProps<{ a?: string }>(), {})",
+            DefaultSource::WithDefaults | DefaultSource::Destructure,
+        ),
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.external_default_sources(), expected, "`{code}`");
+    }
+
+    let model = js_model(
+        "export default { props: { a: { type: String } } }",
+        JsFileSource::vue(),
+    );
+    let component = model.components().next().expect("a component");
+    let prop = component.props().next().expect("a prop");
+    assert!(prop.external_default_sources().is_empty());
+}
+
+#[test]
+fn unreadable_with_defaults_leaves_the_defaults_incomplete() {
+    for (code, complete) in [
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { a: '' })",
+            true,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { a: '' } as const)",
+            true,
+        ),
+        ("withDefaults(defineProps<{ a?: string }>())", true),
+        ("const { a = '' } = defineProps<{ a?: string }>()", true),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), defaults)",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), makeDefaults())",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { ...defaults })",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { [key]: '' })",
+            false,
+        ),
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.has_complete_defaults(), complete, "`{code}`");
+    }
+}
+
+#[test]
+fn unreadable_prop_options_leave_the_defaults_incomplete() {
+    for (code, complete) in [
+        ("export default { props: { a: { type: String } } }", true),
+        ("export default { props: { a: { ...shared } } }", false),
+        ("export default { props: { a: { [key]: 1 } } }", false),
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.has_complete_defaults(), complete, "`{code}`");
     }
 }
 
