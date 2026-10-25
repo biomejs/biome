@@ -3368,6 +3368,11 @@ export interface Nursery {
 	 */
 	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
 	/**
+	 * Disallow \<slot> elements whose slot isn't declared in the component's types.
+	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-slots
+	 */
+	noVueUndeclaredSlots?: NoVueUndeclaredSlotsConfiguration;
+	/**
 	 * Disallow declaring events that a Vue component never emits.
 	 * See https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations
 	 */
@@ -6125,6 +6130,9 @@ export type NoVueShadowNativeEventsConfiguration =
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
+export type NoVueUndeclaredSlotsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUndeclaredSlotsOptions;
 export type NoVueUnusedEmitDeclarationsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedEmitDeclarationsOptions;
@@ -8833,6 +8841,10 @@ export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
 }
+export interface RuleWithNoVueUndeclaredSlotsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUndeclaredSlotsOptions;
+}
 export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedEmitDeclarationsOptions;
@@ -11380,6 +11392,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	 */
 	globals?: string[];
 }
+export type NoVueUndeclaredSlotsOptions = {};
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
@@ -13043,14 +13056,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13148,6 +13161,7 @@ export type Category =
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
+	| "lint/nursery/noVueUndeclaredSlots"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
@@ -13237,9 +13251,9 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"

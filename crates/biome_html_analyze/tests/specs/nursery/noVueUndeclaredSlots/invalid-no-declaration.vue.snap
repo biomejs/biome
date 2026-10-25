@@ -1,0 +1,62 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-no-declaration.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const message = "hello";
+</script>
+
+<template>
+    <div>
+        <slot />
+        <slot name="header" :message="message" />
+    </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-no-declaration.vue:8:10 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot default isn't declared.
+  
+     6 │ <template>
+     7 │     <div>
+   > 8 │         <slot />
+       │          ^^^^
+     9 │         <slot name="header" :message="message" />
+    10 │     </div>
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-no-declaration.vue:9:21 lint/nursery/noVueUndeclaredSlots ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The slot header isn't declared.
+  
+     7 │     <div>
+     8 │         <slot />
+   > 9 │         <slot name="header" :message="message" />
+       │                     ^^^^^^
+    10 │     </div>
+    11 │ </template>
+  
+  i Without a declaration, the content that parent components pass to this slot isn't type checked.
+  
+  i Declare the slot with defineSlots() in <script setup>, or with the slots option of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
