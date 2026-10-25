@@ -3053,6 +3053,11 @@ export interface Nursery {
 	 */
 	noJsonUnsafeValues?: NoJsonUnsafeValuesConfiguration;
 	/**
+	 * Disallow unexplained numbers as the depth argument of Array.prototype.flat().
+	 * See https://biomejs.dev/linter/rules/no-magic-array-flat-depth
+	 */
+	noMagicArrayFlatDepth?: NoMagicArrayFlatDepthConfiguration;
+	/**
 	 * Disallow void when it does not discard a call's return value or a thenable.
 	 * See https://biomejs.dev/linter/rules/no-meaningless-void-operator
 	 */
@@ -5951,6 +5956,9 @@ export type NoJsRestrictedPropertiesConfiguration =
 export type NoJsonUnsafeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsonUnsafeValuesOptions;
+export type NoMagicArrayFlatDepthConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMagicArrayFlatDepthOptions;
 export type NoMeaninglessVoidOperatorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMeaninglessVoidOperatorOptions;
@@ -8544,6 +8552,10 @@ export interface RuleWithNoJsRestrictedPropertiesOptions {
 export interface RuleWithNoJsonUnsafeValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsonUnsafeValuesOptions;
+}
+export interface RuleWithNoMagicArrayFlatDepthOptions {
+	level: RulePlainConfiguration;
+	options?: NoMagicArrayFlatDepthOptions;
 }
 export interface RuleWithNoMeaninglessVoidOperatorOptions {
 	/**
@@ -11312,6 +11324,7 @@ export interface NoJsRestrictedPropertiesOptions {
 	entries?: RestrictedPropertyEntry[];
 }
 export type NoJsonUnsafeValuesOptions = {};
+export type NoMagicArrayFlatDepthOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
@@ -13110,6 +13123,7 @@ export type Category =
 	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
+	| "lint/nursery/noMagicArrayFlatDepth"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMisplacedListElements"
