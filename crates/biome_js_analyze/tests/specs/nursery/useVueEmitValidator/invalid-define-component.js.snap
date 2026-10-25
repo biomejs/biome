@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  emits: ["foo"],
+});
+
+export const Other = defineComponent({
+  emits: {
+    foo: null,
+    bar: (payload) => {},
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:5:11 lint/nursery/useVueEmitValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared without a validator function.
+  
+    4 │ export default defineComponent({
+  > 5 │   emits: ["foo"],
+      │           ^^^^^
+    6 │ });
+    7 │ 
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Declare the events in an object instead of an array, and give this event a function that receives its values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:10:5 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared with a value that turns off validation.
+  
+     8 │ export const Other = defineComponent({
+     9 │   emits: {
+  > 10 │     foo: null,
+       │     ^^^^^^^^^
+    11 │     bar: (payload) => {},
+    12 │   },
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+     8  8 │   export const Other = defineComponent({
+     9  9 │     emits: {
+    10    │ - ····foo:·null,
+       10 │ + ····foo:·()·=>·true,
+    11 11 │       bar: (payload) => {},
+    12 12 │     },
+  
+
+```
