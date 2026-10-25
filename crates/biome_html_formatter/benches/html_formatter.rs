@@ -1,4 +1,4 @@
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_html_formatter::{HtmlFormatOptions, format_node};
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::HtmlRoot;

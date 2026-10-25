@@ -1,5 +1,5 @@
 use biome_configuration::{Configuration, JsConfiguration};
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_service::{
     Workspace,

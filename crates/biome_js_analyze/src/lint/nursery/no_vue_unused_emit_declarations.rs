@@ -88,7 +88,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueUnusedEmitDeclarations {
-        version: "next",
+        version: "2.6.3",
         name: "noVueUnusedEmitDeclarations",
         language: "js",
         recommended: true,

@@ -1,0 +1,1309 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+
+	processNext();
+}
+
+while (true) {
+	if (!hasMore()) break;
+	processNext();
+}
+
+while (true) {
+	if (done) {
+		break;
+	}
+
+	processNext();
+}
+
+while (true) {
+	if (done || cancelled) {
+		break;
+	}
+
+	processNext();
+}
+
+while ((true)) {
+	if ((!(a && b))) {
+		break;
+	}
+	processNext();
+}
+
+while (true) {
+	if (!!value) {
+		break;
+	}
+	processNext();
+}
+
+while (true) {
+	if (a === b) {
+		break;
+	}
+	processNext();
+}
+
+while (true) {
+	if (() => {}) {
+		break;
+	}
+}
+
+while (true) { if (done) break; processNext(); }
+
+for (;;) {
+	if (!hasMore()) {
+		break;
+	}
+
+	processNext();
+}
+
+for (; true;) {
+	if (!hasMore()) break;
+	processNext();
+}
+
+for (;;) {
+	if (!hasMore()) {
+		break;
+	}
+
+	if (skip) {
+		continue;
+	}
+
+	processNext();
+}
+
+do {
+	if (!hasMore()) {
+		break;
+	}
+
+	processNext();
+} while (true);
+
+do {
+	if (!hasMore()) {
+		break;
+	}
+
+	if (skip) {
+		continue;
+	}
+
+	processNext();
+} while (true);
+
+do {
+	if (!hasMore()) break;
+	processNext();
+} while (true)
+
+do {
+	if (done || cancelled) {
+		break;
+	}
+
+	processNext();
+} while (true);
+
+// `break` statements of nested loops, `switch` statements, and functions don't stop the loop.
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+
+	for (const item of items) {
+		if (done(item)) {
+			break;
+		}
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+
+	switch (value) {
+		case 1:
+			break;
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+
+	function stop() {
+		while (done) {
+			break;
+		}
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+
+	const stop = () => {
+		for (;;) {
+			break;
+		}
+	};
+}
+
+outer: for (const item of items) {
+	while (true) {
+		if (!hasMore()) {
+			break;
+		}
+		if (skip) {
+			break outer;
+		}
+	}
+}
+
+// A `var` declared in the body is the same variable outside of it.
+while (true) {
+	if (done) {
+		break;
+	}
+
+	var done = true;
+	work();
+}
+
+// Variables declared inside the condition itself don't matter.
+while (true) {
+	if (((value) => value)(input)) {
+		break;
+	}
+	work();
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+for (;;) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+for (; true;) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+do {
+	if (!hasMore()) {
+		break;
+	}
+} while (true);
+
+async function* generator() {
+	while (true) {
+		if (!(await hasMore())) {
+			break;
+		}
+		yield next();
+	}
+}
+
+// Comments before the loop, after the loop, and in the rest of the body are kept.
+// Before the loop.
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+
+	// Process the remaining work.
+	processNext();
+} // After the loop.
+
+do {
+	if (!hasMore()) {
+		break;
+	}
+	processNext(); // Trailing comment.
+} while (true); // Preserve this comment.
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+	// Only a comment is left.
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    1 │ /* should generate diagnostics */
+    2 │ while (true) {
+  > 3 │ 	if (!hasMore()) {
+      │ 	^^^^^^^^^^^^^^^^^
+  > 4 │ 		break;
+  > 5 │ 	}
+      │ 	^
+    6 │ 
+    7 │ 	processNext();
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+      1   1 │   /* should generate diagnostics */
+      2     │ - while·(true)·{
+      3     │ - → if·(!hasMore())·{
+      4     │ - → → break;
+      5     │ - → }
+      6     │ - 
+          2 │ + while·(hasMore())·{
+      7   3 │     processNext();
+      8   4 │   }
+  
+
+```
+
+```
+invalid.js:11:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    10 │ while (true) {
+  > 11 │ 	if (!hasMore()) break;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	processNext();
+    13 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+      8   8 │   }
+      9   9 │   
+     10     │ - while·(true)·{
+     11     │ - → if·(!hasMore())·break;
+         10 │ + while·(hasMore())·{
+     12  11 │     processNext();
+     13  12 │   }
+  
+
+```
+
+```
+invalid.js:16:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    15 │ while (true) {
+  > 16 │ 	if (done) {
+       │ 	^^^^^^^^^^^
+  > 17 │ 		break;
+  > 18 │ 	}
+       │ 	^
+    19 │ 
+    20 │ 	processNext();
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     13  13 │   }
+     14  14 │   
+     15     │ - while·(true)·{
+     16     │ - → if·(done)·{
+     17     │ - → → break;
+     18     │ - → }
+     19     │ - 
+         15 │ + while·(!done)·{
+     20  16 │     processNext();
+     21  17 │   }
+  
+
+```
+
+```
+invalid.js:24:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    23 │ while (true) {
+  > 24 │ 	if (done || cancelled) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+  > 25 │ 		break;
+  > 26 │ 	}
+       │ 	^
+    27 │ 
+    28 │ 	processNext();
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     21  21 │   }
+     22  22 │   
+     23     │ - while·(true)·{
+     24     │ - → if·(done·||·cancelled)·{
+     25     │ - → → break;
+     26     │ - → }
+     27     │ - 
+         23 │ + while·(!(done·||·cancelled))·{
+     28  24 │     processNext();
+     29  25 │   }
+  
+
+```
+
+```
+invalid.js:32:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    31 │ while ((true)) {
+  > 32 │ 	if ((!(a && b))) {
+       │ 	^^^^^^^^^^^^^^^^^^
+  > 33 │ 		break;
+  > 34 │ 	}
+       │ 	^
+    35 │ 	processNext();
+    36 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     29  29 │   }
+     30  30 │   
+     31     │ - while·((true))·{
+     32     │ - → if·((!(a·&&·b)))·{
+     33     │ - → → break;
+     34     │ - → }
+         31 │ + while·(a·&&·b)·{
+     35  32 │     processNext();
+     36  33 │   }
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    38 │ while (true) {
+  > 39 │ 	if (!!value) {
+       │ 	^^^^^^^^^^^^^^
+  > 40 │ 		break;
+  > 41 │ 	}
+       │ 	^
+    42 │ 	processNext();
+    43 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     36  36 │   }
+     37  37 │   
+     38     │ - while·(true)·{
+     39     │ - → if·(!!value)·{
+     40     │ - → → break;
+     41     │ - → }
+         38 │ + while·(!value)·{
+     42  39 │     processNext();
+     43  40 │   }
+  
+
+```
+
+```
+invalid.js:46:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    45 │ while (true) {
+  > 46 │ 	if (a === b) {
+       │ 	^^^^^^^^^^^^^^
+  > 47 │ 		break;
+  > 48 │ 	}
+       │ 	^
+    49 │ 	processNext();
+    50 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     43  43 │   }
+     44  44 │   
+     45     │ - while·(true)·{
+     46     │ - → if·(a·===·b)·{
+     47     │ - → → break;
+     48     │ - → }
+         45 │ + while·(!(a·===·b))·{
+     49  46 │     processNext();
+     50  47 │   }
+  
+
+```
+
+```
+invalid.js:53:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    52 │ while (true) {
+  > 53 │ 	if (() => {}) {
+       │ 	^^^^^^^^^^^^^^^
+  > 54 │ 		break;
+  > 55 │ 	}
+       │ 	^
+    56 │ }
+    57 │ 
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     50  50 │   }
+     51  51 │   
+     52     │ - while·(true)·{
+     53     │ - → if·(()·=>·{})·{
+     54     │ - → → break;
+     55     │ - → }
+     56     │ - }
+         52 │ + while·(!(()·=>·{}))·{}
+     57  53 │   
+     58  54 │   while (true) { if (done) break; processNext(); }
+  
+
+```
+
+```
+invalid.js:58:16 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    56 │ }
+    57 │ 
+  > 58 │ while (true) { if (done) break; processNext(); }
+       │                ^^^^^^^^^^^^^^^^
+    59 │ 
+    60 │ for (;;) {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     56  56 │   }
+     57  57 │   
+     58     │ - while·(true)·{·if·(done)·break;·processNext();·}
+         58 │ + while·(!done)·{·processNext();·}
+     59  59 │   
+     60  60 │   for (;;) {
+  
+
+```
+
+```
+invalid.js:61:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    60 │ for (;;) {
+  > 61 │ 	if (!hasMore()) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 62 │ 		break;
+  > 63 │ 	}
+       │ 	^
+    64 │ 
+    65 │ 	processNext();
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     58  58 │   while (true) { if (done) break; processNext(); }
+     59  59 │   
+     60     │ - for·(;;)·{
+     61     │ - → if·(!hasMore())·{
+     62     │ - → → break;
+     63     │ - → }
+     64     │ - 
+         60 │ + while·(hasMore())·{
+     65  61 │     processNext();
+     66  62 │   }
+  
+
+```
+
+```
+invalid.js:69:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    68 │ for (; true;) {
+  > 69 │ 	if (!hasMore()) break;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 	processNext();
+    71 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     66  66 │   }
+     67  67 │   
+     68     │ - for·(;·true;)·{
+     69     │ - → if·(!hasMore())·break;
+         68 │ + while·(hasMore())·{
+     70  69 │     processNext();
+     71  70 │   }
+  
+
+```
+
+```
+invalid.js:74:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    73 │ for (;;) {
+  > 74 │ 	if (!hasMore()) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 75 │ 		break;
+  > 76 │ 	}
+       │ 	^
+    77 │ 
+    78 │ 	if (skip) {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     71  71 │   }
+     72  72 │   
+     73     │ - for·(;;)·{
+     74     │ - → if·(!hasMore())·{
+     75     │ - → → break;
+     76     │ - → }
+     77     │ - 
+         73 │ + while·(hasMore())·{
+     78  74 │     if (skip) {
+     79  75 │       continue;
+  
+
+```
+
+```
+invalid.js:86:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    85 │ do {
+  > 86 │ 	if (!hasMore()) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 87 │ 		break;
+  > 88 │ 	}
+       │ 	^
+    89 │ 
+    90 │ 	processNext();
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     83  83 │   }
+     84  84 │   
+     85     │ - do·{
+     86     │ - → if·(!hasMore())·{
+     87     │ - → → break;
+     88     │ - → }
+     89     │ - 
+         85 │ + while·(hasMore())·{
+     90  86 │     processNext();
+     91     │ - }·while·(true);
+         87 │ + }
+     92  88 │   
+     93  89 │   do {
+  
+
+```
+
+```
+invalid.js:94:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    93 │ do {
+  > 94 │ 	if (!hasMore()) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 95 │ 		break;
+  > 96 │ 	}
+       │ 	^
+    97 │ 
+    98 │ 	if (skip) {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     91  91 │   } while (true);
+     92  92 │   
+     93     │ - do·{
+     94     │ - → if·(!hasMore())·{
+     95     │ - → → break;
+     96     │ - → }
+     97     │ - 
+         93 │ + while·(hasMore())·{
+     98  94 │     if (skip) {
+     99  95 │       continue;
+    ······· │ 
+    101  97 │   
+    102  98 │     processNext();
+    103     │ - }·while·(true);
+         99 │ + }
+    104 100 │   
+    105 101 │   do {
+  
+
+```
+
+```
+invalid.js:106:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    105 │ do {
+  > 106 │ 	if (!hasMore()) break;
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    107 │ 	processNext();
+    108 │ } while (true)
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    103 103 │   } while (true);
+    104 104 │   
+    105     │ - do·{
+    106     │ - → if·(!hasMore())·break;
+        105 │ + while·(hasMore())·{
+    107 106 │     processNext();
+    108     │ - }·while·(true)
+        107 │ + }
+    109 108 │   
+    110 109 │   do {
+  
+
+```
+
+```
+invalid.js:111:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    110 │ do {
+  > 111 │ 	if (done || cancelled) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+  > 112 │ 		break;
+  > 113 │ 	}
+        │ 	^
+    114 │ 
+    115 │ 	processNext();
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    108 108 │   } while (true)
+    109 109 │   
+    110     │ - do·{
+    111     │ - → if·(done·||·cancelled)·{
+    112     │ - → → break;
+    113     │ - → }
+    114     │ - 
+    115     │ - → processNext();
+    116     │ - }·while·(true);
+        110 │ + while·(!(done·||·cancelled))·{
+        111 │ + → processNext();
+        112 │ + }
+    117 113 │   
+    118 114 │   // `break` statements of nested loops, `switch` statements, and functions don't stop the loop.
+  
+
+```
+
+```
+invalid.js:120:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    118 │ // `break` statements of nested loops, `switch` statements, and functions don't stop the loop.
+    119 │ while (true) {
+  > 120 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 121 │ 		break;
+  > 122 │ 	}
+        │ 	^
+    123 │ 
+    124 │ 	for (const item of items) {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    117 117 │   
+    118 118 │   // `break` statements of nested loops, `switch` statements, and functions don't stop the loop.
+    119     │ - while·(true)·{
+    120     │ - → if·(!hasMore())·{
+    121     │ - → → break;
+    122     │ - → }
+    123     │ - 
+        119 │ + while·(hasMore())·{
+    124 120 │     for (const item of items) {
+    125 121 │       if (done(item)) {
+  
+
+```
+
+```
+invalid.js:132:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    131 │ while (true) {
+  > 132 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 133 │ 		break;
+  > 134 │ 	}
+        │ 	^
+    135 │ 
+    136 │ 	switch (value) {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    129 129 │   }
+    130 130 │   
+    131     │ - while·(true)·{
+    132     │ - → if·(!hasMore())·{
+    133     │ - → → break;
+    134     │ - → }
+    135     │ - 
+        131 │ + while·(hasMore())·{
+    136 132 │     switch (value) {
+    137 133 │       case 1:
+  
+
+```
+
+```
+invalid.js:143:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    142 │ while (true) {
+  > 143 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 144 │ 		break;
+  > 145 │ 	}
+        │ 	^
+    146 │ 
+    147 │ 	function stop() {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    140 140 │   }
+    141 141 │   
+    142     │ - while·(true)·{
+    143     │ - → if·(!hasMore())·{
+    144     │ - → → break;
+    145     │ - → }
+    146     │ - 
+        142 │ + while·(hasMore())·{
+    147 143 │     function stop() {
+    148 144 │       while (done) {
+  
+
+```
+
+```
+invalid.js:155:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    154 │ while (true) {
+  > 155 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 156 │ 		break;
+  > 157 │ 	}
+        │ 	^
+    158 │ 
+    159 │ 	const stop = () => {
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    152 152 │   }
+    153 153 │   
+    154     │ - while·(true)·{
+    155     │ - → if·(!hasMore())·{
+    156     │ - → → break;
+    157     │ - → }
+    158     │ - 
+        154 │ + while·(hasMore())·{
+    159 155 │     const stop = () => {
+    160 156 │       for (;;) {
+  
+
+```
+
+```
+invalid.js:168:3 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    166 │ outer: for (const item of items) {
+    167 │ 	while (true) {
+  > 168 │ 		if (!hasMore()) {
+        │ 		^^^^^^^^^^^^^^^^^
+  > 169 │ 			break;
+  > 170 │ 		}
+        │ 		^
+    171 │ 		if (skip) {
+    172 │ 			break outer;
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    165 165 │   
+    166 166 │   outer: for (const item of items) {
+    167     │ - → while·(true)·{
+    168     │ - → → if·(!hasMore())·{
+    169     │ - → → → break;
+    170     │ - → → }
+        167 │ + → while·(hasMore())·{
+    171 168 │       if (skip) {
+    172 169 │         break outer;
+  
+
+```
+
+```
+invalid.js:179:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    177 │ // A `var` declared in the body is the same variable outside of it.
+    178 │ while (true) {
+  > 179 │ 	if (done) {
+        │ 	^^^^^^^^^^^
+  > 180 │ 		break;
+  > 181 │ 	}
+        │ 	^
+    182 │ 
+    183 │ 	var done = true;
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    176 176 │   
+    177 177 │   // A `var` declared in the body is the same variable outside of it.
+    178     │ - while·(true)·{
+    179     │ - → if·(done)·{
+    180     │ - → → break;
+    181     │ - → }
+    182     │ - 
+        178 │ + while·(!done)·{
+    183 179 │     var done = true;
+    184 180 │     work();
+  
+
+```
+
+```
+invalid.js:189:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    187 │ // Variables declared inside the condition itself don't matter.
+    188 │ while (true) {
+  > 189 │ 	if (((value) => value)(input)) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 190 │ 		break;
+  > 191 │ 	}
+        │ 	^
+    192 │ 	work();
+    193 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    186 186 │   
+    187 187 │   // Variables declared inside the condition itself don't matter.
+    188     │ - while·(true)·{
+    189     │ - → if·(((value)·=>·value)(input))·{
+    190     │ - → → break;
+    191     │ - → }
+        188 │ + while·(!((value)·=>·value)(input))·{
+    192 189 │     work();
+    193 190 │   }
+  
+
+```
+
+```
+invalid.js:196:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    195 │ while (true) {
+  > 196 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 197 │ 		break;
+  > 198 │ 	}
+        │ 	^
+    199 │ }
+    200 │ 
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    193 193 │   }
+    194 194 │   
+    195     │ - while·(true)·{
+    196     │ - → if·(!hasMore())·{
+    197     │ - → → break;
+    198     │ - → }
+    199     │ - }
+        195 │ + while·(hasMore())·{}
+    200 196 │   
+    201 197 │   for (;;) {
+  
+
+```
+
+```
+invalid.js:202:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    201 │ for (;;) {
+  > 202 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 203 │ 		break;
+  > 204 │ 	}
+        │ 	^
+    205 │ }
+    206 │ 
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    199 199 │   }
+    200 200 │   
+    201     │ - for·(;;)·{
+    202     │ - → if·(!hasMore())·{
+    203     │ - → → break;
+    204     │ - → }
+    205     │ - }
+        201 │ + while·(hasMore())·{}
+    206 202 │   
+    207 203 │   for (; true;) {
+  
+
+```
+
+```
+invalid.js:208:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    207 │ for (; true;) {
+  > 208 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 209 │ 		break;
+  > 210 │ 	}
+        │ 	^
+    211 │ }
+    212 │ 
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    205 205 │   }
+    206 206 │   
+    207     │ - for·(;·true;)·{
+    208     │ - → if·(!hasMore())·{
+    209     │ - → → break;
+    210     │ - → }
+    211     │ - }
+        207 │ + while·(hasMore())·{}
+    212 208 │   
+    213 209 │   do {
+  
+
+```
+
+```
+invalid.js:214:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    213 │ do {
+  > 214 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 215 │ 		break;
+  > 216 │ 	}
+        │ 	^
+    217 │ } while (true);
+    218 │ 
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    211 211 │   }
+    212 212 │   
+    213     │ - do·{
+    214     │ - → if·(!hasMore())·{
+    215     │ - → → break;
+    216     │ - → }
+    217     │ - }·while·(true);
+        213 │ + while·(hasMore())·{}
+    218 214 │   
+    219 215 │   async function* generator() {
+  
+
+```
+
+```
+invalid.js:221:3 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    219 │ async function* generator() {
+    220 │ 	while (true) {
+  > 221 │ 		if (!(await hasMore())) {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 222 │ 			break;
+  > 223 │ 		}
+        │ 		^
+    224 │ 		yield next();
+    225 │ 	}
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    218 218 │   
+    219 219 │   async function* generator() {
+    220     │ - → while·(true)·{
+    221     │ - → → if·(!(await·hasMore()))·{
+    222     │ - → → → break;
+    223     │ - → → }
+        220 │ + → while·(await·hasMore())·{
+    224 221 │       yield next();
+    225 222 │     }
+  
+
+```
+
+```
+invalid.js:231:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    229 │ // Before the loop.
+    230 │ while (true) {
+  > 231 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 232 │ 		break;
+  > 233 │ 	}
+        │ 	^
+    234 │ 
+    235 │ 	// Process the remaining work.
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    228 228 │   // Comments before the loop, after the loop, and in the rest of the body are kept.
+    229 229 │   // Before the loop.
+    230     │ - while·(true)·{
+    231     │ - → if·(!hasMore())·{
+    232     │ - → → break;
+    233     │ - → }
+    234     │ - 
+        230 │ + while·(hasMore())·{
+    235 231 │     // Process the remaining work.
+    236 232 │     processNext();
+  
+
+```
+
+```
+invalid.js:240:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    239 │ do {
+  > 240 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 241 │ 		break;
+  > 242 │ 	}
+        │ 	^
+    243 │ 	processNext(); // Trailing comment.
+    244 │ } while (true); // Preserve this comment.
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    237 237 │   } // After the loop.
+    238 238 │   
+    239     │ - do·{
+    240     │ - → if·(!hasMore())·{
+    241     │ - → → break;
+    242     │ - → }
+    243     │ - → processNext();·//·Trailing·comment.
+    244     │ - }·while·(true);·//·Preserve·this·comment.
+        239 │ + while·(hasMore())·{
+        240 │ + → processNext();·//·Trailing·comment.
+        241 │ + }·//·Preserve·this·comment.
+    245 242 │   
+    246 243 │   while (true) {
+  
+
+```
+
+```
+invalid.js:247:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    246 │ while (true) {
+  > 247 │ 	if (!hasMore()) {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 248 │ 		break;
+  > 249 │ 	}
+        │ 	^
+    250 │ 	// Only a comment is left.
+    251 │ }
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    244 244 │   } while (true); // Preserve this comment.
+    245 245 │   
+    246     │ - while·(true)·{
+    247     │ - → if·(!hasMore())·{
+    248     │ - → → break;
+    249     │ - → }
+        246 │ + while·(hasMore())·{
+    250 247 │     // Only a comment is left.
+    251 248 │   }
+  
+
+```

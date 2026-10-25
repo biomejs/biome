@@ -63,6 +63,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions>(),
     ));
     result.push((
+        "nursery",
+        "noArraySortForMinMax",
+        TypeId::of::<biome_rule_options::no_array_sort_for_min_max::NoArraySortForMinMaxOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
@@ -183,6 +188,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "noConsole",
         TypeId::of::<biome_rule_options::no_console::NoConsoleOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noConsoleSpaces",
+        TypeId::of::<biome_rule_options::no_console_spaces::NoConsoleSpacesOptions>(),
     ));
     result.push((
         "correctness",
@@ -814,6 +824,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_loop_func::NoLoopFuncOptions>(),
     ));
     result.push((
+        "nursery",
+        "noMagicArrayFlatDepth",
+        TypeId::of::<biome_rule_options::no_magic_array_flat_depth::NoMagicArrayFlatDepthOptions>(),
+    ));
+    result.push((
         "style",
         "noMagicNumbers",
         TypeId::of::<biome_rule_options::no_magic_numbers::NoMagicNumbersOptions>(),
@@ -943,6 +958,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("a11y", "noNoninteractiveElementToInteractiveRole", TypeId::of::<biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions>()));
     result.push(("a11y", "noNoninteractiveTabindex", TypeId::of::<biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions>()));
     result.push(("correctness", "noNonoctalDecimalEscape", TypeId::of::<biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions>()));
+    result.push((
+        "nursery",
+        "noNull",
+        TypeId::of::<biome_rule_options::no_null::NoNullOptions>(),
+    ));
     result.push((
         "nursery",
         "noObjectConstructor",
@@ -1194,6 +1214,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_restricted_types::NoRestrictedTypesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noReturnArrayPush",
+        TypeId::of::<biome_rule_options::no_return_array_push::NoReturnArrayPushOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noReturnAssign",
         TypeId::of::<biome_rule_options::no_return_assign::NoReturnAssignOptions>(),
@@ -1338,6 +1363,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noSvelteInspect",
         TypeId::of::<biome_rule_options::no_svelte_inspect::NoSvelteInspectOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noSvelteInternal",
+        TypeId::of::<biome_rule_options::no_svelte_internal::NoSvelteInternalOptions>(),
     ));
     result.push((
         "nursery",
@@ -1529,6 +1559,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noUnreadableIife",
+        TypeId::of::<biome_rule_options::no_unreadable_iife::NoUnreadableIifeOptions>(),
+    ));
+    result.push((
         "correctness",
         "noUnresolvedImports",
         TypeId::of::<biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions>(),
@@ -1700,6 +1735,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_useless_label::NoUselessLabelOptions>(),
     ));
     result.push(("complexity", "noUselessLoneBlockStatements", TypeId::of::<biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions>()));
+    result.push((
+        "nursery",
+        "noUselessRecursion",
+        TypeId::of::<biome_rule_options::no_useless_recursion::NoUselessRecursionOptions>(),
+    ));
     result.push((
         "suspicious",
         "noUselessRegexBackrefs",
@@ -1889,6 +1929,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "noVueVTextVHtmlOnComponent", TypeId::of::<biome_rule_options::no_vue_v_text_v_html_on_component::NoVueVTextVHtmlOnComponentOptions>()));
     result.push((
+        "nursery",
+        "noVueWatchAfterAwait",
+        TypeId::of::<biome_rule_options::no_vue_watch_after_await::NoVueWatchAfterAwaitOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noWith",
         TypeId::of::<biome_rule_options::no_with::NoWithOptions>(),
@@ -1897,6 +1942,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noXorAsExponentiation",
         TypeId::of::<biome_rule_options::no_xor_as_exponentiation::NoXorAsExponentiationOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noYamlBooleanKeys",
+        TypeId::of::<biome_rule_options::no_yaml_boolean_keys::NoYamlBooleanKeysOptions>(),
     ));
     result.push((
         "style",
@@ -1997,6 +2047,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "suspicious",
         "useBiomeIgnoreFolder",
         TypeId::of::<biome_rule_options::use_biome_ignore_folder::UseBiomeIgnoreFolderOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useBlockStatementOverIife",
+        TypeId::of::<
+            biome_rule_options::use_block_statement_over_iife::UseBlockStatementOverIifeOptions,
+        >(),
     ));
     result.push((
         "style",
@@ -2737,6 +2794,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_strict_mode::UseStrictModeOptions>(),
     ));
     result.push(("nursery", "useStringStartsEndsWith", TypeId::of::<biome_rule_options::use_string_starts_ends_with::UseStringStartsEndsWithOptions>()));
+    result.push(("nursery", "useSvelteEventDispatcherTypes", TypeId::of::<biome_rule_options::use_svelte_event_dispatcher_types::UseSvelteEventDispatcherTypesOptions>()));
     result.push((
         "nursery",
         "useSvelteKitResolve",
@@ -2900,6 +2958,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueBaseImport",
         TypeId::of::<biome_rule_options::use_vue_base_import::UseVueBaseImportOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useVueComponentIs",
+        TypeId::of::<biome_rule_options::use_vue_component_is::UseVueComponentIsOptions>(),
+    ));
     result.push(("style", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
     result.push(("nursery", "useVueConsistentEventHyphenation", TypeId::of::<biome_rule_options::use_vue_consistent_event_hyphenation::UseVueConsistentEventHyphenationOptions>()));
     result.push((
@@ -2931,6 +2994,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueNextTickPromise",
         TypeId::of::<biome_rule_options::use_vue_next_tick_promise::UseVueNextTickPromiseOptions>(),
     ));
+    result.push(("nursery", "useVueToggleInsideTransition", TypeId::of::<biome_rule_options::use_vue_toggle_inside_transition::UseVueToggleInsideTransitionOptions>()));
     result.push((
         "nursery",
         "useVueTypedRef",
@@ -2940,6 +3004,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "correctness",
         "useVueVForKey",
         TypeId::of::<biome_rule_options::use_vue_v_for_key::UseVueVForKeyOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueVOnExact",
+        TypeId::of::<biome_rule_options::use_vue_v_on_exact::UseVueVOnExactOptions>(),
     ));
     result.push(("correctness", "useVueValidTemplateRoot", TypeId::of::<biome_rule_options::use_vue_valid_template_root::UseVueValidTemplateRootOptions>()));
     result.push((
@@ -3006,6 +3075,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "complexity",
         "useWhile",
         TypeId::of::<biome_rule_options::use_while::UseWhileOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useWhileLoopCondition",
+        TypeId::of::<biome_rule_options::use_while_loop_condition::UseWhileLoopConditionOptions>(),
     ));
     result.push((
         "correctness",

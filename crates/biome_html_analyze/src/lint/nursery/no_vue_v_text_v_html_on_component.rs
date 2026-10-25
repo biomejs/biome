@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// - [Vue `v-html` directive](https://vuejs.org/api/built-in-directives.html#v-html)
     /// - [Vue fallthrough attributes](https://vuejs.org/guide/components/attrs.html)
     pub NoVueVTextVHtmlOnComponent {
-        version: "next",
+        version: "2.6.3",
         name: "noVueVTextVHtmlOnComponent",
         language: "html",
         recommended: true,

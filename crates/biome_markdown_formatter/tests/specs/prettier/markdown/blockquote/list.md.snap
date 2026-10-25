@@ -32,11 +32,8 @@ info: markdown/blockquote/list.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,14 +5,12 @@
- >     across multiple lines
- >     > quote in nested list in quote
- >     > with multiple lines
--
+@@ -8,11 +8,10 @@
+ 
  - > quote in list
    > with multiple lines
 -  >
@@ -62,6 +59,7 @@ info: markdown/blockquote/list.md
 >     across multiple lines
 >     > quote in nested list in quote
 >     > with multiple lines
+
 - > quote in list
   > with multiple lines
   > - list item in quote in list

@@ -60,7 +60,7 @@ use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
 use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
@@ -494,6 +494,8 @@ impl FileFeaturesResult {
         // NPM
         "npm-shrinkwrap.json",
         "package-lock.json",
+        // pnpm
+        "pnpm-lock.yaml",
         // Yarn
         "yarn.lock",
     ];

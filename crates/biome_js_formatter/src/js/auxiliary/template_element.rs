@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::prelude::tag::Tag;
+use biome_formatter::rowan::Tag;
 use biome_formatter::{
     CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer, format_args, write,
 };

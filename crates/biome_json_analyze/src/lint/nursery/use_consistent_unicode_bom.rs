@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentUnicodeBom {
-        version: "next",
+        version: "2.6.3",
         name: "useConsistentUnicodeBom",
         language: "json",
         sources: &[RuleSource::Eslint("unicode-bom").same()],

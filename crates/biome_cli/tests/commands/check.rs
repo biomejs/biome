@@ -199,13 +199,14 @@ fn maximum_diagnostics() {
             .iter()
             .filter(|m| m.level == LogLevel::Error)
             .count(),
-        20_usize
+        // 20 diagnostics, the max-diagnostics warning, and the summary
+        22_usize
     );
 
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
@@ -221,6 +222,46 @@ fn maximum_diagnostics() {
         console,
         result,
     ));
+}
+
+#[test]
+fn summary_is_printed_to_stderr() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
+
+    let (_, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let messages = &console.out_buffer;
+
+    assert!(
+        messages.iter().all(|m| m.level == LogLevel::Error),
+        "expected every message to be printed to stderr: {messages:?}"
+    );
+
+    let error_contents: Vec<_> = messages
+        .iter()
+        .map(|m| markup_to_string(markup! {{m.content}}))
+        .collect();
+
+    assert!(
+        error_contents
+            .iter()
+            .any(|content| content.contains("Skipped") && content.contains("suggested fixes")),
+        "{error_contents:#?}"
+    );
+    assert!(
+        error_contents
+            .iter()
+            .any(|content| content.contains("Checked"))
+    );
 }
 
 #[test]

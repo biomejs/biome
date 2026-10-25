@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoPlaywrightNthMethods {
-        version: "next",
+        version: "2.6.3",
         name: "noPlaywrightNthMethods",
         language: "js",
         sources: &[RuleSource::EslintPlaywright("no-nth-methods").same()],

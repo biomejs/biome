@@ -3,14 +3,15 @@ use crate::context::HtmlFormatContext;
 use biome_formatter::comments::{CommentKind, SourceComment};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{
+use biome_formatter::rowan::prelude::{
     Tag, empty_line, expand_parent, format_with, hard_line_break, line_suffix,
     should_nestle_adjacent_doc_comments, space, text,
 };
 
+use biome_formatter::rowan::FormatElement;
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatRefWithRule,
-    FormatResult, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatRefWithRule, FormatResult,
+    LINE_TERMINATORS, normalize_newlines,
 };
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
 use biome_rowan::{Direction, SyntaxElement, TextRange};

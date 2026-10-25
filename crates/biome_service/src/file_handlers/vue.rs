@@ -12,7 +12,8 @@ use crate::file_handlers::{
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
 use biome_db::AnyParsedSource;
-use biome_formatter::{Printed, SourceMapGeneration};
+use biome_formatter::SourceMapGeneration;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};

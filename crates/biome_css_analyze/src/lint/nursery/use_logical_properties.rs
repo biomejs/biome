@@ -1,5 +1,5 @@
 use crate::CssRuleAction;
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssFunction, AnyCssGenericPropertyValueOrExpression, AnyCssValue, CssFunction,
@@ -129,6 +129,10 @@ declare_lint_rule! {
         version: "2.5.15",
         name: "useLogicalProperties",
         language: "css",
+        sources: &[
+            RuleSource::Stylelint("csstools/use-logical").same(),
+            RuleSource::Stylelint("liberty/use-logical-spec").same(),
+        ],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

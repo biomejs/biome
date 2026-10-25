@@ -84,7 +84,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessSplice {
-        version: "next",
+        version: "2.6.3",
         name: "noUselessSplice",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-unnecessary-splice").same()],

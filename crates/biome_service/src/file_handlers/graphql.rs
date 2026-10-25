@@ -26,9 +26,10 @@ use biome_configuration::graphql::{
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
 };
 use biome_db::AnyParsedSource;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    QuoteStyle, TrailingNewline,
+    BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_graphql_analyze::{analyze, analyze_snippet};

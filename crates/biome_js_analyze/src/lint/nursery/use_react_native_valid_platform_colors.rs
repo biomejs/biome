@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseReactNativeValidPlatformColors {
-        version: "next",
+        version: "2.6.3",
         name: "useReactNativeValidPlatformColors",
         language: "js",
         sources: &[RuleSource::EslintReactNative("platform-colors").same()],

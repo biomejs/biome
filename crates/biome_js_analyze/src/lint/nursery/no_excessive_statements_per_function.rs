@@ -246,7 +246,9 @@ declare_node_union! {
 /// class static blocks.
 fn count_statements(body: &JsFunctionBody) -> usize {
     let mut count = body.directives().len() + body.statements().len();
-    let mut events = body.syntax().preorder();
+    let mut events = body
+        .syntax()
+        .preorder_of_kinds(AnyStatementCountBoundary::KIND_SET.union(JsBlockStatement::KIND_SET));
     while let Some(event) = events.next() {
         let WalkEvent::Enter(node) = event else {
             continue;
@@ -274,7 +276,9 @@ fn is_top_level(function: &AnyStatementCountBoundary) -> bool {
 /// Expression-bodied arrow functions are top-level functions too.
 fn has_multiple_top_level_functions(root: &AnyJsRoot) -> bool {
     let mut count = 0;
-    let mut events = root.syntax().preorder();
+    let mut events = root
+        .syntax()
+        .preorder_of_kinds(AnyStatementCountBoundary::KIND_SET);
     while let Some(event) = events.next() {
         let WalkEvent::Enter(node) = event else {
             continue;

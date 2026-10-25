@@ -15,7 +15,7 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
     let mut builder = SemanticModelBuilder::new(root.clone());
 
     let root = root.syntax();
-    for node in root.preorder() {
+    for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {
         match node {
             biome_css_syntax::WalkEvent::Enter(node) => {
                 extractor.enter(&node);

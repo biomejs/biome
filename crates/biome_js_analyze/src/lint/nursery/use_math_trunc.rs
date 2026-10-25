@@ -84,7 +84,7 @@ declare_lint_rule! {
     /// - If you want to disallow bitwise operators entirely, see [`noBitwiseOperators`](https://biomejs.dev/linter/rules/no-bitwise-operators/).
     ///
     pub UseMathTrunc {
-        version: "next",
+        version: "2.6.3",
         name: "useMathTrunc",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-math-trunc").same()],

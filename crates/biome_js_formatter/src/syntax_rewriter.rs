@@ -466,7 +466,8 @@ mod tests {
     use super::JsFormatSyntaxRewriter;
     use crate::JsFormatLanguage;
     use crate::{JsFormatOptions, TextRange};
-    use biome_formatter::{SourceMapGeneration, SourceMarker, TransformSourceMap};
+    use biome_formatter::rowan::SourceMarker;
+    use biome_formatter::{SourceMapGeneration, TransformSourceMap};
     use biome_js_parser::{JsParserOptions, parse, parse_module};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsIdentifierExpression,

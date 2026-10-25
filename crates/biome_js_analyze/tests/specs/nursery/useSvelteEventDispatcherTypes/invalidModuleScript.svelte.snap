@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidModuleScript.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script module lang="ts">
+	import { createEventDispatcher } from 'svelte';
+
+	export function createDispatcher() {
+		return createEventDispatcher();
+	}
+</script>
+
+```
+
+# Diagnostics
+```
+invalidModuleScript.svelte:6:10 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+    5 │ 	export function createDispatcher() {
+  > 6 │ 		return createEventDispatcher();
+      │ 		       ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	}
+    8 │ </script>
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

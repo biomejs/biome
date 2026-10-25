@@ -3473,6 +3473,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArraySortForMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArraySortForMinMaxOptions" }
+			]
+		},
+		"NoArraySortForMinMaxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAssignInExpressionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3757,6 +3767,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"NoConsoleSpacesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConsoleSpacesOptions" }
+			]
+		},
+		"NoConsoleSpacesOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"NoConstAssignConfiguration": {
@@ -5207,6 +5227,16 @@
 			]
 		},
 		"NoLoopFuncOptions": { "type": "object", "additionalProperties": false },
+		"NoMagicArrayFlatDepthConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMagicArrayFlatDepthOptions" }
+			]
+		},
+		"NoMagicArrayFlatDepthOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMagicNumbersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5510,6 +5540,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNullConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNullOptions" }
+			]
+		},
+		"NoNullOptions": { "type": "object", "additionalProperties": false },
 		"NoObjectConstructorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6067,6 +6104,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoReturnArrayPushConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReturnArrayPushOptions" }
+			]
+		},
+		"NoReturnArrayPushOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReturnAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6370,6 +6417,16 @@
 			]
 		},
 		"NoSvelteInspectOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoSvelteInternalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteInternalOptions" }
+			]
+		},
+		"NoSvelteInternalOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6888,6 +6945,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnreadableIifeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnreadableIifeOptions" }
+			]
+		},
+		"NoUnreadableIifeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnresolvedImportsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7321,6 +7388,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessRecursionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessRecursionOptions" }
+			]
+		},
+		"NoUselessRecursionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessRegexBackrefsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7710,6 +7787,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueWatchAfterAwaitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueWatchAfterAwaitOptions" }
+			]
+		},
+		"NoVueWatchAfterAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7724,6 +7811,16 @@
 			]
 		},
 		"NoXorAsExponentiationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoYamlBooleanKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoYamlBooleanKeysOptions" }
+			]
+		},
+		"NoYamlBooleanKeysOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -7823,6 +7920,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noArraySortForMinMax": {
+					"description": "Disallow sorting an array only to read its smallest or largest value.\nSee https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArraySortForMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroConflictingSetDirectives": {
 					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
 					"anyOf": [
@@ -7855,6 +7959,13 @@
 					"description": "Forbid the use of Bun builtin modules.\nSee https://biomejs.dev/linter/rules/no-bun-modules",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoBunModulesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConsoleSpaces": {
+					"description": "Disallow leading and trailing spaces in console method arguments.\nSee https://biomejs.dev/linter/rules/no-console-spaces",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConsoleSpacesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7949,6 +8060,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMagicArrayFlatDepth": {
+					"description": "Disallow unexplained numbers as the depth argument of Array.prototype.flat().\nSee https://biomejs.dev/linter/rules/no-magic-array-flat-depth",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMagicArrayFlatDepthConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMeaninglessVoidOperator": {
 					"description": "Disallow void when it does not discard a call's return value or a thenable.\nSee https://biomejs.dev/linter/rules/no-meaningless-void-operator",
 					"anyOf": [
@@ -8009,6 +8127,13 @@
 					"description": "Disallow disabling zoom with user-scalable=no in the \\<meta name=\"viewport\"> element.\nSee https://biomejs.dev/linter/rules/no-non-scalable-viewport",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNonScalableViewportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNull": {
+					"description": "Disallow the use of the null literal.\nSee https://biomejs.dev/linter/rules/no-null",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNullConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8082,6 +8207,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReturnArrayPush": {
+					"description": "Disallow using the return value of Array.prototype.push() and Array.prototype.unshift().\nSee https://biomejs.dev/linter/rules/no-return-array-push",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReturnArrayPushConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReturnInFinally": {
 					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
@@ -8149,6 +8281,13 @@
 					"description": "Disallow the use of the $inspect rune.\nSee https://biomejs.dev/linter/rules/no-svelte-inspect",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteInspectConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteInternal": {
+					"description": "Disallow importing from svelte/internal.\nSee https://biomejs.dev/linter/rules/no-svelte-internal",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteInternalConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8250,6 +8389,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnreadableIife": {
+					"description": "Disallow immediately called arrow functions whose body is wrapped in parentheses.\nSee https://biomejs.dev/linter/rules/no-unreadable-iife",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnreadableIifeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnsafeIframeSandbox": {
 					"description": "Disallow allow-scripts together with allow-same-origin in an iframe sandbox.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
 					"anyOf": [
@@ -8310,6 +8456,13 @@
 					"description": "Disallow calling .getTime() on a date before passing it to the Date constructor.\nSee https://biomejs.dev/linter/rules/no-useless-date-get-time",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessDateGetTimeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessRecursion": {
+					"description": "Disallow functions that return a call to themselves when a loop can do the same work.\nSee https://biomejs.dev/linter/rules/no-useless-recursion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessRecursionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8404,10 +8557,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueWatchAfterAwait": {
+					"description": "Disallow creating Vue watchers after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-watch-after-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueWatchAfterAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noXorAsExponentiation": {
 					"description": "Disallow the bitwise XOR operator where exponentiation was likely intended.\nSee https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoXorAsExponentiationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noYamlBooleanKeys": {
+					"description": "Disallow boolean values as keys in YAML.\nSee https://biomejs.dev/linter/rules/no-yaml-boolean-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoYamlBooleanKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8450,6 +8617,13 @@
 					"description": "Enforce the use of bigint literals over the BigInt() constructor.\nSee https://biomejs.dev/linter/rules/use-bigint-literals",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseBigintLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useBlockStatementOverIife": {
+					"description": "Prefer block statements over functions that are called immediately only to create a scope.\nSee https://biomejs.dev/linter/rules/use-block-statement-over-iife",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBlockStatementOverIifeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8737,6 +8911,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteEventDispatcherTypes": {
+					"description": "Require createEventDispatcher calls to declare the types of their events.\nSee https://biomejs.dev/linter/rules/use-svelte-event-dispatcher-types",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteEventDispatcherTypesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSvelteKitResolve": {
 					"description": "Require internal navigation in SvelteKit apps to use paths built with resolve().\nSee https://biomejs.dev/linter/rules/use-svelte-kit-resolve",
 					"anyOf": [
@@ -8821,6 +9002,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueComponentIs": {
+					"description": "Require \\<component> elements to bind the is attribute.\nSee https://biomejs.dev/linter/rules/use-vue-component-is",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueComponentIsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentEventHyphenation": {
 					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
 					"anyOf": [
@@ -8835,10 +9023,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueToggleInsideTransition": {
+					"description": "Require the element inside a Vue \\<Transition> to be shown and hidden with v-if or v-show.\nSee https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueToggleInsideTransitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTypedRef": {
 					"description": "Require a type for refs created with ref() or shallowRef() in TypeScript.\nSee https://biomejs.dev/linter/rules/use-vue-typed-ref",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueVOnExact": {
+					"description": "Enforce the .exact modifier on v-on directives when another listener for the same event needs more modifier keys.\nSee https://biomejs.dev/linter/rules/use-vue-v-on-exact",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVOnExactConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useWhileLoopCondition": {
+					"description": "Require the condition that ends a loop to be written in the while statement.\nSee https://biomejs.dev/linter/rules/use-while-loop-condition",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseWhileLoopConditionConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -9739,6 +9948,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoArraySortForMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArraySortForMinMaxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoAssignInExpressionsOptions": {
 			"type": "object",
 			"properties": {
@@ -10016,6 +10238,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoConsoleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConsoleSpacesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConsoleSpacesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11314,6 +11549,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoMagicArrayFlatDepthOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMagicArrayFlatDepthOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoMagicNumbersOptions": {
 			"type": "object",
 			"properties": {
@@ -11633,6 +11877,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNonoctalDecimalEscapeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNullOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNullOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12164,6 +12421,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoReturnArrayPushOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReturnArrayPushOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoReturnAssignOptions": {
 			"type": "object",
 			"properties": {
@@ -12449,6 +12719,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteInspectOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteInternalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteInternalOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12850,6 +13129,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUnreadableIifeOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnreadableIifeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUnresolvedImportsOptions": {
 			"type": "object",
 			"properties": {
@@ -13237,6 +13529,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessLoneBlockStatementsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessRecursionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessRecursionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13665,6 +13966,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueWatchAfterAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueWatchAfterAwaitOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoWithOptions": {
 			"type": "object",
 			"properties": {
@@ -13683,6 +13993,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoXorAsExponentiationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoYamlBooleanKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoYamlBooleanKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13940,6 +14259,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseBiomeIgnoreFolderOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseBlockStatementOverIifeOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBlockStatementOverIifeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15645,6 +15977,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteEventDispatcherTypesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteEventDispatcherTypesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSvelteKitResolveOptions": {
 			"type": "object",
 			"properties": {
@@ -15998,6 +16339,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueComponentIsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueComponentIsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -16105,6 +16455,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueToggleInsideTransitionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueToggleInsideTransitionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTypedRefOptions": {
 			"type": "object",
 			"properties": {
@@ -16119,6 +16478,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueVForKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueVOnExactOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVOnExactOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -16256,6 +16624,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueVaporOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseWhileLoopConditionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseWhileLoopConditionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -18786,6 +19167,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseBlockStatementOverIifeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBlockStatementOverIifeOptions" }
+			]
+		},
+		"UseBlockStatementOverIifeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseBlockStatementsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -20872,6 +21263,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSvelteEventDispatcherTypesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteEventDispatcherTypesOptions" }
+			]
+		},
+		"UseSvelteEventDispatcherTypesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseSvelteKitResolveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -21270,6 +21671,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseVueComponentIsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueComponentIsOptions" }
+			]
+		},
+		"UseVueComponentIsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueConsistentDefinePropsDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -21428,6 +21839,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseVueToggleInsideTransitionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueToggleInsideTransitionOptions" }
+			]
+		},
+		"UseVueToggleInsideTransitionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueTypedRefConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -21445,6 +21866,16 @@
 			]
 		},
 		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
+		"UseVueVOnExactConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVOnExactOptions" }
+			]
+		},
+		"UseVueVOnExactOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidTemplateRootConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -21585,6 +22016,16 @@
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
 				{ "$ref": "#/$defs/RuleWithUseWhileOptions" }
 			]
+		},
+		"UseWhileLoopConditionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseWhileLoopConditionOptions" }
+			]
+		},
+		"UseWhileLoopConditionOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseWhileOptions": { "type": "object", "additionalProperties": false },
 		"UseYieldConfiguration": {
