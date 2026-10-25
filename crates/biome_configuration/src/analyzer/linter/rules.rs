@@ -707,6 +707,7 @@ pub enum RuleName {
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
     UseVueConsistentVBindStyle,
+    UseVueConsistentVForDelimiter,
     UseVueConsistentVOnStyle,
     UseVueDefineMacrosOrder,
     UseVueHyphenatedAttributes,
@@ -1361,6 +1362,7 @@ impl RuleName {
             }
             Self::UseVueConsistentEventHyphenation => "useVueConsistentEventHyphenation",
             Self::UseVueConsistentVBindStyle => "useVueConsistentVBindStyle",
+            Self::UseVueConsistentVForDelimiter => "useVueConsistentVForDelimiter",
             Self::UseVueConsistentVOnStyle => "useVueConsistentVOnStyle",
             Self::UseVueDefineMacrosOrder => "useVueDefineMacrosOrder",
             Self::UseVueHyphenatedAttributes => "useVueHyphenatedAttributes",
@@ -2007,6 +2009,7 @@ impl RuleName {
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Style,
+            Self::UseVueConsistentVForDelimiter => RuleGroup::Nursery,
             Self::UseVueConsistentVOnStyle => RuleGroup::Style,
             Self::UseVueDefineMacrosOrder => RuleGroup::Style,
             Self::UseVueHyphenatedAttributes => RuleGroup::Style,
@@ -2666,6 +2669,7 @@ impl std::str::FromStr for RuleName {
             }
             "useVueConsistentEventHyphenation" => Ok(Self::UseVueConsistentEventHyphenation),
             "useVueConsistentVBindStyle" => Ok(Self::UseVueConsistentVBindStyle),
+            "useVueConsistentVForDelimiter" => Ok(Self::UseVueConsistentVForDelimiter),
             "useVueConsistentVOnStyle" => Ok(Self::UseVueConsistentVOnStyle),
             "useVueDefineMacrosOrder" => Ok(Self::UseVueDefineMacrosOrder),
             "useVueHyphenatedAttributes" => Ok(Self::UseVueHyphenatedAttributes),
