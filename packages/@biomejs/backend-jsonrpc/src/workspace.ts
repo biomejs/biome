@@ -3333,6 +3333,11 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	 * Disallow asynchronous code in Vue computed properties.
+	 * See https://biomejs.dev/linter/rules/no-vue-async-computed
+	 */
+	noVueAsyncComputed?: NoVueAsyncComputedConfiguration;
+	/**
 	 * Disallow default values for Boolean props in Vue components.
 	 * See https://biomejs.dev/linter/rules/no-vue-boolean-default
 	 */
@@ -6104,6 +6109,9 @@ export type NoUselessSpliceConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoVueAsyncComputedConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueAsyncComputedOptions;
 export type NoVueBooleanDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueBooleanDefaultOptions;
@@ -8797,6 +8805,10 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoVueAsyncComputedOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueAsyncComputedOptions;
+}
 export interface RuleWithNoVueBooleanDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueBooleanDefaultOptions;
@@ -11366,6 +11378,13 @@ export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export interface NoVueAsyncComputedOptions {
+	/**
+	 * Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as
+	 * asynchronous, such as `z` from the Zod validation library.
+	 */
+	ignoreObjects?: string[];
+}
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
@@ -13043,14 +13062,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13139,6 +13158,7 @@ export type Category =
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noVueAsyncComputed"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
