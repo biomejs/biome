@@ -1,0 +1,380 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-html="foo">bar</div>
+  <div v-html="foo">{{ bar }}</div>
+  <div v-html="foo"><span /></div>
+  <div v-html="foo"><!-- bar --></div>
+  <div v-html="foo">
+    <!-- this is a test -->
+    <span>foo</span>
+    bar
+  </div>
+  <div v-text="foo">bar</div>
+  <p class="a" v-text="foo" v-html="bar">baz</p>
+  <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+  <div v-html="foo">bar <!-- trailing --></div>
+  <div v-html="foo"> <!-- leading --> bar</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-html="foo">bar</div>
+      │                     ^^^
+    4 │   <div v-html="foo">{{ bar }}</div>
+    5 │   <div v-html="foo"><span /></div>
+  
+  i This directive replaces the content of the element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-html="foo">bar</div>
+      │        ^^^^^^^^^^^^
+    4 │   <div v-html="foo">{{ bar }}</div>
+    5 │   <div v-html="foo"><span /></div>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    3 │ ··<div·v-html="foo">bar</div>
+      │                     ---      
+
+```
+
+```
+invalid.vue:4:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    2 │ <template>
+    3 │   <div v-html="foo">bar</div>
+  > 4 │   <div v-html="foo">{{ bar }}</div>
+      │                     ^^^^^^^^^
+    5 │   <div v-html="foo"><span /></div>
+    6 │   <div v-html="foo"><!-- bar --></div>
+  
+  i This directive replaces the content of the element.
+  
+    2 │ <template>
+    3 │   <div v-html="foo">bar</div>
+  > 4 │   <div v-html="foo">{{ bar }}</div>
+      │        ^^^^^^^^^^^^
+    5 │   <div v-html="foo"><span /></div>
+    6 │   <div v-html="foo"><!-- bar --></div>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    4 │ ··<div·v-html="foo">{{·bar·}}</div>
+      │                     ---------      
+
+```
+
+```
+invalid.vue:5:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    3 │   <div v-html="foo">bar</div>
+    4 │   <div v-html="foo">{{ bar }}</div>
+  > 5 │   <div v-html="foo"><span /></div>
+      │                     ^^^^^^^^
+    6 │   <div v-html="foo"><!-- bar --></div>
+    7 │   <div v-html="foo">
+  
+  i This directive replaces the content of the element.
+  
+    3 │   <div v-html="foo">bar</div>
+    4 │   <div v-html="foo">{{ bar }}</div>
+  > 5 │   <div v-html="foo"><span /></div>
+      │        ^^^^^^^^^^^^
+    6 │   <div v-html="foo"><!-- bar --></div>
+    7 │   <div v-html="foo">
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    5 │ ··<div·v-html="foo"><span·/></div>
+      │                     --------      
+
+```
+
+```
+invalid.vue:6:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    4 │   <div v-html="foo">{{ bar }}</div>
+    5 │   <div v-html="foo"><span /></div>
+  > 6 │   <div v-html="foo"><!-- bar --></div>
+      │                     ^^^^^^^^^^^^
+    7 │   <div v-html="foo">
+    8 │     <!-- this is a test -->
+  
+  i This directive replaces the content of the element.
+  
+    4 │   <div v-html="foo">{{ bar }}</div>
+    5 │   <div v-html="foo"><span /></div>
+  > 6 │   <div v-html="foo"><!-- bar --></div>
+      │        ^^^^^^^^^^^^
+    7 │   <div v-html="foo">
+    8 │     <!-- this is a test -->
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    6 │ ··<div·v-html="foo"><!--·bar·--></div>
+      │                     ------------      
+
+```
+
+```
+invalid.vue:7:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+     5 │   <div v-html="foo"><span /></div>
+     6 │   <div v-html="foo"><!-- bar --></div>
+   > 7 │   <div v-html="foo">
+       │                     
+   > 8 │     <!-- this is a test -->
+   > 9 │     <span>foo</span>
+  > 10 │     bar
+  > 11 │   </div>
+       │   
+    12 │   <div v-text="foo">bar</div>
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+  
+  i This directive replaces the content of the element.
+  
+    5 │   <div v-html="foo"><span /></div>
+    6 │   <div v-html="foo"><!-- bar --></div>
+  > 7 │   <div v-html="foo">
+      │        ^^^^^^^^^^^^
+    8 │     <!-- this is a test -->
+    9 │     <span>foo</span>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+     5  5 │     <div v-html="foo"><span /></div>
+     6  6 │     <div v-html="foo"><!-- bar --></div>
+     7    │ - ··<div·v-html="foo">
+     8    │ - ····<!--·this·is·a·test·-->
+     9    │ - ····<span>foo</span>
+    10    │ - ····bar
+    11    │ - ··</div>
+        7 │ + ··<div·v-html="foo"></div>
+    12  8 │     <div v-text="foo">bar</div>
+    13  9 │     <p class="a" v-text="foo" v-html="bar">baz</p>
+  
+
+```
+
+```
+invalid.vue:12:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-text directive.
+  
+    10 │     bar
+    11 │   </div>
+  > 12 │   <div v-text="foo">bar</div>
+       │                     ^^^
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+  
+  i This directive replaces the content of the element.
+  
+    10 │     bar
+    11 │   </div>
+  > 12 │   <div v-text="foo">bar</div>
+       │        ^^^^^^^^^^^^
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-text and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    12 │ ··<div·v-text="foo">bar</div>
+       │                     ---      
+
+```
+
+```
+invalid.vue:13:42 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-text directive.
+  
+    11 │   </div>
+    12 │   <div v-text="foo">bar</div>
+  > 13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+       │                                          ^^^
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+    15 │   <div v-html="foo">bar <!-- trailing --></div>
+  
+  i This directive replaces the content of the element.
+  
+    11 │   </div>
+    12 │   <div v-text="foo">bar</div>
+  > 13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+       │                ^^^^^^^^^^^^
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+    15 │   <div v-html="foo">bar <!-- trailing --></div>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-text and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    13 │ ··<p·class="a"·v-text="foo"·v-html="bar">baz</p>
+       │                                          ---    
+
+```
+
+```
+invalid.vue:14:29 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-text directive.
+  
+    12 │   <div v-text="foo">bar</div>
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+  > 14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │   <div v-html="foo">bar <!-- trailing --></div>
+    16 │   <div v-html="foo"> <!-- leading --> bar</div>
+  
+  i This directive replaces the content of the element.
+  
+    12 │   <div v-text="foo">bar</div>
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+  > 14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+       │                ^^^^^^^^^^^^
+    15 │   <div v-html="foo">bar <!-- trailing --></div>
+    16 │   <div v-html="foo"> <!-- leading --> bar</div>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-text and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    14 │ ··<MyComponent·v-text="foo"><template·#default>bar</template></MyComponent>
+       │                             ---------------------------------              
+
+```
+
+```
+invalid.vue:15:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+  > 15 │   <div v-html="foo">bar <!-- trailing --></div>
+       │                     ^^^^^^^^^^^^^^^^^^^^^
+    16 │   <div v-html="foo"> <!-- leading --> bar</div>
+    17 │ </template>
+  
+  i This directive replaces the content of the element.
+  
+    13 │   <p class="a" v-text="foo" v-html="bar">baz</p>
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+  > 15 │   <div v-html="foo">bar <!-- trailing --></div>
+       │        ^^^^^^^^^^^^
+    16 │   <div v-html="foo"> <!-- leading --> bar</div>
+    17 │ </template>
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    15 │ ··<div·v-html="foo">bar·<!--·trailing·--></div>
+       │                     ---------------------      
+
+```
+
+```
+invalid.vue:16:21 lint/nursery/noVueChildContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The content of this element is replaced by the v-html directive.
+  
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+    15 │   <div v-html="foo">bar <!-- trailing --></div>
+  > 16 │   <div v-html="foo"> <!-- leading --> bar</div>
+       │                     ^^^^^^^^^^^^^^^^^^^^^
+    17 │ </template>
+    18 │ 
+  
+  i This directive replaces the content of the element.
+  
+    14 │   <MyComponent v-text="foo"><template #default>bar</template></MyComponent>
+    15 │   <div v-html="foo">bar <!-- trailing --></div>
+  > 16 │   <div v-html="foo"> <!-- leading --> bar</div>
+       │        ^^^^^^^^^^^^
+    17 │ </template>
+    18 │ 
+  
+  i Vue discards this content, so it never appears on the page.
+  
+  i Remove the content, or remove v-html and keep the content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the content of the element.
+  
+    16 │ ··<div·v-html="foo">·<!--·leading·-->·bar</div>
+       │                     ---------------------      
+
+```
