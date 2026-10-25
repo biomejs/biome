@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-not-vue.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const emitter = { $emit() {}, emit() {} };
+emitter.$emit("change", value1, value2);
+
+function setup(props, { emit }) {
+  emit("change", value1, value2);
+}
+
+```

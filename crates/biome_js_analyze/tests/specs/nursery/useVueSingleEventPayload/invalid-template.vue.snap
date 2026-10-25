@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-template.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <button @click="$emit('change', value1, value2)">Change</button>
+  <button @click="$emit('update', a, b, c)">Update</button>
+</template>
+
+<script>
+export default {
+  emits: ["change", "update"],
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-template.vue:3:43 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event change is emitted with more than one value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <button @click="$emit('change', value1, value2)">Change</button>
+      │                                           ^^^^^^
+    4 │   <button @click="$emit('update', a, b, c)">Update</button>
+    5 │ </template>
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:4:38 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update is emitted with more than one value.
+  
+    2 │ <template>
+    3 │   <button @click="$emit('change', value1, value2)">Change</button>
+  > 4 │   <button @click="$emit('update', a, b, c)">Update</button>
+      │                                      ^^^^
+    5 │ </template>
+    6 │ 
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

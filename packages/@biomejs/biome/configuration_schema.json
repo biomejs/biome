@@ -9982,6 +9982,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSingleEventPayload": {
+					"description": "Require Vue component events to carry at most one value.\nSee https://biomejs.dev/linter/rules/use-vue-single-event-payload",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSingleEventPayloadConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueSlotNameCasing": {
 					"description": "Enforce a consistent casing for the names of Vue slots.\nSee https://biomejs.dev/linter/rules/use-vue-slot-name-casing",
 					"anyOf": [
@@ -18175,6 +18182,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSingleEventPayloadOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSingleEventPayloadOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueSlotNameCasingOptions": {
 			"type": "object",
 			"properties": {
@@ -23912,6 +23928,16 @@
 			]
 		},
 		"UseVueRenderReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueSingleEventPayloadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSingleEventPayloadOptions" }
+			]
+		},
+		"UseVueSingleEventPayloadOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
