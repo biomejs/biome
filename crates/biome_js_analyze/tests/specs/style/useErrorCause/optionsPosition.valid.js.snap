@@ -14,10 +14,23 @@ class ErrorWithCode extends Error {
 	}
 }
 
+class ErrorWithTrailingCode extends Error {
+	constructor(message, options, code) {
+		super(message, options);
+		this.code = code;
+	}
+}
+
 try {
 	doSomething();
 } catch (err) {
 	throw new ErrorWithCode("Something went wrong", "E_CODE", { cause: err });
+}
+
+try {
+	doSomething();
+} catch (err) {
+	throw new ErrorWithTrailingCode("Something went wrong", { cause: err }, "E_CODE");
 }
 
 try {

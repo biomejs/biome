@@ -2,8 +2,8 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsExpression, AnyJsObjectMember, JsCatchClause, JsIdentifierBinding,
-    JsReferenceIdentifier, JsThrowStatement, global_identifier,
+    AnyJsBindingPattern, AnyJsExpression, AnyJsObjectMember, JsCallArgumentList, JsCatchClause,
+    JsIdentifierBinding, JsReferenceIdentifier, JsThrowStatement, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_error_cause::UseErrorCauseOptions;
@@ -187,13 +187,11 @@ impl Rule for UseErrorCause {
                     };
                     let args = arguments.args();
 
-                    // Built-in errors take their options at a fixed position; other
-                    // constructors conventionally take them last.
                     let options_position = new_expression
                         .callee()
                         .ok()
                         .and_then(|callee| builtin_error_options_position(callee, model))
-                        .unwrap_or_else(|| args.len().saturating_sub(1));
+                        .unwrap_or_else(|| custom_error_options_position(&args));
 
                     if options_position == 0 {
                         return Some(State::WithoutCause(throw_statement.range()));
@@ -381,6 +379,22 @@ fn builtin_error_options_position(
         | "URIError" => Some(1),
         "AggregateError" => Some(2),
         _ => None,
+    }
+}
+
+/// Custom constructors usually take the options after the message, like `Error`; when the
+/// second argument isn't an object, they are expected last.
+fn custom_error_options_position(args: &JsCallArgumentList) -> usize {
+    let second_is_object = args
+        .iter()
+        .nth(1)
+        .and_then(|arg| arg.ok())
+        .and_then(|arg| arg.as_any_js_expression().cloned())
+        .is_some_and(|expr| expr.as_js_object_expression().is_some());
+    if second_is_object {
+        1
+    } else {
+        args.len().saturating_sub(1)
     }
 }
 
