@@ -6,10 +6,10 @@ use biome_db::{
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     JsExpressionStatement, JsFunctionDeclaration, JsNumberLiteralExpression, JsReturnStatement,
-    JsSyntaxKind,
+    JsSyntaxElement, JsSyntaxKind,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{RawSyntaxKind, SyntaxKind, TextRange, TextSize};
+use biome_rowan::{NodeOrToken, RawSyntaxKind, SyntaxKind, TextRange, TextSize};
 use rustc_hash::FxHashSet;
 use salsa::Setter;
 
@@ -50,23 +50,25 @@ fn visited_kinds_are_the_kinds_the_visitor_acts_on() {
     }
 }
 
+const SOURCES: [&str; 13] = [
+    "",
+    "label: for (const a of b) { if (a) continue label; else break; }",
+    "function f(x) { switch (x) { case 1: return; default: throw x; } }",
+    "const f = () => { try { g(() => { debugger; }); } catch { ; } finally { h(); } };",
+    "for (let i = 0; i < 1; i++) { for (const k in o) { while (k) { do { i++; } while (i); } } }",
+    "class A extends B { constructor() { super(); } static { init(); } get a() { return 1; } set a(v) {} m() { return class { n() {} }; } }",
+    "const o = { get a() { return 1; }, set a(v) {}, m() { return function* () { yield 1; }; } };",
+    "namespace N { export function f() { return 1; } } declare module 'm' { const a: number; }",
+    "interface I { a: { b: () => void }; [key: string]: unknown } type T = { c: number };",
+    "a(b(c(d(async function () { await e; return () => { if (f) { return g; } }; }))));",
+    "function f() { if (x) { return } } }",
+    "function f() { for (;;) { break } while (",
+    "class { m() { if } }",
+];
+
 #[test]
 fn model_equals_a_visit_of_every_node() {
-    for source in [
-        "",
-        "label: for (const a of b) { if (a) continue label; else break; }",
-        "function f(x) { switch (x) { case 1: return; default: throw x; } }",
-        "const f = () => { try { g(() => { debugger; }); } catch { ; } finally { h(); } };",
-        "for (let i = 0; i < 1; i++) { for (const k in o) { while (k) { do { i++; } while (i); } } }",
-        "class A extends B { constructor() { super(); } static { init(); } get a() { return 1; } set a(v) {} m() { return class { n() {} }; } }",
-        "const o = { get a() { return 1; }, set a(v) {}, m() { return function* () { yield 1; }; } };",
-        "namespace N { export function f() { return 1; } } declare module 'm' { const a: number; }",
-        "interface I { a: { b: () => void }; [key: string]: unknown } type T = { c: number };",
-        "a(b(c(d(async function () { await e; return () => { if (f) { return g; } }; }))));",
-        "function f() { if (x) { return } } }",
-        "function f() { for (;;) { break } while (",
-        "class { m() { if } }",
-    ] {
+    for source in SOURCES {
         let root = parsed(source).tree();
         let mut visitor = visitor::ControlFlowVisitor::new();
         let mut graphs = Vec::new();
@@ -78,6 +80,61 @@ fn model_equals_a_visit_of_every_node() {
             ControlFlowModel::new(&root, graphs),
             "{source}"
         );
+    }
+}
+
+#[test]
+fn restored_graphs_hold_the_nodes_they_were_built_with() {
+    // Each instruction's node and the parent chain above it, which tells
+    // apart nodes that share a range and kind with an ancestor.
+    fn chain(element: &JsSyntaxElement) -> Vec<(JsSyntaxKind, TextRange, usize)> {
+        let (head, parent) = match element {
+            NodeOrToken::Node(node) => (Vec::new(), Some(node.clone())),
+            NodeOrToken::Token(token) => (
+                vec![(token.kind(), token.text_range(), token.index())],
+                token.parent(),
+            ),
+        };
+        head.into_iter()
+            .chain(
+                parent
+                    .into_iter()
+                    .flat_map(|node| node.ancestors())
+                    .map(|node| (node.kind(), node.text_range_with_trivia(), node.index())),
+            )
+            .collect()
+    }
+
+    for source in SOURCES {
+        let root = parsed(source).tree();
+        let mut visitor = visitor::ControlFlowVisitor::new();
+        let mut built = Vec::new();
+        for event in root.syntax().preorder() {
+            visitor.visit(event, &mut built);
+        }
+        let model = ControlFlowModel::new(&root, built.clone());
+
+        let mut restored: Vec<_> = model.graphs().collect();
+        assert_eq!(restored.len(), built.len(), "{source}");
+        // A module and a function declaration without surrounding trivia
+        // share a range, so the kind breaks the tie.
+        let key =
+            |graph: &JsControlFlowGraph| (graph.node.text_range_with_trivia(), graph.node.kind());
+        restored.sort_by_key(key);
+        built.sort_by_key(key);
+
+        for (restored, built) in restored.iter().zip(&built) {
+            assert_eq!(restored.node, built.node, "{source}");
+            let instructions = |graph: &JsControlFlowGraph| {
+                graph
+                    .blocks
+                    .iter()
+                    .flat_map(|block| &block.instructions)
+                    .map(|instruction| (instruction.kind, instruction.node.as_ref().map(chain)))
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(instructions(restored), instructions(built), "{source}");
+        }
     }
 }
 

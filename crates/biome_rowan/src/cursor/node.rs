@@ -495,6 +495,39 @@ impl SyntaxNode {
             })
     }
 
+    /// Returns the first node with the given range and kind on the path that
+    /// repeated calls to [Self::child_or_token_at_range] take from this node,
+    /// this node included. The path ends at the first slot that is empty or
+    /// holds a token.
+    ///
+    /// Each level's red node is created once, and the search stops at the
+    /// match without looking at its children.
+    pub(crate) fn descendant_at_range_with_kind(
+        &self,
+        range: TextRange,
+        kind: RawSyntaxKind,
+    ) -> Option<Self> {
+        if self.text_range() == range && self.kind() == kind {
+            return Some(self.clone());
+        }
+
+        // `green` borrows from `self`, which keeps the whole tree alive, so
+        // `node` can move into its child without being borrowed.
+        let mut green = self.green();
+        let mut node = self.clone();
+        loop {
+            let offset = node.offset();
+            let (index, rel_offset, slot) = green.slot_at_range(range - offset)?;
+            let child = slot.as_ref()?.into_node()?;
+            let child_offset = offset + rel_offset;
+            node = Self::new_child(child, node, index as u32, child_offset);
+            if TextRange::at(child_offset, child.text_len()) == range && child.kind() == kind {
+                return Some(node);
+            }
+            green = child;
+        }
+    }
+
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn detach(self) -> Self {
         Self {

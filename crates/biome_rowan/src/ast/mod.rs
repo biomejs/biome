@@ -10,7 +10,7 @@ use serde::Serialize;
 use std::error::Error;
 use std::fmt::{self, Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
-use std::iter::{FusedIterator, successors};
+use std::iter::FusedIterator;
 use std::marker::PhantomData;
 
 mod batch;
@@ -861,10 +861,7 @@ impl<L: Language> SyntaxNodePtr<L> {
         if root.parent().is_some() {
             return None;
         }
-        let node = successors(Some(root.clone()), |node| {
-            node.child_or_token_at_range(self.range)?.into_node()
-        })
-        .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind);
+        let node = root.descendant_at_range_with_kind(self.range, self.kind);
 
         if node.is_some() || !self.range.is_empty() {
             node
@@ -872,6 +869,48 @@ impl<L: Language> SyntaxNodePtr<L> {
             root.pruned_descendents(|it| it.text_range_with_trivia().contains_range(self.range))
                 .find(|it| it.text_range_with_trivia() == self.range && it.kind() == self.kind)
         }
+    }
+
+    /// Like [Self::try_to_node_near] but panics instead of returning `None`
+    /// on failure.
+    pub fn to_node_near(&self, node: &SyntaxNode<L>) -> SyntaxNode<L> {
+        self.try_to_node_near(node)
+            .unwrap_or_else(|| panic!("can't resolve {self:?} near {node:?}"))
+    }
+
+    /// Returns the same node as [Self::try_to_node] called with the root of
+    /// `node`'s tree, but starts the search at the closest ancestor of `node`
+    /// (`node` included) whose range strictly contains the pointer's range.
+    ///
+    /// Only the nodes below that ancestor are created, so this is cheaper
+    /// than [Self::try_to_node] when `node` is close to the pointed-to node,
+    /// such as a sibling or a parent. `node` must belong to a tree equivalent
+    /// to the one the pointer was created from.
+    ///
+    /// Pointers with an empty range are resolved from the root, because
+    /// several nodes can share an empty range at a boundary.
+    pub fn try_to_node_near(&self, node: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
+        if self.range.is_empty() {
+            let root = node.ancestors().last()?;
+            return self.try_to_node(&root);
+        }
+
+        // Every node whose range contains a non-empty range lies on the path
+        // from the root to that range, so the search can start at any of
+        // them. A strict container cannot be the match itself, and neither can
+        // any of its ancestors, so no earlier match on the path is skipped.
+        let mut start = node.clone();
+        loop {
+            let range = start.text_range_with_trivia();
+            if range != self.range && range.contains_range(self.range) {
+                break;
+            }
+            match start.parent() {
+                Some(parent) => start = parent,
+                None => break,
+            }
+        }
+        start.descendant_at_range_with_kind(self.range, self.kind)
     }
 
     /// Casts this to an [`AstPtr`] to the given node type if possible.
@@ -1055,11 +1094,15 @@ pub mod support {
 
 #[cfg(test)]
 mod tests {
+    use crate::green::GreenElement;
     use crate::raw_language::{
         LiteralExpression, RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder,
         SeparatedExpressionList,
     };
-    use crate::{AstNode, AstPtr, AstSeparatedElement, AstSeparatedList, SyntaxResult};
+    use crate::{
+        AstNode, AstPtr, AstSeparatedElement, AstSeparatedList, GreenNode, GreenToken, SyntaxKind,
+        SyntaxNode, SyntaxResult, TextRange,
+    };
 
     use super::SyntaxNodePtr;
 
@@ -1418,6 +1461,182 @@ mod tests {
         let empty_ptr = SyntaxNodePtr::new(&empty);
 
         assert_eq!(empty, empty_ptr.to_node(&tree));
+    }
+
+    /// Resolves `pointer` the way [SyntaxNodePtr::try_to_node] is specified:
+    /// the first node with the pointer's range and kind on the path of
+    /// `child_or_token_at_range` calls from the root, with a scan of the whole
+    /// tree as the fallback for empty ranges.
+    fn to_node_by_child_steps(
+        pointer: &SyntaxNodePtr<RawLanguage>,
+        root: &SyntaxNode<RawLanguage>,
+    ) -> Option<SyntaxNode<RawLanguage>> {
+        let matches = |node: &SyntaxNode<RawLanguage>| {
+            node.text_range_with_trivia() == pointer.text_range() && node.kind() == pointer.kind()
+        };
+        std::iter::successors(Some(root.clone()), |node| {
+            node.child_or_token_at_range(pointer.text_range())?
+                .into_node()
+        })
+        .find(matches)
+        .or_else(|| {
+            pointer
+                .text_range()
+                .is_empty()
+                .then(|| root.descendants().find(matches))
+                .flatten()
+        })
+    }
+
+    /// The kind, range, and slot index of the node and of each of its
+    /// ancestors.
+    fn node_and_ancestors(
+        node: &SyntaxNode<RawLanguage>,
+    ) -> Vec<(RawLanguageKind, TextRange, usize)> {
+        node.ancestors()
+            .map(|ancestor| {
+                (
+                    ancestor.kind(),
+                    ancestor.text_range_with_trivia(),
+                    ancestor.index(),
+                )
+            })
+            .collect()
+    }
+
+    /// Builds a random tree of up to `depth` levels below the root. Nodes
+    /// with a single child share their range with it, sometimes with the same
+    /// kind, and empty tokens, empty nodes, and missing slots put several
+    /// slots on the same boundary.
+    fn random_tree(seed: u64, depth: u32) -> SyntaxNode<RawLanguage> {
+        struct Rng(u64);
+        impl Rng {
+            fn below(&mut self, n: u64) -> u64 {
+                self.0 = self
+                    .0
+                    .wrapping_mul(6_364_136_223_846_793_005)
+                    .wrapping_add(1_442_695_040_888_963_407);
+                (self.0 >> 33) % n
+            }
+        }
+
+        fn node(rng: &mut Rng, depth: u32) -> GreenNode {
+            const KINDS: [RawLanguageKind; 3] = [
+                RawLanguageKind::LITERAL_EXPRESSION,
+                RawLanguageKind::CONDITION,
+                RawLanguageKind::BOGUS,
+            ];
+            let kind = KINDS[rng.below(3) as usize];
+            let slots: Vec<_> = (0..rng.below(4))
+                .map(|_| match rng.below(if depth == 0 { 4 } else { 7 }) {
+                    0 => None,
+                    1 => Some(GreenElement::Token(GreenToken::new_raw(
+                        RawLanguageKind::STRING_TOKEN.to_raw(),
+                        "",
+                    ))),
+                    2 | 3 => Some(GreenElement::Token(GreenToken::new_raw(
+                        RawLanguageKind::NUMBER_TOKEN.to_raw(),
+                        if rng.below(2) == 0 { "1" } else { "23" },
+                    ))),
+                    _ => Some(GreenElement::Node(node(rng, depth - 1))),
+                })
+                .collect();
+            GreenNode::new(kind.to_raw(), slots)
+        }
+
+        let mut rng = Rng(seed);
+        let child = node(&mut rng, depth);
+        SyntaxNode::new_root(GreenNode::new(
+            RawLanguageKind::ROOT.to_raw(),
+            [Some(GreenElement::Node(child))],
+        ))
+    }
+
+    #[test]
+    fn syntax_ptr_resolves_like_child_steps_from_root() {
+        let kinds = [
+            RawLanguageKind::ROOT,
+            RawLanguageKind::LITERAL_EXPRESSION,
+            RawLanguageKind::CONDITION,
+            RawLanguageKind::BOGUS,
+        ];
+
+        for seed in 0..300 {
+            let root = random_tree(seed, 4);
+            let nodes: Vec<_> = root.descendants().collect();
+            let len = u32::from(root.text_range_with_trivia().len()) + 1;
+
+            // Pointers to every node, and pointers with every range and kind
+            // that may or may not resolve.
+            let mut pointers: Vec<_> = nodes.iter().map(SyntaxNodePtr::new).collect();
+            for start in 0..=len {
+                for end in start..=len {
+                    for kind in kinds {
+                        pointers.push(SyntaxNodePtr {
+                            kind,
+                            range: TextRange::new(start.into(), end.into()),
+                        });
+                    }
+                }
+            }
+
+            for pointer in &pointers {
+                let expected = to_node_by_child_steps(pointer, &root);
+                let expected = expected.as_ref().map(node_and_ancestors);
+
+                let actual = pointer.try_to_node(&root);
+                assert_eq!(
+                    actual.as_ref().map(node_and_ancestors),
+                    expected,
+                    "try_to_node({pointer:?}), seed {seed}"
+                );
+
+                for near in &nodes {
+                    let actual = pointer.try_to_node_near(near);
+                    assert_eq!(
+                        actual.as_ref().map(node_and_ancestors),
+                        expected,
+                        "try_to_node_near({pointer:?}, {near:?}), seed {seed}"
+                    );
+                }
+            }
+
+            for node in &nodes[1..] {
+                assert!(pointers[0].try_to_node(node).is_none());
+            }
+        }
+    }
+
+    #[test]
+    fn syntax_ptr_near_resolves_node_sharing_range_with_ancestor() {
+        // ROOT > CONDITION > CONDITION > LITERAL_EXPRESSION > "1", all with
+        // range 0..1. The pointer to the inner CONDITION resolves to the outer
+        // one, as from the root, even when starting from inside it.
+        let wrap = |kind: RawLanguageKind, child: GreenElement| {
+            GreenElement::Node(GreenNode::new(kind.to_raw(), [Some(child)]))
+        };
+        let token = GreenElement::Token(GreenToken::new_raw(
+            RawLanguageKind::NUMBER_TOKEN.to_raw(),
+            "1",
+        ));
+        let literal = wrap(RawLanguageKind::LITERAL_EXPRESSION, token);
+        let condition = wrap(
+            RawLanguageKind::CONDITION,
+            wrap(RawLanguageKind::CONDITION, literal),
+        );
+        let tree: SyntaxNode<RawLanguage> = SyntaxNode::new_root(GreenNode::new(
+            RawLanguageKind::ROOT.to_raw(),
+            [Some(condition)],
+        ));
+        let outer = tree.first_child().unwrap();
+        let inner = outer.first_child().unwrap();
+        let literal = inner.first_child().unwrap();
+        let pointer = SyntaxNodePtr::new(&inner);
+
+        assert_eq!(pointer.to_node(&tree), outer);
+        assert_eq!(pointer.to_node_near(&literal), outer);
+        assert_eq!(pointer.to_node_near(&inner), outer);
+        assert_eq!(SyntaxNodePtr::new(&tree).to_node_near(&literal), tree);
     }
 
     #[test]
