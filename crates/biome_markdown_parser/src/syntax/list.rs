@@ -1064,7 +1064,18 @@ fn continuation_list_marker_with_base_indent(
     p: &mut MarkdownParser,
     base_indent: usize,
 ) -> Option<ContinuationListMarker> {
-    if !list_item_within_indent(p, base_indent) {
+    let is_candidate = match p.cur() {
+        MD_SETEXT_UNDERLINE_LITERAL => is_single_dash_setext_marker(p.cur_text()),
+        MD_ORDERED_LIST_MARKER | T![-] | T![*] | T![+] => true,
+        MD_TEXTUAL_LITERAL => {
+            let text = p.cur_text();
+            is_whitespace_only(text)
+                || is_textual_bullet_marker(text)
+                || textual_starts_with_ordered_marker(text)
+        }
+        _ => false,
+    };
+    if !is_candidate || !list_item_within_indent(p, base_indent) {
         return None;
     }
 
