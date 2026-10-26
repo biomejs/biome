@@ -3626,6 +3626,44 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForArrayBinding {
         )
     }
 }
+impl FormatRule<biome_html_syntax::VueVForDefaultBinding>
+    for crate::vue::auxiliary::v_for_default_binding::FormatVueVForDefaultBinding
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::VueVForDefaultBinding,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::VueVForDefaultBinding>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::VueVForDefaultBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::VueVForDefaultBinding,
+        crate::vue::auxiliary::v_for_default_binding::FormatVueVForDefaultBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_default_binding::FormatVueVForDefaultBinding::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::VueVForDefaultBinding {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::VueVForDefaultBinding,
+        crate::vue::auxiliary::v_for_default_binding::FormatVueVForDefaultBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::vue::auxiliary::v_for_default_binding::FormatVueVForDefaultBinding::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::VueVForIdentifierBinding>
     for crate::vue::auxiliary::v_for_identifier_binding::FormatVueVForIdentifierBinding
 {

@@ -761,6 +761,15 @@ pub(crate) fn collect_template_references(
                 let scope = builder.data.elements[element.index()].scope;
                 builder.data.scopes[scope.index()].parent.unwrap_or(scope)
             }
+            // A default value sees the variables of its `v-for`, like the
+            // default value of a function parameter sees the parameters, but
+            // not the `v-slot` parameters of its element.
+            SnippetHost::VForDefault(attr) => {
+                let element = builder.data.attrs[attr.index()].element;
+                let scope = builder.data.elements[element.index()].scope;
+                slot_owner = Some(scope);
+                scope
+            }
             SnippetHost::StyleVBind(_)
             | SnippetHost::Interpolation(None)
             | SnippetHost::Unknown => scopes.head,
