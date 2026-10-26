@@ -1,0 +1,16 @@
+---
+// should generate diagnostics
+const color = "red";
+const gap = "1rem";
+---
+<style define:vars={{ color, gap, unused: "blue", "font-size": "2rem", __proto__: null }}>
+.card {
+	color: var(--color);
+	gap: var(--gap, 0);
+	font-size: var(--font-size);
+}
+</style>
+
+<style define:vars={{ separate: "red" }}>
+.other { color: var(--color); }
+</style>

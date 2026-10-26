@@ -6,8 +6,16 @@ use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
+        RuleFilter::Rule("nursery", "noAstroExportsFromComponents"),
+        RuleFilter::Rule("nursery", "noAstroPrerenderExportOutsidePages"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
+        RuleFilter::Rule("nursery", "noAstroUnsafeInlineScripts"),
+        RuleFilter::Rule("nursery", "noAstroUnusedCssSelector"),
+        RuleFilter::Rule("nursery", "noAstroUnusedDefineVarsInStyle"),
+        RuleFilter::Rule("nursery", "useAstroClassListDirective"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
+        RuleFilter::Rule("nursery", "useAstroObjectClassList"),
+        RuleFilter::Rule("nursery", "useAstroSplitClassList"),
     ]
 });
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -55,10 +63,13 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noAstroUnusedCssSelector"),
+        RuleFilter::Rule("nursery", "noAstroUnusedDefineVarsInStyle"),
         RuleFilter::Rule("nursery", "noSelfImport"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
+        RuleFilter::Rule("nursery", "noUnusedClasses"),
         RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
         RuleFilter::Rule("suspicious", "noImportCycles"),

@@ -962,6 +962,7 @@ dependencies = [
  "codspeed-criterion-compat",
  "enumflags2",
  "filetime",
+ "htmlize",
  "insta",
  "mimalloc",
  "phf 0.13.1",
