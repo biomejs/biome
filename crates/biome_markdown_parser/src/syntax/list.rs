@@ -1032,25 +1032,13 @@ fn at_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> 
         return false;
     }
 
-    let marker = first_non_whitespace_token(p);
-    match p.nth(marker) {
-        MD_SETEXT_UNDERLINE_LITERAL => {
-            p.nth_text(marker).is_some_and(is_single_dash_setext_marker)
-                && marker_followed_by_whitespace_or_eol_at(p, marker + 1)
-        }
-        MD_TEXTUAL_LITERAL => {
-            if p.nth_text(marker).is_some_and(is_textual_bullet_marker) {
-                marker_followed_by_whitespace_or_eol_at(p, marker + 1)
-            } else {
-                p.nth_text(marker)
-                    .is_some_and(textual_starts_with_ordered_marker)
-            }
-        }
-        T![-] | T![*] | T![+] | MD_ORDERED_LIST_MARKER => {
-            marker_followed_by_whitespace_or_eol_at(p, marker + 1)
-        }
-        _ => false,
-    }
+    let source = p.source_after_current().trim_start_matches([' ', '\t']);
+    let bytes = source.as_bytes();
+    let is_bullet = matches!(bytes.first(), Some(b'-' | b'*' | b'+'))
+        && bytes
+            .get(1)
+            .is_none_or(|byte| matches!(byte, b' ' | b'\t' | b'\r' | b'\n'));
+    is_bullet || textual_starts_with_ordered_marker(source)
 }
 
 #[derive(Clone, Copy)]
