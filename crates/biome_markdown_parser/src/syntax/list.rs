@@ -2364,7 +2364,12 @@ fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> boo
     let line = &line[..line_end];
     let required_indent = p.state().list_item_required_indent;
 
-    dash_thematic_break_after_required_indent(line, required_indent).is_some()
+    dash_thematic_break_after_required_indent(
+        line,
+        p.cached_absolute_column_at(line_start),
+        required_indent,
+    )
+    .is_some()
 }
 
 fn next_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option<usize> {
@@ -2441,7 +2446,11 @@ fn current_line_dash_thematic_break_after_required_indent(
     let source = p.source().source_text();
     let line = source.get(line_start..)?;
     let line_end = line.find(['\n', '\r']).unwrap_or(line.len());
-    dash_thematic_break_after_required_indent(&line[..line_end], required_indent)
+    dash_thematic_break_after_required_indent(
+        &line[..line_end],
+        p.cached_absolute_column_at(line_start),
+        required_indent,
+    )
 }
 
 fn current_line_required_indent_byte_count(
@@ -2502,8 +2511,13 @@ fn required_indent_byte_count(
     Some((byte_offset, column - start_column))
 }
 
-fn dash_thematic_break_after_required_indent(line: &str, required_indent: usize) -> Option<usize> {
-    let (mut byte_offset, mut column) = required_indent_byte_count(line, 0, required_indent)?;
+fn dash_thematic_break_after_required_indent(
+    line: &str,
+    start_column: usize,
+    required_indent: usize,
+) -> Option<usize> {
+    let (mut byte_offset, mut column) =
+        required_indent_byte_count(line, start_column, required_indent)?;
     let bytes = line.as_bytes();
 
     let required_byte_offset = byte_offset;
@@ -2513,7 +2527,7 @@ fn dash_thematic_break_after_required_indent(line: &str, required_indent: usize)
             b'\t' => column + (TAB_STOP_SPACES - (column % TAB_STOP_SPACES)),
             _ => break,
         };
-        if next_column.saturating_sub(required_indent) > MAX_BLOCK_PREFIX_INDENT {
+        if next_column.saturating_sub(start_column + required_indent) > MAX_BLOCK_PREFIX_INDENT {
             return None;
         }
         column = next_column;
