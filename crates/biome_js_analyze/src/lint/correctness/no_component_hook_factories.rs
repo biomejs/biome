@@ -122,6 +122,7 @@ impl Rule for NoComponentHookFactories {
                 if matches!(decl, AnyPotentialReactComponentDeclaration::JsPropertyObjectMember(_))
                     && !syntax
                         .descendants()
+                        .skip(1)
                         .any(|node| JsxTagExpression::can_cast(node.kind()))
                 {
                     return None;
