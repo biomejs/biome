@@ -26,6 +26,12 @@ try {
 try {
 	doSomething();
 } catch (err) {
+	throw new globalThis.Error("Something went wrong", "ignored", { cause: err });
+}
+
+try {
+	doSomething();
+} catch (err) {
 	const other = err;
 	if (other) {
 		const err = new Error("Unrelated");

@@ -30,3 +30,9 @@ try {
 } catch (err) {
 	throw new AggregateError([err], "Something went wrong", { cause: err });
 }
+
+try {
+	doSomething();
+} catch (err) {
+	throw new globalThis.Error("Something went wrong", { cause: err });
+}

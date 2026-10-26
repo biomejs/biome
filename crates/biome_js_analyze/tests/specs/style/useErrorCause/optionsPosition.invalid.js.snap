@@ -33,6 +33,12 @@ try {
 try {
 	doSomething();
 } catch (err) {
+	throw new globalThis.Error("Something went wrong", "ignored", { cause: err });
+}
+
+try {
+	doSomething();
+} catch (err) {
 	const other = err;
 	if (other) {
 		const err = new Error("Unrelated");
@@ -101,25 +107,44 @@ optionsPosition.invalid.js:23:2 lint/style/useErrorCause ━━━━━━━�
 ```
 
 ```
-optionsPosition.invalid.js:32:70 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+optionsPosition.invalid.js:29:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The original error is not passed to the new `Error` object.
+  
+    27 │ 	doSomething();
+    28 │ } catch (err) {
+  > 29 │ 	throw new globalThis.Error("Something went wrong", "ignored", { cause: err });
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ }
+    31 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
+
+```
+
+```
+optionsPosition.invalid.js:38:70 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The `cause` property is shadowing the original error from the `catch` clause.
   
-    30 │ 	if (other) {
-    31 │ 		const err = new Error("Unrelated");
-  > 32 │ 		throw new ErrorWithCode("Something went wrong", "E_CODE", { cause: err });
+    36 │ 	if (other) {
+    37 │ 		const err = new Error("Unrelated");
+  > 38 │ 		throw new ErrorWithCode("Something went wrong", "E_CODE", { cause: err });
        │ 		                                                                   ^^^
-    33 │ 	}
-    34 │ }
+    39 │ 	}
+    40 │ }
   
   i The original error is declared here.
   
-    26 │ try {
-    27 │ 	doSomething();
-  > 28 │ } catch (err) {
+    32 │ try {
+    33 │ 	doSomething();
+  > 34 │ } catch (err) {
        │          ^^^
-    29 │ 	const other = err;
-    30 │ 	if (other) {
+    35 │ 	const other = err;
+    36 │ 	if (other) {
   
   i The `cause` refers to a different value than the caught error, so the original error is still lost.
   

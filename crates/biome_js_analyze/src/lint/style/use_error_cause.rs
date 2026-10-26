@@ -3,7 +3,7 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsBindingPattern, AnyJsExpression, AnyJsObjectMember, JsCatchClause, JsIdentifierBinding,
-    JsObjectExpression, JsReferenceIdentifier, JsThrowStatement,
+    JsReferenceIdentifier, JsThrowStatement, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_error_cause::UseErrorCauseOptions;
@@ -73,17 +73,6 @@ declare_lint_rule! {
     ///         throw new Error("New unrelated error");
     ///     }
     ///     fn();
-    /// }
-    /// ```
-    ///
-    /// Built-in errors take the options in their usual position, which is the third argument for `AggregateError`.
-    /// Other constructors can receive the `cause` in any argument after the first:
-    ///
-    /// ```js
-    /// try {
-    ///   // ...
-    /// } catch (err) {
-    ///   throw new ErrorWithCode("Something went wrong", "E_CODE", { cause: err });
     /// }
     /// ```
     ///
@@ -196,41 +185,88 @@ impl Rule for UseErrorCause {
                     let Some(arguments) = new_expression.arguments() else {
                         return Some(State::WithoutCause(throw_statement.range()));
                     };
+                    let args = arguments.args();
+
+                    // Built-in errors take their options at a fixed position; other
+                    // constructors conventionally take them last.
                     let options_position = new_expression
                         .callee()
                         .ok()
-                        .and_then(|callee| builtin_error_options_position(&callee, model));
+                        .and_then(|callee| builtin_error_options_position(callee, model))
+                        .unwrap_or_else(|| args.len().saturating_sub(1));
 
-                    // Built-in errors take their options at a fixed position. Other constructors
-                    // may forward the options from any argument after the message.
-                    let candidates = arguments.args().iter().enumerate().filter(|(index, _)| {
-                        options_position.map_or(*index >= 1, |position| *index == position)
-                    });
+                    if options_position == 0 {
+                        return Some(State::WithoutCause(throw_statement.range()));
+                    }
 
-                    for (_, argument) in candidates {
-                        let Some(obj_expr) = argument
-                            .ok()
-                            .as_ref()
-                            .and_then(|argument| argument.as_any_js_expression())
-                            .and_then(|expr| expr.as_js_object_expression())
-                            .cloned()
-                        else {
-                            continue;
-                        };
+                    let Some(Ok(options_arg)) = args.iter().nth(options_position) else {
+                        return Some(State::WithoutCause(throw_statement.range()));
+                    };
+                    let Some(expr) = options_arg.as_any_js_expression() else {
+                        return Some(State::WithoutCause(throw_statement.range()));
+                    };
+                    let Some(obj_expr) = expr.as_js_object_expression() else {
+                        return Some(State::WithoutCause(throw_statement.range()));
+                    };
 
-                        match find_cause_in_options(&obj_expr, identifier_binding, model) {
-                            CauseSearchResult::Preserved => return None,
-                            CauseSearchResult::Shadowed(cause_range) => {
-                                return Some(State::ShadowedCause {
-                                    cause_range,
-                                    catch_binding_range: identifier_binding.range(),
-                                });
+                    for member in obj_expr.members().iter().flatten() {
+                        match member {
+                            AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+                                let is_cause_prop = prop
+                                    .name()
+                                    .ok()
+                                    .and_then(|name_node| name_node.name())
+                                    .is_some_and(|name| name == "cause");
+
+                                if is_cause_prop && let Ok(value) = prop.value() {
+                                    match is_cause_value_correct_error(
+                                        &value,
+                                        identifier_binding,
+                                        model,
+                                    ) {
+                                        CauseValueCheckResult::Correct => return None,
+                                        CauseValueCheckResult::Shadowed => {
+                                            return Some(State::ShadowedCause {
+                                                cause_range: value.range(),
+                                                catch_binding_range: identifier_binding.range(),
+                                            });
+                                        }
+                                        CauseValueCheckResult::Incorrect => {
+                                            // Continue checking other properties, another `cause` might be present.
+                                            // This is unlikely to be valid JS, but we handle it.
+                                        }
+                                    }
+                                }
                             }
-                            CauseSearchResult::Missing => {}
+                            AnyJsObjectMember::JsShorthandPropertyObjectMember(prop) => {
+                                if let Ok(cause_reference) = prop.name()
+                                    && cause_reference
+                                        .value_token()
+                                        .is_ok_and(|token| token.text_trimmed() == "cause")
+                                {
+                                    match is_cause_reference_correct_error(
+                                        &cause_reference,
+                                        identifier_binding,
+                                        model,
+                                    ) {
+                                        CauseValueCheckResult::Correct => return None,
+                                        CauseValueCheckResult::Shadowed => {
+                                            return Some(State::ShadowedCause {
+                                                cause_range: cause_reference.range(),
+                                                catch_binding_range: identifier_binding.range(),
+                                            });
+                                        }
+                                        CauseValueCheckResult::Incorrect => {
+                                            // Continue checking other properties, another `cause` might be present.
+                                        }
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
                     }
 
-                    // If no valid cause was found in any options argument, it's a violation.
+                    // If no valid cause was found after checking all members, it's a violation.
                     Some(State::WithoutCause(throw_statement.range()))
                 }
                 AnyJsBindingPattern::JsArrayBindingPattern(_)
@@ -327,83 +363,25 @@ enum CauseValueCheckResult {
     Incorrect,
 }
 
-enum CauseSearchResult {
-    Preserved,
-    Shadowed(TextRange),
-    Missing,
-}
-
 /// Returns the index of the options argument when `callee` is a global built-in error
-/// constructor, or `None` for any other constructor.
+/// constructor, such as `Error` or `globalThis.AggregateError`.
 fn builtin_error_options_position(
-    callee: &AnyJsExpression,
+    callee: AnyJsExpression,
     model: &SemanticModel,
 ) -> Option<usize> {
-    let reference = callee.as_js_identifier_expression()?.name().ok()?;
+    let (reference, name) = callee
+        .omit_parentheses()
+        .as_any_global_identifier_expression()
+        .and_then(|expr| global_identifier(&expr))?;
     if model.binding(&reference).is_some() {
-        // A local declaration shadows the global constructor.
         return None;
     }
-    match reference.value_token().ok()?.text_trimmed() {
+    match name.text() {
         "Error" | "EvalError" | "RangeError" | "ReferenceError" | "SyntaxError" | "TypeError"
         | "URIError" => Some(1),
         "AggregateError" => Some(2),
         _ => None,
     }
-}
-
-fn find_cause_in_options(
-    options: &JsObjectExpression,
-    catch_error_binding: &JsIdentifierBinding,
-    model: &SemanticModel,
-) -> CauseSearchResult {
-    for member in options.members().iter().flatten() {
-        match member {
-            AnyJsObjectMember::JsPropertyObjectMember(prop) => {
-                let is_cause_prop = prop
-                    .name()
-                    .ok()
-                    .and_then(|name_node| name_node.name())
-                    .is_some_and(|name| name == "cause");
-
-                if is_cause_prop && let Ok(value) = prop.value() {
-                    match is_cause_value_correct_error(&value, catch_error_binding, model) {
-                        CauseValueCheckResult::Correct => return CauseSearchResult::Preserved,
-                        CauseValueCheckResult::Shadowed => {
-                            return CauseSearchResult::Shadowed(value.range());
-                        }
-                        CauseValueCheckResult::Incorrect => {
-                            // Continue checking other properties, another `cause` might be present.
-                            // This is unlikely to be valid JS, but we handle it.
-                        }
-                    }
-                }
-            }
-            AnyJsObjectMember::JsShorthandPropertyObjectMember(prop) => {
-                if let Ok(cause_reference) = prop.name()
-                    && cause_reference
-                        .value_token()
-                        .is_ok_and(|token| token.text_trimmed() == "cause")
-                {
-                    match is_cause_reference_correct_error(
-                        &cause_reference,
-                        catch_error_binding,
-                        model,
-                    ) {
-                        CauseValueCheckResult::Correct => return CauseSearchResult::Preserved,
-                        CauseValueCheckResult::Shadowed => {
-                            return CauseSearchResult::Shadowed(cause_reference.range());
-                        }
-                        CauseValueCheckResult::Incorrect => {
-                            // Continue checking other properties, another `cause` might be present.
-                        }
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-    CauseSearchResult::Missing
 }
 
 fn is_cause_value_correct_error(
