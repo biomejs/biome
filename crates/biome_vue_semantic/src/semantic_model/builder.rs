@@ -99,6 +99,7 @@ impl ModelBuilder {
             instance,
             name: None,
             inherit_attrs: Tri::Unknown,
+            model_option: None,
             decl_open: [OpenReasons::default(); Namespace::COUNT],
             uses_open: [false; Namespace::COUNT],
             macro_conflict: false,

@@ -1839,6 +1839,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_vue_data_object_declaration::NoVueDataObjectDeclarationOptions,
         >(),
     ));
+    result.push(("nursery", "noVueDeprecatedModelDefinition", TypeId::of::<biome_rule_options::no_vue_deprecated_model_definition::NoVueDeprecatedModelDefinitionOptions>()));
     result.push((
         "nursery",
         "noVueDeprecatedScopedSlots",

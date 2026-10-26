@@ -514,6 +514,7 @@ impl Collector<'_, '_> {
                 ),
                 "setup" => self.collect_setup_function(member_function(&member), component),
                 "name" | "inheritAttrs" => self.collect_scalar_option(&member, component),
+                "model" => self.collect_model_option(&member, component),
                 "extends" | "mixins" => self.builder.open_all(component, OpenReason::Extends),
                 // The template is a string the model does not read, and it
                 // may use any declaration.
@@ -546,6 +547,19 @@ impl Collector<'_, '_> {
             }
             None => {}
         }
+    }
+
+    /// Records the first `model` option whose value is an object.
+    fn collect_model_option(&mut self, member: &AnyJsObjectMember, component: ComponentId) {
+        if self.builder.component_mut(component).model_option.is_some()
+            || !member_value(member)
+                .and_then(|value| value.inner_expression())
+                .is_some_and(|value| value.as_js_object_expression().is_some())
+        {
+            return;
+        }
+        let range = self.host(member.syntax().text_trimmed_range());
+        self.builder.component_mut(component).model_option = Some(range);
     }
 
     /// Adds a declaration to the instance scope of `component`. Ranges are in
