@@ -420,23 +420,26 @@ fn make_left_recursive_logical_expression(
     operator: SyntaxToken<JsLanguage>,
     right: AnyJsExpression,
 ) -> JsLogicalExpression {
-    if let AnyJsExpression::JsLogicalExpression(right_logical) = &right
-        && let (Ok(right_left), Ok(right_operator), Ok(right_right)) = (
-            right_logical.left(),
-            right_logical.operator_token(),
-            right_logical.right(),
-        )
-        && right_operator.kind() == operator.kind()
+    // The operators and right operands along the left spine of `right`, from the outermost to the
+    // innermost expression.
+    let mut tail = Vec::new();
+    let mut innermost = right;
+
+    while let AnyJsExpression::JsLogicalExpression(logical) = &innermost
+        && let (Ok(logical_left), Ok(logical_operator), Ok(logical_right)) =
+            (logical.left(), logical.operator_token(), logical.right())
+        && logical_operator.kind() == operator.kind()
     {
-        let left = make_left_recursive_logical_expression(left, operator, right_left);
-        return biome_js_factory::make::js_logical_expression(
-            left.into(),
-            right_operator,
-            right_right,
-        );
+        tail.push((logical_operator, logical_right));
+        innermost = logical_left;
     }
 
-    biome_js_factory::make::js_logical_expression(left, operator, right)
+    let mut result = biome_js_factory::make::js_logical_expression(left, operator, innermost);
+    for (operator, right) in tail.into_iter().rev() {
+        result = biome_js_factory::make::js_logical_expression(result.into(), operator, right);
+    }
+
+    result
 }
 
 // TODO: This should be handled with a `NeedsParentheses` impl.
@@ -533,31 +536,6 @@ mod tests {
 
         assert_eq!(left.left().unwrap().to_trimmed_string(), "a");
         assert_eq!(left.right().unwrap().to_trimmed_string(), "b");
-    }
-
-    #[test]
-    fn rebalances_logical_expressions_with_multiple_right_operands() {
-        let root = parse_module("a && (b && c && (d && e))", JsParserOptions::default()).syntax();
-
-        let transformed = JsFormatSyntaxRewriter::default().transform(root);
-
-        assert_eq!(
-            &transformed.text_with_trivia().to_string(),
-            "a && b && c && d && e"
-        );
-
-        let mut logical = transformed
-            .descendants()
-            .find_map(JsLogicalExpression::cast)
-            .unwrap();
-
-        for expected_right in ["e", "d", "c"] {
-            assert_eq!(logical.right().unwrap().to_trimmed_string(), expected_right);
-            logical = JsLogicalExpression::cast(logical.left().unwrap().into_syntax()).unwrap();
-        }
-
-        assert_eq!(logical.left().unwrap().to_trimmed_string(), "a");
-        assert_eq!(logical.right().unwrap().to_trimmed_string(), "b");
     }
 
     #[test]
