@@ -113,3 +113,26 @@ export function aliasInstance(): number {
     }
     return found.armour;
 }
+
+declare function make<T extends {}>(): T | null;
+declare function make<T>(): T;
+
+export function emptyObjectConstraint(): number {
+    const made = make<number>();
+    if (made === null) {
+        return 0;
+    }
+    return made;
+}
+
+declare function settle(callback: () => Promise<string> | Promise<number>): object | null;
+declare function settle(callback: unknown): object;
+declare const pending: () => Promise<string> | Promise<number>;
+
+export function promiseUnionCallback(): number {
+    const settled = settle(pending);
+    if (settled === null) {
+        return 0;
+    }
+    return 1;
+}

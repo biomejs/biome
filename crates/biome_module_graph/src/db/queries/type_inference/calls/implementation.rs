@@ -1141,65 +1141,123 @@ pub(super) fn resolve_callable_function_impl<'db>(
 /// Returns whether a callback argument remains viable for a callback
 /// parameter during overload selection, judged by their return types.
 ///
+/// The callback is viable when the parameter accepts every kind of result
+/// (Promise or not) the argument may produce, looking through unions and
+/// generic constraints.
+///
 /// A parameter returning `void`, `any`, `unknown`, an unresolved type, or an
-/// unconstrained generic accepts every callback; a constrained generic accepts
-/// whatever its constraint accepts, and a union whatever any member accepts.
-/// Inside a union, `void` is an ordinary member and does not discard the
-/// result. Every other return type, a type predicate included, must agree
-/// with the argument on returning a Promise, which is what separates sync
-/// from async overloads:
+/// unconstrained generic accepts every callback. Inside a union, `void` is an
+/// ordinary member and does not discard the result. On either side, a type
+/// predicate produces a non-Promise value. An argument returning `any`,
+/// `unknown`, an unresolved type, or an unconstrained generic is also taken to
+/// produce a non-Promise value, so it does not select an async-only overload.
+/// Exceeding the work limit leaves the callback viable.
 ///
 /// ```ts
 /// declare function run(callback: () => unknown): string;
 /// declare function schedule(callback: () => string | void): string;
 /// declare function schedule(callback: () => Promise<string>): number;
+/// declare function settle(callback: () => Promise<string> | Promise<number>): string;
+/// declare const pending: () => Promise<string> | Promise<number>;
 ///
 /// run(async () => 1);           // viable: `unknown` accepts a Promise
 /// schedule(async () => "");     // second overload: neither `string` nor
 ///                               // `void` accepts a Promise
+/// settle(pending);              // viable: both sides produce only Promises
 /// ```
 fn callback_return_is_viable<'db>(
     db: &'db dyn ModuleDb,
     parameter_function: InferredFunction<'db>,
     argument_function: InferredFunction<'db>,
 ) -> bool {
-    let argument_returns_promise = argument_function.returns_promise(db);
-    let parameter_return_ty = match parameter_function.return_type(db) {
-        ReturnType::Type(ty) => resolve_local_type_on_demand(db, *ty),
-        ReturnType::Predicate(_) | ReturnType::Asserts(_) => return !argument_returns_promise,
-    };
-    if parameter_return_ty == InferredTypeData::VoidKeyword {
+    if let ReturnType::Type(ty) = parameter_function.return_type(db)
+        && resolve_local_type_on_demand(db, *ty) == InferredTypeData::VoidKeyword
+    {
         return true;
     }
-
-    let mut pending = Vec::from([parameter_return_ty]);
-    let mut remaining_steps = MAX_ARGUMENT_MATCH_STEPS;
-    while let Some(parameter_return_ty) = pending.pop() {
-        if remaining_steps == 0 {
-            return true;
-        }
-        remaining_steps -= 1;
-        let parameter_return_ty = resolve_local_type_on_demand(db, parameter_return_ty);
-        if let Some(generic) = generic_type_parameter(db, parameter_return_ty) {
-            match generic.constraint(db) {
-                Some(constraint) => pending.push(constraint),
-                None => return true,
-            }
-            continue;
-        }
-        match parameter_return_ty {
-            InferredTypeData::AnyKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::Unknown => return true,
-            InferredTypeData::Union(union) => pending.extend_from_slice(union.types(db)),
-            parameter_return_ty => {
-                if parameter_return_ty.is_promise_instance(db) == argument_returns_promise {
-                    return true;
-                }
-            }
-        }
+    let (Some(parameter), Some(argument)) = (
+        CallbackResults::of_return_type(db, parameter_function.return_type(db)),
+        CallbackResults::of_return_type(db, argument_function.return_type(db)),
+    ) else {
+        return true;
+    };
+    if parameter.unsettled {
+        return true;
     }
-    false
+    let argument_non_promise = argument.non_promise || argument.unsettled;
+    (!argument.promise || parameter.promise) && (!argument_non_promise || parameter.non_promise)
+}
+
+/// The kinds of result a callback's return type may produce, as read by
+/// [`callback_return_is_viable`].
+#[derive(Clone, Copy, Default)]
+struct CallbackResults {
+    promise: bool,
+    non_promise: bool,
+    /// The return type reaches `any`, `unknown`, an unresolved type, or an
+    /// unconstrained generic, so it does not settle what the callback produces.
+    unsettled: bool,
+}
+
+impl CallbackResults {
+    /// Returns `None` when reading the return type exceeds the work limit.
+    fn of_return_type<'db>(db: &'db dyn ModuleDb, return_type: &ReturnType<'db>) -> Option<Self> {
+        let ty = match return_type {
+            ReturnType::Type(ty) => *ty,
+            ReturnType::Predicate(_) | ReturnType::Asserts(_) => {
+                return Some(Self {
+                    non_promise: true,
+                    ..Self::default()
+                });
+            }
+        };
+
+        let mut results = Self::default();
+        let mut pending = Vec::from([ty]);
+        let mut remaining_steps = MAX_ARGUMENT_MATCH_STEPS;
+        while let Some(ty) = pending.pop() {
+            if remaining_steps == 0 {
+                return None;
+            }
+            remaining_steps -= 1;
+            let ty = resolve_local_type_on_demand(db, ty);
+            if let Some(generic) = generic_type_parameter(db, ty) {
+                match generic.constraint(db) {
+                    Some(constraint) => pending.push(constraint),
+                    None => results.unsettled = true,
+                }
+                continue;
+            }
+            match ty {
+                InferredTypeData::AnyKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::Unknown => results.unsettled = true,
+                InferredTypeData::Union(union) => pending.extend_from_slice(union.types(db)),
+                ty if ty.is_promise_instance(db) => results.promise = true,
+                // A reference to a type alias is an instance of the alias's
+                // body, which produces what the body produces.
+                InferredTypeData::InstanceOf(instance) => {
+                    let target = resolve_local_type_on_demand(db, instance.ty(db));
+                    if matches!(
+                        target,
+                        InferredTypeData::Union(_) | InferredTypeData::InstanceOf(_)
+                    ) {
+                        let substitutions = substitutions_for_instance(
+                            db,
+                            target,
+                            instance.type_parameters(db),
+                            &[],
+                        );
+                        pending.push(apply_substitutions_to_root_body(db, target, &substitutions));
+                    } else {
+                        results.non_promise = true;
+                    }
+                }
+                _ => results.non_promise = true,
+            }
+        }
+        Some(results)
+    }
 }
 
 /// A directional relation between an expected parameter type and an actual argument type.
@@ -1550,6 +1608,15 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::Object(_)
                 | InferredTypeData::Tuple(_),
             ) => ArgumentMatchAction::Match,
+            // `{}` accepts every value except `null` and `undefined`.
+            (
+                InferredTypeData::Object(_),
+                InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol,
+            ) if declares_no_members(db, self.parameter_ty) => ArgumentMatchAction::Match,
             (
                 InferredTypeData::Class(_)
                 | InferredTypeData::Constructor(_)
@@ -1763,6 +1830,22 @@ impl<'db> ArgumentTypeCompatibility<'db> {
         }
 
         false
+    }
+}
+
+/// Returns whether `ty` is an object type with no members, such as `{}`, which
+/// accepts every value except `null` and `undefined`.
+///
+/// Interfaces always return `false`: the collector silently drops members it
+/// cannot model, such as `[Symbol.iterator]`, so an empty list proves nothing.
+fn declares_no_members<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> bool {
+    match ty {
+        InferredTypeData::Object(object) => {
+            object.prototype(db).is_none()
+                && object.members(db).is_empty()
+                && !object.has_unknown_members(db)
+        }
+        _ => false,
     }
 }
 

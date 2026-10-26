@@ -1534,6 +1534,96 @@ fn test_infer_module_types_rejects_callable_type_arguments_outside_generic_const
 }
 
 #[test]
+fn test_infer_module_types_accepts_primitive_type_arguments_within_empty_object_constraints_on_build()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function make<T extends {}>(): T | null;
+            declare function make<T>(): T;
+
+            declare function kind<T extends {}>(): "object";
+            declare function kind<T>(): "fallback";
+
+            interface Iterable { [Symbol.iterator](): Iterator<number> }
+            declare function iterate<T extends Iterable>(): "iterable";
+            declare function iterate<T>(): "fallback";
+
+            declare function sized<T extends { length: number }>(): "sized";
+            declare function sized<T>(): "fallback";
+
+            export const made = make<number>();
+            export const fromString = kind<string>();
+            export const fromBoolean = kind<boolean>();
+            export const fromNull = kind<null>();
+            export const fromUndefined = kind<undefined>();
+            export const fromNumber = sized<number>();
+            export const fromIterable = iterate<number>();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let resolved = |name: &str| {
+        inferred_binding_ty_by_name(&db, module, inferred, name).map_or_else(
+            || panic!("{name} binding type must be inferred"),
+            |ty| inferred.resolve_type(&db, ty),
+        )
+    };
+
+    // `{}` accepts every non-nullish value, so the constrained overload stays
+    // a candidate and contributes `null`.
+    let made = resolved("made");
+    let InferredTypeData::Union(union) = made else {
+        panic!(
+            "made must be `number | null`, got {}",
+            format_inferred_type(&db, made)
+        );
+    };
+    assert!(union.types(&db).contains(&InferredTypeData::Null));
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_number(&db, *ty))
+    );
+
+    for name in ["fromString", "fromBoolean"] {
+        let ty = resolved(name);
+        assert!(
+            is_inferred_string_literal(&db, ty, "object"),
+            "{name} must be `\"object\"`, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    // `null` and `undefined` do not satisfy `{}`.
+    for name in ["fromNull", "fromUndefined"] {
+        let ty = resolved(name);
+        assert!(
+            is_inferred_string_literal(&db, ty, "fallback"),
+            "{name} must be `\"fallback\"`, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    // A constraint that requires a member still rejects a primitive lacking
+    // it, including a member keyed by a symbol.
+    for name in ["fromNumber", "fromIterable"] {
+        let ty = resolved(name);
+        assert!(
+            is_inferred_string_literal(&db, ty, "fallback"),
+            "{name} must be `\"fallback\"`, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+}
+
+#[test]
 fn test_infer_module_types_calls_instantiated_generic_alias_call_signatures_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(

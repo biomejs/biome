@@ -380,3 +380,158 @@ fn test_infer_module_types_keeps_strict_callback_return_types_for_async_callback
         "predicate"
     ));
 }
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_for_primitives_within_empty_object_parameters_on_build()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function accept(value: {}): "object";
+            declare function accept(value: unknown): "fallback";
+
+            declare function named(value: { name: string }): "named";
+            declare function named(value: unknown): "fallback";
+
+            export const fromNumber = accept(1);
+            export const fromString = accept("");
+            export const fromNull = accept(null);
+            export const fromUndefined = accept(undefined);
+            export const fromNamed = named(1);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let literal = |name: &str| {
+        inferred_binding_ty_by_name(&db, index_module, inferred, name).map_or_else(
+            || panic!("{name} binding type must be inferred"),
+            |ty| inferred.resolve_type(&db, ty),
+        )
+    };
+
+    // `{}` accepts every non-nullish value.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromNumber"),
+        "object"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromString"),
+        "object"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromNull"),
+        "fallback"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromUndefined"),
+        "fallback"
+    ));
+
+    // A parameter that requires a member still rejects a primitive.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromNamed"),
+        "fallback"
+    ));
+}
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_for_promise_union_callback_returns_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Pending = Promise<string> | Promise<number>;
+            type Wrap<T> = T | Promise<number>;
+
+            declare function settle(callback: () => Promise<string> | Promise<number>): "promise";
+            declare function settle(callback: unknown): "fallback";
+
+            declare function aliased(callback: () => Pending): "promise";
+            declare function aliased(callback: unknown): "fallback";
+
+            declare function wrapped(callback: () => Wrap<Promise<string>>): "promise";
+            declare function wrapped(callback: unknown): "fallback";
+
+            declare function strict(callback: () => Promise<string>): "promise";
+            declare function strict(callback: unknown): "fallback";
+
+            declare const identical: () => Promise<string> | Promise<number>;
+            declare const viaAlias: () => Pending;
+            declare const viaGeneric: () => Wrap<Promise<string>>;
+            declare const viaGenericString: () => Wrap<string>;
+            declare const mixed: () => string | Promise<string>;
+            declare const loose: () => any;
+
+            export const fromIdentical = settle(identical);
+            export const fromAliasArgument = settle(viaAlias);
+            export const fromAliasParameter = aliased(identical);
+            export const fromAliasBoth = aliased(viaAlias);
+            export const fromAsync = settle(async () => "");
+            export const fromGenericArgument = settle(viaGeneric);
+            export const fromGenericParameter = wrapped(identical);
+            export const fromGenericString = settle(viaGenericString);
+            export const fromMixed = strict(mixed);
+            export const fromAny = strict(loose);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let literal = |name: &str| {
+        inferred_binding_ty_by_name(&db, index_module, inferred, name).map_or_else(
+            || panic!("{name} binding type must be inferred"),
+            |ty| inferred.resolve_type(&db, ty),
+        )
+    };
+
+    // A callback returning only Promises fits a parameter returning only
+    // Promises, whether either side spells the union out or names an alias.
+    for name in [
+        "fromIdentical",
+        "fromAliasArgument",
+        "fromAliasParameter",
+        "fromAliasBoth",
+        "fromAsync",
+        "fromGenericArgument",
+        "fromGenericParameter",
+    ] {
+        let ty = literal(name);
+        assert!(
+            is_inferred_string_literal(&db, ty, "promise"),
+            "{name} must be `\"promise\"`, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    // A callback that may return a non-Promise does not fit a parameter
+    // returning only Promises.
+    for name in ["fromMixed", "fromGenericString"] {
+        let ty = literal(name);
+        assert!(
+            is_inferred_string_literal(&db, ty, "fallback"),
+            "{name} must be `\"fallback\"`, got {}",
+            format_inferred_type(&db, ty)
+        );
+    }
+
+    // A callback returning `any` is not taken to return a Promise. TypeScript
+    // also selects the fallback here.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromAny"),
+        "fallback"
+    ));
+}
