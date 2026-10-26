@@ -2516,8 +2516,10 @@ fn dash_thematic_break_after_required_indent(
     start_column: usize,
     required_indent: usize,
 ) -> Option<usize> {
-    let (mut byte_offset, mut column) =
+    let (mut byte_offset, indent_columns) =
         required_indent_byte_count(line, start_column, required_indent)?;
+    let mut column = start_column + indent_columns;
+    let item_content_column = start_column + required_indent;
     let bytes = line.as_bytes();
 
     let required_byte_offset = byte_offset;
@@ -2527,7 +2529,7 @@ fn dash_thematic_break_after_required_indent(
             b'\t' => column + (TAB_STOP_SPACES - (column % TAB_STOP_SPACES)),
             _ => break,
         };
-        if next_column.saturating_sub(start_column + required_indent) > MAX_BLOCK_PREFIX_INDENT {
+        if next_column.saturating_sub(item_content_column) > MAX_BLOCK_PREFIX_INDENT {
             return None;
         }
         column = next_column;
