@@ -27,7 +27,7 @@ use biome_markdown_syntax::{
     MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken, MdFencedCodeBlock,
 };
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, TextRange};
+use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize};
 use biome_yaml_formatter::YamlFormatLanguage;
 use rustc_hash::FxHashMap;
 
@@ -71,15 +71,19 @@ pub(super) fn format_embedded(
         let file_source = snippet.file_source(&workspace_db)?;
         // This is needed due to the parsed representation of code blocks (mostly rowan), so we need
         // to allocate a new string to replace the previous code.
-        let parse = match IndentedFenceCode::from_range(&tree, range) {
-            Some(code) => parse_snippet_code(
-                &code.without_indentation(),
-                range.start(),
-                file_source,
-                biome_path,
-                settings,
-            )?,
-            None => snippet.parsed_origin().parse(&workspace_db),
+        let parse = if matches!(file_source, DocumentFileSource::Markdown(_)) {
+            parse_markdown_fence_code(&tree, range, file_source, biome_path, settings)?
+        } else {
+            match IndentedFenceCode::from_range(&tree, range) {
+                Some(code) => parse_snippet_code(
+                    &code.without_indentation(),
+                    range.start(),
+                    file_source,
+                    biome_path,
+                    settings,
+                )?,
+                None => snippet.parsed_origin().parse(&workspace_db),
+            }
         };
         if parse.has_errors() {
             return None;
@@ -91,6 +95,47 @@ pub(super) fn format_embedded(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+/// Parses the Markdown code of the fenced code block of `root` whose code
+/// spans `range`, without the line break that ends the opening fence line.
+///
+/// The snippet of the block is parsed from code that starts with that line
+/// break. Frontmatter must start on the first line of a document, so the
+/// snippet reads frontmatter at the start of the code as a thematic break and a
+/// paragraph, and formatting it would remove the indentation of the YAML.
+///
+/// When the opening fence is indented, positions in the parsed code don't
+/// match the file. Use it only for formatting.
+fn parse_markdown_fence_code(
+    root: &MarkdownSyntaxNode,
+    range: TextRange,
+    file_source: DocumentFileSource,
+    path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<AnyParse> {
+    let code = match IndentedFenceCode::from_range(root, range) {
+        Some(code) => code.without_indentation(),
+        None => root
+            .covering_element(range)
+            .into_token()?
+            .text()
+            .to_string(),
+    };
+    let opening_line_end = code.find(['\n', '\r']).map_or(0, |line_break| {
+        if code[line_break..].starts_with("\r\n") {
+            line_break + 2
+        } else {
+            line_break + 1
+        }
+    });
+    parse_snippet_code(
+        &code[opening_line_end..],
+        range.start() + TextSize::from(opening_line_end as u32),
+        file_source,
+        path,
+        settings,
+    )
 }
 
 /// A fenced code block whose opening fence is indented.
