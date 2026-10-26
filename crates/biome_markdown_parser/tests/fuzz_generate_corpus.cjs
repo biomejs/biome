@@ -360,6 +360,50 @@ function genQuotedSublistAtContentColumn() {
 
 // #endregion
 
+// #region Quote-in-list combinators — block quotes inside list items whose
+// content column is 4 or more. Each `>` continuation marker follows the
+// item's content indent, so the indent before `>` exceeds the 0-3 columns a
+// top-level quote allows. Continuation lines vary between a matching prefix,
+// a lazy line, a nested quote, and an under-indented `>` that starts a new
+// block.
+
+function genQuoteInList() {
+  const marker = pick(["-", "1.", "10.", "100."]);
+  const space = " ".repeat(randInt(1, 4));
+  const contentCol = marker.length + space.length;
+  const pad = (n) => " ".repeat(n);
+  let result = `${marker}${space}item\n`;
+  let quoteCol = contentCol;
+  if (maybe(0.5)) {
+    const child = pick(["-", "1."]);
+    const childIndent = contentCol + randInt(0, 1);
+    result += `${pad(childIndent)}${child} child\n`;
+    quoteCol = childIndent + child.length + 1;
+  }
+  result += `${pad(quoteCol + randInt(0, 1))}> q\n`;
+  const lines = randInt(1, 3);
+  for (let i = 0; i < lines; i++) {
+    result += pick([
+      `${pad(quoteCol)}> r\n`,
+      `${pad(quoteCol + randInt(1, 3))}> r\n`,
+      `${pad(quoteCol)}lazy\n`,
+      `${pad(quoteCol)}> > nested\n`,
+      `${pad(quoteCol)}>\n`,
+      `${pad(quoteCol)}> - item in quote\n`,
+      `${pad(randInt(0, Math.max(0, quoteCol - 1)))}> under-indented\n`,
+    ]);
+  }
+  if (maybe(0.2)) {
+    result = result
+      .split("\n")
+      .map((line) => (line ? `> ${line}` : line))
+      .join("\n");
+  }
+  return result;
+}
+
+// #endregion
+
 // #endregion
 
 // #region Document generator
@@ -403,6 +447,8 @@ const blockGenerators = [
   { fn: genOrderedSublistAtContentColumn, weight: 4 },
   { fn: genNestedSublistBoundary, weight: 4 },
   { fn: genQuotedSublistAtContentColumn, weight: 3 },
+  // Quote-in-list combinators — block quotes inside deep list content.
+  { fn: genQuoteInList, weight: 4 },
 ];
 
 const totalWeight = blockGenerators.reduce((sum, g) => sum + g.weight, 0);
