@@ -1,0 +1,22 @@
+---
+// should not generate diagnostics
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const { url, site } = Astro;
+const { canonicalURL: fromProps } = Astro.props;
+const key = "url";
+const dynamic = Astro[key];
+const other = { canonicalURL: "https://example.com" };
+const fromOther = other.canonicalURL;
+const nested = other.Astro;
+const alias = Astro;
+const fromAlias = alias.url;
+let notAstro;
+notAstro = other;
+const fromNotAstro = notAstro.canonicalURL;
+function withDefault({ url } = Astro) {}
+const fromTest = (Astro ? other : other).canonicalURL;
+Astro.canonicalURL = "https://example.com";
+({ url: Astro.canonicalURL } = other);
+---
+<link rel="canonical" href={canonicalURL} />
+<p>{other.canonicalURL}</p>

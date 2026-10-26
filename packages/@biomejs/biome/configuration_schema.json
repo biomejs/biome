@@ -3503,6 +3503,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroDeprecatedCanonicalUrlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroDeprecatedCanonicalUrlOptions" }
+			]
+		},
+		"NoAstroDeprecatedCanonicalUrlOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroSetHtmlDirectiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7934,6 +7944,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroDeprecatedCanonicalUrl": {
+					"description": "Disallow the deprecated Astro.canonicalURL property.\nSee https://biomejs.dev/linter/rules/no-astro-deprecated-canonical-url",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroDeprecatedCanonicalUrlConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroSetHtmlDirective": {
 					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
 					"anyOf": [
@@ -9975,6 +9992,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAstroConflictingSetDirectivesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroDeprecatedCanonicalUrlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroDeprecatedCanonicalUrlOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
