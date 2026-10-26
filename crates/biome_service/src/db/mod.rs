@@ -587,6 +587,35 @@ impl WorkspaceDb {
         self.files.pin().get(path).copied()
     }
 
+    /// Returns the parsed source cached for `path` if it already holds the
+    /// same tree as `parsed`.
+    ///
+    /// Shared mode replaces a parsed source by allocating a new Salsa input,
+    /// and Salsa never frees inputs. A project scan parses every file again,
+    /// so reusing the current input when nothing changed keeps each rescan
+    /// from adding a full copy of the project to memory.
+    ///
+    /// Only sources without diagnostics or snippets are reused, because
+    /// those can't be compared cheaply.
+    pub fn unchanged_parsed_source(
+        &self,
+        path: &Utf8Path,
+        parsed: &AnyParse,
+        document_source_index: usize,
+    ) -> Option<ParsedSource> {
+        let existing = self.get_parsed_source(path)?;
+        let current = existing.parsed(self);
+        let unchanged = existing.document_source_index(self) == document_source_index
+            && existing.snippets(self).is_empty()
+            && current.diagnostics().is_empty()
+            && parsed.diagnostics().is_empty()
+            && current
+                .as_send_node()
+                .is_some_and(|root| Some(root) == parsed.as_send_node());
+
+        unchanged.then_some(existing)
+    }
+
     /// Returns the number of cached parsed sources.
     ///
     /// Only used by tests to check that eviction empties the collection,

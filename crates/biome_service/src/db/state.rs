@@ -665,6 +665,11 @@ impl DbState {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
+                if snippets.is_empty()
+                    && let Some(file) = db.unchanged_parsed_source(path, &parsed, language_index)
+                {
+                    return file;
+                }
                 let parsed_snippets = create_parsed_snippets(&db, snippets);
                 let file = db.update_or_insert_file(
                     path,
@@ -1117,6 +1122,26 @@ mod tests {
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
+    }
+
+    /// Shared storage replaces a parsed source by allocating a new Salsa
+    /// input, which is never freed. Parsing an unchanged file again, as every
+    /// project rescan does, must reuse the current input instead. Otherwise
+    /// each rescan keeps another copy of every file in memory.
+    #[test]
+    fn shared_storage_reuses_unchanged_parsed_source() {
+        let state = DbState::new(test_fs());
+        let path = Utf8PathBuf::from("test.js");
+
+        let first = state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        let unchanged = state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        assert_eq!(first.as_id(), unchanged.as_id());
+
+        let changed = state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+        assert_ne!(first.as_id(), changed.as_id());
+
+        let other_source = state.update_parsed_file(&path, parse_js("let b = 2;"), 1, vec![]);
+        assert_ne!(changed.as_id(), other_source.as_id());
     }
 
     #[test]

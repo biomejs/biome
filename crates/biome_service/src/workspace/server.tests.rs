@@ -1873,12 +1873,12 @@ fn change_file_resumes_module_update_after_cancellation() {
 fn owned_scan_uses_replacement_updates() {
     const PATH: &str = "/project/index.js";
 
-    let fs = MemoryFileSystem::default();
+    let fs = Arc::new(MemoryFileSystem::default());
     fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
     let (watcher_tx, _) = crossbeam::channel::unbounded();
     let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
     let mut workspace = LocalWorkspace::new(
-        Arc::new(fs),
+        fs.clone(),
         watcher_tx,
         service_tx,
         Arc::new(NoopQueryProvider {}),
@@ -1918,6 +1918,9 @@ fn owned_scan_uses_replacement_updates() {
         .get_db()
         .get_parsed_source(Utf8Path::new(PATH))
         .unwrap();
+    // A rescan keeps the input of an unchanged file, so change the file to
+    // see how the scan publishes the update.
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 2;");
     scan();
     let second = workspace
         .get_db()
