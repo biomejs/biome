@@ -54,6 +54,7 @@ declare_lint_rule! {
             RuleSource::Eslint("dot-notation").same(),
             RuleSource::Eslint("no-useless-computed-key").same(),
             RuleSource::EslintTypeScript("dot-notation").same(),
+            RuleSource::EslintVueJs("dot-notation").same(),
         ],
         recommended: true,
         severity: Severity::Information,
