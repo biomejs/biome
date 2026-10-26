@@ -4,5 +4,5 @@ import type { Options } from "./options";
 type PrivateType = Options;
 export type PublicType = PrivateType;
 
-// Without this empty export, PrivateType would also be exported.
+// Without this empty export, PrivateType would also be exported: `export type` above doesn't prevent that.
 export {};

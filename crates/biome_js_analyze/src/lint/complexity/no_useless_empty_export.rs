@@ -23,8 +23,9 @@ declare_lint_rule! {
     ///
     /// However, an `export {}` statement does nothing if there are any other top-level import or export in the file.
     ///
-    /// Declaration files (`.d.ts`) are ignored. In a declaration file, every declaration is exported implicitly
-    /// unless the file contains an export declaration such as `export {}`, so the empty export is not useless there.
+    /// Declaration files (`.d.ts`) are ignored. In a declaration file, declarations without the `export` keyword
+    /// are exported too, unless the file has an export statement such as `export {}`. The `export` keyword on a
+    /// declaration, as in `export type`, doesn't stop this, so the empty export is not useless there.
     ///
     /// ## Examples
     ///
