@@ -415,20 +415,23 @@ fn at_bullet_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usi
     if !is_candidate || !list_item_within_indent(p, base_indent) {
         return false;
     }
-    p.lookahead(|p| {
-        skip_leading_whitespace_tokens(p);
-        match p.cur() {
-            MD_SETEXT_UNDERLINE_LITERAL if is_single_dash_setext_marker(p.cur_text()) => {
-                p.bump_remap(T![-]);
-            }
-            MD_TEXTUAL_LITERAL if is_textual_bullet_marker(p.cur_text()) => {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            T![-] | T![*] | T![+] => p.bump(p.cur()),
-            _ => return false,
-        }
-        marker_followed_by_whitespace_or_eol(p)
-    })
+    let marker = first_non_whitespace_token(p);
+    let is_bullet = match p.nth(marker) {
+        MD_SETEXT_UNDERLINE_LITERAL => p.nth_text(marker).is_some_and(is_single_dash_setext_marker),
+        MD_TEXTUAL_LITERAL => p.nth_text(marker).is_some_and(is_textual_bullet_marker),
+        T![-] | T![*] | T![+] => true,
+        _ => false,
+    };
+    is_bullet && marker_followed_by_whitespace_or_eol_at(p, marker + 1)
+}
+
+fn first_non_whitespace_token(p: &mut MarkdownParser) -> usize {
+    let mut offset = 0;
+    while p.nth_at(offset, MD_TEXTUAL_LITERAL) && p.nth_text(offset).is_some_and(is_whitespace_only)
+    {
+        offset += 1;
+    }
+    offset
 }
 
 pub(crate) fn marker_followed_by_whitespace_or_eol(p: &mut MarkdownParser) -> bool {
@@ -1008,27 +1011,9 @@ fn at_order_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usiz
     if !is_candidate || !list_item_within_indent(p, base_indent) {
         return false;
     }
-    p.lookahead(|p| {
-        skip_leading_whitespace_tokens(p);
-        if !p.at(MD_ORDERED_LIST_MARKER) {
-            return false;
-        }
-        p.bump(MD_ORDERED_LIST_MARKER);
-        marker_followed_by_whitespace_or_eol(p)
-    })
-}
-
-fn at_order_list_item_textual_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
-    if !p.at(MD_TEXTUAL_LITERAL)
-        || (!is_whitespace_only(p.cur_text()) && !textual_starts_with_ordered_marker(p.cur_text()))
-        || !list_item_within_indent(p, base_indent)
-    {
-        return false;
-    }
-    p.lookahead(|p| {
-        skip_leading_whitespace_tokens(p);
-        p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
-    })
+    let marker = first_non_whitespace_token(p);
+    p.nth_at(marker, MD_ORDERED_LIST_MARKER)
+        && marker_followed_by_whitespace_or_eol_at(p, marker + 1)
 }
 
 fn at_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
@@ -1047,29 +1032,73 @@ fn at_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> 
         return false;
     }
 
-    p.lookahead(|p| {
-        skip_leading_whitespace_tokens(p);
-        match p.cur() {
-            MD_SETEXT_UNDERLINE_LITERAL if is_single_dash_setext_marker(p.cur_text()) => {
-                p.bump_remap(T![-]);
-                marker_followed_by_whitespace_or_eol(p)
-            }
-            MD_TEXTUAL_LITERAL if is_textual_bullet_marker(p.cur_text()) => {
-                p.bump(MD_TEXTUAL_LITERAL);
-                marker_followed_by_whitespace_or_eol(p)
-            }
-            T![-] | T![*] | T![+] => {
-                p.bump(p.cur());
-                marker_followed_by_whitespace_or_eol(p)
-            }
-            MD_ORDERED_LIST_MARKER => {
-                p.bump(MD_ORDERED_LIST_MARKER);
-                marker_followed_by_whitespace_or_eol(p)
-            }
-            MD_TEXTUAL_LITERAL => textual_starts_with_ordered_marker(p.cur_text()),
-            _ => false,
+    let marker = first_non_whitespace_token(p);
+    match p.nth(marker) {
+        MD_SETEXT_UNDERLINE_LITERAL => {
+            p.nth_text(marker).is_some_and(is_single_dash_setext_marker)
+                && marker_followed_by_whitespace_or_eol_at(p, marker + 1)
         }
-    })
+        MD_TEXTUAL_LITERAL => {
+            if p.nth_text(marker).is_some_and(is_textual_bullet_marker) {
+                marker_followed_by_whitespace_or_eol_at(p, marker + 1)
+            } else {
+                p.nth_text(marker)
+                    .is_some_and(textual_starts_with_ordered_marker)
+            }
+        }
+        T![-] | T![*] | T![+] | MD_ORDERED_LIST_MARKER => {
+            marker_followed_by_whitespace_or_eol_at(p, marker + 1)
+        }
+        _ => false,
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ContinuationListMarker {
+    Bullet,
+    Ordered,
+    TextualOrdered,
+}
+
+fn continuation_list_marker_with_base_indent(
+    p: &mut MarkdownParser,
+    base_indent: usize,
+) -> Option<ContinuationListMarker> {
+    if !list_item_within_indent(p, base_indent) {
+        return None;
+    }
+
+    let marker = first_non_whitespace_token(p);
+    match p.nth(marker) {
+        MD_SETEXT_UNDERLINE_LITERAL
+            if p.nth_text(marker).is_some_and(is_single_dash_setext_marker)
+                && marker_followed_by_whitespace_or_eol_at(p, marker + 1) =>
+        {
+            Some(ContinuationListMarker::Bullet)
+        }
+        MD_TEXTUAL_LITERAL => {
+            let (is_bullet, is_ordered) = p.nth_text(marker).map(|text| {
+                (
+                    is_textual_bullet_marker(text),
+                    textual_starts_with_ordered_marker(text),
+                )
+            })?;
+            if is_bullet && marker_followed_by_whitespace_or_eol_at(p, marker + 1) {
+                Some(ContinuationListMarker::Bullet)
+            } else if is_ordered {
+                Some(ContinuationListMarker::TextualOrdered)
+            } else {
+                None
+            }
+        }
+        T![-] | T![*] | T![+] if marker_followed_by_whitespace_or_eol_at(p, marker + 1) => {
+            Some(ContinuationListMarker::Bullet)
+        }
+        MD_ORDERED_LIST_MARKER if marker_followed_by_whitespace_or_eol_at(p, marker + 1) => {
+            Some(ContinuationListMarker::Ordered)
+        }
+        _ => None,
+    }
 }
 
 /// Struct implementing `ParseNodeList` for ordered lists.
@@ -2761,14 +2790,14 @@ fn check_continuation_indent(
 
             // Detect nested list markers before emitting indentation because
             // at_*_list_item uses the original leading whitespace.
-            let starts_nested_bullet = at_bullet_list_item(p);
-            let mut starts_nested_ordered = !starts_nested_bullet && at_order_list_item(p);
-            let mut starts_nested_ordered_textual = !starts_nested_bullet
-                && !starts_nested_ordered
-                && at_order_list_item_textual_with_base_indent(
-                    p,
-                    p.state().list_item_required_indent,
-                );
+            let nested_marker =
+                continuation_list_marker_with_base_indent(p, list_marker_base_indent(p));
+            let starts_nested_bullet =
+                matches!(nested_marker, Some(ContinuationListMarker::Bullet));
+            let mut starts_nested_ordered =
+                matches!(nested_marker, Some(ContinuationListMarker::Ordered));
+            let mut starts_nested_ordered_textual =
+                matches!(nested_marker, Some(ContinuationListMarker::TextualOrdered));
 
             // CommonMark §5.2: ordered markers that do not start with `1`
             // cannot interrupt an ongoing paragraph. Detect any ordered
