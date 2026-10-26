@@ -61,8 +61,8 @@ use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS,
     MIN_FENCE_RUN_LENGTH, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES, at_block_interrupt,
-    at_indent_code_block, first_non_indent_byte, is_ordered_list_starts_with_one,
-    is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
+    at_indent_code_block, first_non_indent_byte, is_paragraph_like, is_whitespace_only,
+    parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
@@ -2580,50 +2580,19 @@ fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
     dash_count >= MIN_THEMATIC_BREAK_RUN
 }
 
-/// Return true when the current line's ordered marker starts with `1`.
-///
-/// The cursor may still be on separate indentation tokens, or the lexer may
-/// have bundled indentation and marker text into one `MD_TEXTUAL_LITERAL`
-/// (for example, `"  1. child"`).
-fn nested_ordered_marker_starts_with_one(p: &mut MarkdownParser) -> bool {
-    if p.at(MD_TEXTUAL_LITERAL) {
-        let trimmed = p.cur_text().trim_start_matches([' ', '\t']);
-        if let Some(rest) = trimmed
-            .strip_prefix("1.")
-            .or_else(|| trimmed.strip_prefix("1)"))
-        {
-            return rest.is_empty() || rest.starts_with([' ', '\t']);
-        }
+/// Return whether the current line has an ordered marker, and whether it
+/// starts with `1`, without asking the lexer to tokenize beyond the cursor.
+fn ordered_marker_starting_with_one(p: &MarkdownParser) -> Option<bool> {
+    let source = p.source_after_current().trim_start_matches([' ', '\t']);
+    if !textual_starts_with_ordered_marker(source) {
+        return None;
     }
-    p.lookahead(|p| {
-        skip_leading_whitespace_tokens(p);
-        is_ordered_list_starts_with_one(p)
-    })
-}
 
-/// Return true when the current line starts with an ordered marker.
-///
-/// This detects markers that are too deeply indented for `at_order_list_item`,
-/// so CommonMark §5.2 paragraph-interrupt rules still apply.
-fn line_starts_with_ordered_marker_after_whitespace(p: &mut MarkdownParser) -> bool {
-    if p.at(MD_TEXTUAL_LITERAL) {
-        let trimmed = p.cur_text().trim_start_matches([' ', '\t']);
-        if textual_starts_with_ordered_marker(trimmed) {
-            return true;
-        }
-    }
-    p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
-        if p.at(MD_ORDERED_LIST_MARKER) {
-            return true;
-        }
-        if p.at(MD_TEXTUAL_LITERAL) {
-            return textual_starts_with_ordered_marker(p.cur_text());
-        }
-        false
-    })
+    let starts_with_one = source
+        .strip_prefix("1.")
+        .or_else(|| source.strip_prefix("1)"))
+        .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\r', '\n']));
+    Some(starts_with_one)
 }
 
 /// Emit an explicit `MdContinuationIndent` covering exactly `indent` columns
@@ -2804,8 +2773,8 @@ fn check_continuation_indent(
             // this base indent, then verify whether it starts with `1`.
             let force_paragraph_continuation = state.last_block_was_paragraph
                 && !prev_was_blank
-                && line_starts_with_ordered_marker_after_whitespace(p)
-                && !nested_ordered_marker_starts_with_one(p);
+                && !starts_nested_bullet
+                && ordered_marker_starting_with_one(p) == Some(false);
             if force_paragraph_continuation {
                 // Clear nested ordered matches so the line is parsed as
                 // paragraph continuation below instead of as a child list.
