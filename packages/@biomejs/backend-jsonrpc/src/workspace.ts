@@ -3743,6 +3743,11 @@ export interface Nursery {
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 	/**
+	 * Require the render function of a Vue component to return a value.
+	 * See https://biomejs.dev/linter/rules/use-vue-render-return
+	 */
+	useVueRenderReturn?: UseVueRenderReturnConfiguration;
+	/**
 	 * Require the element inside a Vue \<Transition> to be shown and hidden with v-if or v-show.
 	 * See https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition
 	 */
@@ -6385,6 +6390,9 @@ export type UseVueConsistentEventHyphenationConfiguration =
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVueRenderReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueRenderReturnOptions;
 export type UseVueToggleInsideTransitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueToggleInsideTransitionOptions;
@@ -9333,6 +9341,10 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVueRenderReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueRenderReturnOptions;
+}
 export interface RuleWithUseVueToggleInsideTransitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueToggleInsideTransitionOptions;
@@ -11734,6 +11746,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	ignoreTags?: string[];
 }
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVueRenderReturnOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
@@ -13345,6 +13358,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"

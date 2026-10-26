@@ -514,6 +514,10 @@ impl Collector<'_, '_> {
                 ),
                 "setup" => self.collect_setup_function(member_function(&member), component),
                 "name" | "inheritAttrs" => self.collect_scalar_option(&member, component),
+                "render" => {
+                    let range = self.host(member.syntax().text_trimmed_range());
+                    self.builder.component_mut(component).render = Some(range);
+                }
                 "extends" | "mixins" => self.builder.open_all(component, OpenReason::Extends),
                 // The template is a string the model does not read, and it
                 // may use any declaration.
