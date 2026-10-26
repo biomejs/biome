@@ -4,6 +4,7 @@ pub use any_type_kind::AnyTypeKind;
 pub use boolean_coercion::BooleanCoercion;
 
 use crate::TypeDb;
+use crate::generated::global_types::ids::READONLY_ARRAY_ID_GLOBAL_TYPE_ID;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
@@ -74,6 +75,14 @@ pub struct IgnoredPrimitiveTypes {
 pub struct InferredType<'db> {
     db: &'db dyn TypeDb,
     data: TypeData<'db>,
+}
+
+impl<'db> fmt::Debug for InferredType<'db> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("InferredType")
+            .field("data", &self.data)
+            .finish()
+    }
 }
 
 impl<'db> InferredType<'db> {
@@ -270,6 +279,94 @@ impl<'db> InferredType<'db> {
                     TypeData::InstanceOf(instance)
                         if instance.ty(self.db).is_array_class(self.db)
                 )
+        })
+        .unwrap_or(false)
+    }
+
+    /// Returns whether this type is conclusively known not to be an Array,
+    /// Tuple, TypedArray, or Iterator.
+    ///
+    /// Indeterminate types (such as `any`, `unknown`, or unresolved types) return `false`.
+    pub fn is_known_non_array_or_iterator(self) -> bool {
+        self.try_all_variants_match(|mut data| {
+            while let TypeData::TypeOperator(operator) = data {
+                if operator.operator(self.db) == crate::TypeOperator::Readonly {
+                    data = operator.ty(self.db);
+                } else {
+                    break;
+                }
+            }
+            if matches!(data, TypeData::Tuple(_)) {
+                return false;
+            }
+            if let TypeData::InstanceOf(instance) = data {
+                let mut target = instance.ty(self.db);
+                loop {
+                    if let TypeData::TypeOperator(operator) = target
+                        && operator.operator(self.db) == crate::TypeOperator::Readonly
+                    {
+                        target = operator.ty(self.db);
+                        continue;
+                    }
+                    if let TypeData::InstanceOf(inner) = target {
+                        target = inner.ty(self.db);
+                        continue;
+                    }
+                    break;
+                }
+                if target.is_array_class(self.db)
+                    || target == TypeData::GlobalType(READONLY_ARRAY_ID_GLOBAL_TYPE_ID)
+                {
+                    return false;
+                }
+                let mut canonical = target.expand_canonical_global(self.db);
+                while let TypeData::TypeOperator(operator) = canonical {
+                    if operator.operator(self.db) == crate::TypeOperator::Readonly {
+                        canonical = operator.ty(self.db).expand_canonical_global(self.db);
+                    } else {
+                        break;
+                    }
+                }
+                match canonical {
+                    TypeData::Class(class) => {
+                        if let Some(name) = class.name(self.db) {
+                            let text = name.text();
+                            if text.ends_with("Array") || text.starts_with("Iterator") {
+                                return false;
+                            }
+                        }
+                    }
+                    TypeData::Interface(interface) => {
+                        let text = interface.name(self.db).text();
+                        if text == "ReadonlyArray"
+                            || text.ends_with("Array")
+                            || text.starts_with("Iterator")
+                        {
+                            return false;
+                        }
+                    }
+                    _ => {}
+                }
+                return true;
+            }
+
+            matches!(
+                data,
+                TypeData::Literal(literal)
+                    if matches!(literal.literal(self.db), Literal::Object(_))
+            ) || matches!(
+                data,
+                TypeData::Object(_)
+                    | TypeData::Interface(_)
+                    | TypeData::String
+                    | TypeData::Number
+                    | TypeData::Boolean
+                    | TypeData::BigInt
+                    | TypeData::Symbol
+                    | TypeData::Null
+                    | TypeData::Undefined
+                    | TypeData::VoidKeyword
+            ) || data.is_primitive(self.db)
         })
         .unwrap_or(false)
     }

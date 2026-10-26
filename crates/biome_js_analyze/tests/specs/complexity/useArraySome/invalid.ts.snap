@@ -1,0 +1,97 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+const arr: string[] = ["a", "b"];
+arr.find((item) => item === "a") !== undefined;
+
+const roArr: readonly string[] = ["a", "b"];
+roArr.find((item) => item === "a") !== undefined;
+
+const items: number[] = [1, 2, 3];
+if (items.find((x) => x > 1)) {}
+
+class Container {
+    readonly items: string[] = [];
+    has(id: string): boolean {
+        return this.items.find((item) => item === id) !== undefined;
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/complexity/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression uses .find() only to check whether an array element exists.
+  
+    1 │ const arr: string[] = ["a", "b"];
+  > 2 │ arr.find((item) => item === "a") !== undefined;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ const roArr: readonly string[] = ["a", "b"];
+  
+  i .some() makes that intent clearer because it returns a boolean directly.
+  
+  i Use .some() if you only need to know whether any element matches.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/complexity/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression uses .find() only to check whether an array element exists.
+  
+    4 │ const roArr: readonly string[] = ["a", "b"];
+  > 5 │ roArr.find((item) => item === "a") !== undefined;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ const items: number[] = [1, 2, 3];
+  
+  i .some() makes that intent clearer because it returns a boolean directly.
+  
+  i Use .some() if you only need to know whether any element matches.
+  
+
+```
+
+```
+invalid.ts:8:5 lint/complexity/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression uses a .find()-style call as a boolean test.
+  
+     7 │ const items: number[] = [1, 2, 3];
+   > 8 │ if (items.find((x) => x > 1)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ class Container {
+  
+  i .some() makes that intent clearer because it returns a boolean directly.
+  
+  i Use .some() instead.
+  
+
+```
+
+```
+invalid.ts:13:16 lint/complexity/useArraySome ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression uses .find() only to check whether an array element exists.
+  
+    11 │     readonly items: string[] = [];
+    12 │     has(id: string): boolean {
+  > 13 │         return this.items.find((item) => item === id) !== undefined;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │     }
+    15 │ }
+  
+  i .some() makes that intent clearer because it returns a boolean directly.
+  
+  i Use .some() if you only need to know whether any element matches.
+  
+
+```

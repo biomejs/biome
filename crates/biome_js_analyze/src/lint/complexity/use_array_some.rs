@@ -1,14 +1,14 @@
-use crate::JsRuleAction;
+use crate::{JsRuleAction, services::typed::Typed};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression, JsSyntaxNode,
-    is_in_boolean_context,
+    JsSyntaxToken, is_in_boolean_context,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TextRange};
 use biome_rule_options::use_array_some::UseArraySomeOptions;
 
 declare_lint_rule! {
@@ -54,6 +54,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("prefer-array-some").inspired()],
+        domains: &[RuleDomain::Types],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -82,25 +83,64 @@ pub enum UseArraySomeState {
 }
 
 impl Rule for UseArraySome {
-    type Query = Ast<JsCallExpression>;
+    type Query = Typed<JsCallExpression>;
     type State = UseArraySomeState;
     type Signals = Option<Self::State>;
     type Options = UseArraySomeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
-        let method_name = call_method_name(call)?;
+        let (object, member_name_token) = call_method_and_object(call)?;
+        let method_name = member_name_token.text_trimmed();
+
+        if !matches!(
+            method_name,
+            "filter" | "findIndex" | "findLastIndex" | "find" | "findLast"
+        ) {
+            return None;
+        }
+
+        let arguments = call.arguments().ok()?;
+        let args = arguments.args();
+        if !(1..=2).contains(&args.len()) {
+            return None;
+        }
+
+        let first_arg = args.first()?.ok()?;
+        if let Some(first_expr) = first_arg.as_any_js_expression() {
+            if is_definitely_non_callable_expression(first_expr) {
+                return None;
+            }
+            if ctx
+                .type_of_expression(first_expr)
+                .and_then(|ty| ty.is_callable())
+                == Some(false)
+            {
+                return None;
+            }
+        }
+
+        if is_definitely_non_array_receiver(&object) {
+            return None;
+        }
+
+        if ctx
+            .type_of_expression(&object)
+            .is_some_and(|ty| ty.is_known_non_array_or_iterator())
+        {
+            return None;
+        }
 
         if method_name == "filter" {
             return detect_filter_length_pattern(call);
         }
 
         if method_name == "findIndex" || method_name == "findLastIndex" {
-            return detect_find_index_comparison_pattern(call, &method_name);
+            return detect_find_index_comparison_pattern(call, method_name);
         }
 
         if (method_name == "find" || method_name == "findLast")
-            && let Some(state) = detect_find_existence_comparison_pattern(call, &method_name)
+            && let Some(state) = detect_find_existence_comparison_pattern(call, method_name)
         {
             return Some(state);
         }
@@ -214,12 +254,42 @@ impl Rule for UseArraySome {
     }
 }
 
-fn call_method_name(call: &JsCallExpression) -> Option<String> {
+fn call_method_and_object(
+    call: &JsCallExpression,
+) -> Option<(AnyJsExpression, JsSyntaxToken)> {
     let callee = call.callee().ok()?;
     let member = callee.as_js_static_member_expression()?;
+    let object = member.object().ok()?;
     let member_name = member.member().ok()?;
     let name = member_name.as_js_name()?;
-    Some(name.value_token().ok()?.text_trimmed().to_string())
+    let token = name.value_token().ok()?;
+    Some((object, token))
+}
+
+fn is_definitely_non_callable_expression(expr: &AnyJsExpression) -> bool {
+    let expr = expr.clone().omit_parentheses();
+    match expr {
+        AnyJsExpression::AnyJsLiteralExpression(_) => true,
+        AnyJsExpression::JsArrayExpression(_) => true,
+        AnyJsExpression::JsObjectExpression(_) => true,
+        AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
+        AnyJsExpression::JsUnaryExpression(_) => true,
+        AnyJsExpression::JsBinaryExpression(_) => true,
+        _ => false,
+    }
+}
+
+fn is_definitely_non_array_receiver(expr: &AnyJsExpression) -> bool {
+    let expr = expr.clone().omit_parentheses();
+    match expr {
+        AnyJsExpression::AnyJsLiteralExpression(_) => true,
+        AnyJsExpression::JsObjectExpression(_) => true,
+        AnyJsExpression::JsClassExpression(_) => true,
+        AnyJsExpression::JsFunctionExpression(_) => true,
+        AnyJsExpression::JsArrowFunctionExpression(_) => true,
+        AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
+        _ => false,
+    }
 }
 
 fn detect_filter_length_pattern(call: &JsCallExpression) -> Option<UseArraySomeState> {

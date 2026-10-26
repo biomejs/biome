@@ -21,3 +21,10 @@ items.findLast(x => x > 1) == null;
 
 found;
 foundLast;
+
+// Non-callable argument
+items.find("string") !== undefined;
+items.find(123) != null;
+
+// Literal object receiver
+({ find() {} }).find(x => x > 1) !== undefined;

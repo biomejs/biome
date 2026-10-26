@@ -1,0 +1,45 @@
+// should not generate diagnostics
+// Reproduction of issue #12630: useArraySome reports a user-defined .find() method on a non-array receiver
+class Registry {
+    readonly items: string[] = [];
+    find(id: string): string | undefined {
+        return this.items.find((item) => item === id);
+    }
+}
+
+export function has(registry: Registry, id: string): boolean {
+    return registry.find(id) !== undefined;
+}
+
+// User-defined class with a callback predicate but no .some() method
+class QueryBuilder {
+    find(predicate: (x: any) => boolean): any {
+        return undefined;
+    }
+}
+
+export function testBuilder(qb: QueryBuilder, cb: (x: any) => boolean): boolean {
+    return qb.find(cb) !== undefined;
+}
+
+// Plain object with user-defined find method
+const obj: { find(id: string): string | undefined } = {
+    find(_id: string) {
+        return undefined;
+    },
+};
+obj.find("123") !== undefined;
+
+const objWithCb: { find(cb: () => boolean): string | undefined } = {
+    find(_cb: () => boolean) {
+        return undefined;
+    },
+};
+objWithCb.find(() => true) !== undefined;
+
+// User-defined class in boolean context
+const reg = new Registry();
+if (reg.find("test")) {}
+
+// Literal object receiver
+({ find(id: string) { return id; } }).find("test") !== undefined;
