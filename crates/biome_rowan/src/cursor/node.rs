@@ -751,8 +751,9 @@ pub(crate) struct PreorderMatching<'a, L: Language> {
     /// Path from `start` to the node whose children are being read. Empty before
     /// the first call to `next` and after the traversal has left `start`.
     ///
-    /// A node is on the path only if it matches `kinds` or has a child node:
-    /// any other node has no events to yield and nothing below it to read.
+    /// Below `start`, a node is on the path only if it matches `kinds` or has a
+    /// child node: any other node has no events to yield and nothing below it
+    /// to read.
     path: Vec<PathSegment<'a>>,
     entered_start: bool,
 }
@@ -835,9 +836,8 @@ impl<L: Language> Iterator for PreorderMatching<'_, L> {
                     Slot::Token { .. } | Slot::Empty { .. } => None,
                 });
             let Some((index, rel_offset, green)) = next_child else {
-                // Takes the fields out of the segment in place: moving the
-                // whole segment out would read its slot index right after
-                // it was written.
+                // Only `is_match` and `node` are needed, so they are read in
+                // place instead of copying the whole segment out with `pop`.
                 let node = if parent.is_match {
                     parent.node.take()
                 } else {
