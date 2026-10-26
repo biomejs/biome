@@ -160,7 +160,7 @@ ryu-js                       = "1.0.3"
 salsa                        = "0.28.5"
 schemars                     = { version = "1.2.2", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.229", features = ["derive"] }
-serde_json                   = "1.0.151"
+serde_json                   = "1.0.154"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
 smallvec                     = { version = "1.16.2", features = ["const_new", "serde", "union"] }
