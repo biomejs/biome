@@ -31,13 +31,17 @@ impl CssPropertyDefinition {
     }
 }
 
-#[salsa::tracked]
+// The model holds the syntax tree of the file, so it has the same cache limit
+// as the parse.
+#[salsa::tracked(lru = 200)]
 pub(crate) fn css_model_from_parsed_source(db: &dyn ParseDb, file: Source) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
-#[salsa::tracked]
+// The model holds the syntax tree of the snippet, so it has the same cache
+// limit as the parse.
+#[salsa::tracked(lru = 200)]
 pub(crate) fn css_model_from_parsed_snippet<'db>(
     db: &'db dyn ParseDb,
     file: TrackedSnippet<'db>,

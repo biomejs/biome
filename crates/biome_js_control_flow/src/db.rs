@@ -2,12 +2,16 @@ use crate::{ControlFlowModel, control_flow_model};
 use biome_db::Source;
 use biome_parser::db::{AnalyzedSource, ParseDb, SourceExt, TrackedSnippet};
 
-#[salsa::tracked]
+// The model holds the syntax tree of the file, so it has the same cache limit
+// as the parse.
+#[salsa::tracked(lru = 200)]
 pub fn control_flow_model_from_source(db: &dyn ParseDb, file: Source) -> ControlFlowModel {
     control_flow_model(&file.parsed(db).tree())
 }
 
-#[salsa::tracked]
+// The model holds the syntax tree of the snippet, so it has the same cache
+// limit as the parse.
+#[salsa::tracked(lru = 200)]
 pub fn control_flow_model_from_snippet<'db>(
     db: &'db dyn ParseDb,
     file: TrackedSnippet<'db>,
