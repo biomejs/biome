@@ -1048,9 +1048,7 @@ fn at_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> 
     }
 
     p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.consume_as_whitespace_trivia();
-        }
+        skip_leading_whitespace_tokens(p);
         match p.cur() {
             MD_SETEXT_UNDERLINE_LITERAL if is_single_dash_setext_marker(p.cur_text()) => {
                 p.bump_remap(T![-]);
