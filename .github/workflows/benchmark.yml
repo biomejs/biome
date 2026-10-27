@@ -573,6 +573,7 @@ jobs:
       matrix:
         package:
           - biome_toml_parser
+          - biome_toml_formatter
     steps: *bench_steps
 
   configuration:

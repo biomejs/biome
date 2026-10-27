@@ -1,0 +1,85 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+short = [ 1,2 , 3 ]
+trailing_comma = [1, 2, 3,]
+empty = [ ]
+nested = [[1, 2], [3, 4], ["a", "b"]]
+long = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota"]
+expanded_in_source = [
+  "a", "b"
+]
+collapsed_after_first = ["a",
+  "b"]
+with_comments = [
+  1, # one
+  # before two
+  2,
+]
+empty_with_comment = [ # nothing here
+]
+tables = [ { name = "a", value = 1 }, { name = "b", value = 2 }, { name = "c", value = 3 } ]
+blank_lines = [
+  1,
+
+  2,
+]
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+short = [1, 2, 3]
+trailing_comma = [1, 2, 3]
+empty = []
+nested = [[1, 2], [3, 4], ["a", "b"]]
+long = [
+	"alpha",
+	"beta",
+	"gamma",
+	"delta",
+	"epsilon",
+	"zeta",
+	"eta",
+	"theta",
+	"iota",
+]
+expanded_in_source = [
+	"a",
+	"b",
+]
+collapsed_after_first = ["a", "b"]
+with_comments = [
+	1, # one
+	# before two
+	2,
+]
+empty_with_comment = [
+	# nothing here
+]
+tables = [
+	{ name = "a", value = 1 },
+	{ name = "b", value = 2 },
+	{ name = "c", value = 3 },
+]
+blank_lines = [
+	1,
+
+	2,
+]
+```
