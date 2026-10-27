@@ -3388,6 +3388,11 @@ export interface Nursery {
 	 */
 	noVueLifecycleAfterAwait?: NoVueLifecycleAfterAwaitConfiguration;
 	/**
+	 * Disallow passing more than one argument to a Vue slot.
+	 * See https://biomejs.dev/linter/rules/no-vue-multiple-slot-args
+	 */
+	noVueMultipleSlotArgs?: NoVueMultipleSlotArgsConfiguration;
+	/**
 	 * Disallow changing the props of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-mutating-props
 	 */
@@ -6257,6 +6262,9 @@ export type NoVueDeprecatedScopedSlotsConfiguration =
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
+export type NoVueMultipleSlotArgsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueMultipleSlotArgsOptions;
 export type NoVueMutatingPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueMutatingPropsOptions;
@@ -9049,6 +9057,10 @@ export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
 }
+export interface RuleWithNoVueMultipleSlotArgsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueMultipleSlotArgsOptions;
+}
 export interface RuleWithNoVueMutatingPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueMutatingPropsOptions;
@@ -11686,6 +11698,7 @@ export interface NoVueDeprecatedRouterLinkTagPropOptions {
 export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
+export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
@@ -13483,6 +13496,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueLifecycleAfterAwait"
+	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
