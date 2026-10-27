@@ -6,7 +6,14 @@
 
 use crate::lexer::TomlLexContext;
 use crate::parser::TomlParser;
-use biome_parser::diagnostic::{expected_node, expected_token};
+mod parse_error;
+
+use crate::syntax::parse_error::{
+    equals_on_next_line, expected_equals_and_value, expected_key, expected_key_value,
+    expected_key_value_or_table_header, expected_newline, expected_value,
+    expected_value_on_same_line, multiline_string_key, nesting_too_deep, token_on_next_line,
+};
+use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
@@ -90,7 +97,7 @@ impl ParseNodeList for RootItemList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        recover_line_item(p, parsed_element, "key/value pair or table header")
+        recover_line_item(p, parsed_element)
     }
 }
 
@@ -122,7 +129,7 @@ impl ParseNodeList for TableEntryList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        recover_line_item(p, parsed_element, "key/value pair or table header")
+        recover_line_item(p, parsed_element)
     }
 }
 
@@ -139,22 +146,12 @@ fn prepare_line_item(p: &mut TomlParser, requires_line_break: bool) {
 
     if requires_line_break && !p.has_preceding_line_break() {
         let range = p.cur_range();
-        p.error(
-            ParseDiagnostic::new(
-                format!("Expected a newline but instead found `{}`.", p.cur_text()),
-                range,
-            )
-            .with_hint("Each key/value pair and table header must be on its own line."),
-        );
+        p.error(expected_newline(p, range));
     }
 }
 
 /// Wraps the rest of the line into a bogus item when no item could be parsed.
-fn recover_line_item(
-    p: &mut TomlParser,
-    parsed_element: ParsedSyntax,
-    expected: &str,
-) -> RecoveryResult {
+fn recover_line_item(p: &mut TomlParser, parsed_element: ParsedSyntax) -> RecoveryResult {
     if let Present(marker) = parsed_element {
         return Ok(marker);
     }
@@ -166,7 +163,7 @@ fn recover_line_item(
     // The lexer has already reported invalid characters.
     if !p.at(ERROR_TOKEN) {
         let range = p.cur_range();
-        p.error(expected_node(expected, range, p));
+        p.error(expected_key_value_or_table_header(p, range));
     }
 
     let m = p.start();
@@ -221,7 +218,7 @@ fn parse_header_key(p: &mut TomlParser) -> TextRange {
     p.start_key();
     p.invalidate_key();
     let range = p.cur_range();
-    p.error(expected_node("key", range, p));
+    p.error(expected_key(p, range));
     range
 }
 
@@ -233,13 +230,7 @@ fn expect_on_same_line(p: &mut TomlParser, kind: TomlSyntaxKind, context: TomlLe
         false
     } else if p.has_preceding_line_break() {
         let range = p.cur_range();
-        p.error(ParseDiagnostic::new(
-            format!(
-                "`{}` must be on the same line as the previous token.",
-                p.cur_text()
-            ),
-            range,
-        ));
+        p.error(token_on_next_line(p, range));
         false
     } else {
         p.bump_with_context(kind, context);
@@ -268,15 +259,12 @@ fn parse_key_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     if p.has_preceding_line_break() || p.at(EOF) {
         // The value is missing and the current token belongs to the next line.
         let range = p.cur_range();
-        p.error(
-            expected_node("value", range, p)
-                .with_hint("The value must be on the same line as the key."),
-        );
+        p.error(expected_value_on_same_line(p, range));
         if !p.at(EOF) {
             p.re_lex(TomlLexContext::Key);
         }
     } else {
-        parse_value(p, after).or_add_diagnostic(p, |p, range| expected_node("value", range, p));
+        parse_value(p, after).or_add_diagnostic(p, expected_value);
     }
 
     Present(m.complete(p, TOML_KEY_VALUE))
@@ -287,16 +275,10 @@ fn parse_key_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
 fn report_missing_equals(p: &mut TomlParser, key_range: Option<TextRange>) {
     if p.at(T![=]) {
         let range = p.cur_range();
-        p.error(ParseDiagnostic::new(
-            "`=` must be on the same line as the key.",
-            range,
-        ));
+        p.error(equals_on_next_line(p, range));
     } else if p.has_preceding_line_break() || p.at(EOF) {
         let range = key_range.unwrap_or_else(|| p.cur_range());
-        p.error(
-            ParseDiagnostic::new("Expected `=` and a value after this key.", range)
-                .with_hint("Key/value pairs use the `key = value` format."),
-        );
+        p.error(expected_equals_and_value(p, range));
     } else {
         p.error(expected_token(T![=]));
         let m = p.start();
@@ -324,14 +306,14 @@ fn parse_key(p: &mut TomlParser) -> ParsedSyntax {
         if p.has_preceding_line_break() {
             p.invalidate_key();
             let range = p.cur_range();
-            p.error(expected_node("key", range, p));
+            p.error(expected_key(p, range));
             break;
         }
 
         if parse_key_part(p).is_absent() {
             p.invalidate_key();
             let range = p.cur_range();
-            p.error(expected_node("key", range, p));
+            p.error(expected_key(p, range));
         }
     }
 
@@ -352,10 +334,7 @@ fn parse_key_part(p: &mut TomlParser) -> ParsedSyntax {
         TOML_ML_BASIC_STRING_LITERAL | TOML_ML_LITERAL_STRING_LITERAL => {
             p.invalidate_key();
             let range = p.cur_range();
-            p.error(
-                ParseDiagnostic::new("Multi-line strings can't be used as keys.", range)
-                    .with_hint("Use a basic string (`\"key\"`) or a literal string (`'key'`)."),
-            );
+            p.error(multiline_string_key(p, range));
             TOML_BOGUS
         }
         _ => return Absent,
@@ -388,7 +367,7 @@ fn parse_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
 
 /// The maximum number of arrays and inline tables that can be nested in each
 /// other. It bounds the recursion of the parser and of tree consumers.
-const MAX_NESTING_DEPTH: usize = 128;
+pub(crate) const MAX_NESTING_DEPTH: usize = 128;
 
 // [1, 2, 3]
 fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
@@ -414,12 +393,7 @@ fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
 /// bogus value, without recursing into it.
 fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMarker {
     let range = p.cur_range();
-    p.error(ParseDiagnostic::new(
-        format!(
-            "Arrays and inline tables can't be nested more than {MAX_NESTING_DEPTH} levels deep."
-        ),
-        range,
-    ));
+    p.error(nesting_too_deep(p, range));
 
     let m = p.start();
     // The brackets that are open, innermost last.
@@ -591,7 +565,7 @@ impl ParseSeparatedList for ArrayElementList {
             },
             TomlLexContext::Value,
             TOML_BOGUS_VALUE,
-            "value",
+            expected_value,
         )
     }
 
@@ -610,7 +584,7 @@ impl ParseSeparatedList for ArrayElementList {
 
     fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
         let range = p.cur_range();
-        p.error(expected_node("value", range, p));
+        p.error(expected_value(p, range));
     }
 }
 
@@ -682,7 +656,7 @@ impl ParseSeparatedList for InlineTableEntryList {
             },
             TomlLexContext::Key,
             TOML_BOGUS,
-            "key/value pair",
+            expected_key_value,
         )
     }
 
@@ -701,7 +675,7 @@ impl ParseSeparatedList for InlineTableEntryList {
 
     fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
         let range = p.cur_range();
-        p.error(expected_node("key/value pair", range, p));
+        p.error(expected_key_value(p, range));
     }
 }
 
@@ -717,15 +691,16 @@ fn expect_with_context(p: &mut TomlParser, kind: TomlSyntaxKind, context: TomlLe
     }
 }
 
-/// Wraps tokens into a `bogus_kind` node until a token in `recovery_set`, a
-/// line break, or the end of the file.
+/// Reports the current token with `expected` and wraps tokens into a
+/// `bogus_kind` node until a token in `recovery_set`, a line break, or the end
+/// of the file.
 fn recover_list_element(
     p: &mut TomlParser,
     parsed_element: ParsedSyntax,
     recovery_set: TokenSet<TomlSyntaxKind>,
     context: TomlLexContext,
     bogus_kind: TomlSyntaxKind,
-    expected: &str,
+    expected: fn(&TomlParser, TextRange) -> ParseDiagnostic,
 ) -> RecoveryResult {
     if let Present(marker) = parsed_element {
         return Ok(marker);
@@ -740,7 +715,7 @@ fn recover_list_element(
     }
 
     let range = p.cur_range();
-    p.error(expected_node(expected, range, p));
+    p.error(expected(p, range));
 
     let m = p.start();
     p.bump_any_with_context(context);
