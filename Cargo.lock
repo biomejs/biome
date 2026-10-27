@@ -7908,6 +7908,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_string_case",
+ "biome_toml_parser",
  "biome_yaml_parser",
  "biome_yaml_syntax",
  "camino",
