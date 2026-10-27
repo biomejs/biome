@@ -9016,6 +9016,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueDefinePropsDestructuring": {
+					"description": "Require destructuring the props returned by Vue's defineProps macro.\nSee https://biomejs.dev/linter/rules/use-vue-define-props-destructuring",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueDefinePropsDestructuringConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueMatchingComponentFileName": {
 					"description": "Enforce that the name of a Vue component matches its file name.\nSee https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
 					"anyOf": [
@@ -16425,6 +16432,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueDefinePropsDestructuringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueDefinePropsDestructuringOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueHyphenatedAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -21806,6 +21822,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueDefinePropsDestructuringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueDefinePropsDestructuringOptions" }
+			]
+		},
+		"UseVueDefinePropsDestructuringOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueHyphenatedAttributesConfiguration": {
