@@ -662,11 +662,12 @@ pub enum Access {
     Read,
     /// Assigned to, incremented, or deleted.
     Write,
-    /// A method that changes the value in place is called on it.
+    /// A method that changes the value in place is called on it, or it is
+    /// the target of `Object.assign()`.
     Mutate,
     Call,
     /// The value goes somewhere the model does not follow: it is passed as an
-    /// argument, returned, spread, or indexed with a computed key.
+    /// argument, returned, spread, or assigned to another variable.
     Escape,
 }
 
@@ -746,6 +747,9 @@ pub(crate) struct SemanticModelData {
     pub(crate) references: Vec<ReferenceData>,
     /// For each symbol, the references that resolve to it.
     pub(crate) uses: Vec<Vec<ReferenceId>>,
+    /// The references written outside every snippet, then those of each
+    /// snippet: index `0` holds the former, index `i + 1` those of snippet `i`.
+    pub(crate) references_by_snippet: Vec<Vec<ReferenceId>>,
     pub(crate) components: Vec<ComponentData>,
 }
 
@@ -925,6 +929,20 @@ impl VueSemanticModel {
     /// Returns every reference in the model.
     pub fn references(&self) -> impl Iterator<Item = Reference> + '_ {
         (0..self.data.references.len()).map(|index| self.reference(ReferenceId::new(index)))
+    }
+
+    /// Returns the references written in `snippet`, or, for `None`, those of a
+    /// model built from a single JavaScript tree.
+    pub fn references_in(
+        &self,
+        snippet: Option<SnippetId>,
+    ) -> impl Iterator<Item = Reference> + '_ {
+        self.data
+            .references_by_snippet
+            .get(snippet.map_or(0, |id| id.index() + 1))
+            .into_iter()
+            .flatten()
+            .map(|id| self.reference(*id))
     }
 
     /// Returns every conditional chain in the template.
@@ -1477,15 +1495,14 @@ impl Snippet {
 
     /// The references written inside this snippet.
     pub fn references(&self) -> impl Iterator<Item = Reference> + '_ {
-        let id = self.id;
         self.data
-            .references
-            .iter()
-            .enumerate()
-            .filter(move |(_, reference)| reference.snippet == Some(id))
-            .map(|(index, _)| Reference {
+            .references_by_snippet
+            .get(self.id.index() + 1)
+            .into_iter()
+            .flatten()
+            .map(|id| Reference {
                 data: self.data.clone(),
-                id: ReferenceId::new(index),
+                id: *id,
             })
     }
 }
@@ -1652,6 +1669,18 @@ impl Reference {
 
     pub fn base(&self) -> RefBase {
         self.row().base
+    }
+
+    /// The binding the reference is reached through: `props` in
+    /// `props.title`.
+    pub fn base_symbol(&self) -> Option<Symbol> {
+        match self.row().base {
+            RefBase::Via(id) => Some(Symbol {
+                data: self.data.clone(),
+                id,
+            }),
+            _ => None,
+        }
     }
 
     /// The static members read after the name: `[b, c]` for `a.b.c`.
