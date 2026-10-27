@@ -3973,6 +3973,11 @@ export interface Nursery {
 	 */
 	useVueBlockOrder?: UseVueBlockOrderConfiguration;
 	/**
+	 * Require Boolean to be the first type of Vue props that accept several types.
+	 * See https://biomejs.dev/linter/rules/use-vue-boolean-prop-type-first
+	 */
+	useVueBooleanPropTypeFirst?: UseVueBooleanPropTypeFirstConfiguration;
+	/**
 	 * Require \<component> elements to bind the is attribute.
 	 * See https://biomejs.dev/linter/rules/use-vue-component-is
 	 */
@@ -6908,6 +6913,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueBlockOrderConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueBlockOrderOptions;
+export type UseVueBooleanPropTypeFirstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueBooleanPropTypeFirstOptions;
 export type UseVueComponentIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComponentIsOptions;
@@ -10177,6 +10185,14 @@ export interface RuleWithUseVueBlockOrderOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueBlockOrderOptions;
 }
+export interface RuleWithUseVueBooleanPropTypeFirstOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueBooleanPropTypeFirstOptions;
+}
 export interface RuleWithUseVueComponentIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComponentIsOptions;
@@ -12848,6 +12864,7 @@ export interface UseVueBlockOrderOptions {
 	 */
 	order?: BlockOrderEntry[];
 }
+export type UseVueBooleanPropTypeFirstOptions = {};
 export type UseVueComponentIsOptions = {};
 export type UseVueComputedPropertyReturnOptions = {};
 export interface UseVueConsistentDefineEmitsDeclarationOptions {
@@ -14611,6 +14628,7 @@ export type Category =
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueBlockOrder"
+	| "lint/nursery/useVueBooleanPropTypeFirst"
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueComputedPropertyReturn"
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
