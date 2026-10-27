@@ -57,6 +57,8 @@ impl CstFormatContext for TomlFormatContext {
 pub struct TomlFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
+    /// The line ending of the output. TOML only allows LF and CRLF, so
+    /// [LineEnding::Cr] prints LF.
     line_ending: LineEnding,
     line_width: LineWidth,
     /// Whether arrays are printed on multiple lines.
@@ -147,7 +149,10 @@ impl FormatOptions for TomlFormatOptions {
     }
 
     fn line_ending(&self) -> LineEnding {
-        self.line_ending
+        match self.line_ending {
+            LineEnding::Cr => LineEnding::Lf,
+            line_ending => line_ending,
+        }
     }
 
     fn trailing_newline(&self) -> TrailingNewline {
@@ -163,7 +168,7 @@ impl fmt::Display for TomlFormatOptions {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
-        writeln!(f, "Line ending: {}", self.line_ending)?;
+        writeln!(f, "Line ending: {}", FormatOptions::line_ending(self))?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Expand: {}", self.expand)?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
