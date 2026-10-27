@@ -3368,6 +3368,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedListeners?: NoVueDeprecatedListenersConfiguration;
 	/**
+	 * Disallow the tag prop on RouterLink.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-router-link-tag-prop
+	 */
+	noVueDeprecatedRouterLinkTagProp?: NoVueDeprecatedRouterLinkTagPropConfiguration;
+	/**
 	 * Disallow the deprecated Vue $scopedSlots API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots
 	 */
@@ -6225,6 +6230,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueDeprecatedListenersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedListenersOptions;
+export type NoVueDeprecatedRouterLinkTagPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedRouterLinkTagPropOptions;
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
@@ -8997,6 +9005,10 @@ export interface RuleWithNoVueDeprecatedListenersOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedListenersOptions;
 }
+export interface RuleWithNoVueDeprecatedRouterLinkTagPropOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedRouterLinkTagPropOptions;
+}
 export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11629,6 +11641,12 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
+export interface NoVueDeprecatedRouterLinkTagPropOptions {
+	/**
+	 * Names of the link components to check for the `tag` prop.
+	 */
+	components?: string[];
+}
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
@@ -13422,6 +13440,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedListeners"
+	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
