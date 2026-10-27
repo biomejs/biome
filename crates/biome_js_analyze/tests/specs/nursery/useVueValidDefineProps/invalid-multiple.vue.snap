@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-multiple.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineProps({ msg: String });
+defineProps({ count: Number });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-multiple.vue:4:1 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineProps() is called more than once.
+  
+    2 │ <script setup>
+    3 │ defineProps({ msg: String });
+  > 4 │ defineProps({ count: Number });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i It's first called here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineProps({ msg: String });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ defineProps({ count: Number });
+    5 │ </script>
+  
+  i A component declares its props once, and Vue fails to compile a component that calls defineProps() several times.
+  
+  i Declare all the props in a single defineProps() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

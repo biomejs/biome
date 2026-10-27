@@ -1,7 +1,7 @@
 use super::sfc;
 use crate::{
     Access, Assignability, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue,
-    Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
+    MacroOption, Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
 
 const LIST: &str = r#"<script setup lang="ts">
@@ -317,6 +317,19 @@ defineEmits(['a'])
 }
 
 #[test]
+fn plain_block_emits_option() {
+    let model = sfc(r#"<script>
+export default { emits: ['change'] }
+</script>
+<script setup>
+defineProps(['a'])
+</script>
+"#);
+    let component = model.template_component().unwrap();
+    assert_eq!(component.macro_options(), MacroOption::Emits);
+}
+
+#[test]
 fn both_script_blocks() {
     let model = sfc(r#"<script>
 let nextId = 0
@@ -336,6 +349,7 @@ defineProps(['b'])
     assert_eq!(component.name(), Some("Both"));
     assert_eq!(component.inherit_attrs(), Tri::No);
     assert!(component.has_macro_conflict());
+    assert_eq!(component.macro_options(), MacroOption::Props);
     let props: Vec<_> = component
         .props()
         .map(|prop| prop.name().to_string())
