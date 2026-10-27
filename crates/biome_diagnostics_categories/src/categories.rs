@@ -436,6 +436,7 @@ define_categories! {
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
     "lint/nursery/useVueValidVIs": "https://biomejs.dev/linter/rules/use-vue-valid-v-is",
+    "lint/nursery/useVueValidVMemo": "https://biomejs.dev/linter/rules/use-vue-valid-v-memo",
     "lint/nursery/useVueValidVModel": "https://biomejs.dev/linter/rules/use-vue-valid-v-model",
     "lint/nursery/useVueVOnExact": "https://biomejs.dev/linter/rules/use-vue-v-on-exact",
     "lint/nursery/useWhileLoopCondition": "https://biomejs.dev/linter/rules/use-while-loop-condition",

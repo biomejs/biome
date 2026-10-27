@@ -3783,6 +3783,11 @@ export interface Nursery {
 	 */
 	useVueValidVIs?: UseVueValidVIsConfiguration;
 	/**
+	 * Enforce valid v-memo Vue directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-memo
+	 */
+	useVueValidVMemo?: UseVueValidVMemoConfiguration;
+	/**
 	 * Enforce valid v-model directives.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-model
 	 */
@@ -6449,6 +6454,9 @@ export type UseVueVOnExactConfiguration =
 export type UseVueValidVIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVIsOptions;
+export type UseVueValidVMemoConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVMemoOptions;
 export type UseVueValidVModelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVModelOptions;
@@ -9429,6 +9437,10 @@ export interface RuleWithUseVueValidVIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVIsOptions;
 }
+export interface RuleWithUseVueValidVMemoOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVMemoOptions;
+}
 export interface RuleWithUseVueValidVModelOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVModelOptions;
@@ -11838,6 +11850,7 @@ export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidVIsOptions = {};
+export type UseVueValidVMemoOptions = {};
 export type UseVueValidVModelOptions = {};
 export type UseVueValidVShowOptions = {};
 export type UseVueValidVSlotOptions = {};
@@ -13457,6 +13470,7 @@ export type Category =
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
+	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
