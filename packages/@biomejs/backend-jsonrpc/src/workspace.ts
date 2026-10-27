@@ -3958,6 +3958,11 @@ export interface Nursery {
 	 */
 	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
 	/**
+	 * Require the shorthand form when passing true to a component prop.
+	 * See https://biomejs.dev/linter/rules/use-true-attribute-shorthand
+	 */
+	useTrueAttributeShorthand?: UseTrueAttributeShorthandConfiguration;
+	/**
 	 * Enforce the use of the unary minus operator over multiplying or dividing by -1.
 	 * See https://biomejs.dev/linter/rules/use-unary-minus
 	 */
@@ -6929,6 +6934,9 @@ export type UseTanstackQueryStableQueryClientConfiguration =
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
+export type UseTrueAttributeShorthandConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTrueAttributeShorthandOptions;
 export type UseUnaryMinusConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnaryMinusOptions;
@@ -10201,6 +10209,14 @@ export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
 }
+export interface RuleWithUseTrueAttributeShorthandOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTrueAttributeShorthandOptions;
+}
 export interface RuleWithUseUnaryMinusOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12917,6 +12933,19 @@ export type UseTailwindVariablesShorthandOptions = {};
 export type UseTanstackQueryInfiniteQueryPropertyOrderOptions = {};
 export type UseTanstackQueryStableQueryClientOptions = {};
 export type UseTopLevelHeadingOptions = {};
+export interface UseTrueAttributeShorthandOptions {
+	/**
+	 * A list of prop names that must use the opposite of `style`.
+	 * Names must match exactly, as written in the template.
+	 */
+	except?: string[];
+	/**
+	 * How a component prop set to `true` should be written: `"shorthand"` writes only the
+	 * prop name, and `"longhand"` writes the value `true` explicitly.
+	 * Default: `"shorthand"`.
+	 */
+	style?: TrueAttributeStyle;
+}
 export type UseUnaryMinusOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
@@ -14020,6 +14049,7 @@ export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
 	| "arrowFunction";
+export type TrueAttributeStyle = "shorthand" | "longhand";
 /**
  * One position in the configured block order.
  */
@@ -14759,6 +14789,7 @@ export type Category =
 	| "lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder"
 	| "lint/nursery/useTanstackQueryStableQueryClient"
 	| "lint/nursery/useTopLevelHeading"
+	| "lint/nursery/useTrueAttributeShorthand"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

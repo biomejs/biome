@@ -1,0 +1,116 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: longhand-invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComp show />
+  <MyComp show other="x" />
+  <my-comp foo-bar></my-comp>
+  <Transition appear><div /></Transition>
+</template>
+
+```
+
+# Diagnostics
+```
+longhand-invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show is written without a value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComp show />
+      │           ^^^^
+    4 │   <MyComp show other="x" />
+    5 │   <my-comp foo-bar></my-comp>
+  
+  i This project requires writing the value true explicitly, which makes it clear that the prop receives a boolean.
+  
+  i A prop without a value receives true only if the component declares it as Boolean and doesn't list String before Boolean. Otherwise, it receives an empty string. Check how the component declares the prop before you add the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Write the value true explicitly.
+  
+    3 │ ··<MyComp·:show="true"·/>
+      │           +    +++++++   
+
+```
+
+```
+longhand-invalid.vue:4:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show is written without a value.
+  
+    2 │ <template>
+    3 │   <MyComp show />
+  > 4 │   <MyComp show other="x" />
+      │           ^^^^
+    5 │   <my-comp foo-bar></my-comp>
+    6 │   <Transition appear><div /></Transition>
+  
+  i This project requires writing the value true explicitly, which makes it clear that the prop receives a boolean.
+  
+  i A prop without a value receives true only if the component declares it as Boolean and doesn't list String before Boolean. Otherwise, it receives an empty string. Check how the component declares the prop before you add the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Write the value true explicitly.
+  
+    4 │ ··<MyComp·:show="true"·other="x"·/>
+      │           +    +++++++             
+
+```
+
+```
+longhand-invalid.vue:5:12 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop foo-bar is written without a value.
+  
+    3 │   <MyComp show />
+    4 │   <MyComp show other="x" />
+  > 5 │   <my-comp foo-bar></my-comp>
+      │            ^^^^^^^
+    6 │   <Transition appear><div /></Transition>
+    7 │ </template>
+  
+  i This project requires writing the value true explicitly, which makes it clear that the prop receives a boolean.
+  
+  i A prop without a value receives true only if the component declares it as Boolean and doesn't list String before Boolean. Otherwise, it receives an empty string. Check how the component declares the prop before you add the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Write the value true explicitly.
+  
+    5 │ ··<my-comp·:foo-bar="true"></my-comp>
+      │            +       +++++++           
+
+```
+
+```
+longhand-invalid.vue:6:15 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop appear is written without a value.
+  
+    4 │   <MyComp show other="x" />
+    5 │   <my-comp foo-bar></my-comp>
+  > 6 │   <Transition appear><div /></Transition>
+      │               ^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i This project requires writing the value true explicitly, which makes it clear that the prop receives a boolean.
+  
+  i A prop without a value receives true only if the component declares it as Boolean and doesn't list String before Boolean. Otherwise, it receives an empty string. Check how the component declares the prop before you add the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Write the value true explicitly.
+  
+    6 │ ··<Transition·:appear="true"><div·/></Transition>
+      │               +      +++++++                     
+
+```
