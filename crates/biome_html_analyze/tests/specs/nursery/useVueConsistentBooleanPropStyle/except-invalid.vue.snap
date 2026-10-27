@@ -14,7 +14,7 @@ expression: except-invalid.vue
 
 # Diagnostics
 ```
-except-invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+except-invalid.vue:3:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The prop value is written without a value.
   
@@ -39,7 +39,7 @@ except-invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━�
 ```
 
 ```
-except-invalid.vue:3:17 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+except-invalid.vue:3:17 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The prop foo-bar is written without a value.
   
@@ -64,7 +64,7 @@ except-invalid.vue:3:17 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━�
 ```
 
 ```
-except-invalid.vue:4:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+except-invalid.vue:4:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   

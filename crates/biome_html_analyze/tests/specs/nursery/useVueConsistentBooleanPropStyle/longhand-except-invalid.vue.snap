@@ -14,7 +14,7 @@ expression: longhand-except-invalid.vue
 
 # Diagnostics
 ```
-longhand-except-invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━
+longhand-except-invalid.vue:3:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━
 
   i The prop value has the value true, which can be omitted.
   
@@ -39,7 +39,7 @@ longhand-except-invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE
 ```
 
 ```
-longhand-except-invalid.vue:3:25 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━
+longhand-except-invalid.vue:3:25 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━
 
   i The prop foo-bar has the value true, which can be omitted.
   
@@ -64,7 +64,7 @@ longhand-except-invalid.vue:3:25 lint/nursery/useTrueAttributeShorthand  FIXABLE
 ```
 
 ```
-longhand-except-invalid.vue:4:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━
+longhand-except-invalid.vue:4:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━
 
   i The prop show is written without a value.
   

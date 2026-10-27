@@ -4,9 +4,9 @@
     "enabled": true,
     "rules": {
       "nursery": {
-        "useTrueAttributeShorthand": {
+        "useVueConsistentBooleanPropStyle": {
           "level": "on",
-          "options": { "style": "longhand" }
+          "options": { "except": ["value", "foo-bar"] }
         }
       }
     }

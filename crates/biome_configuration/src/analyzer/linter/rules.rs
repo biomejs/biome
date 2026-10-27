@@ -744,7 +744,6 @@ pub enum RuleName {
     UseTopLevelHeading,
     UseTopLevelRegex,
     UseTrimStartEnd,
-    UseTrueAttributeShorthand,
     UseUnaryMinus,
     UseUnicodeRegex,
     UseUnifiedTypeSignatures,
@@ -764,6 +763,7 @@ pub enum RuleName {
     UseVueBooleanPropTypeFirst,
     UseVueComponentIs,
     UseVueComputedPropertyReturn,
+    UseVueConsistentBooleanPropStyle,
     UseVueConsistentDefineEmitsDeclaration,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
@@ -1491,7 +1491,6 @@ impl RuleName {
             Self::UseTopLevelHeading => "useTopLevelHeading",
             Self::UseTopLevelRegex => "useTopLevelRegex",
             Self::UseTrimStartEnd => "useTrimStartEnd",
-            Self::UseTrueAttributeShorthand => "useTrueAttributeShorthand",
             Self::UseUnaryMinus => "useUnaryMinus",
             Self::UseUnicodeRegex => "useUnicodeRegex",
             Self::UseUnifiedTypeSignatures => "useUnifiedTypeSignatures",
@@ -1511,6 +1510,7 @@ impl RuleName {
             Self::UseVueBooleanPropTypeFirst => "useVueBooleanPropTypeFirst",
             Self::UseVueComponentIs => "useVueComponentIs",
             Self::UseVueComputedPropertyReturn => "useVueComputedPropertyReturn",
+            Self::UseVueConsistentBooleanPropStyle => "useVueConsistentBooleanPropStyle",
             Self::UseVueConsistentDefineEmitsDeclaration => {
                 "useVueConsistentDefineEmitsDeclaration"
             }
@@ -2232,7 +2232,6 @@ impl RuleName {
             Self::UseTopLevelHeading => RuleGroup::Nursery,
             Self::UseTopLevelRegex => RuleGroup::Performance,
             Self::UseTrimStartEnd => RuleGroup::Style,
-            Self::UseTrueAttributeShorthand => RuleGroup::Nursery,
             Self::UseUnaryMinus => RuleGroup::Nursery,
             Self::UseUnicodeRegex => RuleGroup::Style,
             Self::UseUnifiedTypeSignatures => RuleGroup::Style,
@@ -2252,6 +2251,7 @@ impl RuleName {
             Self::UseVueBooleanPropTypeFirst => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
             Self::UseVueComputedPropertyReturn => RuleGroup::Nursery,
+            Self::UseVueConsistentBooleanPropStyle => RuleGroup::Nursery,
             Self::UseVueConsistentDefineEmitsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
@@ -2984,7 +2984,6 @@ impl std::str::FromStr for RuleName {
             "useTopLevelHeading" => Ok(Self::UseTopLevelHeading),
             "useTopLevelRegex" => Ok(Self::UseTopLevelRegex),
             "useTrimStartEnd" => Ok(Self::UseTrimStartEnd),
-            "useTrueAttributeShorthand" => Ok(Self::UseTrueAttributeShorthand),
             "useUnaryMinus" => Ok(Self::UseUnaryMinus),
             "useUnicodeRegex" => Ok(Self::UseUnicodeRegex),
             "useUnifiedTypeSignatures" => Ok(Self::UseUnifiedTypeSignatures),
@@ -3004,6 +3003,7 @@ impl std::str::FromStr for RuleName {
             "useVueBooleanPropTypeFirst" => Ok(Self::UseVueBooleanPropTypeFirst),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
             "useVueComputedPropertyReturn" => Ok(Self::UseVueComputedPropertyReturn),
+            "useVueConsistentBooleanPropStyle" => Ok(Self::UseVueConsistentBooleanPropStyle),
             "useVueConsistentDefineEmitsDeclaration" => {
                 Ok(Self::UseVueConsistentDefineEmitsDeclaration)
             }

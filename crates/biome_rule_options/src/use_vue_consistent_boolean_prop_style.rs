@@ -3,12 +3,12 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Merge, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseTrueAttributeShorthandOptions {
+pub struct UseVueConsistentBooleanPropStyleOptions {
     /// How a component prop set to `true` should be written: `"shorthand"` writes only the
     /// prop name, and `"longhand"` writes the value `true` explicitly.
     /// Default: `"shorthand"`.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
-    pub style: Option<TrueAttributeStyle>,
+    pub style: Option<BooleanPropStyle>,
 
     /// A list of prop names that must use the opposite of `style`.
     /// Names must match exactly, as written in the template.
@@ -21,7 +21,7 @@ pub struct UseTrueAttributeShorthandOptions {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
-pub enum TrueAttributeStyle {
+pub enum BooleanPropStyle {
     /// Write only the prop name, such as `<MyComponent disabled />`.
     #[default]
     Shorthand,
@@ -29,12 +29,12 @@ pub enum TrueAttributeStyle {
     Longhand,
 }
 
-impl UseTrueAttributeShorthandOptions {
-    pub const DEFAULT_STYLE: TrueAttributeStyle = TrueAttributeStyle::Shorthand;
+impl UseVueConsistentBooleanPropStyleOptions {
+    pub const DEFAULT_STYLE: BooleanPropStyle = BooleanPropStyle::Shorthand;
 
     /// Returns [`Self::style`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_STYLE`].
-    pub fn style(&self) -> TrueAttributeStyle {
+    pub fn style(&self) -> BooleanPropStyle {
         self.style.unwrap_or(Self::DEFAULT_STYLE)
     }
 
