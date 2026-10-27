@@ -9051,6 +9051,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueValidVShow": {
+					"description": "Enforce valid v-show directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-show",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVShowConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useWhileLoopCondition": {
 					"description": "Require the condition that ends a loop to be written in the while statement.\nSee https://biomejs.dev/linter/rules/use-while-loop-condition",
 					"anyOf": [
@@ -16622,6 +16629,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVShowOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVShowOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVTextOptions": {
 			"type": "object",
 			"properties": {
@@ -22017,6 +22033,16 @@
 			]
 		},
 		"UseVueValidVPreOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVShowConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVShowOptions" }
+			]
+		},
+		"UseVueValidVShowOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
