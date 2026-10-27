@@ -121,6 +121,8 @@ pub(crate) struct MarkdownParserState {
     pub(crate) list_item_ordered_delim: Option<char>,
     /// Innermost open block quote inside a list, linked to the quotes enclosing it.
     pub(crate) open_quote: Option<Rc<OpenQuote>>,
+    /// Innermost open list item, linked to the items enclosing it.
+    pub(crate) open_list_item: Option<Rc<OpenListItem>>,
     /// Emphasis parsing context for the current inline item list.
     pub(crate) emphasis_context: Option<Rc<EmphasisContext>>,
     /// Link reference definitions accepted while parsing block structure.
@@ -155,6 +157,7 @@ struct MarkdownParserStateCheckpoint {
     list_item_marker_kind: Option<MarkdownSyntaxKind>,
     list_item_ordered_delim: Option<char>,
     open_quote: Option<Rc<OpenQuote>>,
+    open_list_item: Option<Rc<OpenListItem>>,
     emphasis_context: Option<Rc<EmphasisContext>>,
     link_reference_definitions_len: usize,
     deferred_inlines_len: usize,
@@ -179,6 +182,7 @@ impl MarkdownParserState {
             list_item_marker_kind: self.list_item_marker_kind,
             list_item_ordered_delim: self.list_item_ordered_delim,
             open_quote: self.open_quote.clone(),
+            open_list_item: self.open_list_item.clone(),
             emphasis_context: self.emphasis_context.clone(),
             link_reference_definitions_len: self.link_reference_definitions.len(),
             deferred_inlines_len: self.deferred_inlines.len(),
@@ -202,6 +206,7 @@ impl MarkdownParserState {
         self.list_item_marker_kind = checkpoint.list_item_marker_kind;
         self.list_item_ordered_delim = checkpoint.list_item_ordered_delim;
         self.open_quote = checkpoint.open_quote;
+        self.open_list_item = checkpoint.open_list_item;
         self.emphasis_context = checkpoint.emphasis_context;
         self.link_reference_definitions
             .truncate(checkpoint.link_reference_definitions_len);
@@ -236,6 +241,23 @@ pub(crate) struct OpenQuote {
     /// this one, with no list item opened in between, has no container indent.
     pub(crate) list_nesting_depth: usize,
     /// The quote enclosing this one.
+    pub(crate) parent: Option<Rc<Self>>,
+}
+
+/// An open list item's content column.
+///
+/// Deciding whether a list marker on an under-indented line starts an item or
+/// continues a paragraph lazily (CommonMark §5.2) needs the content columns of
+/// every enclosing item, not only the innermost one.
+#[derive(Debug)]
+pub(crate) struct OpenListItem {
+    /// Columns required for a line to continue this item.
+    pub(crate) required_indent: usize,
+    /// Block quote depth at which the item opened. Indentation inside a block
+    /// quote is measured from the quote content, so only items opened at the
+    /// current depth share a column origin with the current line.
+    pub(crate) block_quote_depth: usize,
+    /// The item enclosing this one.
     pub(crate) parent: Option<Rc<Self>>,
 }
 
@@ -393,6 +415,8 @@ pub(crate) struct InlineContainerContext {
     list_item_ordered_delim: Option<char>,
     /// Innermost open block quote inside a list, linked to the quotes enclosing it.
     open_quote: Option<Rc<OpenQuote>>,
+    /// Innermost open list item, linked to the items enclosing it.
+    open_list_item: Option<Rc<OpenListItem>>,
     /// Logical line start after a container prefix has been consumed.
     virtual_line_start: Option<TextSize>,
 }
@@ -610,6 +634,7 @@ impl<'source> MarkdownParser<'source> {
             list_item_marker_kind: context.list_item_marker_kind,
             list_item_ordered_delim: context.list_item_ordered_delim,
             open_quote: context.open_quote,
+            open_list_item: context.open_list_item,
             virtual_line_start: context.virtual_line_start,
             ..MarkdownParserState::default()
         };
@@ -723,6 +748,7 @@ impl<'source> MarkdownParser<'source> {
             list_item_marker_kind: self.state.list_item_marker_kind,
             list_item_ordered_delim: self.state.list_item_ordered_delim,
             open_quote: self.state.open_quote.clone(),
+            open_list_item: self.state.open_list_item.clone(),
             virtual_line_start: self.state.virtual_line_start,
         }
     }
