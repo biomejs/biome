@@ -21,6 +21,7 @@ harness = false
 name    = "toml_parser"
 
 [dependencies]
+biome_diagnostics   = { workspace = true }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_toml_factory  = { workspace = true }
@@ -30,7 +31,6 @@ rustc-hash          = { workspace = true }
 
 [dev-dependencies]
 biome_console     = { path = "../biome_console" }
-biome_diagnostics = { path = "../biome_diagnostics" }
 biome_test_utils  = { path = "../biome_test_utils" }
 criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true }

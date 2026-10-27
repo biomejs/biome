@@ -52,7 +52,9 @@ pub struct TomlParse {
 }
 
 impl TomlParse {
-    pub fn new(root: TomlSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
+    /// Creates a parse result. `root` must be the root of a tree, which the
+    /// conversion to [AnyParse] relies on.
+    pub(crate) fn new(root: TomlSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> Self {
         Self { root, diagnostics }
     }
 
@@ -102,7 +104,7 @@ impl From<TomlParse> for AnyParse {
         let root = parse.syntax();
         let diagnostics = parse.into_diagnostics();
         NodeParse::new(
-            // SAFETY: the parser should always return a root node
+            // SAFETY: `TomlParse` is only created from the root of a parsed tree.
             root.as_send().unwrap(),
             diagnostics,
         )

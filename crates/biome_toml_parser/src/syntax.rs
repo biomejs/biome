@@ -424,8 +424,16 @@ fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMark
     let m = p.start();
     // The brackets that are open, innermost last.
     let mut open = Vec::new();
+    let mut previous = None;
     loop {
         let kind = p.cur();
+        if kind == EOF
+            || previous
+                .is_some_and(|previous| ends_skipped_value(p, previous, open.last().copied()))
+        {
+            break;
+        }
+
         match kind {
             T!['['] | T!['{'] => open.push(kind),
             T![']'] if open.last() == Some(&T!['[']) => {
@@ -434,7 +442,6 @@ fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMark
             T!['}'] if open.last() == Some(&T!['{']) => {
                 open.pop();
             }
-            EOF => break,
             _ => {}
         }
 
@@ -446,6 +453,7 @@ fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMark
             Some(_) => TomlLexContext::Key,
         };
         p.bump_any_with_context(context);
+        previous = Some(kind);
 
         if open.is_empty() {
             break;
@@ -453,6 +461,74 @@ fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMark
     }
 
     m.complete(p, TOML_BOGUS_VALUE)
+}
+
+/// Returns `true` if the current value-like token on a new line is the start
+/// of a key/value pair or a table header that follows an unterminated array.
+///
+/// The check only succeeds where valid TOML can't continue the array: a value
+/// followed by `=`, or a bracketed key followed by anything but `,` or `]`. A
+/// valid element such as `[[2]]` is always followed by `,` or `]`.
+fn is_at_line_item(p: &mut TomlParser) -> bool {
+    if !p.at(T!['[']) {
+        // Lookahead lexes in the key context, which is what follows a key.
+        return p.nth_at(1, T![=]) && !p.has_nth_preceding_line_break(1);
+    }
+
+    // `[[` is only a single token in the key context.
+    let is_array_table = p.re_lex(TomlLexContext::Key) == T!["[["];
+    let close = if is_array_table { T!["]]"] } else { T![']'] };
+
+    let mut n = 1;
+    let mut expects_part = true;
+    let is_header = loop {
+        if p.has_nth_preceding_line_break(n) {
+            break false;
+        }
+        match p.nth(n) {
+            kind if expects_part && KEY_PART_START.contains(kind) => expects_part = false,
+            T![.] if !expects_part => expects_part = true,
+            kind if kind == close && !expects_part => {
+                let next = p.nth(n + 1);
+                break next == EOF
+                    || (p.has_nth_preceding_line_break(n + 1) && next != T![,] && next != T![']']);
+            }
+            _ => break false,
+        }
+        n += 1;
+    };
+
+    if !is_header {
+        p.re_lex(TomlLexContext::Value);
+    }
+    is_header
+}
+
+/// Returns `true` if the current token can't continue a value that is skipped
+/// by [skip_nested_value] and most likely starts the next line item.
+///
+/// `previous` is the last skipped token and `innermost` the innermost open
+/// bracket. The rules mirror the line-break handling of the list parsers.
+fn ends_skipped_value(
+    p: &mut TomlParser,
+    previous: TomlSyntaxKind,
+    innermost: Option<TomlSyntaxKind>,
+) -> bool {
+    if !p.has_preceding_line_break() {
+        return false;
+    }
+
+    let at_separator_or_close = p.at_ts(token_set![T![,], T![']'], T!['}']]);
+    match previous {
+        // A key and its `=` must be on the same line as the value.
+        T![=] | T![.] | TOML_BARE_KEY_LITERAL => true,
+        T!['['] | T![,] if innermost == Some(T!['[']) => {
+            !at_separator_or_close && !p.at_ts(VALUE_START)
+        }
+        T!['{'] | T![,] => p.at_ts(TABLE_HEADER_START),
+        // The previous token ended a value or a key.
+        _ => !at_separator_or_close,
+    }
 }
 
 #[derive(Default)]
@@ -483,7 +559,7 @@ impl ParseSeparatedList for ArrayElementList {
         if !p.has_preceding_line_break() || p.at(T![,]) {
             return false;
         }
-        self.expects_separator || !p.at_ts(VALUE_START)
+        self.expects_separator || !p.at_ts(VALUE_START) || is_at_line_item(p)
     }
 
     fn recover(

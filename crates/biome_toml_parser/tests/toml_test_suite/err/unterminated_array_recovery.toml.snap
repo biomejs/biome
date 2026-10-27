@@ -131,27 +131,23 @@ TomlRoot {
                                 value_token: TOML_INTEGER_LITERAL@43..44 "1" [] [],
                             },
                             COMMA@44..45 "," [] [],
-                            TomlArray {
-                                l_brack_token: L_BRACK@45..47 "[" [Newline("\n")] [],
-                                elements: TomlArrayElementList [
-                                    TomlArray {
-                                        l_brack_token: L_BRACK@47..48 "[" [] [],
-                                        elements: TomlArrayElementList [
-                                            TomlBogusValue {
-                                                items: [
-                                                    ERROR_TOKEN@48..49 "g" [] [],
-                                                ],
-                                            },
-                                        ],
-                                        r_brack_token: R_BRACK@49..50 "]" [] [],
-                                    },
-                                ],
-                                r_brack_token: R_BRACK@50..51 "]" [] [],
-                            },
                         ],
                         r_brack_token: missing (required),
                     },
                 },
+            ],
+        },
+        TomlArrayTable {
+            l_double_brack_token: L_DOUBLE_BRACK@45..48 "[[" [Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@48..49 "g" [] [],
+                    },
+                ],
+            },
+            r_double_brack_token: R_DOUBLE_BRACK@49..51 "]]" [] [],
+            entries: TomlKeyValueList [
                 TomlKeyValue {
                     key: TomlKey {
                         parts: TomlKeyPartList [
@@ -254,14 +250,14 @@ TomlRoot {
           0: TOML_INTEGER@5..6
             0: TOML_INTEGER_LITERAL@5..6 "1" [] []
         2: (empty)
-    1: TOML_TABLE@6..85
+    1: TOML_TABLE@6..45
       0: L_BRACK@6..8 "[" [Newline("\n")] []
       1: TOML_KEY@8..9
         0: TOML_KEY_PART_LIST@8..9
           0: TOML_BARE_KEY@8..9
             0: TOML_BARE_KEY_LITERAL@8..9 "b" [] []
       2: R_BRACK@9..10 "]" [] []
-      3: TOML_KEY_VALUE_LIST@10..85
+      3: TOML_KEY_VALUE_LIST@10..45
         0: TOML_KEY_VALUE@10..16
           0: TOML_KEY@10..13
             0: TOML_KEY_PART_LIST@10..13
@@ -298,30 +294,28 @@ TomlRoot {
           1: EQ@34..36 "=" [] [Whitespace(" ")]
           2: TOML_INTEGER@36..37
             0: TOML_INTEGER_LITERAL@36..37 "3" [] []
-        4: TOML_KEY_VALUE@37..51
+        4: TOML_KEY_VALUE@37..45
           0: TOML_KEY@37..40
             0: TOML_KEY_PART_LIST@37..40
               0: TOML_BARE_KEY@37..40
                 0: TOML_BARE_KEY_LITERAL@37..40 "f" [Newline("\n")] [Whitespace(" ")]
           1: EQ@40..42 "=" [] [Whitespace(" ")]
-          2: TOML_ARRAY@42..51
+          2: TOML_ARRAY@42..45
             0: L_BRACK@42..43 "[" [] []
-            1: TOML_ARRAY_ELEMENT_LIST@43..51
+            1: TOML_ARRAY_ELEMENT_LIST@43..45
               0: TOML_INTEGER@43..44
                 0: TOML_INTEGER_LITERAL@43..44 "1" [] []
               1: COMMA@44..45 "," [] []
-              2: TOML_ARRAY@45..51
-                0: L_BRACK@45..47 "[" [Newline("\n")] []
-                1: TOML_ARRAY_ELEMENT_LIST@47..50
-                  0: TOML_ARRAY@47..50
-                    0: L_BRACK@47..48 "[" [] []
-                    1: TOML_ARRAY_ELEMENT_LIST@48..49
-                      0: TOML_BOGUS_VALUE@48..49
-                        0: ERROR_TOKEN@48..49 "g" [] []
-                    2: R_BRACK@49..50 "]" [] []
-                2: R_BRACK@50..51 "]" [] []
             2: (empty)
-        5: TOML_KEY_VALUE@51..63
+    2: TOML_ARRAY_TABLE@45..85
+      0: L_DOUBLE_BRACK@45..48 "[[" [Newline("\n")] []
+      1: TOML_KEY@48..49
+        0: TOML_KEY_PART_LIST@48..49
+          0: TOML_BARE_KEY@48..49
+            0: TOML_BARE_KEY_LITERAL@48..49 "g" [] []
+      2: R_DOUBLE_BRACK@49..51 "]]" [] []
+      3: TOML_KEY_VALUE_LIST@51..85
+        0: TOML_KEY_VALUE@51..63
           0: TOML_KEY@51..54
             0: TOML_KEY_PART_LIST@51..54
               0: TOML_BARE_KEY@51..54
@@ -339,7 +333,7 @@ TomlRoot {
                 2: TOML_INTEGER@62..63
                   0: TOML_INTEGER_LITERAL@62..63 "1" [] []
             2: (empty)
-        6: TOML_KEY_VALUE@63..69
+        1: TOML_KEY_VALUE@63..69
           0: TOML_KEY@63..66
             0: TOML_KEY_PART_LIST@63..66
               0: TOML_BARE_KEY@63..66
@@ -347,7 +341,7 @@ TomlRoot {
           1: EQ@66..68 "=" [] [Whitespace(" ")]
           2: TOML_INTEGER@68..69
             0: TOML_INTEGER_LITERAL@68..69 "2" [] []
-        7: TOML_KEY_VALUE@69..79
+        2: TOML_KEY_VALUE@69..79
           0: TOML_KEY@69..72
             0: TOML_KEY_PART_LIST@69..72
               0: TOML_BARE_KEY@69..72
@@ -359,14 +353,14 @@ TomlRoot {
               0: TOML_INTEGER@75..79
                 0: TOML_INTEGER_LITERAL@75..79 "1" [Newline("\n"), Whitespace("  ")] []
             2: (empty)
-        8: TOML_KEY_VALUE@79..83
+        3: TOML_KEY_VALUE@79..83
           0: TOML_KEY@79..83
             0: TOML_KEY_PART_LIST@79..83
               0: TOML_BARE_KEY@79..83
                 0: TOML_BARE_KEY_LITERAL@79..83 "2" [Newline("\n"), Whitespace("  ")] []
           1: (empty)
           2: (empty)
-        9: TOML_BOGUS@83..85
+        4: TOML_BOGUS@83..85
           0: R_BRACK@83..85 "]" [Newline("\n")] []
   2: EOF@85..86 "" [Newline("\n")] []
 
@@ -400,31 +394,18 @@ unterminated_array_recovery.toml:5:1 parse ━━━━━━━━━━━━�
   
   i Remove "d"
   
-unterminated_array_recovery.toml:8:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unterminated_array_recovery.toml:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Invalid value.
+  × expected `]` but instead found `[[`
   
      6 │ e = 3
      7 │ f = [1,
    > 8 │ [[g]]
-       │   ^
+       │ ^^
      9 │ h = { i = 1
     10 │ j = 2
   
-  i Strings must be quoted, for example `"value"`.
-  
-unterminated_array_recovery.toml:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `]` but instead found `h`
-  
-     7 │ f = [1,
-     8 │ [[g]]
-   > 9 │ h = { i = 1
-       │ ^
-    10 │ j = 2
-    11 │ k = [
-  
-  i Remove h
+  i Remove [[
   
 unterminated_array_recovery.toml:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

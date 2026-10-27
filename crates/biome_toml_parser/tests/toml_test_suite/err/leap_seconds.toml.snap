@@ -8,6 +8,8 @@ not_end_of_day = 2000-01-01T12:30:60Z
 not_last_minute = 2016-12-31T23:58:60Z
 not_end_of_month = 2016-12-30T23:59:60Z
 offset_not_end_of_day = 2016-12-31T23:59:60+01:00
+not_inserted = 1990-11-30T23:59:60Z
+not_inserted_in_2017 = 2017-12-31T23:59:60Z
 
 ```
 
@@ -69,17 +71,43 @@ TomlRoot {
                 value_token: TOML_OFFSET_DATE_TIME_LITERAL@141..166 "2016-12-31T23:59:60+01:00" [] [],
             },
         },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@166..180 "not_inserted" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@180..182 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@182..202 "1990-11-30T23:59:60Z" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@202..224 "not_inserted_in_2017" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@224..226 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@226..246 "2017-12-31T23:59:60Z" [] [],
+            },
+        },
     ],
-    eof_token: EOF@166..167 "" [Newline("\n")] [],
+    eof_token: EOF@246..247 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: TOML_ROOT@0..167
+0: TOML_ROOT@0..247
   0: (empty)
-  1: TOML_ROOT_ITEM_LIST@0..166
+  1: TOML_ROOT_ITEM_LIST@0..246
     0: TOML_KEY_VALUE@0..37
       0: TOML_KEY@0..15
         0: TOML_KEY_PART_LIST@0..15
@@ -112,7 +140,23 @@ TomlRoot {
       1: EQ@139..141 "=" [] [Whitespace(" ")]
       2: TOML_DATE_TIME@141..166
         0: TOML_OFFSET_DATE_TIME_LITERAL@141..166 "2016-12-31T23:59:60+01:00" [] []
-  2: EOF@166..167 "" [Newline("\n")] []
+    4: TOML_KEY_VALUE@166..202
+      0: TOML_KEY@166..180
+        0: TOML_KEY_PART_LIST@166..180
+          0: TOML_BARE_KEY@166..180
+            0: TOML_BARE_KEY_LITERAL@166..180 "not_inserted" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@180..182 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@182..202
+        0: TOML_OFFSET_DATE_TIME_LITERAL@182..202 "1990-11-30T23:59:60Z" [] []
+    5: TOML_KEY_VALUE@202..246
+      0: TOML_KEY@202..224
+        0: TOML_KEY_PART_LIST@202..224
+          0: TOML_BARE_KEY@202..224
+            0: TOML_BARE_KEY_LITERAL@202..224 "not_inserted_in_2017" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@224..226 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@226..246
+        0: TOML_OFFSET_DATE_TIME_LITERAL@226..246 "2017-12-31T23:59:60Z" [] []
+  2: EOF@246..247 "" [Newline("\n")] []
 
 ```
 
@@ -121,18 +165,18 @@ TomlRoot {
 ```
 leap_seconds.toml:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This time isn't a possible leap second.
+  × This time isn't a leap second.
   
   > 1 │ not_end_of_day = 2000-01-01T12:30:60Z
       │                  ^^^^^^^^^^^^^^^^^^^^
     2 │ not_last_minute = 2016-12-31T23:58:60Z
     3 │ not_end_of_month = 2016-12-30T23:59:60Z
   
-  i A second of 60 is only valid at 23:59:60 UTC on the last day of a month.
+  i A second of 60 is only valid at 23:59:60 UTC on a date with a leap second.
   
 leap_seconds.toml:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This time isn't a possible leap second.
+  × This time isn't a leap second.
   
     1 │ not_end_of_day = 2000-01-01T12:30:60Z
   > 2 │ not_last_minute = 2016-12-31T23:58:60Z
@@ -140,31 +184,57 @@ leap_seconds.toml:2:19 parse ━━━━━━━━━━━━━━━━━
     3 │ not_end_of_month = 2016-12-30T23:59:60Z
     4 │ offset_not_end_of_day = 2016-12-31T23:59:60+01:00
   
-  i A second of 60 is only valid at 23:59:60 UTC on the last day of a month.
+  i A second of 60 is only valid at 23:59:60 UTC on a date with a leap second.
   
 leap_seconds.toml:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This time isn't a possible leap second.
+  × This time isn't a leap second.
   
     1 │ not_end_of_day = 2000-01-01T12:30:60Z
     2 │ not_last_minute = 2016-12-31T23:58:60Z
   > 3 │ not_end_of_month = 2016-12-30T23:59:60Z
       │                    ^^^^^^^^^^^^^^^^^^^^
     4 │ offset_not_end_of_day = 2016-12-31T23:59:60+01:00
-    5 │ 
+    5 │ not_inserted = 1990-11-30T23:59:60Z
   
-  i A second of 60 is only valid at 23:59:60 UTC on the last day of a month.
+  i A second of 60 is only valid at 23:59:60 UTC on a date with a leap second.
   
 leap_seconds.toml:4:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This time isn't a possible leap second.
+  × This time isn't a leap second.
   
     2 │ not_last_minute = 2016-12-31T23:58:60Z
     3 │ not_end_of_month = 2016-12-30T23:59:60Z
   > 4 │ offset_not_end_of_day = 2016-12-31T23:59:60+01:00
       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
+    5 │ not_inserted = 1990-11-30T23:59:60Z
+    6 │ not_inserted_in_2017 = 2017-12-31T23:59:60Z
   
-  i A second of 60 is only valid at 23:59:60 UTC on the last day of a month.
+  i A second of 60 is only valid at 23:59:60 UTC on a date with a leap second.
+  
+leap_seconds.toml:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This time isn't a leap second.
+  
+    3 │ not_end_of_month = 2016-12-30T23:59:60Z
+    4 │ offset_not_end_of_day = 2016-12-31T23:59:60+01:00
+  > 5 │ not_inserted = 1990-11-30T23:59:60Z
+      │                ^^^^^^^^^^^^^^^^^^^^
+    6 │ not_inserted_in_2017 = 2017-12-31T23:59:60Z
+    7 │ 
+  
+  i A second of 60 is only valid at 23:59:60 UTC on a date with a leap second.
+  
+leap_seconds.toml:6:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This time isn't a leap second.
+  
+    4 │ offset_not_end_of_day = 2016-12-31T23:59:60+01:00
+    5 │ not_inserted = 1990-11-30T23:59:60Z
+  > 6 │ not_inserted_in_2017 = 2017-12-31T23:59:60Z
+      │                        ^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i A second of 60 is only valid at 23:59:60 UTC on a date with a leap second.
   
 ```

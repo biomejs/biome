@@ -13,6 +13,7 @@
 #[rustfmt::skip]
 mod tests;
 
+use biome_diagnostics::Diagnostic;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -63,10 +64,6 @@ pub(crate) struct TomlLexer<'src> {
     unicode_bom_length: usize,
 
     diagnostics: Vec<ParseDiagnostic>,
-
-    /// Number of diagnostics reported before the current token, so re-lexing
-    /// can drop the diagnostics of the previous interpretation.
-    current_diagnostics_start: usize,
 }
 
 impl<'src> Lexer<'src> for TomlLexer<'src> {
@@ -92,7 +89,6 @@ impl<'src> Lexer<'src> for TomlLexer<'src> {
     fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
         self.current_start = TextSize::from(self.position as u32);
         self.current_flags = TokenFlags::empty();
-        self.current_diagnostics_start = self.diagnostics.len();
 
         let kind = match self.current_byte() {
             Some(current) => self.consume_token(current, context),
@@ -189,7 +185,16 @@ impl<'src> ReLexer<'src> for TomlLexer<'src> {
     /// including whether it follows a line break.
     fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
         self.position = usize::from(self.current_start);
-        self.diagnostics.truncate(self.current_diagnostics_start);
+        // Drop the diagnostics of the previous interpretation. The lexer
+        // reports diagnostics in source order, inside the token's range.
+        while self.diagnostics.last().is_some_and(|diagnostic| {
+            diagnostic
+                .location()
+                .span
+                .is_some_and(|range| range.start() >= self.current_start)
+        }) {
+            self.diagnostics.pop();
+        }
 
         let kind = match self.current_byte() {
             Some(current) => self.consume_token(current, context),
@@ -212,7 +217,6 @@ impl<'src> TomlLexer<'src> {
             after_newline: false,
             unicode_bom_length: 0,
             diagnostics: Vec::new(),
-            current_diagnostics_start: 0,
         }
     }
 
@@ -995,31 +999,75 @@ fn classify_date_time(word: &[u8]) -> ValueResult {
     if time.second == 60 && !is_leap_second(year, month, day, time, offset) {
         return Err(ValueError::new(
             TOML_OFFSET_DATE_TIME_LITERAL,
-            "This time isn't a possible leap second.",
+            "This time isn't a leap second.",
         )
-        .with_hint("A second of 60 is only valid at 23:59:60 UTC on the last day of a month."));
+        .with_hint("A second of 60 is only valid at 23:59:60 UTC on a date with a leap second."));
     }
 
     Ok(TOML_OFFSET_DATE_TIME_LITERAL)
 }
 
-/// Returns `true` if the date-time is 23:59:60 UTC on the last day of a
-/// month, the only instants at which RFC 3339 allows a leap second.
+/// The UTC dates whose last minute had a leap second, as `(year, month, day)`.
+///
+/// Source: IERS Bulletin C. No leap second has been inserted since 2016.
+const LEAP_SECOND_DATES: [(u32, u32, u32); 27] = [
+    (1972, 6, 30),
+    (1972, 12, 31),
+    (1973, 12, 31),
+    (1974, 12, 31),
+    (1975, 12, 31),
+    (1976, 12, 31),
+    (1977, 12, 31),
+    (1978, 12, 31),
+    (1979, 12, 31),
+    (1981, 6, 30),
+    (1982, 6, 30),
+    (1983, 6, 30),
+    (1985, 6, 30),
+    (1987, 12, 31),
+    (1989, 12, 31),
+    (1990, 12, 31),
+    (1992, 6, 30),
+    (1993, 6, 30),
+    (1994, 6, 30),
+    (1995, 12, 31),
+    (1997, 6, 30),
+    (1998, 12, 31),
+    (2005, 12, 31),
+    (2008, 12, 31),
+    (2012, 6, 30),
+    (2015, 6, 30),
+    (2016, 12, 31),
+];
+
+/// The first year whose leap seconds aren't known when this table was last
+/// updated. From this year on, any June 30 or December 31, the dates IERS
+/// prefers for insertions, is accepted.
+const FIRST_UNKNOWN_LEAP_SECOND_YEAR: u32 = 2026;
+
+/// Returns `true` if the date-time is 23:59:60 UTC on a date that had, or may
+/// still get, a leap second. RFC 3339 only allows a second of 60 at such
+/// instants.
 fn is_leap_second(year: u32, month: u32, day: u32, time: PartialTime, offset: i32) -> bool {
     let utc_minutes = (time.hour * 60 + time.minute) as i32 - offset;
-    let day_shift = utc_minutes.div_euclid(24 * 60);
     if utc_minutes.rem_euclid(24 * 60) != 23 * 60 + 59 {
         return false;
     }
 
-    let last_day = days_in_month(year, month);
-    match day_shift {
-        // The UTC date is the previous day, which is the last day of the
-        // previous month only on the first day of a month.
-        -1 => day == 1,
-        0 => day == last_day,
-        1 => day + 1 == last_day,
-        _ => false,
+    // The offset is less than a day, so 23:59 UTC is on the same date or on
+    // the previous day.
+    let (year, month, day) = match utc_minutes.div_euclid(24 * 60) {
+        0 => (year, month, day),
+        -1 if day > 1 => (year, month, day - 1),
+        -1 if month > 1 => (year, month - 1, days_in_month(year, month - 1)),
+        -1 => (year.wrapping_sub(1), 12, 31),
+        _ => return false,
+    };
+
+    if year >= FIRST_UNKNOWN_LEAP_SECOND_YEAR {
+        matches!((month, day), (6, 30) | (12, 31))
+    } else {
+        LEAP_SECOND_DATES.contains(&(year, month, day))
     }
 }
 

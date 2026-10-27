@@ -250,8 +250,10 @@ fn leap_seconds() {
     // 23:59:60 UTC on 2016-12-31.
     assert_value("2016-12-31T18:59:60-05:00", TOML_OFFSET_DATE_TIME_LITERAL);
     assert_value("2017-01-01T08:59:60+09:00", TOML_OFFSET_DATE_TIME_LITERAL);
-    // 23:59:60 UTC on 2016-02-29, the last day of February in a leap year.
-    assert_value("2016-03-01T08:59:60+09:00", TOML_OFFSET_DATE_TIME_LITERAL);
+    // 23:59:60 UTC on 2015-06-30.
+    assert_value("2015-07-01T08:59:60+09:00", TOML_OFFSET_DATE_TIME_LITERAL);
+    // Leap seconds after the known table may still be announced.
+    assert_value("2030-12-31T23:59:60Z", TOML_OFFSET_DATE_TIME_LITERAL);
     // The UTC instant is unknown without an offset.
     assert_value("2000-01-01T12:30:60", TOML_LOCAL_DATE_TIME_LITERAL);
     assert_value("12:30:60", TOML_LOCAL_TIME_LITERAL);
@@ -262,6 +264,11 @@ fn leap_seconds() {
     assert_invalid_value("2016-12-31T23:59:60+01:00");
     assert_invalid_value("2016-12-31T23:59:60-00:01");
     assert_invalid_value("2016-03-02T08:59:60+09:00");
+    // Month ends without a leap second.
+    assert_invalid_value("1990-11-30T23:59:60Z");
+    assert_invalid_value("2016-03-01T08:59:60+09:00");
+    assert_invalid_value("2017-12-31T23:59:60Z");
+    assert_invalid_value("2030-11-30T23:59:60Z");
 }
 
 #[test]
