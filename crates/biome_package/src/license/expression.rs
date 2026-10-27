@@ -176,7 +176,10 @@ fn tokenize(input: &str) -> Vec<Token<'_>> {
 
         // Support npm's "SEE LICENSE IN <file>" license form
         let remaining = &input[i..];
-        if remaining.len() >= 15 && remaining[..15].eq_ignore_ascii_case("SEE LICENSE IN ") {
+        if remaining
+            .get(..15)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("SEE LICENSE IN "))
+        {
             let start = i;
             for _ in 0..15 {
                 chars.next();
@@ -358,6 +361,12 @@ mod tests {
                 Box::new(SpdxExpression::Id("SEE LICENSE IN LICENSE.txt")),
             )
         );
+    }
+
+    #[test]
+    fn parse_multibyte_utf8_does_not_panic() {
+        assert!(SpdxExpression::parse("LicenseRef-Café").is_some());
+        assert!(SpdxExpression::parse("🔥-License").is_some());
     }
 
     fn boxed(strings: &[&str]) -> Vec<Box<str>> {
