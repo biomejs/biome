@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-named-exports.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export const A = 42;
+export default { name: "Foo" };
+</script>
+
+<script setup>
+const props = defineProps(["foo"]);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-named-exports.vue:4:16 lint/nursery/useVueDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component sets its options with a default export, but it also uses <script setup>.
+  
+    2 │ <script>
+    3 │ export const A = 42;
+  > 4 │ export default { name: "Foo" };
+      │                ^^^^^^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Splitting the component across two script blocks makes it harder to read. The defineOptions() macro sets the same options inside <script setup>.
+  
+  i Move these options into a defineOptions() call in the <script setup> block, and remove the default export. Declare props and events with defineProps() and defineEmits() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

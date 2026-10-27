@@ -9074,6 +9074,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueDefineOptions": {
+					"description": "Enforce defineOptions() instead of a default export in components that use \\<script setup>.\nSee https://biomejs.dev/linter/rules/use-vue-define-options",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueDefineOptionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefinePropsDestructuring": {
 					"description": "Require destructuring the props returned by Vue's defineProps macro.\nSee https://biomejs.dev/linter/rules/use-vue-define-props-destructuring",
 					"anyOf": [
@@ -16573,6 +16580,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueDefineOptionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueDefineOptionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefinePropsDestructuringOptions": {
 			"type": "object",
 			"properties": {
@@ -22039,6 +22055,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueDefineOptionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueDefineOptionsOptions" }
+			]
+		},
+		"UseVueDefineOptionsOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueDefinePropsDestructuringConfiguration": {
