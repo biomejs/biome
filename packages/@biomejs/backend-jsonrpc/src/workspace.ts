@@ -3373,6 +3373,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedRouterLinkTagProp?: NoVueDeprecatedRouterLinkTagPropConfiguration;
 	/**
+	 * Disallow the scope attribute on \<template> elements in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scope-attribute
+	 */
+	noVueDeprecatedScopeAttribute?: NoVueDeprecatedScopeAttributeConfiguration;
+	/**
 	 * Disallow the deprecated Vue $scopedSlots API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots
 	 */
@@ -6243,6 +6248,9 @@ export type NoVueDeprecatedListenersConfiguration =
 export type NoVueDeprecatedRouterLinkTagPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedRouterLinkTagPropOptions;
+export type NoVueDeprecatedScopeAttributeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedScopeAttributeOptions;
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
@@ -9025,6 +9033,10 @@ export interface RuleWithNoVueDeprecatedRouterLinkTagPropOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedRouterLinkTagPropOptions;
 }
+export interface RuleWithNoVueDeprecatedScopeAttributeOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedScopeAttributeOptions;
+}
 export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11671,6 +11683,7 @@ export interface NoVueDeprecatedRouterLinkTagPropOptions {
 	 */
 	components?: string[];
 }
+export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueMutatingPropsOptions = {};
@@ -13467,6 +13480,7 @@ export type Category =
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedListeners"
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
+	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueMutatingProps"

@@ -7626,6 +7626,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedScopeAttributeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedScopeAttributeOptions" }
+			]
+		},
+		"NoVueDeprecatedScopeAttributeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedScopedSlotsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8545,6 +8555,13 @@
 					"description": "Disallow the tag prop on RouterLink.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-router-link-tag-prop",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedRouterLinkTagPropConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedScopeAttribute": {
+					"description": "Disallow the scope attribute on \\<template> elements in Vue templates.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scope-attribute",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedScopeAttributeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13960,6 +13977,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedRouterLinkTagPropOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedScopeAttributeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedScopeAttributeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
