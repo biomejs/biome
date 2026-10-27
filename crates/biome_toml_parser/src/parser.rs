@@ -20,6 +20,8 @@ pub(crate) struct TomlParser<'source> {
     /// `false` if a part of the key that is being parsed is missing or invalid.
     key_is_valid: bool,
     keys: KeyTracker<'source>,
+    /// The number of arrays and inline tables that enclose the current token.
+    nesting_depth: usize,
 }
 
 impl<'source> TomlParser<'source> {
@@ -31,7 +33,20 @@ impl<'source> TomlParser<'source> {
             key_parts: Vec::new(),
             key_is_valid: true,
             keys: KeyTracker::default(),
+            nesting_depth: 0,
         }
+    }
+
+    pub fn nesting_depth(&self) -> usize {
+        self.nesting_depth
+    }
+
+    pub fn enter_nesting(&mut self) {
+        self.nesting_depth += 1;
+    }
+
+    pub fn exit_nesting(&mut self) {
+        self.nesting_depth -= 1;
     }
 
     /// Starts collecting the parts of a new key.

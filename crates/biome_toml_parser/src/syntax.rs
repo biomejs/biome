@@ -132,7 +132,8 @@ impl ParseNodeList for TableEntryList {
 /// previous error left it lexed as a value. `requires_line_break` is `false`
 /// for the first item of the document.
 fn prepare_line_item(p: &mut TomlParser, requires_line_break: bool) {
-    if !p.at_ts(KEY_PART_START.union(TABLE_HEADER_START)) && !p.at(EOF) {
+    // A `[` lexed as a value can be the first half of a `[[` header.
+    if p.at(T!['[']) || (!p.at_ts(KEY_PART_START.union(TABLE_HEADER_START)) && !p.at(EOF)) {
         p.re_lex(TomlLexContext::Key);
     }
 
@@ -385,21 +386,80 @@ fn parse_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
+/// The maximum number of arrays and inline tables that can be nested in each
+/// other. It bounds the recursion of the parser and of tree consumers.
+const MAX_NESTING_DEPTH: usize = 128;
+
 // [1, 2, 3]
 fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     if !p.at(T!['[']) {
         return Absent;
     }
 
+    if p.nesting_depth() >= MAX_NESTING_DEPTH {
+        return Present(skip_nested_value(p, after));
+    }
+
     let m = p.start();
     p.bump_with_context(T!['['], TomlLexContext::Value);
-    ArrayElementList.parse_list(p);
+    p.enter_nesting();
+    ArrayElementList::default().parse_list(p);
+    p.exit_nesting();
     expect_with_context(p, T![']'], after);
 
     Present(m.complete(p, TOML_ARRAY))
 }
 
-struct ArrayElementList;
+/// Wraps an array or inline table that exceeds [MAX_NESTING_DEPTH] into a
+/// bogus value, without recursing into it.
+fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMarker {
+    let range = p.cur_range();
+    p.error(ParseDiagnostic::new(
+        format!(
+            "Arrays and inline tables can't be nested more than {MAX_NESTING_DEPTH} levels deep."
+        ),
+        range,
+    ));
+
+    let m = p.start();
+    // The brackets that are open, innermost last.
+    let mut open = Vec::new();
+    loop {
+        let kind = p.cur();
+        match kind {
+            T!['['] | T!['{'] => open.push(kind),
+            T![']'] if open.last() == Some(&T!['[']) => {
+                open.pop();
+            }
+            T!['}'] if open.last() == Some(&T!['{']) => {
+                open.pop();
+            }
+            EOF => break,
+            _ => {}
+        }
+
+        // Lex the next token the way the regular parse rules would.
+        let context = match open.last() {
+            None => after,
+            Some(_) if kind == T![=] => TomlLexContext::Value,
+            Some(&T!['[']) => TomlLexContext::Value,
+            Some(_) => TomlLexContext::Key,
+        };
+        p.bump_any_with_context(context);
+
+        if open.is_empty() {
+            break;
+        }
+    }
+
+    m.complete(p, TOML_BOGUS_VALUE)
+}
+
+#[derive(Default)]
+struct ArrayElementList {
+    /// `true` after an element, when a `,` or `]` should follow.
+    expects_separator: bool,
+}
 
 impl ParseSeparatedList for ArrayElementList {
     type Kind = TomlSyntaxKind;
@@ -410,11 +470,20 @@ impl ParseSeparatedList for ArrayElementList {
         parse_value(p, TomlLexContext::Value)
     }
 
-    /// Ends the list at `]`. A token on a new line that can't continue the
-    /// list most likely belongs to the next key/value pair of an unterminated
-    /// array.
+    /// Ends the list at `]`.
+    ///
+    /// The array is most likely unterminated if a token on a new line can't
+    /// continue it: anything but a `,` after an element, or anything but a
+    /// value after a `,`. That token starts the next table header or
+    /// key/value pair.
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![']']) || (p.has_preceding_line_break() && !p.at(T![,]) && !p.at_ts(VALUE_START))
+        if p.at(T![']']) {
+            return true;
+        }
+        if !p.has_preceding_line_break() || p.at(T![,]) {
+            return false;
+        }
+        self.expects_separator || !p.at_ts(VALUE_START)
     }
 
     fn recover(
@@ -422,6 +491,7 @@ impl ParseSeparatedList for ArrayElementList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
+        self.expects_separator = true;
         recover_list_element(
             p,
             parsed_element,
@@ -437,6 +507,7 @@ impl ParseSeparatedList for ArrayElementList {
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
+        self.expects_separator = false;
         expect_with_context(p, T![,], TomlLexContext::Value)
     }
 
@@ -456,18 +527,28 @@ fn parse_inline_table(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax
         return Absent;
     }
 
+    if p.nesting_depth() >= MAX_NESTING_DEPTH {
+        return Present(skip_nested_value(p, after));
+    }
+
     let m = p.start();
     let range = p.cur_range();
     p.bump_with_context(T!['{'], TomlLexContext::Key);
+    p.enter_nesting();
     p.start_inline_table(range);
-    InlineTableEntryList.parse_list(p);
+    InlineTableEntryList::default().parse_list(p);
     p.end_inline_table();
+    p.exit_nesting();
     expect_with_context(p, T!['}'], after);
 
     Present(m.complete(p, TOML_INLINE_TABLE))
 }
 
-struct InlineTableEntryList;
+#[derive(Default)]
+struct InlineTableEntryList {
+    /// `true` after an entry, when a `,` or `}` should follow.
+    expects_separator: bool,
+}
 
 impl ParseSeparatedList for InlineTableEntryList {
     type Kind = TomlSyntaxKind;
@@ -478,10 +559,18 @@ impl ParseSeparatedList for InlineTableEntryList {
         parse_key_value(p, TomlLexContext::Key)
     }
 
-    /// Ends the list at `}`. A table header at the start of a line most likely
-    /// follows an unterminated inline table.
+    /// Ends the list at `}`.
+    ///
+    /// The inline table is most likely unterminated if a token on a new line
+    /// can't continue it: anything but a `,` after an entry, or a table header.
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}']) || (p.has_preceding_line_break() && p.at_ts(TABLE_HEADER_START))
+        if p.at(T!['}']) {
+            return true;
+        }
+        if !p.has_preceding_line_break() || p.at(T![,]) {
+            return false;
+        }
+        self.expects_separator || p.at_ts(TABLE_HEADER_START)
     }
 
     fn recover(
@@ -489,6 +578,7 @@ impl ParseSeparatedList for InlineTableEntryList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
+        self.expects_separator = true;
         recover_list_element(
             p,
             parsed_element,
@@ -504,6 +594,7 @@ impl ParseSeparatedList for InlineTableEntryList {
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
+        self.expects_separator = false;
         expect_with_context(p, T![,], TomlLexContext::Key)
     }
 

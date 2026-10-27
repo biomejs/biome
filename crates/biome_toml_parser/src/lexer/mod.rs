@@ -969,24 +969,57 @@ fn classify_date_time(word: &[u8]) -> ValueResult {
         .unwrap_or(time.len());
     let (time, offset) = time.split_at(offset_start);
 
-    validate_partial_time(time)?;
+    let time = validate_partial_time(time)?;
 
-    match offset {
-        [] => Ok(TOML_LOCAL_DATE_TIME_LITERAL),
-        [b'Z' | b'z'] => Ok(TOML_OFFSET_DATE_TIME_LITERAL),
-        [b'+' | b'-', h1, h2, b':', m1, m2]
+    // Offset from UTC, in minutes.
+    let offset = match offset {
+        [] => return Ok(TOML_LOCAL_DATE_TIME_LITERAL),
+        [b'Z' | b'z'] => 0,
+        [sign @ (b'+' | b'-'), h1, h2, b':', m1, m2]
             if [h1, h2, m1, m2].iter().all(|b| b.is_ascii_digit()) =>
         {
-            if two_digits(&[*h1, *h2]) > 23 || two_digits(&[*m1, *m2]) > 59 {
-                Err(ValueError::new(
+            let hours = two_digits(&[*h1, *h2]);
+            let minutes = two_digits(&[*m1, *m2]);
+            if hours > 23 || minutes > 59 {
+                return Err(ValueError::new(
                     TOML_OFFSET_DATE_TIME_LITERAL,
                     "Invalid time offset.",
-                ))
-            } else {
-                Ok(TOML_OFFSET_DATE_TIME_LITERAL)
+                ));
             }
+            let offset = (hours * 60 + minutes) as i32;
+            if *sign == b'-' { -offset } else { offset }
         }
-        _ => Err(invalid().with_hint("Time offsets use the `Z` or `+HH:MM` format.")),
+        _ => return Err(invalid().with_hint("Time offsets use the `Z` or `+HH:MM` format.")),
+    };
+
+    if time.second == 60 && !is_leap_second(year, month, day, time, offset) {
+        return Err(ValueError::new(
+            TOML_OFFSET_DATE_TIME_LITERAL,
+            "This time isn't a possible leap second.",
+        )
+        .with_hint("A second of 60 is only valid at 23:59:60 UTC on the last day of a month."));
+    }
+
+    Ok(TOML_OFFSET_DATE_TIME_LITERAL)
+}
+
+/// Returns `true` if the date-time is 23:59:60 UTC on the last day of a
+/// month, the only instants at which RFC 3339 allows a leap second.
+fn is_leap_second(year: u32, month: u32, day: u32, time: PartialTime, offset: i32) -> bool {
+    let utc_minutes = (time.hour * 60 + time.minute) as i32 - offset;
+    let day_shift = utc_minutes.div_euclid(24 * 60);
+    if utc_minutes.rem_euclid(24 * 60) != 23 * 60 + 59 {
+        return false;
+    }
+
+    let last_day = days_in_month(year, month);
+    match day_shift {
+        // The UTC date is the previous day, which is the last day of the
+        // previous month only on the first day of a month.
+        -1 => day == 1,
+        0 => day == last_day,
+        1 => day + 1 == last_day,
+        _ => false,
     }
 }
 
@@ -995,8 +1028,19 @@ fn classify_local_time(word: &[u8]) -> ValueResult {
     Ok(TOML_LOCAL_TIME_LITERAL)
 }
 
+#[derive(Debug, Copy, Clone)]
+struct PartialTime {
+    hour: u32,
+    minute: u32,
+    second: u32,
+}
+
 /// Validates `HH:MM[:SS[.fraction]]`.
-fn validate_partial_time(time: &[u8]) -> Result<(), ValueError> {
+///
+/// A second of 60 is accepted because it can be a leap second. Without an
+/// offset, the UTC instant is unknown, so only offset date-times can be
+/// checked further.
+fn validate_partial_time(time: &[u8]) -> Result<PartialTime, ValueError> {
     let invalid = || {
         ValueError::new(ERROR_TOKEN, "Invalid time.")
             .with_hint("Times use the `HH:MM:SS` format, optionally followed by a fraction.")
@@ -1029,7 +1073,11 @@ fn validate_partial_time(time: &[u8]) -> Result<(), ValueError> {
         return Err(ValueError::new(ERROR_TOKEN, "The time is out of range."));
     }
 
-    Ok(())
+    Ok(PartialTime {
+        hour,
+        minute,
+        second,
+    })
 }
 
 #[inline]
