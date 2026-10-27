@@ -3388,6 +3388,11 @@ export interface Nursery {
 	 */
 	noVueShadowNativeEvents?: NoVueShadowNativeEventsConfiguration;
 	/**
+	 * Disallow changing state inside Vue computed properties.
+	 * See https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed
+	 */
+	noVueSideEffectsInComputed?: NoVueSideEffectsInComputedConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
@@ -6192,6 +6197,9 @@ export type NoVueRootVIfConfiguration =
 export type NoVueShadowNativeEventsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueShadowNativeEventsOptions;
+export type NoVueSideEffectsInComputedConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueSideEffectsInComputedOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -8949,6 +8957,10 @@ export interface RuleWithNoVueShadowNativeEventsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueShadowNativeEventsOptions;
 }
+export interface RuleWithNoVueSideEffectsInComputedOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueSideEffectsInComputedOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -11521,6 +11533,7 @@ export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
+export type NoVueSideEffectsInComputedOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -13307,6 +13320,7 @@ export type Category =
 	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
+	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueVHtml"
