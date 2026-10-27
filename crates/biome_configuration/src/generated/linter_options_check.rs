@@ -3135,6 +3135,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueBooleanPropTypeFirst",
+        TypeId::of::<
+            biome_rule_options::use_vue_boolean_prop_type_first::UseVueBooleanPropTypeFirstOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useVueComponentIs",
         TypeId::of::<biome_rule_options::use_vue_component_is::UseVueComponentIsOptions>(),
     ));

@@ -758,6 +758,7 @@ pub enum RuleName {
     UseVarsOnTop,
     UseVueBaseImport,
     UseVueBlockOrder,
+    UseVueBooleanPropTypeFirst,
     UseVueComponentIs,
     UseVueComputedPropertyReturn,
     UseVueConsistentDefineEmitsDeclaration,
@@ -1497,6 +1498,7 @@ impl RuleName {
             Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueBaseImport => "useVueBaseImport",
             Self::UseVueBlockOrder => "useVueBlockOrder",
+            Self::UseVueBooleanPropTypeFirst => "useVueBooleanPropTypeFirst",
             Self::UseVueComponentIs => "useVueComponentIs",
             Self::UseVueComputedPropertyReturn => "useVueComputedPropertyReturn",
             Self::UseVueConsistentDefineEmitsDeclaration => {
@@ -2230,6 +2232,7 @@ impl RuleName {
             Self::UseVarsOnTop => RuleGroup::Style,
             Self::UseVueBaseImport => RuleGroup::Nursery,
             Self::UseVueBlockOrder => RuleGroup::Nursery,
+            Self::UseVueBooleanPropTypeFirst => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
             Self::UseVueComputedPropertyReturn => RuleGroup::Nursery,
             Self::UseVueConsistentDefineEmitsDeclaration => RuleGroup::Nursery,
@@ -2974,6 +2977,7 @@ impl std::str::FromStr for RuleName {
             "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueBaseImport" => Ok(Self::UseVueBaseImport),
             "useVueBlockOrder" => Ok(Self::UseVueBlockOrder),
+            "useVueBooleanPropTypeFirst" => Ok(Self::UseVueBooleanPropTypeFirst),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
             "useVueComputedPropertyReturn" => Ok(Self::UseVueComputedPropertyReturn),
             "useVueConsistentDefineEmitsDeclaration" => {
