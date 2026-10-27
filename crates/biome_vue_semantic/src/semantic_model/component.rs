@@ -621,6 +621,7 @@ impl Collector<'_, '_> {
                         required: Tri::No,
                         defaults: Box::default(),
                         validator: None,
+                        runtime_type: None,
                         form: PropForm::ArrayString,
                     });
                     props.push(id);
@@ -662,6 +663,7 @@ impl Collector<'_, '_> {
                             required: Tri::Unknown,
                             defaults: Box::default(),
                             validator: None,
+                            runtime_type: None,
                             form: PropForm::Constructor,
                         },
                     };
@@ -685,6 +687,9 @@ impl Collector<'_, '_> {
     }
 
     fn runtime_prop_detail(&self, value: Option<AnyJsExpression>) -> PropDetail {
+        let runtime_type = value
+            .as_ref()
+            .map(|value| self.host(value.syntax().text_trimmed_range()));
         let value = value.and_then(|value| value.inner_expression());
         let Some(AnyJsExpression::JsObjectExpression(options)) = &value else {
             return PropDetail {
@@ -694,6 +699,7 @@ impl Collector<'_, '_> {
                 required: Tri::No,
                 defaults: Box::default(),
                 validator: None,
+                runtime_type,
                 form: PropForm::Constructor,
             };
         };
@@ -702,6 +708,7 @@ impl Collector<'_, '_> {
             required: Tri::No,
             defaults: Box::default(),
             validator: None,
+            runtime_type: None,
             form: PropForm::Options,
         };
         for member in options.members().iter().flatten() {
@@ -712,6 +719,7 @@ impl Collector<'_, '_> {
                 "type" => {
                     if let Some(value) = member_value(&member) {
                         detail.types = self.constructor_types(&value);
+                        detail.runtime_type = Some(self.host(value.syntax().text_trimmed_range()));
                     }
                 }
                 "required" => {
@@ -846,6 +854,7 @@ impl Collector<'_, '_> {
                 required: (!is_optional).into(),
                 defaults: Box::default(),
                 validator: None,
+                runtime_type: None,
                 form: PropForm::TypeMember,
             });
             props.push(id);

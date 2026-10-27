@@ -649,6 +649,7 @@ pub mod use_vue_multi_word_component_names;
 pub mod use_vue_next_tick_promise;
 pub mod use_vue_template_ref;
 pub mod use_vue_toggle_inside_transition;
+pub mod use_vue_typed_object_props;
 pub mod use_vue_typed_ref;
 pub mod use_vue_v_for_key;
 pub mod use_vue_v_on_exact;
