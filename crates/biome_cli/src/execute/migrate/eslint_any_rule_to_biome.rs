@@ -7239,6 +7239,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "vue/no-use-v-else-with-v-for" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_vue_v_if_with_v_for
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "vue/no-use-v-if-with-v-for" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group

@@ -1549,7 +1549,7 @@
 					]
 				},
 				"noVueVIfWithVFor": {
-					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
+					"description": "Disallow using v-if, v-else-if, or v-else and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
 						{ "type": "null" }

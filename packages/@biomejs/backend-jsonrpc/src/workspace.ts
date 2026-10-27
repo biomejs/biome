@@ -2741,7 +2741,7 @@ export interface Correctness {
 	 */
 	noVueSetupPropsReactivityLoss?: NoVueSetupPropsReactivityLossConfiguration;
 	/**
-	 * Disallow using v-if and v-for directives on the same element.
+	 * Disallow using v-if, v-else-if, or v-else and v-for directives on the same element.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
