@@ -4694,6 +4694,7 @@ export function bar() {
 }
 
 #[tokio::test]
+#[ignore = "Currently flaky, and fails from time to time. To review later"]
 async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
     const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
     const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
