@@ -1,10 +1,9 @@
+use crate::FormatTomlTrailingComments;
 use crate::context::TomlFormatContext;
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{Tag, text};
-use biome_formatter::trivia::{
-    format_leading_comments_from_slice, format_trailing_comments_from_slice,
-};
+use biome_formatter::trivia::format_leading_comments_from_slice;
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
     FormatWithRule, normalize_newlines,
@@ -146,10 +145,7 @@ impl Format<TomlFormatContext> for FormatTomlVerbatimNode<'_> {
                 comment.mark_formatted();
             }
 
-            biome_formatter::write!(
-                f,
-                [format_trailing_comments_from_slice(outside_trimmed_range)]
-            )?;
+            FormatTomlTrailingComments::new(outside_trimmed_range).fmt(f)?;
         }
 
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))

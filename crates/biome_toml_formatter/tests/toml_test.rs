@@ -105,6 +105,9 @@ const EDGE_CASES: &[&str] = &[
     "x = { a = [1, # one\n2], b = 3 }\n",
     // Comments separated by commas that the formatter moves.
     "a = [1 # one\n, # two\n2]\n",
+    "a = [\n# biome-ignore format: preserve\n1 # one\n, # two\n2\n]\n",
+    "# biome-ignore format: preserve\na   =   1 # one\n# two\nb = 2\n",
+    "# biome-ignore format: preserve\n[  t  ] # one\nc = 1 # two\n",
 ];
 
 #[test]

@@ -18,7 +18,7 @@ pub use crate::context::{TomlFormatContext, TomlFormatOptions};
 use crate::cst::FormatTomlSyntaxNode;
 pub(crate) use crate::trivia::*;
 use crate::verbatim::{format_bogus_node, format_suppressed_node};
-use biome_formatter::comments::Comments;
+use biome_formatter::comments::{Comments, SourceComment};
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
@@ -236,10 +236,8 @@ where
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
     fn fmt_trailing_comments(&self, node: &N, f: &mut TomlFormatter) -> FormatResult<()> {
-        FormatTomlTrailingComments {
-            node: node.syntax(),
-        }
-        .fmt(f)
+        let comments = f.context().comments().clone();
+        FormatTomlTrailingComments::new(comments.trailing_comments(node.syntax())).fmt(f)
     }
 }
 
@@ -249,15 +247,19 @@ where
 /// after the first starts a new line, even if the source separated the two
 /// comments by a token that the formatter moves, such as the comma in
 /// `[1 # a` / `, # b` / `2]`.
-struct FormatTomlTrailingComments<'a> {
-    node: &'a TomlSyntaxNode,
+pub(crate) struct FormatTomlTrailingComments<'a> {
+    comments: &'a [SourceComment<TomlLanguage>],
+}
+
+impl<'a> FormatTomlTrailingComments<'a> {
+    pub(crate) fn new(comments: &'a [SourceComment<TomlLanguage>]) -> Self {
+        Self { comments }
+    }
 }
 
 impl Format<TomlFormatContext> for FormatTomlTrailingComments<'_> {
     fn fmt(&self, f: &mut TomlFormatter) -> FormatResult<()> {
-        let comments = f.context().comments().clone();
-
-        for (index, comment) in comments.trailing_comments(self.node).iter().enumerate() {
+        for (index, comment) in self.comments.iter().enumerate() {
             let format_comment = FormatRefWithRule::new(comment, FormatTomlLeadingComment);
             let content = format_with(|f| {
                 match comment.lines_before() {
