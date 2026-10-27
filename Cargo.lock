@@ -2254,7 +2254,6 @@ dependencies = [
  "countme",
  "insta",
  "mimalloc",
- "serde_json",
  "tests_macros",
  "tikv-jemallocator",
 ]

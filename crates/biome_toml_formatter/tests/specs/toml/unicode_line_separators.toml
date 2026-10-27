@@ -2,3 +2,7 @@
 b = "a b"
 # biome-ignore format: preserve
 c   =   "a b"
+e = """a b"""
+# biome-ignore format: preserve
+d   =   """a 
+b"""
