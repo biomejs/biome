@@ -7,7 +7,7 @@ use biome_html_syntax::{HtmlAttributeList, VueDirective, element_ext::AnyHtmlTag
 use biome_rowan::AstNode;
 use biome_rule_options::no_vue_v_text_v_html_on_component::NoVueVTextVHtmlOnComponentOptions;
 
-use crate::vue::is_native_element_name;
+use crate::vue::is_vue_component;
 
 declare_lint_rule! {
     /// Disallow `v-text` and `v-html` on components.
@@ -99,7 +99,7 @@ impl Rule for NoVueVTextVHtmlOnComponent {
         let element = directive
             .parent::<HtmlAttributeList>()?
             .parent::<AnyHtmlTagElement>()?;
-        is_component(&element).then_some(())
+        is_vue_component(&element).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -122,30 +122,4 @@ impl Rule for NoVueVTextVHtmlOnComponent {
             }),
         )
     }
-}
-
-/// Returns `true` if Vue renders `element` as a component instead of a native element.
-///
-/// An element is a component if its name isn't a known HTML, SVG, or MathML element, such as
-/// `<MyComponent>`, `<my-element>`, or `<component>`, or if it has an `is` attribute whose
-/// value starts with `vue:`, such as `<tr is="vue:my-row">`.
-fn is_component(element: &AnyHtmlTagElement) -> bool {
-    let Ok(name) = element.name() else {
-        return false;
-    };
-    !is_native_element_name(&name) || has_vue_is_attribute(element)
-}
-
-fn has_vue_is_attribute(element: &AnyHtmlTagElement) -> bool {
-    element
-        .find_attribute_by_name("is")
-        .and_then(|attribute| {
-            attribute
-                .as_html_attribute()?
-                .initializer()?
-                .value()
-                .ok()?
-                .as_static_value()
-        })
-        .is_some_and(|value| value.text().starts_with("vue:"))
 }

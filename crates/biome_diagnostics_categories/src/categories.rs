@@ -418,6 +418,7 @@ define_categories! {
     "lint/nursery/useTailwindSortedClasses": "https://biomejs.dev/linter/rules/use-tailwind-sorted-classes",
     "lint/nursery/useTailwindStaticClassStrings": "https://biomejs.dev/linter/rules/use-tailwind-static-class-strings",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",
+    "lint/nursery/useTrueAttributeShorthand": "https://biomejs.dev/linter/rules/use-true-attribute-shorthand",
     "lint/nursery/useUnaryMinus": "https://biomejs.dev/linter/rules/use-unary-minus",
     "lint/nursery/useUniqueArgumentNames": "https://biomejs.dev/linter/rules/use-unique-argument-names",
     "lint/nursery/useUniqueFieldDefinitionNames": "https://biomejs.dev/linter/rules/use-unique-field-definition-names",

@@ -1,0 +1,328 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComp :show="true" />
+  <MyComp v-bind:show="true" />
+  <MyComp :show=" true " />
+  <MyComp :show='true' />
+  <MyComp :foo-bar="true" other />
+  <my-comp :show="true"></my-comp>
+  <UI.Button :show="true" />
+  <component :is="comp" :show="true" />
+  <card :show="true" />
+  <tr is="vue:my-row" :show="true"></tr>
+  <MyComp :a="true" :b="true" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComp :show="true" />
+      │           ^^^^^^^^^^^^
+    4 │   <MyComp v-bind:show="true" />
+    5 │   <MyComp :show=" true " />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    3 │ ··<MyComp·:show="true"·/>
+      │           -    -------   
+
+```
+
+```
+invalid.vue:4:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+    2 │ <template>
+    3 │   <MyComp :show="true" />
+  > 4 │   <MyComp v-bind:show="true" />
+      │           ^^^^^^^^^^^^^^^^^^
+    5 │   <MyComp :show=" true " />
+    6 │   <MyComp :show='true' />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+     2  2 │   <template>
+     3  3 │     <MyComp :show="true" />
+     4    │ - ··<MyComp·v-bind:show="true"·/>
+        4 │ + ··<MyComp·show·/>
+     5  5 │     <MyComp :show=" true " />
+     6  6 │     <MyComp :show='true' />
+  
+
+```
+
+```
+invalid.vue:5:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+    3 │   <MyComp :show="true" />
+    4 │   <MyComp v-bind:show="true" />
+  > 5 │   <MyComp :show=" true " />
+      │           ^^^^^^^^^^^^^^
+    6 │   <MyComp :show='true' />
+    7 │   <MyComp :foo-bar="true" other />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    5 │ ··<MyComp·:show="·true·"·/>
+      │           -    ---------   
+
+```
+
+```
+invalid.vue:6:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+    4 │   <MyComp v-bind:show="true" />
+    5 │   <MyComp :show=" true " />
+  > 6 │   <MyComp :show='true' />
+      │           ^^^^^^^^^^^^
+    7 │   <MyComp :foo-bar="true" other />
+    8 │   <my-comp :show="true"></my-comp>
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    6 │ ··<MyComp·:show='true'·/>
+      │           -    -------   
+
+```
+
+```
+invalid.vue:7:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop foo-bar has the value true, which can be omitted.
+  
+    5 │   <MyComp :show=" true " />
+    6 │   <MyComp :show='true' />
+  > 7 │   <MyComp :foo-bar="true" other />
+      │           ^^^^^^^^^^^^^^^
+    8 │   <my-comp :show="true"></my-comp>
+    9 │   <UI.Button :show="true" />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    7 │ ··<MyComp·:foo-bar="true"·other·/>
+      │           -       -------         
+
+```
+
+```
+invalid.vue:8:12 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+     6 │   <MyComp :show='true' />
+     7 │   <MyComp :foo-bar="true" other />
+   > 8 │   <my-comp :show="true"></my-comp>
+       │            ^^^^^^^^^^^^
+     9 │   <UI.Button :show="true" />
+    10 │   <component :is="comp" :show="true" />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    8 │ ··<my-comp·:show="true"></my-comp>
+      │            -    -------           
+
+```
+
+```
+invalid.vue:9:14 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+     7 │   <MyComp :foo-bar="true" other />
+     8 │   <my-comp :show="true"></my-comp>
+   > 9 │   <UI.Button :show="true" />
+       │              ^^^^^^^^^^^^
+    10 │   <component :is="comp" :show="true" />
+    11 │   <card :show="true" />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    9 │ ··<UI.Button·:show="true"·/>
+      │              -    -------   
+
+```
+
+```
+invalid.vue:10:25 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+     8 │   <my-comp :show="true"></my-comp>
+     9 │   <UI.Button :show="true" />
+  > 10 │   <component :is="comp" :show="true" />
+       │                         ^^^^^^^^^^^^
+    11 │   <card :show="true" />
+    12 │   <tr is="vue:my-row" :show="true"></tr>
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    10 │ ··<component·:is="comp"·:show="true"·/>
+       │                         -    -------   
+
+```
+
+```
+invalid.vue:11:9 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+     9 │   <UI.Button :show="true" />
+    10 │   <component :is="comp" :show="true" />
+  > 11 │   <card :show="true" />
+       │         ^^^^^^^^^^^^
+    12 │   <tr is="vue:my-row" :show="true"></tr>
+    13 │   <MyComp :a="true" :b="true" />
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    11 │ ··<card·:show="true"·/>
+       │         -    -------   
+
+```
+
+```
+invalid.vue:12:23 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop show has the value true, which can be omitted.
+  
+    10 │   <component :is="comp" :show="true" />
+    11 │   <card :show="true" />
+  > 12 │   <tr is="vue:my-row" :show="true"></tr>
+       │                       ^^^^^^^^^^^^
+    13 │   <MyComp :a="true" :b="true" />
+    14 │ </template>
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    12 │ ··<tr·is="vue:my-row"·:show="true"></tr>
+       │                       -    -------      
+
+```
+
+```
+invalid.vue:13:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop a has the value true, which can be omitted.
+  
+    11 │   <card :show="true" />
+    12 │   <tr is="vue:my-row" :show="true"></tr>
+  > 13 │   <MyComp :a="true" :b="true" />
+       │           ^^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    13 │ ··<MyComp·:a="true"·:b="true"·/>
+       │           - -------             
+
+```
+
+```
+invalid.vue:13:21 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop b has the value true, which can be omitted.
+  
+    11 │   <card :show="true" />
+    12 │   <tr is="vue:my-row" :show="true"></tr>
+  > 13 │   <MyComp :a="true" :b="true" />
+       │                     ^^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i A prop written without a value receives true, so the shorthand form is shorter and passes the same value.
+  
+  i The shorthand form passes true only if the component declares the prop as Boolean and doesn't list String before Boolean. Otherwise, it passes an empty string. Check how the component declares the prop before you remove the value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the value.
+  
+    13 │ ··<MyComp·:a="true"·:b="true"·/>
+       │                     - -------   
+
+```

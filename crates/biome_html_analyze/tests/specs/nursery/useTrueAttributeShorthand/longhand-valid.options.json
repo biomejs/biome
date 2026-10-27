@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "useTrueAttributeShorthand": {
+          "level": "on",
+          "options": { "style": "longhand" }
+        }
+      }
+    }
+  }
+}

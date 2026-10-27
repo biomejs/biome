@@ -2898,6 +2898,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useTrueAttributeShorthand",
+        TypeId::of::<
+            biome_rule_options::use_true_attribute_shorthand::UseTrueAttributeShorthandOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useUnaryMinus",
         TypeId::of::<biome_rule_options::use_unary_minus::UseUnaryMinusOptions>(),
     ));
