@@ -89,6 +89,59 @@ fn formatting_preserves_toml_test_documents() {
     assert!(failures.is_empty(), "{failures}");
 }
 
+/// Documents that exercise formatting edge cases. Each must keep its values
+/// and comments and be idempotent, like the toml-test documents.
+const EDGE_CASES: &[&str] = &[
+    // U+2028 and U+2029 aren't line breaks in TOML.
+    "# note\u{2028}a = 1\nb = 2\n",
+    "# note\u{2029}a = 1\nb = 2\n",
+    "x = \"a\u{2028}b\"\ny = \"\"\"a\u{2029}b\"\"\"\n",
+    "# biome-ignore format: preserve\nx   =   \"a\u{2028}b\"\n",
+    "# biome-ignore format: preserve\nx   =   \"\"\"a\u{2029}\nb\"\"\"\n",
+    // Entries of an inline table that start lines after commas.
+    "x = { a = 1, # a\nb = 2, # b\nc = 3 }\n",
+    "x = { a = 1,\nb = 2 }\n",
+    "x = { a = 1\n, b = 2 }\n",
+    "x = { a = [1, # one\n2], b = 3 }\n",
+    // Comments separated by commas that the formatter moves.
+    "a = [1 # one\n, # two\n2]\n",
+];
+
+#[test]
+fn formatting_preserves_edge_cases() {
+    let options = [
+        TomlFormatOptions::default(),
+        TomlFormatOptions::default().with_expand(Expand::Always),
+        TomlFormatOptions::default().with_line_width(LineWidth::try_from(10).unwrap()),
+    ];
+    for source in EDGE_CASES {
+        let original = parse_toml(source);
+        assert!(
+            !original.has_errors(),
+            "{source:?}: {:#?}",
+            original.diagnostics()
+        );
+        for options in &options {
+            let formatted = format(source, options);
+            let parse = parse_toml(&formatted);
+            assert!(
+                !parse.has_errors(),
+                "{source:?} formatted to an invalid document:\n{formatted}"
+            );
+            assert!(
+                decode_document(&parse.tree()) == decode_document(&original.tree()),
+                "{source:?}: formatting changed the values:\n{formatted}"
+            );
+            assert_eq!(
+                comments(&parse.syntax()),
+                comments(&original.syntax()),
+                "{source:?}: formatting changed the comments:\n{formatted}"
+            );
+            assert_eq!(format(&formatted, options), formatted, "{source:?}");
+        }
+    }
+}
+
 /// Returns the text of every comment in document order, with the token that
 /// precedes it, so moving a comment past a token changes the result. Commas are
 /// ignored because the formatter moves them before trailing comments.

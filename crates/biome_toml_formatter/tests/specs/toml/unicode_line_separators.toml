@@ -1,0 +1,4 @@
+# note a = 1
+b = "a b"
+# biome-ignore format: preserve
+c   =   "a b"
