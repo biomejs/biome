@@ -41,7 +41,9 @@ impl Format<TomlFormatContext> for FormatTableEntries<'_> {
 /// outside of its values. Inline tables can only span lines since TOML 1.1.
 pub(crate) fn is_multiline_inline_table(table: &TomlInlineTable) -> bool {
     let entries = table.entries();
-    entries.syntax().has_leading_newline()
+    entries
+        .iter()
+        .any(|entry| entry.is_ok_and(|entry| entry.syntax().has_leading_newline()))
         || entries.elements().any(|element| {
             element.trailing_separator().is_ok_and(|separator| {
                 separator.is_some_and(|separator| separator.has_leading_newline())

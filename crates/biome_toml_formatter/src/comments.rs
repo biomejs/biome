@@ -3,7 +3,7 @@ use biome_formatter::comments::{
     CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
 };
 use biome_formatter::formatter::Formatter;
-use biome_formatter::{FormatResult, FormatRule, write};
+use biome_formatter::{FormatResult, FormatRule, normalize_newlines, write};
 use biome_rowan::SyntaxTriviaPieceComments;
 use biome_toml_syntax::{
     TomlArray, TomlArrayTable, TomlInlineTable, TomlLanguage, TomlSyntaxKind, TomlTable,
@@ -17,12 +17,27 @@ pub struct FormatTomlLeadingComment;
 impl FormatRule<SourceComment<TomlLanguage>> for FormatTomlLeadingComment {
     type Context = TomlFormatContext;
 
+    /// Prints the comment without its trailing whitespace.
+    ///
+    /// Unlike the generic trivia formatting, this doesn't treat U+2028 and
+    /// U+2029 as line breaks: TOML only recognizes LF and CRLF, so printing
+    /// them as line breaks would end the comment early.
     fn fmt(
         &self,
         comment: &SourceComment<TomlLanguage>,
         f: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
-        write!(f, [comment.piece().as_piece()])
+        let piece = comment.piece();
+        let text = piece.text().trim_end_matches([' ', '\t']);
+        write!(
+            f,
+            [syntax_token_cow_slice(
+                // A comment only contains a `\r` in an invalid document.
+                normalize_newlines(text, ['\r']),
+                &piece.as_piece().token(),
+                piece.text_range().start()
+            )]
+        )
     }
 }
 

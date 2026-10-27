@@ -48,7 +48,10 @@ multiline = {
 	# comment
 	key2 = [1, 2],
 }
-multiline_trailing = { a = 1, b = 2 }
+multiline_trailing = {
+	a = 1,
+	b = 2,
+}
 empty_multiline = {
 	# only a comment
 }

@@ -7,7 +7,7 @@ use biome_formatter::trivia::{
 };
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    FormatWithRule, normalize_newlines,
 };
 use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 use biome_toml_syntax::{TomlLanguage, TomlSyntaxNode};
@@ -118,7 +118,9 @@ impl Format<TomlFormatContext> for FormatTomlVerbatimNode<'_> {
         );
 
         text(
-            &normalize_newlines(&original_source, LINE_TERMINATORS),
+            // TOML only recognizes LF and CRLF line breaks, so U+2028 and
+            // U+2029 must stay as they are.
+            &normalize_newlines(&original_source, ['\r']),
             Some(verbatim_text_start),
         )
         .fmt(f)?;
