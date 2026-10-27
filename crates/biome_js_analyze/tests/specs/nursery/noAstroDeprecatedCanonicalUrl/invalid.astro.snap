@@ -1,0 +1,392 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+const canonicalURL = Astro.canonicalURL;
+const computed = Astro["canonicalURL"];
+const optional = Astro?.canonicalURL;
+const parenthesized = (Astro).canonicalURL;
+const asserted = (Astro as any).canonicalURL;
+const href = Astro.canonicalURL.href;
+const { canonicalURL: renamed } = Astro;
+{
+	const { canonicalURL } = Astro;
+}
+const alias = Astro;
+const fromAlias = alias.canonicalURL;
+const chained = alias;
+const fromChained = chained["canonicalURL"];
+let page = Astro;
+if (Astro.site) page = Astro;
+const fromPage = page.canonicalURL;
+const fromConditional = (Astro.site ? Astro : other).canonicalURL;
+const fromLogical = (Astro || other).canonicalURL;
+let destructured;
+({ canonicalURL: destructured } = Astro);
+function withDefault({ canonicalURL } = Astro) {}
+---
+<link rel="canonical" href={Astro.canonicalURL} />
+<p>{Astro.canonicalURL.pathname}</p>
+
+```
+
+# Diagnostics
+```
+invalid.astro:3:22 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ const canonicalURL = Astro.canonicalURL;
+      │                      ^^^^^^^^^^^^^^^^^^
+    4 │ const computed = Astro["canonicalURL"];
+    5 │ const optional = Astro?.canonicalURL;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:4:18 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    2 │ // should generate diagnostics
+    3 │ const canonicalURL = Astro.canonicalURL;
+  > 4 │ const computed = Astro["canonicalURL"];
+      │                  ^^^^^^^^^^^^^^^^^^^^^
+    5 │ const optional = Astro?.canonicalURL;
+    6 │ const parenthesized = (Astro).canonicalURL;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:5:18 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    3 │ const canonicalURL = Astro.canonicalURL;
+    4 │ const computed = Astro["canonicalURL"];
+  > 5 │ const optional = Astro?.canonicalURL;
+      │                  ^^^^^^^^^^^^^^^^^^^
+    6 │ const parenthesized = (Astro).canonicalURL;
+    7 │ const asserted = (Astro as any).canonicalURL;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:6:23 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    4 │ const computed = Astro["canonicalURL"];
+    5 │ const optional = Astro?.canonicalURL;
+  > 6 │ const parenthesized = (Astro).canonicalURL;
+      │                       ^^^^^^^^^^^^^^^^^^^^
+    7 │ const asserted = (Astro as any).canonicalURL;
+    8 │ const href = Astro.canonicalURL.href;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:7:18 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    5 │ const optional = Astro?.canonicalURL;
+    6 │ const parenthesized = (Astro).canonicalURL;
+  > 7 │ const asserted = (Astro as any).canonicalURL;
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const href = Astro.canonicalURL.href;
+    9 │ const { canonicalURL: renamed } = Astro;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:8:14 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+     6 │ const parenthesized = (Astro).canonicalURL;
+     7 │ const asserted = (Astro as any).canonicalURL;
+   > 8 │ const href = Astro.canonicalURL.href;
+       │              ^^^^^^^^^^^^^^^^^^
+     9 │ const { canonicalURL: renamed } = Astro;
+    10 │ {
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:9:9 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+     7 │ const asserted = (Astro as any).canonicalURL;
+     8 │ const href = Astro.canonicalURL.href;
+   > 9 │ const { canonicalURL: renamed } = Astro;
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    10 │ {
+    11 │ 	const { canonicalURL } = Astro;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:11:10 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+     9 │ const { canonicalURL: renamed } = Astro;
+    10 │ {
+  > 11 │ 	const { canonicalURL } = Astro;
+       │ 	        ^^^^^^^^^^^^
+    12 │ }
+    13 │ const alias = Astro;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:14:19 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    12 │ }
+    13 │ const alias = Astro;
+  > 14 │ const fromAlias = alias.canonicalURL;
+       │                   ^^^^^^^^^^^^^^^^^^
+    15 │ const chained = alias;
+    16 │ const fromChained = chained["canonicalURL"];
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:16:21 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    14 │ const fromAlias = alias.canonicalURL;
+    15 │ const chained = alias;
+  > 16 │ const fromChained = chained["canonicalURL"];
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ let page = Astro;
+    18 │ if (Astro.site) page = Astro;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:19:18 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    17 │ let page = Astro;
+    18 │ if (Astro.site) page = Astro;
+  > 19 │ const fromPage = page.canonicalURL;
+       │                  ^^^^^^^^^^^^^^^^^
+    20 │ const fromConditional = (Astro.site ? Astro : other).canonicalURL;
+    21 │ const fromLogical = (Astro || other).canonicalURL;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:20:25 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    18 │ if (Astro.site) page = Astro;
+    19 │ const fromPage = page.canonicalURL;
+  > 20 │ const fromConditional = (Astro.site ? Astro : other).canonicalURL;
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ const fromLogical = (Astro || other).canonicalURL;
+    22 │ let destructured;
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:21:21 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    19 │ const fromPage = page.canonicalURL;
+    20 │ const fromConditional = (Astro.site ? Astro : other).canonicalURL;
+  > 21 │ const fromLogical = (Astro || other).canonicalURL;
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ let destructured;
+    23 │ ({ canonicalURL: destructured } = Astro);
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:23:4 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    21 │ const fromLogical = (Astro || other).canonicalURL;
+    22 │ let destructured;
+  > 23 │ ({ canonicalURL: destructured } = Astro);
+       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ function withDefault({ canonicalURL } = Astro) {}
+    25 │ ---
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:24:24 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    22 │ let destructured;
+    23 │ ({ canonicalURL: destructured } = Astro);
+  > 24 │ function withDefault({ canonicalURL } = Astro) {}
+       │                        ^^^^^^^^^^^^
+    25 │ ---
+    26 │ <link rel="canonical" href={Astro.canonicalURL} />
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:26:29 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    24 │ function withDefault({ canonicalURL } = Astro) {}
+    25 │ ---
+  > 26 │ <link rel="canonical" href={Astro.canonicalURL} />
+       │                             ^^^^^^^^^^^^^^^^^^
+    27 │ <p>{Astro.canonicalURL.pathname}</p>
+    28 │ 
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:27:5 lint/nursery/noAstroDeprecatedCanonicalUrl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro.canonicalURL is deprecated.
+  
+    25 │ ---
+    26 │ <link rel="canonical" href={Astro.canonicalURL} />
+  > 27 │ <p>{Astro.canonicalURL.pathname}</p>
+       │     ^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i Astro 2.0 removed Astro.canonicalURL, so reading it causes an error.
+  
+  i Build the URL from Astro.url instead, for example new URL(Astro.url.pathname, Astro.site).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,27 @@
+---
+// should generate diagnostics
+const canonicalURL = Astro.canonicalURL;
+const computed = Astro["canonicalURL"];
+const optional = Astro?.canonicalURL;
+const parenthesized = (Astro).canonicalURL;
+const asserted = (Astro as any).canonicalURL;
+const href = Astro.canonicalURL.href;
+const { canonicalURL: renamed } = Astro;
+{
+	const { canonicalURL } = Astro;
+}
+const alias = Astro;
+const fromAlias = alias.canonicalURL;
+const chained = alias;
+const fromChained = chained["canonicalURL"];
+let page = Astro;
+if (Astro.site) page = Astro;
+const fromPage = page.canonicalURL;
+const fromConditional = (Astro.site ? Astro : other).canonicalURL;
+const fromLogical = (Astro || other).canonicalURL;
+let destructured;
+({ canonicalURL: destructured } = Astro);
+function withDefault({ canonicalURL } = Astro) {}
+---
+<link rel="canonical" href={Astro.canonicalURL} />
+<p>{Astro.canonicalURL.pathname}</p>

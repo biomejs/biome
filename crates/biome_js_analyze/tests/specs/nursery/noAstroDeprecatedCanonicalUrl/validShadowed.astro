@@ -1,0 +1,6 @@
+---
+// should not generate diagnostics
+const Astro = { canonicalURL: "https://example.com" };
+const canonicalURL = Astro.canonicalURL;
+---
+<link rel="canonical" href={Astro.canonicalURL} />
