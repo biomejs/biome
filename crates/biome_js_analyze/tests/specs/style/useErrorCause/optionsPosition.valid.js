@@ -14,6 +14,14 @@ class ErrorWithTrailingCode extends Error {
 	}
 }
 
+class ErrorWithStatus extends Error {
+	constructor(message, code, status, options) {
+		super(message, options);
+		this.code = code;
+		this.status = status;
+	}
+}
+
 try {
 	doSomething();
 } catch (err) {
@@ -29,13 +37,13 @@ try {
 try {
 	doSomething();
 } catch (err) {
-	throw new ErrorWithCode("Something went wrong", "E_CODE", 500, { cause: err });
+	throw new ErrorWithStatus("Something went wrong", "E_CODE", 500, { cause: err });
 }
 
 try {
 	doSomething();
 } catch (err) {
-	throw new ErrorWithCode("Something went wrong", ...details, { cause: err });
+	throw new ExternalError("Something went wrong", ...details, { cause: err });
 }
 
 try {
