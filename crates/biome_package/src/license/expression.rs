@@ -174,6 +174,25 @@ fn tokenize(input: &str) -> Vec<Token<'_>> {
             continue;
         }
 
+        // Support npm's "SEE LICENSE IN <file>" license form
+        let remaining = &input[i..];
+        if remaining.len() >= 15 && remaining[..15].eq_ignore_ascii_case("SEE LICENSE IN ") {
+            let start = i;
+            for _ in 0..15 {
+                chars.next();
+            }
+            while let Some(&(_, ch)) = chars.peek() {
+                if ch.is_whitespace() || ch == ')' {
+                    break;
+                }
+                chars.next();
+            }
+            let end = chars.peek().map_or(input.len(), |&(idx, _)| idx);
+            let license_ref = &input[start..end];
+            tokens.push(Token::Id(license_ref));
+            continue;
+        }
+
         // Read an identifier (license ID or keyword)
         let start = i;
         while let Some(&(_, ch)) = chars.peek() {
@@ -326,6 +345,21 @@ mod tests {
         assert!(SpdxExpression::parse("   ").is_none());
     }
 
+    #[test]
+    fn parse_npm_see_license_in() {
+        let expr = SpdxExpression::parse("SEE LICENSE IN LICENSE.md").unwrap();
+        assert_eq!(expr, SpdxExpression::Id("SEE LICENSE IN LICENSE.md"));
+
+        let expr_or = SpdxExpression::parse("MIT OR (SEE LICENSE IN LICENSE.txt)").unwrap();
+        assert_eq!(
+            expr_or,
+            SpdxExpression::Or(
+                Box::new(SpdxExpression::Id("MIT")),
+                Box::new(SpdxExpression::Id("SEE LICENSE IN LICENSE.txt")),
+            )
+        );
+    }
+
     fn boxed(strings: &[&str]) -> Vec<Box<str>> {
         strings.iter().map(|s| Box::from(*s)).collect()
     }
@@ -359,6 +393,24 @@ mod tests {
         let expr = SpdxExpression::parse("foo").unwrap();
         let allow = boxed(&["foo"]);
         assert!(expr.check_trust(&config(&allow, &[])).is_ok());
+    }
+
+    #[test]
+    fn trust_npm_see_license_in_with_allow() {
+        let expr = SpdxExpression::parse("SEE LICENSE IN LICENSE.md").unwrap();
+        assert_eq!(
+            expr.check_trust(&config(&[], &[])),
+            Err(RejectReason::Untrusted)
+        );
+
+        let allow = boxed(&["SEE LICENSE IN LICENSE.md"]);
+        assert!(expr.check_trust(&config(&allow, &[])).is_ok());
+
+        let deny = boxed(&["SEE LICENSE IN LICENSE.md"]);
+        assert_eq!(
+            expr.check_trust(&config(&allow, &deny)),
+            Err(RejectReason::Denied)
+        );
     }
 
     #[test]
