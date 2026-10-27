@@ -1,5 +1,6 @@
 use crate::comments::{FormatTomlLeadingComment, TomlCommentStyle, TomlComments};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{
     CstFormatContext, Expand, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap,
@@ -33,6 +34,7 @@ impl TomlFormatContext {
 
 impl FormatContext for TomlFormatContext {
     type Options = TomlFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

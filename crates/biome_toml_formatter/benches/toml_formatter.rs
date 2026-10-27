@@ -1,4 +1,4 @@
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
 use biome_toml_formatter::TomlFormatOptions;
