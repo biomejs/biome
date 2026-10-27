@@ -1041,7 +1041,6 @@ fn at_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> 
     is_bullet || textual_starts_with_ordered_marker(source)
 }
 
-#[derive(Clone, Copy)]
 enum ContinuationListMarker {
     Bullet,
     Ordered,
