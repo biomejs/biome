@@ -3743,6 +3743,11 @@ export interface Nursery {
 	 */
 	useVueBaseImport?: UseVueBaseImportConfiguration;
 	/**
+	 * Require Boolean to be the first type of Vue props that accept several types.
+	 * See https://biomejs.dev/linter/rules/use-vue-boolean-prop-type-first
+	 */
+	useVueBooleanPropTypeFirst?: UseVueBooleanPropTypeFirstConfiguration;
+	/**
 	 * Require \<component> elements to bind the is attribute.
 	 * See https://biomejs.dev/linter/rules/use-vue-component-is
 	 */
@@ -6460,6 +6465,9 @@ export type UseValidTestTitleConfiguration =
 export type UseVueBaseImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueBaseImportOptions;
+export type UseVueBooleanPropTypeFirstConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueBooleanPropTypeFirstOptions;
 export type UseVueComponentIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComponentIsOptions;
@@ -9445,6 +9453,14 @@ export interface RuleWithUseVueBaseImportOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueBaseImportOptions;
 }
+export interface RuleWithUseVueBooleanPropTypeFirstOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueBooleanPropTypeFirstOptions;
+}
 export interface RuleWithUseVueComponentIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComponentIsOptions;
@@ -11909,6 +11925,7 @@ export interface UseValidTestTitleOptions {
 	disallowedWords?: string[];
 }
 export type UseVueBaseImportOptions = {};
+export type UseVueBooleanPropTypeFirstOptions = {};
 export type UseVueComponentIsOptions = {};
 export interface UseVueConsistentEventHyphenationOptions {
 	/**
@@ -13350,15 +13367,15 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13547,6 +13564,7 @@ export type Category =
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
+	| "lint/nursery/useVueBooleanPropTypeFirst"
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
@@ -13559,13 +13577,13 @@ export type Category =
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidDefineEmits"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueVModel"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
 	| "lint/nursery/useVueValidVSlot"

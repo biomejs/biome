@@ -26,7 +26,7 @@ use biome_db::AnyParsedSource;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_rowan::{AstNode, WalkEvent};
+use biome_rowan::{AstNode, NodeOrToken, WalkEvent};
 use biome_vue_semantic::{
     Component, Prop, Snippet, SnippetId, Symbol, VueSemanticModel, component_model,
     vue_model_from_source,
@@ -187,3 +187,21 @@ define_vue_query!(
     VueSnippetMatch,
     Snippet
 );
+
+/// Returns the node of type `N` whose range in `root` is exactly `range`.
+pub(crate) fn node_at_range<N: AstNode<Language = JsLanguage>>(
+    root: &AnyJsRoot,
+    range: TextRange,
+) -> Option<N> {
+    let root = root.syntax();
+    if !root.text_range_with_trivia().contains_range(range) {
+        return None;
+    }
+    let node = match root.covering_element(range) {
+        NodeOrToken::Node(node) => node,
+        NodeOrToken::Token(token) => token.parent()?,
+    };
+    node.ancestors()
+        .filter(|node| node.text_trimmed_range() == range)
+        .find_map(N::cast)
+}
