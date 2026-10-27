@@ -654,6 +654,7 @@ pub mod use_vue_typed_ref;
 pub mod use_vue_v_for_key;
 pub mod use_vue_v_model;
 pub mod use_vue_v_on_exact;
+pub mod use_vue_valid_define_emits;
 pub mod use_vue_valid_define_props;
 pub mod use_vue_valid_template_root;
 pub mod use_vue_valid_v_bind;

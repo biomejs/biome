@@ -435,6 +435,7 @@ define_categories! {
     "lint/nursery/useVueToggleInsideTransition": "https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
     "lint/nursery/useVueTypedProps": "https://biomejs.dev/linter/rules/use-vue-typed-props",
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
+    "lint/nursery/useVueValidDefineEmits": "https://biomejs.dev/linter/rules/use-vue-valid-define-emits",
     "lint/nursery/useVueValidDefineProps": "https://biomejs.dev/linter/rules/use-vue-valid-define-props",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
     "lint/nursery/useVueValidVIs": "https://biomejs.dev/linter/rules/use-vue-valid-v-is",
