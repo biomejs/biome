@@ -23,7 +23,7 @@ expression: invalid.vue
 
 # Diagnostics
 ```
-invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -48,7 +48,7 @@ invalid.vue:3:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:4:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -78,7 +78,7 @@ invalid.vue:4:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:5:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:5:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -103,7 +103,7 @@ invalid.vue:5:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:6:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:6:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -128,7 +128,7 @@ invalid.vue:6:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:7:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop foo-bar has the value true, which can be omitted.
   
@@ -153,7 +153,7 @@ invalid.vue:7:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:8:12 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:12 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -178,7 +178,7 @@ invalid.vue:8:12 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:9:14 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:14 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -203,7 +203,7 @@ invalid.vue:9:14 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:10:25 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:10:25 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -228,7 +228,7 @@ invalid.vue:10:25 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:11:9 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:11:9 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -253,7 +253,7 @@ invalid.vue:11:9 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:12:23 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:12:23 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop show has the value true, which can be omitted.
   
@@ -278,7 +278,7 @@ invalid.vue:12:23 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:13:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:13:11 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop a has the value true, which can be omitted.
   
@@ -303,7 +303,7 @@ invalid.vue:13:11 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.vue:13:21 lint/nursery/useTrueAttributeShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:13:21 lint/nursery/useVueConsistentBooleanPropStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The prop b has the value true, which can be omitted.
   

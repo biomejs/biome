@@ -11,15 +11,15 @@ use biome_html_syntax::{
 };
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
-use biome_rule_options::use_true_attribute_shorthand::{
-    TrueAttributeStyle, UseTrueAttributeShorthandOptions,
+use biome_rule_options::use_vue_consistent_boolean_prop_style::{
+    BooleanPropStyle, UseVueConsistentBooleanPropStyleOptions,
 };
 
 use crate::HtmlRuleAction;
 use crate::vue::is_vue_component;
 
 declare_lint_rule! {
-    /// Require the shorthand form when passing `true` to a component prop.
+    /// Enforce a consistent style for component props set to `true`.
     ///
     /// In Vue, a `Boolean` prop written without a value receives `true`. This means
     /// `<MyComponent disabled />` passes the same value as `<MyComponent :disabled="true" />`, and
@@ -34,7 +34,9 @@ declare_lint_rule! {
     /// It passes an empty string instead when the prop isn't declared as `Boolean`, when its type
     /// lists `String` before `Boolean`, such as `type: [String, Boolean]`, or when the component
     /// doesn't declare the prop and Vue adds it to the component's root element as an HTML
-    /// attribute. Check how the component declares the prop before applying the fix.
+    /// attribute. Check how the component declares the prop before applying the fix. To catch
+    /// props that list another type before `Boolean`, use
+    /// [`useVueBooleanPropTypeFirst`](https://biomejs.dev/linter/rules/use-vue-boolean-prop-type-first/).
     /// :::
     ///
     /// ## Examples
@@ -136,10 +138,11 @@ declare_lint_rule! {
     /// ## See Also
     ///
     /// - If you want a consistent style for `v-bind` in Vue, see [`useVueConsistentVBindStyle`](https://biomejs.dev/linter/rules/use-vue-consistent-v-bind-style/).
+    /// - If you want `Boolean` to be listed first in the type of a prop, see [`useVueBooleanPropTypeFirst`](https://biomejs.dev/linter/rules/use-vue-boolean-prop-type-first/).
     ///
-    pub UseTrueAttributeShorthand {
+    pub UseVueConsistentBooleanPropStyle {
         version: "next",
-        name: "useTrueAttributeShorthand",
+        name: "useVueConsistentBooleanPropStyle",
         language: "html",
         recommended: false,
         domains: &[RuleDomain::Vue],
@@ -156,11 +159,11 @@ pub enum TrueAttribute {
     Longhand(AnyVueDirective),
 }
 
-impl Rule for UseTrueAttributeShorthand {
+impl Rule for UseVueConsistentBooleanPropStyle {
     type Query = Ast<AnyHtmlTagElement>;
     type State = TrueAttribute;
     type Signals = Box<[Self::State]>;
-    type Options = UseTrueAttributeShorthandOptions;
+    type Options = UseVueConsistentBooleanPropStyleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
@@ -172,7 +175,7 @@ impl Rule for UseTrueAttributeShorthand {
         }
 
         let options = ctx.options();
-        let prefers_shorthand = options.style() == TrueAttributeStyle::Shorthand;
+        let prefers_shorthand = options.style() == BooleanPropStyle::Shorthand;
         element
             .attributes()
             .iter()

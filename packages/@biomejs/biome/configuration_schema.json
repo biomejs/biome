@@ -499,6 +499,20 @@
 			"additionalProperties": false
 		},
 		"Bool": { "type": "boolean" },
+		"BooleanPropStyle": {
+			"oneOf": [
+				{
+					"description": "Write only the prop name, such as `<MyComponent disabled />`.",
+					"type": "string",
+					"const": "shorthand"
+				},
+				{
+					"description": "Write the value `true` explicitly, such as `<MyComponent :disabled=\"true\" />`.",
+					"type": "string",
+					"const": "longhand"
+				}
+			]
+		},
 		"BracketSameLine": {
 			"description": "Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome\nplaces the bracket at the end of the last attribute line when enabled and on its own line after\nthe last attribute when disabled. This option also affects self-closing HTML elements, but\nself-closing JSX elements are unaffected.",
 			"type": "boolean"
@@ -9039,13 +9053,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useTrueAttributeShorthand": {
-					"description": "Require the shorthand form when passing true to a component prop.\nSee https://biomejs.dev/linter/rules/use-true-attribute-shorthand",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseTrueAttributeShorthandConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useUnaryMinus": {
 					"description": "Enforce the use of the unary minus operator over multiplying or dividing by -1.\nSee https://biomejs.dev/linter/rules/use-unary-minus",
 					"anyOf": [
@@ -9071,6 +9078,13 @@
 					"description": "Require \\<component> elements to bind the is attribute.\nSee https://biomejs.dev/linter/rules/use-vue-component-is",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueComponentIsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentBooleanPropStyle": {
+					"description": "Enforce a consistent style for component props set to true.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-boolean-prop-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentBooleanPropStyleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16348,19 +16362,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseTrueAttributeShorthandOptions": {
-			"type": "object",
-			"properties": {
-				"fix": {
-					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
-					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
-				},
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseTrueAttributeShorthandOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseUnaryMinusOptions": {
 			"type": "object",
 			"properties": {
@@ -16533,6 +16534,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseVueComponentIsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueConsistentBooleanPropStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentBooleanPropStyleOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -19229,20 +19243,6 @@
 			]
 		},
 		"TrailingNewline": { "type": "boolean" },
-		"TrueAttributeStyle": {
-			"oneOf": [
-				{
-					"description": "Write only the prop name, such as `<MyComponent disabled />`.",
-					"type": "string",
-					"const": "shorthand"
-				},
-				{
-					"description": "Write the value `true` explicitly, such as `<MyComponent :disabled=\"true\" />`.",
-					"type": "string",
-					"const": "longhand"
-				}
-			]
-		},
 		"UnicodeBom": {
 			"oneOf": [
 				{
@@ -21802,30 +21802,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"UseTrueAttributeShorthandConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseTrueAttributeShorthandOptions" }
-			]
-		},
-		"UseTrueAttributeShorthandOptions": {
-			"type": "object",
-			"properties": {
-				"except": {
-					"description": "A list of prop names that must use the opposite of `style`.\nNames must match exactly, as written in the template.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"style": {
-					"description": "How a component prop set to `true` should be written: `\"shorthand\"` writes only the\nprop name, and `\"longhand\"` writes the value `true` explicitly.\nDefault: `\"shorthand\"`.",
-					"anyOf": [
-						{ "$ref": "#/$defs/TrueAttributeStyle" },
-						{ "type": "null" }
-					]
-				}
-			},
-			"additionalProperties": false
-		},
 		"UseUnaryMinusConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -22018,6 +21994,27 @@
 		},
 		"UseVueComponentIsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueConsistentBooleanPropStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentBooleanPropStyleOptions" }
+			]
+		},
+		"UseVueConsistentBooleanPropStyleOptions": {
+			"type": "object",
+			"properties": {
+				"except": {
+					"description": "A list of prop names that must use the opposite of `style`.\nNames must match exactly, as written in the template.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"style": {
+					"description": "How a component prop set to `true` should be written: `\"shorthand\"` writes only the\nprop name, and `\"longhand\"` writes the value `true` explicitly.\nDefault: `\"shorthand\"`.",
+					"anyOf": [{ "$ref": "#/$defs/BooleanPropStyle" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueConsistentDefinePropsDeclarationConfiguration": {

@@ -3728,11 +3728,6 @@ export interface Nursery {
 	 */
 	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
 	/**
-	 * Require the shorthand form when passing true to a component prop.
-	 * See https://biomejs.dev/linter/rules/use-true-attribute-shorthand
-	 */
-	useTrueAttributeShorthand?: UseTrueAttributeShorthandConfiguration;
-	/**
 	 * Enforce the use of the unary minus operator over multiplying or dividing by -1.
 	 * See https://biomejs.dev/linter/rules/use-unary-minus
 	 */
@@ -3752,6 +3747,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-component-is
 	 */
 	useVueComponentIs?: UseVueComponentIsConfiguration;
+	/**
+	 * Enforce a consistent style for component props set to true.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-boolean-prop-style
+	 */
+	useVueConsistentBooleanPropStyle?: UseVueConsistentBooleanPropStyleConfiguration;
 	/**
 	 * Enforce a consistent hyphenation style for event names in v-on directives on custom components.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation
@@ -6456,9 +6456,6 @@ export type UseTailwindStaticClassStringsConfiguration =
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
-export type UseTrueAttributeShorthandConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseTrueAttributeShorthandOptions;
 export type UseUnaryMinusConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnaryMinusOptions;
@@ -6471,6 +6468,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueComponentIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComponentIsOptions;
+export type UseVueConsistentBooleanPropStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentBooleanPropStyleOptions;
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
@@ -9429,14 +9429,6 @@ export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
 }
-export interface RuleWithUseTrueAttributeShorthandOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseTrueAttributeShorthandOptions;
-}
 export interface RuleWithUseUnaryMinusOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -9464,6 +9456,14 @@ export interface RuleWithUseVueBaseImportOptions {
 export interface RuleWithUseVueComponentIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComponentIsOptions;
+}
+export interface RuleWithUseVueConsistentBooleanPropStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentBooleanPropStyleOptions;
 }
 export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	/**
@@ -11917,7 +11917,16 @@ export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
 export type UseTopLevelHeadingOptions = {};
-export interface UseTrueAttributeShorthandOptions {
+export type UseUnaryMinusOptions = {};
+export interface UseValidTestTitleOptions {
+	/**
+	 * A list of words that are disallowed in test titles.
+	 */
+	disallowedWords?: string[];
+}
+export type UseVueBaseImportOptions = {};
+export type UseVueComponentIsOptions = {};
+export interface UseVueConsistentBooleanPropStyleOptions {
 	/**
 	 * A list of prop names that must use the opposite of `style`.
 	 * Names must match exactly, as written in the template.
@@ -11928,17 +11937,8 @@ export interface UseTrueAttributeShorthandOptions {
 	 * prop name, and `"longhand"` writes the value `true` explicitly.
 	 * Default: `"shorthand"`.
 	 */
-	style?: TrueAttributeStyle;
+	style?: BooleanPropStyle;
 }
-export type UseUnaryMinusOptions = {};
-export interface UseValidTestTitleOptions {
-	/**
-	 * A list of words that are disallowed in test titles.
-	 */
-	disallowedWords?: string[];
-}
-export type UseVueBaseImportOptions = {};
-export type UseVueComponentIsOptions = {};
 export interface UseVueConsistentEventHyphenationOptions {
 	/**
 	 * Whether event names in `v-on` directives must be hyphenated (`"always"`) or must not
@@ -12892,7 +12892,7 @@ export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
 	| "arrowFunction";
-export type TrueAttributeStyle = "shorthand" | "longhand";
+export type BooleanPropStyle = "shorthand" | "longhand";
 export type EventHyphenation = "always" | "never";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -13569,7 +13569,6 @@ export type Category =
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
-	| "lint/nursery/useTrueAttributeShorthand"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
@@ -13579,6 +13578,7 @@ export type Category =
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueComponentIs"
+	| "lint/nursery/useVueConsistentBooleanPropStyle"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueDefinePropsDestructuring"

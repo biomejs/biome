@@ -698,7 +698,6 @@ pub enum RuleName {
     UseTopLevelHeading,
     UseTopLevelRegex,
     UseTrimStartEnd,
-    UseTrueAttributeShorthand,
     UseUnaryMinus,
     UseUnicodeRegex,
     UseUnifiedTypeSignatures,
@@ -715,6 +714,7 @@ pub enum RuleName {
     UseVarsOnTop,
     UseVueBaseImport,
     UseVueComponentIs,
+    UseVueConsistentBooleanPropStyle,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
     UseVueConsistentVBindStyle,
@@ -1373,7 +1373,6 @@ impl RuleName {
             Self::UseTopLevelHeading => "useTopLevelHeading",
             Self::UseTopLevelRegex => "useTopLevelRegex",
             Self::UseTrimStartEnd => "useTrimStartEnd",
-            Self::UseTrueAttributeShorthand => "useTrueAttributeShorthand",
             Self::UseUnaryMinus => "useUnaryMinus",
             Self::UseUnicodeRegex => "useUnicodeRegex",
             Self::UseUnifiedTypeSignatures => "useUnifiedTypeSignatures",
@@ -1390,6 +1389,7 @@ impl RuleName {
             Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueBaseImport => "useVueBaseImport",
             Self::UseVueComponentIs => "useVueComponentIs",
+            Self::UseVueConsistentBooleanPropStyle => "useVueConsistentBooleanPropStyle",
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
             }
@@ -2044,7 +2044,6 @@ impl RuleName {
             Self::UseTopLevelHeading => RuleGroup::Nursery,
             Self::UseTopLevelRegex => RuleGroup::Performance,
             Self::UseTrimStartEnd => RuleGroup::Style,
-            Self::UseTrueAttributeShorthand => RuleGroup::Nursery,
             Self::UseUnaryMinus => RuleGroup::Nursery,
             Self::UseUnicodeRegex => RuleGroup::Style,
             Self::UseUnifiedTypeSignatures => RuleGroup::Style,
@@ -2061,6 +2060,7 @@ impl RuleName {
             Self::UseVarsOnTop => RuleGroup::Style,
             Self::UseVueBaseImport => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
+            Self::UseVueConsistentBooleanPropStyle => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Style,
@@ -2724,7 +2724,6 @@ impl std::str::FromStr for RuleName {
             "useTopLevelHeading" => Ok(Self::UseTopLevelHeading),
             "useTopLevelRegex" => Ok(Self::UseTopLevelRegex),
             "useTrimStartEnd" => Ok(Self::UseTrimStartEnd),
-            "useTrueAttributeShorthand" => Ok(Self::UseTrueAttributeShorthand),
             "useUnaryMinus" => Ok(Self::UseUnaryMinus),
             "useUnicodeRegex" => Ok(Self::UseUnicodeRegex),
             "useUnifiedTypeSignatures" => Ok(Self::UseUnifiedTypeSignatures),
@@ -2741,6 +2740,7 @@ impl std::str::FromStr for RuleName {
             "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueBaseImport" => Ok(Self::UseVueBaseImport),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
+            "useVueConsistentBooleanPropStyle" => Ok(Self::UseVueConsistentBooleanPropStyle),
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
             }

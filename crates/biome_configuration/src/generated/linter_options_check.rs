@@ -2898,13 +2898,6 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
-        "useTrueAttributeShorthand",
-        TypeId::of::<
-            biome_rule_options::use_true_attribute_shorthand::UseTrueAttributeShorthandOptions,
-        >(),
-    ));
-    result.push((
-        "nursery",
         "useUnaryMinus",
         TypeId::of::<biome_rule_options::use_unary_minus::UseUnaryMinusOptions>(),
     ));
@@ -2985,6 +2978,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueComponentIs",
         TypeId::of::<biome_rule_options::use_vue_component_is::UseVueComponentIsOptions>(),
     ));
+    result.push(("nursery", "useVueConsistentBooleanPropStyle", TypeId::of::<biome_rule_options::use_vue_consistent_boolean_prop_style::UseVueConsistentBooleanPropStyleOptions>()));
     result.push(("style", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
     result.push(("nursery", "useVueConsistentEventHyphenation", TypeId::of::<biome_rule_options::use_vue_consistent_event_hyphenation::UseVueConsistentEventHyphenationOptions>()));
     result.push((
