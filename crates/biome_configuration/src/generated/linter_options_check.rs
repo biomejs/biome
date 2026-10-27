@@ -3032,6 +3032,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueVModel",
+        TypeId::of::<biome_rule_options::use_vue_v_model::UseVueVModelOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueVOnExact",
         TypeId::of::<biome_rule_options::use_vue_v_on_exact::UseVueVOnExactOptions>(),
     ));

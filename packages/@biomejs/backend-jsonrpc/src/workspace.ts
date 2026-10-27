@@ -3778,6 +3778,11 @@ export interface Nursery {
 	 */
 	useVueTypedRef?: UseVueTypedRefConfiguration;
 	/**
+	 * Enforce v-model instead of a prop binding paired with an update: listener that writes the value back.
+	 * See https://biomejs.dev/linter/rules/use-vue-v-model
+	 */
+	useVueVModel?: UseVueVModelConfiguration;
+	/**
 	 * Enforce the .exact modifier on v-on directives when another listener for the same event needs more modifier keys.
 	 * See https://biomejs.dev/linter/rules/use-vue-v-on-exact
 	 */
@@ -6461,6 +6466,9 @@ export type UseVueTypedPropsConfiguration =
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
+export type UseVueVModelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueVModelOptions;
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
@@ -9449,6 +9457,14 @@ export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
 }
+export interface RuleWithUseVueVModelOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueVModelOptions;
+}
 export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
@@ -11873,6 +11889,7 @@ export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedPropsOptions = {};
 export type UseVueTypedRefOptions = {};
+export type UseVueVModelOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidDefinePropsOptions = {};
 export type UseVueValidVIsOptions = {};
@@ -13500,6 +13517,7 @@ export type Category =
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueVModel"
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
