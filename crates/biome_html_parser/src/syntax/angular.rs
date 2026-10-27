@@ -371,9 +371,12 @@ fn parse_angular_block_body(p: &mut HtmlParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_with_context(T!['{'], HtmlLexContext::InsideTag {
-        framework: HtmlFramework::Angular,
-    });
+    p.bump_with_context(
+        T!['{'],
+        HtmlLexContext::InsideTag {
+            framework: HtmlFramework::Angular,
+        },
+    );
 
     AngularElementList.parse_list(p);
 
