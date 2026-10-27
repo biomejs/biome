@@ -1,0 +1,34 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+dependencies = ["serde", "toml", "biome_formatter"]
+short = [1, 2]
+table = { name = "this stays on one line", version = "1.0" }
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 40
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+dependencies = [
+	"serde",
+	"toml",
+	"biome_formatter",
+]
+short = [1, 2]
+table = { name = "this stays on one line", version = "1.0" }
+```

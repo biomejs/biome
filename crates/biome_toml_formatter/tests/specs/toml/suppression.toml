@@ -1,0 +1,8 @@
+# biome-ignore format: aligned on purpose
+matrix   =   [ 1,  0,
+               0,  1 ]
+formatted   =   [ 1,  0 ]
+
+# biome-ignore format: keep the header
+[  table  ]
+a   =   1
