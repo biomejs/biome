@@ -169,6 +169,11 @@ impl Rule for NoUnknownAttribute {
             return None;
         }
 
+            // Without a manifest, the React version is unknown, so accept the Popover API attributes as-is.
+            if ctx.manifest.is_none() && matches!(name, "popoverTarget" | "popoverTargetAction") {
+                        return None;
+            }
+        
         if let Some(standard_name) = get_standard_name(ctx, name) {
             if standard_name != name {
                 return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
