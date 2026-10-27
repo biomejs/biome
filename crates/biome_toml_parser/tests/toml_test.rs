@@ -323,3 +323,27 @@ fn normalize_date_time(text: &str) -> String {
 
     text
 }
+
+/// Parses every prefix of every valid document. Truncation exercises the error
+/// recovery of every construct; parsing must not panic and must stay lossless.
+#[test]
+fn truncated_documents_parse_losslessly() {
+    let suite = Path::new(SUITE);
+    let files = std::fs::read_to_string(suite.join("files-toml-1.1.0")).unwrap();
+
+    for file in files
+        .lines()
+        .filter(|file| file.starts_with("valid/") && file.ends_with(".toml"))
+    {
+        let source = std::fs::read_to_string(suite.join(file)).unwrap();
+        for (end, _) in source.char_indices().skip(1) {
+            let prefix = &source[..end];
+            let parse = parse_toml(prefix);
+            assert_eq!(
+                parse.syntax().to_string(),
+                prefix,
+                "{file}: prefix of {end} bytes"
+            );
+        }
+    }
+}

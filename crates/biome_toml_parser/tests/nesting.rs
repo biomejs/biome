@@ -136,3 +136,34 @@ fn nested_arrays_on_their_own_lines_stay_elements() {
     assert_eq!(outline(source)[2], "pair c");
     assert_eq!(parse.diagnostics().len(), 1);
 }
+
+#[test]
+fn recovery_after_unterminated_array_before_dotted_assignment() {
+    let source = "a = [1,\n\"b\".c = 2\nd = [\n  true.e = 3\nf = [1.5,\n  1.5 = 4\n";
+    assert_parses_with_error(source);
+    assert_eq!(
+        outline(source),
+        [
+            "pair a",
+            "pair \"b\".c",
+            "pair d",
+            "pair true.e",
+            "pair f",
+            "pair 1.5"
+        ]
+    );
+}
+
+#[test]
+fn recovery_after_too_deep_array_before_header() {
+    let source = format!("a = {}1,\n[[t]]\nb = 2\n", "[".repeat(129));
+    assert_parses_with_error(&source);
+    assert_eq!(outline(&source), ["pair a", "array table t", "  pair b"]);
+}
+
+#[test]
+fn values_that_look_like_keys_stay_elements() {
+    let source = "a = [\n  1.5,\n  \"b\",\n  true,\n  1979-05-27T07:32:00Z\n]\n";
+    let parse = parse_toml(source);
+    assert!(!parse.has_errors(), "{:?}", parse.diagnostics());
+}

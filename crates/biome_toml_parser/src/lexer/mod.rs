@@ -1060,7 +1060,9 @@ fn is_leap_second(year: u32, month: u32, day: u32, time: PartialTime, offset: i3
         0 => (year, month, day),
         -1 if day > 1 => (year, month, day - 1),
         -1 if month > 1 => (year, month - 1, days_in_month(year, month - 1)),
-        -1 => (year.wrapping_sub(1), 12, 31),
+        // There's no year before 0000.
+        -1 if year == 0 => return false,
+        -1 => (year - 1, 12, 31),
         _ => return false,
     };
 

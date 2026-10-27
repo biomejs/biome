@@ -466,42 +466,55 @@ fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMark
 /// Returns `true` if the current value-like token on a new line is the start
 /// of a key/value pair or a table header that follows an unterminated array.
 ///
-/// The check only succeeds where valid TOML can't continue the array: a value
-/// followed by `=`, or a bracketed key followed by anything but `,` or `]`. A
-/// valid element such as `[[2]]` is always followed by `,` or `]`.
+/// The current token is lexed again as a key to scan for a key/value pair
+/// (`key.parts =`) or a table header (`[key]` or `[[key]]` followed by a line
+/// break). The check only succeeds where valid TOML can't continue the array:
+/// an element is always followed by `,`, `]`, or a comment, never by `=`, and
+/// a valid element such as `[[2]]` that ends a line is followed by `,` or `]`.
 fn is_at_line_item(p: &mut TomlParser) -> bool {
-    if !p.at(T!['[']) {
-        // Lookahead lexes in the key context, which is what follows a key.
-        return p.nth_at(1, T![=]) && !p.has_nth_preceding_line_break(1);
-    }
-
-    // `[[` is only a single token in the key context.
-    let is_array_table = p.re_lex(TomlLexContext::Key) == T!["[["];
-    let close = if is_array_table { T!["]]"] } else { T![']'] };
-
-    let mut n = 1;
-    let mut expects_part = true;
-    let is_header = loop {
-        if p.has_nth_preceding_line_break(n) {
-            break false;
+    let first = p.re_lex(TomlLexContext::Key);
+    let is_line_item = match first {
+        T!['['] | T!["[["] => is_at_table_header(p, first),
+        _ if KEY_PART_START.contains(first) => {
+            matches!(scan_key(p, 0), Some(n) if p.nth_at(n, T![=]) && !p.has_nth_preceding_line_break(n))
         }
-        match p.nth(n) {
-            kind if expects_part && KEY_PART_START.contains(kind) => expects_part = false,
-            T![.] if !expects_part => expects_part = true,
-            kind if kind == close && !expects_part => {
-                let next = p.nth(n + 1);
-                break next == EOF
-                    || (p.has_nth_preceding_line_break(n + 1) && next != T![,] && next != T![']']);
-            }
-            _ => break false,
-        }
-        n += 1;
+        _ => false,
     };
 
-    if !is_header {
+    if !is_line_item {
         p.re_lex(TomlLexContext::Value);
     }
-    is_header
+    is_line_item
+}
+
+/// Returns `true` if the `[` or `[[` at the current token opens a table
+/// header that ends its line.
+fn is_at_table_header(p: &mut TomlParser, open: TomlSyntaxKind) -> bool {
+    let close = if open == T!["[["] { T!["]]"] } else { T![']'] };
+    let Some(n) = scan_key(p, 1) else {
+        return false;
+    };
+    if !p.nth_at(n, close) || p.has_nth_preceding_line_break(n) {
+        return false;
+    }
+
+    let next = p.nth(n + 1);
+    next == EOF || (p.has_nth_preceding_line_break(n + 1) && next != T![,] && next != T![']'])
+}
+
+/// Scans a dotted key on the current line that starts at the `n`th token and
+/// returns the position of the token after it.
+fn scan_key(p: &mut TomlParser, mut n: usize) -> Option<usize> {
+    loop {
+        if (n > 0 && p.has_nth_preceding_line_break(n)) || !p.nth_at_ts(n, KEY_PART_START) {
+            return None;
+        }
+        n += 1;
+        if !p.nth_at(n, T![.]) || p.has_nth_preceding_line_break(n) {
+            return Some(n);
+        }
+        n += 1;
+    }
 }
 
 /// Returns `true` if the current token can't continue a value that is skipped
@@ -523,7 +536,7 @@ fn ends_skipped_value(
         // A key and its `=` must be on the same line as the value.
         T![=] | T![.] | TOML_BARE_KEY_LITERAL => true,
         T!['['] | T![,] if innermost == Some(T!['[']) => {
-            !at_separator_or_close && !p.at_ts(VALUE_START)
+            !at_separator_or_close && (!p.at_ts(VALUE_START) || is_at_line_item(p))
         }
         T!['{'] | T![,] => p.at_ts(TABLE_HEADER_START),
         // The previous token ended a value or a key.

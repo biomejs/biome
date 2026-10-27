@@ -269,6 +269,8 @@ fn leap_seconds() {
     assert_invalid_value("2016-03-01T08:59:60+09:00");
     assert_invalid_value("2017-12-31T23:59:60Z");
     assert_invalid_value("2030-11-30T23:59:60Z");
+    // The UTC date would be in the year before 0000.
+    assert_invalid_value("0000-01-01T00:59:60+01:00");
 }
 
 #[test]
