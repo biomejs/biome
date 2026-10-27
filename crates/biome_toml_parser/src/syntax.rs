@@ -402,7 +402,7 @@ fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
 
     let m = p.start();
     p.bump_with_context(T!['['], TomlLexContext::Value);
-    p.enter_nesting();
+    p.enter_nesting(T!['[']);
     ArrayElementList::default().parse_list(p);
     p.exit_nesting();
     expect_with_context(p, T![']'], after);
@@ -566,7 +566,7 @@ impl ParseSeparatedList for ArrayElementList {
     /// value after a `,`. That token starts the next table header or
     /// key/value pair.
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        if p.at(T![']']) {
+        if p.at(T![']']) || (p.at(T!['}']) && p.is_enclosed_by(T!['{'])) {
             return true;
         }
         if !p.has_preceding_line_break() || p.at(T![,]) {
@@ -584,7 +584,11 @@ impl ParseSeparatedList for ArrayElementList {
         recover_list_element(
             p,
             parsed_element,
-            token_set![T![,], T![']']],
+            if p.is_enclosed_by(T!['{']) {
+                token_set![T![,], T![']'], T!['}']]
+            } else {
+                token_set![T![,], T![']']]
+            },
             TomlLexContext::Value,
             TOML_BOGUS_VALUE,
             "value",
@@ -623,7 +627,7 @@ fn parse_inline_table(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax
     let m = p.start();
     let range = p.cur_range();
     p.bump_with_context(T!['{'], TomlLexContext::Key);
-    p.enter_nesting();
+    p.enter_nesting(T!['{']);
     p.start_inline_table(range);
     InlineTableEntryList::default().parse_list(p);
     p.end_inline_table();
@@ -653,7 +657,7 @@ impl ParseSeparatedList for InlineTableEntryList {
     /// The inline table is most likely unterminated if a token on a new line
     /// can't continue it: anything but a `,` after an entry, or a table header.
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        if p.at(T!['}']) {
+        if p.at(T!['}']) || (p.at(T![']']) && p.is_enclosed_by(T!['['])) {
             return true;
         }
         if !p.has_preceding_line_break() || p.at(T![,]) {
@@ -671,7 +675,11 @@ impl ParseSeparatedList for InlineTableEntryList {
         recover_list_element(
             p,
             parsed_element,
-            token_set![T![,], T!['}']],
+            if p.is_enclosed_by(T!['[']) {
+                token_set![T![,], T!['}'], T![']']]
+            } else {
+                token_set![T![,], T!['}']]
+            },
             TomlLexContext::Key,
             TOML_BOGUS,
             "key/value pair",

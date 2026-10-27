@@ -167,3 +167,33 @@ fn values_that_look_like_keys_stay_elements() {
     let parse = parse_toml(source);
     assert!(!parse.has_errors(), "{:?}", parse.diagnostics());
 }
+
+#[test]
+fn unterminated_nested_values_stop_at_enclosing_delimiters() {
+    use biome_rowan::{AstNode, AstSeparatedList};
+    use biome_toml_syntax::{AnyTomlRootItem, AnyTomlValue};
+
+    let source = "x = [{ a = [1 }, { b = 2 }]\ny = 3\nw = { a = 1 ] }\n";
+    let parse = parse_toml(source);
+    assert!(parse.has_errors());
+    assert_eq!(parse.syntax().to_string(), source);
+    // A delimiter that doesn't close an enclosing value stays inside.
+    assert_eq!(outline(source), ["pair x", "pair y", "pair w"]);
+
+    let AnyTomlRootItem::TomlKeyValue(x) = parse.tree().items().into_iter().next().unwrap() else {
+        panic!("expected a key/value pair");
+    };
+    let AnyTomlValue::TomlArray(array) = x.value().unwrap() else {
+        panic!("expected an array");
+    };
+    // Both inline tables remain elements of the outer array.
+    assert_eq!(array.elements().len(), 2);
+    assert!(
+        array
+            .elements()
+            .iter()
+            .all(|element| matches!(element, Ok(AnyTomlValue::TomlInlineTable(_)))),
+        "{:#?}",
+        array.syntax()
+    );
+}

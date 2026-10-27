@@ -20,8 +20,9 @@ pub(crate) struct TomlParser<'source> {
     /// `false` if a part of the key that is being parsed is missing or invalid.
     key_is_valid: bool,
     keys: KeyTracker<'source>,
-    /// The number of arrays and inline tables that enclose the current token.
-    nesting_depth: usize,
+    /// The opening brackets of the arrays and inline tables that enclose the
+    /// current token, innermost last.
+    open_brackets: Vec<TomlSyntaxKind>,
 }
 
 impl<'source> TomlParser<'source> {
@@ -33,20 +34,29 @@ impl<'source> TomlParser<'source> {
             key_parts: Vec::new(),
             key_is_valid: true,
             keys: KeyTracker::default(),
-            nesting_depth: 0,
+            open_brackets: Vec::new(),
         }
     }
 
     pub fn nesting_depth(&self) -> usize {
-        self.nesting_depth
+        self.open_brackets.len()
     }
 
-    pub fn enter_nesting(&mut self) {
-        self.nesting_depth += 1;
+    /// Enters an array or inline table opened by `bracket`.
+    pub fn enter_nesting(&mut self, bracket: TomlSyntaxKind) {
+        self.open_brackets.push(bracket);
     }
 
     pub fn exit_nesting(&mut self) {
-        self.nesting_depth -= 1;
+        self.open_brackets.pop();
+    }
+
+    /// Returns `true` if a value opened by `bracket` encloses the innermost
+    /// array or inline table.
+    pub fn is_enclosed_by(&self, bracket: TomlSyntaxKind) -> bool {
+        self.open_brackets
+            .split_last()
+            .is_some_and(|(_, outer)| outer.contains(&bracket))
     }
 
     /// Starts collecting the parts of a new key.
