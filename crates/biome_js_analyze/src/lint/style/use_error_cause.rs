@@ -187,15 +187,14 @@ impl Rule for UseErrorCause {
                     };
                     let args = arguments.args();
 
-                    let options_position = new_expression
+                    let Some(options_position) = new_expression
                         .callee()
                         .ok()
                         .and_then(|callee| builtin_error_options_position(callee, model))
-                        .unwrap_or_else(|| custom_error_options_position(&args));
-
-                    if options_position == 0 {
+                        .or_else(|| custom_error_options_position(&args))
+                    else {
                         return Some(State::WithoutCause(throw_statement.range()));
-                    }
+                    };
 
                     let Some(Ok(options_arg)) = args.iter().nth(options_position) else {
                         return Some(State::WithoutCause(throw_statement.range()));
@@ -382,20 +381,20 @@ fn builtin_error_options_position(
     }
 }
 
-/// Custom constructors usually take the options after the message, like `Error`; when the
-/// second argument isn't an object, they are expected last.
-fn custom_error_options_position(args: &JsCallArgumentList) -> usize {
-    let second_is_object = args
-        .iter()
-        .nth(1)
-        .and_then(|arg| arg.ok())
-        .and_then(|arg| arg.as_any_js_expression().cloned())
-        .is_some_and(|expr| expr.as_js_object_expression().is_some());
-    if second_is_object {
-        1
-    } else {
-        args.len().saturating_sub(1)
+/// Returns the index of the options argument of a constructor with an unknown signature: the
+/// second argument when it is an object literal, otherwise the last argument. Returns `None`
+/// when there are fewer than two arguments.
+fn custom_error_options_position(args: &JsCallArgumentList) -> Option<usize> {
+    if args.len() < 2 {
+        return None;
     }
+    let second_is_object = args.iter().nth(1).is_some_and(|arg| {
+        arg.is_ok_and(|arg| {
+            arg.as_any_js_expression()
+                .is_some_and(|expr| expr.as_js_object_expression().is_some())
+        })
+    });
+    Some(if second_is_object { 1 } else { args.len() - 1 })
 }
 
 fn is_cause_value_correct_error(

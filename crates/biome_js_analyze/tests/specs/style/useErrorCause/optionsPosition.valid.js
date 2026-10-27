@@ -28,6 +28,18 @@ try {
 
 try {
 	doSomething();
+} catch (err) {
+	throw new ErrorWithCode("Something went wrong", "E_CODE", 500, { cause: err });
+}
+
+try {
+	doSomething();
+} catch (err) {
+	throw new ErrorWithCode("Something went wrong", ...details, { cause: err });
+}
+
+try {
+	doSomething();
 } catch (cause) {
 	throw new ErrorWithCode("Something went wrong", "E_CODE", { cause });
 }
