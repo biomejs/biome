@@ -7609,6 +7609,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedRouterLinkTagPropConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedRouterLinkTagPropOptions" }
+			]
+		},
+		"NoVueDeprecatedRouterLinkTagPropOptions": {
+			"type": "object",
+			"properties": {
+				"components": {
+					"description": "Names of the link components to check for the `tag` prop.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedScopedSlotsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8511,6 +8528,13 @@
 					"description": "Disallow the deprecated Vue $listeners API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-listeners",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedListenersConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedRouterLinkTagProp": {
+					"description": "Disallow the tag prop on RouterLink.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-router-link-tag-prop",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedRouterLinkTagPropConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13882,6 +13906,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedListenersOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedRouterLinkTagPropOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedRouterLinkTagPropOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
