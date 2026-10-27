@@ -3114,6 +3114,93 @@ fn owned_rescan_applies_changed_manifest_first() {
     assert!(is_script());
 }
 
+/// A rescan updates the inputs of the manifests and configuration files that
+/// changed since the previous scan, instead of allocating new ones.
+#[test]
+fn owned_rescan_updates_inputs_of_changed_manifests() {
+    const CONFIGURATION: &str = "/project/biome.json";
+    const MANIFEST: &str = "/project/package.json";
+    const PATH: &str = "/project/index.js";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(CONFIGURATION), b"{}");
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "first" }"#);
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+    let parsed_source = |path: &str| {
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(path))
+            .unwrap()
+    };
+
+    scan_without_watching(&workspace, project_key);
+    let configuration = parsed_source(CONFIGURATION);
+    let manifest = parsed_source(MANIFEST);
+    let allocated = allocated_file_inputs(&workspace);
+
+    fs.insert(
+        Utf8PathBuf::from(CONFIGURATION),
+        br#"{ "formatter": { "enabled": true } }"#,
+    );
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "second" }"#);
+    scan_without_watching(&workspace, project_key);
+
+    assert_eq!(configuration.as_id(), parsed_source(CONFIGURATION).as_id());
+    assert_eq!(manifest.as_id(), parsed_source(MANIFEST).as_id());
+    assert_eq!(allocated_file_inputs(&workspace), allocated);
+    let package = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .unwrap();
+    assert_eq!(package.name.as_deref(), Some("second"));
+}
+
+/// A scan without a scanner indexes only the root manifest. It updates the
+/// inputs of the manifest when the manifest changed since the previous scan,
+/// instead of allocating new ones.
+#[test]
+fn owned_manifest_rescan_updates_inputs_of_changed_manifest() {
+    const MANIFEST: &str = "/project/package.json";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "first" }"#);
+    let (workspace, project_key) = lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::None);
+    let scan = || {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::NoScanner,
+                verbose: false,
+            })
+            .unwrap();
+    };
+
+    scan();
+    let manifest = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(MANIFEST))
+        .unwrap();
+
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "second" }"#);
+    scan();
+
+    let rescanned = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(MANIFEST))
+        .unwrap();
+    assert_eq!(manifest.as_id(), rescanned.as_id());
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+    let package = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .unwrap();
+    assert_eq!(package.name.as_deref(), Some("second"));
+}
+
 /// A file that no client has open and that the scanner doesn't index keeps
 /// its inputs after its last client closes it. Opening the file again updates
 /// those inputs instead of allocating new ones. Opening it sets its text again,

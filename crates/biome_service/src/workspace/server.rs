@@ -965,9 +965,10 @@ impl WorkspaceServerWithDb<'_> {
                 // manifests and on the JSON files that the resolver reads,
                 // such as extended TypeScript configurations. The files that a
                 // scan reads later need them, so a scan publishes them right
-                // away instead of deferring them.
-                let can_defer =
-                    !biome_path.is_manifest() && !matches!(source, DocumentFileSource::Json(_));
+                // away instead of deferring them, except in its setup phase.
+                let can_defer = self.db_state.defers_manifests()
+                    || (!biome_path.is_manifest()
+                        && !matches!(source, DocumentFileSource::Json(_)));
                 parsed_source = if can_defer {
                     self.db_state.update_file_view_or_defer(
                         &path,
@@ -1031,7 +1032,7 @@ impl WorkspaceServerWithDb<'_> {
 
         // Manifest files need to update the module graph. A scan defers a file
         // when updating its inputs needs Salsa setters, and indexes the file
-        // again in its deferred files phase.
+        // again in its next phase.
         if is_indexed {
             if let Some(root) = parsed_source {
                 let (dependencies, diagnostics) = self.update_service_data(
@@ -2721,8 +2722,9 @@ impl Workspace for LocalWorkspace {
 
 /// The result of the setup phase of a project scan.
 enum ScanSetupOutcome {
-    /// The scan is complete: its scan kind needs only the root manifest, or
-    /// the watcher already keeps the index of the project up to date.
+    /// The scan has no files phase: its scan kind needs only the root
+    /// manifest, or the watcher already keeps the index of the project up to
+    /// date.
     Done(ScanProjectResult),
     /// The files phase still has to index the files that the setup phase
     /// found.
@@ -2922,21 +2924,36 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let setup = self
             .with_db_state(session.view())
             .set_up_project_scan(params);
-        let session = session.commit();
+        let (session, deferred_setup_paths) = session.commit();
+        let workspace = self.with_db_state(session.view());
         let scan = match setup? {
-            ScanSetupOutcome::Done(result) => return Ok(result),
+            ScanSetupOutcome::Done(mut result) => {
+                // Without a files phase, the setup phase indexes only the root
+                // manifest, so it's indexed again here if it was deferred.
+                for path in deferred_setup_paths {
+                    let (_, diagnostics) =
+                        workspace.index_file(project_key, path, IndexTrigger::InitialScan)?;
+                    result.diagnostics.extend(
+                        diagnostics
+                            .into_iter()
+                            .map(biome_diagnostics::serde::Diagnostic::new),
+                    );
+                }
+                return Ok(result);
+            }
             ScanSetupOutcome::Files(scan) => scan,
         };
 
         // The pnpm catalogs of a package depend on its nested settings, and
         // the nested settings are readable only after the setup commit.
-        let workspace = self.with_db_state(session.view());
         for configuration_file in scan.configuration_files() {
             if let Some(directory) = configuration_file.parent() {
                 workspace.refresh_pnpm_workspace_catalogs_for_scope(project_key, directory);
             }
         }
-        let mut result = self.scanner.finish_project_scan(&workspace, scan);
+        let mut result = self
+            .scanner
+            .finish_project_scan(&workspace, scan, deferred_setup_paths);
         let (session, deferred_paths) = session.commit();
         if deferred_paths.is_empty() {
             return Ok(result);

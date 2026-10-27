@@ -15,7 +15,8 @@
 //!
 //! 1. The setup phase reads the configuration files, manifests and ignore
 //!    files.
-//! 2. The files phase indexes the other files and their dependencies.
+//! 2. The files phase indexes again the files that the setup phase deferred,
+//!    then the other files and their dependencies.
 //! 3. The deferred files phase indexes again the files that the files phase
 //!    deferred.
 //!
@@ -25,10 +26,13 @@
 //! the session ends, while reads continue.
 //!
 //! The view can't change the inputs that a file already has. When the content
-//! of such a file changed, the files phase defers the file, and the deferred
-//! files phase indexes it again with the published content. Manifests and JSON
-//! files are never deferred, because the files that the scan reads later
-//! depend on them.
+//! of such a file changed, the setup and files phases defer the file, and the
+//! next phase indexes it again with the published content. The other files
+//! read the manifests and the JSON files that the resolver reads, so the files
+//! phase indexes the files that the setup phase deferred first, and never
+//! defers manifests and JSON files itself. The files that the deferred files
+//! phase defers are published when the scan ends, and their next indexing
+//! updates their services.
 //!
 //! Watcher-driven updates run outside the scan. If a setter interrupts file
 //! indexing, the scanner retries that file instead of restarting a project
@@ -183,7 +187,8 @@ impl Scanner {
     /// Returns `None` when the project is watched and `scan_options` doesn't
     /// force the scan, because the watcher keeps the index up to date.
     /// Otherwise, publish the changes of `workspace`, then pass the result to
-    /// [`Self::finish_project_scan()`].
+    /// [`Self::finish_project_scan()`], with the paths of the files that the
+    /// setup phase deferred.
     pub(crate) fn set_up_project_scan<W: WorkspaceScannerBridge>(
         &self,
         workspace: &W,
@@ -213,8 +218,9 @@ impl Scanner {
         }))
     }
 
-    /// Runs the files phase of `scan`: indexes the other files of the project
-    /// and their dependencies.
+    /// Runs the files phase of `scan`: indexes again the files that the setup
+    /// phase deferred, at `deferred_paths`, then the other files of the
+    /// project and their dependencies.
     ///
     /// If [`ScanOptions::watch`] is `true`, this will install a watcher on the
     /// project folder.
@@ -222,13 +228,15 @@ impl Scanner {
         &self,
         workspace: &W,
         scan: ProjectScan,
+        deferred_paths: Vec<Utf8PathBuf>,
     ) -> ScanProjectResult {
         let ProjectScan {
             project_key,
             project_path,
             scan_options,
-            setup,
+            mut setup,
         } = scan;
+        setup.deferred_paths = deferred_paths;
         let result = self.scan_files(
             workspace,
             project_key,
@@ -326,15 +334,7 @@ impl Scanner {
         watch: bool,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.index_with_context(workspace, project_key, trigger, watch, |ctx| {
-            rayon::scope(|scope| {
-                for path in paths {
-                    let ctx = &*ctx;
-                    scope.spawn(move |_| {
-                        let dependencies = open_file(ctx, BiomePath::new(path), ctx.trigger);
-                        ctx.dependencies.lock().unwrap().extend(dependencies);
-                    });
-                }
-            });
+            ctx.index_files_in_parallel(paths);
             let dependencies = mem::take(&mut ctx.dependencies)
                 .into_inner()
                 .unwrap()
@@ -502,6 +502,7 @@ impl Scanner {
             handleable_paths,
         } = folder_result;
         ScanSetupResult {
+            deferred_paths: Vec::new(),
             handleable_paths,
             configuration_files,
             dependencies,
@@ -510,8 +511,9 @@ impl Scanner {
         }
     }
 
-    /// Runs the files phase of a scan of `folder`: indexes the files that
-    /// `setup` found and their dependencies.
+    /// Runs the files phase of a scan of `folder`: indexes again the files
+    /// that `setup` deferred, then the other files that it found and their
+    /// dependencies.
     fn scan_files<W: WorkspaceScannerBridge>(
         &self,
         workspace: &W,
@@ -522,6 +524,7 @@ impl Scanner {
         setup: ScanSetupResult,
     ) -> ScanResult {
         let ScanSetupResult {
+            deferred_paths,
             handleable_paths,
             configuration_files,
             dependencies,
@@ -531,6 +534,9 @@ impl Scanner {
         let (duration, files_diagnostics) =
             self.run_scan_phase(workspace, project_key, trigger, scan_options, |ctx| {
                 let start = web_time::Instant::now();
+                // The other files read the manifests that the setup phase
+                // deferred, so they're indexed first.
+                ctx.index_files_in_parallel(deferred_paths);
                 let traversal_ctx = &*ctx;
                 ctx.workspace
                     .fs()
@@ -693,6 +699,10 @@ struct ScanFolderResult {
 
 /// The result of the setup phase of a folder scan, for its files phase.
 struct ScanSetupResult {
+    /// The files that the setup phase deferred, for the files phase to index
+    /// again before the other files. Only a project scan defers them.
+    deferred_paths: Vec<Utf8PathBuf>,
+
     /// The files for the files phase to index.
     handleable_paths: Vec<BiomePath>,
 
@@ -952,6 +962,19 @@ impl<W: WorkspaceScannerBridge> ScanContext<'_, W> {
     /// Send a message to the display thread
     pub(crate) fn send_diagnostic(&self, diagnostic: impl Into<Diagnostic>) {
         self.diagnostics_sender.send(diagnostic.into()).ok();
+    }
+
+    /// Indexes the files at `paths` in parallel, and adds their dependencies
+    /// to [Self::dependencies].
+    fn index_files_in_parallel(&self, paths: Vec<Utf8PathBuf>) {
+        rayon::scope(|scope| {
+            for path in paths {
+                scope.spawn(move |_| {
+                    let dependencies = open_file(self, BiomePath::new(path), self.trigger);
+                    self.dependencies.lock().unwrap().extend(dependencies);
+                });
+            }
+        });
     }
 }
 

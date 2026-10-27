@@ -205,6 +205,8 @@ pub struct DbState {
     /// Collects the changes that need Salsa setters when this state is the
     /// view of a scan over Owned storage. It's `None` in every other state.
     scanner_changes: Option<Arc<ScannerEpochChanges>>,
+    /// See [Self::defers_manifests].
+    defers_manifests: bool,
 }
 
 /// The changes from the view of a scan that need Salsa setters. The scan
@@ -320,10 +322,16 @@ pub(crate) struct ScanSession<'a, Phase> {
 
 /// The first phase of a scan: reads the configuration files, manifests and
 /// ignore files of the project.
+///
+/// Its view defers every file whose inputs need Salsa setters, including the
+/// manifests. No other file reads them before [ScanFiles] indexes them again.
 pub(crate) struct ScanSetup;
 
-/// The second phase of a scan: indexes the other files of the project and
-/// their dependencies.
+/// The second phase of a scan: indexes again the files that [ScanSetup]
+/// deferred, then the other files of the project and their dependencies.
+///
+/// Its view never defers the manifests and the JSON files, because the files
+/// that it indexes after them read them.
 pub(crate) struct ScanFiles;
 
 /// The last phase of a scan: indexes again the files that [ScanFiles]
@@ -339,8 +347,9 @@ impl<Phase> ScanSession<'_, Phase> {
 
 impl<'a, Phase> ScanSession<'a, Phase> {
     /// Publishes the changes of this phase, then starts the phase `Next` with
-    /// a new view that reads them.
-    fn commit_into<Next>(self) -> ScanSession<'a, Next> {
+    /// a new view that reads them. Returns the paths of the files that this
+    /// phase deferred, sorted and without duplicates.
+    fn commit_into<Next>(self) -> (ScanSession<'a, Next>, Vec<Utf8PathBuf>) {
         let Self {
             view, mut writer, ..
         } = self;
@@ -349,31 +358,33 @@ impl<'a, Phase> ScanSession<'a, Phase> {
         // pattern would keep it alive until the function returns.
         drop(view);
         writer.publish();
-        ScanSession {
-            view: writer.view(),
+        let mut deferred_paths = std::mem::take(&mut writer.deferred_paths);
+        deferred_paths.sort_unstable();
+        deferred_paths.dedup();
+        let session = ScanSession {
+            view: writer.view(false),
             writer,
             phase: PhantomData,
-        }
+        };
+        (session, deferred_paths)
     }
 }
 
 impl<'a> ScanSession<'a, ScanSetup> {
     /// Publishes the changes of the setup phase, such as project settings, and
-    /// starts [ScanFiles].
-    pub(crate) fn commit(self) -> ScanSession<'a, ScanFiles> {
+    /// starts [ScanFiles]. Returns the paths of the deferred files, which
+    /// [ScanFiles] indexes again first.
+    pub(crate) fn commit(self) -> (ScanSession<'a, ScanFiles>, Vec<Utf8PathBuf>) {
         self.commit_into()
     }
 }
 
 impl<'a> ScanSession<'a, ScanFiles> {
     /// Publishes the changes of the files phase and starts [ScanDeferredFiles].
-    /// Returns the paths of the deferred files, sorted and without duplicates.
+    /// Returns the paths of the deferred files, which [ScanDeferredFiles]
+    /// indexes again.
     pub(crate) fn commit(self) -> (ScanSession<'a, ScanDeferredFiles>, Vec<Utf8PathBuf>) {
-        let mut session: ScanSession<'a, ScanDeferredFiles> = self.commit_into();
-        let mut deferred_paths = std::mem::take(&mut session.writer.deferred_paths);
-        deferred_paths.sort_unstable();
-        deferred_paths.dedup();
-        (session, deferred_paths)
+        self.commit_into()
     }
 }
 
@@ -387,7 +398,8 @@ impl ScanSession<'_, ScanDeferredFiles> {
 struct ScanWriter<'a> {
     storage: ScanStorage<'a>,
     changes: Arc<ScannerEpochChanges>,
-    /// The paths of the files that the views deferred. See [ScanDeferredFiles].
+    /// The paths of the files that the view of the current phase deferred.
+    /// Committing the phase returns them.
     deferred_paths: Vec<Utf8PathBuf>,
 }
 
@@ -401,12 +413,14 @@ enum ScanStorage<'a> {
 
 impl ScanWriter<'_> {
     /// Returns a new view of the database. The view records the changes that
-    /// need Salsa setters.
-    fn view(&self) -> DbState {
+    /// need Salsa setters. See [DbState::defers_manifests] for
+    /// `defers_manifests`.
+    fn view(&self, defers_manifests: bool) -> DbState {
         match &self.storage {
             ScanStorage::Shared(shared_db) => DbState {
                 storage: DbStorage::Shared(shared_db.clone()),
                 scanner_changes: None,
+                defers_manifests,
             },
             ScanStorage::Owned { owner, .. } => {
                 let shared_db = {
@@ -416,6 +430,7 @@ impl ScanWriter<'_> {
                 DbState {
                     storage: DbStorage::Shared(shared_db),
                     scanner_changes: Some(self.changes.clone()),
+                    defers_manifests,
                 }
             }
         }
@@ -680,6 +695,7 @@ impl DbState {
         Self {
             storage: DbStorage::Shared(SharedWorkspaceDb::new(fs)),
             scanner_changes: None,
+            defers_manifests: false,
         }
     }
 
@@ -690,6 +706,7 @@ impl DbState {
         Self {
             storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::new(fs))),
             scanner_changes: None,
+            defers_manifests: false,
         }
     }
 
@@ -711,10 +728,20 @@ impl DbState {
             deferred_paths: Vec::new(),
         };
         ScanSession {
-            view: writer.view(),
+            view: writer.view(true),
             writer,
             phase: PhantomData,
         }
+    }
+
+    /// Returns whether the scanner can defer the manifests and the JSON files
+    /// that it indexes in this state, like any other file.
+    ///
+    /// Only the view of [ScanSetup] allows it, because no other file reads
+    /// them before [ScanFiles] indexes them again. Other states publish them
+    /// right away, because the files that the scanner indexes next read them.
+    pub(crate) fn defers_manifests(&self) -> bool {
+        self.defers_manifests
     }
 
     pub(crate) fn fork(&self) -> DbReadGuard {
@@ -1539,7 +1566,7 @@ mod tests {
         settings.languages.json.parser.allow_trailing_commas = Some(true.into());
         session.view().insert_root_settings(project_key, settings);
         assert!(source.has_errors(&*session.view().fork()));
-        let session = session.commit();
+        let (session, _) = session.commit();
 
         assert!(!source.has_errors(&*session.view().fork()));
     }
