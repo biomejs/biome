@@ -1,0 +1,14 @@
+[table] # header comment
+a = 1 # after a
+b = [ # after the bracket
+  1, # after one
+] # after the array
+c = { x = 1 } # after an inline table
+
+[[array]] # header comment
+d = 2 # after d
+
+[empty] # header comment
+# own line after an empty table
+[last]
+e = 3 # last comment

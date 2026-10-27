@@ -1,0 +1,20 @@
+[package]
+name="example"
+version = "0.1.0"
+edition="2024"
+authors = ["Someone <someone@example.com>"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version="1", features=["full"], optional=true }
+
+[dev-dependencies]
+insta="1.40"
+
+[features]
+default = []
+full = ["tokio", "serde/std", "dep:something-with-a-longer-name", "another-feature-name"]
+
+[[bin]]
+name = "example"
+path = "src/main.rs"

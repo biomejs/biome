@@ -1,0 +1,47 @@
+[package]
+name                 = "biome_toml_formatter"
+version.workspace    = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's TOML formatter"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+include              = ["README.md", "src/**/*"]
+publish              = true
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[[bench]]
+harness = false
+name    = "toml_formatter"
+
+[dependencies]
+biome_formatter   = { workspace = true }
+biome_rowan       = { workspace = true }
+biome_toml_syntax = { workspace = true }
+
+[dev-dependencies]
+biome_console     = { path = "../biome_console" }
+biome_diagnostics = { path = "../biome_diagnostics" }
+biome_formatter   = { path = "../biome_formatter", features = ["countme"] }
+biome_test_utils  = { path = "../biome_test_utils" }
+biome_toml_parser = { path = "../biome_toml_parser" }
+countme           = { workspace = true, features = ["enable"] }
+criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+insta             = { workspace = true }
+serde_json        = { workspace = true }
+tests_macros      = { path = "../tests_macros" }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
+
+[lints]
+workspace = true
