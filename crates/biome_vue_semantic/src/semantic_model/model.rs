@@ -1986,8 +1986,10 @@ impl Component {
         self.of_kind(SymbolKind::Prop).map(Prop)
     }
 
-    pub fn models(&self) -> impl Iterator<Item = Symbol> + '_ {
-        self.of_kind(SymbolKind::Model)
+    /// The models the component declares with `defineModel()`. Each model
+    /// declares a prop, described by the returned [`Prop`].
+    pub fn models(&self) -> impl Iterator<Item = Prop> + '_ {
+        self.of_kind(SymbolKind::Model).map(Prop)
     }
 
     pub fn emits(&self) -> impl Iterator<Item = Emit> + '_ {

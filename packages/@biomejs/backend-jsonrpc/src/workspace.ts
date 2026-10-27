@@ -3768,6 +3768,11 @@ export interface Nursery {
 	 */
 	useVueToggleInsideTransition?: UseVueToggleInsideTransitionConfiguration;
 	/**
+	 * Require a type for every prop of a Vue component.
+	 * See https://biomejs.dev/linter/rules/use-vue-typed-props
+	 */
+	useVueTypedProps?: UseVueTypedPropsConfiguration;
+	/**
 	 * Require a type for refs created with ref() or shallowRef() in TypeScript.
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
@@ -6450,6 +6455,9 @@ export type UseVueTemplateRefConfiguration =
 export type UseVueToggleInsideTransitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueToggleInsideTransitionOptions;
+export type UseVueTypedPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueTypedPropsOptions;
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
@@ -9433,6 +9441,10 @@ export interface RuleWithUseVueToggleInsideTransitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueToggleInsideTransitionOptions;
 }
+export interface RuleWithUseVueTypedPropsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueTypedPropsOptions;
+}
 export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
@@ -11859,6 +11871,7 @@ export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
+export type UseVueTypedPropsOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidDefinePropsOptions = {};
@@ -13480,6 +13493,7 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueToggleInsideTransition"
+	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidVFor"

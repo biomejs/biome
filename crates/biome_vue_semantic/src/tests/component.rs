@@ -213,7 +213,6 @@ const Child = defineComponent({ props: ["inner"] });"#,
 fn non_literal_declarations_open_the_namespace() {
     for code in [
         "export default { props: shared }",
-        "export default { props: { title() {} } }",
         "export default { data() { return state } }",
         "export default { data }",
         "export default { computed: { [key]() {} } }",
@@ -252,6 +251,58 @@ fn shorthand_prop_is_a_prop_of_unknown_type() {
     assert_eq!(prop.name(), "size");
     assert!(prop.types() == PropType::Unknown);
     assert!(component.is_complete(Namespace::Binding));
+}
+
+#[test]
+fn inline_function_prop_names_no_type() {
+    for code in [
+        "export default { props: { title() {} } }",
+        "export default { props: { title: () => {} } }",
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().unwrap();
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.name(), "title", "`{code}`");
+        assert!(prop.types().is_empty(), "`{code}` should name no type");
+        assert!(component.is_complete(Namespace::Binding), "`{code}`");
+    }
+}
+
+#[test]
+fn type_option_held_by_a_variable_is_unknown() {
+    for code in [
+        "export default { props: { title: { type } } }",
+        "export default { props: { title: { type: function Title() {} } } }",
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().unwrap();
+        let prop = component.props().next().expect("a prop");
+        assert!(prop.types() == PropType::Unknown, "`{code}`");
+    }
+}
+
+#[test]
+fn define_model_options_describe_its_prop() {
+    let model = js_model(
+        r#"const a = defineModel();
+const b = defineModel("b", { type: Boolean, required: true });
+const c = defineModel<string>("c");
+const d = defineModel(Number);"#,
+        setup_ts(),
+    );
+    let component = model.components().next().unwrap();
+    let models: Vec<_> = component.models().collect();
+    assert_eq!(models[0].name(), "modelValue");
+    assert_eq!(models[0].form(), None);
+    assert!(models[0].types().is_empty());
+    assert_eq!(models[1].name(), "b");
+    assert_eq!(models[1].form(), Some(PropForm::Options));
+    assert!(models[1].types() == PropType::Boolean);
+    assert_eq!(models[1].required(), Tri::Yes);
+    assert_eq!(models[2].form(), Some(PropForm::TypeMember));
+    assert!(models[2].types() == PropType::String);
+    assert_eq!(models[3].form(), Some(PropForm::Constructor));
+    assert!(models[3].types() == PropType::Number);
 }
 
 #[test]
