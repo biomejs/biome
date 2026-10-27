@@ -1,0 +1,162 @@
+// TOML Un-Grammar.
+//
+// This grammar specifies the structure of TOML's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// The grammar follows TOML 1.1.0: https://toml.io/en/v1.1.0
+//
+// Legend:
+//
+//   //                          -- comment
+//   Name =                      -- non-terminal definition
+//   'ident'                     -- token (terminal)
+//   A B                         -- sequence
+//   A | B                       -- alternation
+//   A*                          -- zero or more repetition
+//   (A (',' A)* ','?)            -- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)                -- repetition of node A separated by ',' without a trailing comma
+//   A?                          -- zero or one repetition
+//   (A)                         -- same as A
+//   label:A                     -- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+// - Newlines, whitespace, and comments are trivia. The parser enforces the
+//   places where TOML requires or forbids a newline.
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+
+SyntaxElement = SyntaxElement
+
+TomlBogus = SyntaxElement*
+TomlBogusValue = SyntaxElement*
+
+TomlRoot =
+    bom: 'UNICODE_BOM'?
+    items: TomlRootItemList
+    eof: 'EOF'
+
+// Key/value pairs that precede the first table header, followed by the
+// tables. Each table owns the key/value pairs that follow its header.
+TomlRootItemList = AnyTomlRootItem*
+
+AnyTomlRootItem =
+    TomlKeyValue
+    | TomlTable
+    | TomlArrayTable
+    | TomlBogus
+
+///////////////
+// TABLES
+///////////////
+
+// [a.b]
+// c = 1
+TomlTable =
+    '['
+    key: TomlKey
+    ']'
+    entries: TomlKeyValueList
+
+// [[a.b]]
+// c = 1
+TomlArrayTable =
+    '[['
+    key: TomlKey
+    ']]'
+    entries: TomlKeyValueList
+
+TomlKeyValueList = AnyTomlKeyValue*
+
+AnyTomlKeyValue =
+    TomlKeyValue
+    | TomlBogus
+
+///////////////
+// KEYS
+///////////////
+
+// a.b = 1
+TomlKeyValue =
+    key: TomlKey
+    '='
+    value: AnyTomlValue
+
+// a."b".'c'
+TomlKey = parts: TomlKeyPartList
+
+TomlKeyPartList = (AnyTomlKeyPart ('.' AnyTomlKeyPart)*)
+
+AnyTomlKeyPart =
+    TomlBareKey
+    | TomlQuotedKey
+    | TomlBogus
+
+TomlBareKey = value: 'toml_bare_key_literal'
+
+TomlQuotedKey = value_token: ('toml_basic_string_literal' | 'toml_literal_string_literal')
+
+///////////////
+// VALUES
+///////////////
+
+AnyTomlValue =
+    TomlString
+    | TomlInteger
+    | TomlFloat
+    | TomlBoolean
+    | TomlDateTime
+    | TomlArray
+    | TomlInlineTable
+    | TomlBogusValue
+
+TomlString =
+    value_token: (
+        'toml_basic_string_literal'
+        | 'toml_literal_string_literal'
+        | 'toml_ml_basic_string_literal'
+        | 'toml_ml_literal_string_literal'
+    )
+
+TomlInteger = value: 'toml_integer_literal'
+
+TomlFloat = value: 'toml_float_literal'
+
+TomlBoolean = value_token: ('true' | 'false')
+
+TomlDateTime =
+    value_token: (
+        'toml_offset_date_time_literal'
+        | 'toml_local_date_time_literal'
+        | 'toml_local_date_literal'
+        | 'toml_local_time_literal'
+    )
+
+// [1, 2, 3]
+TomlArray =
+    '['
+    elements: TomlArrayElementList
+    ']'
+
+TomlArrayElementList = (AnyTomlValue (',' AnyTomlValue)* ','?)
+
+// { a = 1, b = 2 }
+TomlInlineTable =
+    '{'
+    entries: TomlInlineTableEntryList
+    '}'
+
+TomlInlineTableEntryList = (AnyTomlKeyValue (',' AnyTomlKeyValue)* ','?)

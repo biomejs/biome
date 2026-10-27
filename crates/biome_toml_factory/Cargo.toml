@@ -1,0 +1,19 @@
+[package]
+name                 = "biome_toml_factory"
+version.workspace    = true
+authors.workspace    = true
+edition.workspace    = true
+description          = "Utilities to create TOML AST for biome_toml_parser"
+documentation        = "https://docs.rs/biome_toml_factory"
+repository.workspace = true
+license.workspace    = true
+publish              = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_rowan       = { workspace = true }
+biome_toml_syntax = { workspace = true }
+
+[lints]
+workspace = true

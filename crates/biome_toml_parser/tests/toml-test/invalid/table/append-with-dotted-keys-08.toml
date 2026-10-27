@@ -1,0 +1,8 @@
+[a.b.c]
+z = 9
+
+[[totally_unrelated]]
+x = 123
+
+[a]
+b.c.t = "this should NOT be allowed"
