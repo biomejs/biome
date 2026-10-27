@@ -9,6 +9,10 @@ expression: snapshot
 b = "a b"
 # biome-ignore format: preserve
 c   =   "a b"
+e = """a b"""
+# biome-ignore format: preserve
+d   =   """a 
+b"""
 ```
 
 # Options
@@ -29,4 +33,8 @@ Trailing newline: true
 b = "a b"
 # biome-ignore format: preserve
 c   =   "a b"
+e = """a b"""
+# biome-ignore format: preserve
+d   =   """a 
+b"""
 ```
