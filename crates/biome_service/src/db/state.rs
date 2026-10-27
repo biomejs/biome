@@ -851,11 +851,22 @@ impl DbState {
         }
     }
 
+    /// Adds the patterns of nested ignore files to the root settings of the
+    /// project `project_key`. Each entry of `payload` holds the directory of
+    /// an ignore file and its patterns.
+    ///
+    /// Does nothing when `payload` is empty.
     pub fn store_nested_ignore_patterns(
         &self,
         project_key: ProjectKey,
         payload: Vec<(Utf8PathBuf, Vec<String>)>,
     ) -> Result<(), WorkspaceError> {
+        // Storing patterns only adds matchers, so storing none changes
+        // nothing. Updating the root settings anyway would make every query
+        // that reads them run again, including the parses.
+        if payload.is_empty() {
+            return Ok(());
+        }
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
@@ -1615,6 +1626,38 @@ mod tests {
 
         state.remove_project(project_key);
         assert!(retained_db.get_project(&project_key).is_none());
+    }
+
+    /// Storing no nested ignore patterns keeps the root settings of the
+    /// project, during a scan and outside one, so the parses that read them
+    /// stay valid.
+    #[test]
+    fn storing_no_nested_ignore_patterns_keeps_root_settings() {
+        let state = DbState::lsp(test_fs());
+        let project_key = state.insert_project(Utf8PathBuf::from("/project"));
+        state.insert_root_settings(project_key, git_settings());
+        let read = || {
+            let db = state.fork();
+            let root_settings = db.get_project(&project_key).unwrap().root_settings(&*db);
+            let generation = crate::db::ProjectsGeneration::try_get(&*db)
+                .map(|generation| generation.value(&*db));
+            (root_settings, generation)
+        };
+        let before = read();
+
+        {
+            let session = state.scan_session();
+            session
+                .view()
+                .store_nested_ignore_patterns(project_key, Vec::new())
+                .unwrap();
+        }
+        assert_eq!(read(), before);
+
+        state
+            .store_nested_ignore_patterns(project_key, Vec::new())
+            .unwrap();
+        assert_eq!(read(), before);
     }
 
     #[test]
