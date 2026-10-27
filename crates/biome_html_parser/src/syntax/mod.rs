@@ -806,7 +806,7 @@ pub(crate) fn parse_html_element(
             p.bump_with_context(HTML_LITERAL, regular_context(p));
             Present(m.complete(p, HTML_CONTENT))
         }
-        HTML_LITERAL if looks_like_angular_block_start(p) => {
+        HTML_LITERAL if is_at_angular_block_start(p) => {
             p.re_lex(HtmlReLexContext::Angular);
             parse_html_element(p, at_vue_sfc_top_level, in_math)
         }
@@ -819,7 +819,7 @@ pub(crate) fn parse_html_element(
     }
 }
 
-fn looks_like_angular_block_start(p: &mut HtmlParser) -> bool {
+fn is_at_angular_block_start(p: &mut HtmlParser) -> bool {
     if !Angular.is_supported(p) || !p.cur_text().starts_with('@') {
         return false;
     }

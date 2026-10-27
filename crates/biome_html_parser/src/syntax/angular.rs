@@ -220,7 +220,7 @@ fn parse_angular_let_initializer_clause(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn parse_angular_text_expression(p: &mut HtmlParser) -> ParsedSyntax {
-    if p.at_ts(token_set![T![')'], T![;], T!['}'], EOF]) {
+    if !p.at(HTML_LITERAL) {
         return Absent;
     }
 

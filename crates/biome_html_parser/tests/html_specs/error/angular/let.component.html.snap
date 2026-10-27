@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 155
 expression: snapshot
 ---
 
@@ -17,6 +18,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         AnyAngularBlock {
@@ -47,7 +49,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..22
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..22
     0: ANY_ANGULAR_BLOCK@0..22
       0: ANGULAR_LET_BLOCK@0..22
         0: AT@0..1 "@" [] []
@@ -59,7 +62,7 @@ HtmlRoot {
           1: HTML_TEXT_EXPRESSION@11..22
             0: HTML_LITERAL@11..22 " user.name\n" [] []
         4: (empty)
-  4: EOF@22..22 "" [] []
+  5: EOF@22..22 "" [] []
 
 ```
 
