@@ -161,3 +161,56 @@ fn should_index_on_create_and_unload_on_delete() {
         );
     });
 }
+
+/// notify calls the event handler from its own thread, and that thread must
+/// not wait forever for [Watcher::run], which may itself be waiting for
+/// notify. This is a regression test for
+/// [#8240](https://github.com/biomejs/biome/issues/8240).
+#[test]
+fn event_handler_drops_events_when_nobody_consumes_them() {
+    use notify::EventHandler;
+
+    let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(1);
+    let (done_tx, done_rx) = bounded(1);
+
+    thread::spawn(move || {
+        let mut sender = NotifyEventSender::new(tx);
+        for _ in 0..100 {
+            sender.handle_event(Ok(NotifyEvent::new(EventKind::Any)));
+        }
+        done_tx.send(()).unwrap();
+    });
+
+    // Only the first dropped event waits for the timeout.
+    assert!(
+        done_rx
+            .recv_timeout(NotifyEventSender::SEND_TIMEOUT * 5)
+            .is_ok(),
+        "the event handler waited for a channel that nobody consumes"
+    );
+    assert_eq!(rx.len(), 1, "the events that didn't fit should be dropped");
+}
+
+/// Events must not be dropped just because they arrive faster than
+/// [Watcher::run] handles them.
+#[test]
+fn event_handler_waits_for_room_while_events_are_consumed() {
+    use notify::EventHandler;
+
+    let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(1);
+
+    thread::spawn(move || {
+        let mut sender = NotifyEventSender::new(tx);
+        for _ in 0..20 {
+            sender.handle_event(Ok(NotifyEvent::new(EventKind::Any)));
+        }
+    });
+
+    for _ in 0..20 {
+        sleep(Duration::from_millis(10));
+        assert!(
+            rx.recv_timeout(Duration::from_secs(5)).is_ok(),
+            "every event should be delivered"
+        );
+    }
+}

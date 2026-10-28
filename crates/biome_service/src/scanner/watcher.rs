@@ -5,7 +5,7 @@ use biome_diagnostics::PrintDescription;
 use biome_diagnostics::serde::Diagnostic;
 use bpaf::Bpaf;
 use camino::{Utf8Path, Utf8PathBuf};
-use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
+use crossbeam::channel::{Receiver, SendTimeoutError, Sender, bounded, unbounded};
 use notify::event::{CreateKind, ModifyKind, RemoveKind, RenameMode};
 use notify::recommended_watcher;
 use notify::{
@@ -117,6 +117,57 @@ impl Drop for WatcherInstructionChannel {
     }
 }
 
+/// Hands the events of the [internal watcher](Watcher::watcher) to
+/// [Watcher::run] without blocking forever.
+///
+/// notify calls the handler from its own thread. [Watcher::run] is the only
+/// consumer of the channel, and while it updates the watched paths, notify
+/// waits for that same thread. If the handler waited on a full channel until
+/// it had room, both would wait for each other forever: on macOS,
+/// `FsEventWatcher::stop()` spins at 100% CPU, and on other platforms the
+/// watcher silently hangs. A burst of file changes, such as a git checkout,
+/// is enough to fill the channel.
+///
+/// So the handler waits for room only for [Self::SEND_TIMEOUT]. If the
+/// channel is still full, the consumer is stuck, and the handler drops events
+/// without waiting until the channel has room again.
+struct NotifyEventSender {
+    sender: Sender<NotifyResult<NotifyEvent>>,
+
+    /// Whether events are being dropped because the channel stayed full.
+    dropping: bool,
+}
+
+impl NotifyEventSender {
+    /// How long to wait for room in the channel before dropping events.
+    ///
+    /// [Watcher::run] handles events much faster than this, so events are
+    /// only dropped when it is busy with something else.
+    const SEND_TIMEOUT: Duration = Duration::from_secs(1);
+
+    fn new(sender: Sender<NotifyResult<NotifyEvent>>) -> Self {
+        Self {
+            sender,
+            dropping: false,
+        }
+    }
+}
+
+impl notify::EventHandler for NotifyEventSender {
+    fn handle_event(&mut self, event: NotifyResult<NotifyEvent>) {
+        if self.dropping {
+            if self.sender.try_send(event).is_ok() {
+                self.dropping = false;
+            }
+        } else if let Err(SendTimeoutError::Timeout(_)) =
+            self.sender.send_timeout(event, Self::SEND_TIMEOUT)
+        {
+            warn!("The file watcher is not consuming events, dropping events");
+            self.dropping = true;
+        }
+    }
+}
+
 /// Watcher to keep the [crate::WorkspaceServer] in sync with the filesystem state.
 ///
 /// Conceptually, it helps to think of the watcher as a helper to the scanner.
@@ -152,10 +203,11 @@ impl Watcher {
     ) -> Result<(Self, WatcherInstructionChannel), WorkspaceError> {
         // We use a bounded channel, because watchers are
         // [intrinsically unreliable](https://docs.rs/notify/latest/notify/#watching-large-directories).
-        // If we block the sender, some events may get dropped, but that was
-        // already a possibility. So there doesn't really seem to be a
-        // justification for using an unbounded sender, which could end up
-        // consuming an ever-increasing amount of memory.
+        // If the channel stays full, events get dropped (see
+        // [NotifyEventSender]), but that was already a possibility. So there
+        // doesn't really seem to be a justification for using an unbounded
+        // sender, which could end up consuming an ever-increasing amount of
+        // memory.
         // The actual size of the buffer is an arbitrary choice that we can
         // tweak if we find a need for it.
         let (tx, rx) = bounded::<NotifyResult<NotifyEvent>>(128);
@@ -169,7 +221,7 @@ impl Watcher {
             match &watcher_configuration.watcher_kind {
                 WatcherKind::Polling => {
                     let watcher = PollWatcher::new(
-                        tx.clone(),
+                        NotifyEventSender::new(tx.clone()),
                         Config::default().with_poll_interval(Duration::from_millis(
                             watcher_configuration.polling_interval as u64,
                         )),
@@ -177,7 +229,7 @@ impl Watcher {
                     Some(Box::new(watcher))
                 }
                 WatcherKind::Recommended => {
-                    let watcher = recommended_watcher(tx)?;
+                    let watcher = recommended_watcher(NotifyEventSender::new(tx))?;
                     Some(Box::new(watcher))
                 }
                 WatcherKind::None => None,
