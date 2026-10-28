@@ -15,7 +15,7 @@ use crate::syntax::parse_error::{
 };
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_toml_syntax::TomlSyntaxKind::{self, *};
@@ -296,26 +296,64 @@ fn parse_key(p: &mut TomlParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    let parts = p.start();
+    KeyPartList::default().parse_list(p);
+    Present(m.complete(p, TOML_KEY))
+}
 
-    parse_key_part(p).ok();
-    while p.at(T![.]) && !p.has_preceding_line_break() {
-        p.bump(T![.]);
+/// The dot-separated parts of a key, which must all be on one line.
+#[derive(Default)]
+struct KeyPartList {
+    /// `true` after the first part, when the next part must follow a `.` on
+    /// the same line.
+    has_parts: bool,
+}
 
-        if p.has_preceding_line_break() {
-            let range = p.cur_range();
-            p.error(expected_key(p, range));
-            break;
+impl ParseSeparatedList for KeyPartList {
+    type Kind = TomlSyntaxKind;
+    type Parser<'source> = TomlParser<'source>;
+    const LIST_KIND: Self::Kind = TOML_KEY_PART_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // A part on the line after a `.` belongs to the next line item.
+        if self.has_parts && p.has_preceding_line_break() {
+            return Absent;
         }
-
-        if parse_key_part(p).is_absent() {
-            let range = p.cur_range();
-            p.error(expected_key(p, range));
-        }
+        self.has_parts = true;
+        parse_key_part(p)
     }
 
-    parts.complete(p, TOML_KEY_PART_LIST);
-    Present(m.complete(p, TOML_KEY))
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !p.at(T![.]) || p.has_preceding_line_break()
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(
+                TOML_BOGUS,
+                token_set![T![.], T![=], T![']'], T!["]]"], T![,], T!['}']],
+            )
+            .enable_recovery_on_line_break(),
+            expected_key,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![.]
+    }
+
+    fn allow_empty(&self) -> bool {
+        false
+    }
+
+    fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
+        let range = p.cur_range();
+        p.error(expected_key(p, range));
+    }
 }
 
 fn parse_key_part(p: &mut TomlParser) -> ParsedSyntax {
