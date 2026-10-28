@@ -634,15 +634,31 @@ impl SessionLifecycle {
             return;
         }
 
-        let Ok(mut sessions) = self.sessions.lock() else {
-            return;
+        let (removed, is_last) = {
+            let Ok(mut sessions) = self.sessions.lock() else {
+                return;
+            };
+            let removed = sessions.remove(&self.session_key);
+            debug_assert!(removed.is_some(), "Session did not exist.");
+            (removed, sessions.is_empty())
         };
-        let removed = sessions.remove(&self.session_key);
-        debug_assert!(removed.is_some(), "Session did not exist.");
+        let is_removed = removed.is_some();
+        // Closing the files of the session runs after the lock of the sessions
+        // is released, so that other connections can start or end meanwhile.
+        // It waits for the reads of the database to end, so it runs on the
+        // blocking thread pool rather than on the async runtime.
+        if let Some(session) = removed {
+            match tokio::runtime::Handle::try_current() {
+                Ok(runtime) => {
+                    runtime.spawn_blocking(move || session.close_files());
+                }
+                Err(_) => session.close_files(),
+            }
+        }
 
-        if removed.is_some()
+        if is_removed
             && self.stop_on_disconnect
-            && sessions.is_empty()
+            && is_last
             && self.is_initialized.load(Ordering::Acquire)
         {
             self.cancellation.notify_one();
@@ -794,6 +810,11 @@ pub struct ServerFactory {
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
     service_rx: watch::Receiver<ServiceNotification>,
+
+    /// The sender of the service notifications, which tests use to count
+    /// their receivers.
+    #[cfg(test)]
+    service_tx: watch::Sender<ServiceNotification>,
 }
 
 impl Default for ServerFactory {
@@ -810,6 +831,8 @@ impl ServerFactory {
         Self {
             cancellation: Arc::default(),
             db_state: Arc::new(DbState::lsp(fs.clone())),
+            #[cfg(test)]
+            service_tx: service_tx.clone(),
             workspace: Arc::new(WorkspaceServer::new(
                 fs,
                 instruction_tx,
@@ -843,6 +866,8 @@ impl ServerFactory {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
+            #[cfg(test)]
+            service_tx: service_tx.clone(),
             workspace: Arc::new(WorkspaceServer::new(
                 fs,
                 watcher_tx,

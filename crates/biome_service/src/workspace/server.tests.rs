@@ -1,4 +1,7 @@
 use super::*;
+use crate::db::FileViews;
+#[cfg(feature = "module_graph")]
+use crate::module_graph::ModuleInfo;
 #[cfg(feature = "module_graph")]
 use crate::scanner::WorkspaceWatcherBridge;
 use crate::settings::ModuleGraphResolutionKind;
@@ -14,12 +17,12 @@ use biome_configuration::{
 use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
-use biome_js_syntax::JsLanguage;
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
-use salsa::plumbing::AsId;
+use salsa::plumbing::{AsId, ZalsaDatabase};
 use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
@@ -236,6 +239,689 @@ fn resolved_import(
         .path()
         .as_path()
         .map(Utf8Path::to_path_buf)
+}
+
+/// Indexes the content on disk of a file that a client has open, and checks
+/// that the content of the client stays the content of the file until the
+/// client closes it.
+#[cfg(feature = "module_graph")]
+fn assert_index_keeps_the_open_content(db_state: impl FnOnce(&LocalWorkspace) -> DbState) {
+    const PATH: &str = "/project/a.js";
+    const DISK_CONTENT: &str = "import 'foo';";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(PATH.into(), DISK_CONTENT);
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs,
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = db_state(&workspace);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: true,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+
+    let content = || {
+        workspace.get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+    };
+    let parsed_text = || {
+        let db = workspace.get_db();
+        let parse = workspace.get_parse(Utf8Path::new(PATH)).unwrap();
+        parse
+            .parsed(&db)
+            .syntax::<JsLanguage>()
+            .text_with_trivia()
+            .to_string()
+    };
+    let imports = || {
+        workspace
+            .get_module_graph(GetModuleGraphParams {})
+            .unwrap()
+            .data
+            .get(PATH)
+            .and_then(|module| module.as_js_module_info())
+            .map(|module| {
+                module
+                    .static_import_paths
+                    .keys()
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
+    };
+    assert_eq!(content().unwrap(), CLIENT_CONTENT);
+    assert_eq!(parsed_text(), CLIENT_CONTENT);
+    assert_eq!(imports(), Some(vec!["bar".to_string()]));
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+
+    assert_eq!(content().unwrap(), DISK_CONTENT);
+    assert_eq!(parsed_text(), DISK_CONTENT);
+}
+
+/// Creates an Owned-mode workspace for the project at `/project`, with the
+/// given files on disk.
+#[cfg(feature = "module_graph")]
+fn lsp_workspace(files: &[(&str, &str)]) -> (LocalWorkspace, ProjectKey, Arc<MemoryFileSystem>) {
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in files {
+        fs.insert((*path).into(), *content);
+    }
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    (workspace, project_key, fs)
+}
+
+/// Returns the text of the current parse of `path`.
+#[cfg(feature = "module_graph")]
+fn parsed_text(workspace: &LocalWorkspace, path: &str) -> String {
+    let db = workspace.get_db();
+    let parse = workspace.get_parse(Utf8Path::new(path)).unwrap();
+    parse
+        .parsed(&db)
+        .syntax::<JsLanguage>()
+        .text_with_trivia()
+        .to_string()
+}
+
+/// Returns the workspace that serves the requests of the client `id`.
+#[cfg(feature = "module_graph")]
+fn client(workspace: &LocalWorkspace, id: u64) -> WorkspaceServerWithDb<'_> {
+    workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(id))
+}
+
+/// Opens `path` in `client` with `content`.
+#[cfg(feature = "module_graph")]
+fn open_in(client: &WorkspaceServerWithDb, project_key: ProjectKey, path: &str, content: &str) {
+    client
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(path),
+            content: FileContent::FromClient {
+                content: content.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+}
+
+/// Returns the content of `path` that `client` reads.
+#[cfg(feature = "module_graph")]
+fn content_in(client: &WorkspaceServerWithDb, project_key: ProjectKey, path: &str) -> String {
+    client
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(path),
+        })
+        .unwrap()
+}
+
+/// Returns the paths that the module of `path` imports.
+#[cfg(feature = "module_graph")]
+fn imports_of(workspace: &LocalWorkspace, path: &str) -> Option<Vec<String>> {
+    workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .unwrap()
+        .data
+        .get(path)
+        .and_then(|module| module.as_js_module_info())
+        .map(|module| module.static_import_paths.keys().cloned().collect())
+}
+
+/// Each client reads its own content. The module graph reads the content of
+/// the client that opened the file first, until that client closes the file.
+#[cfg(feature = "module_graph")]
+#[test]
+fn clients_keep_their_own_content() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let (first, second) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&first, project_key, PATH, "import 'first';");
+    open_in(&second, project_key, PATH, "import 'second';");
+
+    assert_eq!(content_in(&first, project_key, PATH), "import 'first';");
+    assert_eq!(content_in(&second, project_key, PATH), "import 'second';");
+    assert_eq!(
+        imports_of(&workspace, PATH),
+        Some(vec!["first".to_string()])
+    );
+
+    first
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert_eq!(content_in(&first, project_key, PATH), "import 'disk';");
+    assert_eq!(content_in(&second, project_key, PATH), "import 'second';");
+    // Closing the file asks the scanner to index it again.
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    assert_eq!(
+        imports_of(&workspace, PATH),
+        Some(vec!["second".to_string()])
+    );
+
+    second
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert_eq!(content_in(&second, project_key, PATH), "import 'disk';");
+}
+
+/// A client that didn't open a file, like the CLI attached to the daemon of an
+/// editor, reads the content on disk, and doesn't see the files that only
+/// other clients opened.
+#[cfg(feature = "module_graph")]
+#[test]
+fn clients_that_did_not_open_a_file_read_the_disk() {
+    const INDEXED: &str = "/project/indexed.js";
+    const UNSAVED: &str = "/project/unsaved.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(INDEXED, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(INDEXED))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, INDEXED, "import 'editor';");
+    open_in(&editor, project_key, UNSAVED, "import 'editor';");
+
+    assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
+    let db = workspace.get_db();
+    let parse = cli.get_parse(Utf8Path::new(INDEXED)).unwrap();
+    let parsed_text = parse
+        .parsed(&db)
+        .syntax::<JsLanguage>()
+        .text_with_trivia()
+        .to_string();
+    assert_eq!(parsed_text, "import 'disk';");
+    let exists = |client: &WorkspaceServerWithDb, path: &str| {
+        client
+            .file_exists(FileExistsParams {
+                file_path: BiomePath::new(path),
+            })
+            .unwrap()
+    };
+    assert!(exists(&cli, INDEXED));
+    assert!(!exists(&cli, UNSAVED));
+    assert!(exists(&editor, UNSAVED));
+}
+
+/// A change from a client that didn't open a file records the content on
+/// disk, and leaves the content of the client that has the file open
+/// untouched. The CLI attached to a daemon sends such a change after it writes
+/// fixes.
+#[cfg(feature = "module_graph")]
+#[test]
+fn change_from_another_client_records_the_disk_content() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, PATH, "import 'editor';");
+
+    cli.change_file(ChangeFileParams {
+        project_key,
+        path: BiomePath::new(PATH),
+        content: "import 'written';".into(),
+        version: 5,
+        inline_config: None,
+        editor_features: None,
+    })
+    .unwrap();
+
+    assert_eq!(content_in(&editor, project_key, PATH), "import 'editor';");
+    assert_eq!(content_in(&cli, project_key, PATH), "import 'written';");
+    assert_eq!(
+        imports_of(&workspace, PATH),
+        Some(vec!["editor".to_string()])
+    );
+    // The editor keeps its own version.
+    editor
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: "import 'changed';".into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    assert_eq!(content_in(&editor, project_key, PATH), "import 'changed';");
+}
+
+/// Closing the files of a client also closes the dependencies it opened,
+/// which the workspace keeps in the database only.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closing_the_files_of_a_client_closes_its_dependencies() {
+    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    open_in(
+        &editor,
+        project_key,
+        PATH,
+        "export declare const value: number;",
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some()
+    );
+
+    editor.close_client_files().unwrap();
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_none()
+    );
+}
+
+/// The analysis of a script reads the embedded content, such as the template
+/// of a Vue file, from the view that the client reads.
+#[cfg(feature = "module_graph")]
+#[test]
+fn embedded_content_follows_the_view_of_the_client() {
+    const PATH: &str = "/project/App.vue";
+    const DISK: &str = "\
+<script setup>
+import Card from './Card.vue';
+</script>
+<template><Card /></template>
+";
+    const EDITOR: &str = "\
+<script setup>
+import Card from './Card.vue';
+</script>
+<template><div /></template>
+";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, DISK)]);
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, PATH, EDITOR);
+
+    let unused_imports = |client: &WorkspaceServerWithDb| {
+        let no_unused_imports =
+            AnalyzerSelector::from_str("lint/correctness/noUnusedImports").unwrap();
+        client
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: BiomePath::new(PATH),
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                only: vec![no_unused_imports],
+                skip: vec![],
+                enabled_rules: vec![no_unused_imports],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap()
+            .diagnostics
+            .len()
+    };
+    assert_eq!(unused_imports(&editor), 1);
+    assert_eq!(unused_imports(&cli), 0);
+}
+
+/// Forgetting a closed client removes the record of its close, so the files
+/// that a client with the same identifier opens are kept.
+#[cfg(feature = "module_graph")]
+#[test]
+fn forgotten_clients_keep_the_files_they_open() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    editor.close_client_files().unwrap();
+    workspace.server.forget_closed_client(ClientId::new(1));
+    open_in(&editor, project_key, PATH, "let a = 1;");
+
+    let exists = editor
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert!(exists);
+}
+
+/// A change that a client sent before its files were closed, and that
+/// publishes its content after the close, doesn't leave the file open.
+#[cfg(feature = "module_graph")]
+#[test]
+fn change_published_after_the_close_of_its_client_is_closed() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    open_in(&editor, project_key, PATH, "let a = 1;");
+    workspace
+        .server
+        .close_client_files_before_change_publish
+        .store(true, Ordering::Release);
+
+    let changed = editor.change_file(ChangeFileParams {
+        project_key,
+        path: BiomePath::new(PATH),
+        content: "let a = 2;".into(),
+        version: 2,
+        inline_config: None,
+        editor_features: None,
+    });
+
+    assert!(changed.is_err());
+    assert_eq!(
+        workspace.get_db().get_parsed_source(Utf8Path::new(PATH)),
+        None
+    );
+}
+
+/// Closing a dependency, which the workspace keeps in the database only,
+/// keeps the views of the other clients that have it open.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closing_a_dependency_keeps_the_views_of_other_clients() {
+    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let (first, second) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(
+        &first,
+        project_key,
+        PATH,
+        "export declare const first: number;",
+    );
+    open_in(
+        &second,
+        project_key,
+        PATH,
+        "export declare const second: number;",
+    );
+
+    first
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+
+    let db = workspace.get_db();
+    let path = Utf8Path::new(PATH);
+    assert_eq!(db.get_client_parsed_source(path, ClientId::new(1)), None);
+    let parsed_text = db
+        .get_client_parsed_source(path, ClientId::new(2))
+        .expect("the second client keeps its view")
+        .parsed(&db)
+        .syntax::<JsLanguage>()
+        .text_with_trivia()
+        .to_string();
+    assert_eq!(parsed_text, "export declare const second: number;");
+}
+
+/// The requests that a client sent before its files were closed, such as the
+/// ones still running when it disconnects, don't keep the files they open or
+/// change.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closed_clients_do_not_keep_the_files_they_open_or_change() {
+    const OPENED: &str = "/project/opened.js";
+    const INDEXED: &str = "/project/indexed.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(INDEXED, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(INDEXED))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, INDEXED, "import 'editor';");
+    editor.close_client_files().unwrap();
+
+    open_in(&editor, project_key, OPENED, "import 'late';");
+    editor
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(INDEXED),
+            content: "import 'late';".into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let exists = editor
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(OPENED),
+        })
+        .unwrap();
+    assert!(!exists);
+    assert_eq!(
+        workspace.get_db().get_parsed_source(Utf8Path::new(OPENED)),
+        None
+    );
+    assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
+}
+
+/// Closing the files of a client while another write is pending waits for the
+/// write instead of failing.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closing_the_files_of_a_client_retries_when_a_write_is_pending() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    open_in(&client(&workspace, 1), project_key, PATH, "let a = 1;");
+
+    // The retained read keeps the setter pending, so closing the files must
+    // read the database while a write is waiting.
+    let retained_db = workspace.get_db();
+    let closed = std::thread::scope(|scope| {
+        let update = scope.spawn(|| {
+            workspace
+                .db_state
+                .insert_root_settings(project_key, Settings::default());
+        });
+        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
+
+        let close = scope.spawn(|| client(&workspace, 1).close_client_files());
+        std::thread::sleep(Duration::from_millis(50));
+        drop(retained_db);
+
+        update.join().expect("the setter completes");
+        close.join()
+    });
+
+    assert!(
+        closed.expect("closing the files must not unwind").is_ok(),
+        "closing the files succeeds after the write completes"
+    );
+    let exists = client(&workspace, 1)
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert!(!exists);
+}
+
+/// A change to a file that no client opened doesn't stop the workspace from
+/// following the file on disk. The CLI sends such a change after it writes
+/// fixes to a file that the daemon indexes.
+#[cfg(feature = "module_graph")]
+#[test]
+fn change_of_an_unopened_file_follows_the_disk() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, fs) = lsp_workspace(&[(PATH, "import 'foo';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: "import 'bar';".into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    fs.insert(PATH.into(), "import 'baz';");
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert_eq!(content, "import 'baz';");
+    assert_eq!(parsed_text(&workspace, PATH), "import 'baz';");
+}
+
+/// Removing the folder of a file that a client has open keeps the content of
+/// the client, also after the file is indexed again from disk.
+#[cfg(feature = "module_graph")]
+#[test]
+fn unload_of_a_folder_keeps_the_open_content() {
+    const PATH: &str = "/project/src/a.js";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+
+    let (workspace, project_key, fs) = lsp_workspace(&[(PATH, "import 'foo';")]);
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+
+    watcher(&workspace)
+        .unload_path(Utf8Path::new("/project/src"), project_key)
+        .unwrap();
+    assert_eq!(parsed_text(&workspace, PATH), CLIENT_CONTENT);
+
+    fs.insert(PATH.into(), "import 'baz';");
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert_eq!(content, CLIENT_CONTENT);
+    assert_eq!(parsed_text(&workspace, PATH), CLIENT_CONTENT);
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn index_keeps_the_open_content() {
+    assert_index_keeps_the_open_content(|workspace| DbState::new(workspace.server.fs.clone()));
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn index_keeps_the_open_content_of_the_lsp() {
+    assert_index_keeps_the_open_content(|workspace| DbState::lsp(workspace.server.fs.clone()));
 }
 
 #[cfg(feature = "module_graph")]
@@ -1318,8 +2004,322 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     );
 }
 
+/// Changing the parser options of a project parses its open documents again,
+/// without a change from the client.
+#[test]
+fn parser_options_change_parses_open_documents_again() {
+    const PATH: &str = "/project/data.json";
+
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(MemoryFileSystem::default()),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    let allow_comments = |allow_comments: bool| {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration {
+                    json: Some(JsonConfiguration {
+                        parser: Some(biome_configuration::json::JsonParserConfiguration {
+                            allow_comments: Some(allow_comments.into()),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+    };
+
+    allow_comments(false);
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: "// comment\n{}".into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    assert!(
+        !workspace
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+
+    allow_comments(true);
+    assert!(
+        workspace
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// Returns a configuration that sets whether JSON files allow comments.
+fn json_allow_comments(allow_comments: bool) -> Configuration {
+    Configuration {
+        json: Some(JsonConfiguration {
+            parser: Some(biome_configuration::json::JsonParserConfiguration {
+                allow_comments: Some(allow_comments.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
+
+/// Replaces the configuration of the project.
+fn update_configuration(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    configuration: Configuration,
+) {
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration,
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+}
+
+/// Settings that a scan applies parse open documents again, even though the
+/// scan replaces the project instead of updating it.
+#[cfg(feature = "module_graph")]
+#[test]
+fn parser_options_change_in_a_scan_parses_open_documents_again() {
+    const PATH: &str = "/project/data.json";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    update_configuration(&workspace, project_key, json_allow_comments(false));
+    let editor = client(&workspace, 1);
+    open_in(&editor, project_key, PATH, "// comment\n{}");
+    assert!(
+        !editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(json_allow_comments(true), None, vec![])
+        .unwrap();
+    {
+        let epoch = workspace.db_state.scanner_epoch();
+        epoch.view().insert_root_settings(project_key, settings);
+    }
+
+    assert!(
+        editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// Parser options that select a variant of the file source, such as
+/// `javascript.parser.jsxEverywhere`, apply to open documents when they
+/// change.
+#[cfg(feature = "module_graph")]
+#[test]
+fn jsx_everywhere_change_parses_open_documents_again() {
+    const PATH: &str = "/project/component.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let jsx_everywhere = |jsx_everywhere: bool| Configuration {
+        javascript: Some(JsConfiguration {
+            parser: Some(JsParserConfiguration {
+                jsx_everywhere: Some(jsx_everywhere.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    update_configuration(&workspace, project_key, jsx_everywhere(false));
+    let editor = client(&workspace, 1);
+    open_in(&editor, project_key, PATH, "const a = <div />;");
+    assert!(
+        !editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+
+    update_configuration(&workspace, project_key, jsx_everywhere(true));
+    assert!(
+        editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// `markdown.parser.cjkFriendlyEmphasis`, which only the file source carries
+/// to the Markdown parser, applies to open documents when it changes.
+#[cfg(all(feature = "module_graph", feature = "lang_md"))]
+#[test]
+fn cjk_friendly_emphasis_change_parses_open_documents_again() {
+    use biome_configuration::markdown::{MarkdownConfiguration, MarkdownParserConfiguration};
+    use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxKind};
+
+    const PATH: &str = "/project/notes.md";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let cjk_friendly_emphasis = |enabled: bool| Configuration {
+        markdown: Some(MarkdownConfiguration {
+            parser: Some(MarkdownParserConfiguration {
+                cjk_friendly_emphasis: Some(enabled.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let has_emphasis = |editor: &WorkspaceServerWithDb| {
+        let db = workspace.get_db();
+        editor
+            .get_parse(Utf8Path::new(PATH))
+            .unwrap()
+            .parsed(&db)
+            .syntax::<MarkdownLanguage>()
+            .descendants()
+            .any(|node| node.kind() == MarkdownSyntaxKind::MD_INLINE_EMPHASIS)
+    };
+    update_configuration(&workspace, project_key, cjk_friendly_emphasis(false));
+    let editor = client(&workspace, 1);
+    open_in(
+        &editor,
+        project_key,
+        PATH,
+        "これは**私のやりたかったこと。**だからするの。",
+    );
+    assert!(!has_emphasis(&editor));
+
+    update_configuration(&workspace, project_key, cjk_friendly_emphasis(true));
+    assert!(has_emphasis(&editor));
+}
+
+/// The parser options of the inline configuration of a client apply to the
+/// files it opens, and not to the ones of other clients.
+#[cfg(feature = "module_graph")]
+#[test]
+fn inline_configuration_applies_to_the_parse_of_its_client() {
+    const PATH: &str = "/project/data.json";
+    const CONTENT: &str = "// comment\n{}";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, CONTENT)]);
+    update_configuration(&workspace, project_key, json_allow_comments(false));
+    let (inline, other) = (client(&workspace, 1), client(&workspace, 2));
+    inline
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CONTENT.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: Some(json_allow_comments(true)),
+            editor_features: None,
+        })
+        .unwrap();
+    open_in(&other, project_key, PATH, CONTENT);
+
+    assert!(
+        inline
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+    assert!(
+        !other
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// A node cache is kept only for the documents opened with
+/// `persist_node_cache`, across their changes, until the document or its
+/// project is closed.
+#[test]
+fn node_caches_live_while_their_documents_are_open() {
+    const KEPT: &str = "/project/kept.js";
+    const OTHER: &str = "/project/other.js";
+    const NESTED: &str = "/project/nested/kept.js";
+
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let open = |path: &str, persist_node_cache| {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::from_client("let a = 1;"),
+                document_file_source: None,
+                persist_node_cache,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    };
+    open(KEPT, true);
+    open(OTHER, false);
+    open(NESTED, true);
+    let has_node_cache = |path: &str| workspace.db_state.has_node_cache(Utf8Path::new(path));
+    assert!(has_node_cache(KEPT));
+    assert!(!has_node_cache(OTHER));
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(KEPT),
+            content: "let b = 2;".into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    assert!(has_node_cache(KEPT));
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(KEPT),
+        })
+        .unwrap();
+    assert!(!has_node_cache(KEPT));
+    assert!(has_node_cache(NESTED));
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+    assert!(!has_node_cache(NESTED));
+}
+
 /// Closing a file evicts its own cached parsed source through
-/// `DbState::remove_file`, and closing a project evicts the cached parsed
+/// `DbState::remove_editor_view`, and closing a project evicts the cached parsed
 /// sources of the files still open under its root through
 /// `DbState::unload_path`. Neither operation touches parsed sources that
 /// belong to a different project.
@@ -1869,16 +2869,16 @@ fn change_file_resumes_module_update_after_cancellation() {
     assert_eq!(diagnostics.diagnostics.len(), 1);
 }
 
-#[test]
-fn owned_scan_uses_replacement_updates() {
-    const PATH: &str = "/project/index.js";
-
-    let fs = MemoryFileSystem::default();
-    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+/// Creates an Owned-mode workspace, which is the mode of the daemon, with a
+/// project at `/project` that resolves its module graph as `resolution_kind`.
+fn lsp_workspace_with_project(
+    fs: &Arc<MemoryFileSystem>,
+    resolution_kind: ModuleGraphResolutionKind,
+) -> (LocalWorkspace, ProjectKey) {
     let (watcher_tx, _) = crossbeam::channel::unbounded();
     let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
     let mut workspace = LocalWorkspace::new(
-        Arc::new(fs),
+        fs.clone(),
         watcher_tx,
         service_tx,
         Arc::new(NoopQueryProvider {}),
@@ -1897,34 +2897,246 @@ fn owned_scan_uses_replacement_updates() {
             workspace_directory: Some(BiomePath::new("/project")),
             configuration: Configuration::default(),
             extended_configurations: vec![],
-            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+            module_graph_resolution_kind: resolution_kind,
         })
         .unwrap();
+    (workspace, project_key)
+}
 
-    let scan = || {
-        workspace
-            .scan_project(ScanProjectParams {
-                project_key,
-                watch: false,
-                force: true,
-                scan_kind: ScanKind::Project,
-                verbose: false,
-            })
-            .unwrap();
+/// Scans the whole project without watching it, as each
+/// `biome check --use-server` run does.
+fn scan_without_watching(workspace: &LocalWorkspace, project_key: ProjectKey) {
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: true,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+}
+
+/// Opens `path` from the filesystem, reads its syntax tree, and closes it, as
+/// one `biome check --use-server` run does with a file. Returns the source
+/// that the file was opened as, and the root of its syntax tree.
+fn check_file(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    path: &str,
+) -> (Source, JsSyntaxNode) {
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(path),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let db = workspace.get_db();
+    let source = db.get_parsed_source(Utf8Path::new(path)).unwrap();
+    let root = source.parsed(&db).syntax::<JsLanguage>();
+    drop(db);
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(path),
+        })
+        .unwrap();
+    (source, root)
+}
+
+/// Returns how many [Source] and [FileViews] inputs Salsa allocated.
+fn allocated_file_inputs(workspace: &LocalWorkspace) -> (usize, usize) {
+    let db = workspace.get_db();
+    (
+        Source::ingredient(&db).entries(db.zalsa()).count(),
+        FileViews::ingredient(&db).entries(db.zalsa()).count(),
+    )
+}
+
+/// Returns whether the JavaScript module at `path` exports `name`.
+#[cfg(feature = "module_graph")]
+fn module_exports(workspace: &LocalWorkspace, path: &str, name: &str) -> bool {
+    let db = workspace.get_db();
+    let Some(module) = db.module_for_path(Utf8Path::new(path)) else {
+        return false;
+    };
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        return false;
+    };
+    info.exports.get(name).is_some()
+}
+
+/// Scanning a project again updates the inputs that the previous scan
+/// published for its files, instead of allocating new ones, and the updated
+/// inputs hold the content that the latest scan read.
+#[test]
+fn owned_rescan_updates_existing_inputs() {
+    const PATH: &str = "/project/index.js";
+    const UPDATED: &str = "export const other = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    scan_without_watching(&workspace, project_key);
+    let db = workspace.get_db();
+    let first = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+    #[cfg(feature = "module_graph")]
+    let first_module = db.module_for_path(Utf8Path::new(PATH)).unwrap();
+    drop(db);
+
+    // The first rescan reads changed content, and the second one unchanged
+    // content.
+    fs.insert(Utf8PathBuf::from(PATH), UPDATED.as_bytes());
+    for _ in 0..2 {
+        scan_without_watching(&workspace, project_key);
+
+        let db = workspace.get_db();
+        let rescanned = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+        assert_eq!(first.as_id(), rescanned.as_id());
+        assert_eq!(&**rescanned.text(&db), UPDATED);
+        #[cfg(feature = "module_graph")]
+        {
+            let module = db.module_for_path(Utf8Path::new(PATH)).unwrap();
+            assert_eq!(first_module.as_id(), module.as_id());
+            assert_eq!(ModuleInfo::ingredient(&db).entries(db.zalsa()).count(), 1);
+            drop(db);
+            assert!(module_exports(&workspace, PATH, "other"));
+            assert!(!module_exports(&workspace, PATH, "value"));
+        }
+        assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+    }
+}
+
+/// When a manifest changed since the previous scan, a rescan applies it
+/// before it indexes the files that depend on it.
+#[test]
+fn owned_rescan_applies_changed_manifest_first() {
+    const MANIFEST: &str = "/project/package.json";
+    const PATH: &str = "/project/index.js";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "type": "module" }"#);
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+    let is_script = || {
+        let db = workspace.get_db();
+        let source = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+        matches!(
+            db.source_from_index(source.file_source_index(&db)),
+            Some(DocumentFileSource::Js(js)) if js.is_script()
+        )
     };
 
-    scan();
-    let first = workspace
-        .get_db()
-        .get_parsed_source(Utf8Path::new(PATH))
-        .unwrap();
-    scan();
-    let second = workspace
-        .get_db()
-        .get_parsed_source(Utf8Path::new(PATH))
-        .unwrap();
+    scan_without_watching(&workspace, project_key);
+    assert!(!is_script());
 
-    assert_ne!(first.as_id(), second.as_id());
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "type": "commonjs" }"#);
+    scan_without_watching(&workspace, project_key);
+    assert!(is_script());
+}
+
+/// A file that no client has open and that the scanner doesn't index keeps
+/// its inputs after its last client closes it. Opening the file again updates
+/// those inputs instead of allocating new ones. Opening it sets its text again,
+/// so reading the file after it's opened again parses its text again.
+#[test]
+fn owned_reopened_file_reuses_its_inputs() {
+    const PATH: &str = "/project/index.js";
+    const UPDATED: &str = "export const value = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) = lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::None);
+
+    let (first, first_root) = check_file(&workspace, project_key, PATH);
+    let (second, second_root) = check_file(&workspace, project_key, PATH);
+    assert_eq!(first.as_id(), second.as_id());
+    // The key of a node identifies the allocation of its tree. The first tree
+    // is still alive, so a new parse can't reuse its allocation.
+    assert!(first_root.key() != second_root.key());
+
+    fs.insert(Utf8PathBuf::from(PATH), UPDATED.as_bytes());
+    let (third, _) = check_file(&workspace, project_key, PATH);
+    assert_eq!(first.as_id(), third.as_id());
+    assert_eq!(&**third.text(&workspace.get_db()), UPDATED);
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+}
+
+/// Each `biome check --use-server` run connects as a new client, and opens the
+/// files that the scanner doesn't index with the content it read. The inputs
+/// that a file kept after the previous client closed it are reused by the next
+/// client, and by a scan that publishes the content on disk instead.
+#[cfg(feature = "module_graph")]
+#[test]
+fn owned_new_clients_reuse_inputs_of_closed_file() {
+    const PATH: &str = "/project/index.js";
+    const UPDATED: &str = "export const value = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    for (id, content) in [(1, "export const value = 1;"), (2, UPDATED)] {
+        let client = client(&workspace, id);
+        open_in(&client, project_key, PATH, content);
+        client
+            .close_file(CloseFileParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap();
+    }
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+
+    fs.insert(Utf8PathBuf::from(PATH), UPDATED.as_bytes());
+    scan_without_watching(&workspace, project_key);
+    let db = workspace.get_db();
+    let scanned = db.get_parsed_source(Utf8Path::new(PATH)).unwrap();
+    assert_eq!(&**scanned.text(&db), UPDATED);
+    drop(db);
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+}
+
+/// A scan publishes again the inputs that a file kept after its last client
+/// closed it, instead of allocating new ones, whether or not the file changed
+/// meanwhile.
+#[test]
+fn owned_scan_reuses_inputs_of_closed_files() {
+    const UNCHANGED_PATH: &str = "/project/unchanged.js";
+    const CHANGED_PATH: &str = "/project/changed.js";
+    const UPDATED: &str = "export const value = 2;";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        Utf8PathBuf::from(UNCHANGED_PATH),
+        b"export const value = 1;",
+    );
+    fs.insert(Utf8PathBuf::from(CHANGED_PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    let (unchanged, _) = check_file(&workspace, project_key, UNCHANGED_PATH);
+    let (changed, _) = check_file(&workspace, project_key, CHANGED_PATH);
+    fs.insert(Utf8PathBuf::from(CHANGED_PATH), UPDATED.as_bytes());
+    scan_without_watching(&workspace, project_key);
+
+    let db = workspace.get_db();
+    let scanned_unchanged = db.get_parsed_source(Utf8Path::new(UNCHANGED_PATH)).unwrap();
+    let scanned_changed = db.get_parsed_source(Utf8Path::new(CHANGED_PATH)).unwrap();
+    assert_eq!(unchanged.as_id(), scanned_unchanged.as_id());
+    assert_eq!(changed.as_id(), scanned_changed.as_id());
+    assert_eq!(&**scanned_changed.text(&db), UPDATED);
+    drop(db);
+    assert_eq!(allocated_file_inputs(&workspace), (2, 2));
 }
 
 #[test]
@@ -2408,14 +3620,14 @@ fn store_embedded_nodes_with_current_ranges() {
     let scripts: Vec<_> = snippets
         .iter()
         .filter(|node| {
-            db.source_from_index(node.document_source_index(&db))
+            db.source_from_index(node.document_source_index())
                 .is_some_and(|source| source.is_javascript_like())
         })
         .collect();
     let styles: Vec<_> = snippets
         .iter()
         .filter(|node| {
-            db.source_from_index(node.document_source_index(&db))
+            db.source_from_index(node.document_source_index())
                 .is_some_and(|source| source.is_css_like())
         })
         .collect();
@@ -2425,7 +3637,7 @@ fn store_embedded_nodes_with_current_ranges() {
     let script = scripts.first().unwrap();
     let style = styles.first().unwrap();
 
-    let script_node = script.parsed(&db);
+    let script_node = script.parsed();
     assert!(
         script_node
             .unwrap_as_embedded_syntax_node()
@@ -2435,7 +3647,7 @@ fn store_embedded_nodes_with_current_ranges() {
             > TextSize::from(0)
     );
 
-    let style_node = style.parsed(&db);
+    let style_node = style.parsed();
     assert!(
         style_node
             .unwrap_as_embedded_syntax_node()
@@ -3382,7 +4594,7 @@ const Empty = <div style />;"#;
     let style_snippets = snippets
         .iter()
         .filter(|snippet| {
-            db.source_from_index(snippet.document_source_index(&db))
+            db.source_from_index(snippet.document_source_index())
                 .and_then(|source| source.to_css_file_source())
                 .is_some_and(|source| {
                     matches!(
@@ -3396,7 +4608,7 @@ const Empty = <div style />;"#;
     assert_eq!(style_snippets.len(), 1);
     assert_eq!(
         style_snippets[0]
-            .parsed(&db)
+            .parsed()
             .clone()
             .embedded_syntax::<CssLanguage>()
             .text_with_trivia()

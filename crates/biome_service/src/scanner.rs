@@ -16,6 +16,13 @@
 //! After the scan, the temporary view is dropped, the database reports module
 //! graph changes to Salsa once, and waiting writes continue.
 //!
+//! The view can't change the inputs that a file already has, because that
+//! needs setters. When the content of such a file changed, the epoch publishes
+//! it once the scan ends, and the workspace indexes the file again in a second
+//! epoch, so that the services that read it are updated. Manifests and JSON
+//! files are published during the scan instead, because the files that the
+//! scan reads later depend on them.
+//!
 //! Watcher-driven updates run outside the epoch. If a setter interrupts file
 //! indexing, the scanner retries that file instead of restarting a project
 //! scan.
@@ -260,6 +267,56 @@ impl Scanner {
         dependencies: ModuleDependencies,
         trigger: IndexTrigger,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.index_with_context(workspace, project_key, trigger, true, |ctx| {
+            scan_dependencies(project_path, dependencies, ctx).1
+        })
+    }
+
+    /// Indexes the files at `paths` in parallel, and then the dependencies
+    /// that they make reachable.
+    ///
+    /// Use this for files that a project scan accepted already, such as the
+    /// files that it couldn't update. The folders of the dependencies are
+    /// watched only when `watch` is set.
+    pub(crate) fn index_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        project_path: &Utf8Path,
+        paths: Vec<Utf8PathBuf>,
+        trigger: IndexTrigger,
+        watch: bool,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.index_with_context(workspace, project_key, trigger, watch, |ctx| {
+            rayon::scope(|scope| {
+                for path in paths {
+                    let ctx = &*ctx;
+                    scope.spawn(move |_| {
+                        let dependencies = open_file(ctx, BiomePath::new(path), ctx.trigger);
+                        ctx.dependencies.lock().unwrap().extend(dependencies);
+                    });
+                }
+            });
+            let dependencies = mem::take(&mut ctx.dependencies)
+                .into_inner()
+                .unwrap()
+                .into_iter()
+                .collect();
+            scan_dependencies(project_path, dependencies, ctx).1
+        })
+    }
+
+    /// Runs `index` with the context of a scan of the project, and returns the
+    /// diagnostics it reported. The folders that `index` returns are watched
+    /// when `watch` is set.
+    fn index_with_context<'a, W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &'a W,
+        project_key: ProjectKey,
+        trigger: IndexTrigger,
+        watch: bool,
+        index: impl FnOnce(&mut ScanContext<'a, W>) -> FxHashSet<Utf8PathBuf>,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let scan_kind = self
             .get_scan_kind_for_project(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
@@ -285,16 +342,16 @@ impl Scanner {
                 evaluated_paths: Default::default(),
                 scan_kind,
                 trigger,
-                watch: true,
+                watch,
                 dependencies: Default::default(),
             };
 
-            let (_duration, folders_to_watch) =
-                scan_dependencies(project_path, dependencies, &mut ctx);
-
-            let _ = self
-                .watcher_tx
-                .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+            let folders_to_watch = index(&mut ctx);
+            if watch {
+                let _ = self
+                    .watcher_tx
+                    .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+            }
 
             // Make sure the diagnostics sender is dropped.
             drop(ctx);
