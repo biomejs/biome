@@ -499,6 +499,20 @@
 			"additionalProperties": false
 		},
 		"Bool": { "type": "boolean" },
+		"BooleanPropStyle": {
+			"oneOf": [
+				{
+					"description": "Write only the prop name, such as `<MyComponent disabled />`.",
+					"type": "string",
+					"const": "shorthand"
+				},
+				{
+					"description": "Write the value `true` explicitly, such as `<MyComponent :disabled=\"true\" />`.",
+					"type": "string",
+					"const": "longhand"
+				}
+			]
+		},
 		"BracketSameLine": {
 			"description": "Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome\nplaces the bracket at the end of the last attribute line when enabled and on its own line after\nthe last attribute when disabled. This option also affects self-closing HTML elements, but\nself-closing JSX elements are unaffected.",
 			"type": "boolean"
@@ -9135,6 +9149,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentBooleanPropStyle": {
+					"description": "Enforce a consistent style for component props set to true.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-boolean-prop-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentBooleanPropStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentEventHyphenation": {
 					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
 					"anyOf": [
@@ -16621,6 +16642,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentBooleanPropStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentBooleanPropStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -22064,6 +22098,27 @@
 		},
 		"UseVueComponentIsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueConsistentBooleanPropStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentBooleanPropStyleOptions" }
+			]
+		},
+		"UseVueConsistentBooleanPropStyleOptions": {
+			"type": "object",
+			"properties": {
+				"except": {
+					"description": "A list of prop names that must use the opposite of `style`.\nNames must match exactly, as written in the template.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"style": {
+					"description": "How a component prop set to `true` should be written: `\"shorthand\"` writes only the\nprop name, and `\"longhand\"` writes the value `true` explicitly.\nDefault: `\"shorthand\"`.",
+					"anyOf": [{ "$ref": "#/$defs/BooleanPropStyle" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueConsistentDefinePropsDeclarationConfiguration": {

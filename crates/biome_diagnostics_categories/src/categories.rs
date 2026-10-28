@@ -431,6 +431,7 @@ define_categories! {
     "lint/nursery/useValidTestTitle": "https://biomejs.dev/linter/rules/use-valid-test-title",
     "lint/nursery/useVueBaseImport": "https://biomejs.dev/linter/rules/use-vue-base-import",
     "lint/nursery/useVueComponentIs": "https://biomejs.dev/linter/rules/use-vue-component-is",
+    "lint/nursery/useVueConsistentBooleanPropStyle": "https://biomejs.dev/linter/rules/use-vue-consistent-boolean-prop-style",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
     "lint/nursery/useVueConsistentEventHyphenation": "https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
     "lint/nursery/useVueDefinePropsDestructuring": "https://biomejs.dev/linter/rules/use-vue-define-props-destructuring",

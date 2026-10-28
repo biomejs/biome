@@ -3768,6 +3768,11 @@ export interface Nursery {
 	 */
 	useVueComponentIs?: UseVueComponentIsConfiguration;
 	/**
+	 * Enforce a consistent style for component props set to true.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-boolean-prop-style
+	 */
+	useVueConsistentBooleanPropStyle?: UseVueConsistentBooleanPropStyleConfiguration;
+	/**
 	 * Enforce a consistent hyphenation style for event names in v-on directives on custom components.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation
 	 */
@@ -6495,6 +6500,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueComponentIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComponentIsOptions;
+export type UseVueConsistentBooleanPropStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentBooleanPropStyleOptions;
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
@@ -9497,6 +9505,14 @@ export interface RuleWithUseVueComponentIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComponentIsOptions;
 }
+export interface RuleWithUseVueConsistentBooleanPropStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentBooleanPropStyleOptions;
+}
 export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11962,6 +11978,19 @@ export interface UseValidTestTitleOptions {
 }
 export type UseVueBaseImportOptions = {};
 export type UseVueComponentIsOptions = {};
+export interface UseVueConsistentBooleanPropStyleOptions {
+	/**
+	 * A list of prop names that must use the opposite of `style`.
+	 * Names must match exactly, as written in the template.
+	 */
+	except?: string[];
+	/**
+	 * How a component prop set to `true` should be written: `"shorthand"` writes only the
+	 * prop name, and `"longhand"` writes the value `true` explicitly.
+	 * Default: `"shorthand"`.
+	 */
+	style?: BooleanPropStyle;
+}
 export interface UseVueConsistentEventHyphenationOptions {
 	/**
 	 * Whether event names in `v-on` directives must be hyphenated (`"always"`) or must not
@@ -12915,6 +12944,7 @@ export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
 	| "arrowFunction";
+export type BooleanPropStyle = "shorthand" | "longhand";
 export type EventHyphenation = "always" | "never";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -13604,6 +13634,7 @@ export type Category =
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueComponentIs"
+	| "lint/nursery/useVueConsistentBooleanPropStyle"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueDefinePropsDestructuring"
