@@ -769,7 +769,8 @@ fn is_dynamic_css_value(value: &AnyCssValue) -> bool {
                 "var" | "env"
             )
         }),
-        AnyCssFunction::CssUrlFunction(_) | AnyCssFunction::ScssLegacyIfFunction(_) => false,
+        AnyCssFunction::CssUrlFunction(_) => false,
+        AnyCssFunction::ScssLegacyIfFunction(_) => true,
     }
 }
 
