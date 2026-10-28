@@ -329,6 +329,9 @@ pub enum SnippetHost {
     DirectiveValue(AttrId),
     /// The iterable of a `v-for`.
     VForIterable(AttrId),
+    /// The default value of a variable of a `v-for`, such as `fallback` in
+    /// `{ item = fallback } in items`.
+    VForDefault(AttrId),
     /// A `v-bind()` inside a `<style>` block.
     StyleVBind(BlockId),
     /// A snippet the model could not place.
@@ -1447,10 +1450,12 @@ impl Snippet {
         self.row().host
     }
 
-    /// The directive whose value or iterable this snippet is.
+    /// The directive whose value, iterable or default value this snippet is.
     pub fn attr(&self) -> Option<Attr> {
         match self.row().host {
-            SnippetHost::DirectiveValue(id) | SnippetHost::VForIterable(id) => Some(Attr {
+            SnippetHost::DirectiveValue(id)
+            | SnippetHost::VForIterable(id)
+            | SnippetHost::VForDefault(id) => Some(Attr {
                 data: self.data.clone(),
                 id,
             }),
@@ -1465,9 +1470,9 @@ impl Snippet {
                 data: self.data.clone(),
                 id,
             }),
-            SnippetHost::DirectiveValue(_) | SnippetHost::VForIterable(_) => {
-                self.attr().map(|attr| attr.element())
-            }
+            SnippetHost::DirectiveValue(_)
+            | SnippetHost::VForIterable(_)
+            | SnippetHost::VForDefault(_) => self.attr().map(|attr| attr.element()),
             _ => None,
         }
     }

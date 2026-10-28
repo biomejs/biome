@@ -596,6 +596,9 @@ impl EmbeddedBindingsBuilder {
             AnyVueVForBinding::AnyVueVForDestructuredBinding(binding) => {
                 self.visit_vue_v_for_destructured_binding(binding);
             }
+            AnyVueVForBinding::VueVForDefaultBinding(binding) => {
+                self.visit_vue_v_for_binding(&binding.binding().ok()?);
+            }
         }
 
         Some(())
@@ -633,6 +636,9 @@ impl EmbeddedBindingsBuilder {
             }
             AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
                 self.visit_vue_v_for_destructured_binding(binding);
+            }
+            AnyVueVForBindingListElement::VueVForDefaultBinding(binding) => {
+                self.visit_vue_v_for_binding(&binding.binding().ok()?);
             }
         }
 

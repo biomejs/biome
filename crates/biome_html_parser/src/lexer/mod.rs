@@ -416,6 +416,7 @@ impl<'src> HtmlLexer<'src> {
             PNC => self.consume_byte(T![')']),
             COM => self.consume_byte(T![,]),
             COL => self.consume_byte(T![:]),
+            EQL => self.consume_byte(T![=]),
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             BTO => self.consume_byte(T!['[']),
@@ -430,6 +431,33 @@ impl<'src> HtmlLexer<'src> {
             ZER | DIG => self.consume_vue_v_for_number(),
             _ => self.consume_vue_v_for_literal(),
         }
+    }
+
+    /// Consumes the default value of a Vue `v-for` binding, such as `fallback`
+    /// in `{ item = fallback } in items`, as a single literal. When no value
+    /// follows the `=`, the token is lexed as in [HtmlLexContext::VueVForValue].
+    fn consume_token_vue_v_for_default(
+        &mut self,
+        current: u8,
+        quote: HtmlSyntaxKind,
+    ) -> HtmlSyntaxKind {
+        if lookup_byte(current) == WHS {
+            return self.consume_newline_or_whitespaces();
+        }
+        let quote = if quote == T!["'"] { b'\'' } else { b'"' };
+        let source = self.source.as_bytes();
+        // The value is missing when the operator follows, as in `item = in items`.
+        // The whitespace before the operator is the trivia just consumed.
+        let length = if at_vue_v_for_operator(&source[self.position.saturating_sub(1)..]) {
+            0
+        } else {
+            vue_v_for_default_length(&source[self.position..], quote)
+        };
+        if length == 0 {
+            return self.consume_token_vue_v_for_value(current);
+        }
+        self.advance(length);
+        HTML_LITERAL
     }
 
     fn consume_token_vue_v_for_expression(
@@ -1811,6 +1839,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::VueVForExpression(quote) => {
                         self.consume_token_vue_v_for_expression(current, quote)
                     }
+                    HtmlLexContext::VueVForDefault(quote) => {
+                        self.consume_token_vue_v_for_default(current, quote)
+                    }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::SvelteAttributeValue => {
                         self.consume_token_svelte_attribute_value(current)
@@ -2012,6 +2043,141 @@ fn is_linebreak(chr: char) -> bool {
 /// Stops at comma, parens, space, quotes
 fn is_vue_v_for_identifier_byte(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
+/// Returns the length of the default value of a Vue `v-for` binding at the
+/// start of `source`, without trailing whitespace.
+///
+/// The value ends at the `quote` that closes the attribute value, at a `,`,
+/// `)`, `]` or `}` outside the brackets, strings, regular expressions and
+/// block comments of the value, or before whitespace followed by `in` or `of`
+/// and whitespace. Vue splits the value of `v-for` at that operator before it
+/// parses the binding as JavaScript, even inside brackets and strings.
+fn vue_v_for_default_length(source: &[u8], quote: u8) -> usize {
+    let mut depth = 0usize;
+    let mut state = DefaultScanState::Code;
+    // The last byte of code before the current one, other than whitespace. A
+    // `/` after it starts a regular expression rather than a division when it
+    // is missing or an operator.
+    let mut previous = None;
+    let mut index = 0;
+    let mut length = 0;
+    while let Some(&byte) = source.get(index) {
+        if byte == quote {
+            break;
+        }
+        if byte.is_ascii_whitespace() {
+            if at_vue_v_for_operator(&source[index..]) {
+                break;
+            }
+            index += 1;
+            continue;
+        }
+        let next = source.get(index + 1).copied();
+        let escapes = byte == b'\\' && next.is_some_and(|next| next != quote);
+        match state {
+            DefaultScanState::String(delimiter) => {
+                if escapes {
+                    index += 1;
+                } else if byte == delimiter {
+                    state = DefaultScanState::Code;
+                    previous = Some(byte);
+                }
+            }
+            DefaultScanState::Regex { in_class } => match byte {
+                _ if escapes => index += 1,
+                b'[' => state = DefaultScanState::Regex { in_class: true },
+                b']' => state = DefaultScanState::Regex { in_class: false },
+                b'/' if !in_class => {
+                    state = DefaultScanState::Code;
+                    previous = Some(byte);
+                }
+                _ => {}
+            },
+            DefaultScanState::BlockComment => {
+                if byte == b'*' && next == Some(b'/') {
+                    index += 1;
+                    state = DefaultScanState::Code;
+                }
+            }
+            DefaultScanState::Code => {
+                match byte {
+                    b'/' if next == Some(b'*') => {
+                        index += 1;
+                        state = DefaultScanState::BlockComment;
+                    }
+                    b'/' if previous.is_none_or(starts_operand) => {
+                        state = DefaultScanState::Regex { in_class: false };
+                    }
+                    b'\'' | b'"' | b'`' => state = DefaultScanState::String(byte),
+                    b'(' | b'[' | b'{' => depth += 1,
+                    b',' | b')' | b']' | b'}' if depth == 0 => break,
+                    b')' | b']' | b'}' => depth -= 1,
+                    _ => {}
+                }
+                if state == DefaultScanState::Code {
+                    previous = Some(byte);
+                }
+            }
+        }
+        index += 1;
+        length = index;
+    }
+    length
+}
+
+/// What the scan of the default value of a Vue `v-for` binding is inside of.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum DefaultScanState {
+    Code,
+    /// A string or template literal, closed by the given quote.
+    String(u8),
+    /// A regular expression literal, and whether the scan is inside one of
+    /// its character classes, where `/` doesn't end it.
+    Regex {
+        in_class: bool,
+    },
+    /// A `/* */` comment.
+    BlockComment,
+}
+
+/// Returns whether `byte`, the last byte of code before a `/`, leaves the
+/// expression expecting an operand, so the `/` starts a regular expression.
+fn starts_operand(byte: u8) -> bool {
+    matches!(
+        byte,
+        b'(' | b'['
+            | b'{'
+            | b','
+            | b'='
+            | b':'
+            | b'?'
+            | b'!'
+            | b'&'
+            | b'|'
+            | b'+'
+            | b'-'
+            | b'*'
+            | b'%'
+            | b'<'
+            | b'>'
+            | b'~'
+            | b'^'
+            | b';'
+    )
+}
+
+/// Returns whether `source` starts with whitespace, followed by the `in` or
+/// `of` operator of a Vue `v-for` and whitespace.
+fn at_vue_v_for_operator(source: &[u8]) -> bool {
+    let start = source
+        .iter()
+        .position(|byte| !byte.is_ascii_whitespace())
+        .unwrap_or(source.len());
+    let rest = &source[start..];
+    start > 0
+        && (rest.starts_with(b"in") || rest.starts_with(b"of"))
+        && rest.get(2).is_some_and(u8::is_ascii_whitespace)
 }
 
 /// Identifiers can contain letters, numbers and `_`
