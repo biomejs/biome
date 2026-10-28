@@ -1,5 +1,5 @@
 /* should not generate diagnostics */
 <>
-	<button popoverTarget="my-popover" />
-	<button popoverTargetAction="toggle" />
+	<div popoverTarget={id} />
+	<button popoverTargetAction="toggle">Open</button>
 </>;
