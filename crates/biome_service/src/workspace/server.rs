@@ -27,7 +27,7 @@ use crate::module_graph::resolve_js_module;
 use crate::module_graph::{ModuleDb, ModuleInfoKind, module_dependencies};
 use crate::projects::{GetFileFeaturesParams, ProjectDb, ProjectKey};
 use crate::scanner::{
-    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
+    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, WatcherInstruction,
     WorkspaceScannerBridge,
 };
 use crate::settings::{
@@ -699,8 +699,8 @@ impl WorkspaceServerWithDb<'_> {
     /// Starts the watcher.
     ///
     /// This method will not return until the watcher stops.
-    pub fn start_watcher(&self, mut watcher: Watcher) {
-        watcher.run(&ScannerWatcherBridge::new((&self.scanner, self)));
+    pub fn start_watcher(&self, watcher: Watcher) {
+        self.scanner.run_watcher(watcher, self);
     }
 
     /// Attempts to find the root of a project by searching upwards from the
@@ -2858,6 +2858,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         #[cfg(test)]
         self.scanner_test_state.enter_project_scan();
 
+        let watch = params.watch;
         let epoch = self.db_state.scanner_epoch();
         let result = {
             let scanner_workspace = WorkspaceServerWithDb {
@@ -2867,6 +2868,13 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             scanner_workspace.scan_project_inner(params)
         };
         drop(epoch);
+
+        // Changes made after this returns must be seen by the watcher, so wait
+        // until it watches the folders found by the scan.
+        if watch {
+            self.scanner.wait_for_watcher();
+        }
+
         result
     }
 
