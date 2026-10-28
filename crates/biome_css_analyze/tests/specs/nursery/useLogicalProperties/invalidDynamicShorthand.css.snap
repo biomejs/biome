@@ -10,6 +10,8 @@ expression: invalidDynamicShorthand.css
 	margin: calc(var(--spacing)) 2px;
 	inset: env(safe-area-inset-top) 1px;
 	scroll-margin: attr(data-offset) 2px;
+	margin: if(media(width > 1px): 1px 2px; else: 0) 3px;
+	padding: 3px if(media(width > 1px): 1px 2px; else: 0);
 }
 
 ```
@@ -67,7 +69,7 @@ invalidDynamicShorthand.css:5:2 lint/nursery/useLogicalProperties ━━━━�
   > 5 │ 	inset: env(safe-area-inset-top) 1px;
       │ 	^^^^^
     6 │ 	scroll-margin: attr(data-offset) 2px;
-    7 │ }
+    7 │ 	margin: if(media(width > 1px): 1px 2px; else: 0) 3px;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -87,8 +89,50 @@ invalidDynamicShorthand.css:6:2 lint/nursery/useLogicalProperties ━━━━�
     5 │ 	inset: env(safe-area-inset-top) 1px;
   > 6 │ 	scroll-margin: attr(data-offset) 2px;
       │ 	^^^^^^^^^^^^^
-    7 │ }
-    8 │ 
+    7 │ 	margin: if(media(width > 1px): 1px 2px; else: 0) 3px;
+    8 │ 	padding: 3px if(media(width > 1px): 1px 2px; else: 0);
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The variable or function may supply multiple values, so check its substitution and split the shorthand manually.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDynamicShorthand.css:7:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    5 │ 	inset: env(safe-area-inset-top) 1px;
+    6 │ 	scroll-margin: attr(data-offset) 2px;
+  > 7 │ 	margin: if(media(width > 1px): 1px 2px; else: 0) 3px;
+      │ 	^^^^^^
+    8 │ 	padding: 3px if(media(width > 1px): 1px 2px; else: 0);
+    9 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The variable or function may supply multiple values, so check its substitution and split the shorthand manually.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidDynamicShorthand.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+     6 │ 	scroll-margin: attr(data-offset) 2px;
+     7 │ 	margin: if(media(width > 1px): 1px 2px; else: 0) 3px;
+   > 8 │ 	padding: 3px if(media(width > 1px): 1px 2px; else: 0);
+       │ 	^^^^^^^
+     9 │ }
+    10 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   

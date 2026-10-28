@@ -87,4 +87,9 @@ expression: validShorthand.css
 	margin-block-end: 2px;
 }
 
+.merge-conditional-values {
+	margin-block-start: if(media(width > 1px): 1px; else: 0);
+	margin-block-end: 2px;
+}
+
 ```

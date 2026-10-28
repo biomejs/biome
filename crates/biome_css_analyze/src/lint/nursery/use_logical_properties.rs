@@ -134,8 +134,8 @@ declare_lint_rule! {
     /// A multi-value physical shorthand always applies values to physical sides. Use separate
     /// logical properties when values differ by axis. A four-sided shorthand is only equivalent
     /// when all four values are identical, so the rule does not combine differing axis values
-    /// into one. Shorthands containing `var()`, `env()`, `attr()`, or a SCSS variable are reported
-    /// without an automatic fix because these values can expand to multiple values. Check the
+    /// into one. Shorthands containing `var()`, `env()`, `attr()`, `if()`, or a SCSS variable are
+    /// reported without an automatic fix because these values can expand to multiple values. Check the
     /// substitution before splitting the shorthand manually.
     ///
     /// ```css
@@ -755,7 +755,7 @@ fn is_dynamic_css_value(value: &AnyCssValue) -> bool {
     };
 
     match function {
-        AnyCssFunction::CssAttrFunction(_) => true,
+        AnyCssFunction::CssAttrFunction(_) | AnyCssFunction::CssIfFunction(_) => true,
         AnyCssFunction::CssFunction(function) => function_name(function).is_some_and(|token| {
             let name = decode_css_identifier(token.text_trimmed());
             matches!(
@@ -763,9 +763,7 @@ fn is_dynamic_css_value(value: &AnyCssValue) -> bool {
                 "var" | "env"
             )
         }),
-        AnyCssFunction::CssIfFunction(_)
-        | AnyCssFunction::CssUrlFunction(_)
-        | AnyCssFunction::ScssLegacyIfFunction(_) => false,
+        AnyCssFunction::CssUrlFunction(_) | AnyCssFunction::ScssLegacyIfFunction(_) => false,
     }
 }
 
