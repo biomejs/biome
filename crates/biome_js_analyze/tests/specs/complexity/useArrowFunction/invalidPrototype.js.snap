@@ -1,0 +1,271 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPrototype.js
+---
+# Input
+```js
+// Using properties other than `prototype` is fine
+const otherProperty = function () {};
+console.log(otherProperty.name, otherProperty.length);
+
+// `prototype` of another object
+const otherObject = function () {};
+console.log(otherObject().prototype);
+
+const asMember = function () {};
+console.log(Foo[asMember].prototype);
+
+// The function is only passed somewhere else or called
+const passed = function () {};
+register(passed);
+passed.call(null);
+
+// `f` is on the left side of `instanceof`
+const instanceofLeft = function () {};
+console.log(instanceofLeft instanceof Function);
+
+// `f` is passed to a constructor, not constructed
+const constructorArgument = function () {};
+new Foo(constructorArgument);
+
+// Async functions don't have a `prototype`, so the fix doesn't change it
+const asyncFunction = async function () {};
+console.log(asyncFunction.prototype);
+
+// Object properties are not tracked
+const object = { method: function () {} };
+
+// A different binding with the same name
+const shadowed = function () {};
+function scope() {
+	const shadowed = {};
+	return shadowed.prototype;
+}
+
+```
+
+# Diagnostics
+```
+invalidPrototype.js:2:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    1 │ // Using properties other than `prototype` is fine
+  > 2 │ const otherProperty = function () {};
+      │                       ^^^^^^^^^^^^^^
+    3 │ console.log(otherProperty.name, otherProperty.length);
+    4 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+     1  1 │   // Using properties other than `prototype` is fine
+     2    │ - const·otherProperty·=·function·()·{};
+        2 │ + const·otherProperty·=·()·=>·{};
+     3  3 │   console.log(otherProperty.name, otherProperty.length);
+     4  4 │   
+  
+
+```
+
+```
+invalidPrototype.js:6:21 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    5 │ // `prototype` of another object
+  > 6 │ const otherObject = function () {};
+      │                     ^^^^^^^^^^^^^^
+    7 │ console.log(otherObject().prototype);
+    8 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+     4  4 │   
+     5  5 │   // `prototype` of another object
+     6    │ - const·otherObject·=·function·()·{};
+        6 │ + const·otherObject·=·()·=>·{};
+     7  7 │   console.log(otherObject().prototype);
+     8  8 │   
+  
+
+```
+
+```
+invalidPrototype.js:9:18 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+     7 │ console.log(otherObject().prototype);
+     8 │ 
+   > 9 │ const asMember = function () {};
+       │                  ^^^^^^^^^^^^^^
+    10 │ console.log(Foo[asMember].prototype);
+    11 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+     7  7 │   console.log(otherObject().prototype);
+     8  8 │   
+     9    │ - const·asMember·=·function·()·{};
+        9 │ + const·asMember·=·()·=>·{};
+    10 10 │   console.log(Foo[asMember].prototype);
+    11 11 │   
+  
+
+```
+
+```
+invalidPrototype.js:13:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    12 │ // The function is only passed somewhere else or called
+  > 13 │ const passed = function () {};
+       │                ^^^^^^^^^^^^^^
+    14 │ register(passed);
+    15 │ passed.call(null);
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    11 11 │   
+    12 12 │   // The function is only passed somewhere else or called
+    13    │ - const·passed·=·function·()·{};
+       13 │ + const·passed·=·()·=>·{};
+    14 14 │   register(passed);
+    15 15 │   passed.call(null);
+  
+
+```
+
+```
+invalidPrototype.js:18:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    17 │ // `f` is on the left side of `instanceof`
+  > 18 │ const instanceofLeft = function () {};
+       │                        ^^^^^^^^^^^^^^
+    19 │ console.log(instanceofLeft instanceof Function);
+    20 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    16 16 │   
+    17 17 │   // `f` is on the left side of `instanceof`
+    18    │ - const·instanceofLeft·=·function·()·{};
+       18 │ + const·instanceofLeft·=·()·=>·{};
+    19 19 │   console.log(instanceofLeft instanceof Function);
+    20 20 │   
+  
+
+```
+
+```
+invalidPrototype.js:22:29 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    21 │ // `f` is passed to a constructor, not constructed
+  > 22 │ const constructorArgument = function () {};
+       │                             ^^^^^^^^^^^^^^
+    23 │ new Foo(constructorArgument);
+    24 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    20 20 │   
+    21 21 │   // `f` is passed to a constructor, not constructed
+    22    │ - const·constructorArgument·=·function·()·{};
+       22 │ + const·constructorArgument·=·()·=>·{};
+    23 23 │   new Foo(constructorArgument);
+    24 24 │   
+  
+
+```
+
+```
+invalidPrototype.js:26:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    25 │ // Async functions don't have a `prototype`, so the fix doesn't change it
+  > 26 │ const asyncFunction = async function () {};
+       │                       ^^^^^^^^^^^^^^^^^^^^
+    27 │ console.log(asyncFunction.prototype);
+    28 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    24 24 │   
+    25 25 │   // Async functions don't have a `prototype`, so the fix doesn't change it
+    26    │ - const·asyncFunction·=·async·function·()·{};
+       26 │ + const·asyncFunction·=·async·()·=>·{};
+    27 27 │   console.log(asyncFunction.prototype);
+    28 28 │   
+  
+
+```
+
+```
+invalidPrototype.js:30:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    29 │ // Object properties are not tracked
+  > 30 │ const object = { method: function () {} };
+       │                          ^^^^^^^^^^^^^^
+    31 │ 
+    32 │ // A different binding with the same name
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    28 28 │   
+    29 29 │   // Object properties are not tracked
+    30    │ - const·object·=·{·method:·function·()·{}·};
+       30 │ + const·object·=·{·method:·()·=>·{}·};
+    31 31 │   
+    32 32 │   // A different binding with the same name
+  
+
+```
+
+```
+invalidPrototype.js:33:18 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    32 │ // A different binding with the same name
+  > 33 │ const shadowed = function () {};
+       │                  ^^^^^^^^^^^^^^
+    34 │ function scope() {
+    35 │ 	const shadowed = {};
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    31 31 │   
+    32 32 │   // A different binding with the same name
+    33    │ - const·shadowed·=·function·()·{};
+       33 │ + const·shadowed·=·()·=>·{};
+    34 34 │   function scope() {
+    35 35 │   	const shadowed = {};
+  
+
+```
