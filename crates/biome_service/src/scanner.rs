@@ -9,21 +9,32 @@
 //! An initial project scan runs as an epoch. Database setters must not interrupt
 //! it with [`salsa::Cancelled::PendingWrite`].
 //!
-//! Before the scan starts, the workspace creates a dedicated database view
-//! with [`DbState::scanner_epoch`](crate::db::DbState::scanner_epoch). When the
-//! LSP owns the database, the scanner updates this view without invoking Salsa
-//! setters. Regular writes wait until the scan ends, while reads continue.
-//! After the scan, the temporary view is dropped, the database reports module
-//! graph changes to Salsa once, and waiting writes continue.
+//! The workspace starts the scan with
+//! [`DbState::scan_session`](crate::db::DbState::scan_session), which runs it
+//! in three phases:
 //!
-//! The view can't change the inputs that a file already has, because that
-//! needs setters. When the content of such a file changed, the epoch publishes
-//! it once the scan ends, and the workspace indexes the file again in a second
-//! epoch, so that the services that read it are updated. Manifests and JSON
-//! files are published during the scan instead, because the files that the
-//! scan reads later depend on them.
+//! 1. The setup phase reads the configuration files, manifests and ignore
+//!    files.
+//! 2. The files phase indexes again the files that the setup phase deferred,
+//!    then the other files and their dependencies.
+//! 3. The deferred files phase indexes again the files that the files phase
+//!    deferred.
 //!
-//! Watcher-driven updates run outside the epoch. If a setter interrupts file
+//! When the LSP owns the database, the scanner works on a view that can't run
+//! Salsa setters. The view records the changes that need setters, and the
+//! session publishes them at the end of each phase. Regular writes wait until
+//! the session ends, while reads continue.
+//!
+//! The view can't change the inputs that a file already has. When the content
+//! of such a file changed, the setup and files phases defer the file, and the
+//! next phase indexes it again with the published content. The other files
+//! read the manifests and the JSON files that the resolver reads, so the files
+//! phase indexes the files that the setup phase deferred first, and never
+//! defers manifests and JSON files itself. The files that the deferred files
+//! phase defers are published when the scan ends, and their next indexing
+//! updates their services.
+//!
+//! Watcher-driven updates run outside the scan. If a setter interrupts file
 //! indexing, the scanner retries that file instead of restarting a project
 //! scan.
 //!
@@ -54,10 +65,12 @@ use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use rayon::Scope;
 use rustc_hash::FxHashSet;
 use std::hash::RandomState;
+use std::mem;
 use std::panic::catch_unwind;
 use std::sync::Mutex;
+#[cfg(not(target_family = "wasm"))]
+use std::thread;
 use std::time::Duration;
-use std::{mem, thread};
 use tracing::instrument;
 
 pub use watcher::{Watcher, WatcherInstruction, WatcherKind, WatcherOptions, watcher_options};
@@ -168,59 +181,92 @@ impl Scanner {
             .map(|project| project.scan_kind.clone_without_targeting_info())
     }
 
-    /// Indexes the project with the given `project_key`, using the given
-    /// `scan_kind`.
+    /// Runs the setup phase of the scan of the project `project_key`: reads
+    /// its configuration files, manifests and ignore files.
     ///
-    /// If [`ScanOptions::watch`] is `true`, this will install a watcher on the
-    /// project folder.
-    pub fn index_project<W: WorkspaceScannerBridge>(
+    /// Returns `None` when the project is watched and `scan_options` doesn't
+    /// force the scan, because the watcher keeps the index up to date.
+    /// Otherwise, publish the changes of `workspace`, then pass the result to
+    /// [`Self::finish_project_scan()`], with the paths of the files that the
+    /// setup phase deferred.
+    pub(crate) fn set_up_project_scan<W: WorkspaceScannerBridge>(
         &self,
         workspace: &W,
         project_key: ProjectKey,
         scan_options: ScanOptions,
-    ) -> Result<ScanProjectResult, WorkspaceError> {
+    ) -> Result<Option<ProjectScan>, WorkspaceError> {
         let project_path = workspace
             .get_project_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
 
         if !scan_options.force && self.is_watched(&project_path) {
-            return Ok(ScanProjectResult {
-                diagnostics: Default::default(),
-                duration: Default::default(),
-                configuration_files: Default::default(),
-            });
+            return Ok(None);
         }
+
+        let setup = self.set_up_scan(
+            workspace,
+            project_key,
+            &project_path,
+            IndexTrigger::InitialScan,
+            &scan_options,
+        );
+        Ok(Some(ProjectScan {
+            project_key,
+            project_path,
+            scan_options,
+            setup,
+        }))
+    }
+
+    /// Runs the files phase of `scan`: indexes again the files that the setup
+    /// phase deferred, at `deferred_paths`, then the other files of the
+    /// project and their dependencies.
+    ///
+    /// If [`ScanOptions::watch`] is `true`, this will install a watcher on the
+    /// project folder.
+    pub(crate) fn finish_project_scan<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        scan: ProjectScan,
+        deferred_paths: Vec<Utf8PathBuf>,
+    ) -> ScanProjectResult {
+        let ProjectScan {
+            project_key,
+            project_path,
+            scan_options,
+            mut setup,
+        } = scan;
+        setup.deferred_paths = deferred_paths;
+        let result = self.scan_files(
+            workspace,
+            project_key,
+            &project_path,
+            IndexTrigger::InitialScan,
+            &scan_options,
+            setup,
+        );
 
         let scanned_project = ScannedProject {
             scan_kind: scan_options.scan_kind.clone_without_targeting_info(),
             watched: scan_options.watch,
         };
-
-        let result = self.scan(
-            workspace,
-            project_key,
-            &project_path,
-            IndexTrigger::InitialScan,
-            scan_options,
-        )?;
-
         self.projects.pin().insert(project_key, scanned_project);
 
         workspace.notify(ServiceNotification::IndexUpdated);
 
-        Ok(ScanProjectResult {
+        ScanProjectResult {
             diagnostics: result.diagnostics,
             duration: result.duration,
             configuration_files: result.configuration_files,
-        })
+        }
     }
 
     /// Indexes the folder with given `path` within the project with the given
     /// `project_key`.
     ///
     /// The project must already have been scanned using
-    /// [`Self::index_project()`]. The folder will be scanned with the same
-    /// scan kind as the project.
+    /// [`Self::finish_project_scan()`]. The folder will be scanned with the
+    /// same scan kind as the project.
     pub fn index_folder<W: WorkspaceScannerBridge>(
         &self,
         workspace: &W,
@@ -251,8 +297,8 @@ impl Scanner {
             project_key,
             path,
             IndexTrigger::Update,
-            scan_options,
-        )?;
+            &scan_options,
+        );
 
         // No need to notify after this scan, because the individual file
         // updates will already trigger notifications.
@@ -288,15 +334,7 @@ impl Scanner {
         watch: bool,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.index_with_context(workspace, project_key, trigger, watch, |ctx| {
-            rayon::scope(|scope| {
-                for path in paths {
-                    let ctx = &*ctx;
-                    scope.spawn(move |_| {
-                        let dependencies = open_file(ctx, BiomePath::new(path), ctx.trigger);
-                        ctx.dependencies.lock().unwrap().extend(dependencies);
-                    });
-                }
-            });
+            ctx.index_files_in_parallel(paths);
             let dependencies = mem::take(&mut ctx.dependencies)
                 .into_inner()
                 .unwrap()
@@ -320,47 +358,78 @@ impl Scanner {
         let scan_kind = self
             .get_scan_kind_for_project(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
+        let scan_options = ScanOptions {
+            scan_kind,
+            force: false,
+            verbose: false,
+            watch,
+        };
+        let (folders_to_watch, diagnostics) =
+            self.run_scan_phase(workspace, project_key, trigger, &scan_options, index);
+        if watch {
+            let _ = self
+                .watcher_tx
+                .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+        }
+        Ok(diagnostics)
+    }
 
+    /// Runs `phase` with a new scan context. Returns the result of `phase` and
+    /// the diagnostics it reported.
+    fn run_scan_phase<'a, W: WorkspaceScannerBridge, R>(
+        &self,
+        workspace: &'a W,
+        project_key: ProjectKey,
+        trigger: IndexTrigger,
+        scan_options: &ScanOptions,
+        phase: impl FnOnce(&mut ScanContext<'a, W>) -> R,
+    ) -> (R, Vec<Diagnostic>) {
         let (interner, _path_receiver) = PathInterner::new();
-
         let (diagnostics_sender, diagnostics_receiver) = unbounded();
-        let collector = DiagnosticsCollector::new(false);
+        let collector = DiagnosticsCollector::new(scan_options.verbose);
 
-        let diagnostics = thread::scope(|scope| {
+        // The traversal context is scoped to ensure all the channels it
+        // contains are properly closed once the phase finishes.
+        let mut ctx = ScanContext {
+            workspace,
+            project_key,
+            interner,
+            diagnostics_sender,
+            evaluated_paths: Default::default(),
+            scan_kind: scan_options.scan_kind.clone(),
+            trigger,
+            watch: scan_options.watch,
+            dependencies: Default::default(),
+        };
+
+        #[cfg(not(target_family = "wasm"))]
+        let result = thread::scope(|scope| {
             let handler = thread::Builder::new()
                 .name("biome::scanner".to_string())
                 .spawn_scoped(scope, || collector.run(diagnostics_receiver))
                 .expect("failed to spawn scanner thread");
 
-            // The traversal context is scoped to ensure all the channels it
-            // contains are properly closed once scanning finishes.
-            let mut ctx = ScanContext {
-                workspace,
-                project_key,
-                interner,
-                diagnostics_sender,
-                evaluated_paths: Default::default(),
-                scan_kind,
-                trigger,
-                watch,
-                dependencies: Default::default(),
-            };
-
-            let folders_to_watch = index(&mut ctx);
-            if watch {
-                let _ = self
-                    .watcher_tx
-                    .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
-            }
+            let result = phase(&mut ctx);
 
             // Make sure the diagnostics sender is dropped.
             drop(ctx);
 
             // Wait for the collector thread to finish.
-            handler.join().unwrap()
+            (result, handler.join().unwrap())
         });
 
-        Ok(diagnostics)
+        // WASM can't spawn threads, so the phase and the collector run on the
+        // current thread.
+        #[cfg(target_family = "wasm")]
+        let result = {
+            let result = phase(&mut ctx);
+
+            // Close the diagnostics channel before collecting to avoid a deadlock on WASM.
+            drop(ctx);
+            (result, collector.run(diagnostics_receiver))
+        };
+
+        result
     }
 
     /// Updates the index of the file with the given `path`.
@@ -398,102 +467,121 @@ impl Scanner {
 
     /// Performs a file system scan and indexes all supported documents that
     /// qualify for the given `scan_kind`.
-    #[instrument(level = "debug", skip(self, workspace))]
+    #[instrument(level = "debug", skip(self, workspace, scan_options))]
     fn scan<W: WorkspaceScannerBridge>(
         &self,
         workspace: &W,
         project_key: ProjectKey,
         folder: &Utf8Path,
         trigger: IndexTrigger,
-        ScanOptions {
-            scan_kind,
-            force,
-            verbose,
-            watch,
-        }: ScanOptions,
-    ) -> Result<ScanResult, WorkspaceError> {
-        let (interner, _path_receiver) = PathInterner::new();
-        let (diagnostics_sender, diagnostics_receiver) = unbounded();
-
-        let collector = DiagnosticsCollector::new(verbose);
-
-        // The traversal context is scoped to ensure all the channels it
-        // contains are properly closed once scanning finishes.
-        #[cfg_attr(target_family = "wasm", allow(unused_mut))]
-        let mut ctx = ScanContext {
-            workspace,
-            project_key,
-            interner,
-            diagnostics_sender,
-            evaluated_paths: Default::default(),
-            scan_kind,
-            trigger,
-            watch,
-            dependencies: Default::default(),
-        };
-
-        #[cfg(not(target_family = "wasm"))]
-        let (duration, diagnostics, configuration_files) = thread::scope(|scope| {
-            let handler = thread::Builder::new()
-                .name("biome::scanner".to_string())
-                .spawn_scoped(scope, || collector.run(diagnostics_receiver))
-                .expect("failed to spawn scanner thread");
-
-            let ScanFolderResult {
-                mut duration,
-                configuration_files,
-            } = self.scan_folder(folder, &ctx);
-
-            let dependencies_mutex = mem::take(&mut ctx.dependencies);
-            let dependencies = dependencies_mutex.into_inner().unwrap();
-            if !dependencies.is_empty() {
-                let (dependencies_duration, folders_to_watch) =
-                    scan_dependencies(folder, dependencies.into_iter().collect(), &mut ctx);
-
-                duration += dependencies_duration;
-
-                let _ = self
-                    .watcher_tx
-                    .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
-            }
-
-            // Make sure the diagnostics sender is dropped.
-            drop(ctx);
-
-            // Wait for the collector thread to finish.
-            let diagnostics = handler.join().unwrap();
-
-            (duration, diagnostics, configuration_files)
-        });
-
-        // On WASM platforms, run the scanner without spawning a thread.
-        // The watcher is also not available, and we don't scan dependencies
-        // either.
-        #[cfg(target_family = "wasm")]
-        let (duration, diagnostics, configuration_files) = {
-            let ScanFolderResult {
-                duration,
-                configuration_files,
-                ..
-            } = self.scan_folder(folder, &ctx);
-
-            // Close the diagnostics channel before collecting to avoid a deadlock on WASM.
-            drop(ctx);
-            let diagnostics = collector.run(diagnostics_receiver);
-
-            (duration, diagnostics, configuration_files)
-        };
-
-        Ok(ScanResult {
-            diagnostics,
-            duration,
-            configuration_files,
-        })
+        scan_options: &ScanOptions,
+    ) -> ScanResult {
+        let setup = self.set_up_scan(workspace, project_key, folder, trigger, scan_options);
+        self.scan_files(workspace, project_key, folder, trigger, scan_options, setup)
     }
 
-    /// Initiates the filesystem traversal tasks from the provided path and runs it to completion.
+    /// Runs the setup phase of a scan of `folder`: finds its files and reads
+    /// its configuration files, manifests and ignore files.
+    fn set_up_scan<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        folder: &Utf8Path,
+        trigger: IndexTrigger,
+        scan_options: &ScanOptions,
+    ) -> ScanSetupResult {
+        let ((folder_result, dependencies), diagnostics) =
+            self.run_scan_phase(workspace, project_key, trigger, scan_options, |ctx| {
+                let folder_result = self.scan_folder(folder, ctx);
+                let dependencies = mem::take(&mut ctx.dependencies).into_inner().unwrap();
+                (folder_result, dependencies)
+            });
+        let ScanFolderResult {
+            duration,
+            configuration_files,
+            handleable_paths,
+        } = folder_result;
+        ScanSetupResult {
+            deferred_paths: Vec::new(),
+            handleable_paths,
+            configuration_files,
+            dependencies,
+            diagnostics,
+            duration,
+        }
+    }
+
+    /// Runs the files phase of a scan of `folder`: indexes again the files
+    /// that `setup` deferred, then the other files that it found and their
+    /// dependencies.
+    fn scan_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        folder: &Utf8Path,
+        trigger: IndexTrigger,
+        scan_options: &ScanOptions,
+        setup: ScanSetupResult,
+    ) -> ScanResult {
+        let ScanSetupResult {
+            deferred_paths,
+            handleable_paths,
+            configuration_files,
+            dependencies,
+            mut diagnostics,
+            duration: setup_duration,
+        } = setup;
+        let (duration, files_diagnostics) =
+            self.run_scan_phase(workspace, project_key, trigger, scan_options, |ctx| {
+                let start = web_time::Instant::now();
+                // The other files read the manifests that the setup phase
+                // deferred, so they're indexed first.
+                ctx.index_files_in_parallel(deferred_paths);
+                let traversal_ctx = &*ctx;
+                ctx.workspace
+                    .fs()
+                    .traversal(Box::new(|scope: &dyn TraversalScope| {
+                        for path in &handleable_paths {
+                            scope.handle(traversal_ctx, path.to_path_buf());
+                        }
+                    }));
+                #[cfg_attr(target_family = "wasm", expect(unused_mut))]
+                let mut duration = start.elapsed();
+
+                // WASM has no watcher, and scans don't index dependencies
+                // there.
+                #[cfg(not(target_family = "wasm"))]
+                {
+                    let mut all_dependencies =
+                        mem::take(&mut ctx.dependencies).into_inner().unwrap();
+                    all_dependencies.extend(dependencies);
+                    if !all_dependencies.is_empty() {
+                        let (dependencies_duration, folders_to_watch) =
+                            scan_dependencies(folder, all_dependencies.into_iter().collect(), ctx);
+                        duration += dependencies_duration;
+                        let _ = self
+                            .watcher_tx
+                            .try_send(WatcherInstruction::WatchFolders(folders_to_watch));
+                    }
+                }
+                #[cfg(target_family = "wasm")]
+                let _ = (folder, dependencies);
+
+                duration
+            });
+        diagnostics.extend(files_diagnostics);
+
+        ScanResult {
+            diagnostics,
+            duration: setup_duration + duration,
+            configuration_files,
+        }
+    }
+
+    /// Finds the files of `folder` and indexes its configuration files,
+    /// manifests and ignore files.
     ///
-    /// Returns the duration of the process and the evaluated paths.
+    /// Returns the other files, for the files phase of the scan to index.
     #[instrument(level = "debug", skip(self, ctx))]
     fn scan_folder<W: WorkspaceScannerBridge>(
         &self,
@@ -568,15 +656,10 @@ impl Scanner {
             ctx.send_diagnostic(error);
         }
 
-        fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-            for path in &handleable_paths {
-                scope.handle(ctx, path.to_path_buf());
-            }
-        }));
-
         ScanFolderResult {
             duration: start.elapsed(),
             configuration_files: configs,
+            handleable_paths,
         }
     }
 
@@ -609,6 +692,45 @@ struct ScanFolderResult {
     ///
     /// The root configuration is not included in this.
     pub configuration_files: Vec<BiomePath>,
+
+    /// The files for the files phase of the scan to index.
+    pub handleable_paths: Vec<BiomePath>,
+}
+
+/// The result of the setup phase of a folder scan, for its files phase.
+struct ScanSetupResult {
+    /// The files that the setup phase deferred, for the files phase to index
+    /// again before the other files. Only a project scan defers them.
+    deferred_paths: Vec<Utf8PathBuf>,
+
+    /// The files for the files phase to index.
+    handleable_paths: Vec<BiomePath>,
+
+    /// The nested configuration files of the folder.
+    configuration_files: Vec<BiomePath>,
+
+    /// The dependencies of the files that the setup phase indexed.
+    dependencies: Vec<Utf8PathBuf>,
+
+    diagnostics: Vec<Diagnostic>,
+
+    duration: Duration,
+}
+
+/// A project scan after its setup phase. [`Scanner::finish_project_scan()`]
+/// runs its files phase.
+pub(crate) struct ProjectScan {
+    project_key: ProjectKey,
+    project_path: Utf8PathBuf,
+    scan_options: ScanOptions,
+    setup: ScanSetupResult,
+}
+
+impl ProjectScan {
+    /// Returns the nested configuration files of the project.
+    pub(crate) fn configuration_files(&self) -> &[BiomePath] {
+        &self.setup.configuration_files
+    }
 }
 
 #[instrument(level = "debug", skip(ctx))]
@@ -840,6 +962,19 @@ impl<W: WorkspaceScannerBridge> ScanContext<'_, W> {
     /// Send a message to the display thread
     pub(crate) fn send_diagnostic(&self, diagnostic: impl Into<Diagnostic>) {
         self.diagnostics_sender.send(diagnostic.into()).ok();
+    }
+
+    /// Indexes the files at `paths` in parallel, and adds their dependencies
+    /// to [Self::dependencies].
+    fn index_files_in_parallel(&self, paths: Vec<Utf8PathBuf>) {
+        rayon::scope(|scope| {
+            for path in paths {
+                scope.spawn(move |_| {
+                    let dependencies = open_file(self, BiomePath::new(path), self.trigger);
+                    self.dependencies.lock().unwrap().extend(dependencies);
+                });
+            }
+        });
     }
 }
 

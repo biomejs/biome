@@ -4,7 +4,9 @@ use biome_languages::JsFileSource;
 use biome_languages::LanguageDb;
 use biome_parser::db::{AnalyzedSource, SourceExt, TrackedSnippet};
 
-#[salsa::tracked]
+// The model holds the syntax tree of the file, so it has the same cache limit
+// as the parse.
+#[salsa::tracked(lru = 200)]
 pub fn semantic_model_from_source(db: &dyn LanguageDb, file: Source) -> SemanticModel {
     let parsed = file.parsed(db);
     let path = file.path(db);
@@ -17,7 +19,9 @@ pub fn semantic_model_from_source(db: &dyn LanguageDb, file: Source) -> Semantic
     semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type))
 }
 
-#[salsa::tracked]
+// The model holds the syntax tree of the snippet, so it has the same cache
+// limit as the parse.
+#[salsa::tracked(lru = 200)]
 pub fn semantic_model_from_snippet<'db>(
     db: &'db dyn LanguageDb,
     file: TrackedSnippet<'db>,

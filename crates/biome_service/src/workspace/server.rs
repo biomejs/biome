@@ -30,8 +30,8 @@ use crate::module_graph::resolve_js_module;
 use crate::module_graph::{ModuleDb, ModuleInfoKind, module_dependencies};
 use crate::projects::{GetFileFeaturesParams, ProjectDb, ProjectKey};
 use crate::scanner::{
-    IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
-    WorkspaceScannerBridge,
+    IndexRequestKind, IndexTrigger, ProjectScan, ScanOptions, Scanner, ScannerWatcherBridge,
+    WatcherInstruction, WorkspaceScannerBridge,
 };
 use crate::settings::{
     EditorFeature, EditorFeatures, ModuleGraphResolutionKind, SettingsEditorState, SettingsHandle,
@@ -961,13 +961,14 @@ impl WorkspaceServerWithDb<'_> {
             Err(error) => Some(Err(error)),
             Ok(None) => None,
             Ok(Some(text)) => {
-                // The project layout and the module resolution of the files
-                // that a scan reads later depend on the manifests and on the
-                // JSON files the resolver reads, such as the TypeScript
-                // configurations that other ones extend. A scanner epoch
-                // publishes them right away instead of deferring them.
-                let can_defer =
-                    !biome_path.is_manifest() && !matches!(source, DocumentFileSource::Json(_));
+                // The project layout and module resolution depend on the
+                // manifests and on the JSON files that the resolver reads,
+                // such as extended TypeScript configurations. The files that a
+                // scan reads later need them, so a scan publishes them right
+                // away instead of deferring them, except in its setup phase.
+                let can_defer = self.db_state.defers_manifests()
+                    || (!biome_path.is_manifest()
+                        && !matches!(source, DocumentFileSource::Json(_)));
                 parsed_source = if can_defer {
                     self.db_state.update_file_view_or_defer(
                         &path,
@@ -1029,9 +1030,9 @@ impl WorkspaceServerWithDb<'_> {
             return Ok(InternalOpenFileResult::default());
         }
 
-        // Manifest files need to update the module graph. A scanner epoch
-        // defers the update of a file whose inputs need Salsa setters, and the
-        // scan indexes the file again once the epoch ends.
+        // Manifest files need to update the module graph. A scan defers a file
+        // when updating its inputs needs Salsa setters, and indexes the file
+        // again in its next phase.
         if is_indexed {
             if let Some(root) = parsed_source {
                 let (dependencies, diagnostics) = self.update_service_data(
@@ -2719,30 +2720,31 @@ impl Workspace for LocalWorkspace {
     }
 }
 
+/// The result of the setup phase of a project scan.
+enum ScanSetupOutcome {
+    /// The scan has no files phase: its scan kind needs only the root
+    /// manifest, or the watcher already keeps the index of the project up to
+    /// date.
+    Done(ScanProjectResult),
+    /// The files phase still has to index the files that the setup phase
+    /// found.
+    Files(ProjectScan),
+}
+
 impl WorkspaceServerWithDb<'_> {
-    /// Runs `scan` with the view of a new scanner epoch. Returns its result,
-    /// and the paths of the files whose inputs the view couldn't update,
-    /// whose content the epoch published when it ended.
-    fn scan_in_epoch<R>(
-        &self,
-        scan: impl FnOnce(&WorkspaceServerWithDb<'_>) -> R,
-    ) -> (R, Vec<Utf8PathBuf>) {
-        let epoch = self.db_state.scanner_epoch();
-        let result = {
-            let scanner_workspace = WorkspaceServerWithDb {
-                server: self.server,
-                db_state: epoch.view(),
-                client: self.client,
-            };
-            scan(&scanner_workspace)
-        };
-        let deferred_paths = epoch.deferred_paths();
-        drop(epoch);
-        (result, deferred_paths)
+    /// Returns this workspace for the same client, reading from `db_state`,
+    /// such as the view of a scan.
+    fn with_db_state<'a>(&'a self, db_state: &'a DbState) -> WorkspaceServerWithDb<'a> {
+        WorkspaceServerWithDb {
+            server: self.server,
+            db_state,
+            client: self.client,
+        }
     }
 
-    /// Performs a project traversal using the database view selected by the caller.
-    fn scan_project_inner(
+    /// Runs the setup phase of a project scan: reads the configuration files,
+    /// manifests and ignore files of the project.
+    fn set_up_project_scan(
         &self,
         ScanProjectParams {
             project_key,
@@ -2751,7 +2753,7 @@ impl WorkspaceServerWithDb<'_> {
             scan_kind,
             verbose,
         }: ScanProjectParams,
-    ) -> Result<ScanProjectResult, WorkspaceError> {
+    ) -> Result<ScanSetupOutcome, WorkspaceError> {
         let mut diagnostics = Vec::new();
         if scan_kind.is_none() {
             let path = self
@@ -2769,11 +2771,11 @@ impl WorkspaceServerWithDb<'_> {
                         .map(biome_diagnostics::serde::Diagnostic::new),
                 );
             }
-            return Ok(ScanProjectResult {
+            return Ok(ScanSetupOutcome::Done(ScanProjectResult {
                 diagnostics,
                 duration: Duration::from_millis(0),
                 configuration_files: vec![],
-            });
+            }));
         }
 
         let scan_options = ScanOptions {
@@ -2783,13 +2785,19 @@ impl WorkspaceServerWithDb<'_> {
             watch,
         };
 
-        let mut result = self
-            .scanner
-            .index_project(self, project_key, scan_options)?;
-
-        result.diagnostics.extend(diagnostics);
-
-        Ok(result)
+        Ok(
+            match self
+                .scanner
+                .set_up_project_scan(self, project_key, scan_options)?
+            {
+                Some(scan) => ScanSetupOutcome::Files(scan),
+                None => ScanSetupOutcome::Done(ScanProjectResult {
+                    diagnostics,
+                    duration: Duration::default(),
+                    configuration_files: vec![],
+                }),
+            },
+        )
     }
 }
 
@@ -2912,32 +2920,62 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         let project_key = params.project_key;
         let watch = params.watch;
-        let (result, deferred_paths) =
-            self.scan_in_epoch(|workspace| workspace.scan_project_inner(params));
-        let mut result = result?;
+        let session = self.db_state.scan_session();
+        let setup = self
+            .with_db_state(session.view())
+            .set_up_project_scan(params);
+        let (session, deferred_setup_paths) = session.commit();
+        let workspace = self.with_db_state(session.view());
+        let scan = match setup? {
+            ScanSetupOutcome::Done(mut result) => {
+                // Without a files phase, the setup phase indexes only the root
+                // manifest, so it's indexed again here if it was deferred.
+                for path in deferred_setup_paths {
+                    let (_, diagnostics) =
+                        workspace.index_file(project_key, path, IndexTrigger::InitialScan)?;
+                    result.diagnostics.extend(
+                        diagnostics
+                            .into_iter()
+                            .map(biome_diagnostics::serde::Diagnostic::new),
+                    );
+                }
+                return Ok(result);
+            }
+            ScanSetupOutcome::Files(scan) => scan,
+        };
+
+        // The pnpm catalogs of a package depend on its nested settings, and
+        // the nested settings are readable only after the setup commit.
+        for configuration_file in scan.configuration_files() {
+            if let Some(directory) = configuration_file.parent() {
+                workspace.refresh_pnpm_workspace_catalogs_for_scope(project_key, directory);
+            }
+        }
+        let mut result = self
+            .scanner
+            .finish_project_scan(&workspace, scan, deferred_setup_paths);
+        let (session, deferred_paths) = session.commit();
         if deferred_paths.is_empty() {
             return Ok(result);
         }
 
-        // The epoch published the content of these files when it ended,
-        // because their inputs needed Salsa setters. Indexing them again in
-        // another epoch updates the services that read them. The files that
-        // change again meanwhile have their content published when that epoch
-        // ends, and their services are updated the next time they're indexed.
-        let project_path = self
+        // Indexing the deferred files again updates the services that read
+        // them. If a deferred file changes again in the meantime, its next
+        // indexing updates its services.
+        let workspace = self.with_db_state(session.view());
+        let project_path = workspace
             .project_get_path(project_key)
             .ok_or_else(WorkspaceError::no_project)?;
-        let (diagnostics, _) = self.scan_in_epoch(|workspace| {
-            self.scanner.index_files(
-                workspace,
-                project_key,
-                &project_path,
-                deferred_paths,
-                IndexTrigger::InitialScan,
-                watch,
-            )
-        });
-        result.diagnostics.extend(diagnostics?);
+        let diagnostics = self.scanner.index_files(
+            &workspace,
+            project_key,
+            &project_path,
+            deferred_paths,
+            IndexTrigger::InitialScan,
+            watch,
+        )?;
+        session.finish();
+        result.diagnostics.extend(diagnostics);
         let _ = self.notification_tx.send(ServiceNotification::IndexUpdated);
         Ok(result)
     }

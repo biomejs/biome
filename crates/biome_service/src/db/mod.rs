@@ -32,6 +32,7 @@ use biome_rowan::NodeCache;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
+use ignore::gitignore::Gitignore;
 use papaya::{Compute, HashMap, Operation};
 use parking_lot::Mutex;
 use salsa::{Setter, Storage};
@@ -211,8 +212,8 @@ pub struct WorkspaceDb {
     /// It maps a file path to the views of its content.
     ///
     /// Salsa tracks the [FileViews] inputs, but not this map. In Owned mode,
-    /// outside a scanner epoch, adding or removing a view updates the input of
-    /// the path through a Salsa setter.
+    /// outside a scan, adding or removing a view updates the input of the path
+    /// through a Salsa setter.
     ///
     /// The map itself changes when a path gets its first view or loses its
     /// last one, and when Shared storage replaces the input of a path. Tracked
@@ -768,10 +769,10 @@ impl WorkspaceDb {
     ///
     /// Returns `None` when the inputs hold other content, or `path` has none.
     ///
-    /// A reused input keeps the parse it had, even when the project of the
-    /// path was replaced since then: the parse runs again only when the
-    /// [ProjectsGeneration] changes, which Shared storage can't change before
-    /// a scanner epoch ends.
+    /// A reused input keeps its parse, even when the project of the path was
+    /// replaced since then. The parse runs again only when the
+    /// [ProjectsGeneration] changes, and the view of a scan changes it only
+    /// when the scan commits the phase.
     pub(crate) fn reuse_view(
         &self,
         path: &Utf8Path,
@@ -780,10 +781,10 @@ impl WorkspaceDb {
         file_source_index: usize,
         configuration_index: Option<usize>,
     ) -> Option<Source> {
-        // This runs in the view of a scanner epoch, where Salsa setters must
-        // not run: a setter waits for exclusive access to the storage, which
-        // never comes while the shared handles are alive. The inputs are
-        // reused only when they don't need a setter.
+        // This runs in the view of a scan, where Salsa setters must not run. A
+        // setter waits for exclusive access to the storage, and the shared
+        // handles of the view block that access until the scan commits the
+        // phase. So the inputs are reused only when they don't need a setter.
         if let Some(file_views) = self.files.pin().get(path).copied() {
             let views = file_views.views(self);
             return views
@@ -1294,53 +1295,73 @@ impl WorkspaceDb {
         self.data().remove_project(project_key);
     }
 
-    pub(crate) fn store_nested_ignore_patterns_with_mode(
+    /// Parses the patterns of nested ignore files with the VCS client of the
+    /// project `project_key`.
+    ///
+    /// Each entry of `payload` holds the directory of an ignore file and its
+    /// patterns. The VCS client comes from the root settings of the project.
+    /// Returns an empty list when the root settings have no VCS client.
+    pub(crate) fn nested_git_ignores(
+        &self,
+        project_key: ProjectKey,
+        payload: &[(Utf8PathBuf, Vec<String>)],
+    ) -> Result<Vec<Gitignore>, WorkspaceError> {
+        let project = self
+            .get_project(&project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        match project
+            .root_settings(self)
+            .as_ref()
+            .vcs_settings
+            .client_kind
+        {
+            Some(VcsClientKind::Git) => payload
+                .iter()
+                .map(|(path, patterns)| {
+                    let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
+                    VcsIgnoredPatterns::git_ignore(path.as_path(), patterns.as_slice())
+                })
+                .collect(),
+            None => Ok(Vec::new()),
+        }
+    }
+
+    /// Adds `git_ignores` to the root settings of the project `project_key`.
+    /// [Self::nested_git_ignores] parses them from the nested ignore files.
+    pub(crate) fn insert_nested_git_ignores_with_mode(
         &mut self,
         project_key: ProjectKey,
-        payload: Vec<(Utf8PathBuf, Vec<String>)>,
+        git_ignores: &[Gitignore],
         mode: ProjectUpdateMode,
     ) -> Result<(), WorkspaceError> {
-        let update_root_settings =
-            |mut root_settings: SettingsIdentity| -> Result<SettingsIdentity, WorkspaceError> {
-                let git_ignores = match root_settings.as_ref().vcs_settings.client_kind {
-                    Some(VcsClientKind::Git) => payload
-                        .iter()
-                        .map(|(path, patterns)| {
-                            let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
-                            VcsIgnoredPatterns::git_ignore(path.as_path(), patterns.as_slice())
-                        })
-                        .collect::<Result<Vec<_>, _>>()?,
-                    None => Vec::new(),
-                };
-
-                let settings = root_settings.make_mut();
-                if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
-                    for git_ignore in git_ignores {
-                        ignore_matches.insert_git_match(git_ignore);
-                    }
+        let update_root_settings = |mut root_settings: SettingsIdentity| {
+            let settings = root_settings.make_mut();
+            if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
+                for git_ignore in git_ignores {
+                    ignore_matches.insert_git_match(git_ignore.clone());
                 }
-
-                Ok(root_settings)
-            };
+            }
+            root_settings
+        };
 
         match mode {
             ProjectUpdateMode::Replace => {
-                self.try_replace_project_with(project_key, |db, project| {
-                    Ok::<_, WorkspaceError>(ProjectInput::new(
+                self.replace_project_with(project_key, |db, project| {
+                    ProjectInput::new(
                         db,
                         project_key,
                         project.path(db).to_path_buf(),
-                        update_root_settings(project.root_settings(db))?,
+                        update_root_settings(project.root_settings(db)),
                         project.nested_settings(db).clone(),
-                    ))
-                })?
+                    )
+                })
                 .ok_or_else(WorkspaceError::no_project)?;
             }
             ProjectUpdateMode::Setters => {
                 let project = self
                     .get_project(&project_key)
                     .ok_or_else(WorkspaceError::no_project)?;
-                let root_settings = update_root_settings(project.root_settings(self))?;
+                let root_settings = update_root_settings(project.root_settings(self));
                 project.set_root_settings(self).to(root_settings);
             }
         }
@@ -1798,6 +1819,90 @@ mod tests {
 
         file.parsed(&db);
         assert_eq!(parse_count(&events), 0);
+    }
+
+    /// After a text changes, the cache keeps only the 200 parses read most
+    /// recently. Reading an evicted parse parses the text again. Reading the
+    /// document file source index of the same source doesn't.
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn least_recently_read_parses_are_parsed_again() {
+        let (mut db, events) = settings_query_test_db();
+        let file_source_index = db.data().insert_source(js());
+        let publish = |db: &mut WorkspaceDb, path: &str, text: &str| {
+            db.update_or_insert_view(
+                Utf8Path::new(path),
+                ViewId::Disk,
+                text.into(),
+                file_source_index,
+                None,
+                ParsedSourceUpdateMode::Setters,
+            )
+        };
+        let files: Vec<_> = (0..=200)
+            .map(|index| publish(&mut db, &format!("/file{index}.js"), "let a = 1;"))
+            .collect();
+        for file in &files {
+            file.parsed(&db);
+            file.document_source_index(&db);
+        }
+        publish(&mut db, "/changed.js", "let a = 1;");
+        take_events(&events);
+        let parse_count = |db: &WorkspaceDb, events: &Events| {
+            function_query_will_execute_count_by_name(db, "tracked_source", &take_events(events))
+        };
+
+        // `files[0]` is the source read least recently, so the change evicts
+        // its parse.
+        publish(&mut db, "/changed.js", "let b = 2;");
+
+        files[0].document_source_index(&db);
+        assert_eq!(parse_count(&db, &events), 0);
+        files[200].parsed(&db);
+        assert_eq!(parse_count(&db, &events), 0);
+        files[0].parsed(&db);
+        assert_eq!(parse_count(&db, &events), 1);
+    }
+
+    /// A `SnippetRef` still resolves after the cache evicts the parse of its
+    /// document, as long as the document doesn't change.
+    #[cfg(feature = "html_embeds")]
+    #[test]
+    fn snippet_reference_resolves_after_its_document_is_parsed_again() {
+        let mut db = test_db();
+        let js_index = db.data().insert_source(js());
+        let html_index = db
+            .data()
+            .insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
+        let publish = |db: &mut WorkspaceDb, path: &str, text: &str, file_source_index: usize| {
+            db.update_or_insert_view(
+                Utf8Path::new(path),
+                ViewId::Disk,
+                text.into(),
+                file_source_index,
+                None,
+                ParsedSourceUpdateMode::Setters,
+            )
+        };
+        let document = publish(
+            &mut db,
+            "/index.html",
+            "<script>let a = 1;</script>",
+            html_index,
+        );
+        document.snippets(&db)[0].parsed(&db);
+        for index in 0..200 {
+            let file = publish(&mut db, &format!("/file{index}.js"), "let a = 1;", js_index);
+            file.parsed(&db);
+        }
+        publish(&mut db, "/changed.js", "let a = 1;", js_index);
+
+        // The document is the source read least recently, so the change evicts
+        // its parse.
+        publish(&mut db, "/changed.js", "let b = 2;", js_index);
+
+        let reference = document.snippets(&db)[0].to_ref(&db);
+        assert!(reference.resolve(&db).is_some());
     }
 
     #[cfg(feature = "html_embeds")]
@@ -2682,9 +2787,15 @@ mod tests {
             )
         );
 
-        db.store_nested_ignore_patterns_with_mode(
+        let git_ignores = db
+            .nested_git_ignores(
+                project_key,
+                &[(nested_path, vec!["generated.js".to_string()])],
+            )
+            .unwrap();
+        db.insert_nested_git_ignores_with_mode(
             project_key,
-            vec![(nested_path, vec!["generated.js".to_string()])],
+            &git_ignores,
             ProjectUpdateMode::Setters,
         )
         .unwrap();

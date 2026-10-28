@@ -2,6 +2,7 @@ use super::*;
 use crate::db::FileViews;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::ModuleInfo;
+use crate::projects::ProjectInput;
 #[cfg(feature = "module_graph")]
 use crate::scanner::WorkspaceWatcherBridge;
 use crate::settings::ModuleGraphResolutionKind;
@@ -2129,8 +2130,8 @@ fn parser_options_change_in_a_scan_parses_open_documents_again() {
         .merge_with_configuration(json_allow_comments(true), None, vec![])
         .unwrap();
     {
-        let epoch = workspace.db_state.scanner_epoch();
-        epoch.view().insert_root_settings(project_key, settings);
+        let session = workspace.db_state.scan_session();
+        session.view().insert_root_settings(project_key, settings);
     }
 
     assert!(
@@ -3014,6 +3015,76 @@ fn owned_rescan_updates_existing_inputs() {
     }
 }
 
+/// A rescan updates the nested settings of a project on its existing project
+/// input, instead of allocating a new input.
+#[test]
+fn owned_rescan_updates_existing_project_input() {
+    const NESTED_CONFIG: &str = "/project/packages/a/biome.json";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(NESTED_CONFIG), br#"{ "root": false }"#);
+    fs.insert(
+        Utf8PathBuf::from("/project/packages/a/index.js"),
+        b"export const value = 1;",
+    );
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+    let project_inputs = || {
+        let db = workspace.get_db();
+        ProjectInput::ingredient(&db).entries(db.zalsa()).count()
+    };
+    let nested_settings = || {
+        let db = workspace.get_db();
+        db.get_project(&project_key)
+            .map(|project| project.nested_settings(&db).len())
+    };
+
+    scan_without_watching(&workspace, project_key);
+    let project_input_count = project_inputs();
+    assert_eq!(nested_settings(), Some(1));
+
+    scan_without_watching(&workspace, project_key);
+    assert_eq!(project_inputs(), project_input_count);
+    assert_eq!(nested_settings(), Some(1));
+}
+
+/// A scan resolves pnpm catalog versions for a package when its nested
+/// configuration file enables catalogs, even though the scan reads that file
+/// after the package manifest.
+#[test]
+fn owned_scan_applies_catalogs_of_nested_settings() {
+    const PACKAGE: &str = "/project/packages/app";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        Utf8PathBuf::from("/project/pnpm-workspace.yaml"),
+        b"catalogs:\n  react19:\n    react: 19.0.0\n",
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/packages/app/package.json"),
+        br#"{ "name": "app", "dependencies": { "react": "catalog:react19" } }"#,
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/packages/app/biome.json"),
+        br#"{ "root": false, "javascript": { "resolver": { "experimentalPnpmCatalogs": true } } }"#,
+    );
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+
+    scan_without_watching(&workspace, project_key);
+
+    let manifest = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new(PACKAGE))
+        .expect("package manifest should be indexed");
+    let react = manifest
+        .catalog
+        .as_ref()
+        .and_then(|catalogs| catalogs.named.get("react19"))
+        .and_then(|dependencies| dependencies.get("react"));
+    assert_eq!(react, Some("19.0.0"));
+}
+
 /// When a manifest changed since the previous scan, a rescan applies it
 /// before it indexes the files that depend on it.
 #[test]
@@ -3041,6 +3112,93 @@ fn owned_rescan_applies_changed_manifest_first() {
     fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "type": "commonjs" }"#);
     scan_without_watching(&workspace, project_key);
     assert!(is_script());
+}
+
+/// A rescan updates the inputs of the manifests and configuration files that
+/// changed since the previous scan, instead of allocating new ones.
+#[test]
+fn owned_rescan_updates_inputs_of_changed_manifests() {
+    const CONFIGURATION: &str = "/project/biome.json";
+    const MANIFEST: &str = "/project/package.json";
+    const PATH: &str = "/project/index.js";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(CONFIGURATION), b"{}");
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "first" }"#);
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (workspace, project_key) =
+        lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::Modules);
+    let parsed_source = |path: &str| {
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(path))
+            .unwrap()
+    };
+
+    scan_without_watching(&workspace, project_key);
+    let configuration = parsed_source(CONFIGURATION);
+    let manifest = parsed_source(MANIFEST);
+    let allocated = allocated_file_inputs(&workspace);
+
+    fs.insert(
+        Utf8PathBuf::from(CONFIGURATION),
+        br#"{ "formatter": { "enabled": true } }"#,
+    );
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "second" }"#);
+    scan_without_watching(&workspace, project_key);
+
+    assert_eq!(configuration.as_id(), parsed_source(CONFIGURATION).as_id());
+    assert_eq!(manifest.as_id(), parsed_source(MANIFEST).as_id());
+    assert_eq!(allocated_file_inputs(&workspace), allocated);
+    let package = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .unwrap();
+    assert_eq!(package.name.as_deref(), Some("second"));
+}
+
+/// A scan without a scanner indexes only the root manifest. It updates the
+/// inputs of the manifest when the manifest changed since the previous scan,
+/// instead of allocating new ones.
+#[test]
+fn owned_manifest_rescan_updates_inputs_of_changed_manifest() {
+    const MANIFEST: &str = "/project/package.json";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "first" }"#);
+    let (workspace, project_key) = lsp_workspace_with_project(&fs, ModuleGraphResolutionKind::None);
+    let scan = || {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::NoScanner,
+                verbose: false,
+            })
+            .unwrap();
+    };
+
+    scan();
+    let manifest = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(MANIFEST))
+        .unwrap();
+
+    fs.insert(Utf8PathBuf::from(MANIFEST), br#"{ "name": "second" }"#);
+    scan();
+
+    let rescanned = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(MANIFEST))
+        .unwrap();
+    assert_eq!(manifest.as_id(), rescanned.as_id());
+    assert_eq!(allocated_file_inputs(&workspace), (1, 1));
+    let package = workspace
+        .project_layout
+        .get_node_manifest_for_package(Utf8Path::new("/project"))
+        .unwrap();
+    assert_eq!(package.name.as_deref(), Some("second"));
 }
 
 /// A file that no client has open and that the scanner doesn't index keeps
