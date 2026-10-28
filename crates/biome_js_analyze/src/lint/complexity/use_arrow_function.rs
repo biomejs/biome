@@ -312,6 +312,9 @@ fn is_prototype_of_binding_used(parent: &JsSyntaxNode, model: &SemanticModel) ->
 
 /// Returns `true` if the reference `reference` is used in a way that requires a `prototype`:
 /// `f.prototype`, `f["prototype"]`, `new f()`, `class extends f {}`, or `x instanceof f`.
+///
+/// Parentheses and TypeScript type-only wrappers around the reference are ignored,
+/// e.g. `new (f as any)()`.
 fn is_prototype_required_by(reference: &JsSyntaxNode) -> bool {
     let Some(expression) = reference.parent() else {
         return false;
@@ -319,7 +322,16 @@ fn is_prototype_required_by(reference: &JsSyntaxNode) -> bool {
     let expression = expression
         .ancestors()
         .take_while(|node| {
-            node == &expression || node.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            node == &expression
+                || matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+                        | JsSyntaxKind::TS_AS_EXPRESSION
+                        | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+                        | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+                        | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+                        | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+                )
         })
         .last()
         .unwrap_or(expression);
