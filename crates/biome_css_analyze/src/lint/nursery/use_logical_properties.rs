@@ -134,7 +134,7 @@ declare_lint_rule! {
     /// A multi-value physical shorthand always applies values to physical sides. Use separate
     /// logical properties when values differ by axis. A four-sided shorthand is only equivalent
     /// when all four values are identical, so the rule does not combine differing axis values
-    /// into one. Shorthands containing `var()`, `env()`, `attr()`, or a Sass variable are reported
+    /// into one. Shorthands containing `var()`, `env()`, `attr()`, or a SCSS variable are reported
     /// without an automatic fix because these values can expand to multiple values. Check the
     /// substitution before splitting the shorthand manually.
     ///
