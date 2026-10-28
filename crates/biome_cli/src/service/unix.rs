@@ -281,18 +281,22 @@ pub(crate) async fn ensure_daemon(
             {
                 last_error = Some(err);
 
-                if let Some(current_child) = &mut current_child {
+                if let Some(child) = &mut current_child {
                     // If we have a handle to the daemon process, wait for a few
                     // milliseconds for it to exit, or retry the connection
-                    tokio::select! {
-                        result = current_child.wait() => {
-                            let _status = result?;
-                            return Err(io::Error::new(
-                                io::ErrorKind::ConnectionReset,
-                                "the server process exited before the connection could be established",
-                            ));
+                    let exited = tokio::select! {
+                        result = child.wait() => {
+                            result?;
+                            true
                         }
-                        _ = time::sleep(Duration::from_millis(50)) => {}
+                        _ = time::sleep(Duration::from_millis(50)) => false,
+                    };
+
+                    // A daemon spawned concurrently by another client may have
+                    // taken over the socket, which makes ours exit; keep
+                    // retrying the connection to that daemon instead
+                    if exited {
+                        current_child = None;
                     }
                 } else {
                     // Spawn the daemon process and wait a few milliseconds for
@@ -331,6 +335,8 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
 
     info!("Trying to connect to socket {path}");
 
+    let _lock = lock_daemon(&get_socket_dir(), biome_configuration::VERSION)?;
+
     purge_old_sockets().await;
 
     // Try to remove the socket file if it already exists
@@ -346,6 +352,22 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
         let connection = factory.create();
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, stream).instrument(span.or_current()));
+    }
+}
+
+/// Locks the daemon of `version` in `socket_dir` to avoid race conditions,
+/// failing with [ErrorKind::AddrInUse] if another daemon holds the lock.
+fn lock_daemon(socket_dir: &Utf8Path, version: &str) -> io::Result<fs::File> {
+    let path = socket_dir.join(format!("biome-daemon-{version}.lock"));
+    let lock = fs::File::create(&path)?;
+
+    match lock.try_lock() {
+        Ok(()) => Ok(lock),
+        Err(fs::TryLockError::WouldBlock) => Err(io::Error::new(
+            ErrorKind::AddrInUse,
+            format!("Another daemon holds the lock {path}"),
+        )),
+        Err(fs::TryLockError::Error(err)) => Err(err),
     }
 }
 
@@ -398,6 +420,18 @@ mod tests {
 
     fn create_stale_socket(path: &Utf8Path) {
         drop(UnixListener::bind(path).unwrap());
+    }
+
+    #[test]
+    fn lock_daemon_excludes_another_daemon() {
+        let directory = TestDirectory::new();
+        let lock = lock_daemon(&directory.0, "2.0.0").unwrap();
+
+        let err = lock_daemon(&directory.0, "2.0.0").unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::AddrInUse);
+
+        drop(lock);
+        lock_daemon(&directory.0, "2.0.0").unwrap();
     }
 
     #[tokio::test]

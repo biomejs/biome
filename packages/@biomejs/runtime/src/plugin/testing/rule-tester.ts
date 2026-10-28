@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, normalize, resolve, sep } from "node:path";
 import * as nodeTest from "node:test";
+import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import {
@@ -17,6 +18,7 @@ import {
 
 import {
 	createWorkspaceConnection,
+	isContentModifiedError,
 	type WorkspaceConnection,
 	WorkspaceRpcError,
 } from "./jsonrpc.js";
@@ -419,6 +421,10 @@ class Session {
 				}),
 			);
 		} catch (error) {
+			if (isContentModifiedError(error)) {
+				throw error;
+			}
+
 			if (error instanceof WorkspaceRpcError) {
 				throw new RuleExecutionError("load", error.message);
 			}
@@ -443,65 +449,95 @@ class Session {
 		);
 
 		return this.#serial(async () => {
-			const projectKey = await this.#loadSettings(config);
+			// The daemon cancels a request when any of its clients writes. The
+			// Retries are bounded by the timeout, since writes may keep arriving.
+			const { timeout } = this.#connection;
+			const deadline = Date.now() + timeout;
 
-			await this.#call((workspace) =>
-				workspace.openFile({
+			for (;;) {
+				try {
+					return await this.#lint(testCase.code, path, config, fixMode);
+				} catch (error) {
+					if (!isContentModifiedError(error)) {
+						throw error;
+					}
+
+					if (Date.now() >= deadline) {
+						throw new Error(`Workspace RPC timed out after ${timeout}ms`, {
+							cause: error,
+						});
+					}
+
+					await sleep(1);
+				}
+			}
+		});
+	}
+
+	async #lint(
+		source: string,
+		path: string,
+		config: TestConfiguration,
+		fixMode: FixMode | undefined,
+	): Promise<{ diagnostics: TestDiagnostic[]; output?: string }> {
+		const projectKey = await this.#loadSettings(config);
+
+		await this.#call((workspace) =>
+			workspace.openFile({
+				projectKey,
+				path,
+				content: { type: "fromClient", content: source, version: 0 },
+			}),
+		);
+
+		try {
+			const result = await this.#call((workspace) =>
+				workspace.pullDiagnostics({
 					projectKey,
 					path,
-					content: { type: "fromClient", content: testCase.code, version: 0 },
+					categories: ["syntax", "lint"],
 				}),
 			);
 
-			try {
-				const result = await this.#call((workspace) =>
-					workspace.pullDiagnostics({
-						projectKey,
-						path,
-						categories: ["syntax", "lint"],
-					}),
+			const isPluginDiagnostic = (diagnostic: Diagnostic) =>
+				diagnostic.category === "plugin";
+
+			if (result.parseErrors > 0) {
+				throw new RuleExecutionError(
+					"parse",
+					result.diagnostics
+						.filter((diagnostic) => !isPluginDiagnostic(diagnostic))
+						.map((diagnostic) => diagnostic.description)
+						.join("\n"),
 				);
-
-				const isPluginDiagnostic = (diagnostic: Diagnostic) =>
-					diagnostic.category === "plugin";
-
-				if (result.parseErrors > 0) {
-					throw new RuleExecutionError(
-						"parse",
-						result.diagnostics
-							.filter((diagnostic) => !isPluginDiagnostic(diagnostic))
-							.map((diagnostic) => diagnostic.description)
-							.join("\n"),
-					);
-				}
-
-				const code = Buffer.from(testCase.code);
-				const diagnostics = result.diagnostics
-					.filter(isPluginDiagnostic)
-					.map((diagnostic) => toTestDiagnostic(diagnostic, code));
-
-				if (fixMode === undefined) {
-					return { diagnostics };
-				}
-
-				const { code: output } = await this.#call((workspace) =>
-					workspace.fixFile({
-						projectKey,
-						path,
-						fixFileMode: FIX_FILE_MODES[fixMode],
-						shouldFormat: false,
-						ruleCategories: ["lint"],
-					}),
-				);
-
-				return { diagnostics, output };
-			} finally {
-				// Do not mask the original failure, e.g. a timeout that disposed the connection.
-				await this.#call((workspace) =>
-					workspace.closeFile({ projectKey, path }),
-				).catch(() => {});
 			}
-		});
+
+			const code = Buffer.from(source);
+			const diagnostics = result.diagnostics
+				.filter(isPluginDiagnostic)
+				.map((diagnostic) => toTestDiagnostic(diagnostic, code));
+
+			if (fixMode === undefined) {
+				return { diagnostics };
+			}
+
+			const { code: output } = await this.#call((workspace) =>
+				workspace.fixFile({
+					projectKey,
+					path,
+					fixFileMode: FIX_FILE_MODES[fixMode],
+					shouldFormat: false,
+					ruleCategories: ["lint"],
+				}),
+			);
+
+			return { diagnostics, output };
+		} finally {
+			// Do not mask the original failure, e.g. a timeout that disposed the connection.
+			await this.#call((workspace) =>
+				workspace.closeFile({ projectKey, path }),
+			).catch(() => {});
+		}
 	}
 
 	#serial<T>(task: () => Promise<T>): Promise<T> {

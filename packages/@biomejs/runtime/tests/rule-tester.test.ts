@@ -391,6 +391,30 @@ test("concurrent cases do not interleave", async () => {
 	await assert.doesNotReject(result);
 });
 
+test("a case cancelled by a write of another client reloads the plugin", async () => {
+	// Arrange
+	const count = 50;
+	using stateful = register("tests/plugins/stateful.ts", {
+		valid: [],
+		invalid: Array.from({ length: count }, () => ({
+			code: "let x = 1;",
+			diagnostics: [{ message: "Invocation 1" }],
+		})),
+	});
+	using writer = register("tests/plugins/noDebugger.ts", {
+		valid: Array.from({ length: count }, () => "let x = 1;"),
+		invalid: [],
+	});
+
+	// Act
+	const result = Promise.all(
+		[...stateful.cases, ...writer.cases].map((testCase) => testCase.run()),
+	);
+
+	// Assert
+	await assert.doesNotReject(result);
+});
+
 test("package imports resolve on disk", async () => {
 	// Arrange
 	const directory = mkdtempSync(join(tmpdir(), "biome-plugin-imports-"));
@@ -496,28 +520,28 @@ test("an RPC error response keeps the connection", async () => {
 	assert.equal(destroyed, 0);
 });
 
-test("a request cancelled for a concurrent write is sent again", async () => {
+test("a request cancelled for a concurrent write is left to the caller", async () => {
 	// Arrange
 	let attempts = 0;
 	const connection = createWorkspaceConnection(async () =>
 		fake({
 			ping: async () => {
 				attempts++;
-				if (attempts === 1) {
-					throw { code: -32801, message: "cancelled because of pending write" };
-				}
-				return "pong";
+				throw { code: -32801, message: "cancelled because of pending write" };
 			},
 			destroy() {},
 		}),
 	);
 
 	// Act
-	const result = await connection.request(ping);
+	const result = connection.request(ping);
 
 	// Assert
-	assert.equal(result, "pong");
-	assert.equal(attempts, 2);
+	await assert.rejects(
+		result,
+		(error) => error instanceof WorkspaceRpcError && error.code === -32801,
+	);
+	assert.equal(attempts, 1);
 });
 
 test("a connection arriving after a timeout is closed", async () => {

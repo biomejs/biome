@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
-import { setTimeout as sleep } from "node:timers/promises";
 
 import type { Workspace } from "@biomejs/backend-jsonrpc";
 
 export interface WorkspaceConnection {
+	/** Milliseconds that connecting and each request may take. */
+	readonly timeout: number;
+
 	/**
 	 * Runs `call` against the lazily connected workspace.
 	 *
@@ -32,6 +34,11 @@ export class WorkspaceRpcError extends Error {
 
 /** The LSP `ContentModified` error code: the server cancelled the request for a write. */
 const CONTENT_MODIFIED = -32801;
+
+/** Whether the daemon cancelled the request because one of its clients wrote. */
+export function isContentModifiedError(error: unknown): boolean {
+	return error instanceof WorkspaceRpcError && error.code === CONTENT_MODIFIED;
+}
 
 /** `Transport` rejects with the raw JSON-RPC error object, not an `Error`. */
 function isRpcError(
@@ -124,18 +131,7 @@ export function createWorkspaceConnection(
 
 				const client = await bounded(connection);
 
-				// `call` is attempted again when the server cancels it for a concurrent write, like the `WorkspaceClient`.
-				for (;;) {
-					try {
-						return await bounded(call(client));
-					} catch (error) {
-						if (!isRpcError(error) || error.code !== CONTENT_MODIFIED) {
-							throw error;
-						}
-
-						await sleep(1);
-					}
-				}
+				return await bounded(call(client));
 			} catch (error) {
 				if (isRpcError(error)) {
 					throw new WorkspaceRpcError(error);
@@ -147,5 +143,6 @@ export function createWorkspaceConnection(
 			}
 		},
 		dispose,
+		timeout,
 	};
 }

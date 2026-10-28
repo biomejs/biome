@@ -103,7 +103,7 @@ RuleTester.afterAll = afterAll;
 | Option       | Description                                                                                                                          |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `binaryPath` | Path to the Biome binary. Defaults to the `BIOME_BINARY` environment variable, then to the prebuilt binary for the current platform. |
-| `timeout`    | Milliseconds to wait for the connection and for each request. Defaults to `30000`.                                                   |
+| `timeout`    | Milliseconds to wait for the connection, each request, and retries of a case cancelled by a concurrent write. Defaults to `30000`.   |
 | `filename`   | Default filename of the test cases. Defaults to `input.js`.                                                                          |
 | `config`     | Default parser settings: `{ javascript: { parser: { jsxEverywhere, unsafeParameterDecoratorsEnabled } } }`.                          |
 
