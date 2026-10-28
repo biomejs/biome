@@ -100,22 +100,53 @@ where
         self.0[index] & mask != 0
     }
 
-    /// Returns an iterator over all the [SyntaxKind] contained in this set
+    /// Returns an iterator over all the [SyntaxKind] contained in this set,
+    /// in ascending order of their raw value
     pub fn iter(self) -> impl Iterator<Item = L::Kind> {
-        self.0.into_iter().enumerate().flat_map(|(index, item)| {
-            let index = index as u16 * u128::BITS as u16;
-            (0..u128::BITS).filter_map(move |bit| {
-                if (item & (1 << bit)) != 0 {
-                    let raw = index + bit as u16;
-                    let raw = RawSyntaxKind(raw);
-                    Some(<L::Kind as SyntaxKind>::from_raw(raw))
-                } else {
-                    None
-                }
-            })
-        })
+        self.iter_raw().map(<L::Kind as SyntaxKind>::from_raw)
+    }
+
+    /// Returns an iterator over the raw kinds contained in this set, in
+    /// ascending order
+    fn iter_raw(self) -> SyntaxKindSetRawIter {
+        SyntaxKindSetRawIter {
+            words: self.0,
+            word_index: 0,
+        }
     }
 }
+
+/// Iterator over the raw kinds of a [SyntaxKindSet], in ascending order.
+///
+/// Each step costs time proportional to the number of empty words skipped, not
+/// to the number of bits in the set.
+struct SyntaxKindSetRawIter {
+    /// The bits of the set that have not been yielded yet.
+    words: [u128; 6],
+    /// Index of the first word of `words` that can still have a bit set.
+    word_index: usize,
+}
+
+impl Iterator for SyntaxKindSetRawIter {
+    type Item = RawSyntaxKind;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(word) = self.words.get_mut(self.word_index) {
+            if *word != 0 {
+                let bit = word.trailing_zeros();
+                // Clears the lowest set bit, the one yielded here.
+                *word &= *word - 1;
+                let raw = self.word_index as u32 * u128::BITS + bit;
+                return Some(RawSyntaxKind(raw as u16));
+            }
+            self.word_index += 1;
+        }
+        None
+    }
+}
+
+impl FusedIterator for SyntaxKindSetRawIter {}
 
 impl<L: Language> Default for SyntaxKindSet<L> {
     fn default() -> Self {
@@ -1104,11 +1135,12 @@ mod tests {
         SeparatedExpressionList,
     };
     use crate::{
-        AstNode, AstPtr, AstSeparatedElement, AstSeparatedList, GreenNode, GreenToken, SyntaxKind,
-        SyntaxNode, SyntaxResult, TextRange,
+        AstNode, AstPtr, AstSeparatedElement, AstSeparatedList, GreenNode, GreenToken,
+        RawSyntaxKind, SyntaxKind, SyntaxNode, SyntaxResult, TextRange,
     };
+    use std::marker::PhantomData;
 
-    use super::SyntaxNodePtr;
+    use super::{SyntaxKindSet, SyntaxNodePtr};
 
     /// Creates a ast separated list over a sequence of numbers separated by ",".
     /// The elements are pairs of: (value, separator).
@@ -1656,5 +1688,109 @@ mod tests {
         let third = list.iter().nth(2).unwrap().unwrap();
         let third_ptr = AstPtr::new(&third);
         assert_eq!(third, third_ptr.to_node(list.syntax_list().node()));
+    }
+
+    /// Reference for `SyntaxKindSet::iter_raw` that tests each of the 768 bits
+    /// of the set in ascending order.
+    fn iter_raw_every_bit(set: SyntaxKindSet<RawLanguage>) -> Vec<u16> {
+        set.0
+            .into_iter()
+            .enumerate()
+            .flat_map(|(index, item)| {
+                let index = index as u16 * u128::BITS as u16;
+                (0..u128::BITS)
+                    .filter(move |bit| item & (1 << bit) != 0)
+                    .map(move |bit| index + bit as u16)
+            })
+            .collect()
+    }
+
+    fn assert_iter_raw(set: SyntaxKindSet<RawLanguage>) {
+        let actual: Vec<_> = set.iter_raw().map(|RawSyntaxKind(raw)| raw).collect();
+        assert_eq!(actual, iter_raw_every_bit(set));
+    }
+
+    fn set_of(raw: &[u16]) -> SyntaxKindSet<RawLanguage> {
+        raw.iter().fold(SyntaxKindSet::EMPTY, |set, &raw| {
+            set.union(SyntaxKindSet::from_raw(RawSyntaxKind(raw)))
+        })
+    }
+
+    #[test]
+    fn syntax_kind_set_iter_raw_empty() {
+        assert_eq!(SyntaxKindSet::<RawLanguage>::EMPTY.iter_raw().next(), None);
+        assert_iter_raw(SyntaxKindSet::EMPTY);
+    }
+
+    #[test]
+    fn syntax_kind_set_iter_raw_single_kinds() {
+        for raw in [
+            0, 1, 63, 64, 126, 127, 128, 129, 255, 256, 383, 384, 511, 512, 639, 640, 766, 767,
+        ] {
+            let set = set_of(&[raw]);
+            let actual: Vec<_> = set.iter_raw().collect();
+            assert_eq!(actual, [RawSyntaxKind(raw)]);
+            assert_iter_raw(set);
+        }
+    }
+
+    #[test]
+    fn syntax_kind_set_iter_raw_word_boundaries() {
+        assert_iter_raw(set_of(&[0, 127, 128, 767]));
+        assert_iter_raw(set_of(&[127, 128, 255, 256, 383, 384, 511, 512, 639, 640]));
+        // Empty words between and after set bits.
+        assert_iter_raw(set_of(&[5, 700]));
+        assert_iter_raw(set_of(&[300]));
+    }
+
+    #[test]
+    fn syntax_kind_set_iter_raw_full() {
+        let full = SyntaxKindSet::<RawLanguage>([u128::MAX; 6], PhantomData);
+        let actual: Vec<_> = full.iter_raw().map(|RawSyntaxKind(raw)| raw).collect();
+        assert_eq!(actual, (0..768).collect::<Vec<_>>());
+        assert_iter_raw(full);
+    }
+
+    #[test]
+    fn syntax_kind_set_iter_raw_pseudo_random() {
+        // xorshift64, so the sets are the same on every run.
+        let mut state = 0x9e37_79b9_7f4a_7c15_u64;
+        let mut next = || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+        for _ in 0..1000 {
+            let mut words = [0; 6];
+            for word in &mut words {
+                // Leaves about a third of the words empty.
+                if next() % 3 != 0 {
+                    *word = (u128::from(next()) << 64) | u128::from(next());
+                    // Thins out some words to a few bits.
+                    if next() % 2 == 0 {
+                        *word &= (u128::from(next()) << 64) | u128::from(next());
+                        *word &= (u128::from(next()) << 64) | u128::from(next());
+                    }
+                }
+            }
+            assert_iter_raw(SyntaxKindSet(words, PhantomData));
+        }
+    }
+
+    #[test]
+    fn syntax_kind_set_iter_maps_raw_kinds() {
+        let set = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::CONDITION)
+            .union(SyntaxKindSet::of(RawLanguageKind::ROOT))
+            .union(SyntaxKindSet::of(RawLanguageKind::LITERAL_EXPRESSION));
+        let kinds: Vec<_> = set.iter().collect();
+        assert_eq!(
+            kinds,
+            [
+                RawLanguageKind::ROOT,
+                RawLanguageKind::LITERAL_EXPRESSION,
+                RawLanguageKind::CONDITION
+            ]
+        );
     }
 }
