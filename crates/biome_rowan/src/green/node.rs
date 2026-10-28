@@ -217,7 +217,37 @@ impl GreenNodeData {
         }
     }
 
+    /// Returns the slot whose range contains `rel_range`, with its index and
+    /// offset relative to this node.
+    ///
+    /// For a non-empty range at most one slot contains it. An empty range can
+    /// sit on the boundary of several slots. Then a slot that strictly
+    /// contains it wins, otherwise the last slot that ends at it, otherwise
+    /// the first slot when the range is at the start of this node.
     pub(crate) fn slot_at_range(
+        &self,
+        rel_range: TextRange,
+    ) -> Option<(usize, TextSize, &'_ Slot)> {
+        if rel_range.is_empty() {
+            return self.slot_at_range_by_lengths(rel_range);
+        }
+
+        // Slots are contiguous: each one ends where the next one starts, and
+        // the last one ends where this node ends. Reading the ends from the
+        // offsets avoids loading every probed child to read its length.
+        let slots = self.slice();
+        let idx = slots
+            .partition_point(|slot| slot.rel_offset() <= rel_range.start())
+            .checked_sub(1)?;
+        let slot = &slots[idx];
+        let end = slots.get(idx + 1).map_or(self.text_len(), Slot::rel_offset);
+        (rel_range.end() <= end).then_some((idx, slot.rel_offset(), slot))
+    }
+
+    /// Returns the same slot as [Self::slot_at_range], for empty and non-empty
+    /// ranges, but loads each child the binary search probes to read its
+    /// length.
+    fn slot_at_range_by_lengths(
         &self,
         rel_range: TextRange,
     ) -> Option<(usize, TextSize, &'_ Slot)> {
@@ -582,7 +612,7 @@ impl FusedIterator for Children<'_> {}
 mod tests {
     use crate::green::{GreenElement, GreenTrivia};
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{GreenNode, GreenToken, RawSyntaxKind, TriviaPiece, TriviaPieceKind};
+    use crate::{GreenNode, GreenToken, RawSyntaxKind, TextRange, TriviaPiece, TriviaPieceKind};
 
     fn build_test_list() -> GreenNode {
         let mut builder: RawSyntaxTreeBuilder = RawSyntaxTreeBuilder::new();
@@ -642,6 +672,67 @@ mod tests {
 
         // Has 3 slots, one is missing
         assert_eq!(root.slots().len(), 3);
+    }
+
+    /// Compares the offset-based search with the length-based one on every
+    /// sequence of up to five slots drawn from missing slots, empty and
+    /// non-empty tokens, and empty and non-empty nodes, for every range that
+    /// starts and ends within one character past the node.
+    #[test]
+    fn slot_at_range_matches_search_by_lengths() {
+        let token = |text: &str| {
+            Some(GreenElement::Token(GreenToken::new_raw(
+                RawSyntaxKind(1),
+                text,
+            )))
+        };
+        let node = |text: &str| {
+            Some(GreenElement::Node(GreenNode::new(
+                RawSyntaxKind(2),
+                [token(text)],
+            )))
+        };
+        let alphabet = [
+            None,
+            token(""),
+            token("a"),
+            token("abc"),
+            node(""),
+            node("ab"),
+        ];
+
+        let mut sequences = vec![vec![]];
+        let mut longest = vec![vec![]];
+        for _ in 0..5 {
+            longest = longest
+                .iter()
+                .flat_map(|sequence: &Vec<_>| {
+                    alphabet.iter().map(move |slot| {
+                        let mut sequence = sequence.clone();
+                        sequence.push(slot.clone());
+                        sequence
+                    })
+                })
+                .collect();
+            sequences.extend(longest.iter().cloned());
+        }
+
+        for sequence in sequences {
+            let green = GreenNode::new(RawSyntaxKind(0), sequence);
+            let len = u32::from(green.text_len()) + 1;
+            for start in 0..=len {
+                for end in start..=len {
+                    let range = TextRange::new(start.into(), end.into());
+                    let actual = green
+                        .slot_at_range(range)
+                        .map(|(index, offset, _)| (index, offset));
+                    let expected = green
+                        .slot_at_range_by_lengths(range)
+                        .map(|(index, offset, _)| (index, offset));
+                    assert_eq!(actual, expected, "{range:?} in {green:?}");
+                }
+            }
+        }
     }
 
     #[test]

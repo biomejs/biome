@@ -513,6 +513,19 @@ impl<L: Language> SyntaxNode<L> {
             .map(SyntaxElement::from)
     }
 
+    /// Returns the first node with the given range and kind on the path that
+    /// repeated calls to [Self::child_or_token_at_range] take from this node,
+    /// this node included.
+    pub(crate) fn descendant_at_range_with_kind(
+        &self,
+        range: TextRange,
+        kind: L::Kind,
+    ) -> Option<Self> {
+        self.raw
+            .descendant_at_range_with_kind(range, kind.to_raw())
+            .map(Self::from)
+    }
+
     /// Returns an independent copy of the subtree rooted at this node.
     ///
     /// The parent of the returned node will be `None`, the start offset will be

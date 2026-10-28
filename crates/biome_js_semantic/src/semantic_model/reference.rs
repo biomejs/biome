@@ -75,25 +75,14 @@ impl Reference {
         self.data.binding_node_by_start[&self.range_start()].to_node(self.data.to_root().syntax())
     }
 
-    /// Returns the node of this reference, like [Self::syntax], but descends
-    /// from the closest ancestor of `node` that contains the reference instead
-    /// of from the root.
+    /// Returns the node of this reference, like [Self::syntax], but resolves
+    /// it near `node` with [biome_rowan::SyntaxNodePtr::as_node_near]
+    /// instead of from the root.
     ///
-    /// Only the nodes below that ancestor are created, so this is cheaper than
-    /// [Self::syntax] when `node` is close to the reference. `node` must belong
-    /// to the tree the model was built from.
+    /// This is cheaper than [Self::syntax] when `node` is close to the
+    /// reference. `node` must belong to the tree the model was built from.
     pub fn syntax_near(&self, node: &JsSyntaxNode) -> JsSyntaxNode {
-        let ptr = &self.data.binding_node_by_start[&self.range_start()];
-        let range = ptr.text_range();
-        node.ancestors()
-            .find(|ancestor| ancestor.text_range_with_trivia().contains_range(range))
-            .and_then(|ancestor| {
-                std::iter::successors(Some(ancestor), |node| {
-                    node.child_or_token_at_range(range)?.into_node()
-                })
-                .find(|node| node.text_range_with_trivia() == range && node.kind() == ptr.kind())
-            })
-            .unwrap_or_else(|| ptr.to_node(self.data.to_root().syntax()))
+        self.data.binding_node_by_start[&self.range_start()].unwrap_node_near(node)
     }
 
     /// Returns the binding of this reference
