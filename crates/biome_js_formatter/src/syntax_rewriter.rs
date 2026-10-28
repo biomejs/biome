@@ -2,7 +2,8 @@ use crate::comments::is_type_comment;
 use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType, JsLanguage,
-    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia, misc_ext::AnyJsParenthesized,
+    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsSyntaxTrivia,
+    misc_ext::AnyJsParenthesized,
 };
 use biome_rowan::{
     AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize, VisitNodeSignal,
@@ -417,7 +418,7 @@ impl JsFormatSyntaxRewriter {
 /// `a && (b && c)`.
 fn make_left_recursive_logical_expression(
     left: AnyJsExpression,
-    operator: SyntaxToken<JsLanguage>,
+    operator: JsSyntaxToken,
     right: AnyJsExpression,
 ) -> JsLogicalExpression {
     // The operators and right operands along the left spine of `right`, from the outermost to the
