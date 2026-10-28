@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueDefinePropsDestructuring {
-        version: "next",
+        version: "2.6.4",
         name: "useVueDefinePropsDestructuring",
         language: "js",
         recommended: false,

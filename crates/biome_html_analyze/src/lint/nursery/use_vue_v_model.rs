@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueVModel {
-        version: "next",
+        version: "2.6.4",
         name: "useVueVModel",
         language: "html",
         recommended: true,

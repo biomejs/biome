@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// </script>
     /// ```
     pub NoVueDeprecatedListeners {
-        version: "next",
+        version: "2.6.4",
         name: "noVueDeprecatedListeners",
         language: "js",
         sources: &[RuleSource::EslintVueJs("no-deprecated-dollar-listeners-api").same()],

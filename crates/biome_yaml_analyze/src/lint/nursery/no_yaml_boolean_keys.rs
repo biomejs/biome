@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoYamlBooleanKeys {
-        version: "next",
+        version: "2.6.4",
         name: "noYamlBooleanKeys",
         language: "yaml",
         sources: &[RuleSource::EslintYml("no-boolean-key").same()],

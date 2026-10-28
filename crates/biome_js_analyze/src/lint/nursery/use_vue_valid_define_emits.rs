@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidDefineEmits {
-        version: "next",
+        version: "2.6.4",
         name: "useVueValidDefineEmits",
         language: "js",
         recommended: true,

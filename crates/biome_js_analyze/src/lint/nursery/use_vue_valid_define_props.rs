@@ -107,7 +107,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidDefineProps {
-        version: "next",
+        version: "2.6.4",
         name: "useVueValidDefineProps",
         language: "js",
         recommended: true,

@@ -88,7 +88,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueUnusedRefs {
-        version: "next",
+        version: "2.6.4",
         name: "noVueUnusedRefs",
         language: "html",
         recommended: false,

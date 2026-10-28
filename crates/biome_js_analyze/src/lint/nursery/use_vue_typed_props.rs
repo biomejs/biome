@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueTypedProps {
-        version: "next",
+        version: "2.6.4",
         name: "useVueTypedProps",
         language: "js",
         recommended: true,

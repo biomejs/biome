@@ -92,7 +92,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueSideEffectsInComputed {
-        version: "next",
+        version: "2.6.4",
         name: "noVueSideEffectsInComputed",
         language: "js",
         recommended: true,

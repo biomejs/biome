@@ -91,7 +91,7 @@ declare_lint_rule! {
     /// - [Vue Router migration guide: removal of the `tag` prop](https://router.vuejs.org/guide/migration/#Removal-of-event-and-tag-props-in-router-link-)
     /// - [Extending `RouterLink`](https://router.vuejs.org/guide/advanced/extending-router-link.html)
     pub NoVueDeprecatedRouterLinkTagProp {
-        version: "next",
+        version: "2.6.4",
         name: "noVueDeprecatedRouterLinkTagProp",
         language: "html",
         recommended: true,

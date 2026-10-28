@@ -106,7 +106,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueMutatingProps {
-        version: "next",
+        version: "2.6.4",
         name: "noVueMutatingProps",
         language: "js",
         recommended: true,

@@ -72,7 +72,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueComputedPropertiesInData {
-        version: "next",
+        version: "2.6.4",
         name: "noVueComputedPropertiesInData",
         language: "js",
         recommended: true,

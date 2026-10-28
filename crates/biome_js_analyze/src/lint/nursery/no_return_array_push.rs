@@ -93,7 +93,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReturnArrayPush {
-        version: "next",
+        version: "2.6.4",
         name: "noReturnArrayPush",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-return-array-push").same()],

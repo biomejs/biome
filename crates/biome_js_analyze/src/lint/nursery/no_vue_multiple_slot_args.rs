@@ -65,7 +65,7 @@ declare_lint_rule! {
     /// </script>
     /// ```
     pub NoVueMultipleSlotArgs {
-        version: "next",
+        version: "2.6.4",
         name: "noVueMultipleSlotArgs",
         language: "js",
         sources: &[RuleSource::EslintVueJs("no-multiple-slot-args").same()],
