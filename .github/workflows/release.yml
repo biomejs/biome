@@ -409,6 +409,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build plugin runtime
+        run: |
+          pnpm --filter @biomejs/backend-jsonrpc run build
+          pnpm --filter @biomejs/runtime run build
+
       - name: Generate npm packages
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 

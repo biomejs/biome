@@ -225,6 +225,14 @@ jobs:
 
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build plugin runtime
+        run: |
+          pnpm --filter @biomejs/backend-jsonrpc run build
+          pnpm --filter @biomejs/runtime run build
+
       - name: Generate npm packages
         run: node packages/@biomejs/biome/scripts/generate-packages.mjs
 
