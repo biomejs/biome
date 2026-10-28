@@ -2,7 +2,6 @@
 
 #[macro_use]
 mod generated;
-pub mod string_ext;
 mod syntax_node;
 
 pub use self::generated::*;

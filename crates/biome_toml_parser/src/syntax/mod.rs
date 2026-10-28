@@ -182,8 +182,7 @@ fn parse_table(p: &mut TomlParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T!['[']);
-    let key_range = parse_header_key(p);
-    p.start_table(key_range);
+    parse_header_key(p);
     expect_on_same_line(p, T![']'], TomlLexContext::Key);
     TableEntryList.parse_list(p);
 
@@ -198,28 +197,22 @@ fn parse_array_table(p: &mut TomlParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T!["[["]);
-    let key_range = parse_header_key(p);
-    p.start_array_table(key_range);
+    parse_header_key(p);
     expect_on_same_line(p, T!["]]"], TomlLexContext::Key);
     TableEntryList.parse_list(p);
 
     Present(m.complete(p, TOML_ARRAY_TABLE))
 }
 
-/// Parses the key of a table header and returns its range, or the range of
-/// the current token if the key is missing.
-fn parse_header_key(p: &mut TomlParser) -> TextRange {
-    if !p.has_preceding_line_break()
-        && let Present(key) = parse_key(p)
-    {
-        return key.range(p);
+/// Parses the key of a table header, which must be on the same line as the
+/// opening bracket.
+fn parse_header_key(p: &mut TomlParser) {
+    if !p.has_preceding_line_break() && parse_key(p).is_present() {
+        return;
     }
 
-    p.start_key();
-    p.invalidate_key();
     let range = p.cur_range();
     p.error(expected_key(p, range));
-    range
 }
 
 /// Bumps `kind` if it's on the same line as the previous token and lexes the
@@ -249,7 +242,6 @@ fn parse_key_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     let key_range = parse_key(p).ok().map(|key| key.range(p));
 
     if p.at(T![=]) && !p.has_preceding_line_break() {
-        p.define_key_value();
         p.bump_with_context(T![=], TomlLexContext::Value);
     } else {
         report_missing_equals(p, key_range);
@@ -298,20 +290,17 @@ fn parse_key(p: &mut TomlParser) -> ParsedSyntax {
     let m = p.start();
     let parts = p.start();
 
-    p.start_key();
     parse_key_part(p).ok();
     while p.at(T![.]) && !p.has_preceding_line_break() {
         p.bump(T![.]);
 
         if p.has_preceding_line_break() {
-            p.invalidate_key();
             let range = p.cur_range();
             p.error(expected_key(p, range));
             break;
         }
 
         if parse_key_part(p).is_absent() {
-            p.invalidate_key();
             let range = p.cur_range();
             p.error(expected_key(p, range));
         }
@@ -323,16 +312,9 @@ fn parse_key(p: &mut TomlParser) -> ParsedSyntax {
 
 fn parse_key_part(p: &mut TomlParser) -> ParsedSyntax {
     let kind = match p.cur() {
-        TOML_BARE_KEY_LITERAL => {
-            p.push_key_part();
-            TOML_BARE_KEY
-        }
-        TOML_BASIC_STRING_LITERAL | TOML_LITERAL_STRING_LITERAL => {
-            p.push_key_part();
-            TOML_QUOTED_KEY
-        }
+        TOML_BARE_KEY_LITERAL => TOML_BARE_KEY,
+        TOML_BASIC_STRING_LITERAL | TOML_LITERAL_STRING_LITERAL => TOML_QUOTED_KEY,
         TOML_ML_BASIC_STRING_LITERAL | TOML_ML_LITERAL_STRING_LITERAL => {
-            p.invalidate_key();
             let range = p.cur_range();
             p.error(multiline_string_key(p, range));
             TOML_BOGUS
@@ -599,12 +581,9 @@ fn parse_inline_table(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax
     }
 
     let m = p.start();
-    let range = p.cur_range();
     p.bump_with_context(T!['{'], TomlLexContext::Key);
     p.enter_nesting(T!['{']);
-    p.start_inline_table(range);
     InlineTableEntryList::default().parse_list(p);
-    p.end_inline_table();
     p.exit_nesting();
     expect_with_context(p, T!['}'], after);
 

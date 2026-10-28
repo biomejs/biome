@@ -27,7 +27,6 @@ biome_rowan         = { workspace = true }
 biome_toml_factory  = { workspace = true }
 biome_toml_syntax   = { workspace = true }
 biome_unicode_table = { workspace = true }
-rustc-hash          = { workspace = true }
 
 [dev-dependencies]
 biome_console    = { path = "../biome_console" }

@@ -1,7 +1,21 @@
 //! Lossless, error tolerant TOML 1.1 parser.
 //!
-//! [`parse_toml`] reports every violation of the [TOML 1.1.0 specification](https://toml.io/en/v1.1.0):
-//! syntax errors, invalid tokens, and keys or tables that are defined more than once.
+//! [`parse_toml`] reports the syntax errors and invalid tokens of a document,
+//! following the [TOML 1.1.0 specification](https://toml.io/en/v1.1.0).
+//!
+//! The parser doesn't check how keys and tables combine. TOML also forbids
+//! documents that are syntactically valid but define a key or table more than
+//! once, such as a duplicate key, a table defined by two headers, a header for
+//! a table that dotted keys already define, dotted keys that extend a table
+//! defined by a header, keys added to an inline table, and an array of tables
+//! appended to a static array.
+
+// TODO: report the key and table conflicts described above in a syntax rule
+// or lint rule once a TOML analyzer exists. Until then, the invalid cases of
+// toml-test that only define a key or table twice (for example
+// `invalid/key/duplicate-keys-*`, `invalid/table/duplicate-key-*`,
+// `invalid/table/append-with-dotted-keys-*`, and
+// `invalid/inline-table/overwrite-*`) fail the `toml/toml-test` coverage suite.
 
 #![deny(clippy::use_self)]
 
@@ -16,7 +30,6 @@ use biome_toml_syntax::{TomlLanguage, TomlRoot, TomlSyntaxNode};
 
 mod lexer;
 mod parser;
-mod semantic;
 mod syntax;
 mod token_source;
 
