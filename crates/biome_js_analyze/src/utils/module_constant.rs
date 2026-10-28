@@ -1177,8 +1177,7 @@ function read(input) {
                 let binding = id.as_any_js_binding()?.as_js_identifier_binding()?;
                 (binding
                     .name_token()
-                    .ok()
-                    .is_some_and(|token| token.text_trimmed() == "REGEX"))
+                    .is_ok_and(|token| token.text_trimmed() == "REGEX"))
                 .then_some(statement)
             })
             .expect("expected REGEX at module scope");
@@ -1208,8 +1207,7 @@ function read(input) {
                 .any(|reference| {
                     reference
                         .value_token()
-                        .ok()
-                        .is_some_and(|token| token.text_trimmed() == "REGEX")
+                        .is_ok_and(|token| token.text_trimmed() == "REGEX")
                 })
         );
         assert!(
