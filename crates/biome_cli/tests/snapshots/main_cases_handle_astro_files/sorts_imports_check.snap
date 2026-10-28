@@ -69,15 +69,14 @@ file.astro:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Organize imports and exports (Biome)
   
-    1 1 │   
-    2   │ - import·{·getLocale·}·from·"astro:i18n";
-    3   │ - import·{·Code·}·from·"astro:components";
-      2 │ + import·{·Code·}·from·"astro:components";
-      3 │ + import·{·getLocale·}·from·"astro:i18n";
-    4 4 │   import "style.css";
-    5   │ - import·{·B,·A·}·from·"./util.js";
-      5 │ + import·{·A,·B·}·from·"./util.js";
-    6 6 │   
+    1   │ - import·{·getLocale·}·from·"astro:i18n";
+    2   │ - import·{·Code·}·from·"astro:components";
+      1 │ + import·{·Code·}·from·"astro:components";
+      2 │ + import·{·getLocale·}·from·"astro:i18n";
+    3 3 │   import "style.css";
+    4   │ - import·{·B,·A·}·from·"./util.js";
+      4 │ + import·{·A,·B·}·from·"./util.js";
+    5 5 │   
   
 
 ```
