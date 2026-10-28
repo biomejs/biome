@@ -27,7 +27,7 @@ biome_yaml_syntax   = { workspace = true }
 biome_console     = { path = "../biome_console" }
 biome_languages   = { path = "../biome_languages", features = ["lang_yaml"] }
 biome_test_utils  = { path = "../biome_test_utils" }
-criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+criterion         = { package = "codspeed-criterion-compat", version = "=6.0.0" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }
