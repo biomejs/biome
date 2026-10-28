@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-empty.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default { props: [] };
+</script>
+
+<script setup>
+defineProps({});
+</script>
+
+```

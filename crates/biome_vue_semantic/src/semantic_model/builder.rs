@@ -101,7 +101,8 @@ impl ModelBuilder {
             inherit_attrs: Tri::Unknown,
             decl_open: [OpenReasons::default(); Namespace::COUNT],
             uses_open: [false; Namespace::COUNT],
-            macro_conflict: false,
+            macro_options: MacroOptions::empty(),
+            data_function: None,
             merged: None,
             merged_into: None,
             symbols: Vec::new(),
@@ -216,6 +217,13 @@ impl ModelBuilder {
         if let Resolution::Symbol(symbol) = reference.resolution {
             self.data.uses[symbol.index()].push(id);
         }
+        let slot = reference.snippet.map_or(0, |snippet| snippet.index() + 1);
+        if self.data.references_by_snippet.len() <= slot {
+            self.data
+                .references_by_snippet
+                .resize_with(slot + 1, Vec::new);
+        }
+        self.data.references_by_snippet[slot].push(id);
         self.data.references.push(reference);
         id
     }

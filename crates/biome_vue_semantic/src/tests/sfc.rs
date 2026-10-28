@@ -1,7 +1,7 @@
 use super::sfc;
 use crate::{
-    Access, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue, Namespace, Origin,
-    RefSite, Resolution, RootShape, SymbolKind, Tri,
+    Access, Assignability, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue,
+    MacroOption, Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
 
 const LIST: &str = r#"<script setup lang="ts">
@@ -42,6 +42,21 @@ defineProps(['items', 'item'])
   <li v-for="item in items" v-if="item.visible" :key="item.id">{{ item.name }}</li>
   <p v-if="items" />
   <li v-else-if="entry" v-for="entry in items">{{ entry }}</li>
+</template>
+"#
+    ));
+}
+
+#[test]
+fn v_for_default_values_see_the_v_for_aliases_but_not_slot_params() {
+    insta::assert_snapshot!(references(
+        r#"<script setup>
+import List from './List.vue'
+defineProps(['rows', 'fallback', 'id'])
+</script>
+<template>
+  <li v-for="({ id = fallback }, index = id) in rows">{{ index }}</li>
+  <List v-for="{ row = fallback } in rows" v-slot="{ fallback }">{{ fallback }}</List>
 </template>
 "#
     ));
@@ -317,6 +332,19 @@ defineEmits(['a'])
 }
 
 #[test]
+fn plain_block_emits_option() {
+    let model = sfc(r#"<script>
+export default { emits: ['change'] }
+</script>
+<script setup>
+defineProps(['a'])
+</script>
+"#);
+    let component = model.template_component().unwrap();
+    assert_eq!(component.macro_options(), MacroOption::Emits);
+}
+
+#[test]
 fn both_script_blocks() {
     let model = sfc(r#"<script>
 let nextId = 0
@@ -336,6 +364,7 @@ defineProps(['b'])
     assert_eq!(component.name(), Some("Both"));
     assert_eq!(component.inherit_attrs(), Tri::No);
     assert!(component.has_macro_conflict());
+    assert_eq!(component.macro_options(), MacroOption::Props);
     let props: Vec<_> = component
         .props()
         .map(|prop| prop.name().to_string())
@@ -577,6 +606,123 @@ fn equal_expressions_have_equal_fingerprints() {
 }
 
 #[test]
+fn assignability_of_directive_values() {
+    let code = r#"<script setup lang="ts">
+const props = defineProps<{ a: any; b: any }>()
+</script>
+<template>
+  <input v-model="a" />
+  <input v-model="(a)" />
+  <input v-model="a.b[0]" />
+  <input v-model="a as string" />
+  <input v-model="a!" />
+  <input v-model="a?.b" />
+  <input v-model="a?.b.c" />
+  <input v-model="a?.().b" />
+  <input v-model="(a?.b).c" />
+  <input v-model="(a?.b)[0].c" />
+  <input v-model="(null).a" />
+  <input v-model="a + b" />
+  <input v-model="a()" />
+  <input v-model="a?.b()" />
+  <input v-model="(a, b)" />
+</template>
+"#;
+    let model = sfc(code);
+    let values: Vec<_> = model
+        .elements()
+        .filter(|element| element.tag() == "input")
+        .filter_map(|element| element.attrs().next()?.value_snippet())
+        .map(|snippet| (&code[snippet.host_range()], snippet.assignability()))
+        .collect();
+    assert_eq!(
+        values,
+        [
+            ("a", Assignability::Assignable),
+            ("(a)", Assignability::Assignable),
+            ("a.b[0]", Assignability::Assignable),
+            ("a as string", Assignability::Assignable),
+            ("a!", Assignability::Assignable),
+            ("a?.b", Assignability::OptionalChain),
+            ("a?.b.c", Assignability::OptionalChain),
+            ("a?.().b", Assignability::OptionalChain),
+            ("(a?.b).c", Assignability::MaybeNullObject),
+            ("(a?.b)[0].c", Assignability::MaybeNullObject),
+            ("(null).a", Assignability::MaybeNullObject),
+            ("a + b", Assignability::NotAssignable),
+            ("a()", Assignability::NotAssignable),
+            ("a?.b()", Assignability::NotAssignable),
+            ("(a, b)", Assignability::NotAssignable),
+        ]
+    );
+}
+
+#[test]
+fn compound_assignments_do_not_store_the_event() {
+    let model = sfc(r#"<template>
+  <Field @update:value="count += $event" />
+  <Field @update:value="v => count += v" />
+</template>
+"#);
+    let shapes: Vec<_> = model
+        .elements()
+        .filter(|element| element.tag() == "Field")
+        .map(|element| {
+            element
+                .attrs()
+                .next()
+                .unwrap()
+                .value_snippet()
+                .unwrap()
+                .root()
+                .clone()
+        })
+        .collect();
+    assert!(matches!(
+        shapes[0],
+        RootShape::Assignment {
+            from_event: false,
+            ..
+        }
+    ));
+    assert_eq!(shapes[1], RootShape::Function { params: 1 });
+}
+
+#[test]
+fn typed_arrow_parameters_store_the_event() {
+    let model = sfc(r#"<script setup lang="ts">
+const count = 0
+</script>
+<template>
+  <Field @update:value="(v: number) => count = v" />
+  <Field @update:value="(v = 0) => count = v" />
+</template>
+"#);
+    let shapes: Vec<_> = model
+        .elements()
+        .filter(|element| element.tag() == "Field")
+        .map(|element| {
+            element
+                .attrs()
+                .next()
+                .unwrap()
+                .value_snippet()
+                .unwrap()
+                .root()
+                .clone()
+        })
+        .collect();
+    assert!(matches!(
+        shapes[0],
+        RootShape::Assignment {
+            from_event: true,
+            ..
+        }
+    ));
+    assert_eq!(shapes[1], RootShape::Function { params: 1 });
+}
+
+#[test]
 fn slot_params_template_refs_and_slots() {
     let model = sfc(r#"<script setup lang="ts">
 import { ref, useTemplateRef } from 'vue'
@@ -629,4 +775,69 @@ fn ranges_are_local_to_the_declaring_tree() {
     assert_eq!(&code[host], "'a'");
     assert_eq!(prop.range() + snippet.offset(), host);
     assert!(u32::from(prop.range().start()) < u32::from(host.start()));
+}
+
+#[test]
+fn mutating_method_call_points_at_the_member_it_changes() {
+    let code = "<script setup lang=\"ts\">\nconst props = defineProps(['list'])\nprops.list.push(1);\n(props.list!).sort();\n</script>\n";
+    let model = sfc(code);
+    let list = model.template_component().unwrap().props().next().unwrap();
+    let mutations: Vec<_> = list
+        .uses()
+        .filter(|reference| reference.access() == Access::Mutate)
+        .map(|reference| &code[reference.host_range()])
+        .collect();
+    assert_eq!(mutations, ["list", "list"]);
+}
+
+#[test]
+fn write_through_computed_member_is_a_write() {
+    let code = "<script setup>\nconst props = defineProps(['list'])\nprops.list[index].done = true;\nprops.list[index].push(1);\nprops.list[index];\n</script>\n";
+    let model = sfc(code);
+    let list = model.template_component().unwrap().props().next().unwrap();
+    let uses: Vec<_> = list
+        .uses()
+        .map(|reference| {
+            (
+                &code[reference.host_range()],
+                reference.access(),
+                reference.has_open_path(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        uses,
+        [
+            ("list", Access::Write, true),
+            ("list", Access::Mutate, true),
+            ("list", Access::Read, true),
+        ]
+    );
+}
+
+#[test]
+fn v_model_through_computed_member_is_a_write() {
+    let model = sfc(r#"<script setup>
+defineProps(['list'])
+</script>
+<template>
+  <input v-model="list[0].name">
+</template>
+"#);
+    let list = model.template_component().unwrap().props().next().unwrap();
+    let accesses: Vec<_> = list.uses().map(|reference| reference.access()).collect();
+    assert_eq!(accesses, [Access::Write]);
+}
+
+#[test]
+fn object_assign_target_is_a_mutation() {
+    let model = sfc(r#"<script setup>
+const props = defineProps(['user'])
+Object.assign(props.user, { name: 'Alice' });
+Object.assign({}, props.user);
+</script>
+"#);
+    let user = model.template_component().unwrap().props().next().unwrap();
+    let accesses: Vec<_> = user.uses().map(|reference| reference.access()).collect();
+    assert_eq!(accesses, [Access::Mutate, Access::Escape]);
 }

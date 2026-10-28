@@ -1832,6 +1832,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueBooleanDefault",
         TypeId::of::<biome_rule_options::no_vue_boolean_default::NoVueBooleanDefaultOptions>(),
     ));
+    result.push(("nursery", "noVueComputedPropertiesInData", TypeId::of::<biome_rule_options::no_vue_computed_properties_in_data::NoVueComputedPropertiesInDataOptions>()));
     result.push((
         "correctness",
         "noVueDataObjectDeclaration",
@@ -1839,6 +1840,15 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_vue_data_object_declaration::NoVueDataObjectDeclarationOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "noVueDeprecatedListeners",
+        TypeId::of::<
+            biome_rule_options::no_vue_deprecated_listeners::NoVueDeprecatedListenersOptions,
+        >(),
+    ));
+    result.push(("nursery", "noVueDeprecatedRouterLinkTagProp", TypeId::of::<biome_rule_options::no_vue_deprecated_router_link_tag_prop::NoVueDeprecatedRouterLinkTagPropOptions>()));
+    result.push(("nursery", "noVueDeprecatedScopeAttribute", TypeId::of::<biome_rule_options::no_vue_deprecated_scope_attribute::NoVueDeprecatedScopeAttributeOptions>()));
     result.push((
         "nursery",
         "noVueDeprecatedScopedSlots",
@@ -1864,6 +1874,16 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<
             biome_rule_options::no_vue_lifecycle_after_await::NoVueLifecycleAfterAwaitOptions,
         >(),
+    ));
+    result.push((
+        "nursery",
+        "noVueMultipleSlotArgs",
+        TypeId::of::<biome_rule_options::no_vue_multiple_slot_args::NoVueMultipleSlotArgsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noVueMutatingProps",
+        TypeId::of::<biome_rule_options::no_vue_mutating_props::NoVueMutatingPropsOptions>(),
     ));
     result.push((
         "style",
@@ -1893,6 +1913,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("correctness", "noVueSetupPropsReactivityLoss", TypeId::of::<biome_rule_options::no_vue_setup_props_reactivity_loss::NoVueSetupPropsReactivityLossOptions>()));
     result.push(("nursery", "noVueShadowNativeEvents", TypeId::of::<biome_rule_options::no_vue_shadow_native_events::NoVueShadowNativeEventsOptions>()));
+    result.push((
+        "nursery",
+        "noVueSideEffectsInComputed",
+        TypeId::of::<
+            biome_rule_options::no_vue_side_effects_in_computed::NoVueSideEffectsInComputedOptions,
+        >(),
+    ));
     result.push((
         "nursery",
         "noVueUndeclaredDirectives",
@@ -2981,6 +3008,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("style", "useVueDefineMacrosOrder", TypeId::of::<biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions>()));
     result.push((
+        "nursery",
+        "useVueDefineOptions",
+        TypeId::of::<biome_rule_options::use_vue_define_options::UseVueDefineOptionsOptions>(),
+    ));
+    result.push(("nursery", "useVueDefinePropsDestructuring", TypeId::of::<biome_rule_options::use_vue_define_props_destructuring::UseVueDefinePropsDestructuringOptions>()));
+    result.push((
         "style",
         "useVueHyphenatedAttributes",
         TypeId::of::<
@@ -2994,7 +3027,17 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueNextTickPromise",
         TypeId::of::<biome_rule_options::use_vue_next_tick_promise::UseVueNextTickPromiseOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useVueTemplateRef",
+        TypeId::of::<biome_rule_options::use_vue_template_ref::UseVueTemplateRefOptions>(),
+    ));
     result.push(("nursery", "useVueToggleInsideTransition", TypeId::of::<biome_rule_options::use_vue_toggle_inside_transition::UseVueToggleInsideTransitionOptions>()));
+    result.push((
+        "nursery",
+        "useVueTypedProps",
+        TypeId::of::<biome_rule_options::use_vue_typed_props::UseVueTypedPropsOptions>(),
+    ));
     result.push((
         "nursery",
         "useVueTypedRef",
@@ -3007,8 +3050,25 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueVModel",
+        TypeId::of::<biome_rule_options::use_vue_v_model::UseVueVModelOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueVOnExact",
         TypeId::of::<biome_rule_options::use_vue_v_on_exact::UseVueVOnExactOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidDefineEmits",
+        TypeId::of::<biome_rule_options::use_vue_valid_define_emits::UseVueValidDefineEmitsOptions>(
+        ),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidDefineProps",
+        TypeId::of::<biome_rule_options::use_vue_valid_define_props::UseVueValidDefinePropsOptions>(
+        ),
     ));
     result.push(("correctness", "useVueValidTemplateRoot", TypeId::of::<biome_rule_options::use_vue_valid_template_root::UseVueValidTemplateRootOptions>()));
     result.push((
@@ -3047,6 +3107,21 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_vue_valid_v_if::UseVueValidVIfOptions>(),
     ));
     result.push((
+        "nursery",
+        "useVueValidVIs",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_is::UseVueValidVIsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidVMemo",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_memo::UseVueValidVMemoOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidVModel",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_model::UseVueValidVModelOptions>(),
+    ));
+    result.push((
         "correctness",
         "useVueValidVOn",
         TypeId::of::<biome_rule_options::use_vue_valid_v_on::UseVueValidVOnOptions>(),
@@ -3060,6 +3135,16 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "correctness",
         "useVueValidVPre",
         TypeId::of::<biome_rule_options::use_vue_valid_v_pre::UseVueValidVPreOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidVShow",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_show::UseVueValidVShowOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "useVueValidVSlot",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_slot::UseVueValidVSlotOptions>(),
     ));
     result.push((
         "correctness",

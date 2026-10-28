@@ -11,8 +11,9 @@ use super::model::*;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunctionBody,
-    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsRoot, AnyJsStatement, JsLogicalOperator,
-    JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, inner_string_text,
+    AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
+    JsAssignmentOperator, JsLogicalOperator, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator,
+    inner_string_text,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TextSize};
@@ -49,7 +50,7 @@ pub(crate) fn collect_snippets(
         let snippet = &snippets[index];
         let id = SnippetId::new(row);
         ids[index] = id;
-        let host = find_host(builder, snippet.content_range);
+        let host = find_host(builder, layout, snippet.content_range);
         let first_operand = builder.data.operands.len() as u32;
         let root = root_shape(builder, snippet, host);
         builder.data.snippets.push(SnippetData {
@@ -57,6 +58,7 @@ pub(crate) fn collect_snippets(
             offset: snippet.content_offset,
             host,
             root,
+            assignability: assignability(snippet),
             fingerprint: fingerprint(snippet.root.syntax()),
             operands: first_operand..builder.data.operands.len() as u32,
         });
@@ -93,7 +95,7 @@ pub(crate) fn collect_snippets(
 }
 
 /// Finds what holds the snippet whose text is at `range`.
-fn find_host(builder: &ModelBuilder, range: TextRange) -> SnippetHost {
+fn find_host(builder: &ModelBuilder, layout: &Layout, range: TextRange) -> SnippetHost {
     for (index, block) in builder.data.blocks.iter().enumerate() {
         if block.content.contains_range(range) {
             match block.kind {
@@ -120,7 +122,19 @@ fn find_host(builder: &ModelBuilder, range: TextRange) -> SnippetHost {
                 AttrName::Directive {
                     kind: DirectiveKind::For,
                     ..
-                } => SnippetHost::VForIterable(id),
+                } => {
+                    let in_binding = layout.v_fors.iter().any(|v_for| {
+                        v_for.element == attr.element
+                            && v_for
+                                .binding_range
+                                .is_some_and(|binding| binding.contains_range(range))
+                    });
+                    if in_binding {
+                        SnippetHost::VForDefault(id)
+                    } else {
+                        SnippetHost::VForIterable(id)
+                    }
+                }
                 AttrName::Directive { .. } => SnippetHost::DirectiveValue(id),
                 AttrName::Plain(_) => SnippetHost::Unknown,
             };
@@ -256,7 +270,23 @@ fn expression_shape(
                     let single = (items.len() == 1)
                         .then(|| items.iter().next()?.ok())
                         .flatten()
-                        .map(|parameter| parameter.syntax().text_trimmed().to_string());
+                        .and_then(|parameter| {
+                            // Only the name of a plain parameter, so `(value: string)`
+                            // counts and `(value = 0)` doesn't.
+                            let parameter = parameter
+                                .as_any_js_formal_parameter()?
+                                .as_js_formal_parameter()?;
+                            if parameter.initializer().is_some() {
+                                return None;
+                            }
+                            let binding = parameter.binding().ok()?;
+                            let name = binding
+                                .as_any_js_binding()?
+                                .as_js_identifier_binding()?
+                                .name_token()
+                                .ok()?;
+                            Some(name.text_trimmed().to_string())
+                        });
                     (items.len() as u8, single)
                 }
                 Err(_) => (0, None),
@@ -265,6 +295,7 @@ fn expression_shape(
             if let Some(param) = single
                 && let Ok(AnyJsFunctionBody::AnyJsExpression(body)) = arrow.body()
                 && let AnyJsExpression::JsAssignmentExpression(assignment) = body.omit_parentheses()
+                && let Ok(JsAssignmentOperator::Assign) = assignment.operator()
                 && let (Ok(left), Ok(right)) = (assignment.left(), assignment.right())
                 && right.syntax().text_trimmed() == param.as_str()
             {
@@ -276,10 +307,11 @@ fn expression_shape(
             RootShape::Function { params }
         }
         AnyJsExpression::JsAssignmentExpression(assignment) => {
-            match (assignment.left(), assignment.right()) {
-                (Ok(left), Ok(right)) => RootShape::Assignment {
+            match (assignment.left(), assignment.operator(), assignment.right()) {
+                (Ok(left), Ok(operator), Ok(right)) => RootShape::Assignment {
                     target: fingerprint(left.syntax()),
-                    from_event: right.syntax().text_trimmed() == "$event",
+                    from_event: operator == JsAssignmentOperator::Assign
+                        && right.syntax().text_trimmed() == "$event",
                 },
                 _ => RootShape::Invalid,
             }
@@ -302,6 +334,51 @@ fn expression_shape(
         AnyJsExpression::JsConditionalExpression(_) => RootShape::Conditional,
         _ => RootShape::Other,
     }
+}
+
+fn assignability(snippet: &SfcSnippet) -> Assignability {
+    let AnyJsRoot::JsExpressionTemplateRoot(root) = snippet.root else {
+        return Assignability::NotAssignable;
+    };
+    let Some(expression) = root
+        .expression()
+        .and_then(AnyJsExpression::omit_type_wrappers)
+    else {
+        return Assignability::NotAssignable;
+    };
+    let member = match expression {
+        AnyJsExpression::JsIdentifierExpression(_) => return Assignability::Assignable,
+        AnyJsExpression::JsStaticMemberExpression(member) => AnyJsMemberExpression::from(member),
+        AnyJsExpression::JsComputedMemberExpression(member) => AnyJsMemberExpression::from(member),
+        _ => return Assignability::NotAssignable,
+    };
+    if member.is_optional_chain() {
+        return Assignability::OptionalChain;
+    }
+    // Parentheses end an optional chain: `(a?.b).c` reads `c` of `undefined`
+    // when `a` is missing.
+    let mut object = member.object();
+    while let Ok(current) = object {
+        object = match current {
+            AnyJsExpression::JsStaticMemberExpression(member) => member.object(),
+            AnyJsExpression::JsComputedMemberExpression(member) => member.object(),
+            current => {
+                let inner = current.omit_parentheses();
+                if inner.is_optional_chain()
+                    || matches!(
+                        inner,
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsNullLiteralExpression(_)
+                        )
+                    )
+                {
+                    return Assignability::MaybeNullObject;
+                }
+                break;
+            }
+        };
+    }
+    Assignability::Assignable
 }
 
 /// Splits a condition on `||` into groups and each group on `&&` into

@@ -139,6 +139,57 @@ pub struct Settings {
 }
 
 impl Settings {
+    /// Returns `file_source` with the variants that the parser settings
+    /// select: JSX in JavaScript files, CSS modules or Tailwind CSS directives
+    /// in CSS files, and CJK-friendly emphasis in Markdown files.
+    #[cfg_attr(
+        not(any(feature = "lang_js", feature = "lang_css", feature = "lang_md")),
+        expect(unused_mut)
+    )]
+    pub(crate) fn file_source_with_parser_variants(
+        &self,
+        mut file_source: DocumentFileSource,
+    ) -> DocumentFileSource {
+        #[cfg(feature = "lang_js")]
+        if let DocumentFileSource::Js(js) = &mut file_source
+            && !js.is_typescript()
+            && !js.is_jsx()
+            && self
+                .languages
+                .javascript
+                .parser
+                .jsx_everywhere
+                .unwrap_or_default()
+                .into()
+        {
+            js.set_variant(biome_languages::javascript::LanguageVariant::Jsx);
+        }
+
+        #[cfg(feature = "lang_css")]
+        if let DocumentFileSource::Css(css) = &mut file_source {
+            let parser = &self.languages.css.parser;
+            if parser.css_modules_enabled.unwrap_or_default().into() {
+                css.set_variant(biome_languages::css::CssVariant::CssModules)
+            } else if parser.tailwind_directives.unwrap_or_default().into() {
+                css.set_variant(biome_languages::css::CssVariant::TailwindCss)
+            }
+        }
+
+        #[cfg(feature = "lang_md")]
+        if let DocumentFileSource::Markdown(markdown) = &mut file_source {
+            markdown.set_cjk_friendly_emphasis(
+                self.languages
+                    .markdown
+                    .parser
+                    .cjk_friendly_emphasis
+                    .unwrap_or_default()
+                    .into(),
+            );
+        }
+
+        file_source
+    }
+
     pub fn format_options<L>(
         &self,
         override_indices: &[usize],

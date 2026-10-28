@@ -143,7 +143,7 @@ libc                         = "0.2.190"
 # See: https://github.com/biomejs/biome/issues/10270
 # See: https://github.com/biomejs/biome/issues/11242
 mimalloc                     = "=0.1.48"
-notify                       = "8.2.0"
+notify                       = "8.2.1"
 papaya                       = "0.2.5"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
@@ -160,10 +160,10 @@ ryu-js                       = "1.0.3"
 salsa                        = "0.28.5"
 schemars                     = { version = "1.2.2", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.229", features = ["derive"] }
-serde_json                   = "1.0.151"
+serde_json                   = "1.0.154"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
-smallvec                     = { version = "1.16.2", features = ["const_new", "serde", "union"] }
+smallvec                     = { version = "1.16.4", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"

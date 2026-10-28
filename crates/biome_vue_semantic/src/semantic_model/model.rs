@@ -136,6 +136,23 @@ pub enum OpenReason {
 /// Why a component's declarations in a namespace may be incomplete.
 pub type OpenReasons = BitFlags<OpenReason>;
 
+/// An option of the default export of the plain `<script>` block that the
+/// `<script setup>` block of the same file can also declare with a compiler
+/// macro.
+#[bitflags]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum MacroOption {
+    /// The `props` option, which `defineProps()` also declares.
+    Props = 1 << 0,
+    /// The `emits` option, which `defineEmits()` also declares.
+    Emits = 1 << 1,
+}
+
+/// The options of the default export of the plain `<script>` block that the
+/// `<script setup>` block of the same file can also declare with a macro.
+pub type MacroOptions = BitFlags<MacroOption>;
+
 /// The kind of a top-level block.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BlockKind {
@@ -312,6 +329,9 @@ pub enum SnippetHost {
     DirectiveValue(AttrId),
     /// The iterable of a `v-for`.
     VForIterable(AttrId),
+    /// The default value of a variable of a `v-for`, such as `fallback` in
+    /// `{ item = fallback } in items`.
+    VForDefault(AttrId),
     /// A `v-bind()` inside a `<style>` block.
     StyleVBind(BlockId),
     /// A snippet the model could not place.
@@ -336,8 +356,10 @@ pub enum RootShape {
     },
     /// More than one statement, or a statement that is not an expression.
     Statements,
-    /// `target = $event`, or `param => target = param`. `target` is the
-    /// fingerprint of the assigned expression.
+    /// An assignment, such as `target = value` or `target += $event`.
+    /// `target` is the fingerprint of the assigned expression. `from_event`
+    /// is `true` when the assignment stores the event payload unchanged:
+    /// `target = $event`, or `param => target = param`.
     Assignment {
         target: u64,
         from_event: bool,
@@ -358,6 +380,25 @@ pub enum RootShape {
     Invalid,
 }
 
+/// Whether the outermost expression of a snippet can be assigned to, as the
+/// value of `v-model` must be.
+///
+/// Parentheses and TypeScript wrappers such as `name as string` and `name!`
+/// are looked through.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Assignability {
+    /// A variable or a property: `name`, `user.name`, `list[0]`.
+    Assignable,
+    /// A property read through `?.`: `user?.name`, `user?.address.city`.
+    OptionalChain,
+    /// A property of a value that may be `null` or `undefined`:
+    /// `(user?.address).city`, `(null).name`.
+    MaybeNullObject,
+    /// Anything else, such as a call, an operator or a literal. Also a
+    /// snippet that is empty, failed to parse, or holds statements.
+    NotAssignable,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct SnippetData {
     /// The content range in the host document.
@@ -366,6 +407,7 @@ pub(crate) struct SnippetData {
     pub(crate) offset: TextSize,
     pub(crate) host: SnippetHost,
     pub(crate) root: RootShape,
+    pub(crate) assignability: Assignability,
     pub(crate) fingerprint: u64,
     pub(crate) operands: Range<u32>,
 }
@@ -623,11 +665,12 @@ pub enum Access {
     Read,
     /// Assigned to, incremented, or deleted.
     Write,
-    /// A method that changes the value in place is called on it.
+    /// A method that changes the value in place is called on it, or it is
+    /// the target of `Object.assign()`.
     Mutate,
     Call,
     /// The value goes somewhere the model does not follow: it is passed as an
-    /// argument, returned, spread, or indexed with a computed key.
+    /// argument, returned, spread, or assigned to another variable.
     Escape,
 }
 
@@ -683,7 +726,9 @@ pub(crate) struct ComponentData {
     pub(crate) inherit_attrs: Tri,
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
-    pub(crate) macro_conflict: bool,
+    pub(crate) macro_options: MacroOptions,
+    /// The function the `data` option is written as.
+    pub(crate) data_function: Option<TextRange>,
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
@@ -707,6 +752,9 @@ pub(crate) struct SemanticModelData {
     pub(crate) references: Vec<ReferenceData>,
     /// For each symbol, the references that resolve to it.
     pub(crate) uses: Vec<Vec<ReferenceId>>,
+    /// The references written outside every snippet, then those of each
+    /// snippet: index `0` holds the former, index `i + 1` those of snippet `i`.
+    pub(crate) references_by_snippet: Vec<Vec<ReferenceId>>,
     pub(crate) components: Vec<ComponentData>,
 }
 
@@ -886,6 +934,20 @@ impl VueSemanticModel {
     /// Returns every reference in the model.
     pub fn references(&self) -> impl Iterator<Item = Reference> + '_ {
         (0..self.data.references.len()).map(|index| self.reference(ReferenceId::new(index)))
+    }
+
+    /// Returns the references written in `snippet`, or, for `None`, those of a
+    /// model built from a single JavaScript tree.
+    pub fn references_in(
+        &self,
+        snippet: Option<SnippetId>,
+    ) -> impl Iterator<Item = Reference> + '_ {
+        self.data
+            .references_by_snippet
+            .get(snippet.map_or(0, |id| id.index() + 1))
+            .into_iter()
+            .flatten()
+            .map(|id| self.reference(*id))
     }
 
     /// Returns every conditional chain in the template.
@@ -1374,6 +1436,11 @@ impl Snippet {
         self.row().range
     }
 
+    /// The range of the snippet's content, in the coordinates of its tree.
+    pub fn range(&self) -> TextRange {
+        self.data.local(self.row().range, Some(self.id))
+    }
+
     /// The position in the host document of the start of the snippet's tree.
     pub fn offset(&self) -> TextSize {
         self.row().offset
@@ -1383,10 +1450,12 @@ impl Snippet {
         self.row().host
     }
 
-    /// The directive whose value or iterable this snippet is.
+    /// The directive whose value, iterable or default value this snippet is.
     pub fn attr(&self) -> Option<Attr> {
         match self.row().host {
-            SnippetHost::DirectiveValue(id) | SnippetHost::VForIterable(id) => Some(Attr {
+            SnippetHost::DirectiveValue(id)
+            | SnippetHost::VForIterable(id)
+            | SnippetHost::VForDefault(id) => Some(Attr {
                 data: self.data.clone(),
                 id,
             }),
@@ -1401,15 +1470,19 @@ impl Snippet {
                 data: self.data.clone(),
                 id,
             }),
-            SnippetHost::DirectiveValue(_) | SnippetHost::VForIterable(_) => {
-                self.attr().map(|attr| attr.element())
-            }
+            SnippetHost::DirectiveValue(_)
+            | SnippetHost::VForIterable(_)
+            | SnippetHost::VForDefault(_) => self.attr().map(|attr| attr.element()),
             _ => None,
         }
     }
 
     pub fn root(&self) -> &RootShape {
         &self.row().root
+    }
+
+    pub fn assignability(&self) -> Assignability {
+        self.row().assignability
     }
 
     /// A hash of the snippet's tokens, ignoring whitespace and comments.
@@ -1429,15 +1502,14 @@ impl Snippet {
 
     /// The references written inside this snippet.
     pub fn references(&self) -> impl Iterator<Item = Reference> + '_ {
-        let id = self.id;
         self.data
-            .references
-            .iter()
-            .enumerate()
-            .filter(move |(_, reference)| reference.snippet == Some(id))
-            .map(|(index, _)| Reference {
+            .references_by_snippet
+            .get(self.id.index() + 1)
+            .into_iter()
+            .flatten()
+            .map(|id| Reference {
                 data: self.data.clone(),
-                id: ReferenceId::new(index),
+                id: *id,
             })
     }
 }
@@ -1604,6 +1676,18 @@ impl Reference {
 
     pub fn base(&self) -> RefBase {
         self.row().base
+    }
+
+    /// The binding the reference is reached through: `props` in
+    /// `props.title`.
+    pub fn base_symbol(&self) -> Option<Symbol> {
+        match self.row().base {
+            RefBase::Via(id) => Some(Symbol {
+                data: self.data.clone(),
+                id,
+            }),
+            _ => None,
+        }
     }
 
     /// The static members read after the name: `[b, c]` for `a.b.c`.
@@ -1867,7 +1951,26 @@ impl Component {
     /// Whether the plain `<script>` block declares props or emits that the
     /// `<script setup>` block also declares with a macro.
     pub fn has_macro_conflict(&self) -> bool {
-        self.row().macro_conflict
+        !self.macro_options().is_empty()
+    }
+
+    /// For a `<script setup>` component, the options among `props` and
+    /// `emits` that the default export of the plain `<script>` block of the
+    /// same file writes, whatever their value.
+    pub fn macro_options(&self) -> MacroOptions {
+        self.row().macro_options
+    }
+
+    /// The range of the function the `data` option is written as, in the
+    /// coordinates of the tree that holds the component: `data() { ... }`,
+    /// `data: function () { ... }` or `data: () => ({ ... })`.
+    ///
+    /// `None` when the component has no `data` option, or when its value is
+    /// not a function written in place, as in `data: { ... }` or
+    /// `data: createData`.
+    pub fn data_function_range(&self) -> Option<TextRange> {
+        let range = self.row().data_function?;
+        Some(self.data.local(range, self.row().snippet))
     }
 
     /// For a `<script setup>` component, the component defined by the default
@@ -1933,8 +2036,10 @@ impl Component {
         self.of_kind(SymbolKind::Prop).map(Prop)
     }
 
-    pub fn models(&self) -> impl Iterator<Item = Symbol> + '_ {
-        self.of_kind(SymbolKind::Model)
+    /// The models the component declares with `defineModel()`. Each model
+    /// declares a prop, described by the returned [`Prop`].
+    pub fn models(&self) -> impl Iterator<Item = Prop> + '_ {
+        self.of_kind(SymbolKind::Model).map(Prop)
     }
 
     pub fn emits(&self) -> impl Iterator<Item = Emit> + '_ {

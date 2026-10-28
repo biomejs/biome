@@ -1,0 +1,11 @@
+<script setup>
+/* should not generate diagnostics */
+const { foo } = defineProps(['foo']);
+const { bar = 'default' } = defineProps(['bar']);
+const { ...rest } = defineProps(['baz']);
+defineProps(['qux']);
+const props = defineProps();
+const emptyObject = defineProps({});
+const emptyArray = defineProps([]);
+const other = withDefaults(somethingElse(), { foo: 'default' });
+</script>

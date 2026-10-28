@@ -28,7 +28,6 @@ use biome_configuration::json::{
     JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
     JsonLinterEnabled, JsonParserConfiguration,
 };
-use biome_db::AnyParsedSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::rowan::Printed;
 use biome_formatter::{
@@ -44,6 +43,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
 use biome_manifest::BiomeManifest;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -505,7 +505,7 @@ fn parse(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: JsonSyntaxNode = parse.syntax(&workspace_db);
@@ -519,7 +519,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     _path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -554,7 +554,7 @@ fn format(
 fn format_range(
     _path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
@@ -569,7 +569,7 @@ fn format_range(
 fn format_on_type(
     _path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,
@@ -779,7 +779,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         error!("Could not determine the file source of the file");
         return PullActionsResult { actions: vec![] };
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let services = JsonAnalyzeServices {
         file_source,
         configuration_provider: settings.configuration_provider(),
@@ -1000,7 +1000,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
 fn search(
     path: &BiomePath,
     document: &DocumentFileSource,
-    parsed: AnyParsedSource,
+    parsed: AnalyzedSource,
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,

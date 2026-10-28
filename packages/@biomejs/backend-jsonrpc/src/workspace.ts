@@ -2741,7 +2741,7 @@ export interface Correctness {
 	 */
 	noVueSetupPropsReactivityLoss?: NoVueSetupPropsReactivityLossConfiguration;
 	/**
-	 * Disallow using v-if and v-for directives on the same element.
+	 * Disallow using v-if, v-else-if, or v-else and v-for directives on the same element.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for
 	 */
 	noVueVIfWithVFor?: NoVueVIfWithVForConfiguration;
@@ -3363,6 +3363,26 @@ export interface Nursery {
 	 */
 	noVueBooleanDefault?: NoVueBooleanDefaultConfiguration;
 	/**
+	 * Disallow using computed properties inside the data function of a Vue component.
+	 * See https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data
+	 */
+	noVueComputedPropertiesInData?: NoVueComputedPropertiesInDataConfiguration;
+	/**
+	 * Disallow the deprecated Vue $listeners API.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-listeners
+	 */
+	noVueDeprecatedListeners?: NoVueDeprecatedListenersConfiguration;
+	/**
+	 * Disallow the tag prop on RouterLink.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-router-link-tag-prop
+	 */
+	noVueDeprecatedRouterLinkTagProp?: NoVueDeprecatedRouterLinkTagPropConfiguration;
+	/**
+	 * Disallow the scope attribute on \<template> elements in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scope-attribute
+	 */
+	noVueDeprecatedScopeAttribute?: NoVueDeprecatedScopeAttributeConfiguration;
+	/**
 	 * Disallow the deprecated Vue $scopedSlots API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots
 	 */
@@ -3372,6 +3392,16 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
 	noVueLifecycleAfterAwait?: NoVueLifecycleAfterAwaitConfiguration;
+	/**
+	 * Disallow passing more than one argument to a Vue slot.
+	 * See https://biomejs.dev/linter/rules/no-vue-multiple-slot-args
+	 */
+	noVueMultipleSlotArgs?: NoVueMultipleSlotArgsConfiguration;
+	/**
+	 * Disallow changing the props of a Vue component.
+	 * See https://biomejs.dev/linter/rules/no-vue-mutating-props
+	 */
+	noVueMutatingProps?: NoVueMutatingPropsConfiguration;
 	/**
 	 * Disallow props that are both required and have a default value.
 	 * See https://biomejs.dev/linter/rules/no-vue-required-prop-with-default
@@ -3387,6 +3417,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-vue-shadow-native-events
 	 */
 	noVueShadowNativeEvents?: NoVueShadowNativeEventsConfiguration;
+	/**
+	 * Disallow changing state inside Vue computed properties.
+	 * See https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed
+	 */
+	noVueSideEffectsInComputed?: NoVueSideEffectsInComputedConfiguration;
 	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
@@ -3738,25 +3773,85 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Enforce defineOptions() instead of a default export in components that use \<script setup>.
+	 * See https://biomejs.dev/linter/rules/use-vue-define-options
+	 */
+	useVueDefineOptions?: UseVueDefineOptionsConfiguration;
+	/**
+	 * Require destructuring the props returned by Vue's defineProps macro.
+	 * See https://biomejs.dev/linter/rules/use-vue-define-props-destructuring
+	 */
+	useVueDefinePropsDestructuring?: UseVueDefinePropsDestructuringConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
+	/**
+	 * Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.
+	 * See https://biomejs.dev/linter/rules/use-vue-template-ref
+	 */
+	useVueTemplateRef?: UseVueTemplateRefConfiguration;
 	/**
 	 * Require the element inside a Vue \<Transition> to be shown and hidden with v-if or v-show.
 	 * See https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition
 	 */
 	useVueToggleInsideTransition?: UseVueToggleInsideTransitionConfiguration;
 	/**
+	 * Require a type for every prop of a Vue component.
+	 * See https://biomejs.dev/linter/rules/use-vue-typed-props
+	 */
+	useVueTypedProps?: UseVueTypedPropsConfiguration;
+	/**
 	 * Require a type for refs created with ref() or shallowRef() in TypeScript.
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
 	useVueTypedRef?: UseVueTypedRefConfiguration;
 	/**
+	 * Enforce v-model instead of a prop binding paired with an update: listener that writes the value back.
+	 * See https://biomejs.dev/linter/rules/use-vue-v-model
+	 */
+	useVueVModel?: UseVueVModelConfiguration;
+	/**
 	 * Enforce the .exact modifier on v-on directives when another listener for the same event needs more modifier keys.
 	 * See https://biomejs.dev/linter/rules/use-vue-v-on-exact
 	 */
 	useVueVOnExact?: UseVueVOnExactConfiguration;
+	/**
+	 * Enforce valid usage of Vue's defineEmits macro.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-emits
+	 */
+	useVueValidDefineEmits?: UseVueValidDefineEmitsConfiguration;
+	/**
+	 * Enforce valid defineProps() calls in Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-props
+	 */
+	useVueValidDefineProps?: UseVueValidDefinePropsConfiguration;
+	/**
+	 * Enforce valid v-is Vue directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-is
+	 */
+	useVueValidVIs?: UseVueValidVIsConfiguration;
+	/**
+	 * Enforce valid v-memo Vue directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-memo
+	 */
+	useVueValidVMemo?: UseVueValidVMemoConfiguration;
+	/**
+	 * Enforce valid v-model directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-model
+	 */
+	useVueValidVModel?: UseVueValidVModelConfiguration;
+	/**
+	 * Enforce valid v-show directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-show
+	 */
+	useVueValidVShow?: UseVueValidVShowConfiguration;
+	/**
+	 * Enforce valid v-slot directives in Vue templates.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-slot
+	 */
+	useVueValidVSlot?: UseVueValidVSlotConfiguration;
 	/**
 	 * Require the condition that ends a loop to be written in the while statement.
 	 * See https://biomejs.dev/linter/rules/use-while-loop-condition
@@ -6157,12 +6252,30 @@ export type NoUselessTypeConversionConfiguration =
 export type NoVueBooleanDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueBooleanDefaultOptions;
+export type NoVueComputedPropertiesInDataConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueComputedPropertiesInDataOptions;
+export type NoVueDeprecatedListenersConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedListenersOptions;
+export type NoVueDeprecatedRouterLinkTagPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedRouterLinkTagPropOptions;
+export type NoVueDeprecatedScopeAttributeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedScopeAttributeOptions;
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
+export type NoVueMultipleSlotArgsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueMultipleSlotArgsOptions;
+export type NoVueMutatingPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueMutatingPropsOptions;
 export type NoVueRequiredPropWithDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRequiredPropWithDefaultOptions;
@@ -6172,6 +6285,9 @@ export type NoVueRootVIfConfiguration =
 export type NoVueShadowNativeEventsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueShadowNativeEventsOptions;
+export type NoVueSideEffectsInComputedConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueSideEffectsInComputedOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -6382,18 +6498,54 @@ export type UseVueComponentIsConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueDefineOptionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefineOptionsOptions;
+export type UseVueDefinePropsDestructuringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefinePropsDestructuringOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVueTemplateRefConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueTemplateRefOptions;
 export type UseVueToggleInsideTransitionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueToggleInsideTransitionOptions;
+export type UseVueTypedPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueTypedPropsOptions;
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
+export type UseVueVModelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueVModelOptions;
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
+export type UseVueValidDefineEmitsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidDefineEmitsOptions;
+export type UseVueValidDefinePropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidDefinePropsOptions;
+export type UseVueValidVIsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVIsOptions;
+export type UseVueValidVMemoConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVMemoOptions;
+export type UseVueValidVModelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVModelOptions;
+export type UseVueValidVShowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVShowOptions;
+export type UseVueValidVSlotConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVSlotOptions;
 export type UseWhileLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseWhileLoopConditionOptions;
@@ -8889,6 +9041,22 @@ export interface RuleWithNoVueBooleanDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueBooleanDefaultOptions;
 }
+export interface RuleWithNoVueComputedPropertiesInDataOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueComputedPropertiesInDataOptions;
+}
+export interface RuleWithNoVueDeprecatedListenersOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedListenersOptions;
+}
+export interface RuleWithNoVueDeprecatedRouterLinkTagPropOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedRouterLinkTagPropOptions;
+}
+export interface RuleWithNoVueDeprecatedScopeAttributeOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedScopeAttributeOptions;
+}
 export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -8900,6 +9068,14 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
+}
+export interface RuleWithNoVueMultipleSlotArgsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueMultipleSlotArgsOptions;
+}
+export interface RuleWithNoVueMutatingPropsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueMutatingPropsOptions;
 }
 export interface RuleWithNoVueRequiredPropWithDefaultOptions {
 	/**
@@ -8916,6 +9092,10 @@ export interface RuleWithNoVueRootVIfOptions {
 export interface RuleWithNoVueShadowNativeEventsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueShadowNativeEventsOptions;
+}
+export interface RuleWithNoVueSideEffectsInComputedOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueSideEffectsInComputedOptions;
 }
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
@@ -9325,6 +9505,14 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueDefineOptionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefineOptionsOptions;
+}
+export interface RuleWithUseVueDefinePropsDestructuringOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefinePropsDestructuringOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -9333,17 +9521,61 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVueTemplateRefOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueTemplateRefOptions;
+}
 export interface RuleWithUseVueToggleInsideTransitionOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueToggleInsideTransitionOptions;
+}
+export interface RuleWithUseVueTypedPropsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueTypedPropsOptions;
 }
 export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
 }
+export interface RuleWithUseVueVModelOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueVModelOptions;
+}
 export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
+}
+export interface RuleWithUseVueValidDefineEmitsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidDefineEmitsOptions;
+}
+export interface RuleWithUseVueValidDefinePropsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidDefinePropsOptions;
+}
+export interface RuleWithUseVueValidVIsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVIsOptions;
+}
+export interface RuleWithUseVueValidVMemoOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVMemoOptions;
+}
+export interface RuleWithUseVueValidVModelOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVModelOptions;
+}
+export interface RuleWithUseVueValidVShowOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVShowOptions;
+}
+export interface RuleWithUseVueValidVSlotOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVSlotOptions;
 }
 export interface RuleWithUseWhileLoopConditionOptions {
 	/**
@@ -11468,11 +11700,23 @@ export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
+export type NoVueComputedPropertiesInDataOptions = {};
+export type NoVueDeprecatedListenersOptions = {};
+export interface NoVueDeprecatedRouterLinkTagPropOptions {
+	/**
+	 * Names of the link components to check for the `tag` prop.
+	 */
+	components?: string[];
+}
+export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
+export type NoVueMultipleSlotArgsOptions = {};
+export type NoVueMutatingPropsOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
+export type NoVueSideEffectsInComputedOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -11733,10 +11977,22 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueDefineOptionsOptions = {};
+export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
+export type UseVueTypedPropsOptions = {};
 export type UseVueTypedRefOptions = {};
+export type UseVueVModelOptions = {};
 export type UseVueVOnExactOptions = {};
+export type UseVueValidDefineEmitsOptions = {};
+export type UseVueValidDefinePropsOptions = {};
+export type UseVueValidVIsOptions = {};
+export type UseVueValidVMemoOptions = {};
+export type UseVueValidVModelOptions = {};
+export type UseVueValidVShowOptions = {};
+export type UseVueValidVSlotOptions = {};
 export type UseWhileLoopConditionOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
@@ -13248,13 +13504,20 @@ export type Category =
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
+	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueDeprecatedListeners"
+	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
+	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
+	| "lint/nursery/noVueMultipleSlotArgs"
+	| "lint/nursery/noVueMutatingProps"
+	| "lint/nursery/noVueRootVIf"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
+	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueVHtml"
@@ -13343,14 +13606,25 @@ export type Category =
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueDefinePropsDestructuring"
+	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueToggleInsideTransition"
+	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueValidDefineEmits"
+	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidVFor"
+	| "lint/nursery/useVueValidVIs"
+	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueVModel"
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
+	| "lint/nursery/useVueValidVShow"
+	| "lint/nursery/useVueValidVSlot"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
