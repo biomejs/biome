@@ -49,6 +49,8 @@ Use:
 
 Do not use backtracking where a bounded lookahead or a more precise presence test can distinguish the syntax.
 
+Consume the tokens a rule expects by kind: `bump(kind)`, `bump_ts(set)`, `eat`, `expect`, and their `_with_context` variants. These assert the token's kind, so the rule documents what it consumes and a wrong assumption fails loudly. Reserve `bump_any` and `bump_any_with_context` for error recovery, where the tokens are unknown by definition. A parse rule that dispatches on several token kinds should call one parse function per node, each consuming its own kinds, rather than computing a node kind and calling `bump_any`.
+
 ## Error Recovery
 
 Recovery must preserve following valid syntax and produce a bogus node permitted by the grammar at that position.
@@ -95,6 +97,7 @@ Load `testing-codegen` for parser quick tests and snapshot mechanics.
 ## Review Checklist
 
 - `Absent` paths consume no input.
+- Parse rules consume tokens by kind; `bump_any` only appears in recovery.
 - Required nodes and tokens produce useful diagnostics.
 - Recovery emits a grammar-valid bogus node.
 - Every loop either advances or exits.

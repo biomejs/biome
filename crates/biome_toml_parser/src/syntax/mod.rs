@@ -31,6 +31,14 @@ const KEY_PART_START: TokenSet<TomlSyntaxKind> = token_set![
 
 const TABLE_HEADER_START: TokenSet<TomlSyntaxKind> = token_set![T!['['], T!["[["]];
 
+const QUOTED_KEY_LITERALS: TokenSet<TomlSyntaxKind> =
+    token_set![TOML_BASIC_STRING_LITERAL, TOML_LITERAL_STRING_LITERAL];
+
+const MULTILINE_STRING_LITERALS: TokenSet<TomlSyntaxKind> =
+    token_set![TOML_ML_BASIC_STRING_LITERAL, TOML_ML_LITERAL_STRING_LITERAL];
+
+const BOOLEAN_LITERALS: TokenSet<TomlSyntaxKind> = token_set![T![true], T![false]];
+
 const STRING_LITERALS: TokenSet<TomlSyntaxKind> = token_set![
     TOML_BASIC_STRING_LITERAL,
     TOML_LITERAL_STRING_LITERAL,
@@ -311,40 +319,128 @@ fn parse_key(p: &mut TomlParser) -> ParsedSyntax {
 }
 
 fn parse_key_part(p: &mut TomlParser) -> ParsedSyntax {
-    let kind = match p.cur() {
-        TOML_BARE_KEY_LITERAL => TOML_BARE_KEY,
-        TOML_BASIC_STRING_LITERAL | TOML_LITERAL_STRING_LITERAL => TOML_QUOTED_KEY,
+    match p.cur() {
+        TOML_BARE_KEY_LITERAL => parse_bare_key(p),
+        TOML_BASIC_STRING_LITERAL | TOML_LITERAL_STRING_LITERAL => parse_quoted_key(p),
         TOML_ML_BASIC_STRING_LITERAL | TOML_ML_LITERAL_STRING_LITERAL => {
-            let range = p.cur_range();
-            p.error(multiline_string_key(p, range));
-            TOML_BOGUS
+            parse_multiline_string_key(p)
         }
-        _ => return Absent,
-    };
+        _ => Absent,
+    }
+}
+
+// key
+fn parse_bare_key(p: &mut TomlParser) -> ParsedSyntax {
+    if !p.at(TOML_BARE_KEY_LITERAL) {
+        return Absent;
+    }
 
     let m = p.start();
-    p.bump_any();
-    Present(m.complete(p, kind))
+    p.bump(TOML_BARE_KEY_LITERAL);
+    Present(m.complete(p, TOML_BARE_KEY))
+}
+
+// "key" or 'key'
+fn parse_quoted_key(p: &mut TomlParser) -> ParsedSyntax {
+    if !p.at_ts(QUOTED_KEY_LITERALS) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts(QUOTED_KEY_LITERALS);
+    Present(m.complete(p, TOML_QUOTED_KEY))
+}
+
+/// Parses a multi-line string used as a key, which TOML doesn't allow, into a
+/// bogus key part.
+fn parse_multiline_string_key(p: &mut TomlParser) -> ParsedSyntax {
+    if !p.at_ts(MULTILINE_STRING_LITERALS) {
+        return Absent;
+    }
+
+    let range = p.cur_range();
+    p.error(multiline_string_key(p, range));
+
+    let m = p.start();
+    p.bump_ts(MULTILINE_STRING_LITERALS);
+    Present(m.complete(p, TOML_BOGUS))
 }
 
 /// Parses a value. `after` is the context for the token that follows it.
 fn parse_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
-    let kind = match p.cur() {
-        T!['['] => return parse_array(p, after),
-        T!['{'] => return parse_inline_table(p, after),
-        TOML_INTEGER_LITERAL => TOML_INTEGER,
-        TOML_FLOAT_LITERAL => TOML_FLOAT,
-        T![true] | T![false] => TOML_BOOLEAN,
-        // The lexer has already reported the invalid value.
-        ERROR_TOKEN => TOML_BOGUS_VALUE,
-        kind if STRING_LITERALS.contains(kind) => TOML_STRING,
-        kind if DATE_TIME_LITERALS.contains(kind) => TOML_DATE_TIME,
-        _ => return Absent,
-    };
+    match p.cur() {
+        T!['['] => parse_array(p, after),
+        T!['{'] => parse_inline_table(p, after),
+        TOML_INTEGER_LITERAL => parse_integer(p, after),
+        TOML_FLOAT_LITERAL => parse_float(p, after),
+        T![true] | T![false] => parse_boolean(p, after),
+        ERROR_TOKEN => parse_invalid_value(p, after),
+        kind if STRING_LITERALS.contains(kind) => parse_string(p, after),
+        kind if DATE_TIME_LITERALS.contains(kind) => parse_date_time(p, after),
+        _ => Absent,
+    }
+}
+
+fn parse_string(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
+    if !p.at_ts(STRING_LITERALS) {
+        return Absent;
+    }
 
     let m = p.start();
-    p.bump_any_with_context(after);
-    Present(m.complete(p, kind))
+    p.bump_ts_with_context(STRING_LITERALS, after);
+    Present(m.complete(p, TOML_STRING))
+}
+
+fn parse_integer(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
+    if !p.at(TOML_INTEGER_LITERAL) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(TOML_INTEGER_LITERAL, after);
+    Present(m.complete(p, TOML_INTEGER))
+}
+
+fn parse_float(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
+    if !p.at(TOML_FLOAT_LITERAL) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(TOML_FLOAT_LITERAL, after);
+    Present(m.complete(p, TOML_FLOAT))
+}
+
+fn parse_boolean(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
+    if !p.at_ts(BOOLEAN_LITERALS) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts_with_context(BOOLEAN_LITERALS, after);
+    Present(m.complete(p, TOML_BOOLEAN))
+}
+
+fn parse_date_time(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
+    if !p.at_ts(DATE_TIME_LITERALS) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_ts_with_context(DATE_TIME_LITERALS, after);
+    Present(m.complete(p, TOML_DATE_TIME))
+}
+
+/// Wraps a token that the lexer couldn't read as a value, and has already
+/// reported, into a bogus value.
+fn parse_invalid_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
+    if !p.at(ERROR_TOKEN) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(ERROR_TOKEN, after);
+    Present(m.complete(p, TOML_BOGUS_VALUE))
 }
 
 /// The maximum number of arrays and inline tables that can be nested in each
@@ -358,7 +454,7 @@ fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     }
 
     if p.nesting_depth() >= MAX_NESTING_DEPTH {
-        return Present(skip_nested_value(p, after));
+        return Present(recover_too_deep_value(p, after));
     }
 
     let m = p.start();
@@ -371,9 +467,9 @@ fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     Present(m.complete(p, TOML_ARRAY))
 }
 
-/// Wraps an array or inline table that exceeds [MAX_NESTING_DEPTH] into a
-/// bogus value, without recursing into it.
-fn skip_nested_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMarker {
+/// Recovers from an array or inline table that exceeds [MAX_NESTING_DEPTH]:
+/// reports it and wraps it into a bogus value without recursing into it.
+fn recover_too_deep_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMarker {
     let range = p.cur_range();
     p.error(nesting_too_deep(p, range));
 
@@ -474,7 +570,7 @@ fn scan_key(p: &mut TomlParser, mut n: usize) -> Option<usize> {
 }
 
 /// Returns `true` if the current token can't continue a value that is skipped
-/// by [skip_nested_value] and most likely starts the next line item.
+/// by [recover_too_deep_value] and most likely starts the next line item.
 ///
 /// `previous` is the last skipped token and `innermost` the innermost open
 /// bracket. The rules mirror the line-break handling of the list parsers.
@@ -577,7 +673,7 @@ fn parse_inline_table(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax
     }
 
     if p.nesting_depth() >= MAX_NESTING_DEPTH {
-        return Present(skip_nested_value(p, after));
+        return Present(recover_too_deep_value(p, after));
     }
 
     let m = p.start();
