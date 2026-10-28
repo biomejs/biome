@@ -497,7 +497,13 @@ impl Collector<'_, '_> {
             match name.text() {
                 "props" => self.collect_props_option(&member, component),
                 "emits" => self.collect_emits_option(&member, component),
-                "data" => self.collect_data_option(&member, component, SymbolKind::Data),
+                "data" => {
+                    if let Some(function) = member_function(&member) {
+                        let range = self.host(function.syntax().text_trimmed_range());
+                        self.builder.component_mut(component).data_function = Some(range);
+                    }
+                    self.collect_data_option(&member, component, SymbolKind::Data);
+                }
                 "asyncData" => self.collect_data_option(&member, component, SymbolKind::AsyncData),
                 "computed" => self.collect_computed_option(&member, component),
                 "methods" => self.collect_methods_option(&member, component),

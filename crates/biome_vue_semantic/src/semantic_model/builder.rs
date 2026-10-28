@@ -102,6 +102,7 @@ impl ModelBuilder {
             decl_open: [OpenReasons::default(); Namespace::COUNT],
             uses_open: [false; Namespace::COUNT],
             macro_options: MacroOptions::empty(),
+            data_function: None,
             merged: None,
             merged_into: None,
             symbols: Vec::new(),

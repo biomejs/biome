@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-setup-computed.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  data() {
+    return {
+      copy: this.doubled,
+    };
+  },
+};
+</script>
+
+<script setup>
+import { computed } from "vue";
+
+const doubled = computed(() => 2);
+</script>
+
+```
