@@ -8,6 +8,7 @@ use std::{
     env, fs,
     io::{self, ErrorKind},
     os::unix::fs::{DirBuilderExt, FileTypeExt, MetadataExt, PermissionsExt},
+    process::Stdio,
     time::Duration,
 };
 use tokio::{
@@ -201,6 +202,13 @@ fn spawn_daemon(
     cmd.arg(format!("--log-kind={}", log_options.log_kind));
 
     cmd.arg(format!("--log-level={}", log_options.log_level));
+
+    // The daemon outlives the spawning client, which may be reading its
+    // standard output. Inherited pipes would stay open as long as the daemon
+    // runs and keep that reader waiting.
+    cmd.stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
 
     // Create a new session for the process and make it the leader, this will
     // ensures that the child process is fully detached from its parent and will
