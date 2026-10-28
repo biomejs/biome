@@ -20,8 +20,8 @@ pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer,
-    Suppression,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistryCache,
+    SnippetAnalyzer, Suppression,
 };
 use biome_aria::AriaRoles;
 use biome_db::Source;
@@ -252,6 +252,10 @@ where
     )
 }
 
+thread_local! {
+    static REGISTRY_CACHE: RuleRegistryCache<HtmlLanguage> = const { RuleRegistryCache::new() };
+}
+
 fn analyze_with_inspect_matcher_and_snippets<'a, V, F, B, Output>(
     root: &LanguageRoot<HtmlLanguage>,
     filter: AnalysisFilter,
@@ -269,10 +273,8 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    let mut registry = RuleRegistry::builder(&filter, root);
-    visit_registry(&mut registry);
-
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) =
+        REGISTRY_CACHE.with(|cache| cache.build(&filter, root, visit_registry));
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
