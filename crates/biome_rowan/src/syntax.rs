@@ -11,9 +11,9 @@ pub use borrowed_token::{
 };
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
-    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren,
-    SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot,
-    SyntaxSlots,
+    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderOfKinds, PreorderWithTokens, SendNode,
+    SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
+    SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
 };
 pub use rewriter::{SyntaxRewriter, VisitNodeSignal};
 use std::fmt;

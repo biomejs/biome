@@ -25,6 +25,7 @@ biome_console            = { workspace = true }
 biome_css_parser         = { workspace = true }
 biome_css_semantic       = { workspace = true }
 biome_css_syntax         = { workspace = true }
+biome_db                 = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
@@ -33,7 +34,7 @@ biome_html_factory       = { workspace = true }
 biome_html_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_html"] }
 biome_module_graph       = { workspace = true }
-biome_parser             = { workspace = true }
+biome_parser             = { workspace = true, features = ["db"] }
 biome_project_layout     = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
@@ -43,18 +44,22 @@ biome_tailwind_logic     = { workspace = true }
 biome_tailwind_parser    = { workspace = true }
 biome_tailwind_syntax    = { workspace = true }
 biome_unicode_table      = { workspace = true }
+biome_vue_semantic       = { workspace = true }
 camino                   = { workspace = true }
+enumflags2               = { workspace = true }
 phf                      = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
 
 [dev-dependencies]
+biome_db          = { path = "../biome_db" }
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true, features = ["glob"] }
+salsa             = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
 
 [build-dependencies]

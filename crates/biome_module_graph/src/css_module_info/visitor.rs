@@ -3,11 +3,19 @@ use crate::css_module_info::{
 };
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
-    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, TwCustomVariantAtRule,
-    TwThemeAtRule, TwUtilityAtRule,
+    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, CssLanguage,
+    TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
 };
-use biome_rowan::{AstNode, Text, TextRange, TokenText, WalkEvent};
+use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText, WalkEvent};
 use indexmap::IndexMap;
+
+const VISITED_KINDS: SyntaxKindSet<CssLanguage> = AnyCssImportUrl::KIND_SET
+    .union(CssImportAtRule::KIND_SET)
+    .union(TwThemeAtRule::KIND_SET)
+    .union(TwUtilityAtRule::KIND_SET)
+    .union(TwCustomVariantAtRule::KIND_SET)
+    .union(AnyCssPseudoClassFunctionSelector::KIND_SET)
+    .union(CssClassSelector::KIND_SET);
 
 pub(crate) struct CssModuleVisitor {
     root: AnyCssRoot,
@@ -28,8 +36,8 @@ impl CssModuleVisitor {
         // statically traced to specific `class="..."` references, so we skip them.
         let mut global_depth: u32 = 0;
 
-        let iter = self.root.syntax().preorder();
-        for event in iter {
+        let root = self.root.syntax().clone();
+        for event in root.preorder_of_kinds(VISITED_KINDS) {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(node) = AnyCssImportUrl::cast(node.clone()) {

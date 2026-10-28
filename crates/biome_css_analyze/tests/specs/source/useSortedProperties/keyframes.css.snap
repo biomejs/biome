@@ -1,0 +1,321 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: keyframes.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@keyframes fade {
+  from {
+    opacity: 0;
+    display: block;
+  }
+  50%, 75% {
+    color: red;
+    /* Keep this comment with display. */
+    display: block;
+  }
+  to {
+    color: red;
+    display: block;
+  }
+}
+
+@-webkit-keyframes fade {
+  to {
+    transform: translateX(10px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes slide {
+    to {
+      transform: translateX(10px);
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes unsafe {
+  from {
+    margin-top: 1px;
+    margin: 0;
+  }
+}
+
+@keyframes unchanged {
+  from {
+    display: block;
+    opacity: 0;
+  }
+  50% {
+    color: red;
+    unknown-property: 0;
+    display: block;
+  }
+  to {
+    color: red;
+    color: blue;
+  }
+}
+
+@font-face {
+  font-style: normal;
+  font-family: example;
+}
+
+@keyframes no-semicolon {
+  to {
+    color: red;
+    display: block
+  }
+}
+
+@keyframes duplicates {
+  to {
+    color: red;
+    color: blue;
+    ;
+    display: block;
+    --alpha: 1;
+  }
+}
+
+```
+
+# Diagnostics
+```
+keyframes.css:3:8 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @keyframes fade {
+  > 3 │   from {
+      │        ^
+  > 4 │     opacity: 0;
+  > 5 │     display: block;
+  > 6 │   }
+      │   ^
+    7 │   50%, 75% {
+    8 │     color: red;
+  
+  i Safe fix: Sort these properties
+  
+     2  2 │   @keyframes fade {
+     3  3 │     from {
+     4    │ - ····opacity:·0;
+     5    │ - ····display:·block;
+        4 │ + ····display:·block;
+        5 │ + ····opacity:·0;
+     6  6 │     }
+     7  7 │     50%, 75% {
+  
+
+```
+
+```
+keyframes.css:7:12 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     5 │     display: block;
+     6 │   }
+   > 7 │   50%, 75% {
+       │            ^
+   > 8 │     color: red;
+   > 9 │     /* Keep this comment with display. */
+  > 10 │     display: block;
+  > 11 │   }
+       │   ^
+    12 │   to {
+    13 │     color: red;
+  
+  i Safe fix: Sort these properties
+  
+     6  6 │     }
+     7  7 │     50%, 75% {
+     8    │ - ····color:·red;
+     9    │ - ····/*·Keep·this·comment·with·display.·*/
+    10    │ - ····display:·block;
+        8 │ + ····/*·Keep·this·comment·with·display.·*/
+        9 │ + ····display:·block;
+       10 │ + ····color:·red;
+    11 11 │     }
+    12 12 │     to {
+  
+
+```
+
+```
+keyframes.css:12:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    10 │     display: block;
+    11 │   }
+  > 12 │   to {
+       │      ^
+  > 13 │     color: red;
+  > 14 │     display: block;
+  > 15 │   }
+       │   ^
+    16 │ }
+    17 │ 
+  
+  i Safe fix: Sort these properties
+  
+    11 11 │     }
+    12 12 │     to {
+    13    │ - ····color:·red;
+    14    │ - ····display:·block;
+       13 │ + ····display:·block;
+       14 │ + ····color:·red;
+    15 15 │     }
+    16 16 │   }
+  
+
+```
+
+```
+keyframes.css:19:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    18 │ @-webkit-keyframes fade {
+  > 19 │   to {
+       │      ^
+  > 20 │     transform: translateX(10px);
+  > 21 │     opacity: 1;
+  > 22 │   }
+       │   ^
+    23 │ }
+    24 │ 
+  
+  i Safe fix: Sort these properties
+  
+    18 18 │   @-webkit-keyframes fade {
+    19 19 │     to {
+    20    │ - ····transform:·translateX(10px);
+    21    │ - ····opacity:·1;
+       20 │ + ····opacity:·1;
+       21 │ + ····transform:·translateX(10px);
+    22 22 │     }
+    23 23 │   }
+  
+
+```
+
+```
+keyframes.css:27:8 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    25 │ @media (prefers-reduced-motion: no-preference) {
+    26 │   @keyframes slide {
+  > 27 │     to {
+       │        ^
+  > 28 │       transform: translateX(10px);
+  > 29 │       opacity: 1;
+  > 30 │     }
+       │     ^
+    31 │   }
+    32 │ }
+  
+  i Safe fix: Sort these properties
+  
+    26 26 │     @keyframes slide {
+    27 27 │       to {
+    28    │ - ······transform:·translateX(10px);
+    29    │ - ······opacity:·1;
+       28 │ + ······opacity:·1;
+       29 │ + ······transform:·translateX(10px);
+    30 30 │       }
+    31 31 │     }
+  
+
+```
+
+```
+keyframes.css:35:8 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    34 │ @keyframes unsafe {
+  > 35 │   from {
+       │        ^
+  > 36 │     margin-top: 1px;
+  > 37 │     margin: 0;
+  > 38 │   }
+       │   ^
+    39 │ }
+    40 │ 
+  
+
+```
+
+```
+keyframes.css:63:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    62 │ @keyframes no-semicolon {
+  > 63 │   to {
+       │      ^
+  > 64 │     color: red;
+  > 65 │     display: block
+  > 66 │   }
+       │   ^
+    67 │ }
+    68 │ 
+  
+  i Safe fix: Sort these properties
+  
+    62 62 │   @keyframes no-semicolon {
+    63 63 │     to {
+    64    │ - ····color:·red;
+    65    │ - ····display:·block
+       64 │ + ····display:·block;
+       65 │ + ····color:·red;
+    66 66 │     }
+    67 67 │   }
+  
+
+```
+
+```
+keyframes.css:70:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    69 │ @keyframes duplicates {
+  > 70 │   to {
+       │      ^
+  > 71 │     color: red;
+        ...
+  > 75 │     --alpha: 1;
+  > 76 │   }
+       │   ^
+    77 │ }
+    78 │ 
+  
+  i Safe fix: Sort these properties
+  
+    69 69 │   @keyframes duplicates {
+    70 70 │     to {
+    71    │ - ····color:·red;
+    72    │ - ····color:·blue;
+    73    │ - ····;
+    74    │ - ····display:·block;
+    75    │ - ····--alpha:·1;
+       71 │ + ····--alpha:·1;
+       72 │ + ····display:·block;
+       73 │ + ····color:·red;
+       74 │ + ····color:·blue;
+       75 │ + ····;
+    76 76 │     }
+    77 77 │   }
+  
+
+```

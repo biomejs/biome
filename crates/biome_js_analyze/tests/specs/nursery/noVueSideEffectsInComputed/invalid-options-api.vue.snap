@@ -1,0 +1,390 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  computed: {
+    assign() {
+      this.firstName = "lorem";
+      return this.firstName;
+    },
+    update() {
+      this.count += 2;
+      this.count++;
+      return this.count;
+    },
+    reverse() {
+      return this.something.reverse();
+    },
+    nestedPush() {
+      const test = this.another.something.push("example");
+      return test;
+    },
+    computedMember(index) {
+      this.something[index] = 1;
+      return this.something;
+    },
+    nestedSort() {
+      return this.something.keys.sort();
+    },
+    deleteMember() {
+      delete this.cache.entry;
+      return this.cache;
+    },
+    objectAssign() {
+      return Object.assign(this.settings, { theme: "dark" });
+    },
+    getterOnly: {
+      get() {
+        return this.list.splice(0, 1);
+      },
+      set(value) {
+        this.list = value;
+      },
+    },
+    functionValue: function () {
+      return this.items.pop();
+    },
+    callback() {
+      this.items.forEach((item) => {
+        this.total += item;
+      });
+      return this.total;
+    },
+    sharedKey() {
+      this.a[this.b] = 1;
+      return this.a;
+    },
+    swap() {
+      [this.a, this.b] = [this.b, this.a];
+      return this.a;
+    },
+    loopTarget() {
+      for (this.current of this.items);
+      return this.current;
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:6:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property assign changes state.
+  
+    4 │   computed: {
+    5 │     assign() {
+  > 6 │       this.firstName = "lorem";
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │       return this.firstName;
+    8 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:10:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property update changes state.
+  
+     8 │     },
+     9 │     update() {
+  > 10 │       this.count += 2;
+       │       ^^^^^^^^^^^^^^^
+    11 │       this.count++;
+    12 │       return this.count;
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:11:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property update changes state.
+  
+     9 │     update() {
+    10 │       this.count += 2;
+  > 11 │       this.count++;
+       │       ^^^^^^^^^^^^
+    12 │       return this.count;
+    13 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:15:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property reverse changes state.
+  
+    13 │     },
+    14 │     reverse() {
+  > 15 │       return this.something.reverse();
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │     },
+    17 │     nestedPush() {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:18:20 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property nestedPush changes state.
+  
+    16 │     },
+    17 │     nestedPush() {
+  > 18 │       const test = this.another.something.push("example");
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │       return test;
+    20 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:22:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property computedMember changes state.
+  
+    20 │     },
+    21 │     computedMember(index) {
+  > 22 │       this.something[index] = 1;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │       return this.something;
+    24 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:26:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property nestedSort changes state.
+  
+    24 │     },
+    25 │     nestedSort() {
+  > 26 │       return this.something.keys.sort();
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │     },
+    28 │     deleteMember() {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:29:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property deleteMember changes state.
+  
+    27 │     },
+    28 │     deleteMember() {
+  > 29 │       delete this.cache.entry;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^
+    30 │       return this.cache;
+    31 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:33:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property objectAssign changes state.
+  
+    31 │     },
+    32 │     objectAssign() {
+  > 33 │       return Object.assign(this.settings, { theme: "dark" });
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │     },
+    35 │     getterOnly: {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:37:16 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property getterOnly changes state.
+  
+    35 │     getterOnly: {
+    36 │       get() {
+  > 37 │         return this.list.splice(0, 1);
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    38 │       },
+    39 │       set(value) {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:44:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property functionValue changes state.
+  
+    42 │     },
+    43 │     functionValue: function () {
+  > 44 │       return this.items.pop();
+       │              ^^^^^^^^^^^^^^^^
+    45 │     },
+    46 │     callback() {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:48:9 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property callback changes state.
+  
+    46 │     callback() {
+    47 │       this.items.forEach((item) => {
+  > 48 │         this.total += item;
+       │         ^^^^^^^^^^^^^^^^^^
+    49 │       });
+    50 │       return this.total;
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:53:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property sharedKey changes state.
+  
+    51 │     },
+    52 │     sharedKey() {
+  > 53 │       this.a[this.b] = 1;
+       │       ^^^^^^^^^^^^^^^^^^
+    54 │       return this.a;
+    55 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:57:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property swap changes state.
+  
+    55 │     },
+    56 │     swap() {
+  > 57 │       [this.a, this.b] = [this.b, this.a];
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │       return this.a;
+    59 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:61:12 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property loopTarget changes state.
+  
+    59 │     },
+    60 │     loopTarget() {
+  > 61 │       for (this.current of this.items);
+       │            ^^^^^^^^^^^^
+    62 │       return this.current;
+    63 │     },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

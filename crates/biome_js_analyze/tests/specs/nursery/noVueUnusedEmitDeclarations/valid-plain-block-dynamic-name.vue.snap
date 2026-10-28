@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-plain-block-dynamic-name.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  methods: {
+    go(name) {
+      this.$emit(name);
+    },
+  },
+};
+</script>
+
+<script setup>
+defineEmits(["foo"]);
+</script>
+
+```

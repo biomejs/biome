@@ -20,17 +20,11 @@ declare_lint_rule! {
     /// which is the order in which Tailwind CSS writes their CSS. Classes that Tailwind CSS
     /// doesn't know, such as your own CSS classes, come first and keep their original order.
     ///
-    /// :::caution
-    /// ## Important notes
-    ///
-    /// This rule is a work in progress. Progress is being tracked in the following GitHub issue: https://github.com/biomejs/biome/issues/1274
-    ///
-    /// Class sorting is **not part of the formatter**. It's a lint rule with a fix that is classified as unsafe, which means that **it won't be applied automatically** as part of IDE actions such as "fix on save".
-    ///
-    /// To make the rule aware of your own theme values, utilities, and variants, point the [`tailwind.stylesheet`](https://biomejs.dev/reference/configuration/#tailwindstylesheet) option at the CSS file that holds your Tailwind CSS configuration. Without it, the rule only knows the default configuration, and treats classes that use your own theme values, utilities, or variants like classes that Tailwind CSS doesn't know.
-    ///
-    /// Biome scans your project when this rule is enabled, so that it can read the stylesheet and the files it imports. The scan happens even if `tailwind.stylesheet` isn't set, although the rule then only uses the default configuration.
-    /// :::
+    /// To make the rule aware of your own theme values, utilities, and variants, point the
+    /// [`tailwind.stylesheet`](https://biomejs.dev/reference/configuration/#tailwindstylesheet)
+    /// option at the CSS file that holds your Tailwind CSS configuration. Without it, the rule
+    /// only knows the default configuration, and treats classes that use your own theme values,
+    /// utilities, or variants like classes that Tailwind CSS doesn't know.
     ///
     /// ## Examples
     ///
@@ -61,8 +55,6 @@ declare_lint_rule! {
     ///
     /// The Tailwind CSS Prettier plugin preserves all original whitespace. This rule, however, collapses all whitespace (including newlines) into single spaces.
     ///
-    /// This is a deliberate decision. We're unsure about this behavior, and would appreciate feedback on it. If this is a problem for you, please share a detailed explanation of your use case in [the GitHub issue](https://github.com/biomejs/biome/issues/1274).
-    ///
     pub UseTailwindSortedClasses {
         version: "1.6.0",
         name: "useTailwindSortedClasses",
@@ -74,7 +66,6 @@ declare_lint_rule! {
         recommended: false,
         domains: &[RuleDomain::Tailwind, RuleDomain::Project],
         fix_kind: FixKind::Unsafe,
-        issue_number: Some("1274"),
     }
 }
 

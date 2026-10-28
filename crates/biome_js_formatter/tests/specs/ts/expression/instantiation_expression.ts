@@ -15,3 +15,12 @@ function* withYield() {
 // Parentheses around other lower-precedence expressions must be kept too.
 const f = (cond ? a : b)<Value>;
 const g = (x++)<Value>;
+
+// Binary, logical and type-cast operands need them too.
+const h = (a + b)<Value>;
+const i = (a ?? b)<Value>;
+const j = (a in b)<Value>;
+const k = (a ** b)<Value>;
+const l = (a as B)<Value>;
+const m = (a satisfies B)<Value>;
+const n = (<B>a)<Value>;

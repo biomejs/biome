@@ -1,8 +1,9 @@
 #![deny(clippy::use_self)]
 
 use biome_configuration::Configuration;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    CstFormatContext, FormatLanguage, FormatResult, Formatted, Printed, SourceMapGeneration,
+    CstFormatContext, FormatLanguage, FormatResult, Formatted, SourceMapGeneration,
 };
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;

@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueShadowNativeEvents {
-        version: "next",
+        version: "2.6.0",
         name: "noVueShadowNativeEvents",
         language: "js",
         recommended: false,
@@ -519,7 +519,9 @@ fn check_options_based_component(
     }
 
     if let Some(definition) = component.definition_expression() {
-        let mut iter = definition.syntax().preorder();
+        let mut iter = definition
+            .syntax()
+            .preorder_of_kinds(JsCallExpression::KIND_SET);
         while let Some(event) = iter.next() {
             let WalkEvent::Enter(node) = event else {
                 continue;

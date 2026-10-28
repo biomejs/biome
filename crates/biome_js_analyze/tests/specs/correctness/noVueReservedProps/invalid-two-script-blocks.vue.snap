@@ -1,0 +1,51 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-two-script-blocks.vue
+---
+# Input
+```vue
+<script>
+export default {
+    props: ['key'],
+};
+</script>
+
+<script setup>
+defineProps(['ref']);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-two-script-blocks.vue:3:13 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    1 │ <script>
+    2 │ export default {
+  > 3 │     props: ['key'],
+      │             ^^^^^
+    4 │ };
+    5 │ </script>
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
+
+```
+invalid-two-script-blocks.vue:8:14 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+     7 │ <script setup>
+   > 8 │ defineProps(['ref']);
+       │              ^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

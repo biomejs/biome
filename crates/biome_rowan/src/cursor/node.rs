@@ -1,8 +1,8 @@
 use crate::cursor::{NodeData, SyntaxElement, SyntaxToken, SyntaxTrivia};
 use crate::green::{Child, Children, GreenElementRef, Slot};
 use crate::{
-    Direction, GreenNode, GreenNodeData, NodeOrToken, RawSyntaxKind, SyntaxNodeText, TokenAtOffset,
-    WalkEvent,
+    Direction, GreenNode, GreenNodeData, Language, NodeOrToken, RawSyntaxKind, SyntaxKindSet,
+    SyntaxNodeText, TokenAtOffset, WalkEvent,
 };
 use biome_text_size::{TextRange, TextSize};
 use std::borrow::Cow;
@@ -196,6 +196,11 @@ impl SyntaxNode {
     }
 
     #[inline]
+    pub fn grand_parent(&self) -> Option<Self> {
+        self.data().parent()?.parent_node()
+    }
+
+    #[inline]
     pub fn ancestors(&self) -> impl Iterator<Item = Self> + use<> {
         iter::successors(Some(self.clone()), Self::parent)
     }
@@ -384,11 +389,11 @@ impl SyntaxNode {
     }
 
     #[inline]
-    pub fn preorder_matching<M>(&self, matches: M) -> PreorderMatching<'_, M>
-    where
-        M: Fn(RawSyntaxKind) -> bool,
-    {
-        PreorderMatching::new(self, matches)
+    pub fn preorder_matching<L: Language>(
+        &self,
+        kinds: SyntaxKindSet<L>,
+    ) -> PreorderMatching<'_, L> {
+        PreorderMatching::new(self, kinds)
     }
 
     #[inline]
@@ -736,13 +741,13 @@ impl Iterator for Preorder {
 
 impl FusedIterator for Preorder {}
 
-/// Preorder traversal that yields only the nodes whose kind satisfies `matches`.
+/// Preorder traversal that yields only the nodes whose kind is in `kinds`.
 ///
 /// The traversal reads the green tree. It allocates a cursor node for each
 /// yielded node and for the ancestors of that node, and for nothing else.
-pub(crate) struct PreorderMatching<'a, M> {
+pub(crate) struct PreorderMatching<'a, L: Language> {
     start: &'a SyntaxNode,
-    matches: M,
+    kinds: SyntaxKindSet<L>,
     /// Path from `start` to the node whose children are being read. Empty before
     /// the first call to `next` and after the traversal has left `start`.
     path: Vec<PathSegment<'a>>,
@@ -759,16 +764,19 @@ struct PathSegment<'a> {
     node: Option<SyntaxNode>,
 }
 
-impl<'a, M> PreorderMatching<'a, M>
-where
-    M: Fn(RawSyntaxKind) -> bool,
-{
-    fn new(start: &'a SyntaxNode, matches: M) -> Self {
+impl<'a, L: Language> PreorderMatching<'a, L> {
+    fn new(start: &'a SyntaxNode, kinds: SyntaxKindSet<L>) -> Self {
         Self {
             start,
-            matches,
+            kinds,
             path: Vec::new(),
             entered_start: false,
+        }
+    }
+
+    pub fn skip_subtree(&mut self) {
+        if let Some(segment) = self.path.last_mut() {
+            segment.remaining_children = Children::default();
         }
     }
 
@@ -789,17 +797,14 @@ where
     }
 }
 
-impl<M> Iterator for PreorderMatching<'_, M>
-where
-    M: Fn(RawSyntaxKind) -> bool,
-{
+impl<L: Language> Iterator for PreorderMatching<'_, L> {
     type Item = WalkEvent<SyntaxNode>;
 
     fn next(&mut self) -> Option<WalkEvent<SyntaxNode>> {
         if !self.entered_start {
             self.entered_start = true;
             let green = self.start.green();
-            let is_match = (self.matches)(green.kind());
+            let is_match = self.kinds.matches_raw(green.kind());
             self.path.push(PathSegment {
                 green,
                 slot: self.start.data().slot(),
@@ -825,7 +830,7 @@ where
             let GreenElementRef::Node(green) = child.element() else {
                 continue;
             };
-            let is_match = (self.matches)(green.kind());
+            let is_match = self.kinds.matches_raw(green.kind());
             let offset = parent.offset + child.rel_offset();
             self.path.push(PathSegment {
                 green,
@@ -842,7 +847,7 @@ where
     }
 }
 
-impl<M> FusedIterator for PreorderMatching<'_, M> where M: Fn(RawSyntaxKind) -> bool {}
+impl<L: Language> FusedIterator for PreorderMatching<'_, L> {}
 
 pub(crate) struct PreorderWithTokens {
     start: SyntaxElement,
@@ -1274,8 +1279,7 @@ mod tests {
             .collect()
     }
 
-    #[test]
-    fn preorder_of_kinds_yields_the_matching_preorder_events() {
+    fn preorder_test_tree() -> SyntaxNode<RawLanguage> {
         use RawLanguageKind::{CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION, ROOT};
 
         let nested_literal = detached_node(
@@ -1301,7 +1305,7 @@ mod tests {
             ],
         );
         let leading_token = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, "'a'", [], []);
-        let root = detached_node(
+        detached_node(
             ROOT,
             vec![
                 Some(leading_token.into()),
@@ -1310,9 +1314,13 @@ mod tests {
                 Some(nested_literal.into()),
                 Some(detached_node(EXPRESSION_LIST, vec![]).into()),
             ],
-        );
+        )
+    }
 
-        let kind_sets = [
+    fn preorder_kind_sets() -> [SyntaxKindSet<RawLanguage>; 6] {
+        use RawLanguageKind::{CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION, ROOT};
+
+        [
             SyntaxKindSet::EMPTY,
             SyntaxKindSet::of(LITERAL_EXPRESSION),
             SyntaxKindSet::of(CONDITION),
@@ -1322,11 +1330,15 @@ mod tests {
                 .union(SyntaxKindSet::of(EXPRESSION_LIST))
                 .union(SyntaxKindSet::of(LITERAL_EXPRESSION))
                 .union(SyntaxKindSet::of(CONDITION)),
-        ];
+        ]
+    }
 
+    #[test]
+    fn preorder_of_kinds_yields_the_matching_preorder_events() {
+        let root = preorder_test_tree();
         let mut yielded = 0;
         for start in root.descendants() {
-            for kinds in kind_sets {
+            for kinds in preorder_kind_sets() {
                 let expected = observed(start.preorder().filter(|event| match event {
                     WalkEvent::Enter(node) | WalkEvent::Leave(node) => kinds.matches(node.kind()),
                 }));
@@ -1336,6 +1348,53 @@ mod tests {
             }
         }
         assert!(yielded > 0);
+    }
+
+    #[test]
+    fn preorder_of_kinds_skips_subtrees_like_preorder() {
+        use RawLanguageKind::{CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION, ROOT};
+
+        let root = preorder_test_tree();
+        let mut skipped = 0;
+        for start in root.descendants() {
+            for kinds in preorder_kind_sets() {
+                for skipped_kind in [ROOT, CONDITION, EXPRESSION_LIST, LITERAL_EXPRESSION] {
+                    let skips = |event: &WalkEvent<SyntaxNode<RawLanguage>>| matches!(event, WalkEvent::Enter(node) if node.kind() == skipped_kind);
+
+                    let mut preorder = start.preorder();
+                    let mut expected = Vec::new();
+                    while let Some(event) = preorder.next() {
+                        let node = match &event {
+                            WalkEvent::Enter(node) | WalkEvent::Leave(node) => node,
+                        };
+                        if !kinds.matches(node.kind()) {
+                            continue;
+                        }
+                        if skips(&event) {
+                            preorder.skip_subtree();
+                        }
+                        expected.push(event);
+                    }
+
+                    let mut preorder = start.preorder_of_kinds(kinds);
+                    let mut actual = Vec::new();
+                    while let Some(event) = preorder.next() {
+                        if skips(&event) {
+                            preorder.skip_subtree();
+                            skipped += 1;
+                        }
+                        actual.push(event);
+                    }
+
+                    assert_eq!(
+                        observed(actual.into_iter()),
+                        observed(expected.into_iter()),
+                        "from {start:?} skipping {skipped_kind:?}"
+                    );
+                }
+            }
+        }
+        assert!(skipped > 0);
     }
 
     #[test]

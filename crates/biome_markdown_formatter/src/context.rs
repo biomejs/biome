@@ -1,5 +1,6 @@
 use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
@@ -241,6 +242,7 @@ impl MarkdownFormatContext {
 
 impl FormatContext for MarkdownFormatContext {
     type Options = MdFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

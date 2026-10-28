@@ -40,7 +40,7 @@ pub use crate::md::MdFileSource;
 #[cfg(feature = "lang_yaml")]
 pub use crate::yaml::YamlFileSource;
 
-pub use crate::db::LanguageDb;
+pub use crate::db::{LanguageDb, has_embedded_content};
 
 // NOTE: when adding a new ignore file, update [DocumentFileSource::try_from_path]
 pub const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
@@ -451,8 +451,12 @@ impl DocumentFileSource {
 
     /// The file can be parsed
     pub fn can_parse(path: &Utf8Path) -> bool {
-        let file_source = Self::from(path);
-        match file_source {
+        Self::from(path).is_parsable()
+    }
+
+    /// Whether Biome has a parser for documents of this source.
+    pub const fn is_parsable(&self) -> bool {
+        match self {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
             #[cfg(feature = "lang_md")]
@@ -476,8 +480,12 @@ impl DocumentFileSource {
 
     /// The file can be read from the file system
     pub fn can_read(path: &Utf8Path) -> bool {
-        let file_source = Self::from(path);
-        match file_source {
+        Self::from(path).is_readable()
+    }
+
+    /// Whether Biome reads documents of this source from the file system.
+    pub const fn is_readable(&self) -> bool {
+        match self {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
             #[cfg(feature = "lang_md")]
@@ -501,8 +509,13 @@ impl DocumentFileSource {
 
     /// Whether this file can contain embedded nodes
     pub fn can_contain_embeds(path: &Utf8Path, experimental_full_html_support: bool) -> bool {
-        let file_source = Self::from_path(path, experimental_full_html_support);
-        match file_source {
+        Self::from_path(path, experimental_full_html_support).may_contain_embeds()
+    }
+
+    /// Whether documents of this source can contain snippets in another
+    /// language, such as a `<script>` block in HTML.
+    pub const fn may_contain_embeds(&self) -> bool {
+        match self {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
             #[cfg(feature = "lang_md")]

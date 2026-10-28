@@ -11,6 +11,7 @@ use biome_rowan::TextRange;
 use biome_rule_options::use_consistent_function_style::{
     FunctionStyle, UseConsistentFunctionStyleOptions,
 };
+use biome_rule_options::use_consistent_unicode_bom::UnicodeBom;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
@@ -583,6 +584,11 @@ impl Deserializable for Rules {
                         "no-unused-vars" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoUnusedVars(conf));
+                            }
+                        }
+                        "unicode-bom" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicodeBom(conf));
                             }
                         }
                         // Eslint plugin rules with options that we handle
@@ -1194,6 +1200,7 @@ pub(crate) enum Rule {
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     NoUnusedVars(RuleConf<NoUnusedVarsOptions>),
+    UnicodeBom(RuleConf<UnicodeBom>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
@@ -1235,6 +1242,7 @@ impl Rule {
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::NoUnusedVars(_) => Cow::Borrowed("no-unused-vars"),
+            Self::UnicodeBom(_) => Cow::Borrowed("unicode-bom"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::ReactForbidElements(_) => Cow::Borrowed("react/forbid-elements"),

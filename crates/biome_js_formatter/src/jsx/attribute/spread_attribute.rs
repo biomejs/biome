@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
-use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
+use crate::utils::format_node_without_comments::{
+    FormatAnyJsExpressionWithoutComments, formats_own_dangling_comments,
+};
 use biome_formatter::write;
 use biome_js_syntax::{JsxSpreadAttribute, JsxSpreadAttributeFields};
 
@@ -38,10 +40,15 @@ impl FormatNodeRule<JsxSpreadAttribute> for FormatJsxSpreadAttribute {
                     ]
                 )?;
                 FormatAnyJsExpressionWithoutComments.fmt(&argument, f)?;
+                if !formats_own_dangling_comments(&argument) {
+                    write!(
+                        f,
+                        [format_dangling_comments(argument.syntax()).with_soft_block_indent()]
+                    )?;
+                }
                 write!(
                     f,
                     [
-                        format_dangling_comments(argument.syntax()).with_soft_block_indent(),
                         format_trailing_comments(argument.syntax()),
                         line_suffix_boundary()
                     ]

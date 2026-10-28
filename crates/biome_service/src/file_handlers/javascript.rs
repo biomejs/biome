@@ -48,14 +48,14 @@ use biome_configuration::javascript::{
 use biome_css_parser::parse_css_with_offset_and_cache;
 #[cfg(feature = "js_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::AnyParsedSource;
 #[cfg(feature = "js_embeds")]
-use biome_formatter::FormatElement;
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::Printed;
 #[cfg(feature = "js_embeds")]
-use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
+use biome_formatter::rowan::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -102,15 +102,16 @@ use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 #[cfg(feature = "js_embeds")]
 use biome_parser::AnyParse;
+use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::TokenText;
-#[cfg(feature = "type_inference")]
-use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
+#[cfg(feature = "type_inference")]
+use biome_rowan::{SyntaxKindSet, WalkEvent};
 use camino::Utf8Path;
 #[cfg(feature = "js_embeds")]
 use rustc_hash::FxHashMap;
@@ -1011,7 +1012,7 @@ fn parse_js_matched_embed(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: JsSyntaxNode = parse.syntax(&workspace_db);
@@ -1023,11 +1024,14 @@ fn debug_syntax_tree(
 }
 
 fn debug_control_flow(
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     cursor: TextSize,
     workspace_db: WorkspaceDb,
 ) -> String {
-    js_control_flow_model(&workspace_db, &parse)
+    let Some(model) = js_control_flow_model(&workspace_db, &parse) else {
+        return String::new();
+    };
+    model
         .graphs()
         .filter(|graph| graph.node.text_trimmed_range().contains(cursor))
         .min_by_key(|graph| {
@@ -1043,7 +1047,7 @@ fn debug_control_flow(
 fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -1056,15 +1060,23 @@ fn debug_formatter_ir(
     Ok(root_element.to_string())
 }
 
+/// The kinds of the nodes that [debug_type_info] and [debug_registered_types]
+/// read types from.
+#[cfg(feature = "type_inference")]
+const DEBUG_TYPE_KINDS: SyntaxKindSet<JsLanguage> = JsVariableDeclarator::KIND_SET
+    .union(JsFunctionDeclaration::KIND_SET)
+    .union(JsClassDeclaration::KIND_SET)
+    .union(JsClassExpression::KIND_SET);
+
 fn debug_type_info(
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     #[cfg(feature = "type_inference")]
     {
         let tree: AnyJsRoot = parse.tree(&workspace_db);
         let mut result = String::new();
-        let preorder = tree.syntax().preorder();
+        let preorder = tree.syntax().preorder_of_kinds(DEBUG_TYPE_KINDS);
 
         let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
@@ -1123,14 +1135,14 @@ fn debug_type_info(
 
 fn debug_registered_types(
     _path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     #[cfg(feature = "type_inference")]
     {
         let tree: AnyJsRoot = parse.tree(&workspace_db);
         let mut result = String::new();
-        let preorder = tree.syntax().preorder();
+        let preorder = tree.syntax().preorder_of_kinds(DEBUG_TYPE_KINDS);
 
         let mut resolver = DebugTypeCollector::default();
         let scope_id = ScopeId::GLOBAL;
@@ -1196,17 +1208,18 @@ impl RawTypeCollector for DebugTypeCollector {
 }
 
 fn debug_semantic_model(
-    _path: &BiomePath,
-    parse: AnyParsedSource,
+    path: &BiomePath,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let model = js_semantic_model(&workspace_db, &parse);
-    Ok(model.to_string())
+    js_semantic_model(&workspace_db, &parse)
+        .map(ToString::to_string)
+        .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
 }
 
 fn js_analyzer_services(
     root: &AnyJsRoot,
-    parsed_source: Option<&AnyParsedSource>,
+    parsed_source: Option<&AnalyzedSource>,
     workspace_db: &WorkspaceDb,
     #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
     project_layout: Arc<ProjectLayout>,
@@ -1226,14 +1239,14 @@ fn js_analyzer_services(
     match parsed_source {
         Some(source) => services
             .with_parsed_source(source.clone())
-            .with_snippet_offset(source.diagnostic_offset(workspace_db)),
+            .with_snippet_offset(source.diagnostic_offset()),
         None => services,
     }
 }
 
 fn js_analyzer_services_for_fix(
     root: &AnyJsRoot,
-    parsed_source: Option<&AnyParsedSource>,
+    parsed_source: Option<&AnalyzedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
 ) -> JsAnalyzerServices {
@@ -1246,7 +1259,13 @@ fn js_analyzer_services_for_fix(
         params.project_layout.clone(),
         source_type,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
+    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    // The fixes change the analyzed tree but not its host document, so the
+    // services keep reading the embedded content of the document.
+    let services = match params.parsed_source.document() {
+        Some(document) => services.with_document(document),
+        None => services,
+    };
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1316,7 +1335,7 @@ pub(super) fn lint_with_inspector(
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
             };
-            let offset = snippet.content_offset(&params.workspace_db);
+            let offset = snippet.content_offset();
             let snippet_params = params.for_snippet(&snippet, language);
             let analyzer = if language.to_css_file_source().is_some() {
                 LintSnippetAnalyzer::new(
@@ -1353,7 +1372,7 @@ pub(super) fn lint_with_inspector(
         params.project_layout.clone(),
         files_source,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
+    .with_snippet_offset(params.parsed_source.diagnostic_offset());
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1468,7 +1487,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let services = js_analyzer_services(
         &tree,
         Some(&parsed_source),
@@ -1722,7 +1741,7 @@ pub(crate) fn format(
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
@@ -1741,7 +1760,7 @@ pub(crate) fn format_range(
 pub(crate) fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,
@@ -1809,7 +1828,7 @@ fn format_embedded(
         // tags for chunks that were actually parsed as embedded languages.
         let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
             .into_iter()
-            .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+            .map(|snippet| (snippet.content_range(), snippet))
             .collect();
         let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
 
@@ -2009,7 +2028,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         disabled_rules: &disabled_rules,
         range: None,
     };
-    let diagnostic_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let diagnostic_offset = parsed_source.diagnostic_offset();
     let source_type = workspace_db
         .source_from_index(parsed_source.document_file_index(&workspace_db))
         .map_or(JsFileSource::try_from(path.as_path()).ok(), |file_source| {
@@ -2046,7 +2065,7 @@ pub(crate) fn pull_diagnostics_and_actions(
 
 fn rename(
     path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     symbol_at: TextSize,
     new_name: String,
     workspace_db: WorkspaceDb,
@@ -2122,7 +2141,7 @@ fn update_snippets(
 fn search(
     path: &BiomePath,
     document: &DocumentFileSource,
-    parsed: AnyParsedSource,
+    parsed: AnalyzedSource,
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,

@@ -180,12 +180,8 @@ fn resolution_query_tracks_tsconfig_source_changes() {
 
     let source = db.files[Utf8Path::new("/project/tsconfig.json")];
     salsa::Setter::to(
-        source.set_parsed(&mut db),
-        parse_json(
-            r#"{"compilerOptions":{"paths":{"@dep":["./src/second.ts"]}}}"#,
-            JsonParserOptions::default(),
-        )
-        .into(),
+        source.set_text(&mut db),
+        r#"{"compilerOptions":{"paths":{"@dep":["./src/second.ts"]}}}"#.into(),
     );
     db.clear_salsa_events();
 

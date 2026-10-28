@@ -5,13 +5,27 @@ expression: redactor(content)
 ## Command
 
 ```shell
-biome format --verbose package-lock.json
+biome format --verbose package-lock.json pnpm-lock.yaml packages/app/pnpm-lock.yaml
 ```
 
 ## `package-lock.json`
 
 ```json
 { "name": "test" }
+```
+
+## `packages/app/pnpm-lock.yaml`
+
+```yaml
+lockfileVersion:    '9.0'
+
+```
+
+## `pnpm-lock.yaml`
+
+```yaml
+lockfileVersion:    '9.0'
+
 ```
 
 # Termination Message
@@ -26,6 +40,8 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
   i These paths were provided but ignored:
   
   - package-lock.json
+  - pnpm-lock.yaml
+  - packages/app/pnpm-lock.yaml
   
 
 
@@ -37,6 +53,30 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file package-lock.json is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+```block
+packages/app/pnpm-lock.yaml project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file packages/app/pnpm-lock.yaml is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+```block
+pnpm-lock.yaml project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file pnpm-lock.yaml is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   
@@ -68,5 +108,5 @@ package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━�
 ```block
 Scanned project folder in <TIME>.
 Checked 0 files in <TIME>. No fixes applied.
-Found 1 info.
+Found 3 infos.
 ```

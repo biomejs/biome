@@ -57,7 +57,7 @@ declare_lint_rule! {
     ///   This rule reports both `Object()` and `new Object()` when they have no arguments.
     ///
     pub NoObjectConstructor {
-        version: "next",
+        version: "2.6.0",
         name: "noObjectConstructor",
         language: "js",
         sources: &[

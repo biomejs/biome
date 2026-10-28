@@ -43,7 +43,7 @@ biome_languages           = { workspace = true, features = ["lang_js"] }
 biome_module_graph        = { workspace = true }
 biome_module_replacements = { workspace = true }
 biome_package             = { workspace = true }
-biome_parser              = { workspace = true }
+biome_parser              = { workspace = true, features = ["db"] }
 biome_project_layout      = { workspace = true }
 biome_react_compiler      = { workspace = true }
 biome_resolver            = { workspace = true }
@@ -55,6 +55,7 @@ biome_tailwind_logic      = { workspace = true }
 biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }
+biome_vue_semantic        = { workspace = true }
 camino                    = { workspace = true }
 either                    = { workspace = true }
 enumflags2                = { workspace = true }

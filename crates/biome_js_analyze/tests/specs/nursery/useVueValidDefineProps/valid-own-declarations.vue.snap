@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-own-declarations.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+defineProps({
+  add: {
+    type: Function,
+    default(a, b) {
+      const sum = a + b;
+      return sum;
+    },
+  },
+  label: {
+    type: String,
+    default: () => window.location.hostname,
+  },
+});
+</script>
+
+```

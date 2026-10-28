@@ -1,0 +1,22 @@
+# should not generate diagnostics
+%YAML 1.1
+---
+flag: &flag true
+...
+%YAML 1.2
+---
+yes: 1
+# an alias cannot refer to an anchor in another document
+? *flag
+: 2
+---
+no: 3
+...
+%YAML 1.1
+---
+name: 4
+...
+%TAG !e! tag:example.com,2000:
+---
+# a document with its own directives does not keep the previous version
+on: 5

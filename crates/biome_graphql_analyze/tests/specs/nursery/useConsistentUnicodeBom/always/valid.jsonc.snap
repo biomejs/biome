@@ -1,0 +1,30 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```graphql
+﻿query { field }
+```
+
+# Input
+```graphql
+﻿
+```
+
+# Input
+```graphql
+﻿  query { field }
+```
+
+# Input
+```graphql
+﻿
+query { field }
+```
+
+# Input
+```graphql
+﻿# header
+query { field }
+```

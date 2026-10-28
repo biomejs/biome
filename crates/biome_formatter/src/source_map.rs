@@ -1,4 +1,5 @@
-use crate::{Printed, SourceMarker, TextRange};
+use crate::rowan::RowanSource;
+use crate::{Printed, SourceMap, SourceMarker, TextRange};
 use biome_rowan::TextLen;
 use biome_rowan::{Language, SyntaxNode, TextSize};
 use rustc_hash::FxHashMap;
@@ -218,19 +219,19 @@ impl TransformSourceMap {
     ///
     /// This function re-maps the positions from the positions in the transformed tree back to the positions
     /// in the original, untransformed tree.
-    pub fn map_printed(&self, mut printed: Printed) -> Printed {
+    pub fn map_printed(&self, mut printed: Printed<RowanSource>) -> Printed<RowanSource> {
         self.map_markers(&mut printed.sourcemap);
 
         printed
     }
 
     /// Maps the printers source map marker to the source positions.
-    fn map_markers(&self, markers: &mut [SourceMarker]) {
+    fn map_markers(&self, markers: &mut [SourceMarker<TextSize>]) {
         if self.deleted_ranges.is_empty() {
             return;
         }
 
-        let mut previous_marker: Option<SourceMarker> = None;
+        let mut previous_marker: Option<SourceMarker<TextSize>> = None;
         let mut next_range_index = 0;
 
         for marker in markers {
@@ -279,6 +280,12 @@ impl TransformSourceMap {
 
             marker.source = source;
         }
+    }
+}
+
+impl SourceMap<RowanSource> for TransformSourceMap {
+    fn map_printed(&self, printed: Printed<RowanSource>) -> Printed<RowanSource> {
+        Self::map_printed(self, printed)
     }
 }
 

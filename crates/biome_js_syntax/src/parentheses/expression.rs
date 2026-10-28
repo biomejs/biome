@@ -9,9 +9,9 @@ use crate::{
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsBooleanLiteralExpression,
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsExpressionTemplateRoot,
-    JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression,
-    JsImportMetaExpression, JsInExpression, JsInstanceofExpression, JsLogicalExpression,
-    JsLogicalOperator, JsMetavariable, JsNewExpression, JsNewTargetExpression,
+    JsExtendsClause, JsForStatement, JsFunctionExpression, JsIdentifierExpression,
+    JsImportCallExpression, JsImportMetaExpression, JsInExpression, JsInstanceofExpression,
+    JsLogicalExpression, JsLogicalOperator, JsMetavariable, JsNewExpression, JsNewTargetExpression,
     JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
     JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
@@ -715,6 +715,25 @@ impl NeedsParentheses for TsAsExpression {
 impl NeedsParentheses for TsInstantiationExpression {
     #[inline]
     fn needs_parentheses(&self) -> bool {
+        // `(a<T>)<U>` and `(a<T>)!`: `a<T><U>` and `a<T>!` do not parse
+        if self.parent::<Self>().is_some()
+            || self.parent::<TsNonNullAssertionExpression>().is_some()
+        {
+            return true;
+        }
+
+        // `class A extends (B<T>)<U> {}`: `extends B<T><U>` does not parse
+        if self
+            .parent::<JsExtendsClause>()
+            .is_some_and(|clause| clause.type_arguments().is_some())
+        {
+            return true;
+        }
+
+        if is_followed_by_operator_after_type_arguments(self) {
+            return true;
+        }
+
         self.parent::<AnyJsMemberExpression>()
             .is_some_and(|member_expr| {
                 member_expr
@@ -722,6 +741,39 @@ impl NeedsParentheses for TsInstantiationExpression {
                     .is_ok_and(|object| object.syntax() == self.syntax())
             })
     }
+}
+
+/// TypeScript reads `a<T> + b` as `a < T > +b` and rejects `a<T> >> b`,
+/// also when `a<T>` only ends the left operand (`(c + a<T>) - b`, `(typeof a<T>) + b`).
+fn is_followed_by_operator_after_type_arguments(node: &TsInstantiationExpression) -> bool {
+    let mut expression = AnyJsExpression::from(node.clone());
+    while let Some(parent) = expression.parent::<AnyJsExpression>() {
+        match &parent {
+            AnyJsExpression::JsBinaryExpression(binary) => {
+                if binary.right().is_ok_and(|right| right == expression) {
+                    expression = parent;
+                    continue;
+                }
+
+                return binary.left().is_ok_and(|left| left == expression)
+                    && matches!(
+                        binary.operator(),
+                        Ok(JsBinaryOperator::Plus
+                            | JsBinaryOperator::Minus
+                            | JsBinaryOperator::LessThan
+                            | JsBinaryOperator::GreaterThan
+                            | JsBinaryOperator::GreaterThanOrEqual
+                            | JsBinaryOperator::RightShift
+                            | JsBinaryOperator::UnsignedRightShift)
+                    );
+            }
+            AnyJsExpression::JsUnaryExpression(_)
+            | AnyJsExpression::TsTypeAssertionExpression(_) => expression = parent,
+            _ => return false,
+        }
+    }
+
+    false
 }
 
 impl NeedsParentheses for TsNonNullAssertionExpression {
@@ -835,6 +887,7 @@ fn binary_like_needs_parens(node: &JsSyntaxNode) -> bool {
         | JsSyntaxKind::JS_UNARY_EXPRESSION
         | JsSyntaxKind::JS_AWAIT_EXPRESSION
         | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+        | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
         // in spread
         | JsSyntaxKind::JSX_SPREAD_CHILD
         | JsSyntaxKind::JS_SPREAD
@@ -904,7 +957,12 @@ fn member_chain_callee_needs_parens(node: AnyJsExpression) -> bool {
         AnyJsExpression::TsNonNullAssertionExpression(expr) => expr.expression().ok(),
         _ => None,
     });
-    object_chain.any(|object| matches!(object, AnyJsExpression::JsCallExpression(_)))
+    object_chain.any(|object| {
+        matches!(
+            object,
+            AnyJsExpression::JsCallExpression(_) | AnyJsExpression::JsImportCallExpression(_)
+        )
+    })
 }
 
 fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: JsSyntaxNode) -> bool {
@@ -915,6 +973,7 @@ fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: JsSyntaxNode) -> boo
         | JsSyntaxKind::JS_UNARY_EXPRESSION
         | JsSyntaxKind::JS_AWAIT_EXPRESSION
         | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+        | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
         // Callee
         | JsSyntaxKind::JS_CALL_EXPRESSION
         | JsSyntaxKind::JS_NEW_EXPRESSION

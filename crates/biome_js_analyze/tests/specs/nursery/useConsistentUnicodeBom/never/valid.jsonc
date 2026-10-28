@@ -1,0 +1,10 @@
+// should not generate diagnostics
+[
+  "",
+  "var value = 1;",
+  " \ufeffvar value = 1;",
+  "\n\ufeffvar value = 1;",
+  "var value = \"\ufeff\";",
+  "/*\ufeff*/ var value = 1;",
+  "#! /usr/bin/env node\nvar value = 1;"
+]

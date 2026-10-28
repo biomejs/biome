@@ -33,6 +33,7 @@ use biome_rowan::{
 use regex::Regex;
 use rustc_hash::FxHashSet;
 use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 use std::sync::LazyLock;
 
 declare_lint_rule! {
@@ -492,7 +493,7 @@ impl Rule for NoUnusedImports {
 }
 
 /// Model for tracking any types referenced in JsDoc or TSDoc comments (like {@link TypeName} or @param {TypeName})
-#[derive(Clone, Default)]
+#[derive(Default)]
 struct JsDocTypeModel(FxHashSet<String>);
 
 impl Deref for JsDocTypeModel {
@@ -543,7 +544,7 @@ impl Visitor for JsDocTypeCollectorVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(self.jsdoc_types);
+        ctx.services.insert_service(Rc::new(self.jsdoc_types));
     }
 }
 
@@ -588,7 +589,7 @@ fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str
 }
 
 pub struct JsDocTypeServices {
-    jsdoc_types: JsDocTypeModel,
+    jsdoc_types: Rc<JsDocTypeModel>,
     semantic_services: SemanticServices,
 }
 impl JsDocTypeServices {
@@ -607,7 +608,7 @@ impl FromServices for JsDocTypeServices {
         rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let jsdoc_types: &JsDocTypeModel = services
+        let jsdoc_types: &Rc<JsDocTypeModel> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
 

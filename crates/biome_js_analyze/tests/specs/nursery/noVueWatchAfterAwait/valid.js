@@ -1,0 +1,75 @@
+/* should not generate diagnostics */
+import { defineComponent, watch, watchEffect } from "vue";
+import { watch as watchElsewhere } from "some-library";
+
+defineComponent({
+	async setup() {
+		watchEffect(() => {});
+		watch(source, () => {});
+		await doSomething();
+	},
+});
+
+defineComponent({
+	async setup() {
+		watch(source, () => {});
+	},
+});
+
+// The watcher is created before `setup()` pauses to wait for its result.
+defineComponent({
+	async setup() {
+		await watch(source, () => {});
+	},
+});
+
+// An `await` inside a nested function doesn't pause `setup()`.
+defineComponent({
+	setup() {
+		const load = async () => {
+			await doSomething();
+		};
+		watch(source, () => {});
+	},
+});
+
+defineComponent({
+	async setup() {
+		const load = async () => {
+			await doSomething();
+			watch(source, () => {});
+		};
+	},
+});
+
+// Not a function named `setup`.
+defineComponent({
+	async _setup() {
+		await doSomething();
+		watch(source, () => {});
+	},
+});
+
+// Not imported from Vue.
+defineComponent({
+	async setup() {
+		await doSomething();
+		watchElsewhere(source, () => {});
+	},
+});
+
+defineComponent({
+	async setup() {
+		const watch = () => {};
+		await doSomething();
+		watch(source, () => {});
+	},
+});
+
+// Not a Vue component.
+const options = {
+	async setup() {
+		await doSomething();
+		watch(source, () => {});
+	},
+};

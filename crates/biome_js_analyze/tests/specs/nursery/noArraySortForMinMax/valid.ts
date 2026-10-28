@@ -1,0 +1,22 @@
+/* should not generate diagnostics */
+
+function set(set: Set<number>) {
+	return set.toSorted((a, b) => a - b)[0];
+}
+const optional1 = object?.array!.toSorted((a: number, b: number) => a - b)[0];
+const optional2 = object?.getArray()!.toSorted((a: number, b: number) => a - b)[0];
+const second = array.sort((a: number, b: number) => a - b).at(1);
+function bigint1(values: BigInt64Array) {
+	return values.sort((a, b) => a - b)[0];
+}
+function bigint2(values: BigUint64Array) {
+	return values.toSorted((a, b) => a - b).at(-1);
+}
+function union(values: BigInt64Array | Int8Array) {
+	return values.toSorted((a, b) => a - b)[0];
+}
+const annotated: ReadonlySet<number> = getValues();
+annotated.toSorted((a, b) => a - b)[0];
+function collections(values: Set<number> | Map<number, number>) {
+	return values.toSorted((a, b) => a - b)[0];
+}

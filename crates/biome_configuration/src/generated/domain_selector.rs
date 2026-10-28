@@ -37,6 +37,7 @@ static PLAYWRIGHT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(||
         RuleFilter::Rule("complexity", "noPlaywrightUselessAwait"),
         RuleFilter::Rule("correctness", "noPlaywrightMissingAwait"),
         RuleFilter::Rule("correctness", "usePlaywrightValidDescribeCallback"),
+        RuleFilter::Rule("nursery", "noPlaywrightNthMethods"),
         RuleFilter::Rule("style", "noPlaywrightElementHandle"),
         RuleFilter::Rule("style", "noPlaywrightEval"),
         RuleFilter::Rule("style", "noPlaywrightWaitForSelector"),
@@ -111,6 +112,7 @@ static REACTNATIVE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|
     vec![
         RuleFilter::Rule("correctness", "noReactNativeRawText"),
         RuleFilter::Rule("correctness", "useReactNativePlatformComponents"),
+        RuleFilter::Rule("nursery", "useReactNativeValidPlatformColors"),
         RuleFilter::Rule("style", "noReactNativeLiteralColors"),
         RuleFilter::Rule("suspicious", "noReactNativeDeepImports"),
     ]
@@ -131,11 +133,13 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noSvelteClassDirective"),
         RuleFilter::Rule("nursery", "noSvelteExportLet"),
         RuleFilter::Rule("nursery", "noSvelteInspect"),
+        RuleFilter::Rule("nursery", "noSvelteInternal"),
         RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
         RuleFilter::Rule("nursery", "noSvelteObjectInTextMustaches"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
         RuleFilter::Rule("nursery", "noSvelteUselessDerivedBy"),
         RuleFilter::Rule("nursery", "useConsistentBlockLang"),
+        RuleFilter::Rule("nursery", "useSvelteEventDispatcherTypes"),
         RuleFilter::Rule("nursery", "useSvelteKitResolve"),
         RuleFilter::Rule("nursery", "useSvelteKitRuneImports"),
         RuleFilter::Rule("nursery", "useSvelteReactiveClasses"),
@@ -154,9 +158,16 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useTailwindStaticClassStrings"),
     ]
 });
+static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![RuleFilter::Rule(
+        "nursery",
+        "noTanstackQueryRestDestructuring",
+    )]
+});
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
+        RuleFilter::Rule("nursery", "useExpectToContain"),
         RuleFilter::Rule("nursery", "useLowercaseTestTitle"),
         RuleFilter::Rule("nursery", "useValidTestTitle"),
         RuleFilter::Rule("style", "useConsistentTestIt"),
@@ -182,6 +193,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
+        RuleFilter::Rule("nursery", "noUnsafeReturn"),
         RuleFilter::Rule("nursery", "noUnsafeUnaryMinus"),
         RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
@@ -222,18 +234,44 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useVueValidVPre"),
         RuleFilter::Rule("correctness", "useVueValidVText"),
         RuleFilter::Rule("nursery", "noVueBooleanDefault"),
+        RuleFilter::Rule("nursery", "noVueComputedPropertiesInData"),
+        RuleFilter::Rule("nursery", "noVueDeprecatedListeners"),
+        RuleFilter::Rule("nursery", "noVueDeprecatedRouterLinkTagProp"),
+        RuleFilter::Rule("nursery", "noVueDeprecatedScopeAttribute"),
         RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
         RuleFilter::Rule("nursery", "noVueLifecycleAfterAwait"),
+        RuleFilter::Rule("nursery", "noVueMultipleSlotArgs"),
+        RuleFilter::Rule("nursery", "noVueMutatingProps"),
         RuleFilter::Rule("nursery", "noVueRequiredPropWithDefault"),
         RuleFilter::Rule("nursery", "noVueRootVIf"),
         RuleFilter::Rule("nursery", "noVueShadowNativeEvents"),
+        RuleFilter::Rule("nursery", "noVueSideEffectsInComputed"),
         RuleFilter::Rule("nursery", "noVueUndeclaredDirectives"),
+        RuleFilter::Rule("nursery", "noVueUnusedEmitDeclarations"),
         RuleFilter::Rule("nursery", "noVueVHtml"),
         RuleFilter::Rule("nursery", "noVueVText"),
+        RuleFilter::Rule("nursery", "noVueVTextVHtmlOnComponent"),
+        RuleFilter::Rule("nursery", "noVueWatchAfterAwait"),
         RuleFilter::Rule("nursery", "useConsistentBlockLang"),
         RuleFilter::Rule("nursery", "useVueBaseImport"),
+        RuleFilter::Rule("nursery", "useVueComponentIs"),
         RuleFilter::Rule("nursery", "useVueConsistentEventHyphenation"),
+        RuleFilter::Rule("nursery", "useVueDefineOptions"),
+        RuleFilter::Rule("nursery", "useVueDefinePropsDestructuring"),
         RuleFilter::Rule("nursery", "useVueMatchingComponentFileName"),
+        RuleFilter::Rule("nursery", "useVueTemplateRef"),
+        RuleFilter::Rule("nursery", "useVueToggleInsideTransition"),
+        RuleFilter::Rule("nursery", "useVueTypedProps"),
+        RuleFilter::Rule("nursery", "useVueTypedRef"),
+        RuleFilter::Rule("nursery", "useVueVModel"),
+        RuleFilter::Rule("nursery", "useVueVOnExact"),
+        RuleFilter::Rule("nursery", "useVueValidDefineEmits"),
+        RuleFilter::Rule("nursery", "useVueValidDefineProps"),
+        RuleFilter::Rule("nursery", "useVueValidVIs"),
+        RuleFilter::Rule("nursery", "useVueValidVMemo"),
+        RuleFilter::Rule("nursery", "useVueValidVModel"),
+        RuleFilter::Rule("nursery", "useVueValidVShow"),
+        RuleFilter::Rule("nursery", "useVueValidVSlot"),
         RuleFilter::Rule("performance", "useVueVapor"),
         RuleFilter::Rule("style", "noVueOptionsApi"),
         RuleFilter::Rule("style", "useVueConsistentDefinePropsDeclaration"),
@@ -261,6 +299,7 @@ impl DomainSelector {
             "solid" => SOLID_FILTERS.clone(),
             "svelte" => SVELTE_FILTERS.clone(),
             "tailwind" => TAILWIND_FILTERS.clone(),
+            "tanstackQuery" => TANSTACKQUERY_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
             "types" => TYPES_FILTERS.clone(),
@@ -307,6 +346,9 @@ impl DomainSelector {
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "tailwind" => TAILWIND_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "tanstackQuery" => TANSTACKQUERY_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "test" => TEST_FILTERS
