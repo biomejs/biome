@@ -147,6 +147,14 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```scss,expect_diagnostic
+    /// $spacing: 1rem;
+    ///
+    /// p {
+    ///   margin: $spacing 2px;
+    /// }
+    /// ```
+    ///
     /// ## Options
     ///
     /// ### `direction`
