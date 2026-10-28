@@ -71,13 +71,13 @@ impl ControlFlowModel {
 }
 
 /// Restores a graph from its stored locations, resolving them in the tree of
-/// `near` (see [JsSyntaxNodePtr::try_to_node_near]).
+/// `near` (see [JsSyntaxNodePtr::as_node_near]).
 fn restore_graph(
     pointer: JsSyntaxNodePtr,
     blocks: &[BlockData],
     near: &JsSyntaxNode,
 ) -> Option<JsControlFlowGraph> {
-    let node = pointer.try_to_node_near(near)?;
+    let node = pointer.as_node_near(near)?;
     // Consecutive instructions are usually close in the tree, so each one is
     // resolved near the node of the previous one instead of from the root.
     let mut near = node.clone();
@@ -166,18 +166,18 @@ impl ElementPtr {
     }
 
     /// Resolves the element in the tree of `near` with
-    /// [JsSyntaxNodePtr::try_to_node_near].
+    /// [JsSyntaxNodePtr::as_node_near].
     ///
     /// Returns the element together with the node it was resolved from: the
     /// node itself, or the parent of the token.
     fn to_element_near(&self, near: &JsSyntaxNode) -> Option<(JsSyntaxElement, JsSyntaxNode)> {
         Some(match self {
             Self::Node(pointer) => {
-                let node = pointer.try_to_node_near(near)?;
+                let node = pointer.as_node_near(near)?;
                 (node.clone().into(), node)
             }
             Self::Token { parent, index } => {
-                let parent = parent.try_to_node_near(near)?;
+                let parent = parent.as_node_near(near)?;
                 let token = parent.slots().nth(*index)?.into_token()?;
                 (token.into(), parent)
             }

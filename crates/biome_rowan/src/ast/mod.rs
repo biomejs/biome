@@ -871,10 +871,14 @@ impl<L: Language> SyntaxNodePtr<L> {
         }
     }
 
-    /// Like [Self::try_to_node_near] but panics instead of returning `None`
-    /// on failure.
-    pub fn to_node_near(&self, node: &SyntaxNode<L>) -> SyntaxNode<L> {
-        self.try_to_node_near(node)
+    /// Like [Self::as_node_near], but returns the node directly.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if the pointer doesn't resolve in the tree of `node`, which is
+    /// when [Self::as_node_near] returns `None`.
+    pub fn unwrap_node_near(&self, node: &SyntaxNode<L>) -> SyntaxNode<L> {
+        self.as_node_near(node)
             .unwrap_or_else(|| panic!("can't resolve {self:?} near {node:?}"))
     }
 
@@ -889,7 +893,7 @@ impl<L: Language> SyntaxNodePtr<L> {
     ///
     /// Pointers with an empty range are resolved from the root, because
     /// several nodes can share an empty range at a boundary.
-    pub fn try_to_node_near(&self, node: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
+    pub fn as_node_near(&self, node: &SyntaxNode<L>) -> Option<SyntaxNode<L>> {
         if self.range.is_empty() {
             let root = node.ancestors().last()?;
             return self.try_to_node(&root);
@@ -1592,11 +1596,11 @@ mod tests {
                 );
 
                 for near in &nodes {
-                    let actual = pointer.try_to_node_near(near);
+                    let actual = pointer.as_node_near(near);
                     assert_eq!(
                         actual.as_ref().map(node_and_ancestors),
                         expected,
-                        "try_to_node_near({pointer:?}, {near:?}), seed {seed}"
+                        "as_node_near({pointer:?}, {near:?}), seed {seed}"
                     );
                 }
             }
@@ -1634,9 +1638,9 @@ mod tests {
         let pointer = SyntaxNodePtr::new(&inner);
 
         assert_eq!(pointer.to_node(&tree), outer);
-        assert_eq!(pointer.to_node_near(&literal), outer);
-        assert_eq!(pointer.to_node_near(&inner), outer);
-        assert_eq!(SyntaxNodePtr::new(&tree).to_node_near(&literal), tree);
+        assert_eq!(pointer.unwrap_node_near(&literal), outer);
+        assert_eq!(pointer.unwrap_node_near(&inner), outer);
+        assert_eq!(SyntaxNodePtr::new(&tree).unwrap_node_near(&literal), tree);
     }
 
     #[test]

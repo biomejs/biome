@@ -76,13 +76,13 @@ impl Reference {
     }
 
     /// Returns the node of this reference, like [Self::syntax], but resolves
-    /// it near `node` with [biome_rowan::SyntaxNodePtr::try_to_node_near]
+    /// it near `node` with [biome_rowan::SyntaxNodePtr::as_node_near]
     /// instead of from the root.
     ///
     /// This is cheaper than [Self::syntax] when `node` is close to the
     /// reference. `node` must belong to the tree the model was built from.
     pub fn syntax_near(&self, node: &JsSyntaxNode) -> JsSyntaxNode {
-        self.data.binding_node_by_start[&self.range_start()].to_node_near(node)
+        self.data.binding_node_by_start[&self.range_start()].unwrap_node_near(node)
     }
 
     /// Returns the binding of this reference
