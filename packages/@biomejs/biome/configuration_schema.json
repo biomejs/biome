@@ -7609,6 +7609,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedDeleteSetConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedDeleteSetOptions" }
+			]
+		},
+		"NoVueDeprecatedDeleteSetOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedListenersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8578,6 +8588,13 @@
 					"description": "Disallow using computed properties inside the data function of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueComputedPropertiesInDataConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedDeleteSet": {
+					"description": "Disallow the $set and $delete functions that Vue 3 removed.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedDeleteSetConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14019,6 +14036,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDataObjectDeclarationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedDeleteSetOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedDeleteSetOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

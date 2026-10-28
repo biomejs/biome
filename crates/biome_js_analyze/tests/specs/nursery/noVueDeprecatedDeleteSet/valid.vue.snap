@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { nextTick as set, provide as del } from "vue";
+
+function setValue(obj, key, value) {}
+
+export default {
+  mounted() {
+    this.$nextTick();
+    this.$emit("start");
+    a(this.$set);
+    a(this.$delete);
+    this.set(obj, key, value);
+    this.delete(obj, key);
+    set();
+    del(key, value);
+    setValue(obj, key, value);
+  },
+  methods: {
+    update() {
+      let vm = this;
+      vm.$set(obj, key, value);
+      other.$set(obj, key, value);
+    },
+  },
+};
+</script>
+
+```
