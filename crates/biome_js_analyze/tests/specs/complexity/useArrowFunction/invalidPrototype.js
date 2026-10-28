@@ -35,3 +35,11 @@ function scope() {
 	const shadowed = {};
 	return shadowed.prototype;
 }
+
+// The condition of a conditional expression isn't its value
+const conditionTest = function () {} ? a : b;
+conditionTest.prototype;
+
+// A conditional initializer whose binding doesn't need a `prototype`
+const conditionalName = cond ? function () {} : fallback;
+conditionalName.name;

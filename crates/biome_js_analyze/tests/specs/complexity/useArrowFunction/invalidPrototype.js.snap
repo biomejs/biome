@@ -42,6 +42,14 @@ function scope() {
 	return shadowed.prototype;
 }
 
+// The condition of a conditional expression isn't its value
+const conditionTest = function () {} ? a : b;
+conditionTest.prototype;
+
+// A conditional initializer whose binding doesn't need a `prototype`
+const conditionalName = cond ? function () {} : fallback;
+conditionalName.name;
+
 ```
 
 # Diagnostics
@@ -266,6 +274,56 @@ invalidPrototype.js:33:18 lint/complexity/useArrowFunction  FIXABLE  ━━━�
        33 │ + const·shadowed·=·()·=>·{};
     34 34 │   function scope() {
     35 35 │   	const shadowed = {};
+  
+
+```
+
+```
+invalidPrototype.js:40:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    39 │ // The condition of a conditional expression isn't its value
+  > 40 │ const conditionTest = function () {} ? a : b;
+       │                       ^^^^^^^^^^^^^^
+    41 │ conditionTest.prototype;
+    42 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    38 38 │   
+    39 39 │   // The condition of a conditional expression isn't its value
+    40    │ - const·conditionTest·=·function·()·{}·?·a·:·b;
+       40 │ + const·conditionTest·=·(()·=>·{})·?·a·:·b;
+    41 41 │   conditionTest.prototype;
+    42 42 │   
+  
+
+```
+
+```
+invalidPrototype.js:44:32 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    43 │ // A conditional initializer whose binding doesn't need a `prototype`
+  > 44 │ const conditionalName = cond ? function () {} : fallback;
+       │                                ^^^^^^^^^^^^^^
+    45 │ conditionalName.name;
+    46 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    42 42 │   
+    43 43 │   // A conditional initializer whose binding doesn't need a `prototype`
+    44    │ - const·conditionalName·=·cond·?·function·()·{}·:·fallback;
+       44 │ + const·conditionalName·=·cond·?·(()·=>·{})·:·fallback;
+    45 45 │   conditionalName.name;
+    46 46 │   
   
 
 ```

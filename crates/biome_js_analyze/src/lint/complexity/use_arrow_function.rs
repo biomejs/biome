@@ -8,13 +8,14 @@ use biome_js_factory::make;
 use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsStatement,
-    JsAssignmentExpression, JsComputedMemberAssignment, JsConstructorClassMember, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsInitializerClause, JsInstanceofExpression,
-    JsMethodClassMember, JsMethodObjectMember, JsModule, JsNewExpression, JsNewTargetExpression,
-    JsReferenceIdentifier, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression, JsVariableDeclarator, T,
+    JsAssignmentExpression, JsComputedMemberAssignment, JsConditionalExpression,
+    JsConstructorClassMember, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsInitializerClause, JsInstanceofExpression, JsMethodClassMember,
+    JsMethodObjectMember, JsModule, JsNewExpression, JsNewTargetExpression, JsReferenceIdentifier,
+    JsScript, JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsVariableDeclarator,
+    T,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -144,12 +145,8 @@ impl Rule for UseArrowFunction {
             // Ignore functions that explicitly declare a `this` type.
             return None;
         }
-        let requires_prototype = function_expression
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|ancestor| ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION)
-            .is_some_and(|ancestor| {
+        let requires_prototype =
+            value_parent(function_expression.syntax()).is_some_and(|ancestor| {
                 matches!(
                     ancestor.kind(),
                     JsSyntaxKind::JS_NEW_EXPRESSION | JsSyntaxKind::JS_EXTENDS_CLAUSE
@@ -276,6 +273,36 @@ impl Rule for UseArrowFunction {
     }
 }
 
+/// Returns the first ancestor of `node` that uses its value, skipping the nodes that pass it on
+/// unchanged: parentheses, TypeScript type-only wrappers, the branches of a conditional
+/// expression, and the operands of a logical expression.
+///
+/// e.g. the initializer clause in `const f = cond ? function() {} : g;`
+fn value_parent(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    let mut node = node.clone();
+    loop {
+        let parent = node.parent()?;
+        let passes_value = match parent.kind() {
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            | JsSyntaxKind::TS_AS_EXPRESSION
+            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+            | JsSyntaxKind::JS_LOGICAL_EXPRESSION => true,
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => JsConditionalExpression::cast_ref(&parent)
+                .is_some_and(|conditional| {
+                    conditional.test().is_ok_and(|test| test.syntax() != &node)
+                }),
+            _ => false,
+        };
+        if !passes_value {
+            return Some(parent);
+        }
+        node = parent;
+    }
+}
+
 /// Returns `true` if `parent` binds a function expression to a variable that is used
 /// in a way that requires a `prototype`.
 ///
@@ -338,9 +365,8 @@ fn is_prototype_required_by(reference: &JsSyntaxNode) -> bool {
     let Some(parent) = expression.parent() else {
         return false;
     };
-    let is_expression = |node: SyntaxResult<AnyJsExpression>| {
-        node.is_ok_and(|node| node.syntax() == &expression)
-    };
+    let is_expression =
+        |node: SyntaxResult<AnyJsExpression>| node.is_ok_and(|node| node.syntax() == &expression);
     match parent.kind() {
         JsSyntaxKind::JS_EXTENDS_CLAUSE => true,
         JsSyntaxKind::JS_NEW_EXPRESSION => {

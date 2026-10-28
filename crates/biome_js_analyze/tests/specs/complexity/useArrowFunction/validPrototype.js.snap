@@ -46,4 +46,24 @@ reassigned.prototype.y = 1;
 const parenthesizedFunction = (function () {});
 new parenthesizedFunction();
 
+// Conditional and logical initializers
+const conditional = cond ? function () {} : fallback;
+console.log(conditional.prototype);
+
+const conditionalAlternate = cond ? fallback : function () {};
+new conditionalAlternate();
+
+const logicalOr = fallback || function () {};
+logicalOr.prototype.x = 0;
+
+const nullish = fallback ?? (function () {});
+x instanceof nullish;
+
+let assignedConditional;
+assignedConditional = cond ? function () {} : fallback;
+assignedConditional.prototype;
+
+// Directly constructed through a conditional
+new (cond ? function () {} : fallback)();
+
 ```

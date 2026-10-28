@@ -20,3 +20,7 @@ value instanceof (<any>angleInstanceof);
 // `extends` through a type assertion
 const asExtends = function () {};
 class Child extends (asExtends as any) {}
+
+// Type assertion around the function expression itself
+const assertedFunction = function () {} as any;
+assertedFunction.prototype;
