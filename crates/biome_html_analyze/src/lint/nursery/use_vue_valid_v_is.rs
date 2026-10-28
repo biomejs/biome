@@ -68,7 +68,7 @@ declare_lint_rule! {
     ///
     /// - [Vue `is` attribute](https://vuejs.org/api/built-in-special-attributes.html#is)
     pub UseVueValidVIs {
-        version: "next",
+        version: "2.6.4",
         name: "useVueValidVIs",
         language: "html",
         recommended: true,

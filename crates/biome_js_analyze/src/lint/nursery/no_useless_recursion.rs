@@ -71,7 +71,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessRecursion {
-        version: "next",
+        version: "2.6.4",
         name: "noUselessRecursion",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-useless-recursion").same()],

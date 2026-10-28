@@ -109,7 +109,7 @@ declare_lint_rule! {
     /// - [Vue slots](https://vuejs.org/guide/components/slots.html)
     /// - [Vue `v-slot` directive](https://vuejs.org/api/built-in-directives.html#v-slot)
     pub UseVueValidVSlot {
-        version: "next",
+        version: "2.6.4",
         name: "useVueValidVSlot",
         language: "html",
         recommended: true,

@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMagicArrayFlatDepth {
-        version: "next",
+        version: "2.6.4",
         name: "noMagicArrayFlatDepth",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-magic-array-flat-depth").same()],

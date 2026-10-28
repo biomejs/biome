@@ -80,7 +80,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDeprecatedDeleteSet {
-        version: "next",
+        version: "2.6.4",
         name: "noVueDeprecatedDeleteSet",
         language: "js",
         recommended: true,

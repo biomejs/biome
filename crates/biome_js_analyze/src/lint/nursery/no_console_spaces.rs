@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoConsoleSpaces {
-        version: "next",
+        version: "2.6.4",
         name: "noConsoleSpaces",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-console-spaces").same()],

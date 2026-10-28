@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// - [Vue `v-show` directive](https://vuejs.org/api/built-in-directives.html#v-show)
     /// - [Conditional rendering with `v-show`](https://vuejs.org/guide/essentials/conditional.html#v-show)
     pub UseVueValidVShow {
-        version: "next",
+        version: "2.6.4",
         name: "useVueValidVShow",
         language: "html",
         recommended: true,

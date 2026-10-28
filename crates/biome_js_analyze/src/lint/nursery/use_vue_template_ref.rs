@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueTemplateRef {
-        version: "next",
+        version: "2.6.4",
         name: "useVueTemplateRef",
         language: "js",
         recommended: false,

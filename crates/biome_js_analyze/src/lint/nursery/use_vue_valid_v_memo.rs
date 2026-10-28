@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidVMemo {
-        version: "next",
+        version: "2.6.4",
         name: "useVueValidVMemo",
         language: "js",
         recommended: true,

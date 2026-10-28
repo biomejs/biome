@@ -72,7 +72,7 @@ declare_lint_rule! {
     /// - [`defineOptions()`](https://vuejs.org/api/sfc-script-setup.html#defineoptions)
     ///
     pub UseVueDefineOptions {
-        version: "next",
+        version: "2.6.4",
         name: "useVueDefineOptions",
         language: "js",
         recommended: true,
