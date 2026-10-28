@@ -1,5 +1,4 @@
 use crate::parser::TomlParser;
-use crate::syntax::MAX_NESTING_DEPTH;
 use biome_parser::diagnostic::{ParseDiagnostic, expected_node};
 use biome_parser::prelude::*;
 use biome_rowan::TextRange;
@@ -66,13 +65,4 @@ pub(crate) fn expected_equals_and_value(p: &TomlParser, range: TextRange) -> Par
 pub(crate) fn multiline_string_key(p: &TomlParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Multi-line strings can't be used as keys.", range)
         .with_hint("Use a basic string (`\"key\"`) or a literal string (`'key'`).")
-}
-
-pub(crate) fn nesting_too_deep(p: &TomlParser, range: TextRange) -> ParseDiagnostic {
-    p.err_builder(
-        format!(
-            "Arrays and inline tables can't be nested more than {MAX_NESTING_DEPTH} levels deep."
-        ),
-        range,
-    )
 }

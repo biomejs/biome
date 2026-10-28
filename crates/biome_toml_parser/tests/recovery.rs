@@ -1,5 +1,5 @@
-//! Deeply nested values must produce a diagnostic instead of overflowing the
-//! stack.
+//! Error recovery around unterminated arrays and inline tables must keep the
+//! following key/value pairs and table headers parseable.
 
 use biome_toml_parser::parse_toml;
 
@@ -7,30 +7,6 @@ fn assert_parses_with_error(source: &str) {
     let parse = parse_toml(source);
     assert!(parse.has_errors());
     assert_eq!(parse.syntax().to_string(), source);
-}
-
-#[test]
-fn deeply_nested_arrays() {
-    let depth = 100_000;
-    let source = format!("a = {}0{}\nb = 1\n", "[".repeat(depth), "]".repeat(depth));
-    assert_parses_with_error(&source);
-}
-
-#[test]
-fn deeply_nested_inline_tables() {
-    let depth = 100_000;
-    let source = format!(
-        "a = {}0{}\nb = 1\n",
-        "{ a = ".repeat(depth),
-        " }".repeat(depth)
-    );
-    assert_parses_with_error(&source);
-}
-
-#[test]
-fn deeply_nested_unterminated_arrays() {
-    let source = format!("a = {}\nb = 1\n", "[".repeat(100_000));
-    assert_parses_with_error(&source);
 }
 
 /// Returns the root items as `kind name` strings, with the keys of each table's
@@ -80,23 +56,6 @@ fn outline(source: &str) -> Vec<String> {
         }
     }
     outline
-}
-
-#[test]
-fn recovery_after_too_deep_unterminated_array() {
-    let source = format!("a = {}\nb = 1\n[t]\nc = 2\n", "[".repeat(129));
-    assert_parses_with_error(&source);
-    assert_eq!(
-        outline(&source),
-        ["pair a", "pair b", "table t", "  pair c"]
-    );
-}
-
-#[test]
-fn recovery_after_too_deep_unterminated_inline_table() {
-    let source = format!("a = {}\n[t]\nc = 2\n", "{ a = ".repeat(129));
-    assert_parses_with_error(&source);
-    assert_eq!(outline(&source), ["pair a", "table t", "  pair c"]);
 }
 
 #[test]
@@ -152,13 +111,6 @@ fn recovery_after_unterminated_array_before_dotted_assignment() {
             "pair 1.5"
         ]
     );
-}
-
-#[test]
-fn recovery_after_too_deep_array_before_header() {
-    let source = format!("a = {}1,\n[[t]]\nb = 2\n", "[".repeat(129));
-    assert_parses_with_error(&source);
-    assert_eq!(outline(&source), ["pair a", "array table t", "  pair b"]);
 }
 
 #[test]

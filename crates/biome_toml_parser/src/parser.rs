@@ -24,10 +24,6 @@ impl<'source> TomlParser<'source> {
         }
     }
 
-    pub fn nesting_depth(&self) -> usize {
-        self.open_brackets.len()
-    }
-
     /// Enters an array or inline table opened by `bracket`.
     pub fn enter_nesting(&mut self, bracket: TomlSyntaxKind) {
         self.open_brackets.push(bracket);

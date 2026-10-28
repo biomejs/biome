@@ -11,7 +11,7 @@ mod parse_error;
 use crate::syntax::parse_error::{
     equals_on_next_line, expected_equals_and_value, expected_key, expected_key_value,
     expected_key_value_or_table_header, expected_newline, expected_value,
-    expected_value_on_same_line, multiline_string_key, nesting_too_deep, token_on_next_line,
+    expected_value_on_same_line, multiline_string_key, token_on_next_line,
 };
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -443,18 +443,10 @@ fn parse_invalid_value(p: &mut TomlParser, after: TomlLexContext) -> ParsedSynta
     Present(m.complete(p, TOML_BOGUS_VALUE))
 }
 
-/// The maximum number of arrays and inline tables that can be nested in each
-/// other. It bounds the recursion of the parser and of tree consumers.
-pub(crate) const MAX_NESTING_DEPTH: usize = 128;
-
 // [1, 2, 3]
 fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     if !p.at(T!['[']) {
         return Absent;
-    }
-
-    if p.nesting_depth() >= MAX_NESTING_DEPTH {
-        return Present(recover_too_deep_value(p, after));
     }
 
     let m = p.start();
@@ -465,54 +457,6 @@ fn parse_array(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     expect_with_context(p, T![']'], after);
 
     Present(m.complete(p, TOML_ARRAY))
-}
-
-/// Recovers from an array or inline table that exceeds [MAX_NESTING_DEPTH]:
-/// reports it and wraps it into a bogus value without recursing into it.
-fn recover_too_deep_value(p: &mut TomlParser, after: TomlLexContext) -> CompletedMarker {
-    let range = p.cur_range();
-    p.error(nesting_too_deep(p, range));
-
-    let m = p.start();
-    // The brackets that are open, innermost last.
-    let mut open = Vec::new();
-    let mut previous = None;
-    loop {
-        let kind = p.cur();
-        if kind == EOF
-            || previous
-                .is_some_and(|previous| ends_skipped_value(p, previous, open.last().copied()))
-        {
-            break;
-        }
-
-        match kind {
-            T!['['] | T!['{'] => open.push(kind),
-            T![']'] if open.last() == Some(&T!['[']) => {
-                open.pop();
-            }
-            T!['}'] if open.last() == Some(&T!['{']) => {
-                open.pop();
-            }
-            _ => {}
-        }
-
-        // Lex the next token the way the regular parse rules would.
-        let context = match open.last() {
-            None => after,
-            Some(_) if kind == T![=] => TomlLexContext::Value,
-            Some(&T!['[']) => TomlLexContext::Value,
-            Some(_) => TomlLexContext::Key,
-        };
-        p.bump_any_with_context(context);
-        previous = Some(kind);
-
-        if open.is_empty() {
-            break;
-        }
-    }
-
-    m.complete(p, TOML_BOGUS_VALUE)
 }
 
 /// Returns `true` if the current value-like token on a new line is the start
@@ -566,33 +510,6 @@ fn scan_key(p: &mut TomlParser, mut n: usize) -> Option<usize> {
             return Some(n);
         }
         n += 1;
-    }
-}
-
-/// Returns `true` if the current token can't continue a value that is skipped
-/// by [recover_too_deep_value] and most likely starts the next line item.
-///
-/// `previous` is the last skipped token and `innermost` the innermost open
-/// bracket. The rules mirror the line-break handling of the list parsers.
-fn ends_skipped_value(
-    p: &mut TomlParser,
-    previous: TomlSyntaxKind,
-    innermost: Option<TomlSyntaxKind>,
-) -> bool {
-    if !p.has_preceding_line_break() {
-        return false;
-    }
-
-    let at_separator_or_close = p.at_ts(token_set![T![,], T![']'], T!['}']]);
-    match previous {
-        // A key and its `=` must be on the same line as the value.
-        T![=] | T![.] | TOML_BARE_KEY_LITERAL => true,
-        T!['['] | T![,] if innermost == Some(T!['[']) => {
-            !at_separator_or_close && (!p.at_ts(VALUE_START) || is_at_line_item(p))
-        }
-        T!['{'] | T![,] => p.at_ts(TABLE_HEADER_START),
-        // The previous token ended a value or a key.
-        _ => !at_separator_or_close,
     }
 }
 
@@ -670,10 +587,6 @@ impl ParseSeparatedList for ArrayElementList {
 fn parse_inline_table(p: &mut TomlParser, after: TomlLexContext) -> ParsedSyntax {
     if !p.at(T!['{']) {
         return Absent;
-    }
-
-    if p.nesting_depth() >= MAX_NESTING_DEPTH {
-        return Present(recover_too_deep_value(p, after));
     }
 
     let m = p.start();
