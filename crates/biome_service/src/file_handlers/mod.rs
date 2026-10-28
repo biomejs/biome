@@ -32,7 +32,7 @@ use self::css::CssFileHandler;
 use self::javascript::JsFileHandler;
 use self::{json::JsonFileHandler, unknown::UnknownFileHandler};
 use crate::WorkspaceError;
-use crate::db::WorkspaceDb;
+use crate::db::{WorkspaceDb, create_parsed_snippets};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 pub use crate::file_handlers::astro::AstroFileHandler;
@@ -43,7 +43,11 @@ use crate::file_handlers::ignore::IgnoreFileHandler;
 pub use crate::file_handlers::svelte::SvelteFileHandler;
 #[cfg(all(feature = "lang_js", feature = "lang_html"))]
 pub use crate::file_handlers::vue::VueFileHandler;
-use crate::settings::{Settings, SettingsIdentity, SettingsWithEditor};
+use crate::projects::{ProjectInput, ProjectKey};
+use crate::settings::{
+    Settings, SettingsEditorState, SettingsHandle, SettingsIdentity, SettingsQuery,
+    SettingsSelectionKey, SettingsWithEditor,
+};
 use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     CodeAction, DefinitionReference, FixAction, FixFileMode, GetSyntaxTreeResult,
@@ -470,6 +474,54 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) file_source: &'a DocumentFileSource,
     pub(crate) settings: &'a SettingsWithEditor<'settings>,
     pub(crate) node_cache: &'a mut NodeCache,
+}
+
+/// Parses the snippets embedded in a document, such as the scripts, styles,
+/// and Vue directive values of an HTML file, with the parser options of
+/// `settings`.
+///
+/// The snippets match the ones the workspace stores when it opens the
+/// document, so they can be stored with `parse` in a [`ParsedSource`] for
+/// analysis outside the workspace. Returns no snippets for a language that
+/// doesn't embed other languages.
+pub fn parse_embedded_snippets(
+    db: &mut WorkspaceDb,
+    path: &BiomePath,
+    file_source: DocumentFileSource,
+    parse: &AnyParse,
+    settings: &Settings,
+) -> Vec<ParsedSnippet> {
+    let Some(parse_embedded_nodes) = Features::new()
+        .get_deprecated_capabilities(file_source)
+        .parser
+        .parse_embedded_nodes
+    else {
+        return Vec::new();
+    };
+
+    let project = ProjectInput::new(
+        db,
+        ProjectKey::new(),
+        path.to_path_buf(),
+        Arc::new(settings.clone()).into(),
+        Default::default(),
+    );
+    let query = SettingsQuery::new(project, SettingsSelectionKey::Root, settings, None, path);
+    let settings = SettingsHandle::new(settings, SettingsEditorState::new(query));
+    let nodes = parse_embedded_nodes(ParseEmbeddedParams {
+        any_parse: parse,
+        path,
+        file_source: &file_source,
+        settings: &settings,
+        node_cache: &mut NodeCache::default(),
+    })
+    .nodes;
+
+    let snippets = nodes
+        .into_iter()
+        .map(|(parse, content, source)| (parse, content, db.insert_source(source)))
+        .collect();
+    create_parsed_snippets(db, snippets)
 }
 
 type Parse =
