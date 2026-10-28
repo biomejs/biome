@@ -1,0 +1,32 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+list = [
+  "a",
+  "b",
+]
+```
+
+# Options
+
+```
+Indent style: Space
+Indent width: 4
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+list = [
+    "a",
+    "b",
+]
+```

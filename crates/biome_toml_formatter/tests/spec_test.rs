@@ -1,4 +1,3 @@
-use biome_formatter::{Expand, IndentStyle, LineWidth};
 use biome_rowan::Direction;
 use biome_toml_formatter::{TomlFormatOptions, format_node};
 use biome_toml_parser::parse_toml;
@@ -9,26 +8,14 @@ use std::path::Path;
 /// Formats a spec file, which must be valid TOML, and snapshots the output,
 /// which must pass [assert_formatting_preserves].
 ///
-/// Files whose name contains `expand_always`, `expand_never`, `tabs`, or
-/// `narrow` use the matching option.
+/// The formatter options come from an `options.json` next to the spec file,
+/// if there is one.
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
     let path = Path::new(spec_input_file);
     let file_name = path.file_name().unwrap().to_str().unwrap();
     let input = std::fs::read_to_string(path).unwrap();
 
-    let mut options = TomlFormatOptions::default();
-    if file_name.contains("expand_always") {
-        options = options.with_expand(Expand::Always);
-    }
-    if file_name.contains("expand_never") {
-        options = options.with_expand(Expand::Never);
-    }
-    if file_name.contains("tabs") {
-        options = options.with_indent_style(IndentStyle::Tab);
-    }
-    if file_name.contains("narrow") {
-        options = options.with_line_width(LineWidth::try_from(40).unwrap());
-    }
+    let options = load_options(&path.with_file_name("options.json"));
 
     let parse = parse_toml(&input);
     assert!(
@@ -51,6 +38,52 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
+}
+
+// TODO: load `options.json` as a Biome configuration through
+// `biome_formatter_test`, like the other formatters, once the configuration has
+// a `toml` section and `biome_service` can format TOML files. Until then, this
+// reads the `toml.formatter` section that configuration will have directly.
+/// Reads the formatter options from the `toml.formatter` section of the
+/// `options.json` at `path`, or returns the default options if there is no
+/// such file.
+fn load_options(path: &Path) -> TomlFormatOptions {
+    let mut options = TomlFormatOptions::default();
+    let Ok(content) = std::fs::read_to_string(path) else {
+        return options;
+    };
+
+    let json: serde_json::Value = serde_json::from_str(&content).unwrap();
+    let Some(formatter) = json["toml"]["formatter"].as_object() else {
+        panic!("{}: expected a `toml.formatter` object", path.display());
+    };
+
+    for (name, value) in formatter {
+        let value = match value {
+            serde_json::Value::String(value) => value.clone(),
+            value => value.to_string(),
+        };
+        let invalid = |error: &dyn std::fmt::Debug| -> ! {
+            panic!("{}: invalid `{name}`: {error:?}", path.display())
+        };
+        match name.as_str() {
+            "indentStyle" => {
+                options.set_indent_style(value.parse().unwrap_or_else(|e| invalid(&e)))
+            }
+            "indentWidth" => {
+                options.set_indent_width(value.parse().unwrap_or_else(|e| invalid(&e)))
+            }
+            "lineEnding" => options.set_line_ending(value.parse().unwrap_or_else(|e| invalid(&e))),
+            "lineWidth" => options.set_line_width(value.parse().unwrap_or_else(|e| invalid(&e))),
+            "expand" => options.set_expand(value.parse().unwrap_or_else(|e| invalid(&e))),
+            "trailingNewline" => {
+                options.set_trailing_newline(value.parse().unwrap_or_else(|e| invalid(&e)))
+            }
+            _ => panic!("{}: unknown formatter option `{name}`", path.display()),
+        }
+    }
+
+    options
 }
 
 pub fn format(source: &str, options: &TomlFormatOptions) -> String {

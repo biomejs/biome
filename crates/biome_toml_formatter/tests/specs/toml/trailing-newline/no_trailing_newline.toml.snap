@@ -5,10 +5,8 @@ expression: snapshot
 # Input
 
 ```toml
-list = [
-  "a",
-  "b",
-]
+a = 1
+b = [1, 2]
 ```
 
 # Options
@@ -19,14 +17,11 @@ Indent width: 2
 Line ending: LF
 Line width: 80
 Expand: Auto
-Trailing newline: true
+Trailing newline: false
 ```
 
 # Output
 
 ```toml
-list = [
-	"a",
-	"b",
-]
-```
+a = 1
+b = [1, 2]```
