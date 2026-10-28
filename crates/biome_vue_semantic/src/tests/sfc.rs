@@ -841,3 +841,63 @@ Object.assign({}, props.user);
     let accesses: Vec<_> = user.uses().map(|reference| reference.access()).collect();
     assert_eq!(accesses, [Access::Mutate, Access::Escape]);
 }
+
+#[test]
+fn use_template_ref_accepts_a_template_literal() {
+    let model = sfc(r#"<script setup>
+import { useTemplateRef } from 'vue'
+const a = useTemplateRef(`a`)
+const b = useTemplateRef(tag`b`)
+</script>
+<template><input ref="a"><input ref="b"></template>
+"#);
+    let refs: Vec<_> = model
+        .symbols()
+        .filter(|symbol| symbol.kind() == SymbolKind::TemplateRef)
+        .map(|symbol| (symbol.name().to_string(), symbol.uses().count()))
+        .collect();
+    assert_eq!(refs, [("a".into(), 1), ("b".into(), 0)]);
+}
+
+#[test]
+fn template_refs_have_incomplete_uses_when_any_ref_may_be_read() {
+    let cases = [
+        // No script defines a component.
+        r#"<template><input ref="a">{{ $refs[key] }}</template>"#,
+        r#"<script src="./a.js"></script><template><input ref="a"></template>"#,
+        // A component is defined.
+        r#"<script setup>
+import { useTemplateRef } from 'vue'
+const a = useTemplateRef(name)
+</script>
+<template><input ref="a"></template>"#,
+        r#"<script>
+export default { mounted() { for (const key in this.$refs) {} } }
+</script>
+<template><input ref="a"></template>"#,
+        r#"<script src="./a.js"></script>
+<script setup>
+const count = 0
+</script>
+<template><input ref="a"></template>"#,
+    ];
+    for code in cases {
+        let model = sfc(code);
+        let template_ref = model
+            .symbols()
+            .find(|symbol| symbol.kind() == SymbolKind::TemplateRef)
+            .unwrap();
+        assert!(!template_ref.has_complete_uses(), "{code}");
+    }
+}
+
+#[test]
+fn template_refs_have_complete_uses_when_read_by_name() {
+    let model = sfc(r#"<template><input ref="a"><input ref="b">{{ $refs.a }}</template>"#);
+    for template_ref in model
+        .symbols()
+        .filter(|symbol| symbol.kind() == SymbolKind::TemplateRef)
+    {
+        assert!(template_ref.has_complete_uses());
+    }
+}

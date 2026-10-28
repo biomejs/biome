@@ -3433,6 +3433,11 @@ export interface Nursery {
 	 */
 	noVueUnusedEmitDeclarations?: NoVueUnusedEmitDeclarationsConfiguration;
 	/**
+	 * Disallow template refs that are never used.
+	 * See https://biomejs.dev/linter/rules/no-vue-unused-refs
+	 */
+	noVueUnusedRefs?: NoVueUnusedRefsConfiguration;
+	/**
 	 * Disallow the use of Vue's v-html directive.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-html
 	 */
@@ -6294,6 +6299,9 @@ export type NoVueUndeclaredDirectivesConfiguration =
 export type NoVueUnusedEmitDeclarationsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedEmitDeclarationsOptions;
+export type NoVueUnusedRefsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUnusedRefsOptions;
 export type NoVueVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVHtmlOptions;
@@ -9105,6 +9113,10 @@ export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedEmitDeclarationsOptions;
 }
+export interface RuleWithNoVueUnusedRefsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUnusedRefsOptions;
+}
 export interface RuleWithNoVueVHtmlOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVHtmlOptions;
@@ -11726,6 +11738,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	globals?: string[];
 }
 export type NoVueUnusedEmitDeclarationsOptions = {};
+export type NoVueUnusedRefsOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
 export type NoVueVTextVHtmlOnComponentOptions = {};
@@ -13520,6 +13533,7 @@ export type Category =
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
+	| "lint/nursery/noVueUnusedRefs"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"

@@ -1,0 +1,24 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-setup-binding.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+import { ref } from "vue";
+import imported from "./imported";
+
+const input = ref(null);
+let button;
+function handler() {}
+</script>
+
+<template>
+  <input ref="input" />
+  <button ref="button" />
+  <div ref="imported" />
+  <div ref="handler" />
+</template>
+
+```
