@@ -50,7 +50,7 @@ pub(crate) fn collect_snippets(
         let snippet = &snippets[index];
         let id = SnippetId::new(row);
         ids[index] = id;
-        let host = find_host(builder, snippet.content_range);
+        let host = find_host(builder, layout, snippet.content_range);
         let first_operand = builder.data.operands.len() as u32;
         let root = root_shape(builder, snippet, host);
         builder.data.snippets.push(SnippetData {
@@ -95,7 +95,7 @@ pub(crate) fn collect_snippets(
 }
 
 /// Finds what holds the snippet whose text is at `range`.
-fn find_host(builder: &ModelBuilder, range: TextRange) -> SnippetHost {
+fn find_host(builder: &ModelBuilder, layout: &Layout, range: TextRange) -> SnippetHost {
     for (index, block) in builder.data.blocks.iter().enumerate() {
         if block.content.contains_range(range) {
             match block.kind {
@@ -122,7 +122,19 @@ fn find_host(builder: &ModelBuilder, range: TextRange) -> SnippetHost {
                 AttrName::Directive {
                     kind: DirectiveKind::For,
                     ..
-                } => SnippetHost::VForIterable(id),
+                } => {
+                    let in_binding = layout.v_fors.iter().any(|v_for| {
+                        v_for.element == attr.element
+                            && v_for
+                                .binding_range
+                                .is_some_and(|binding| binding.contains_range(range))
+                    });
+                    if in_binding {
+                        SnippetHost::VForDefault(id)
+                    } else {
+                        SnippetHost::VForIterable(id)
+                    }
+                }
                 AttrName::Directive { .. } => SnippetHost::DirectiveValue(id),
                 AttrName::Plain(_) => SnippetHost::Unknown,
             };

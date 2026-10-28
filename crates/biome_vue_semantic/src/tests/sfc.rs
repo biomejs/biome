@@ -48,6 +48,21 @@ defineProps(['items', 'item'])
 }
 
 #[test]
+fn v_for_default_values_see_the_v_for_aliases_but_not_slot_params() {
+    insta::assert_snapshot!(references(
+        r#"<script setup>
+import List from './List.vue'
+defineProps(['rows', 'fallback', 'id'])
+</script>
+<template>
+  <li v-for="({ id = fallback }, index = id) in rows">{{ index }}</li>
+  <List v-for="{ row = fallback } in rows" v-slot="{ fallback }">{{ fallback }}</List>
+</template>
+"#
+    ));
+}
+
+#[test]
 fn slot_params_are_visible_to_the_slot_content_only() {
     insta::assert_snapshot!(references(
         r#"<script setup>

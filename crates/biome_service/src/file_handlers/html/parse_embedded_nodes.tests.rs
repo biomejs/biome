@@ -218,6 +218,20 @@ const duration = 100;
 }
 
 #[test]
+fn vue_v_for_default_values_are_parsed_as_javascript() {
+    const FILE_PATH: &str = "/project/file.vue";
+
+    assert_no_diagnostics(
+        FILE_PATH,
+        r#"<template><div v-for="{ value = gt('v-for default') } in rows" /></template>"#,
+    );
+    assert_diagnostics(
+        FILE_PATH,
+        r#"<template><div v-for="{ value = gt('v-for default' + ) } in rows" /></template>"#,
+    );
+}
+
+#[test]
 fn html_style_attribute_is_parsed_as_css() {
     assert_diagnostics("/project/file.html", r#"<div style="color: rgb("></div>"#);
 }

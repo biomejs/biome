@@ -882,6 +882,15 @@ fn format_embedded(
                     if printed.as_code().contains('"') {
                         return None;
                     }
+                    // Vue splits a `v-for` value at the first `in` or `of`
+                    // between whitespace, so a default value can't contain
+                    // one that its source didn't have, such as `'k' in obj`
+                    // formatted from `'k'in obj`.
+                    if matches!(attribute_snippet, Some(AttributeSnippet::VForDefault))
+                        && contains_v_for_operator(printed.as_code())
+                    {
+                        return None;
+                    }
                     // Removing an empty statement, such as the `;` of
                     // `if (ok) {};`, can leave a handler without any `;`.
                     if handler_needs_semicolon && !printed.as_code().contains(';') {
@@ -944,6 +953,9 @@ enum AttributeSnippet {
     /// The snippet is the expression of a `v-for`, which follows the binding
     /// and the operator.
     VForExpression,
+    /// The snippet is the default value of a binding of a `v-for`, such as
+    /// `fallback` in `{ item = fallback } in items`.
+    VForDefault,
 }
 
 #[cfg(feature = "html_embeds")]
@@ -955,16 +967,25 @@ impl AttributeSnippet {
         let parent = token.parent()?;
         match parent.kind() {
             HtmlSyntaxKind::HTML_STRING => Some(Self::Value),
-            HtmlSyntaxKind::HTML_TEXT_EXPRESSION
-                if parent
-                    .parent()
-                    .is_some_and(|node| node.kind() == HtmlSyntaxKind::VUE_V_FOR_VALUE) =>
-            {
-                Some(Self::VForExpression)
-            }
+            HtmlSyntaxKind::HTML_TEXT_EXPRESSION => match parent.parent()?.kind() {
+                HtmlSyntaxKind::VUE_V_FOR_VALUE => Some(Self::VForExpression),
+                HtmlSyntaxKind::VUE_V_FOR_DEFAULT_BINDING => Some(Self::VForDefault),
+                _ => None,
+            },
             _ => None,
         }
     }
+}
+
+/// Returns `true` if `code` contains `in` or `of` between whitespace, where
+/// Vue splits the value of a `v-for`.
+#[cfg(feature = "html_embeds")]
+fn contains_v_for_operator(code: &str) -> bool {
+    code.as_bytes().windows(4).any(|window| {
+        window[0].is_ascii_whitespace()
+            && matches!(&window[1..3], b"in" | b"of")
+            && window[3].is_ascii_whitespace()
+    })
 }
 
 /// Returns `true` if the statements of a Vue event handler are a single
