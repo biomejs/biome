@@ -1,0 +1,7 @@
+{
+  "toml": {
+    "formatter": {
+      "trailingNewline": false
+    }
+  }
+}
