@@ -185,7 +185,7 @@ impl CompletedMarker {
     /// Panics if both `start_pos` and `finish_pos` are 0. The finish event of
     /// a node always comes after its start event.
     #[inline]
-    pub fn new(start_pos: u32, finish_pos: u32, offset: TextSize) -> Self {
+    pub(crate) fn new(start_pos: u32, finish_pos: u32, offset: TextSize) -> Self {
         Self {
             start_and_finish_pos: NonZeroU64::new(pack(start_pos, finish_pos))
                 .expect("The finish event of a node must come after its start event"),
