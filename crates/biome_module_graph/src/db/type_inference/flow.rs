@@ -10,11 +10,13 @@ use crate::db::queries::{
     BindingTypeInput, FlowBindingRootInput, FlowBindingTypeInput, infer_flow_binding_baseline,
     infer_flow_binding_states, infer_flow_binding_type,
 };
-use crate::js_module_info::flow::{FlowGuard, FlowNode, FlowNodeId, FlowTest, RootFlow};
+use crate::js_module_info::flow::{
+    FlowGuard, FlowNode, FlowNodeId, FlowTest, RootFlow, guard_signature,
+};
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
 use biome_js_syntax::JsIdentifierExpression;
-use biome_js_type_info::interned_types::TypeData;
-use biome_js_type_info::{NarrowingPredicate, is_narrowing_invariant, narrow_type};
+use biome_js_type_info::interned_types::{Literal, TypeData};
+use biome_js_type_info::{NarrowingPredicate, TypeofKind, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
 use std::collections::VecDeque;
 
@@ -446,6 +448,44 @@ impl<'db> ResolutionCtx<'db, '_> {
                 NarrowingPredicate::Literal(TypeData::Undefined)
             }
             FlowTest::Undefined { strict: false } => NarrowingPredicate::Nullish,
+            FlowTest::Predicate(function) => return self.guard_predicate(function),
+        })
+    }
+
+    /// Returns the test that calls to the guard declared at `function` report.
+    ///
+    /// Returns `None` when the guard's predicate names neither a primitive type
+    /// nor a primitive literal.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Only primitive types and primitive literals map to a runtime test."
+    )]
+    fn guard_predicate(&mut self, function: TextRange) -> Option<NarrowingPredicate<'db>> {
+        let info = self.js_info;
+        let (_, predicate) = guard_signature(&info.raw_types, &info.raw_binding_types, function)?;
+        let target = self.resolve(&predicate.ty);
+        // An alias resolves to an instance of its target. The baseline flattens
+        // that instance, as it does for a variable declared with the alias.
+        let target = self.flow_baseline(target)?;
+        Some(match target {
+            TypeData::BigInt => NarrowingPredicate::Typeof(TypeofKind::BigInt),
+            TypeData::Boolean => NarrowingPredicate::Typeof(TypeofKind::Boolean),
+            TypeData::Number => NarrowingPredicate::Typeof(TypeofKind::Number),
+            TypeData::String => NarrowingPredicate::Typeof(TypeofKind::String),
+            TypeData::Symbol => NarrowingPredicate::Typeof(TypeofKind::Symbol),
+            TypeData::Null | TypeData::Undefined => NarrowingPredicate::Literal(target),
+            TypeData::Literal(literal)
+                if matches!(
+                    literal.literal(self.db),
+                    Literal::BigInt(_)
+                        | Literal::Boolean(_)
+                        | Literal::Number(_)
+                        | Literal::String(_)
+                ) =>
+            {
+                NarrowingPredicate::Literal(target)
+            }
+            _ => return None,
         })
     }
 }
