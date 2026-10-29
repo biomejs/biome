@@ -1,0 +1,7 @@
+$suffix: abc;
+.theme {
+  --hashes: #4566a8 #12unknown #\31 2unknown;
+  --interpolation: #12#{$suffix};
+  --nested: token(#12345);
+  --boundaries: # 12px #/**/12px #;
+}
