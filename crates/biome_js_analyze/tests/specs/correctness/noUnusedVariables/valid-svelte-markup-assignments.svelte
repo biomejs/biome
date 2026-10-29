@@ -2,6 +2,8 @@
 <script>
   let count = 0;
   let total = 0;
+  let defaultCount = 0;
+  let items = [1];
 </script>
 
 <button
@@ -13,3 +15,8 @@
 </button>
 
 <button on:click={() => (total += 1)}> Increment </button>
+
+{#if items.length > 0}
+  {@const [value = (defaultCount += 1)] = items}
+  <span>{value}</span>
+{/if}

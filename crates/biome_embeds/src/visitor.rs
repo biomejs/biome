@@ -16,10 +16,14 @@ use biome_js_syntax::{
     AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
     AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyJsVueGenericTypeParameters,
-    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
-    JsIdentifierAssignment, JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier,
-    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsSyntaxToken,
-    JsVariableStatement, JsxReferenceIdentifier,
+    AnyTsIdentifierBinding, AnyTsType, JsArrowFunctionExpression, JsAssignmentExpression,
+    JsCallExpression, JsCatchDeclaration, JsClassDeclaration, JsClassExpression,
+    JsConstructorClassMember, JsExport, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExpression, JsIdentifierAssignment, JsIdentifierBinding, JsImport,
+    JsMethodClassMember, JsMethodObjectMember, JsModuleItemList, JsParameterList,
+    JsReferenceIdentifier, JsRestParameter, JsSetterClassMember, JsSetterObjectMember,
+    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsSyntaxNode,
+    JsSyntaxToken, JsVariableDeclaration, JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -1710,14 +1714,15 @@ impl EmbeddedReferencesBuilder {
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {
-        let svelte_const_lhs_range = if file_source.is_svelte_const_block() {
+        let svelte_const_binding_ranges = if file_source.is_svelte_const_block() {
             root.as_js_expression_template_root()
                 .and_then(|snippet| snippet.expression())
                 .and_then(|expr| expr.as_js_assignment_expression().cloned())
                 .and_then(|assign| assign.left().ok())
-                .map(|left| left.syntax().text_trimmed_range())
+                .map(collect_assignment_pattern_target_ranges)
+                .unwrap_or_default()
         } else {
-            None
+            Vec::new()
         };
 
         let kinds = JsxReferenceIdentifier::KIND_SET
@@ -1738,9 +1743,9 @@ impl EmbeddedReferencesBuilder {
                             file_source.as_embedding_kind(),
                             JsEmbeddingKind::Vue { .. } | JsEmbeddingKind::Svelte { .. }
                         )
-                        && !svelte_const_lhs_range.is_some_and(|range| {
-                            range.contains_range(assignment.syntax().text_trimmed_range())
-                        })
+                        && !svelte_const_binding_ranges
+                            .contains(&assignment.syntax().text_trimmed_range())
+                        && !is_shadowed_by_local_binding(&assignment, root)
                     {
                         self.visit_identifier_assignment(assignment);
                     } else if let Some(member) = JsStaticMemberExpression::cast_ref(&node) {
@@ -1988,6 +1993,141 @@ impl EmbeddedReferencesBuilder {
         }
         Some(())
     }
+}
+
+fn collect_assignment_pattern_target_ranges(pattern: AnyJsAssignmentPattern) -> Vec<TextRange> {
+    let mut ranges = Vec::new();
+    let mut queue = VecDeque::from([pattern]);
+
+    while let Some(current) = queue.pop_front() {
+        match current {
+            AnyJsAssignmentPattern::AnyJsAssignment(assignment) => {
+                if let Some(ident) = assignment.as_js_identifier_assignment() {
+                    ranges.push(ident.syntax().text_trimmed_range());
+                }
+            }
+            AnyJsAssignmentPattern::JsObjectAssignmentPattern(object) => {
+                for member in object.properties().iter().flatten() {
+                    match member {
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternProperty(
+                            prop,
+                        ) => {
+                            if let Ok(inner) = prop.pattern() {
+                                queue.push_back(inner);
+                            }
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternShorthandProperty(
+                            prop,
+                        ) => {
+                            if let Ok(ident) = prop.identifier() {
+                                ranges.push(ident.syntax().text_trimmed_range());
+                            }
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsObjectAssignmentPatternRest(rest) => {
+                            if let Ok(target) = rest.target()
+                                && let Some(ident) = target.as_js_identifier_assignment()
+                            {
+                                ranges.push(ident.syntax().text_trimmed_range());
+                            }
+                        }
+                        AnyJsObjectAssignmentPatternMember::JsBogusAssignment(_) => {}
+                    }
+                }
+            }
+            AnyJsAssignmentPattern::JsArrayAssignmentPattern(array) => {
+                for element in array.elements().iter().flatten() {
+                    match element {
+                        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternElement(el) => {
+                            if let Ok(inner) = el.pattern() {
+                                queue.push_back(inner);
+                            }
+                        }
+                        AnyJsArrayAssignmentPatternElement::JsArrayAssignmentPatternRestElement(
+                            rest,
+                        ) => {
+                            if let Ok(inner) = rest.pattern() {
+                                queue.push_back(inner);
+                            }
+                        }
+                        AnyJsArrayAssignmentPatternElement::JsArrayHole(_) => {}
+                    }
+                }
+            }
+        }
+    }
+
+    ranges
+}
+
+fn is_shadowed_by_local_binding(assignment: &JsIdentifierAssignment, root: &AnyJsRoot) -> bool {
+    let Ok(name_token) = assignment.name_token() else {
+        return false;
+    };
+    let target_name = name_token.text_trimmed();
+    let assignment_range = assignment.syntax().text_trimmed_range();
+
+    root.syntax().descendants().any(|node| {
+        let Some(binding) = JsIdentifierBinding::cast_ref(&node) else {
+            return false;
+        };
+        let Ok(binding_token) = binding.name_token() else {
+            return false;
+        };
+        if binding_token.text_trimmed() != target_name {
+            return false;
+        }
+        binding_scope_node(&binding, root)
+            .is_some_and(|scope| scope.text_trimmed_range().contains_range(assignment_range))
+    })
+}
+
+fn binding_scope_node(binding: &JsIdentifierBinding, root: &AnyJsRoot) -> Option<JsSyntaxNode> {
+    for ancestor in binding.syntax().ancestors().skip(1) {
+        if let Some(decl) = JsVariableDeclaration::cast_ref(&ancestor) {
+            if decl.is_var() {
+                return decl
+                    .syntax()
+                    .ancestors()
+                    .find(|node| JsFunctionBody::can_cast(node.kind()))
+                    .or_else(|| Some(root.syntax().clone()));
+            }
+            return decl
+                .syntax()
+                .parent()
+                .and_then(|parent| parent.parent())
+                .or_else(|| decl.syntax().parent());
+        }
+        if JsFormalParameter::can_cast(ancestor.kind())
+            || JsRestParameter::can_cast(ancestor.kind())
+        {
+            return ancestor.ancestors().skip(1).find(|node| {
+                let kind = node.kind();
+                JsArrowFunctionExpression::can_cast(kind)
+                    || JsFunctionExpression::can_cast(kind)
+                    || JsFunctionDeclaration::can_cast(kind)
+                    || JsMethodObjectMember::can_cast(kind)
+                    || JsMethodClassMember::can_cast(kind)
+                    || JsSetterObjectMember::can_cast(kind)
+                    || JsSetterClassMember::can_cast(kind)
+                    || JsConstructorClassMember::can_cast(kind)
+                    || JsSvelteSnippetRoot::can_cast(kind)
+            });
+        }
+        if JsArrowFunctionExpression::can_cast(ancestor.kind())
+            || JsFunctionExpression::can_cast(ancestor.kind())
+            || JsClassExpression::can_cast(ancestor.kind())
+            || JsSvelteSnippetRoot::can_cast(ancestor.kind())
+        {
+            return Some(ancestor);
+        }
+        if JsCatchDeclaration::can_cast(ancestor.kind())
+            || JsFunctionDeclaration::can_cast(ancestor.kind())
+            || JsClassDeclaration::can_cast(ancestor.kind())
+        {
+            return ancestor.parent();
+        }
+    }
+    None
 }
 
 #[cfg(test)]

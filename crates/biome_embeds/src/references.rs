@@ -542,6 +542,20 @@ mod tests {
                 content_offset: TextSize::default(),
                 source_index: 4,
             },
+            TestSnippet {
+                text: "[value = (defaultAssigned += 1)] = items".to_string(),
+                element_range: TextRange::default(),
+                content_range: TextRange::default(),
+                content_offset: TextSize::default(),
+                source_index: 4,
+            },
+            TestSnippet {
+                text: "() => { let shadowed = 0; shadowed += 1; }".to_string(),
+                element_range: TextRange::default(),
+                content_range: TextRange::default(),
+                content_offset: TextSize::default(),
+                source_index: 3,
+            },
         ];
         db.insert_document(&path, "<button></button>", 2, snippets);
 
@@ -557,9 +571,21 @@ mod tests {
             &db,
             InternedReference::new(&db, document(&db, &path), token_text("source"))
         ));
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("defaultAssigned"))
+        ));
         assert!(!is_value_reference_used(
             &db,
             InternedReference::new(&db, document(&db, &path), token_text("nested"))
+        ));
+        assert!(!is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("value"))
+        ));
+        assert!(!is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("shadowed"))
         ));
     }
 
