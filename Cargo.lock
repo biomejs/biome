@@ -1742,6 +1742,7 @@ dependencies = [
  "camino",
  "cfg-if",
  "codspeed-divan-compat",
+ "either",
  "indexmap",
  "insta",
  "mimalloc",
