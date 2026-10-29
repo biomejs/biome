@@ -1,8 +1,19 @@
+//! Utilities for executing and rendering analyzer rule documentation.
+//!
+//! This crate combines code-block analysis and diagnostic rendering with the
+//! rule-document HIR re-exported from `biome_ruledoc`. Consumers such as the
+//! website generator can depend on this crate alone for both layers.
+
 mod analyzer;
 mod codeblock;
 mod printer;
 
 pub use analyzer::*;
+pub use biome_ruledoc::{
+    RuleDocCodeBlock, RuleDocHeading, RuleDocHtml, RuleDocHtmlKind, RuleDocument, RuleDocumentItem,
+    RuleDocumentParse, RuleSummary, RuleSummaryError, RuleSummaryFragment, RuleSummaryParse,
+    parse_rule_document, parse_rule_summary,
+};
 pub use codeblock::*;
 pub use printer::*;
 

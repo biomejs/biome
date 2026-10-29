@@ -1,6 +1,6 @@
 use crate::list_ext::AnyListItem;
-use crate::{AnyMdInline, MdInlineItemList};
-use biome_rowan::AstNodeList;
+use crate::{AnyMdInline, MdInlineCode, MdInlineItemList};
+use biome_rowan::{AstNode, AstNodeList, Direction};
 
 impl AnyMdInline {
     /// `true` if this node is a line break: a hard break, soft break,
@@ -54,7 +54,55 @@ impl AnyListItem {
     }
 }
 
+impl MdInlineCode {
+    /// Returns code-span content after applying CommonMark whitespace
+    /// normalization.
+    ///
+    /// The returned text excludes the backtick delimiters. Line endings become
+    /// spaces, and one surrounding space is removed when the span is not made
+    /// entirely of spaces.
+    pub fn normalized_text(&self) -> String {
+        crate::text_ext::normalize_code_span(&self.content().literal_text())
+    }
+}
+
 impl MdInlineItemList {
+    /// Reconstructs literal text represented by this inline list.
+    ///
+    /// Document-level fenced blocks may store their entire body in one
+    /// `MdCodeContent`, while nested blocks use textual, indentation, and quote
+    /// prefix nodes. Hard line nodes contribute only their line ending. Other
+    /// nodes contribute their token text without interpreting escapes or
+    /// entities.
+    pub fn literal_text(&self) -> String {
+        let mut text = String::new();
+        for item in self.iter() {
+            match item {
+                AnyMdInline::MdTextual(textual) => {
+                    if let Ok(token) = textual.value_token() {
+                        text.push_str(token.text());
+                    }
+                }
+                AnyMdInline::MdHardLine(_) => text.push('\n'),
+                AnyMdInline::MdCodeContent(content) => {
+                    if let Ok(token) = content.value_token() {
+                        text.push_str(token.text());
+                    }
+                }
+                _ => {
+                    for token in item
+                        .syntax()
+                        .descendants_with_tokens(Direction::Next)
+                        .filter_map(|element| element.into_token())
+                    {
+                        text.push_str(token.text());
+                    }
+                }
+            }
+        }
+        text
+    }
+
     /// `true` if the content spans multiple lines — i.e. there is a line
     /// break with visible content after it. A trailing newline at the end
     /// of the list (with no content following) does not count.

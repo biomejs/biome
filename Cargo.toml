@@ -97,6 +97,7 @@ biome_react_compiler         = { path = "./crates/biome_react_compiler", version
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.7.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.7.0" }
 biome_rule_options           = { path = "./crates/biome_rule_options", version = "0.7.0" }
+biome_ruledoc                = { path = "./crates/biome_ruledoc" }
 biome_ruledoc_utils          = { path = "./crates/biome_ruledoc_utils" }
 biome_service                = { path = "./crates/biome_service" }
 biome_string_case            = { path = "./crates/biome_string_case", version = "0.7.0" }
