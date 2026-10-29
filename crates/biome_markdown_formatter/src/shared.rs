@@ -61,6 +61,7 @@ pub(crate) enum TextContext {
     Neutral,
     List,
     Header,
+    Inline,
 }
 
 impl TextContext {
