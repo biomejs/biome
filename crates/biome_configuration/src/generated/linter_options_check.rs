@@ -1642,6 +1642,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noTanstackQueryRestDestructuring", TypeId::of::<biome_rule_options::no_tanstack_query_rest_destructuring::NoTanstackQueryRestDestructuringOptions>()));
     result.push((
         "nursery",
+        "noTanstackQueryUnstableDeps",
+        TypeId::of::<
+            biome_rule_options::no_tanstack_query_unstable_deps::NoTanstackQueryUnstableDepsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noTanstackQueryVoidQueryFn",
         TypeId::of::<
             biome_rule_options::no_tanstack_query_void_query_fn::NoTanstackQueryVoidQueryFnOptions,
