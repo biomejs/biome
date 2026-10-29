@@ -14,7 +14,7 @@ use crate::globals::{
 };
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
-use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference};
+use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference, TypeReferenceQualifier};
 
 const MAX_NARROWING_STEPS: usize = 256;
 const MAX_LITERAL_BYTES: usize = 1024;
@@ -74,25 +74,41 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
     }
 }
 
-/// Limits the chain of raw references that [`may_resolve_to_raw_primitive`]
-/// follows.
+/// Limits the chain of raw references that [`raw_primitive_target`] follows.
 const MAX_RAW_REFERENCE_STEPS: usize = 16;
 
-/// Returns whether a collected type reference can resolve to a primitive type
-/// or a primitive literal, without resolving it.
+/// What a collected type reference can resolve to, as far as raw tables tell.
+#[derive(Debug)]
+pub enum RawPrimitiveTarget<'a> {
+    /// The reference resolves to a primitive type or a primitive literal.
+    Primitive,
+    /// The reference cannot resolve to a primitive type or a primitive literal.
+    Other,
+    /// The reference names a type without type arguments. Only the scope that
+    /// declares the name tells whether it is a type alias for a primitive.
+    Named(&'a TypeReferenceQualifier),
+}
+
+/// Classifies whether a collected type reference can resolve to a primitive
+/// type or a primitive literal, without resolving it.
 ///
-/// `raw_types` is the module table that local references index. A reference by
-/// name without type arguments returns true, because it can name a type alias
-/// that only resolution expands. A chain of raw references longer than the
-/// step limit returns false.
-pub fn may_resolve_to_raw_primitive(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+/// `raw_types` is the module table that local references index. A chain of
+/// raw references longer than the step limit is [`RawPrimitiveTarget::Other`].
+pub fn raw_primitive_target<'a>(
+    reference: &'a TypeReference,
+    raw_types: &'a [RawTypeData],
+) -> RawPrimitiveTarget<'a> {
     let mut reference = reference;
     for _ in 0..MAX_RAW_REFERENCE_STEPS {
         let local = match reference {
-            TypeReference::Qualifier(qualifier) => return qualifier.type_parameters.is_empty(),
-            TypeReference::Import(_) => return false,
+            TypeReference::Qualifier(qualifier) if qualifier.type_parameters.is_empty() => {
+                return RawPrimitiveTarget::Named(qualifier);
+            }
+            TypeReference::Qualifier(_) | TypeReference::Import(_) => {
+                return RawPrimitiveTarget::Other;
+            }
             TypeReference::Resolved(id @ RawTypeId::Global(_)) => {
-                return [
+                let primitive = [
                     GLOBAL_BIGINT_KEYWORD_ID,
                     GLOBAL_BOOLEAN_KEYWORD_ID,
                     GLOBAL_NULL_KEYWORD_ID,
@@ -101,11 +117,19 @@ pub fn may_resolve_to_raw_primitive(reference: &TypeReference, raw_types: &[RawT
                     GLOBAL_SYMBOL_KEYWORD_ID,
                 ]
                 .contains(id);
+                return if primitive {
+                    RawPrimitiveTarget::Primitive
+                } else {
+                    RawPrimitiveTarget::Other
+                };
             }
             TypeReference::Resolved(RawTypeId::Local(local)) => local,
         };
-        match raw_types.get(local.index()) {
-            Some(RawTypeData::Reference(next)) => reference = next,
+        let primitive = match raw_types.get(local.index()) {
+            Some(RawTypeData::Reference(next)) => {
+                reference = next;
+                continue;
+            }
             Some(
                 RawTypeData::BigInt
                 | RawTypeData::Boolean
@@ -114,25 +138,28 @@ pub fn may_resolve_to_raw_primitive(reference: &TypeReference, raw_types: &[RawT
                 | RawTypeData::String
                 | RawTypeData::Symbol
                 | RawTypeData::Undefined,
-            ) => return true,
-            Some(RawTypeData::Literal(literal)) => {
-                return matches!(
-                    literal.as_ref(),
-                    crate::Literal::BigInt(_)
-                        | crate::Literal::Boolean(_)
-                        | crate::Literal::Number(_)
-                        | crate::Literal::String(_)
-                );
+            ) => true,
+            Some(RawTypeData::Literal(literal)) => matches!(
+                literal.as_ref(),
+                crate::Literal::BigInt(_)
+                    | crate::Literal::Boolean(_)
+                    | crate::Literal::Number(_)
+                    | crate::Literal::String(_)
+            ),
+            // A reference by name to a type collects as an instance of it.
+            Some(RawTypeData::InstanceOf(instance)) if instance.type_parameters.is_empty() => {
+                reference = &instance.ty;
+                continue;
             }
-            // A type alias reference collects as an instance of the named type.
-            Some(RawTypeData::InstanceOf(instance)) => {
-                return instance.type_parameters.is_empty()
-                    && matches!(&instance.ty, TypeReference::Qualifier(qualifier) if qualifier.type_parameters.is_empty());
-            }
-            _ => return false,
-        }
+            _ => false,
+        };
+        return if primitive {
+            RawPrimitiveTarget::Primitive
+        } else {
+            RawPrimitiveTarget::Other
+        };
     }
-    false
+    RawPrimitiveTarget::Other
 }
 
 /// Retains the values of `ty` that can pass a runtime test.

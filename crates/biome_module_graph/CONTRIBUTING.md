@@ -71,7 +71,8 @@ enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
 possible paths through each execution root that tests one of its own
 variables. The module visitor selects the roots that contain a condition and
 only supported syntax during its own syntax walk, so collection never walks the
-whole module again and a module without conditions builds no graph.
+whole module again. In a module with an `asserts` annotation, a standalone call
+also selects its root. A module without either builds no graph.
 Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no
 code that runs, so the visitor does not look for flow roots in them. Collection
 decomposes every condition into guards on semantic bindings. For

@@ -564,9 +564,14 @@ fn unsupported_assertion_targets_do_not_expand_large_baselines() {
         "void",
         "object",
         "() => void",
+        "Shape",
+        "Box",
+        "Kind",
+        "Error",
     ] {
         let source = format!(
-            "declare function check(input: unknown): asserts input is {target};\n\
+            "interface Shape {{ kind: string }} class Box {{}} enum Kind {{ A }}\n\
+             declare function check(input: unknown): asserts input is {target};\n\
              function f(value: {variants}) {{ /*before*/value; check(value); /*after*/value; }}"
         );
         let (db, module) = assertion_db(&source);

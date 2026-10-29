@@ -5,7 +5,14 @@ function checks(number: number | null, string: string | undefined, boolean?: boo
     assert(number);
     assertSecond("present", string);
     assert(boolean);
+}
+// Each check below runs before any assertion narrows its operands.
+function logicalAnd(number: number | null) {
     assert(true && number);
+}
+function logicalOr(number: number | null, string: string | undefined) {
     assert(number || string);
+}
+function parenthesized(boolean?: boolean) {
     assert((boolean));
 }
