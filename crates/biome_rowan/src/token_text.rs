@@ -82,6 +82,18 @@ impl TokenText {
         self
     }
 
+    /// Returns a view of this text with `prefix` removed.
+    ///
+    /// Returns `None` when the text doesn't start with `prefix`. The returned
+    /// value references the same token with an adjusted range.
+    pub fn strip_prefix<P>(&self, prefix: P) -> Option<Self>
+    where
+        P: TokenTextPattern,
+    {
+        let prefix_len = TextSize::from(prefix.prefix_len(self.text())? as u32);
+        Some(self.clone().slice(TextRange::new(prefix_len, self.len())))
+    }
+
     pub fn text(&self) -> &str {
         &self.token.text()[self.range]
     }
@@ -208,6 +220,12 @@ pub trait TokenTextPattern {
     /// Finds the next match of this pattern in `haystack`,
     /// returning the byte range `(start, end)` of the match.
     fn find(&self, haystack: &str) -> Option<(usize, usize)>;
+
+    /// Returns the byte length of this pattern when it matches the start of `haystack`.
+    fn prefix_len(&self, haystack: &str) -> Option<usize> {
+        self.find(haystack)
+            .and_then(|(start, end)| (start == 0).then_some(end))
+    }
 }
 
 impl TokenTextPattern for char {
@@ -225,6 +243,10 @@ impl TokenTextPattern for &str {
             return None;
         }
         haystack.find(self).map(|start| (start, start + self.len()))
+    }
+
+    fn prefix_len(&self, haystack: &str) -> Option<usize> {
+        haystack.starts_with(*self).then_some(self.len())
     }
 }
 
@@ -272,6 +294,21 @@ mod tests {
 
     fn tt(text: &str) -> TokenText {
         TokenText::new_raw(RawSyntaxKind(0), text)
+    }
+
+    #[test]
+    fn strip_prefix_returns_token_backed_slice() {
+        let text = tt("éclair");
+        let stripped = text.strip_prefix('é').unwrap();
+        assert_eq!(stripped.text(), "clair");
+        assert_eq!(
+            stripped.relative_range(),
+            TextRange::new(TextSize::from(2), TextSize::from(7))
+        );
+
+        let unchanged = text.strip_prefix("").unwrap();
+        assert_eq!(unchanged.relative_range(), text.relative_range());
+        assert!(text.strip_prefix("clair").is_none());
     }
 
     #[test]

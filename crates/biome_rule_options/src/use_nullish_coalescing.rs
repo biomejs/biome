@@ -140,12 +140,12 @@ impl biome_deserialize::Merge for IgnorePrimitives {
 }
 
 impl Deserializable for IgnorePrimitives {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Bool {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Bool {
             Self::All(<bool as Deserializable>::deserialize(ctx, value, name)?)
         } else {
             Self::Specific(<IgnorePrimitivesOptions as Deserializable>::deserialize(

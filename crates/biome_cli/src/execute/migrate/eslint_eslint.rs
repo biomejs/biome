@@ -134,9 +134,9 @@ impl AsRef<str> for IgnorePattern {
     }
 }
 impl biome_deserialize::Deserializable for IgnorePattern {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
@@ -187,12 +187,12 @@ impl GlobalConf {
     }
 }
 impl Deserializable for GlobalConf {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Qualifier)
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::Flag)
@@ -252,13 +252,13 @@ impl<T> IntoIterator for ShorthandVec<T> {
     }
 }
 impl<T: Deserializable> Deserializable for ShorthandVec<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         Some(Self(
-            if value.visitable_type()? == DeserializableType::Array {
+            if value.visitable_type(ctx)? == DeserializableType::Array {
                 Deserializable::deserialize(ctx, value, name)?
             } else {
                 Vec::from_iter([Deserializable::deserialize(ctx, value, name)?])
@@ -293,9 +293,9 @@ impl<T> From<Vec<T>> for NestableVec<T> {
     }
 }
 impl<T: Deserializable> Deserializable for NestableVec<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         value
@@ -312,19 +312,19 @@ impl<T> NestableVecVisitor<T> {
         Self { _ty: PhantomData }
     }
 }
-impl<T: Deserializable> DeserializationVisitor for NestableVecVisitor<T> {
+impl<S, T: Deserializable> DeserializationVisitor<S> for NestableVecVisitor<T> {
     type Output = Vec<T>;
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
     fn visit_array(
         self,
-        ctx: &mut dyn DeserializationContext,
-        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
         _range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
         let mut output = Vec::new();
         for item in items.flatten() {
-            if item.visitable_type()? == DeserializableType::Array {
+            if item.visitable_type(ctx)? == DeserializableType::Array {
                 output.extend(Vec::<T>::deserialize(ctx, &item, name)?);
             } else {
                 output.push(T::deserialize(ctx, &item, name)?);
@@ -374,21 +374,23 @@ impl<T: Default, U: Default> RuleConf<T, U> {
     }
 }
 impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable for RuleConf<T, U> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T, U>(PhantomData<(T, U)>);
-        impl<T: Deserializable + 'static, U: Deserializable + 'static> DeserializationVisitor
+        impl<S, T: Deserializable + 'static, U: Deserializable + 'static> DeserializationVisitor<S>
             for Visitor<T, U>
         {
             type Output = RuleConf<T, U>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                values: &mut dyn ExactSizeIterator<
+                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                >,
                 range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -433,7 +435,7 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
             }
         }
         if matches!(
-            value.visitable_type()?,
+            value.visitable_type(ctx)?,
             DeserializableType::Number | DeserializableType::Str
         ) {
             Deserializable::deserialize(ctx, value, name).map(RuleConf::Severity)
@@ -485,12 +487,12 @@ enum NumberOrString {
     String(String),
 }
 impl Deserializable for NumberOrString {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Str {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Str {
             Self::String(Deserializable::deserialize(ctx, value, name)?)
         } else {
             Self::Number(Deserializable::deserialize(ctx, value, name)?)
@@ -512,19 +514,19 @@ impl Deref for Rules {
     }
 }
 impl Deserializable for Rules {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = Rules;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: biome_rowan::TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -873,13 +875,13 @@ impl NoUnusedVarsOptions {
 }
 
 impl Deserializable for NoUnusedVarsOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         // The string form (`"all"` or `"local"`) only sets `vars`, which has no Biome equivalent.
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             return Some(Self::default());
         }
 
@@ -955,12 +957,12 @@ impl MaxNestedCallbacksOptions {
 }
 
 impl Deserializable for MaxNestedCallbacksOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Number {
+        if value.visitable_type(ctx)? == DeserializableType::Number {
             return Some(Self {
                 max: Deserializable::deserialize(ctx, value, name),
             });
@@ -1004,12 +1006,12 @@ pub(crate) struct MaxStatementsOptions {
 }
 
 impl Deserializable for MaxStatementsOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Number {
+        if value.visitable_type(ctx)? == DeserializableType::Number {
             return Some(Self {
                 max: Deserializable::deserialize(ctx, value, name),
             });
@@ -1143,12 +1145,12 @@ impl NoRestrictedGlobal {
     }
 }
 impl Deserializable for NoRestrictedGlobal {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(NoRestrictedGlobal::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(NoRestrictedGlobal::WithMessage)
@@ -1322,12 +1324,12 @@ impl From<SvelteNoUnnecessaryStateWrapOptions>
 #[derive(Debug)]
 pub(crate) struct OneOrMany<T>(pub(crate) Vec<T>);
 impl<T: Deserializable> Deserializable for OneOrMany<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Array {
+        if value.visitable_type(ctx)? == DeserializableType::Array {
             Vec::deserialize(ctx, value, name).map(Self)
         } else {
             T::deserialize(ctx, value, name).map(|item| Self(vec![item]))
