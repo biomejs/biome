@@ -1710,6 +1710,16 @@ impl EmbeddedReferencesBuilder {
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {
+        let svelte_const_lhs_range = if file_source.is_svelte_const_block() {
+            root.as_js_expression_template_root()
+                .and_then(|snippet| snippet.expression())
+                .and_then(|expr| expr.as_js_assignment_expression().cloned())
+                .and_then(|assign| assign.left().ok())
+                .map(|left| left.syntax().text_trimmed_range())
+        } else {
+            None
+        };
+
         let kinds = JsxReferenceIdentifier::KIND_SET
             .union(JsReferenceIdentifier::KIND_SET)
             .union(JsIdentifierAssignment::KIND_SET)
@@ -1723,7 +1733,14 @@ impl EmbeddedReferencesBuilder {
                     } else if let Some(reference) = JsReferenceIdentifier::cast_ref(&node) {
                         self.visit_reference_identifier(reference);
                     } else if let Some(assignment) = JsIdentifierAssignment::cast_ref(&node)
-                        && matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
+                        && !file_source.is_embedded_source()
+                        && matches!(
+                            file_source.as_embedding_kind(),
+                            JsEmbeddingKind::Vue { .. } | JsEmbeddingKind::Svelte { .. }
+                        )
+                        && !svelte_const_lhs_range.is_some_and(|range| {
+                            range.contains_range(assignment.syntax().text_trimmed_range())
+                        })
                     {
                         self.visit_identifier_assignment(assignment);
                     } else if let Some(member) = JsStaticMemberExpression::cast_ref(&node) {

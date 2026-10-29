@@ -202,7 +202,7 @@ mod tests {
     use crate::testing::{TestSnippet, parse_test_source};
     use biome_db::testing::{Events, assert_function_query_was_not_run};
     use biome_db::{Db, Source};
-    use biome_languages::javascript::JsEmbeddingKind;
+    use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFileKind};
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
     use biome_parser::db::{ParseDb, SourceOutput};
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
@@ -287,6 +287,23 @@ mod tests {
         fn source_from_index(&self, index: usize) -> Option<DocumentFileSource> {
             Some(match index {
                 0 => DocumentFileSource::Html(HtmlFileSource::vue()),
+                2 => DocumentFileSource::Html(HtmlFileSource::svelte()),
+                3 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                    JsEmbeddingKind::Svelte {
+                        file_kind: SvelteFileKind::Component,
+                        embedding_kind: SvelteEmbeddingKind::Expression,
+                        is_class_attribute: false,
+                        is_module_script: false,
+                    },
+                )),
+                4 => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
+                    JsEmbeddingKind::Svelte {
+                        file_kind: SvelteFileKind::Component,
+                        embedding_kind: SvelteEmbeddingKind::LegacyConst,
+                        is_class_attribute: false,
+                        is_module_script: false,
+                    },
+                )),
                 _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Vue {
                         is_class_attribute: false,
@@ -496,6 +513,53 @@ mod tests {
         assert!(!is_value_reference_used(
             &db,
             InternedReference::new(&db, document(&db, &path), token_text("Missing"))
+        ));
+    }
+
+    #[test]
+    fn is_value_reference_used_finds_svelte_assignment_and_update_targets() {
+        let db = TestDb::new();
+        let path = Utf8PathBuf::from("src/App.svelte");
+        let snippets = vec![
+            TestSnippet {
+                text: "() => { console.log(`id-${count++}`); }".to_string(),
+                element_range: TextRange::default(),
+                content_range: TextRange::default(),
+                content_offset: TextSize::default(),
+                source_index: 3,
+            },
+            TestSnippet {
+                text: "() => (total += 1)".to_string(),
+                element_range: TextRange::default(),
+                content_range: TextRange::default(),
+                content_offset: TextSize::default(),
+                source_index: 3,
+            },
+            TestSnippet {
+                text: "nested = (source = 1) + 2".to_string(),
+                element_range: TextRange::default(),
+                content_range: TextRange::default(),
+                content_offset: TextSize::default(),
+                source_index: 4,
+            },
+        ];
+        db.insert_document(&path, "<button></button>", 2, snippets);
+
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("count"))
+        ));
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("total"))
+        ));
+        assert!(is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("source"))
+        ));
+        assert!(!is_value_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("nested"))
         ));
     }
 
