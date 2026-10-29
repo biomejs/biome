@@ -9002,6 +9002,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useObjectFromEntries": {
+					"description": "Enforce using Object.fromEntries() to build an object from a list of key-value pairs.\nSee https://biomejs.dev/linter/rules/use-object-from-entries",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseObjectFromEntriesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePackageJsonValidCpu": {
 					"description": "Require the cpu field in package.json to be a valid list of processor types.\nSee https://biomejs.dev/linter/rules/use-package-json-valid-cpu",
 					"anyOf": [
@@ -15867,6 +15874,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseObjectFromEntriesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseObjectFromEntriesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseObjectSpreadOptions": {
 			"type": "object",
 			"properties": {
@@ -21178,6 +21198,23 @@
 						{ "$ref": "#/$defs/NumericLiteralSeparatorOptions" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseObjectFromEntriesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseObjectFromEntriesOptions" }
+			]
+		},
+		"UseObjectFromEntriesOptions": {
+			"type": "object",
+			"properties": {
+				"functions": {
+					"description": "Extra functions that build an object from key-value pairs, such as `utils.fromPairs`.\nA name can contain dots to match a function accessed through an object.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

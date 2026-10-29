@@ -2625,6 +2625,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_numeric_separators::UseNumericSeparatorsOptions>(),
     ));
     result.push((
+        "nursery",
+        "useObjectFromEntries",
+        TypeId::of::<biome_rule_options::use_object_from_entries::UseObjectFromEntriesOptions>(),
+    ));
+    result.push((
         "style",
         "useObjectSpread",
         TypeId::of::<biome_rule_options::use_object_spread::UseObjectSpreadOptions>(),
