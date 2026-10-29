@@ -1,7 +1,8 @@
 use biome_formatter::rowan::prelude::*;
 use biome_formatter::{Format, FormatOptions, FormatResult, write};
 use biome_markdown_syntax::{
-    AnyMdInline, MdHardLine, MdInlineEmphasis, MdInlineItalic, MdInlineItemList,
+    AnyMdInline, GfmStrikethrough, MarkdownSyntaxNode, MdHardLine, MdInlineEmphasis,
+    MdInlineItalic, MdInlineItemList, MdQuote,
     emphasis_ext::{MdEmphasisFence, MdItalicFence},
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
@@ -10,6 +11,11 @@ use biome_unicode_table::{
 };
 use smallvec::SmallVec;
 
+use crate::context::ProseWrap;
+use crate::markdown::auxiliary::inline_emphasis::format_emphasis_fence;
+use crate::markdown::auxiliary::inline_italic::{
+    is_inside_reference_image, normalized_fence_kind, swapped_strong_emphasis, write_fence,
+};
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed, format_replaced};
 
@@ -60,6 +66,178 @@ enum ProseAtom {
     Word(MdWord),
     /// An atomic inline element: emphasis, code, link, image, autolink, etc.
     InlineElement(AnyMdInline),
+    /// The opening delimiter of an inline element whose content is collected as prose.
+    OpeningDelimiter(DelimitedInline),
+    /// The closing delimiter of an inline element whose content is collected as prose.
+    ClosingDelimiter(DelimitedInline),
+}
+
+impl Format<MarkdownFormatContext> for ProseAtom {
+    fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        match self {
+            Self::Word(word) => word.fmt(f),
+            Self::InlineElement(element) => element.format().fmt(f),
+            Self::OpeningDelimiter(delimited) => delimited.fmt_opening_delimiter(f),
+            Self::ClosingDelimiter(delimited) => delimited.fmt_closing_delimiter(f),
+        }
+    }
+}
+
+/// An inline element that wraps with the surrounding prose.
+///
+/// Its delimiters attach to the first and last words of its content, and the words in between
+/// become word groups of the enclosing paragraph. This lets a line break fall inside the element
+/// instead of only before or after it.
+#[derive(Debug, Clone)]
+enum DelimitedInline {
+    Emphasis(MdInlineEmphasis),
+    Italic(MdInlineItalic),
+    /// An italic containing only strong emphasis, printed with swapped fences as `**_..._**`.
+    StrongInsideItalic {
+        italic: MdInlineItalic,
+        emphasis: MdInlineEmphasis,
+    },
+    Strikethrough(GfmStrikethrough),
+}
+
+impl DelimitedInline {
+    /// Returns the element if its content can wrap with the surrounding prose.
+    ///
+    /// The content qualifies only if one of its text nodes contains whitespace, or it contains
+    /// another element that qualifies. Other content has nothing to wrap, and keeps the element
+    /// formatter's layouts for escaped delimiters. Italics in reference images keep their source
+    /// delimiters, and suppressed or commented elements keep their own formatting.
+    ///
+    /// Elements inside block quotes don't qualify either. When an element spans lines there, the
+    /// parser keeps the quote markers of its continuation lines as text of the content, which would
+    /// otherwise be printed as words. Elements on a single line are excluded too, so that wrapping
+    /// one across lines doesn't change its layout when the output is formatted again.
+    fn from_inline(item: &AnyMdInline, f: &MarkdownFormatter) -> Option<Self> {
+        let delimited = match item {
+            AnyMdInline::MdInlineEmphasis(emphasis) => Self::Emphasis(emphasis.clone()),
+            AnyMdInline::MdInlineItalic(italic) if !is_inside_reference_image(italic) => {
+                match swapped_strong_emphasis(italic).ok()? {
+                    Some(emphasis) => Self::StrongInsideItalic {
+                        italic: italic.clone(),
+                        emphasis,
+                    },
+                    None => Self::Italic(italic.clone()),
+                }
+            }
+            AnyMdInline::GfmStrikethrough(strikethrough) => {
+                Self::Strikethrough(strikethrough.clone())
+            }
+            _ => return None,
+        };
+
+        let syntax = delimited.syntax();
+        if syntax
+            .ancestors()
+            .any(|ancestor| MdQuote::can_cast(ancestor.kind()))
+        {
+            return None;
+        }
+
+        let comments = f.context().comments();
+        let is_formatted_by_node = |node: &MarkdownSyntaxNode| {
+            comments.has_comments(node)
+                || comments.is_suppressed(node)
+                || comments.is_global_suppressed(node)
+        };
+        if is_formatted_by_node(syntax) {
+            return None;
+        }
+        if let Self::StrongInsideItalic { emphasis, .. } = &delimited
+            && is_formatted_by_node(emphasis.syntax())
+        {
+            return None;
+        }
+
+        let has_wrappable_content = delimited.content().iter().any(|item| match &item {
+            AnyMdInline::MdTextual(textual) => textual
+                .value_token()
+                .is_ok_and(|token| token.text().bytes().any(|byte| byte.is_ascii_whitespace())),
+            item => Self::from_inline(item, f).is_some(),
+        });
+
+        has_wrappable_content.then_some(delimited)
+    }
+
+    fn syntax(&self) -> &MarkdownSyntaxNode {
+        match self {
+            Self::Emphasis(emphasis) => emphasis.syntax(),
+            Self::Italic(italic) | Self::StrongInsideItalic { italic, .. } => italic.syntax(),
+            Self::Strikethrough(strikethrough) => strikethrough.syntax(),
+        }
+    }
+
+    fn content(&self) -> MdInlineItemList {
+        match self {
+            Self::Emphasis(emphasis) | Self::StrongInsideItalic { emphasis, .. } => {
+                emphasis.content()
+            }
+            Self::Italic(italic) => italic.content(),
+            Self::Strikethrough(strikethrough) => strikethrough.content(),
+        }
+    }
+
+    fn fmt_opening_delimiter(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        match self {
+            Self::Emphasis(emphasis) => {
+                format_emphasis_fence(&emphasis.l_fence()?, emphasis.fence()?).fmt(f)
+            }
+            Self::Italic(italic) => {
+                write_fence(&italic.l_fence()?, normalized_fence_kind(italic)?, f)
+            }
+            Self::StrongInsideItalic { italic, emphasis } => {
+                let italic_fence = italic.l_fence()?;
+                let emphasis_fence = emphasis.l_fence()?;
+                write!(
+                    f,
+                    [
+                        format_replaced(
+                            &italic_fence,
+                            &text("**", Some(italic_fence.text_range().start()))
+                        ),
+                        format_replaced(
+                            &emphasis_fence,
+                            &text("_", Some(emphasis_fence.text_range().start()))
+                        ),
+                    ]
+                )
+            }
+            Self::Strikethrough(strikethrough) => strikethrough.l_fence_token()?.format().fmt(f),
+        }
+    }
+
+    fn fmt_closing_delimiter(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
+        match self {
+            Self::Emphasis(emphasis) => {
+                format_emphasis_fence(&emphasis.r_fence()?, emphasis.fence()?).fmt(f)
+            }
+            Self::Italic(italic) => {
+                write_fence(&italic.r_fence()?, normalized_fence_kind(italic)?, f)
+            }
+            Self::StrongInsideItalic { italic, emphasis } => {
+                let emphasis_fence = emphasis.r_fence()?;
+                let italic_fence = italic.r_fence()?;
+                write!(
+                    f,
+                    [
+                        format_replaced(
+                            &emphasis_fence,
+                            &text("_", Some(emphasis_fence.text_range().start()))
+                        ),
+                        format_replaced(
+                            &italic_fence,
+                            &text("**", Some(italic_fence.text_range().start()))
+                        ),
+                    ]
+                )
+            }
+            Self::Strikethrough(strikethrough) => strikethrough.r_fence_token()?.format().fmt(f),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq)]
@@ -80,6 +258,10 @@ enum WordGroupEscape {
 pub(crate) struct WordGroup {
     atoms: SmallVec<[ProseAtom; 1]>,
     escape: WordGroupEscape,
+    /// Whether the group is collected from the content of a [DelimitedInline] element. The
+    /// element's formatter prints its content without escaping, so such groups use the default
+    /// layout and don't count as marker boundaries for groups outside the element.
+    is_delimited_content: bool,
 }
 
 /// Result of inspecting prose content for a character that controls soft-break handling.
@@ -269,6 +451,9 @@ impl WordGroup {
             let character = match atom {
                 ProseAtom::Word(word) => first_significant_character_in_text(word.text.text()),
                 ProseAtom::InlineElement(item) => first_significant_character_in_inline(item),
+                ProseAtom::OpeningDelimiter(_) | ProseAtom::ClosingDelimiter(_) => {
+                    BoundaryCharacter::Transparent
+                }
             };
             match character {
                 BoundaryCharacter::Significant(character) => return Some(character),
@@ -284,6 +469,9 @@ impl WordGroup {
             let character = match atom {
                 ProseAtom::Word(word) => last_significant_character_in_text(word.text.text()),
                 ProseAtom::InlineElement(item) => last_significant_character_in_inline(item),
+                ProseAtom::OpeningDelimiter(_) | ProseAtom::ClosingDelimiter(_) => {
+                    BoundaryCharacter::Transparent
+                }
             };
             match character {
                 BoundaryCharacter::Significant(character) => return Some(character),
@@ -351,128 +539,28 @@ pub(crate) struct ProseItemList(Vec<ProseItem>);
 
 impl ProseItemList {
     /// Collects prose as word groups separated by spaces and line breaks.
+    ///
+    /// Unless prose wrap is `preserve`, the content of emphasis, italic, and strikethrough
+    /// elements is collected as prose of the enclosing list, so it wraps with the surrounding
+    /// words. See [DelimitedInline].
     pub(crate) fn from_inline_item_list(
         node: &MdInlineItemList,
         f: &mut MarkdownFormatter,
     ) -> SyntaxResult<Self> {
-        let mut items = Self(Vec::new());
-        let mut current_word_group = WordGroup::default();
+        let mut collector = ProseItemCollector {
+            items: Vec::new(),
+            current_word_group: WordGroup::default(),
+            expand_delimited_inlines: f.options().prose_wrap() != ProseWrap::Preserve,
+            delimited_depth: 0,
+        };
+        collector.collect(node, f)?;
+        collector.finish_word_group(f)?;
 
-        for item in node.iter() {
-            match &item {
-                AnyMdInline::MdTextual(text) => {
-                    let token = text.value_token()?;
-                    let token_text_str = token.text();
-
-                    f.context().comments().is_suppressed(text.syntax());
-
-                    if text.is_newline()? {
-                        items.finish_word_group(&mut current_word_group);
-                        items.0.push(ProseItem::SoftBreak);
-                        f.state_mut().track_token(&token);
-                        continue;
-                    }
-
-                    f.state_mut().track_token(&token);
-                    let token_start = token.text_range().start();
-
-                    let bytes = token_text_str.as_bytes();
-                    let len = bytes.len();
-                    let mut pos = 0usize;
-
-                    while pos < len {
-                        let white_space_start = pos;
-                        while pos < len && bytes[pos].is_ascii_whitespace() {
-                            pos += 1;
-                        }
-                        if pos > white_space_start {
-                            items.finish_word_group(&mut current_word_group);
-                            items.0.push(ProseItem::Space);
-                        }
-
-                        let word_start = pos;
-                        while pos < len && !bytes[pos].is_ascii_whitespace() {
-                            pos += 1;
-                        }
-                        if pos > word_start {
-                            let start = TextSize::from(word_start as u32);
-                            let end = TextSize::from(pos as u32);
-                            let text_slice = token.token_text().slice(TextRange::new(start, end));
-                            current_word_group.push(ProseAtom::Word(MdWord::new(
-                                text_slice,
-                                token_start + start,
-                            )));
-                        }
-                    }
-                }
-
-                AnyMdInline::MdHardLine(hard_line) => {
-                    items.finish_word_group(&mut current_word_group);
-                    items.0.push(ProseItem::HardBreak(hard_line.clone()));
-                }
-
-                AnyMdInline::MdInlineItalic(_)
-                | AnyMdInline::MdInlineEmphasis(_)
-                | AnyMdInline::MdInlineCode(_)
-                | AnyMdInline::MdInlineLink(_)
-                | AnyMdInline::MdInlineImage(_)
-                | AnyMdInline::MdAutolink(_)
-                | AnyMdInline::MdReferenceLink(_)
-                | AnyMdInline::MdReferenceImage(_)
-                | AnyMdInline::MdInlineHtml(_)
-                | AnyMdInline::MdEntityReference(_)
-                | AnyMdInline::GfmStrikethrough(_)
-                | AnyMdInline::GfmTaskListItem(_) => {
-                    current_word_group.push(ProseAtom::InlineElement(item));
-                }
-
-                AnyMdInline::MdIndentToken(indent) => {
-                    f.context().comments().is_suppressed(indent.syntax());
-                    let token = indent.md_indent_char_token()?;
-                    format_removed(&token).fmt(f).ok();
-                    if current_word_group.is_empty()
-                        && matches!(items.0.last(), Some(ProseItem::SoftBreak))
-                    {
-                        items.0.push(ProseItem::OutdentedLineStart);
-                    }
-                }
-
-                AnyMdInline::MdHtmlBlock(html_block) => {
-                    f.context().comments().is_suppressed(html_block.syntax());
-                    items.finish_word_group(&mut current_word_group);
-                    current_word_group.push(ProseAtom::InlineElement(item));
-                    items.finish_word_group(&mut current_word_group);
-                }
-
-                AnyMdInline::MdCodeContent(code) => {
-                    f.context().comments().is_suppressed(code.syntax());
-                    items.finish_word_group(&mut current_word_group);
-                    current_word_group.push(ProseAtom::InlineElement(item));
-                    items.finish_word_group(&mut current_word_group);
-                }
-                AnyMdInline::MdQuotePrefix(prefix) => {
-                    prefix
-                        .format()
-                        .with_options(FormatMdQuotePrefixOptions {
-                            should_remove: true,
-                        })
-                        .fmt(f)
-                        .ok();
-                }
-            }
-        }
-
-        items.finish_word_group(&mut current_word_group);
+        let mut items = Self(collector.items);
         items.mark_word_groups_for_escaping();
         items.mark_outdented_setext_markers();
 
         Ok(items)
-    }
-
-    fn finish_word_group(&mut self, current: &mut WordGroup) {
-        if !current.is_empty() {
-            self.0.push(ProseItem::WordGroup(std::mem::take(current)));
-        }
     }
 
     pub(crate) fn as_slice(&self) -> &[ProseItem] {
@@ -579,12 +667,190 @@ impl ProseItemList {
         marker_sequence: EmphasisMarkerSequence,
     ) -> bool {
         self.0[..index].iter().any(|item| match item {
-            ProseItem::WordGroup(group) => marker_sequence.matches_start_of(group),
+            ProseItem::WordGroup(group) => {
+                !group.is_delimited_content && marker_sequence.matches_start_of(group)
+            }
             _ => false,
         }) || self.0[index + 1..].iter().any(|item| match item {
-            ProseItem::WordGroup(group) => marker_sequence.matches_end_of(group),
+            ProseItem::WordGroup(group) => {
+                !group.is_delimited_content && marker_sequence.matches_end_of(group)
+            }
             _ => false,
         })
+    }
+}
+
+/// Builds the items of a [ProseItemList].
+struct ProseItemCollector {
+    items: Vec<ProseItem>,
+    /// The word group receiving atoms until the next separator.
+    current_word_group: WordGroup,
+    /// Whether [DelimitedInline] elements are expanded into the prose of their content.
+    expand_delimited_inlines: bool,
+    /// The number of [DelimitedInline] elements whose content is being collected.
+    delimited_depth: usize,
+}
+
+impl ProseItemCollector {
+    fn collect(&mut self, node: &MdInlineItemList, f: &mut MarkdownFormatter) -> SyntaxResult<()> {
+        for item in node.iter() {
+            match &item {
+                AnyMdInline::MdTextual(text) => {
+                    let token = text.value_token()?;
+                    let token_text_str = token.text();
+
+                    f.context().comments().is_suppressed(text.syntax());
+
+                    if text.is_newline()? {
+                        self.finish_word_group(f)?;
+                        self.items.push(ProseItem::SoftBreak);
+                        f.state_mut().track_token(&token);
+                        continue;
+                    }
+
+                    f.state_mut().track_token(&token);
+                    let token_start = token.text_range().start();
+
+                    let bytes = token_text_str.as_bytes();
+                    let len = bytes.len();
+                    let mut pos = 0usize;
+
+                    while pos < len {
+                        let white_space_start = pos;
+                        while pos < len && bytes[pos].is_ascii_whitespace() {
+                            pos += 1;
+                        }
+                        if pos > white_space_start {
+                            self.finish_word_group(f)?;
+                            self.items.push(ProseItem::Space);
+                        }
+
+                        let word_start = pos;
+                        while pos < len && !bytes[pos].is_ascii_whitespace() {
+                            pos += 1;
+                        }
+                        if pos > word_start {
+                            let start = TextSize::from(word_start as u32);
+                            let end = TextSize::from(pos as u32);
+                            let text_slice = token.token_text().slice(TextRange::new(start, end));
+                            self.current_word_group.push(ProseAtom::Word(MdWord::new(
+                                text_slice,
+                                token_start + start,
+                            )));
+                        }
+                    }
+                }
+
+                AnyMdInline::MdHardLine(hard_line) => {
+                    self.finish_word_group(f)?;
+                    self.items.push(ProseItem::HardBreak(hard_line.clone()));
+                }
+
+                AnyMdInline::MdInlineItalic(_)
+                | AnyMdInline::MdInlineEmphasis(_)
+                | AnyMdInline::MdInlineCode(_)
+                | AnyMdInline::MdInlineLink(_)
+                | AnyMdInline::MdInlineImage(_)
+                | AnyMdInline::MdAutolink(_)
+                | AnyMdInline::MdReferenceLink(_)
+                | AnyMdInline::MdReferenceImage(_)
+                | AnyMdInline::MdInlineHtml(_)
+                | AnyMdInline::MdEntityReference(_)
+                | AnyMdInline::GfmStrikethrough(_)
+                | AnyMdInline::GfmTaskListItem(_) => {
+                    self.current_word_group.push(ProseAtom::InlineElement(item));
+                }
+
+                AnyMdInline::MdIndentToken(indent) => {
+                    f.context().comments().is_suppressed(indent.syntax());
+                    let token = indent.md_indent_char_token()?;
+                    format_removed(&token).fmt(f).ok();
+                    if self.current_word_group.is_empty()
+                        && matches!(self.items.last(), Some(ProseItem::SoftBreak))
+                    {
+                        self.items.push(ProseItem::OutdentedLineStart);
+                    }
+                }
+
+                AnyMdInline::MdHtmlBlock(html_block) => {
+                    f.context().comments().is_suppressed(html_block.syntax());
+                    self.finish_word_group(f)?;
+                    self.current_word_group.push(ProseAtom::InlineElement(item));
+                    self.finish_word_group(f)?;
+                }
+
+                AnyMdInline::MdCodeContent(code) => {
+                    f.context().comments().is_suppressed(code.syntax());
+                    self.finish_word_group(f)?;
+                    self.current_word_group.push(ProseAtom::InlineElement(item));
+                    self.finish_word_group(f)?;
+                }
+                AnyMdInline::MdQuotePrefix(prefix) => {
+                    prefix
+                        .format()
+                        .with_options(FormatMdQuotePrefixOptions {
+                            should_remove: true,
+                        })
+                        .fmt(f)
+                        .ok();
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Appends the current word group to the items.
+    ///
+    /// Expands each [DelimitedInline] element of the group into its delimiters and the prose of its
+    /// content. The group stays unchanged when it needs an escaping layout for underscores next to
+    /// an element, because that layout formats the element as a whole.
+    fn finish_word_group(&mut self, f: &mut MarkdownFormatter) -> SyntaxResult<()> {
+        let group = std::mem::take(&mut self.current_word_group);
+        if group.is_empty() {
+            return Ok(());
+        }
+
+        if !self.expand_delimited_inlines || group.unmatched_underscore_layout()?.is_some() {
+            self.push_word_group(group);
+            return Ok(());
+        }
+
+        let mut has_expanded = false;
+        for atom in group.atoms {
+            let delimited = match &atom {
+                ProseAtom::InlineElement(item) => DelimitedInline::from_inline(item, f),
+                _ => None,
+            };
+
+            if let Some(delimited) = delimited {
+                has_expanded = true;
+                self.current_word_group
+                    .push(ProseAtom::OpeningDelimiter(delimited.clone()));
+                self.delimited_depth += 1;
+                self.collect(&delimited.content(), f)?;
+                self.delimited_depth -= 1;
+                self.current_word_group
+                    .push(ProseAtom::ClosingDelimiter(delimited));
+            } else {
+                self.current_word_group.push(atom);
+            }
+        }
+
+        // The last group can still hold elements from expanded content, such as the italic in
+        // `**_a b_**`, because no separator after them finished their group.
+        if has_expanded {
+            self.finish_word_group(f)
+        } else {
+            let group = std::mem::take(&mut self.current_word_group);
+            self.push_word_group(group);
+            Ok(())
+        }
+    }
+
+    fn push_word_group(&mut self, mut group: WordGroup) {
+        group.is_delimited_content = self.delimited_depth > 0;
+        self.items.push(ProseItem::WordGroup(group));
     }
 }
 
@@ -769,6 +1035,7 @@ impl WordGroup {
             WordGroupEscape::EscapeEachMarker => WordGroupLayout::EscapeEachMarker,
             WordGroupEscape::EscapeLeadingMarker => WordGroupLayout::EscapeLeadingMarker,
             WordGroupEscape::EmptyStrongWithEscapedMarker => self.empty_strong_sequence_layout(),
+            WordGroupEscape::None if self.is_delimited_content => WordGroupLayout::Default,
             WordGroupEscape::None => self
                 .literal_leading_underscore_layout()
                 .or(self
@@ -912,10 +1179,7 @@ impl WordGroup {
 
     fn fmt_default(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         for atom in &self.atoms {
-            match atom {
-                ProseAtom::Word(word) => word.fmt(f)?,
-                ProseAtom::InlineElement(elem) => elem.format().fmt(f)?,
-            }
+            atom.fmt(f)?;
         }
         Ok(())
     }
@@ -924,7 +1188,7 @@ impl WordGroup {
         for atom in &self.atoms {
             match atom {
                 ProseAtom::Word(word) => write!(f, [token("\\"), word])?,
-                ProseAtom::InlineElement(elem) => elem.format().fmt(f)?,
+                atom => atom.fmt(f)?,
             }
         }
         Ok(())
@@ -990,14 +1254,14 @@ impl EmphasisMarkerSequence {
     fn matches_start_of(self, group: &WordGroup) -> bool {
         self.matches_boundary(group.atoms.iter().map(|atom| match atom {
             ProseAtom::Word(word) => Some(word.text.text().bytes()),
-            ProseAtom::InlineElement(_) => None,
+            _ => None,
         }))
     }
 
     fn matches_end_of(self, group: &WordGroup) -> bool {
         self.matches_boundary(group.atoms.iter().rev().map(|atom| match atom {
             ProseAtom::Word(word) => Some(word.text.text().bytes().rev()),
-            ProseAtom::InlineElement(_) => None,
+            _ => None,
         }))
     }
 
@@ -1038,6 +1302,10 @@ impl WordGroupEscape {
         let Some(ProseItem::WordGroup(group)) = items.0.get(index) else {
             return Self::None;
         };
+
+        if group.is_delimited_content {
+            return Self::None;
+        }
 
         let Some(marker_sequence) = group.emphasis_marker_sequence() else {
             return Self::None;

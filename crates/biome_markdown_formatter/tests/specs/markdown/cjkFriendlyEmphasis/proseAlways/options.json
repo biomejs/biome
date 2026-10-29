@@ -1,0 +1,12 @@
+{
+  "markdown": {
+    "parser": {
+      "cjkFriendlyEmphasis": true
+    },
+    "formatter": {
+      "proseWrap": "always",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
