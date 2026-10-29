@@ -479,9 +479,6 @@ fn unwritten_let_and_const_subjects_narrow_but_writes_captures_and_var_do_not() 
         function unsupportedRoot(value: string | number) {
             try { if (guard(value)) { /*try*/value; } } finally {}
         }
-        function dynamic(value: string | number) {
-            if (guard(value)) { eval("value = 0"); /*eval*/value; }
-        }
     "#;
     let (db, module) = guard_db(SOURCE);
     for (marker, expression, expected) in [
@@ -491,11 +488,19 @@ fn unwritten_let_and_const_subjects_narrow_but_writes_captures_and_var_do_not() 
         ("written", "value", &[String, Number]),
         ("captured", "value", &[String, Number]),
         ("try", "value", &[String, Number]),
-        ("eval", "value", &[String, Number]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
         assert_variants(&db, ty, expected, marker);
     }
+    const DYNAMIC: &str = r#"
+        declare function guard(input: unknown): input is string;
+        function dynamic(value: string | number) {
+            if (guard(value)) { eval("value = 0"); /*eval*/value; }
+        }
+    "#;
+    let (db, module) = guard_db(DYNAMIC);
+    let ty = normalized_type_at(&db, module, DYNAMIC, "eval", "value");
+    assert_variants(&db, ty, &[String, Number], "eval");
 }
 
 #[test]
@@ -533,13 +538,23 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
             "guard(value)",
         ),
         (
-            "arrow",
-            "const guard = (input: unknown): input is string => typeof input === 'string';",
+            "written let",
+            "let guard = (input: unknown): input is string => typeof input === 'string'; guard = (input): input is string => false;",
             "guard(value)",
         ),
         (
-            "function expression",
-            "const guard = function(input: unknown): input is string { return typeof input === 'string'; };",
+            "async arrow",
+            "const guard = async (input: unknown): input is string => typeof input === 'string';",
+            "guard(value)",
+        ),
+        (
+            "generator expression",
+            "const guard = function*(input: unknown): input is string { yield 0; return typeof input === 'string'; };",
+            "guard(value)",
+        ),
+        (
+            "default arrow formal",
+            "const guard = (input: unknown = ''): input is string => typeof input === 'string';",
             "guard(value)",
         ),
         (
@@ -583,11 +598,6 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
             "guard(...[value])",
         ),
         (
-            "spread after target",
-            "declare function guard(input: unknown): input is string;",
-            "guard(value, ...[])",
-        ),
-        (
             "missing target argument",
             "declare function guard(ignored: unknown, input: unknown): input is string;",
             "guard(value)",
@@ -611,21 +621,6 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
             "default formal",
             "function guard(input: unknown = ''): input is string { return typeof input === 'string'; }",
             "guard(value)",
-        ),
-        (
-            "default before target",
-            "function guard(ignored: unknown = '', input: unknown): input is string { return typeof input === 'string'; }",
-            "guard(other, value)",
-        ),
-        (
-            "rest after target",
-            "function guard(input: unknown, ...ignored: unknown[]): input is string { return typeof input === 'string'; }",
-            "guard(value)",
-        ),
-        (
-            "destructured before target",
-            "function guard({ ignored }: { ignored: unknown }, input: unknown): input is string { return typeof input === 'string'; }",
-            "guard(other, value)",
         ),
         (
             "rest formal",
@@ -672,7 +667,69 @@ fn unsupported_callees_signatures_and_arguments_do_not_refine() {
 }
 
 #[test]
-fn guard_selection_limits_do_not_publish_refinements() {
+fn guards_bound_to_variables_and_untested_parameters_narrow() {
+    use InferredTypeData::{Number, String};
+    for (name, declaration, call) in [
+        (
+            "arrow",
+            "const guard = (input: unknown): input is string => typeof input === 'string';",
+            "guard(value)",
+        ),
+        (
+            "function expression",
+            "const guard = function(input: unknown): input is string { return typeof input === 'string'; };",
+            "guard(value)",
+        ),
+        (
+            "unwritten let",
+            "let guard = (input: unknown): input is string => typeof input === 'string';",
+            "guard(value)",
+        ),
+        (
+            "spread after target",
+            "declare function guard(input: unknown): input is string;",
+            "guard(value, ...[])",
+        ),
+        (
+            "default before target",
+            "function guard(ignored: unknown = '', input: unknown): input is string { return typeof input === 'string'; }",
+            "guard(other, value)",
+        ),
+        (
+            "rest after target",
+            "function guard(input: unknown, ...ignored: unknown[]): input is string { return typeof input === 'string'; }",
+            "guard(value)",
+        ),
+        (
+            "destructured before target",
+            "function guard({ ignored }: { ignored: unknown }, input: unknown): input is string { return typeof input === 'string'; }",
+            "guard(other, value)",
+        ),
+    ] {
+        let source = format!(
+            r#"
+                {declaration}
+                function inspect(value: string | number, other: unknown) {{
+                    if ({call}) {{ /*then*/value; }} else {{ /*else*/value; }}
+                    /*join*/value;
+                }}
+            "#
+        );
+        let (db, module) = guard_db(&source);
+        for (marker, expected) in [
+            ("then", &[String][..]),
+            ("else", &[Number]),
+            ("join", &[String, Number]),
+        ] {
+            let ty = normalized_type_at(&db, module, &source, marker, "value");
+            assert_variants(&db, ty, expected, &format!("{name}: {marker}"));
+        }
+        assert_no_whole_module_inference(&db, &db.take_salsa_events());
+    }
+}
+
+#[test]
+fn long_signatures_names_and_parenthesized_callees_narrow() {
     let parameters = (0..128)
         .map(|index| format!("p{index}?: unknown"))
         .collect::<Vec<_>>()
@@ -698,12 +755,7 @@ fn guard_selection_limits_do_not_publish_refinements() {
         );
         let (db, module) = guard_db(&source);
         let ty = normalized_type_at(&db, module, &source, "read", "value");
-        assert_variants(
-            &db,
-            ty,
-            &[InferredTypeData::String, InferredTypeData::Number],
-            "limited",
-        );
+        assert_variants(&db, ty, &[InferredTypeData::String], &source);
         assert_no_whole_module_inference(&db, &db.take_salsa_events());
     }
 }
@@ -716,7 +768,6 @@ fn unsupported_predicate_targets_preserve_unknown_and_indeterminate_classificati
         "object",
         "string | number",
         "string & {}",
-        "Alias",
         "Promise<void>",
         "string[]",
         "any",
@@ -726,7 +777,6 @@ fn unsupported_predicate_targets_preserve_unknown_and_indeterminate_classificati
     ] {
         let source = format!(
             r#"
-                type Alias = string;
                 declare function guard(input: unknown): input is {target};
                 function inspect(value: unknown) {{
                     if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
@@ -754,6 +804,53 @@ fn unsupported_predicate_targets_preserve_unknown_and_indeterminate_classificati
             );
         }
         assert_no_whole_module_inference(&db, &db.take_salsa_events());
+    }
+}
+
+#[test]
+fn alias_targets_narrow_like_the_types_they_name() {
+    use InferredTypeData::{Number, String};
+    for target in ["Alias", "Nested"] {
+        let source = format!(
+            r#"
+                type Alias = string;
+                type Nested = Alias;
+                declare function guard(input: unknown): input is {target};
+                function inspect(value: string | number) {{
+                    if (guard(value)) {{ /*then*/value; }} else {{ /*else*/value; }}
+                }}
+            "#
+        );
+        let (db, module) = guard_db(&source);
+        for (marker, expected) in [("then", String), ("else", Number)] {
+            assert_eq!(
+                normalized_type_at(&db, module, &source, marker, "value"),
+                expected,
+                "{target}: {marker}"
+            );
+        }
+    }
+}
+
+#[test]
+fn guards_in_modules_that_read_eval_do_not_refine() {
+    use InferredTypeData::{Number, String};
+    for declaration in [
+        "let guard = (input: unknown): input is string => typeof input === 'string';",
+        "function guard(input: unknown): input is string { return typeof input === 'string'; }",
+    ] {
+        let source = format!(
+            r#"
+                {declaration}
+                function loosen() {{ eval("guard = () => true"); }}
+                function inspect(value: string | number) {{
+                    if (guard(value)) {{ /*then*/value; }}
+                }}
+            "#
+        );
+        let (db, module) = guard_db(&source);
+        let ty = normalized_type_at(&db, module, &source, "then", "value");
+        assert_variants(&db, ty, &[String, Number], declaration);
     }
 }
 
@@ -889,8 +986,8 @@ fn promise_classifiers_observe_guarded_reads_and_nested_call_arguments() {
 }
 
 #[test]
-fn heavily_referenced_guards_have_a_bounded_write_proof() {
-    for count in [1024, 1025] {
+fn heavily_referenced_guards_narrow() {
+    for count in [1, 2048] {
         let source = format!(
             r#"
             declare function guard(input: unknown): input is string;
@@ -903,12 +1000,7 @@ fn heavily_referenced_guards_have_a_bounded_write_proof() {
         );
         let (db, module) = guard_db(&source);
         let ty = normalized_type_at(&db, module, &source, "read", "value");
-        let expected = if count == 1024 {
-            &[InferredTypeData::String][..]
-        } else {
-            &[InferredTypeData::String, InferredTypeData::Number][..]
-        };
-        assert_variants(&db, ty, expected, &count.to_string());
+        assert_variants(&db, ty, &[InferredTypeData::String], &count.to_string());
         assert_no_whole_module_inference(&db, &db.take_salsa_events());
     }
 }

@@ -1,4 +1,4 @@
-use super::guards::{FlowGuard, FlowOutcome, decompose_condition};
+use super::guards::{FlowGuard, FlowOutcome, GuardFunctions, decompose_condition};
 use super::{FlowNode, FlowNodeId};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
@@ -49,12 +49,17 @@ type Build<T> = Result<T, Unsupported>;
 /// loop.
 ///
 /// [`FlowRootScanner`]: super::FlowRootScanner
-pub(super) fn build_root(root: &AnyJsControlFlowRoot, model: &SemanticModel) -> Option<BuiltRoot> {
+pub(super) fn build_root(
+    root: &AnyJsControlFlowRoot,
+    model: &SemanticModel,
+    functions: &mut GuardFunctions,
+) -> Option<BuiltRoot> {
     if !has_complete_statements(root) {
         return None;
     }
     let mut builder = RootBuilder {
         model,
+        functions,
         nodes: vec![FlowNode::Start],
         guards: Vec::new(),
         mentions: Vec::new(),
@@ -211,8 +216,9 @@ struct JumpTarget {
     breaks: Vec<FlowNodeId>,
 }
 
-struct RootBuilder<'model> {
-    model: &'model SemanticModel,
+struct RootBuilder<'a, 'raw> {
+    model: &'a SemanticModel,
+    functions: &'a mut GuardFunctions<'raw>,
     nodes: Vec<FlowNode>,
     guards: Vec<FlowGuard>,
     mentions: Vec<(FlowNodeId, TextRange)>,
@@ -223,7 +229,7 @@ struct RootBuilder<'model> {
     remaining_visits: usize,
 }
 
-impl RootBuilder<'_> {
+impl RootBuilder<'_, '_> {
     fn root(&mut self, root: &AnyJsControlFlowRoot) -> Build<()> {
         if let AnyJsControlFlowRoot::AnyJsFunction(AnyJsFunction::JsArrowFunctionExpression(arrow)) =
             root
@@ -567,7 +573,13 @@ impl RootBuilder<'_> {
         expression: &AnyJsExpression,
         outcome: FlowOutcome,
     ) -> Build<FlowNodeId> {
-        let condition = decompose_condition(expression, outcome, self.model, &mut self.guards);
+        let condition = decompose_condition(
+            expression,
+            outcome,
+            self.model,
+            self.functions,
+            &mut self.guards,
+        );
         let node = self.push(FlowNode::Condition {
             antecedent,
             guard: condition.guard,
@@ -625,6 +637,7 @@ mod tests {
     use biome_js_syntax::JsSyntaxKind;
     use biome_languages::JsFileSource;
     use biome_rowan::TextSize;
+    use rustc_hash::FxHashMap;
 
     struct Built {
         source: String,
@@ -648,9 +661,14 @@ mod tests {
             .filter(|node| node.kind() == kind)
             .find_map(AnyJsControlFlowRoot::cast)
             .unwrap();
+        let raw_binding_types = FxHashMap::default();
         Built {
             source: source.to_owned(),
-            root: build_root(&root, &model),
+            root: build_root(
+                &root,
+                &model,
+                &mut GuardFunctions::new(&[], &raw_binding_types, false),
+            ),
         }
     }
 
