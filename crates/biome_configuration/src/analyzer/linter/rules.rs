@@ -720,6 +720,7 @@ pub enum RuleName {
     UseVarsOnTop,
     UseVueBaseImport,
     UseVueComponentIs,
+    UseVueConsistentDefineEmitsDeclaration,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
     UseVueConsistentVBindStyle,
@@ -1400,6 +1401,9 @@ impl RuleName {
             Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueBaseImport => "useVueBaseImport",
             Self::UseVueComponentIs => "useVueComponentIs",
+            Self::UseVueConsistentDefineEmitsDeclaration => {
+                "useVueConsistentDefineEmitsDeclaration"
+            }
             Self::UseVueConsistentDefinePropsDeclaration => {
                 "useVueConsistentDefinePropsDeclaration"
             }
@@ -2076,6 +2080,7 @@ impl RuleName {
             Self::UseVarsOnTop => RuleGroup::Style,
             Self::UseVueBaseImport => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
+            Self::UseVueConsistentDefineEmitsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
             Self::UseVueConsistentVBindStyle => RuleGroup::Style,
@@ -2761,6 +2766,9 @@ impl std::str::FromStr for RuleName {
             "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueBaseImport" => Ok(Self::UseVueBaseImport),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
+            "useVueConsistentDefineEmitsDeclaration" => {
+                Ok(Self::UseVueConsistentDefineEmitsDeclaration)
+            }
             "useVueConsistentDefinePropsDeclaration" => {
                 Ok(Self::UseVueConsistentDefinePropsDeclaration)
             }

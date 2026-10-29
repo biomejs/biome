@@ -1987,6 +1987,25 @@
 				}
 			]
 		},
+		"DefineEmitsDeclarationStyle": {
+			"oneOf": [
+				{
+					"description": "Events are declared with a type argument, such as\n`defineEmits<{ change: [id: number] }>()` or\n`defineEmits<{ (e: 'change', id: number): void }>()`.",
+					"type": "string",
+					"const": "type"
+				},
+				{
+					"description": "Events are declared with a type argument whose members are all\nproperties, such as `defineEmits<{ change: [id: number] }>()`.",
+					"type": "string",
+					"const": "typeLiteral"
+				},
+				{
+					"description": "Events are declared with an argument, such as\n`defineEmits(['change'])`.",
+					"type": "string",
+					"const": "runtime"
+				}
+			]
+		},
 		"DelimiterSpacing": {
 			"description": "Whether to insert spaces inside delimiters (after the opening delimiter and before the closing\ndelimiter), such as parentheses, brackets, angle brackets, and template literal interpolations.\nSpaces are not added before the opening delimiter, and empty delimiters are not affected.\nOnly applies when the content fits on a single line; when content breaks across multiple lines,\nno extra spaces are added. The specific delimiters affected depend on the language.",
 			"type": "boolean"
@@ -9166,6 +9185,15 @@
 					"description": "Require \\<component> elements to bind the is attribute.\nSee https://biomejs.dev/linter/rules/use-vue-component-is",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueComponentIsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentDefineEmitsDeclaration": {
+					"description": "Enforce a consistent declaration style for Vue's defineEmits macro.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-emits-declaration",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseVueConsistentDefineEmitsDeclarationConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -16673,6 +16701,17 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentDefineEmitsDeclarationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseVueConsistentDefineEmitsDeclarationOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -22116,6 +22155,27 @@
 		},
 		"UseVueComponentIsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueConsistentDefineEmitsDeclarationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithUseVueConsistentDefineEmitsDeclarationOptions"
+				}
+			]
+		},
+		"UseVueConsistentDefineEmitsDeclarationOptions": {
+			"type": "object",
+			"properties": {
+				"style": {
+					"description": "The style that `defineEmits` calls must use to declare events.\nDefaults to `type`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/DefineEmitsDeclarationStyle" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueConsistentDefinePropsDeclarationConfiguration": {
