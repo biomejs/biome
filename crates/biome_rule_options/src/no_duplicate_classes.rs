@@ -3,7 +3,6 @@ use biome_deserialize::{
     DeserializationDiagnostic, DeserializationVisitor, MapMembers, TextRange,
 };
 use biome_rowan::Text;
-use std::ops::Deref;
 use serde::{Deserialize, Serialize};
 
 /// Options for the `noDuplicateClasses` assist action.
@@ -70,7 +69,7 @@ const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
 impl Deserializable for NoDuplicateClassesOptions {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {

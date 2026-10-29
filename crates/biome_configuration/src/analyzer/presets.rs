@@ -70,17 +70,17 @@ impl PresetConfig {
 
 impl Deserializable for PresetConfig {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = PresetConfig;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
             fn visit_str(
                 self,
-                ctx: &mut C,
+                ctx: &mut dyn DeserializationContext<State = S>,
                 value: Text,
                 range: TextRange,
                 _name: &str,

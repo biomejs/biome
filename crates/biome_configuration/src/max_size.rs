@@ -1,4 +1,4 @@
-use biome_deserialize::{Deserializable, DeserializableValue};
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
 use biome_deserialize_macros::Merge;
 use std::{
     fmt,
@@ -30,7 +30,7 @@ impl FromStr for MaxSize {
 
 impl Deserializable for MaxSize {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {

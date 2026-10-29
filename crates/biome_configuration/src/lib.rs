@@ -281,9 +281,9 @@ pub struct Configuration {
 }
 
 impl DeserializableValidator for Configuration {
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _name: &str,
         range: TextRange,
     ) -> bool {
@@ -562,18 +562,18 @@ static SCHEMA_REGEX: LazyLock<Regex> =
 
 impl Deserializable for Schema {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = Schema;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
 
             fn visit_str(
                 self,
-                ctx: &mut C,
+                ctx: &mut dyn DeserializationContext<State = S>,
                 value: Text,
                 range: TextRange,
                 _name: &str,
@@ -704,11 +704,11 @@ pub struct FilesConfiguration {
 }
 
 impl FilesConfiguration {
-    fn deserialize_field<V: DeserializableValue>(
+    fn deserialize_field<S>(
         &mut self,
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = S>,
         name: &str,
-        value: &V,
+        value: &impl DeserializableValue<State = S>,
         range: TextRange,
     ) {
         match name {
@@ -774,18 +774,18 @@ impl FilesConfiguration {
 
 impl biome_deserialize::Deserializable for FilesConfiguration {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = FilesConfiguration;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut C,
-                members: &mut MapMembers<'_, C>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

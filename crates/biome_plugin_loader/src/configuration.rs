@@ -1,4 +1,6 @@
-use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue};
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
+};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_fs::normalize_path;
 use biome_glob::NormalizedGlob;
@@ -306,7 +308,7 @@ impl Hash for PluginConfiguration {
 
 impl Deserializable for PluginConfiguration {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         rule_name: &str,
     ) -> Option<Self> {

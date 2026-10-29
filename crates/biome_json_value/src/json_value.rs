@@ -17,7 +17,8 @@ use std::{
 };
 
 use biome_deserialize::{
-    DeserializableType, DeserializableValue, Text, json::unescape_json_string,
+    DeserializableType, DeserializableValue, DeserializationContext, Text,
+    json::unescape_json_string,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_json_syntax::{
@@ -90,7 +91,7 @@ impl JsonValue {
 
 impl biome_deserialize::Deserializable for JsonValue {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {

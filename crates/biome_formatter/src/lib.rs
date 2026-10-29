@@ -368,7 +368,7 @@ impl Default for IndentWidth {
 #[cfg(feature = "deserialize")]
 impl Deserializable for IndentWidth {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -490,7 +490,7 @@ impl Default for LineWidth {
 #[cfg(feature = "deserialize")]
 impl Deserializable for LineWidth {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {

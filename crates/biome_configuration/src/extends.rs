@@ -41,7 +41,7 @@ impl Default for Extends {
 
 impl Deserializable for Extends {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {

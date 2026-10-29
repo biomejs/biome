@@ -1,4 +1,6 @@
-use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue};
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
+};
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 
@@ -139,7 +141,7 @@ impl biome_deserialize::Merge for IgnorePrimitives {
 
 impl Deserializable for IgnorePrimitives {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut V::Context,
+        ctx: &mut dyn DeserializationContext<State = V::State>,
         value: &V,
         name: &str,
     ) -> Option<Self> {
