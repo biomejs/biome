@@ -13,6 +13,7 @@ pub mod no_arguments;
 pub mod no_arguments_caller_or_callee;
 pub mod no_aria_hidden_on_focusable;
 pub mod no_aria_unsupported_elements;
+pub mod no_array_for_each;
 pub mod no_array_index_key;
 pub mod no_array_sort_for_min_max;
 pub mod no_assign_in_expressions;
