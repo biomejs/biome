@@ -711,6 +711,7 @@ impl<'a> ProcessLint<'a> {
         signal: &dyn AnalyzerSignal<L>,
     ) -> ControlFlow {
         if let Some(mut diagnostic) = signal.diagnostic() {
+            let is_internal = diagnostic.tags().is_internal();
             if self.ignores_suppression_comment
                 && diagnostic.category() == Some(category!("suppressions/unused"))
             {
@@ -751,9 +752,10 @@ impl<'a> ProcessLint<'a> {
                 Severity::Hint => {}
             }
 
-            if self
-                .max_diagnostics
-                .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
+            if is_internal
+                || self
+                    .max_diagnostics
+                    .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
             {
                 if self.pull_code_actions {
                     for action in signal.actions(ActionFilter::rule_fix()) {
@@ -1118,7 +1120,7 @@ impl ProcessDiagnosticsAndActions {
                     offset: None,
                 })
                 .collect();
-            if !actions.is_empty() {
+            if !actions.is_empty() || diagnostic.tags().is_internal() {
                 if let Some(offset) = &self.diagnostic_offset {
                     diagnostic.add_diagnostic_offset(*offset);
                 }
