@@ -67,3 +67,20 @@ function nestedCall(value: string | null) {
 		return identity(value)?.length;
 	}
 }
+
+const isText = (input: unknown): input is string => typeof input === "string";
+
+function constGuard(value: string | null) {
+	if (isText(value)) {
+		return value?.length;
+	}
+}
+
+type Text = string;
+declare function isAliasedText(input: unknown): input is Text;
+
+function aliasTarget(value: string | null) {
+	if (isAliasedText(value)) {
+		return value?.length;
+	}
+}

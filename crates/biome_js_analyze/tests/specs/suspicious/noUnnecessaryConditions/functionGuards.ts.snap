@@ -74,6 +74,23 @@ function nestedCall(value: string | null) {
 	}
 }
 
+const isText = (input: unknown): input is string => typeof input === "string";
+
+function constGuard(value: string | null) {
+	if (isText(value)) {
+		return value?.length;
+	}
+}
+
+type Text = string;
+declare function isAliasedText(input: unknown): input is Text;
+
+function aliasTarget(value: string | null) {
+	if (isAliasedText(value)) {
+		return value?.length;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -91,6 +108,8 @@ functionGuards.ts:15:7 lint/suspicious/noUnnecessaryConditions ━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -107,6 +126,8 @@ functionGuards.ts:17:7 lint/suspicious/noUnnecessaryConditions ━━━━━�
     19 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -177,6 +198,8 @@ functionGuards.ts:33:7 lint/suspicious/noUnnecessaryConditions ━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -193,6 +216,8 @@ functionGuards.ts:35:7 lint/suspicious/noUnnecessaryConditions ━━━━━�
     37 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
@@ -343,6 +368,58 @@ functionGuards.ts:67:10 lint/suspicious/noUnnecessaryConditions ━━━━━�
        │ 		                      ^^
     68 │ 	}
     69 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:75:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    73 │ function constGuard(value: string | null) {
+    74 │ 	if (isText(value)) {
+  > 75 │ 		return value?.length;
+       │ 		       ^^^^^
+    76 │ 	}
+    77 │ }
+  
+  i Replace ?. with ..
+  
+    73 │ function constGuard(value: string | null) {
+    74 │ 	if (isText(value)) {
+  > 75 │ 		return value?.length;
+       │ 		            ^^
+    76 │ 	}
+    77 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:84:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    82 │ function aliasTarget(value: string | null) {
+    83 │ 	if (isAliasedText(value)) {
+  > 84 │ 		return value?.length;
+       │ 		       ^^^^^
+    85 │ 	}
+    86 │ }
+  
+  i Replace ?. with ..
+  
+    82 │ function aliasTarget(value: string | null) {
+    83 │ 	if (isAliasedText(value)) {
+  > 84 │ 		return value?.length;
+       │ 		            ^^
+    85 │ 	}
+    86 │ }
   
   i The receiver is guaranteed to be non-nullish.
   

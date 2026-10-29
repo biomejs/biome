@@ -58,7 +58,7 @@ Reads inside a nested function do not inherit facts from the outer function.
 Biome uses its semantic model to distinguish variables with the same name.
 
 `src/db/type_inference/flow.rs` applies `typeof`, literal equality, nullish, and
-truthiness tests. Where branches meet, or a loop returns to an earlier point,
+truthiness tests, and the tests that calls to local type guards report. Where branches meet, or a loop returns to an earlier point,
 it keeps every type still possible on a reachable path. `flow_expressions.rs`
 uses narrowed operands when inferring member accesses, calls, logical and
 conditional expressions, and `await`. Complete module inference uses the same
@@ -74,8 +74,8 @@ whole module again and a module without conditions builds no graph.
 Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no
 code that runs, so the visitor does not look for flow roots in them. Collection
 decomposes every condition into guards on semantic bindings. For
-example, `typeof value === "string"` can narrow `value`; `check(value)` and
-`value.length` cannot. Collection then records which reads a test of their
+example, `typeof value === "string"` can narrow `value`; `value.length` and a
+call to an imported `check(value)` cannot. Collection then records which reads a test of their
 variable can reach, and those reads plus the enclosing expressions that can use
 a narrowed operand become candidates. A test inside a nested function never
 reaches reads in the enclosing one, and an array or object literal ends the
@@ -89,17 +89,23 @@ limit, the guard makes the result unknown rather than assuming the expression is
 unaffected. The variable's ordinary type stays separate from the result at each
 read.
 
-A call to a local function can also narrow a variable when its return annotation
-states a type predicate, such as `value is string`. The function must have one
-signature, be declared in the same module, and never be reassigned. It must not
-be generic, async, or a generator. The annotation must name a parameter and a
-primitive type or literal value. Biome reads this contract without inferring the
-function body or the types of other arguments.
+A call to a local type guard can also narrow a variable. A type guard returns a
+type predicate on one of its parameters, such as `value is string`. The guard is
+a function declaration, or an arrow or function expression that initializes a
+variable. It is declared in the same module, nothing reassigns it, and it has
+one signature that is not generic, async, or a generator. Collection selects
+the tested argument from the guard's collected signature. Inference resolves
+only the predicate's target, which must be a primitive type or a primitive
+literal, directly or through type aliases. Neither step infers the guard's body.
 
 Only identifier arguments can be narrowed by these guards. Imported or aliased
-guards, methods, optional calls, and calls with spread arguments are unsupported.
-So are declarations with default, rest, or destructured parameters, predicates
-on `this`, and predicates whose target is a named or compound type.
+guards, default-exported functions, `var` declarations, variables with a type
+annotation, methods, optional calls, and calls with type arguments are
+unsupported. A direct `eval` can reassign any guard, so a module that reads
+`eval` or the implicit `arguments` object in any function has no guards.
+So are spread arguments before or at the tested one, and predicates on `this`.
+The tested parameter must be named, must not be a rest parameter, and must not
+have a default value, because a default replaces an `undefined` argument.
 
 An object shape such as `{}` can also describe `0` or `""`. Removing `null`
 therefore does not prove that the value is truthy. A `void` return annotation

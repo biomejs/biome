@@ -10,7 +10,6 @@ declare function union(input: unknown): input is string | number;
 declare function assertString(input: unknown): asserts input is string;
 
 const alias = isString;
-const variableHeld = (input: unknown): input is string => typeof input === "string";
 
 function beforeAndAfterJoin(value: string | null) {
 	value?.length;
@@ -60,7 +59,6 @@ function captured(value: string | null) {
 
 function unsupportedCallees(value: string | null) {
 	if (alias(value)) value?.length;
-	if (variableHeld(value)) value?.length;
 	if (generic(value)) value?.length;
 	if (overloaded(value)) value?.length;
 	assertString(value);
