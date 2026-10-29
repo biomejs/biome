@@ -229,10 +229,26 @@ impl TryFrom<CssSyntaxKind> for TriviaPieceKind {
 pub fn inner_string_text(token: &CssSyntaxToken) -> TokenText {
     let mut text = token.token_text_trimmed();
     if token.kind() == CssSyntaxKind::CSS_STRING_LITERAL {
-        // remove string delimiters
-        // SAFETY: string literal token have a delimiters at the start and the end of the string
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+        let (delimiter_len, _) = html_quote_entity_at(&text).unwrap_or((1, 0));
+        let delimiter_len = TextSize::from(delimiter_len as u32);
+        let range = TextRange::new(delimiter_len, text.len() - delimiter_len);
         text = text.slice(range);
     }
     text
+}
+
+pub fn html_quote_entity_at(text: &str) -> Option<(usize, u8)> {
+    const ENTITIES: [(&str, u8); 6] = [
+        ("&quot;", b'"'),
+        ("&#34;", b'"'),
+        ("&#x22;", b'"'),
+        ("&apos;", b'\''),
+        ("&#39;", b'\''),
+        ("&#x27;", b'\''),
+    ];
+
+    ENTITIES
+        .iter()
+        .find(|(entity, _)| text.starts_with(entity))
+        .map(|(entity, quote)| (entity.len(), *quote))
 }

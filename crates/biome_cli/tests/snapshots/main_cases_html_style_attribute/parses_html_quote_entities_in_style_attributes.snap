@@ -1,0 +1,33 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint index.html
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `index.html`
+
+```html
+<p style="font-family: RotisSansCyrillic, &quot;Rotis Sans Cyrillic&quot;, &#39;Open Sans&#39;, sans-serif; font-size: 10px">test</p>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
