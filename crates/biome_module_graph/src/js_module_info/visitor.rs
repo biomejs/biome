@@ -12,6 +12,7 @@ use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
+use either::Either;
 
 use crate::{
     JsImport, JsImportPhase, JsModuleInfo, JsReexport,
@@ -56,7 +57,14 @@ impl JsModuleVisitor {
             .union(JsxAttribute::KIND_SET)
             .union(JsModuleInfoCollector::LEAVE_NODE_KINDS);
         let root = self.root.syntax().clone();
-        for event in root.preorder_of_kinds(kinds) {
+        // The flow root scanner must see every node, not only the kinds that
+        // the collector visits.
+        let events = if scan_flow_roots {
+            Either::Left(root.preorder())
+        } else {
+            Either::Right(root.preorder_of_kinds(kinds))
+        };
+        for event in events {
             match event {
                 WalkEvent::Enter(node) => {
                     if scan_flow_roots {
