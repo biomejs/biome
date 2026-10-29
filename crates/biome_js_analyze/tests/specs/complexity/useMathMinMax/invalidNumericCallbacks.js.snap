@@ -1,0 +1,337 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNumericCallbacks.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+const numbers = [1, 2];
+const largestNumber = numbers.reduce((a, b) => (a > b ? a : b));
+const smallestNumber = numbers.reduceRight((a, b) => (a < b ? a : b));
+
+const wordsWithNumericAccumulator = ["foo", "bar"];
+const numericAccumulator = wordsWithNumericAccumulator.reduce(
+    (size, word) => (size > 10 ? size : 10),
+    0,
+);
+
+const wordsWithNumericIndex = ["foo", "bar"];
+const numericIndex = wordsWithNumericIndex.reduce(
+    (size, word, index) => (index > 2 ? index : 2),
+    0,
+);
+
+const mutatedValues = ["foo", 1];
+mutatedValues[0] = 2;
+const mutatedMaximum = mutatedValues.reduce((a, b) => (a > b ? a : b));
+
+const unknownMaximum = unknownArray.reduce((a, b) => (a > b ? a : b));
+
+const aliasedValues = ["foo", 1];
+const valuesAlias = aliasedValues;
+valuesAlias[0] = 2;
+const aliasedMaximum = aliasedValues.reduce((a, b) => (a > b ? a : b));
+
+const numericStrings = ["1", "2"];
+const convertedMaximum = numericStrings.reduce((a, b) => {
+    b = Number(b);
+    return a > b ? a : b;
+}, 0);
+
+const numberFromTemplate = (parts) => Number(parts[0]);
+const taggedNumbers = [numberFromTemplate`1`, numberFromTemplate`2`];
+const taggedMaximum = taggedNumbers.reduce((a, b) => (a > b ? a : b));
+
+const wrappedNumbers = [1, 2];
+const wrappedMaximum = ((wrappedNumbers).reduce)(((a, b) => (a > b ? a : b)));
+
+let changingElement = "1";
+changingElement = 1;
+const valuesWithChangedElement = [changingElement, 2];
+const changedElementMaximum = valuesWithChangedElement.reduce((a, b) => (a > b ? a : b));
+
+```
+
+# Diagnostics
+```
+invalidNumericCallbacks.js:4:49 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    3 │ const numbers = [1, 2];
+  > 4 │ const largestNumber = numbers.reduce((a, b) => (a > b ? a : b));
+      │                                                 ^^^^^^^^^^^^^
+    5 │ const smallestNumber = numbers.reduceRight((a, b) => (a < b ? a : b));
+    6 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     2  2 │   
+     3  3 │   const numbers = [1, 2];
+     4    │ - const·largestNumber·=·numbers.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
+        4 │ + const·largestNumber·=·numbers.reduce((a,·b)·=>·(Math.max(a·,·b)));
+     5  5 │   const smallestNumber = numbers.reduceRight((a, b) => (a < b ? a : b));
+     6  6 │   
+  
+
+```
+
+```
+invalidNumericCallbacks.js:5:55 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    3 │ const numbers = [1, 2];
+    4 │ const largestNumber = numbers.reduce((a, b) => (a > b ? a : b));
+  > 5 │ const smallestNumber = numbers.reduceRight((a, b) => (a < b ? a : b));
+      │                                                       ^^^^^^^^^^^^^
+    6 │ 
+    7 │ const wordsWithNumericAccumulator = ["foo", "bar"];
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     3  3 │   const numbers = [1, 2];
+     4  4 │   const largestNumber = numbers.reduce((a, b) => (a > b ? a : b));
+     5    │ - const·smallestNumber·=·numbers.reduceRight((a,·b)·=>·(a·<·b·?·a·:·b));
+        5 │ + const·smallestNumber·=·numbers.reduceRight((a,·b)·=>·(Math.min(a·,·b)));
+     6  6 │   
+     7  7 │   const wordsWithNumericAccumulator = ["foo", "bar"];
+  
+
+```
+
+```
+invalidNumericCallbacks.js:9:22 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+     7 │ const wordsWithNumericAccumulator = ["foo", "bar"];
+     8 │ const numericAccumulator = wordsWithNumericAccumulator.reduce(
+   > 9 │     (size, word) => (size > 10 ? size : 10),
+       │                      ^^^^^^^^^^^^^^^^^^^^^
+    10 │     0,
+    11 │ );
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     7  7 │   const wordsWithNumericAccumulator = ["foo", "bar"];
+     8  8 │   const numericAccumulator = wordsWithNumericAccumulator.reduce(
+     9    │ - ····(size,·word)·=>·(size·>·10·?·size·:·10),
+        9 │ + ····(size,·word)·=>·(Math.max(size·,·10)),
+    10 10 │       0,
+    11 11 │   );
+  
+
+```
+
+```
+invalidNumericCallbacks.js:15:29 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    13 │ const wordsWithNumericIndex = ["foo", "bar"];
+    14 │ const numericIndex = wordsWithNumericIndex.reduce(
+  > 15 │     (size, word, index) => (index > 2 ? index : 2),
+       │                             ^^^^^^^^^^^^^^^^^^^^^
+    16 │     0,
+    17 │ );
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    13 13 │   const wordsWithNumericIndex = ["foo", "bar"];
+    14 14 │   const numericIndex = wordsWithNumericIndex.reduce(
+    15    │ - ····(size,·word,·index)·=>·(index·>·2·?·index·:·2),
+       15 │ + ····(size,·word,·index)·=>·(Math.max(index·,·2)),
+    16 16 │       0,
+    17 17 │   );
+  
+
+```
+
+```
+invalidNumericCallbacks.js:21:56 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    19 │ const mutatedValues = ["foo", 1];
+    20 │ mutatedValues[0] = 2;
+  > 21 │ const mutatedMaximum = mutatedValues.reduce((a, b) => (a > b ? a : b));
+       │                                                        ^^^^^^^^^^^^^
+    22 │ 
+    23 │ const unknownMaximum = unknownArray.reduce((a, b) => (a > b ? a : b));
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    19 19 │   const mutatedValues = ["foo", 1];
+    20 20 │   mutatedValues[0] = 2;
+    21    │ - const·mutatedMaximum·=·mutatedValues.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
+       21 │ + const·mutatedMaximum·=·mutatedValues.reduce((a,·b)·=>·(Math.max(a·,·b)));
+    22 22 │   
+    23 23 │   const unknownMaximum = unknownArray.reduce((a, b) => (a > b ? a : b));
+  
+
+```
+
+```
+invalidNumericCallbacks.js:23:55 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    21 │ const mutatedMaximum = mutatedValues.reduce((a, b) => (a > b ? a : b));
+    22 │ 
+  > 23 │ const unknownMaximum = unknownArray.reduce((a, b) => (a > b ? a : b));
+       │                                                       ^^^^^^^^^^^^^
+    24 │ 
+    25 │ const aliasedValues = ["foo", 1];
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    21 21 │   const mutatedMaximum = mutatedValues.reduce((a, b) => (a > b ? a : b));
+    22 22 │   
+    23    │ - const·unknownMaximum·=·unknownArray.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
+       23 │ + const·unknownMaximum·=·unknownArray.reduce((a,·b)·=>·(Math.max(a·,·b)));
+    24 24 │   
+    25 25 │   const aliasedValues = ["foo", 1];
+  
+
+```
+
+```
+invalidNumericCallbacks.js:28:56 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    26 │ const valuesAlias = aliasedValues;
+    27 │ valuesAlias[0] = 2;
+  > 28 │ const aliasedMaximum = aliasedValues.reduce((a, b) => (a > b ? a : b));
+       │                                                        ^^^^^^^^^^^^^
+    29 │ 
+    30 │ const numericStrings = ["1", "2"];
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    26 26 │   const valuesAlias = aliasedValues;
+    27 27 │   valuesAlias[0] = 2;
+    28    │ - const·aliasedMaximum·=·aliasedValues.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
+       28 │ + const·aliasedMaximum·=·aliasedValues.reduce((a,·b)·=>·(Math.max(a·,·b)));
+    29 29 │   
+    30 30 │   const numericStrings = ["1", "2"];
+  
+
+```
+
+```
+invalidNumericCallbacks.js:33:12 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    31 │ const convertedMaximum = numericStrings.reduce((a, b) => {
+    32 │     b = Number(b);
+  > 33 │     return a > b ? a : b;
+       │            ^^^^^^^^^^^^^
+    34 │ }, 0);
+    35 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    31 31 │   const convertedMaximum = numericStrings.reduce((a, b) => {
+    32 32 │       b = Number(b);
+    33    │ - ····return·a·>·b·?·a·:·b;
+       33 │ + ····return·Math.max(a·,·b);
+    34 34 │   }, 0);
+    35 35 │   
+  
+
+```
+
+```
+invalidNumericCallbacks.js:38:55 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    36 │ const numberFromTemplate = (parts) => Number(parts[0]);
+    37 │ const taggedNumbers = [numberFromTemplate`1`, numberFromTemplate`2`];
+  > 38 │ const taggedMaximum = taggedNumbers.reduce((a, b) => (a > b ? a : b));
+       │                                                       ^^^^^^^^^^^^^
+    39 │ 
+    40 │ const wrappedNumbers = [1, 2];
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    36 36 │   const numberFromTemplate = (parts) => Number(parts[0]);
+    37 37 │   const taggedNumbers = [numberFromTemplate`1`, numberFromTemplate`2`];
+    38    │ - const·taggedMaximum·=·taggedNumbers.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
+       38 │ + const·taggedMaximum·=·taggedNumbers.reduce((a,·b)·=>·(Math.max(a·,·b)));
+    39 39 │   
+    40 40 │   const wrappedNumbers = [1, 2];
+  
+
+```
+
+```
+invalidNumericCallbacks.js:41:62 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    40 │ const wrappedNumbers = [1, 2];
+  > 41 │ const wrappedMaximum = ((wrappedNumbers).reduce)(((a, b) => (a > b ? a : b)));
+       │                                                              ^^^^^^^^^^^^^
+    42 │ 
+    43 │ let changingElement = "1";
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    39 39 │   
+    40 40 │   const wrappedNumbers = [1, 2];
+    41    │ - const·wrappedMaximum·=·((wrappedNumbers).reduce)(((a,·b)·=>·(a·>·b·?·a·:·b)));
+       41 │ + const·wrappedMaximum·=·((wrappedNumbers).reduce)(((a,·b)·=>·(Math.max(a·,·b))));
+    42 42 │   
+    43 43 │   let changingElement = "1";
+  
+
+```
+
+```
+invalidNumericCallbacks.js:46:74 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    44 │ changingElement = 1;
+    45 │ const valuesWithChangedElement = [changingElement, 2];
+  > 46 │ const changedElementMaximum = valuesWithChangedElement.reduce((a, b) => (a > b ? a : b));
+       │                                                                          ^^^^^^^^^^^^^
+    47 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    44 44 │   changingElement = 1;
+    45 45 │   const valuesWithChangedElement = [changingElement, 2];
+    46    │ - const·changedElementMaximum·=·valuesWithChangedElement.reduce((a,·b)·=>·(a·>·b·?·a·:·b));
+       46 │ + const·changedElementMaximum·=·valuesWithChangedElement.reduce((a,·b)·=>·(Math.max(a·,·b)));
+    47 47 │   
+  
+
+```

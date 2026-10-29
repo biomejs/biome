@@ -7,12 +7,15 @@ use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyTsType, JsAssignmentExpression, JsBinaryOperator,
-    JsCallExpression, JsConditionalExpression, JsFormalParameter, JsImportCallExpression,
-    JsNewExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsSyntaxToken,
-    JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
+    AnyJsArrayElement, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression,
+    AnyJsFunction, AnyJsMemberExpression, AnyTsType, JsArrayExpression, JsAssignmentExpression,
+    JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsConditionalExpression, JsFormalParameter, JsIdentifierExpression, JsImportCallExpression,
+    JsNewExpression, JsParameterList, JsParameters, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclarator,
+    binding_ext::AnyJsBindingDeclaration,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxTriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxTriviaPiece};
 use biome_rule_options::use_math_min_max::UseMathMinMaxOptions;
 
 declare_lint_rule! {
@@ -70,10 +73,12 @@ impl Rule for UseMathMinMax {
         let model = ctx.model();
         let comparison = extract_comparison(conditional)?;
 
-        if has_unsupported_operand(ctx, &comparison.left)
-            || has_unsupported_operand(ctx, &comparison.right)
+        if has_unsupported_operand(&comparison.left)
+            || has_unsupported_operand(&comparison.right)
             || has_unsupported_identifier_operand(model, &comparison.left).unwrap_or(false)
             || has_unsupported_identifier_operand(model, &comparison.right).unwrap_or(false)
+            || has_non_numeric_reduce_parameter(&comparison.left, model).unwrap_or(false)
+            || has_non_numeric_reduce_parameter(&comparison.right, model).unwrap_or(false)
             || has_shadowed_math(model, conditional)
         {
             return None;
@@ -511,13 +516,152 @@ fn clean_argument(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
 
 /// Detect whether the expression is obviously not compatible with `Math.min`/`Math.max`,
 /// such as non-number literals, `bigint`, and `Date`.
-fn has_unsupported_operand(
-    _ctx: &RuleContext<UseMathMinMax>,
-    expression: &AnyJsExpression,
-) -> bool {
+fn has_unsupported_operand(expression: &AnyJsExpression) -> bool {
     unwrap_expression(expression.clone()).is_none_or(|expr| {
         is_non_number_literal(&expr) || is_bigint_like(&expr) || is_date_construction(&expr)
     })
+}
+
+fn has_non_numeric_reduce_parameter(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let expression = unwrap_expression(expression.clone())?;
+    let reference = expression.as_js_identifier_expression()?.name().ok()?;
+    let binding = model.binding(&reference)?;
+    if binding.all_writes().next().is_some() {
+        return None;
+    }
+    let parameter = JsFormalParameter::cast(binding.syntax().parent()?)?;
+    let parameter_list = parameter.parent::<JsParameterList>()?;
+    let parameters = parameter_list.parent::<JsParameters>()?;
+    let index = parameters
+        .items()
+        .iter()
+        .position(|item| item.is_ok_and(|item| item.syntax() == parameter.syntax()))?;
+    if index > 1 {
+        return Some(false);
+    }
+
+    let function = parameters.parent::<AnyJsFunction>()?;
+    let call = AnyJsExpression::cast_ref(function.syntax())?
+        .outer_expression()?
+        .parent::<JsCallArgumentList>()?
+        .parent::<JsCallArguments>()?
+        .parent::<JsCallExpression>()?;
+    let mut arguments = call.arguments().ok()?.args().iter();
+    let callback_argument = arguments.next()?.ok()?;
+    let callback = callback_argument
+        .as_any_js_expression()?
+        .clone()
+        .omit_type_wrappers()?;
+    if callback.syntax() != function.syntax() {
+        return None;
+    }
+
+    let member = reduce_member_expression(&call)?;
+    let array = array_from_reduce_receiver(&member.object().ok()?, model)?;
+    Some(match index {
+        0 => match arguments.next() {
+            None => array_has_known_non_numeric_element(&array, model),
+            Some(Ok(initial)) => initial.as_any_js_expression().is_some_and(|initial| {
+                has_non_numeric_reduction_value(initial, model).unwrap_or(false)
+            }),
+            Some(Err(_)) => false,
+        },
+        1 => array_has_known_non_numeric_element(&array, model),
+        _ => false,
+    })
+}
+
+fn array_from_reduce_receiver(
+    receiver: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<JsArrayExpression> {
+    let receiver = receiver.clone().omit_type_wrappers()?;
+    if let AnyJsExpression::JsArrayExpression(array) = receiver {
+        return Some(array);
+    }
+    let AnyJsExpression::JsIdentifierExpression(identifier) = receiver else {
+        return None;
+    };
+    let binding = model.binding(&identifier.name().ok()?)?;
+    if binding.is_exported()
+        || binding.all_writes().next().is_some()
+        || !binding
+            .all_reads()
+            .all(|read| is_reduce_receiver_read(&read.syntax()).is_some())
+    {
+        return None;
+    }
+
+    let declaration = binding.tree().declaration()?;
+    let declaration = declaration
+        .parent_binding_pattern_declaration()
+        .unwrap_or(declaration);
+    let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
+        return None;
+    };
+    if !matches!(
+        declarator.id().ok()?,
+        AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(_))
+    ) || !declarator.declaration()?.is_const()
+    {
+        return None;
+    }
+
+    declarator
+        .initializer()?
+        .expression()
+        .ok()?
+        .omit_type_wrappers()?
+        .as_js_array_expression()
+        .cloned()
+}
+
+fn array_has_known_non_numeric_element(array: &JsArrayExpression, model: &SemanticModel) -> bool {
+    array.elements().iter().any(|element| match element {
+        Ok(AnyJsArrayElement::AnyJsExpression(expression)) => {
+            has_non_numeric_reduction_value(&expression, model).unwrap_or(false)
+        }
+        _ => false,
+    })
+}
+
+fn has_non_numeric_reduction_value(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    if has_unsupported_operand(expression) {
+        return Some(true);
+    }
+    let expression = unwrap_expression(expression.clone())?;
+    let reference = expression.as_js_identifier_expression()?.name().ok()?;
+    let binding = model.binding(&reference)?;
+    if binding.all_writes().next().is_some() {
+        return None;
+    }
+    has_unsupported_identifier_operand(model, &expression)
+}
+
+fn reduce_member_expression(call: &JsCallExpression) -> Option<AnyJsMemberExpression> {
+    let member =
+        AnyJsMemberExpression::cast(call.callee().ok()?.omit_type_wrappers()?.into_syntax())?;
+    matches!(member.member_name()?.text(), "reduce" | "reduceRight").then_some(member)
+}
+
+fn is_reduce_receiver_read(reference: &JsSyntaxNode) -> Option<()> {
+    let identifier = JsIdentifierExpression::cast(reference.parent()?)?;
+    let member = AnyJsExpression::cast_ref(identifier.syntax())?
+        .outer_expression()?
+        .parent::<AnyJsMemberExpression>()?;
+    let call = AnyJsExpression::cast_ref(member.syntax())?
+        .outer_expression()?
+        .parent::<JsCallExpression>()?;
+    let reduce_member = reduce_member_expression(&call)?;
+    let object = reduce_member.object().ok()?.omit_type_wrappers()?;
+    (member.syntax() == reduce_member.syntax() && object.syntax() == identifier.syntax())
+        .then_some(())
 }
 
 /// Strip TS-only wrappers that do not change which value the ternary returns.
@@ -640,11 +784,13 @@ fn declarator_has_unsupported_metadata(declarator: &JsVariableDeclarator) -> boo
 /// const b = 10; // false
 /// ```
 fn is_non_number_literal(expression: &AnyJsExpression) -> bool {
+    let expression = expression.clone().omit_parentheses();
     expression
-        .clone()
-        .omit_parentheses()
         .as_any_js_literal_expression()
         .is_some_and(|literal| literal.as_js_number_literal_expression().is_none())
+        || expression
+            .as_js_template_expression()
+            .is_some_and(|template| template.tag().is_none())
 }
 
 /// Is it a `new Date()`?
