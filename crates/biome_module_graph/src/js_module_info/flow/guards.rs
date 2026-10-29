@@ -6,8 +6,8 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
-    Function, FunctionParameter, PredicateReturnType, RawTypeData, RawTypeId, ReturnType,
-    TypeReference, TypeofKind,
+    Function, FunctionParameter, RawTypeData, RawTypeId, ReturnType, TypeReference, TypeofKind,
+    may_resolve_to_raw_primitive,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, Text, TextRange};
 use rustc_hash::FxHashMap;
@@ -73,20 +73,33 @@ pub(crate) enum FlowTest {
         strict: bool,
     },
     /// A call to the guard declared at this range. The guard's return
-    /// annotation states the tested type, as in `value is string`.
+    /// annotation states the tested type, as in `value is string` or
+    /// `asserts value is string`.
     Predicate(TextRange),
 }
 
-/// Returns the signature and type predicate of the guard declared at
-/// `function`.
+/// What a guard's return annotation states about one of its parameters.
+#[derive(Clone, Copy)]
+pub(crate) struct GuardContract<'a> {
+    pub(crate) parameter: &'a Text,
+    /// The type that the tested argument has when the contract holds, or
+    /// `None` for `asserts value`, which only requires a truthy argument.
+    pub(crate) target: Option<&'a TypeReference>,
+    /// Whether a call returns only when the contract holds. Otherwise, the
+    /// call's result reports whether it holds.
+    pub(crate) asserts: bool,
+}
+
+/// Returns the signature of the guard declared at `function` and the contract
+/// that its return annotation states.
 ///
 /// Returns `None` unless the guard's collected type is one signature that is
-/// synchronous, is not generic, and returns a type predicate.
+/// synchronous, is not generic, and returns a type predicate or an assertion.
 pub(crate) fn guard_signature<'a>(
     raw_types: &'a [RawTypeData],
     raw_binding_types: &FxHashMap<TextRange, TypeReference>,
     function: TextRange,
-) -> Option<(&'a Function, &'a PredicateReturnType)> {
+) -> Option<(&'a Function, GuardContract<'a>)> {
     let TypeReference::Resolved(RawTypeId::Local(id)) = raw_binding_types.get(&function)? else {
         return None;
     };
@@ -97,18 +110,37 @@ pub(crate) fn guard_signature<'a>(
     if signature.is_async || !signature.type_parameters.is_empty() {
         return None;
     }
-    let ReturnType::Predicate(predicate) = &signature.return_type else {
-        return None;
+    let contract = match &signature.return_type {
+        ReturnType::Predicate(predicate) => GuardContract {
+            parameter: &predicate.parameter_name,
+            target: Some(&predicate.ty),
+            asserts: false,
+        },
+        ReturnType::Asserts(assertion) => GuardContract {
+            parameter: &assertion.parameter_name,
+            // Collection records a bare `asserts value` as `Conditional`, which
+            // no type annotation names.
+            target: (!matches!(
+                &assertion.ty,
+                TypeReference::Resolved(RawTypeId::Local(id))
+                    if matches!(raw_types.get(id.index()), Some(RawTypeData::Conditional))
+            ))
+            .then_some(&assertion.ty),
+            asserts: true,
+        },
+        ReturnType::Type(_) => return None,
     };
-    Some((signature, predicate))
+    Some((signature, contract))
 }
 
 /// Selects the argument that a call to a local type guard tests.
 ///
-/// A type guard returns a type predicate on one of its parameters, such as
-/// `value is string`. A call to it tests the argument passed for that
-/// parameter. The guard's collected signature and its declaration select that
-/// argument. Collection never infers the guard's body.
+/// A type guard's return annotation states a contract about one of its
+/// parameters. With a type predicate, such as `value is string`, the call's
+/// result reports whether the argument has the type. With an assertion, such
+/// as `asserts value is string` or `asserts value`, the call returns only when
+/// the contract holds. The guard's collected signature and its declaration
+/// select the tested argument. Collection never infers the guard's body.
 pub(super) struct GuardFunctions<'a> {
     raw_types: &'a [RawTypeData],
     raw_binding_types: &'a FxHashMap<TextRange, TypeReference>,
@@ -116,9 +148,29 @@ pub(super) struct GuardFunctions<'a> {
     /// `arguments` object. A direct `eval` can reassign any guard, so the
     /// module then has no supported guard.
     has_dynamic_scope: bool,
-    /// Maps each function binding to its tested argument index, or to `None`
-    /// when the function is not a supported guard.
-    tested_arguments: FxHashMap<TextRange, Option<usize>>,
+    /// Maps each function binding to its guard, or to `None` when the
+    /// function is not a supported guard.
+    guards: FxHashMap<TextRange, Option<Guard>>,
+}
+
+/// A supported guard function.
+#[derive(Clone, Copy)]
+struct Guard {
+    /// The index of the tested argument.
+    argument: usize,
+    kind: GuardKind,
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum GuardKind {
+    /// `value is T`: the call's result reports whether the argument has type
+    /// `T`.
+    Predicate,
+    /// `asserts value is T`: the call returns only when the argument has type
+    /// `T`.
+    TypeAssertion,
+    /// `asserts value`: the call returns only when the argument is truthy.
+    TruthyAssertion,
 }
 
 impl<'a> GuardFunctions<'a> {
@@ -131,23 +183,44 @@ impl<'a> GuardFunctions<'a> {
             raw_types,
             raw_binding_types,
             has_dynamic_scope,
-            tested_arguments: FxHashMap::default(),
+            guards: FxHashMap::default(),
         }
     }
 
-    /// Returns the variable that `call` tests, with the range of the guard it
-    /// calls.
+    /// Returns the variable that `call` tests, with the range of the type
+    /// predicate it calls.
     ///
-    /// Returns `None` unless `call` calls a supported guard directly and passes
-    /// an identifier as the tested argument. A spread argument before or at the
-    /// tested one is unsupported, because it can pass a different value to the
-    /// tested parameter.
+    /// Returns `None` unless `call` calls a supported type predicate and passes
+    /// an identifier as the tested argument.
     fn tested_variable(
         &mut self,
         call: &JsCallExpression,
         model: &SemanticModel,
         remaining: &mut usize,
     ) -> Option<(JsReferenceIdentifier, TextRange)> {
+        let (guard, function, argument) = self.guard_call(call, model, remaining)?;
+        if guard.kind != GuardKind::Predicate {
+            return None;
+        }
+        let AnyJsExpression::JsIdentifierExpression(subject) = argument else {
+            return None;
+        };
+        Some((subject.name().ok()?, function))
+    }
+
+    /// Returns the guard that `call` calls, the range of its declaration, and
+    /// the tested argument without parentheses.
+    ///
+    /// Returns `None` unless `call` calls a supported guard directly and passes
+    /// the tested argument. A spread argument before or at the tested one is
+    /// unsupported, because it can pass a different value to the tested
+    /// parameter.
+    fn guard_call(
+        &mut self,
+        call: &JsCallExpression,
+        model: &SemanticModel,
+        remaining: &mut usize,
+    ) -> Option<(Guard, TextRange, AnyJsExpression)> {
         if call.is_optional_chain() || call.type_arguments().is_some() {
             return None;
         }
@@ -158,12 +231,12 @@ impl<'a> GuardFunctions<'a> {
         };
         let function = model.binding(&callee.name().ok()?)?;
         let range = function.range();
-        let index = match self.tested_arguments.get(&range) {
-            Some(index) => *index,
+        let guard = match self.guards.get(&range) {
+            Some(guard) => *guard,
             None => {
-                let index = self.tested_argument(&function);
-                self.tested_arguments.insert(range, index);
-                index
+                let guard = self.guard(&function);
+                self.guards.insert(range, guard);
+                guard
             }
         }?;
         let mut tested = None;
@@ -171,41 +244,47 @@ impl<'a> GuardFunctions<'a> {
             let AnyJsCallArgument::AnyJsExpression(argument) = argument.ok()? else {
                 return None;
             };
-            if position == index {
+            if position == guard.argument {
                 tested = Some(argument);
                 break;
             }
         }
-        let AnyJsExpression::JsIdentifierExpression(subject) =
-            omit_parentheses(tested?, remaining)?
-        else {
-            return None;
-        };
-        Some((subject.name().ok()?, range))
+        Some((guard, range, omit_parentheses(tested?, remaining)?))
     }
 
-    /// Returns the index of the argument that calls to `function` test.
+    /// Returns the guard that `function` declares.
     ///
     /// Returns `None` unless `function` is a supported guard. A supported guard
     /// is a local function declaration, or an arrow or function expression that
     /// initializes a variable. Nothing reassigns it, and it is not a generator.
     /// Its tested parameter is named and is not a rest parameter. That
     /// parameter has no default value, because a default replaces an
-    /// `undefined` argument.
-    fn tested_argument(&self, function: &Binding) -> Option<usize> {
+    /// `undefined` argument. A target type must be able to resolve to a
+    /// primitive type or a primitive literal, the only targets that narrow.
+    fn guard(&self, function: &Binding) -> Option<Guard> {
         if self.has_dynamic_scope
             || function.is_imported()
             || !matches!(
                 function.declaration_kind(),
                 JsDeclarationKind::Function | JsDeclarationKind::Value
             )
-            || function.all_writes().next().is_some()
         {
             return None;
         }
-        let (signature, predicate) =
+        // Most callees are not guards, and the raw signature rules them out
+        // before the write check visits every reference.
+        let (signature, contract) =
             guard_signature(self.raw_types, self.raw_binding_types, function.range())?;
-        let tested = parameter_name(&predicate.parameter_name)?;
+        if function.all_writes().next().is_some() {
+            return None;
+        }
+        let kind = match contract.target {
+            Some(target) if !may_resolve_to_raw_primitive(target, self.raw_types) => return None,
+            Some(_) if contract.asserts => GuardKind::TypeAssertion,
+            Some(_) => GuardKind::Predicate,
+            None => GuardKind::TruthyAssertion,
+        };
+        let tested = parameter_name(contract.parameter)?;
         // A `this` parameter types the receiver, so it takes no argument.
         let receiver = usize::from(matches!(
             signature.parameters.first(),
@@ -228,6 +307,10 @@ impl<'a> GuardFunctions<'a> {
         {
             return None;
         }
+        let guard = Guard {
+            argument: index - receiver,
+            kind,
+        };
 
         let parameters = match function.tree().declaration()? {
             AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
@@ -244,9 +327,7 @@ impl<'a> GuardFunctions<'a> {
                     AnyJsExpression::JsArrowFunctionExpression(arrow) => {
                         match arrow.parameters().ok()? {
                             // A parameter without parentheses has no default value.
-                            AnyJsArrowFunctionParameters::AnyJsBinding(_) => {
-                                return Some(index - receiver);
-                            }
+                            AnyJsArrowFunctionParameters::AnyJsBinding(_) => return Some(guard),
                             AnyJsArrowFunctionParameters::JsParameters(parameters) => parameters,
                         }
                     }
@@ -269,10 +350,54 @@ impl<'a> GuardFunctions<'a> {
         else {
             return None;
         };
-        parameter
-            .initializer()
-            .is_none()
-            .then_some(index - receiver)
+        parameter.initializer().is_none().then_some(guard)
+    }
+}
+
+/// Decomposes the condition that a standalone call `expression` establishes
+/// when it returns, or returns `None` when `expression` does not call a
+/// supported assertion.
+///
+/// `asserts value is T` tests an identifier argument against the guard's
+/// target. `asserts value` decomposes the argument as a condition that holds,
+/// so `assert(value !== null)` excludes `null` from `value`.
+pub(super) fn decompose_assertion(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+    functions: &mut GuardFunctions,
+    guards: &mut Vec<FlowGuard>,
+) -> Option<DecomposedCondition> {
+    let mut remaining = MAX_CONDITION_STEPS;
+    let AnyJsExpression::JsCallExpression(call) =
+        omit_parentheses(expression.clone(), &mut remaining)?
+    else {
+        return None;
+    };
+    let (guard, function, argument) = functions.guard_call(&call, model, &mut remaining)?;
+    match guard.kind {
+        GuardKind::Predicate => None,
+        GuardKind::TruthyAssertion => Some(decompose_condition(
+            &argument,
+            FlowOutcome::Truthy,
+            model,
+            functions,
+            guards,
+        )),
+        GuardKind::TypeAssertion => {
+            let AnyJsExpression::JsIdentifierExpression(subject) = argument else {
+                return None;
+            };
+            let binding = model.binding(&subject.name().ok()?)?.range();
+            guards.push(FlowGuard::Test {
+                binding,
+                test: FlowTest::Predicate(function),
+                positive: true,
+            });
+            Some(DecomposedCondition {
+                guard: guards.len() - 1,
+                mentions: vec![binding],
+            })
+        }
     }
 }
 

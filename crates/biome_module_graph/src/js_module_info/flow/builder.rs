@@ -1,4 +1,7 @@
-use super::guards::{FlowGuard, FlowOutcome, GuardFunctions, decompose_condition};
+use super::guards::{
+    DecomposedCondition, FlowGuard, FlowOutcome, GuardFunctions, decompose_assertion,
+    decompose_condition,
+};
 use super::{FlowNode, FlowNodeId};
 use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
@@ -294,9 +297,24 @@ impl RootBuilder<'_, '_> {
                     Err(_) => Ok(()),
                 }
             }
-            AnyJsStatement::JsExpressionStatement(_)
-            | AnyJsStatement::JsDebuggerStatement(_)
-            | AnyJsStatement::JsEmptyStatement(_) => {
+            AnyJsStatement::JsExpressionStatement(statement) => {
+                let flow = self.evaluate(statement.syntax(), current, 0)?;
+                let expression = statement.expression().map_err(|_| Unsupported)?;
+                // An assertion call that returns has established its condition.
+                self.current = Some(
+                    match decompose_assertion(
+                        &expression,
+                        self.model,
+                        self.functions,
+                        &mut self.guards,
+                    ) {
+                        Some(condition) => self.push_condition(flow, condition)?,
+                        None => flow,
+                    },
+                );
+                Ok(())
+            }
+            AnyJsStatement::JsDebuggerStatement(_) | AnyJsStatement::JsEmptyStatement(_) => {
                 self.current = Some(self.evaluate(statement.syntax(), current, 0)?);
                 Ok(())
             }
@@ -580,6 +598,15 @@ impl RootBuilder<'_, '_> {
             self.functions,
             &mut self.guards,
         );
+        self.push_condition(antecedent, condition)
+    }
+
+    /// Adds a node where `condition` holds after `antecedent`.
+    fn push_condition(
+        &mut self,
+        antecedent: FlowNodeId,
+        condition: DecomposedCondition,
+    ) -> Build<FlowNodeId> {
         let node = self.push(FlowNode::Condition {
             antecedent,
             guard: condition.guard,
