@@ -142,7 +142,11 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
             return joiner.finish();
         }
 
-        DefaultBlockListFormatter { node: node.clone() }.fmt(f)
+        DefaultBlockListFormatter {
+            node: node.clone(),
+            text_context,
+        }
+        .fmt(f)
     }
 }
 
@@ -272,6 +276,7 @@ fn quote_boundary_trim_end(node: &MdBlockList, start: usize) -> usize {
 
 pub(crate) struct DefaultBlockListFormatter {
     node: MdBlockList,
+    text_context: TextContext,
 }
 
 #[derive(Default)]
@@ -288,6 +293,10 @@ impl PreviousBlock {
 
     fn is_list(&self) -> bool {
         self.0.as_ref().is_some_and(AnyMdBlock::is_list)
+    }
+
+    fn is_paragraph(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_paragraph)
     }
 
     fn is_link_reference_definition(&self) -> bool {
@@ -576,6 +585,17 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     && !after_newline
                 {
                     joiner.entry(&hard_line_break());
+                } else if previous_block.is_paragraph()
+                    && !node.is_html_block()
+                    && !after_newline
+                    && !self.text_context.is_list()
+                {
+                    // A block that interrupts a paragraph (a header, a fenced
+                    // code block, a list, ...) gets a blank line before it.
+                    // Inside a list item the two stay tight, so a nested list
+                    // doesn't turn the item into a loose one. HTML blocks stay
+                    // attached to the paragraph, as Prettier does.
+                    joiner.entry(&empty_line());
                 }
 
                 still_leading = false;

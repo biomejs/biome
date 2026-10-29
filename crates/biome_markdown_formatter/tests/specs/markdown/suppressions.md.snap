@@ -64,6 +64,7 @@ Mixed    paragraph <!-- biome-ignore format: preserve the following heading -->
 -    formatted item
 
 Mixed    paragraph <!-- biome-ignore format: preserve the following heading -->
+
 ###    preserved after inline suppression
 
 - parent
