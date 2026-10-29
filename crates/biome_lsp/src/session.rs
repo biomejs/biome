@@ -41,6 +41,7 @@ use std::sync::atomic::{AtomicBool, AtomicI32};
 use std::sync::{Arc, OnceLock, Weak};
 use std::time::Duration;
 use tokio::spawn;
+use tokio::sync::Mutex as TokioMutex;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock as TokioRwLock;
@@ -165,6 +166,9 @@ pub(crate) struct Session {
     /// Cached configuration status per base path to avoid reloading on every request.
     configuration_status_by_path:
         TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
+
+    /// Dynamic capabilities that the client has acknowledged as registered.
+    registered_capabilities: TokioMutex<FxHashMap<&'static str, RegisteredCapability>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -242,6 +246,12 @@ pub(crate) enum CapabilityStatus {
     Disable,
 }
 
+#[derive(PartialEq)]
+struct RegisteredCapability {
+    method: &'static str,
+    register_options: Option<Value>,
+}
+
 impl CapabilitySet {
     /// Insert a capability in the set
     pub(crate) fn add_capability(
@@ -296,6 +306,7 @@ impl Session {
             diagnostics_refresh: OnceLock::new(),
             loading_operations: Default::default(),
             configuration_status_by_path: Default::default(),
+            registered_capabilities: Default::default(),
             workspace_folders: Default::default(),
         }
     }
@@ -412,54 +423,84 @@ impl Session {
         }
     }
 
-    /// Register a set of capabilities with the client
+    /// Updates the dynamic capabilities registered with the client.
     pub(crate) async fn register_capabilities(&self, capabilities: CapabilitySet) {
+        let mut registered_capabilities = self.registered_capabilities.lock().await;
         let mut registrations = Vec::new();
         let mut unregistrations = Vec::new();
 
-        let mut register_methods = String::new();
-        let mut unregister_methods = String::new();
-
         for (id, (method, status)) in capabilities.registry {
-            unregistrations.push(Unregistration {
-                id: id.to_string(),
-                method: method.to_string(),
-            });
-
-            if !unregister_methods.is_empty() {
-                unregister_methods.push_str(", ");
-            }
-
-            unregister_methods.push_str(method);
-
-            if let CapabilityStatus::Enable(register_options) = status {
-                registrations.push(Registration {
-                    id: id.to_string(),
-                    method: method.to_string(),
-                    register_options,
-                });
-
-                if !register_methods.is_empty() {
-                    register_methods.push_str(", ");
+            match status {
+                CapabilityStatus::Enable(register_options) => {
+                    let capability = RegisteredCapability {
+                        method,
+                        register_options,
+                    };
+                    if registered_capabilities.get(id) == Some(&capability) {
+                        continue;
+                    }
+                    if let Some(registered) = registered_capabilities.get(id) {
+                        unregistrations.push((id, registered.method));
+                    }
+                    registrations.push((id, capability));
                 }
-
-                register_methods.push_str(method);
+                CapabilityStatus::Disable => {
+                    if let Some(registered) = registered_capabilities.get(id) {
+                        unregistrations.push((id, registered.method));
+                    }
+                }
             }
         }
 
-        if let Err(e) = self.client.unregister_capability(unregistrations).await {
-            error!(
-                "Error unregistering {unregister_methods:?} capabilities: {}",
-                e
+        if !unregistrations.is_empty() {
+            let request = unregistrations
+                .iter()
+                .map(|(id, method)| Unregistration {
+                    id: (*id).to_string(),
+                    method: (*method).to_string(),
+                })
+                .collect();
+
+            if let Err(error) = self.client.unregister_capability(request).await {
+                error!(
+                    capability_count = unregistrations.len(),
+                    "Error unregistering capabilities: {error}"
+                );
+                return;
+            }
+
+            info!(
+                capability_count = unregistrations.len(),
+                "Unregister capabilities"
             );
-        } else {
-            info!("Unregister capabilities {unregister_methods:?}");
+            for (id, _) in &unregistrations {
+                registered_capabilities.remove(id);
+            }
         }
 
-        if let Err(e) = self.client.register_capability(registrations).await {
-            error!("Error registering {register_methods:?} capabilities: {}", e);
-        } else {
-            info!("Register capabilities {register_methods:?}");
+        if !registrations.is_empty() {
+            let request = registrations
+                .iter()
+                .map(|(id, capability)| Registration {
+                    id: (*id).to_string(),
+                    method: capability.method.to_string(),
+                    register_options: capability.register_options.clone(),
+                })
+                .collect();
+
+            if let Err(error) = self.client.register_capability(request).await {
+                error!(
+                    capability_count = registrations.len(),
+                    "Error registering capabilities: {error}"
+                );
+                return;
+            }
+
+            info!(
+                capability_count = registrations.len(),
+                "Register capabilities"
+            );
+            registered_capabilities.extend(registrations);
         }
     }
 
@@ -1672,11 +1713,14 @@ mod tests {
     use biome_service::WorkspaceServer;
     use biome_service::workspace::NoopQueryProvider;
     use crossbeam::channel::bounded;
+    use futures::SinkExt;
     use std::sync::Mutex;
     use tokio::sync::Notify;
+    use tower::{Service, ServiceExt};
+    use tower_lsp_server::ClientSocket;
     use tower_lsp_server::LanguageServer;
     use tower_lsp_server::LspService;
-    use tower_lsp_server::jsonrpc::Result as JsonRpcResult;
+    use tower_lsp_server::jsonrpc::{Request, Response, Result as JsonRpcResult};
     use tower_lsp_server::ls_types::{InitializeParams, InitializeResult};
 
     struct DummyServer;
@@ -1691,7 +1735,8 @@ mod tests {
         }
     }
 
-    fn create_test_session() -> Arc<Session> {
+    fn create_test_session_with_transport() -> (Arc<Session>, LspService<DummyServer>, ClientSocket)
+    {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         let fs: Arc<dyn biome_resolver::FsWithResolverProxy> =
@@ -1713,7 +1758,7 @@ mod tests {
         let cancellation = cancellation.clone();
         let service_rx = service_rx.clone();
 
-        let (_service, _socket) = LspService::build(move |client| {
+        let (service, socket) = LspService::build(move |client| {
             let session = Arc::new(Session::new(
                 SessionKey(0),
                 client,
@@ -1727,11 +1772,79 @@ mod tests {
         })
         .finish();
 
-        session_slot
+        let session = session_slot
             .lock()
             .unwrap()
             .take()
-            .expect("session should be initialized")
+            .expect("session should be initialized");
+        (session, service, socket)
+    }
+
+    fn create_test_session() -> Arc<Session> {
+        create_test_session_with_transport().0
+    }
+
+    #[tokio::test]
+    async fn capability_updates_are_serialized_and_skip_unchanged_registrations() {
+        let (session, mut service, client) = create_test_session_with_transport();
+        service
+            .ready()
+            .await
+            .unwrap()
+            .call(
+                Request::build("initialize")
+                    .id("init")
+                    .params(serde_json::json!({ "capabilities": {} }))
+                    .finish(),
+            )
+            .await
+            .unwrap();
+
+        let (mut stream, mut sink) = client.split();
+        let requests = Arc::new(Mutex::new(Vec::new()));
+        let recorded_requests = requests.clone();
+        let handler = tokio::spawn(async move {
+            while let Some(request) = stream.next().await {
+                recorded_requests
+                    .lock()
+                    .unwrap()
+                    .push(request.method().to_string());
+                let id = request.id().expect("request should have an id").clone();
+                sink.send(Response::from_ok(id, serde_json::to_value(()).unwrap()))
+                    .await
+                    .unwrap();
+            }
+        });
+
+        let capabilities = |register_options| {
+            let mut capabilities = CapabilitySet::default();
+            capabilities.add_capability(
+                "biome_formatting",
+                "textDocument/formatting",
+                CapabilityStatus::Enable(register_options),
+            );
+            capabilities
+        };
+
+        tokio::join!(
+            session.register_capabilities(capabilities(None)),
+            session.register_capabilities(capabilities(None))
+        );
+        session
+            .register_capabilities(capabilities(Some(serde_json::json!({
+                "documentSelector": null
+            }))))
+            .await;
+        handler.abort();
+
+        assert_eq!(
+            *requests.lock().unwrap(),
+            [
+                "client/registerCapability",
+                "client/unregisterCapability",
+                "client/registerCapability"
+            ]
+        );
     }
 
     #[tokio::test]

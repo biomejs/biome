@@ -6670,7 +6670,7 @@ fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) 
         ServerNotification::ShowMessage(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
-        ServerNotification::RegisterCapability(_) => {
+        ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }
@@ -6684,7 +6684,7 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
         ServerNotification::ShowMessage(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
-        ServerNotification::RegisterCapability(_) => {
+        ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }
@@ -6812,7 +6812,10 @@ async fn registered_watched_files(
     server.initialized().await?;
 
     let notification = wait_for_notification(&mut receiver, |notification| {
-        matches!(notification, ServerNotification::RegisterCapability(_))
+        matches!(
+            notification,
+            ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_)
+        )
     })
     .await;
     let Some(ServerNotification::RegisterCapability(params)) = notification else {
@@ -6828,6 +6831,15 @@ async fn registered_watched_files(
             .register_options
             .context("watched-file registration has no options")?,
     )?;
+
+    server.load_configuration().await?;
+    wait_for_no_notification(&mut receiver, Duration::from_millis(250), |notification| {
+        matches!(
+            notification,
+            ServerNotification::RegisterCapability(_) | ServerNotification::UnregisterCapability(_)
+        )
+    })
+    .await;
 
     server.shutdown().await?;
     reader.abort();
