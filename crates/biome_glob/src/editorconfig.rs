@@ -6,8 +6,6 @@
 //! The current implementation has some limitations:
 //!
 //! - Empty choice inside alternates such as `{a,b,}` is not supported
-//! - When braces are unbalanced, only the unclosed `{` are matched literally.
-//!   For example, `{a,{b,c}` matches `{a,b` and `{a,c`.
 //! - `.editorconfig` allows globstars `**` at any position.
 //!   It matches any character including `/`.
 //!   Internally, Biome translates `**` to `*/**/*`.
@@ -228,6 +226,9 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
             range: std::ops::Range<usize>,
         },
     }
+    // As in the reference implementation, a single unmatched brace makes every brace literal.
+    // For example, `{a,{b,c}` only matches the file named `{a,{b,c}`.
+    let braces_are_paired = are_braces_paired(pattern.as_bytes());
     let mut it = pattern.bytes().enumerate();
     let mut changes = Vec::new();
     let mut has_no_slashes = true;
@@ -301,8 +302,14 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
                     }
                 }
             }
-            b'{' => {
+            b'{' if braces_are_paired => {
                 alternations.push((i, false));
+            }
+            b'{' => {
+                changes.push(StrOp::Insert {
+                    index: i,
+                    content: r"\",
+                });
             }
             b',' => {
                 if let Some((_, has_comma)) = alternations.last_mut() {
@@ -348,7 +355,8 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
         }
         prev_is_slash = false;
     }
-    // If it is not closed, then it is not an alternation.
+    // Braces can be paired while a `{` stays unclosed here, because the pairing check also
+    // counts braces inside bracket expressions: in `{[}]`, the `}` belongs to `[}]`.
     for (alternation_start, _) in alternations {
         changes.push(StrOp::Insert {
             index: alternation_start,
@@ -385,6 +393,29 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
         pattern.insert_str(0, "**/");
     }
     Ok(pattern)
+}
+
+/// Returns `true` if every `{` in `pattern` is closed by a later `}` and every `}` closes an
+/// earlier `{`. Escaped braces are ignored, but braces inside bracket expressions such as `[{]`
+/// are counted, as in the reference implementation.
+fn are_braces_paired(pattern: &[u8]) -> bool {
+    let mut depth = 0usize;
+    let mut i = 0;
+    while i < pattern.len() {
+        match pattern[i] {
+            b'\\' => i += 1,
+            b'{' => depth += 1,
+            b'}' => {
+                let Some(new_depth) = depth.checked_sub(1) else {
+                    return false;
+                };
+                depth = new_depth;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    depth == 0
 }
 
 #[cfg(test)]
@@ -443,6 +474,12 @@ mod tests {
             "**/{*.{json,toml},biome.jsonc}"
         );
         assert_eq!(convert_valid_glob("{a,{b"), r"**/\{a,\{b");
+        assert_eq!(convert_valid_glob("{a,{b,c}"), r"**/\{a,\{b,c\}");
+        assert_eq!(convert_valid_glob("{a,b}}"), r"**/\{a,b\}\}");
+        assert_eq!(convert_valid_glob("}{a,b}"), r"**/\}\{a,b\}");
+        assert_eq!(convert_valid_glob("{[}],b}"), r"**/\{[}],b\}");
+        assert_eq!(convert_valid_glob("{[}]"), r"**/\{[}]");
+        assert_eq!(convert_valid_glob(r"{a,\{b}"), r"**/{a,\{b}");
         assert_eq!(convert_valid_glob("{a,{b}"), r"**/\{a,\{b\}");
         assert_eq!(convert_valid_glob("{**a"), r"**/\{*/**/*a");
         assert_eq!(convert_valid_glob("**}"), r"**/*\}");
@@ -672,6 +709,12 @@ mod tests {
         assert!(!is_matching(&glob, "b.i"));
         assert!(!is_matching(&glob, "c{d.i"));
         assert!(!is_matching(&glob, ".i"));
+
+        // unmatched brace next to a matched pair
+        glob = "{a,{b,c}.m".parse().unwrap();
+        assert!(is_matching(&glob, "{a,{b,c}.m"));
+        assert!(!is_matching(&glob, "{a,b.m"));
+        assert!(!is_matching(&glob, "{a,c.m"));
 
         // patterns nested in braces
         glob = "{some,a{*c,b}[ef]}.j".parse().unwrap();
