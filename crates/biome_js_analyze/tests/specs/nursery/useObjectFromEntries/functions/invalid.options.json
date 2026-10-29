@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useObjectFromEntries": {
+					"level": "error",
+					"options": {
+						"functions": ["myFromPairsFunction", "utils.object.foo"]
+					}
+				}
+			}
+		}
+	}
+}
