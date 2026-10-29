@@ -7,7 +7,11 @@ use biome_js_syntax::numbers::{
 };
 use biome_rowan::Text;
 
-use crate::globals::{GLOBAL_ANY_KEYWORD_ID, GLOBAL_UNKNOWN_ID};
+use crate::globals::{
+    GLOBAL_ANY_KEYWORD_ID, GLOBAL_BIGINT_KEYWORD_ID, GLOBAL_BOOLEAN_KEYWORD_ID,
+    GLOBAL_NULL_KEYWORD_ID, GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID,
+    GLOBAL_SYMBOL_KEYWORD_ID, GLOBAL_UNKNOWN_ID,
+};
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
 use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference};
@@ -68,6 +72,67 @@ pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTyp
             Some(RawTypeData::Unknown | RawTypeData::AnyKeyword)
         ),
     }
+}
+
+/// Limits the chain of raw references that [`may_resolve_to_raw_primitive`]
+/// follows.
+const MAX_RAW_REFERENCE_STEPS: usize = 16;
+
+/// Returns whether a collected type reference can resolve to a primitive type
+/// or a primitive literal, without resolving it.
+///
+/// `raw_types` is the module table that local references index. A reference by
+/// name without type arguments returns true, because it can name a type alias
+/// that only resolution expands. A chain of raw references longer than the
+/// step limit returns false.
+pub fn may_resolve_to_raw_primitive(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    let mut reference = reference;
+    for _ in 0..MAX_RAW_REFERENCE_STEPS {
+        let local = match reference {
+            TypeReference::Qualifier(qualifier) => return qualifier.type_parameters.is_empty(),
+            TypeReference::Import(_) => return false,
+            TypeReference::Resolved(id @ RawTypeId::Global(_)) => {
+                return [
+                    GLOBAL_BIGINT_KEYWORD_ID,
+                    GLOBAL_BOOLEAN_KEYWORD_ID,
+                    GLOBAL_NULL_KEYWORD_ID,
+                    GLOBAL_NUMBER_KEYWORD_ID,
+                    GLOBAL_STRING_KEYWORD_ID,
+                    GLOBAL_SYMBOL_KEYWORD_ID,
+                ]
+                .contains(id);
+            }
+            TypeReference::Resolved(RawTypeId::Local(local)) => local,
+        };
+        match raw_types.get(local.index()) {
+            Some(RawTypeData::Reference(next)) => reference = next,
+            Some(
+                RawTypeData::BigInt
+                | RawTypeData::Boolean
+                | RawTypeData::Null
+                | RawTypeData::Number
+                | RawTypeData::String
+                | RawTypeData::Symbol
+                | RawTypeData::Undefined,
+            ) => return true,
+            Some(RawTypeData::Literal(literal)) => {
+                return matches!(
+                    literal.as_ref(),
+                    crate::Literal::BigInt(_)
+                        | crate::Literal::Boolean(_)
+                        | crate::Literal::Number(_)
+                        | crate::Literal::String(_)
+                );
+            }
+            // A type alias reference collects as an instance of the named type.
+            Some(RawTypeData::InstanceOf(instance)) => {
+                return instance.type_parameters.is_empty()
+                    && matches!(&instance.ty, TypeReference::Qualifier(qualifier) if qualifier.type_parameters.is_empty());
+            }
+            _ => return false,
+        }
+    }
+    false
 }
 
 /// Retains the values of `ty` that can pass a runtime test.

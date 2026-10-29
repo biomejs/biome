@@ -311,9 +311,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         })
     }
 
-    /// Returns the test that calls to the guard declared at `function` report.
+    /// Returns the test that the guard declared at `function` applies to its
+    /// tested argument, whether a call reports it or asserts it.
     ///
-    /// Returns `None` when the guard's predicate names neither a primitive type
+    /// Returns `None` when the guard's target type is neither a primitive type
     /// nor a primitive literal.
     #[expect(
         clippy::wildcard_enum_match_arm,
@@ -321,8 +322,8 @@ impl<'db> ResolutionCtx<'db, '_> {
     )]
     fn guard_predicate(&mut self, function: TextRange) -> Option<NarrowingPredicate<'db>> {
         let info = self.js_info;
-        let (_, predicate) = guard_signature(&info.raw_types, &info.raw_binding_types, function)?;
-        let target = self.resolve(&predicate.ty);
+        let (_, contract) = guard_signature(&info.raw_types, &info.raw_binding_types, function)?;
+        let target = self.resolve(contract.target?);
         // An alias resolves to an instance of its target. The baseline flattens
         // that instance, as it does for a variable declared with the alias.
         let target = self.flow_baseline(target)?;

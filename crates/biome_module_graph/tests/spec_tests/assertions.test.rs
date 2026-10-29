@@ -435,11 +435,6 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         function exceptional(value: string | number) {
             try { assertString(value); /*try*/value; } finally {}
         }
-        function dynamic(value: string | number) {
-            assertString(value);
-            \u0065val('value = 0');
-            /*eval*/value;
-        }
         function writable(input: unknown): asserts input is string {}
         writable = (input): asserts input is string => {};
         function writtenCallee(value: string | number) {
@@ -460,13 +455,24 @@ fn assertions_respect_binding_identity_writes_and_existing_subject_restrictions(
         ("argumentWrite", "value", &[String, Number]),
         ("captured", "value", &[String, Number]),
         ("try", "value", &[String, Number]),
-        ("eval", "value", &[String, Number]),
         ("writtenCallee", "value", &[String, Number]),
     ] {
         let ty = normalized_type_at(&db, module, SOURCE, marker, expression);
         assert_variants(&db, ty, expected, marker);
     }
     assert_no_whole_module_inference(&db, &db.take_salsa_events());
+    // A direct `eval` can write any variable in scope, including the guard.
+    const DYNAMIC: &str = r#"
+        declare function assertString(input: unknown): asserts input is string;
+        function dynamic(value: string | number) {
+            assertString(value);
+            \u0065val('value = 0');
+            /*eval*/value;
+        }
+    "#;
+    let (db, module) = assertion_db(DYNAMIC);
+    let ty = normalized_type_at(&db, module, DYNAMIC, "eval", "value");
+    assert_variants(&db, ty, &[String, Number], "eval");
 }
 
 #[test]
@@ -520,7 +526,6 @@ fn unsupported_assertion_signatures_and_never_returns_do_not_add_facts() {
     use InferredTypeData::{Null, String};
     for declaration in [
         "declare function check(input: unknown): asserts input is string | number;",
-        "type Alias = string; declare function check(input: unknown): asserts input is Alias;",
         "declare function check(input: unknown): asserts input is Promise<void>;",
         "function check(this: unknown, input: unknown): asserts this is string {}",
         "function check(this: unknown, input: unknown): asserts this {}",
@@ -551,7 +556,6 @@ fn unsupported_assertion_targets_do_not_expand_large_baselines() {
         .collect::<Vec<_>>()
         .join(" | ");
     for target in [
-        "Alias",
         "string | number",
         "Promise<void>",
         "unknown",
@@ -562,7 +566,7 @@ fn unsupported_assertion_targets_do_not_expand_large_baselines() {
         "() => void",
     ] {
         let source = format!(
-            "type Alias = string; declare function check(input: unknown): asserts input is {target};\n\
+            "declare function check(input: unknown): asserts input is {target};\n\
              function f(value: {variants}) {{ /*before*/value; check(value); /*after*/value; }}"
         );
         let (db, module) = assertion_db(&source);
@@ -582,6 +586,32 @@ fn unsupported_assertion_targets_do_not_expand_large_baselines() {
             function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
             0,
             "{target}"
+        );
+    }
+}
+
+#[test]
+fn alias_assertion_targets_narrow_like_the_types_they_name() {
+    const SOURCE: &str = r#"
+        type Alias = string;
+        type Nested = Alias;
+        declare function assertAlias(input: unknown): asserts input is Alias;
+        declare function assertNested(input: unknown): asserts input is Nested;
+        function alias(value: string | number) {
+            assertAlias(value);
+            /*alias*/value;
+        }
+        function nested(value: string | number) {
+            assertNested(value);
+            /*nested*/value;
+        }
+    "#;
+    let (db, module) = assertion_db(SOURCE);
+    for marker in ["alias", "nested"] {
+        assert_eq!(
+            normalized_type_at(&db, module, SOURCE, marker, "value"),
+            InferredTypeData::String,
+            "{marker}"
         );
     }
 }
