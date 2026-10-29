@@ -233,7 +233,8 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
     let mut changes = Vec::new();
     let mut has_no_slashes = true;
     let mut prev_is_slash = true;
-    // Each entry is the index of an unclosed `{` and whether its alternation has a top-level comma.
+    // Each entry is the index of an unclosed `{` and whether a comma appears inside it,
+    // including inside nested braces.
     let mut alternations = Vec::new();
     while let Some((i, c)) = it.next() {
         match c {
@@ -318,6 +319,11 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
             }
             b'}' => {
                 if let Some((alternation_start, has_comma)) = alternations.pop() {
+                    // As in the reference implementation, a comma inside nested braces also makes
+                    // the enclosing braces an alternation: `{{js,ts}}` matches `js` and `ts`.
+                    if has_comma && let Some((_, parent_has_comma)) = alternations.last_mut() {
+                        *parent_has_comma = true;
+                    }
                     let range_candidate = &pattern[(alternation_start + 1)..i];
                     if let Some((start, end)) = range_candidate
                         .split_once("..")
@@ -468,6 +474,8 @@ mod tests {
         assert_eq!(convert_valid_glob("{a,b}{c}"), r"**/{a,b}\{c\}");
         assert_eq!(convert_valid_glob("{a,{b,c}}"), "**/{a,{b,c}}");
         assert_eq!(convert_valid_glob("{a,{b}}"), r"**/{a,\{b\}}");
+        assert_eq!(convert_valid_glob("{{js,ts}}"), "**/{{js,ts}}");
+        assert_eq!(convert_valid_glob("{a{b,c}}"), "**/{a{b,c}}");
         assert_eq!(convert_valid_glob("{a,{0..2}}"), "**/{a,{0,1,2}}");
         assert_eq!(
             convert_valid_glob("{*.{json,toml},biome.jsonc}"),
@@ -709,6 +717,13 @@ mod tests {
         assert!(!is_matching(&glob, "b.i"));
         assert!(!is_matching(&glob, "c{d.i"));
         assert!(!is_matching(&glob, ".i"));
+
+        // comma only inside nested braces
+        glob = "{{js,ts}}".parse().unwrap();
+        assert!(is_matching(&glob, "js"));
+        assert!(is_matching(&glob, "ts"));
+        assert!(!is_matching(&glob, "{js}"));
+        assert!(!is_matching(&glob, "{{js,ts}}"));
 
         // unmatched brace next to a matched pair
         glob = "{a,{b,c}.m".parse().unwrap();
