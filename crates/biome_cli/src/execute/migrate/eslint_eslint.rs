@@ -875,13 +875,13 @@ impl NoUnusedVarsOptions {
 }
 
 impl Deserializable for NoUnusedVarsOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         // The string form (`"all"` or `"local"`) only sets `vars`, which has no Biome equivalent.
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             return Some(Self::default());
         }
 
@@ -1006,12 +1006,12 @@ pub(crate) struct MaxStatementsOptions {
 }
 
 impl Deserializable for MaxStatementsOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Number {
+        if value.visitable_type(ctx)? == DeserializableType::Number {
             return Some(Self {
                 max: Deserializable::deserialize(ctx, value, name),
             });
@@ -1324,12 +1324,12 @@ impl From<SvelteNoUnnecessaryStateWrapOptions>
 #[derive(Debug)]
 pub(crate) struct OneOrMany<T>(pub(crate) Vec<T>);
 impl<T: Deserializable> Deserializable for OneOrMany<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Array {
+        if value.visitable_type(ctx)? == DeserializableType::Array {
             Vec::deserialize(ctx, value, name).map(Self)
         } else {
             T::deserialize(ctx, value, name).map(|item| Self(vec![item]))
