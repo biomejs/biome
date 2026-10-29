@@ -244,6 +244,9 @@ where
             if let ControlFlow::Break(br) = result {
                 return Some(br);
             }
+            if query_matcher.has_panicked() {
+                return None;
+            }
 
             // Finish all the active visitors, this is executed outside of the
             // phase runner as it needs mutable access to the service bag (the
@@ -443,6 +446,13 @@ where
                 };
 
                 visitor.visit(&event, ctx);
+                if self.query_matcher.has_panicked() {
+                    break;
+                }
+            }
+
+            if self.query_matcher.has_panicked() {
+                return self.flush_matches(None);
             }
 
             after_event(self)?;
@@ -555,7 +565,9 @@ where
                 continue;
             }
 
-            if range_match(self.range, entry.text_range) {
+            if matches!(&entry.rule, SignalRuleKey::Internal)
+                || range_match(self.range, entry.text_range)
+            {
                 // TODO: would be nice to remove suppressed instances, if any, before emitting
                 (self.emit_signal)(&*entry.signal)?;
             }

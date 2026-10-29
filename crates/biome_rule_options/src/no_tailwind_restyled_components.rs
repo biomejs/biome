@@ -56,12 +56,12 @@ impl Default for TailwindAllowedComponents {
 }
 
 impl Deserializable for TailwindAllowedComponents {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Name)
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::Names)
