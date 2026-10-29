@@ -1,3 +1,4 @@
+use crate::js_module_info::TsBindingReferenceExt;
 use biome_js_semantic::{Binding, JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
@@ -6,8 +7,8 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, unescape_js_identifier,
 };
 use biome_js_type_info::{
-    Function, FunctionParameter, RawTypeData, RawTypeId, ReturnType, TypeReference, TypeofKind,
-    may_resolve_to_raw_primitive,
+    Function, FunctionParameter, RawPrimitiveTarget, RawTypeData, RawTypeId, ReturnType,
+    TypeReference, TypeReferenceQualifier, TypeofKind, raw_primitive_target,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, Text, TextRange};
 use rustc_hash::FxHashMap;
@@ -234,7 +235,7 @@ impl<'a> GuardFunctions<'a> {
         let guard = match self.guards.get(&range) {
             Some(guard) => *guard,
             None => {
-                let guard = self.guard(&function);
+                let guard = self.guard(&function, model);
                 self.guards.insert(range, guard);
                 guard
             }
@@ -261,7 +262,7 @@ impl<'a> GuardFunctions<'a> {
     /// parameter has no default value, because a default replaces an
     /// `undefined` argument. A target type must be able to resolve to a
     /// primitive type or a primitive literal, the only targets that narrow.
-    fn guard(&self, function: &Binding) -> Option<Guard> {
+    fn guard(&self, function: &Binding, model: &SemanticModel) -> Option<Guard> {
         if self.has_dynamic_scope
             || function.is_imported()
             || !matches!(
@@ -279,7 +280,7 @@ impl<'a> GuardFunctions<'a> {
             return None;
         }
         let kind = match contract.target {
-            Some(target) if !may_resolve_to_raw_primitive(target, self.raw_types) => return None,
+            Some(target) if !self.may_resolve_to_primitive(target, model) => return None,
             Some(_) if contract.asserts => GuardKind::TypeAssertion,
             Some(_) => GuardKind::Predicate,
             None => GuardKind::TruthyAssertion,
@@ -351,6 +352,65 @@ impl<'a> GuardFunctions<'a> {
             return None;
         };
         parameter.initializer().is_none().then_some(guard)
+    }
+
+    /// Returns whether the raw guard `target` can resolve to a primitive type
+    /// or a primitive literal.
+    ///
+    /// A name continues with the type that a local type alias names. An
+    /// imported name can name an alias in another module, so it returns true.
+    /// Other names, such as interfaces, classes, enums, and global types, and
+    /// names qualified by a namespace return false.
+    fn may_resolve_to_primitive(&self, target: &TypeReference, model: &SemanticModel) -> bool {
+        let mut target = target;
+        for _ in 0..MAX_ALIAS_STEPS {
+            let qualifier = match raw_primitive_target(target, self.raw_types) {
+                RawPrimitiveTarget::Primitive => return true,
+                RawPrimitiveTarget::Other => return false,
+                RawPrimitiveTarget::Named(qualifier) => qualifier,
+            };
+            let Some(binding) = named_binding(qualifier, model) else {
+                return false;
+            };
+            if binding.is_imported() {
+                return true;
+            }
+            if !matches!(
+                binding.tree().declaration(),
+                Some(AnyJsBindingDeclaration::TsTypeAliasDeclaration(_))
+            ) {
+                return false;
+            }
+            let Some(aliased) = self.raw_binding_types.get(&binding.range()) else {
+                return false;
+            };
+            target = aliased;
+        }
+        false
+    }
+}
+
+/// Limits the chain of type aliases that a guard target follows.
+const MAX_ALIAS_STEPS: usize = 16;
+
+/// Returns the binding that `qualifier` names, or `None` for a name qualified
+/// by a namespace and for a name that no enclosing scope declares.
+fn named_binding(qualifier: &TypeReferenceQualifier, model: &SemanticModel) -> Option<Binding> {
+    let mut path = qualifier.path.iter();
+    let name = path.next()?;
+    if path.next().is_some() {
+        return None;
+    }
+    let mut scope = model.scope_from_id(qualifier.scope_id);
+    loop {
+        if let Some(binding) = scope
+            .get_binding_reference(name.text())
+            .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
+            .and_then(|id| model.binding_by_id(id))
+        {
+            return Some(binding);
+        }
+        scope = scope.parent()?;
     }
 }
 
