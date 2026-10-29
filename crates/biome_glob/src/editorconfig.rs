@@ -216,6 +216,8 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
     // Rust doesn't allow us to iterate and mutate a string at the same time.
     // Thus, we first gather all changes (operations) to perform on the pattern and
     // then we perform them in a second step.
+    // The changes are applied from the last position to the first, so an insertion never
+    // shifts a position that hasn't been applied yet.
     enum StrOp {
         Insert {
             index: usize,
@@ -353,14 +355,9 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
             content: r"\",
         });
     }
-    // Each change records an index into the original pattern, and applying a change shifts
-    // everything after it. Applying changes from the last index to the first keeps the
-    // remaining indexes valid.
-    //
-    // Several insertions can target the same index. For example, `**}` records `/*` and then
-    // `\` at the index of `}`, and the result must be `**/*\}`. Inserting at the same index
-    // pushes earlier insertions to the right, so applying them in reverse order of recording
-    // keeps them in recording order. The stable sort preserves that order.
+    // Changes are not recorded in position order: whether a `{` should be escaped is only known
+    // after later characters have recorded their own changes. The sort is stable so that
+    // insertions at the same position keep the order in which they were recorded.
     changes.sort_by_key(|change| match change {
         StrOp::Insert { index, .. } => *index,
         StrOp::ConvertNumericRange { indexes, .. } => indexes.start,
