@@ -15,23 +15,6 @@ pub use block_ext::{AnyYamlBlockScalar, AnyYamlEntryValue};
 pub use flow_ext::AnyYamlFlowScalar;
 pub use syntax_node::*;
 
-/// Text of `token`, excluding all trivia and removing quotes if `token` is a quoted scalar.
-///
-/// An unterminated quoted scalar only loses its opening quote. The text of a plain scalar
-/// excludes the blanks that end it, which its token includes when a line break follows them.
-pub fn inner_string_text(token: &YamlSyntaxToken) -> TokenText {
-    let text = token.token_text_trimmed();
-    let range = match token.kind() {
-        YamlSyntaxKind::SINGLE_QUOTED_LITERAL => range_without_quotes(&text, '\''),
-        YamlSyntaxKind::DOUBLE_QUOTED_LITERAL => range_without_quotes(&text, '"'),
-        YamlSyntaxKind::PLAIN_LITERAL => {
-            TextRange::up_to(text.trim_end_matches([' ', '\t']).text_len())
-        }
-        _ => return text,
-    };
-    text.slice(range)
-}
-
 /// Returns the range of `text` without its opening quote, and without its closing `quote` when
 /// it has one.
 fn range_without_quotes(text: &str, quote: char) -> TextRange {
@@ -134,15 +117,14 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
 /// assert_eq!(inner_string_text(&a), inner_string_text(&b));
 /// ```
 pub fn inner_string_text(token: &YamlSyntaxToken) -> TokenText {
-    let mut text = token.token_text_trimmed();
-    if matches!(
-        token.kind(),
-        YamlSyntaxKind::SINGLE_QUOTED_LITERAL | YamlSyntaxKind::DOUBLE_QUOTED_LITERAL
-    ) && text.starts_with(['"', '\''])
-    {
-        // SAFETY: a string literal that starts with a quote is terminated by its matching quote
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
-        text = text.slice(range);
-    }
-    text
+    let text = token.token_text_trimmed();
+    let range = match token.kind() {
+        YamlSyntaxKind::SINGLE_QUOTED_LITERAL => range_without_quotes(&text, '\''),
+        YamlSyntaxKind::DOUBLE_QUOTED_LITERAL => range_without_quotes(&text, '"'),
+        YamlSyntaxKind::PLAIN_LITERAL => {
+            TextRange::up_to(text.trim_end_matches([' ', '\t']).text_len())
+        }
+        _ => return text,
+    };
+    text.slice(range)
 }

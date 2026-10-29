@@ -18,30 +18,12 @@ mod schema;
 mod tests;
 mod value;
 
-use crate::{
-    DefaultDeserializationContext, Deserializable, DeserializationContext,
-    DeserializationDiagnostic, Deserialized,
-};
+use crate::{DefaultDeserializationContext, Deserializable, Deserialized};
 use anchors::Anchors;
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_yaml_parser::parse_yaml;
 use biome_yaml_syntax::YamlRoot;
 use value::YamlValue;
-
-struct YamlDeserializationContext {
-    inner: DefaultDeserializationContext,
-    anchors: Anchors,
-}
-
-impl DeserializationContext for YamlDeserializationContext {
-    fn id(&self) -> Option<&str> {
-        self.inner.id()
-    }
-
-    fn report(&mut self, diagnostic: DeserializationDiagnostic) {
-        self.inner.report(diagnostic);
-    }
-}
 
 /// It attempts to parse and deserialize a source file in YAML. Diagnostics from the parse phase
 /// are consumed and joined with the diagnostics emitted during the deserialization.
@@ -101,13 +83,10 @@ pub fn deserialize_from_yaml_ast<Output: Deserializable>(
         // The parser already reported the bogus document
         return Deserialized::new(None, Vec::new());
     };
-    let mut ctx = YamlDeserializationContext {
-        inner: DefaultDeserializationContext::new(id),
-        anchors: Anchors::new(document),
-    };
+    let mut ctx = DefaultDeserializationContext::with_state(id, Anchors::new(document));
     let deserialized = Output::deserialize(&mut ctx, &value, "");
     Deserialized {
-        diagnostics: ctx.inner.diagnostics,
+        diagnostics: ctx.diagnostics,
         deserialized,
     }
 }

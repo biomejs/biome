@@ -15,19 +15,20 @@ publish              = true
 development = ["biome_deserialize", "biome_deserialize_macros"]
 
 [dependencies]
-biome_console     = { workspace = true }
-biome_diagnostics = { workspace = true }
-biome_json_parser = { workspace = true }
-biome_json_syntax = { workspace = true }
-biome_rowan       = { workspace = true }
-biome_yaml_parser = { workspace = true, optional = true }
-biome_yaml_syntax = { workspace = true, optional = true }
-camino            = { workspace = true, optional = true }
-enumflags2        = { workspace = true }
-indexmap          = { workspace = true, optional = true }
-serde             = { workspace = true, optional = true }
-serde_json        = { workspace = true, optional = true }
-smallvec          = { workspace = true, optional = true }
+biome_console       = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_json_parser   = { workspace = true }
+biome_json_syntax   = { workspace = true }
+biome_rowan         = { workspace = true }
+biome_unicode_table = { workspace = true, optional = true }
+biome_yaml_parser   = { workspace = true, optional = true }
+biome_yaml_syntax   = { workspace = true, optional = true }
+camino              = { workspace = true, optional = true }
+enumflags2          = { workspace = true }
+indexmap            = { workspace = true, optional = true }
+serde               = { workspace = true, optional = true }
+serde_json          = { workspace = true, optional = true }
+smallvec            = { workspace = true, optional = true }
 
 [dev-dependencies]
 # Enables the optional data formats, so that their tests run
@@ -39,7 +40,11 @@ camino   = ["dep:camino"]
 indexmap = ["dep:indexmap"]
 serde    = ["dep:serde", "dep:serde_json"]
 smallvec = ["dep:smallvec"]
-yaml     = ["dep:biome_yaml_parser", "dep:biome_yaml_syntax"]
+yaml     = [
+  "dep:biome_unicode_table",
+  "dep:biome_yaml_parser",
+  "dep:biome_yaml_syntax",
+]
 
 [lints]
 workspace = true

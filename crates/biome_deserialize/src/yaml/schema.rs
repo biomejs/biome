@@ -1,7 +1,11 @@
 //! The type of scalars: null, boolean, number, or string, resolved with the
 //! [core schema](https://yaml.org/spec/1.2.2/#103-core-schema) and its tags.
 use crate::TextNumber;
-use biome_rowan::{AstNodeList, SyntaxKind, Text, TextRange, TextSize, TokenText};
+use biome_rowan::{AstNodeList, SyntaxKind, Text, TokenText};
+use biome_unicode_table::{
+    Dispatch::{DIG, IDT, ZER},
+    lookup_byte,
+};
 use biome_yaml_syntax::{AnyYamlFlowScalar, YamlPropertyList, YamlSyntaxKind};
 
 /// The value of a flow scalar.
@@ -135,16 +139,17 @@ fn owned_number(text: &str) -> TextNumber {
 
 /// Removes the leading `+` of a number, which `serde_json` doesn't parse.
 fn without_plus_sign(text: TokenText) -> TokenText {
-    if text.starts_with('+') {
-        let len = text.len();
-        text.slice(TextRange::new(TextSize::from(1), len))
-    } else {
-        text
-    }
+    text.strip_prefix('+').unwrap_or(text)
 }
 
 fn is_digits(text: &str, radix: u32) -> bool {
-    !text.is_empty() && text.chars().all(|c| c.is_digit(radix))
+    !text.is_empty()
+        && text.bytes().all(|byte| match lookup_byte(byte) {
+            ZER => true,
+            DIG => u32::from(byte - b'0') < radix,
+            IDT => radix == 16 && matches!(byte, b'a'..=b'f' | b'A'..=b'F'),
+            _ => false,
+        })
 }
 
 /// Whether `text` matches `[-+]?[0-9]+`.
