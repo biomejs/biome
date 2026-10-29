@@ -1,0 +1,70 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseNever/delimited_inline.md
+---
+
+# Input
+
+```md
+Some words before the strong text, **stop and tell
+them** after the strong text.
+
+Some words before the italic text, _stop and tell
+them_ after the italic text.
+
+Some words before the deleted text, ~~stop and tell
+them~~ after the deleted text.
+
+- List item with enough words, **strong text that
+  continues** on the next line.
+
+> Quote with enough words in it, **strong text that
+> continues** on the next line.
+
+Some words before the strong text, ***stop and tell
+them*** after the strong text.
+
+Paragraph with *foo ** bar* text.
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "never",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+Some words before the strong text, **stop and tell them** after the strong text.
+
+Some words before the italic text, _stop and tell them_ after the italic text.
+
+Some words before the deleted text, ~~stop and tell them~~ after the deleted text.
+
+- List item with enough words, **strong text that continues** on the next line.
+
+> Quote with enough words in it, **strong text that
+> continues** on the next line.
+
+Some words before the strong text, **_stop and tell them_** after the strong text.
+
+Paragraph with _foo ** bar_ text.
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: Some words before the deleted text, ~~stop and tell them~~ after the deleted text.
+   12: Some words before the strong text, **_stop and tell them_** after the strong text.
+```
