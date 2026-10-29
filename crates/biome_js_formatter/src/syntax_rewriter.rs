@@ -838,6 +838,8 @@ mod tests {
             "(a?.b)!`template`",
             "(a?.b).c = 1",
             "(a?.b)!.c = 1",
+            "(a?.b)[c] = 1",
+            "(a?.b)![c] = 1",
         ] {
             assert!(
                 keeps_parentheses(source),
