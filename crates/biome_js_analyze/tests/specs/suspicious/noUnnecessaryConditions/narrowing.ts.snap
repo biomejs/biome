@@ -108,6 +108,8 @@ narrowing.ts:16:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -125,6 +127,8 @@ narrowing.ts:18:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   
   i The value's type can never be truthy, so this check is redundant.
   
+  i Remove the condition and the code it guards, or check the value you meant to test.
+  
 
 ```
 
@@ -141,6 +145,8 @@ narrowing.ts:24:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
     26 │ }
   
   i The value's type can never be truthy, so this check is redundant.
+  
+  i Remove the condition and the code it guards, or check the value you meant to test.
   
 
 ```
