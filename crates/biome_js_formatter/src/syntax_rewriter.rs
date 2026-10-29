@@ -153,9 +153,7 @@ impl JsFormatSyntaxRewriter {
                     || has_type_cast_comment_or_skipped(&l_paren.leading_trivia())
                     || prev_token.is_some_and(|prev_token| has_type_cast_comment_or_skipped(&prev_token.trailing_trivia()))
                     || r_paren.leading_trivia().has_skipped()
-                    // Don't remove parentheses if it is an optional chain inside a chain that doesn't start by an optional token
-                    // (a?.b).c
-                    || (parenthesized.syntax().parent().and_then(AnyJsOptionalChainExpression::cast).is_some_and(|chain| chain.optional_chain_token().is_none()) && AnyJsOptionalChainExpression::cast_ref(&inner).is_some_and(|x| x.is_optional_chain()))
+                    || optional_chain_needs_parens(parenthesized.syntax(), &inner)
                 {
                     return VisitNodeSignal::Traverse(parenthesized.into_syntax());
                 } else {
@@ -451,6 +449,90 @@ impl SyntaxRewriter for JsFormatSyntaxRewriter {
     }
 }
 
+/// Returns `true` if `inner` is an optional chain and removing the parentheses around it would
+/// join it to the expression that continues it. Neither a non-null assertion nor type arguments
+/// end an optional chain, so this looks through `!` on both sides of the parentheses, and through
+/// type arguments and other parentheses (which may be removed too) after them.
+///
+/// The joined chain either short-circuits more than the original, or doesn't parse:
+///
+/// ```js
+/// (a?.b).c;        // `a?.b.c` returns `undefined` instead of throwing when `a` is nullish
+/// (a?.b)!.c;       // same for `a?.b!.c`, and for `a?.b!()`
+/// ((a?.b)).c;      // same once both parentheses are removed
+/// new (a?.b)!();   // `new a?.b!()` doesn't parse
+/// new (a?.b)!<T>(); // `new a?.b!<T>()` doesn't parse
+/// (a?.b)`t`;       // `a?.b`t`` doesn't parse
+/// (a?.b).c = 1;    // `a?.b.c = 1` doesn't parse
+/// ```
+fn optional_chain_needs_parens(parenthesized: &JsSyntaxNode, inner: &JsSyntaxNode) -> bool {
+    if !is_optional_chain_through_non_null(inner) {
+        return false;
+    }
+
+    let mut chain_element = parenthesized.clone();
+    let mut parent = chain_element.parent();
+    while let Some(wrapper) = parent.as_ref().filter(|node| {
+        matches!(
+            node.kind(),
+            JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+                | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+                | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+        )
+    }) {
+        chain_element = wrapper.clone();
+        parent = wrapper.parent();
+    }
+    let Some(parent) = parent else {
+        return false;
+    };
+
+    let continues_chain = |object: Option<AnyJsExpression>| {
+        object.is_some_and(|object| object.syntax() == &chain_element)
+    };
+    if let Some(chain) = AnyJsOptionalChainExpression::cast_ref(&parent) {
+        return chain.optional_chain_token().is_none() && continues_chain(chain.object().ok());
+    }
+    match parent.kind() {
+        JsSyntaxKind::JS_NEW_EXPRESSION => continues_chain(
+            biome_js_syntax::JsNewExpression::unwrap_cast(parent)
+                .callee()
+                .ok(),
+        ),
+        JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
+            continues_chain(biome_js_syntax::JsTemplateExpression::unwrap_cast(parent).tag())
+        }
+        JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => continues_chain(
+            biome_js_syntax::JsStaticMemberAssignment::unwrap_cast(parent)
+                .object()
+                .ok(),
+        ),
+        JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => continues_chain(
+            biome_js_syntax::JsComputedMemberAssignment::unwrap_cast(parent)
+                .object()
+                .ok(),
+        ),
+        _ => false,
+    }
+}
+
+/// Returns `true` if `expression` is an optional chain, including one that a non-null assertion
+/// wraps or interrupts, such as `a?.b!` or `a?.b!.c`.
+fn is_optional_chain_through_non_null(expression: &JsSyntaxNode) -> bool {
+    let mut current = AnyJsExpression::cast_ref(expression);
+    while let Some(expression) = current {
+        current = match expression {
+            AnyJsExpression::TsNonNullAssertionExpression(non_null) => non_null.expression().ok(),
+            expression => match AnyJsOptionalChainExpression::cast(expression.into_syntax()) {
+                Some(chain) if chain.is_optional() => return true,
+                Some(chain) => chain.object().ok(),
+                None => return false,
+            },
+        };
+    }
+    false
+}
+
 fn has_type_cast_comment_or_skipped(trivia: &JsSyntaxTrivia) -> bool {
     trivia.pieces().any(|piece| {
         if let Some(comment) = piece.as_comments() {
@@ -471,8 +553,8 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse, parse_module};
     use biome_js_syntax::{
         JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsIdentifierExpression,
-        JsLogicalExpression, JsSequenceExpression, JsStringLiteralExpression, JsSyntaxNode,
-        JsUnaryExpression, JsxTagExpression,
+        JsLogicalExpression, JsParenthesizedExpression, JsSequenceExpression,
+        JsStringLiteralExpression, JsSyntaxNode, JsUnaryExpression, JsxTagExpression,
     };
     use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
@@ -728,6 +810,47 @@ mod tests {
             source_map.trimmed_source_text(binary.syntax()),
             "(/* left */ a + b /* right */)"
         );
+    }
+
+    #[test]
+    fn optional_chain_parentheses() {
+        let keeps_parentheses = |source: &str| {
+            let tree = parse(source, JsFileSource::ts(), JsParserOptions::default()).syntax();
+            let transformed = JsFormatSyntaxRewriter::default().transform(tree);
+            transformed
+                .descendants()
+                .any(|node| JsParenthesizedExpression::can_cast(node.kind()))
+        };
+
+        for source in [
+            "(a?.b).c",
+            "(a?.b)!.c",
+            "(a?.b!).c",
+            "(a?.b!.c).d",
+            "(a?.b)![c]",
+            "(a?.b)!()",
+            "(a?.b!)()",
+            "new (a?.b)!()",
+            "new ((a?.b)!<c>)()",
+            "new ((a?.b!))<c>()",
+            "((a?.b)).c",
+            "(a?.b)`template`",
+            "(a?.b)!`template`",
+            "(a?.b).c = 1",
+            "(a?.b)!.c = 1",
+        ] {
+            assert!(
+                keeps_parentheses(source),
+                "removed the parentheses in `{source}`"
+            );
+        }
+
+        for source in ["(a?.b)?.c", "x = (a?.b)!", "x[(a?.b)]"] {
+            assert!(
+                !keeps_parentheses(source),
+                "kept the parentheses in `{source}`"
+            );
+        }
     }
 
     #[test]

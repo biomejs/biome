@@ -1,0 +1,14 @@
+(a?.b)!.c;
+(a?.b)![c];
+(a?.b!).c;
+new (a?.b)!();
+(a?.b)`template`;
+(a?.b)!`template`;
+(a?.b).c = 1;
+(a?.b)!.c = 1;
+(a?.b)!.c++;
+(a?.b)!();
+x = (a?.b)!;
+((a?.b)).c;
+new ((a?.b)!<c>)();
+new ((a?.b!))<c>();
