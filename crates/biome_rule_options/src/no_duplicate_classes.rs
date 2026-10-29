@@ -78,15 +78,15 @@ impl Deserializable for NoDuplicateClassesOptions {
 }
 
 struct NoDuplicateClassesOptionsVisitor;
-impl DeserializationVisitor for NoDuplicateClassesOptionsVisitor {
+impl<S> DeserializationVisitor<S> for NoDuplicateClassesOptionsVisitor {
     type Output = NoDuplicateClassesOptions;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext,
-        members: &mut MapMembers<'_>,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        members: &mut MapMembers<'_, S>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
