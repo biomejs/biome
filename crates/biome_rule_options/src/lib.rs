@@ -396,6 +396,7 @@ pub mod no_vue_deprecated_listeners;
 pub mod no_vue_deprecated_router_link_tag_prop;
 pub mod no_vue_deprecated_scope_attribute;
 pub mod no_vue_deprecated_scoped_slots;
+pub mod no_vue_deprecated_v_bind_sync;
 pub mod no_vue_duplicate_keys;
 pub mod no_vue_import_compiler_macros;
 pub mod no_vue_lifecycle_after_await;
