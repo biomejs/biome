@@ -1,10 +1,11 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
-    AnyMdInline, MarkdownSyntaxKind, MdInlineItalic, MdInlineItalicFields, MdReferenceImage,
-    emphasis_ext::MdItalicFence,
+    AnyMdInline, MarkdownSyntaxKind, MdInlineEmphasis, MdInlineItalic, MdInlineItalicFields,
+    MdReferenceImage,
+    emphasis_ext::{MdEmphasisFence, MdItalicFence},
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxResult};
 use biome_unicode_table::is_unicode_punctuation;
 
 #[derive(Debug, Clone, Default)]
@@ -83,37 +84,11 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         let l_fence = l_fence?;
         let r_fence = r_fence?;
 
-        // Inside reference images the alt text doubles as the reference label.
-        // Normalizing `*` → `_` would change the label and break reference resolution.
-        // E.g. `![foo *bar*]` with `[foo *bar*]: url` must keep `*`.
-        let inside_ref_image = node
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .any(|a| MdReferenceImage::can_cast(a.kind()));
-
-        if inside_ref_image || self.should_keep_fences {
+        if is_inside_reference_image(node) || self.should_keep_fences {
             return write!(f, [l_fence.format(), content.format(), r_fence.format()]);
         }
 
-        // Swap the outer italic and inner strong fences in `***...***` to produce
-        // `**_..._**`. This applies only when text exists on both sides and
-        // underscores can delimit the inner italic; joined and paragraph-wide
-        // spans keep their original fences.
-        let has_surrounding_text = l_fence
-            .prev_token()
-            .is_some_and(|token| token.text().chars().any(|char| !char.is_whitespace()))
-            && r_fence
-                .next_token()
-                .is_some_and(|token| token.text().chars().any(|char| !char.is_whitespace()));
-        let mut content_items = content.iter();
-        if node.fence()? == MdItalicFence::Star
-            && resolve_target_kind(node) == MarkdownSyntaxKind::UNDERSCORE
-            && has_surrounding_text
-            && let Some(AnyMdInline::MdInlineEmphasis(emphasis)) = content_items.next()
-            && content_items.next().is_none()
-            && emphasis.fence()? == biome_markdown_syntax::emphasis_ext::MdEmphasisFence::DoubleStar
-        {
+        if let Some(emphasis) = swapped_strong_emphasis(node)? {
             let emphasis_l_fence = emphasis.l_fence()?;
             let emphasis_r_fence = emphasis.r_fence()?;
             f.context()
@@ -190,27 +165,76 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             }
         }
 
-        // Use `*` if inside another italic or next to a word character; otherwise `_`.
-        let mut target_kind = if has_ancestor_italic(node) {
-            MarkdownSyntaxKind::STAR
-        } else {
-            resolve_target_kind(node)
-        };
-        // If content has a `MdTextual` node containing the target char (e.g. a
-        // plain-text `_` inside `*foo _bar*`), keep the original fence to avoid
-        // that text being re-parsed as a delimiter.
-        if content_has_char(&content, target_kind) {
-            target_kind = l_fence.kind();
-        }
-
+        let target_kind = normalized_fence_kind(node)?;
         write_fence(&l_fence, target_kind, f)?;
         write!(f, [content.format()])?;
         write_fence(&r_fence, target_kind, f)
     }
 }
 
+/// Returns the strong emphasis whose fences swap with this italic's fences.
+///
+/// Swaps the outer italic and inner strong fences in `***...***` to produce `**_..._**`. This
+/// applies only when text exists on both sides and underscores can delimit the inner italic;
+/// joined and paragraph-wide spans keep their original fences.
+pub(crate) fn swapped_strong_emphasis(
+    node: &MdInlineItalic,
+) -> SyntaxResult<Option<MdInlineEmphasis>> {
+    let l_fence = node.l_fence()?;
+    let r_fence = node.r_fence()?;
+    let has_surrounding_text = l_fence
+        .prev_token()
+        .is_some_and(|token| token.text().chars().any(|char| !char.is_whitespace()))
+        && r_fence
+            .next_token()
+            .is_some_and(|token| token.text().chars().any(|char| !char.is_whitespace()));
+    let mut content_items = node.content().iter();
+    if node.fence()? == MdItalicFence::Star
+        && resolve_target_kind(node) == MarkdownSyntaxKind::UNDERSCORE
+        && has_surrounding_text
+        && let Some(AnyMdInline::MdInlineEmphasis(emphasis)) = content_items.next()
+        && content_items.next().is_none()
+        && emphasis.fence()? == MdEmphasisFence::DoubleStar
+    {
+        return Ok(Some(emphasis));
+    }
+
+    Ok(None)
+}
+
+/// Returns whether the italic is part of a reference image's alt text.
+///
+/// The alt text doubles as the reference label, so normalizing `*` to `_` would change the label
+/// and break reference resolution. For example, `![foo *bar*]` with `[foo *bar*]: url` must keep
+/// `*`.
+pub(crate) fn is_inside_reference_image(node: &MdInlineItalic) -> bool {
+    node.syntax()
+        .ancestors()
+        .skip(1)
+        .any(|a| MdReferenceImage::can_cast(a.kind()))
+}
+
+/// Returns the delimiter kind for an italic printed without a special-case layout.
+///
+/// Uses `*` if inside another italic or next to a word character; otherwise `_`. If the content
+/// has a `MdTextual` node containing the target char (e.g. a plain-text `_` inside `*foo _bar*`),
+/// the original fence is kept to avoid that text being re-parsed as a delimiter.
+pub(crate) fn normalized_fence_kind(node: &MdInlineItalic) -> SyntaxResult<MarkdownSyntaxKind> {
+    let target_kind = if has_ancestor_italic(node) {
+        MarkdownSyntaxKind::STAR
+    } else {
+        resolve_target_kind(node)
+    };
+
+    if content_has_char(&node.content(), target_kind) {
+        Ok(node.l_fence()?.kind())
+    } else {
+        Ok(target_kind)
+    }
+}
+
 /// Write a fence token, reusing it if it already matches the target kind.
-fn write_fence(
+pub(crate) fn write_fence(
     fence: &biome_markdown_syntax::MarkdownSyntaxToken,
     target_kind: MarkdownSyntaxKind,
     f: &mut MarkdownFormatter,
