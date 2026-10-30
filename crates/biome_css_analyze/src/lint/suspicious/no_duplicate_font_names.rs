@@ -7,6 +7,7 @@ use crate::fonts::{
     AnyCssFontValue, CssFontComponent, CssFontValue, find_font_family, font_components,
     is_font_family_keyword,
 };
+use crate::utils::{DuplicateGroup, collect_duplicates};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -16,7 +17,6 @@ use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
-use std::collections::HashSet;
 
 declare_lint_rule! {
     /// Disallow duplicate names in font-family lists.
@@ -72,28 +72,30 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateFontNames {
     type Query = Ast<CssGenericProperty>;
-    type State = (CssFontValue, CssFontValue);
-    type Signals = Option<Self::State>;
+    type State = DuplicateGroup<CssFontValue>;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateFontNamesOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let property_name = node.name().ok()?.to_trimmed_text();
+        let Ok(property_name) = node.name() else {
+            return Box::default();
+        };
+        let property_name = property_name.to_trimmed_text();
         let property_name = property_name.to_ascii_lowercase_cow();
 
         let is_font_family = property_name == "font-family";
         let is_font = property_name == "font";
 
         if !is_font_family && !is_font {
-            return None;
+            return Box::default();
         }
 
-        let mut family_names: HashSet<CssFontValue> = HashSet::new();
-        let components = font_components(node.value().ok()?)?;
-        let is_comma_separated_pair = matches!(
-            components.as_slice(),
-            [_, CssFontComponent::Comma, _]
-        );
+        let Some(components) = node.value().ok().and_then(font_components) else {
+            return Box::default();
+        };
+        let is_comma_separated_pair =
+            matches!(components.as_slice(), [_, CssFontComponent::Comma, _]);
         let font_families = find_font_family(&components);
 
         if is_font_family
@@ -102,47 +104,57 @@ impl Rule for NoDuplicateFontNames {
             && is_monospace_keyword(first)
             && is_monospace_keyword(second)
         {
-            return None;
+            return Box::default();
         }
 
+        let mut families = Vec::new();
         for css_value in font_families {
-            let value = css_value.to_string()?;
-
             // check the case: "Arial", Arial
             // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
             // e.g "sans-serif", sans-serif
-            if css_value.is_identifier() && is_font_family_keyword(&value) && is_font {
+            if is_font
+                && css_value.is_identifier()
+                && css_value
+                    .to_string()
+                    .is_some_and(|value| is_font_family_keyword(&value))
+            {
                 continue;
             }
 
-            if let Some(duplicate) = family_names.get(&css_value) {
-                return Some((css_value.clone(), duplicate.clone()));
-            } else {
-                family_names.insert(css_value.clone());
-            }
+            let range = css_value.range();
+            families.push((css_value.clone(), css_value, range));
         }
-        None
+
+        collect_duplicates(families)
     }
 
-    fn diagnostic(
-        _: &RuleContext<Self>,
-        (this, duplicate): &Self::State,
-    ) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                this.range(),
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateGroup {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.to_string()?;
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The font name "<Emphasis>{name}</Emphasis>" is used more than once in the same property."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Duplicate font names are redundant and unnecessary: "<Emphasis>{ this.to_string()? }</Emphasis>
+                    "The font name "<Emphasis>{name}</Emphasis>" is repeated here."
                 },
-            )
-            .detail(duplicate.range(), markup! {
-                "This is where the duplicate font name is found:"
-            })
-            .note(markup! {
-                "Remove duplicate font names within the property."
-            }),
-        )
+            );
+        }
+
+        Some(diagnostic.note(markup! {
+            "Duplicate font names are redundant and unnecessary. Remove them from the property."
+        }))
     }
 }
 

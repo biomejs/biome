@@ -12,9 +12,16 @@ expression: invalidMultipleMedia.css
 
 # Diagnostics
 ```
-invalidMultipleMedia.css:3:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidMultipleMedia.css:1:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Each @import should be unique unless differing by media queries.
+  × The stylesheet url("a.css") is imported more than once.
+  
+  > 1 │ @import url("a.css") tv, projection;
+      │  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ @import url("a.css") mobile;
+    3 │ @import url("a.css") tv;
+  
+  i The same stylesheet is imported again here.
   
     1 │ @import url("a.css") tv, projection;
     2 │ @import url("a.css") mobile;
@@ -22,9 +29,11 @@ invalidMultipleMedia.css:3:2 lint/suspicious/noDuplicateAtImportRules ━━━�
       │  ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
   
+  i Each @import should be unique unless differing by media queries.
+  
   i Importing the same stylesheet more than once is redundant and can cause an extra request.
   
-  i Consider removing one of the duplicated imports.
+  i Consider removing the duplicated imports.
   
 
 ```

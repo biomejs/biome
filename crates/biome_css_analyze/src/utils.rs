@@ -14,10 +14,52 @@ use biome_css_syntax::{
     CssDeclarationWithSemicolon, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssFunctionAtRule,
     ScssNestingDeclaration,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
+use rustc_hash::FxHashMap;
 use std::cmp::Ordering;
+use std::hash::Hash;
 use std::iter::successors;
+
+/// An item that is declared more than once in the same scope.
+#[derive(Debug)]
+pub struct DuplicateGroup<N> {
+    /// The name as written at its first occurrence.
+    pub(crate) name: N,
+    /// The first occurrence.
+    pub(crate) first: TextRange,
+    /// Every later occurrence, in source order. Never empty.
+    pub(crate) duplicates: Vec<TextRange>,
+}
+
+/// Groups `items` by key and returns one [DuplicateGroup] per key that appears more than once.
+///
+/// Each item is a `(key, name, range)` tuple. The result is ordered by the first occurrence of each key.
+pub(crate) fn collect_duplicates<K: Hash + Eq, N>(
+    items: impl IntoIterator<Item = (K, N, TextRange)>,
+) -> Box<[DuplicateGroup<N>]> {
+    let mut indexes: FxHashMap<K, usize> = FxHashMap::default();
+    let mut groups: Vec<DuplicateGroup<N>> = Vec::new();
+
+    for (key, name, range) in items {
+        match indexes.get(&key) {
+            Some(&index) => groups[index].duplicates.push(range),
+            None => {
+                indexes.insert(key, groups.len());
+                groups.push(DuplicateGroup {
+                    name,
+                    first: range,
+                    duplicates: Vec::new(),
+                });
+            }
+        }
+    }
+
+    groups
+        .into_iter()
+        .filter(|group| !group.duplicates.is_empty())
+        .collect()
+}
 
 pub fn is_css_variable(value: &str) -> bool {
     value.to_ascii_lowercase_cow().starts_with("var(")
