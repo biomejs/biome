@@ -761,7 +761,7 @@ root = true
 indent_style = space
 indent_size = 4
 
-[{*.{json,toml},biome.jsonc}]
+[{*.{js,json},biome.jsonc}]
 indent_size = 2
 "#,
     );
