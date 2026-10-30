@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importAllReferences.ts
+---
+# Input
+```ts
+import { describe, expect, test } from "bun:test";
+
+describe("math", () => {
+	test("adds", () => {
+		expect(1 + 1).toBe(2);
+	});
+});
+
+test("top level", () => {
+	expect(true).toBe(true);
+});
+
+```
+
+# Diagnostics
+```
+importAllReferences.ts:4:2 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    3 │ describe("math", () => {
+  > 4 │ 	test("adds", () => {
+      │ 	^^^^
+    5 │ 		expect(1 + 1).toBe(2);
+    6 │ 	});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i Safe fix: Use it instead.
+  
+     1    │ - import·{·describe,·expect,·test·}·from·"bun:test";
+        1 │ + import·{·describe,·expect,·test·as·it·}·from·"bun:test";
+     2  2 │   
+     3  3 │   describe("math", () => {
+     4    │ - → test("adds",·()·=>·{
+        4 │ + → it("adds",·()·=>·{
+     5  5 │       expect(1 + 1).toBe(2);
+     6  6 │     });
+     7  7 │   });
+     8  8 │   
+     9    │ - test("top·level",·()·=>·{
+        9 │ + it("top·level",·()·=>·{
+    10 10 │     expect(true).toBe(true);
+    11 11 │   });
+  
+
+```
+
+```
+importAllReferences.ts:9:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+     7 │ });
+     8 │ 
+   > 9 │ test("top level", () => {
+       │ ^^^^
+    10 │ 	expect(true).toBe(true);
+    11 │ });
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i Safe fix: Use it instead.
+  
+     1    │ - import·{·describe,·expect,·test·}·from·"bun:test";
+        1 │ + import·{·describe,·expect,·test·as·it·}·from·"bun:test";
+     2  2 │   
+     3  3 │   describe("math", () => {
+     4    │ - → test("adds",·()·=>·{
+        4 │ + → it("adds",·()·=>·{
+     5  5 │       expect(1 + 1).toBe(2);
+     6  6 │     });
+     7  7 │   });
+     8  8 │   
+     9    │ - test("top·level",·()·=>·{
+        9 │ + it("top·level",·()·=>·{
+    10 10 │     expect(true).toBe(true);
+    11 11 │   });
+  
+
+```

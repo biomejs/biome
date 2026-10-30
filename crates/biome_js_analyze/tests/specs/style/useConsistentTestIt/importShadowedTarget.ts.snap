@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importShadowedTarget.ts
+---
+# Input
+```ts
+import { test } from "vitest";
+test("first", () => {});
+for (const it of cases) {
+	test(it.name, () => {});
+}
+
+```
+
+# Diagnostics
+```
+importShadowedTarget.ts:2:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { test } from "vitest";
+  > 2 │ test("first", () => {});
+      │ ^^^^
+    3 │ for (const it of cases) {
+    4 │ 	test(it.name, () => {});
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i Safe fix: Use it instead.
+  
+    1   │ - import·{·test·}·from·"vitest";
+    2   │ - test("first",·()·=>·{});
+      1 │ + import·{·test,·test·as·it·}·from·"vitest";
+      2 │ + it("first",·()·=>·{});
+    3 3 │   for (const it of cases) {
+    4 4 │   	test(it.name, () => {});
+  
+
+```
+
+```
+importShadowedTarget.ts:4:2 lint/style/useConsistentTestIt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    2 │ test("first", () => {});
+    3 │ for (const it of cases) {
+  > 4 │ 	test(it.name, () => {});
+      │ 	^^^^
+    5 │ }
+    6 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+
+```
