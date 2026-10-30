@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid-other-package.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { createApp, defineComponent } from "other";
+
+createApp({});
+createApp({});
+defineComponent({});
+defineComponent({});
+
+```

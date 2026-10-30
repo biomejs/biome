@@ -3041,6 +3041,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueOneComponentPerFile",
+        TypeId::of::<
+            biome_rule_options::use_vue_one_component_per_file::UseVueOneComponentPerFileOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useVueTemplateRef",
         TypeId::of::<biome_rule_options::use_vue_template_ref::UseVueTemplateRefOptions>(),
     ));

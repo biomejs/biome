@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+import { defineComponent, h } from "vue";
+
+const Badge = defineComponent({
+  render: () => h("span", "New"),
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup.vue:5:15 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    3 │ import { defineComponent, h } from "vue";
+    4 │ 
+  > 5 │ const Badge = defineComponent({
+      │               ^^^^^^^^^^^^^^^^^
+  > 6 │   render: () => h("span", "New"),
+  > 7 │ });
+      │ ^^
+    8 │ </script>
+    9 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

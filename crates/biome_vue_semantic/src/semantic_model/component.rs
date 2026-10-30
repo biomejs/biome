@@ -141,6 +141,7 @@ impl Collector<'_, '_> {
             let component =
                 self.builder
                     .add_component(ComponentKind::Setup, range, self.input.snippet);
+            self.builder.component_mut(component).is_defined_in_place = true;
             self.output.components.push(component);
             self.collect_module_bindings(Some(component));
             self.collect_setup_statements(module.items().iter(), component);
@@ -233,8 +234,13 @@ impl Collector<'_, '_> {
         let component =
             self.builder
                 .add_component(ComponentKind::OptionsObject, range, self.input.snippet);
+        self.builder.component_mut(component).is_defined_in_place = matches!(
+            expression.inner_expression(),
+            Some(AnyJsExpression::JsObjectExpression(_))
+        );
         self.output.components.push(component);
         self.output.default_export = Some(component);
+        self.builder.component_mut(component).is_default_export = true;
         self.collect_options_expression(&expression, component);
     }
 
@@ -294,6 +300,7 @@ impl Collector<'_, '_> {
         self.output.components.push(component);
         if is_default_export {
             self.output.default_export = Some(component);
+            self.builder.component_mut(component).is_default_export = true;
         }
 
         let arguments: Vec<AnyJsExpression> = call
@@ -303,6 +310,24 @@ impl Collector<'_, '_> {
             .flat_map(|arguments| arguments.args().iter().flatten())
             .filter_map(|argument| argument.as_any_js_expression().cloned())
             .collect();
+
+        let is_object = |expression: &AnyJsExpression| {
+            matches!(
+                expression.inner_expression(),
+                Some(AnyJsExpression::JsObjectExpression(_))
+            )
+        };
+        self.builder.component_mut(component).is_defined_in_place = match kind {
+            // createApp({ ... }), but not createApp(App, rootProps)
+            ComponentKind::CreateApp => arguments.first().is_some_and(is_object),
+            // defineComponent({ ... }) or defineComponent((props) => { ... }, options)
+            _ => {
+                arguments.last().is_some_and(is_object)
+                    || arguments
+                        .first()
+                        .is_some_and(|setup| expression_function(setup).is_some())
+            }
+        };
 
         match kind {
             // createApp({ props: [...] })

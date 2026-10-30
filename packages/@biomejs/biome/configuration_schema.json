@@ -9197,6 +9197,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueOneComponentPerFile": {
+					"description": "Enforce that each file defines at most one Vue component.\nSee https://biomejs.dev/linter/rules/use-vue-one-component-per-file",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueOneComponentPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTemplateRef": {
 					"description": "Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.\nSee https://biomejs.dev/linter/rules/use-vue-template-ref",
 					"anyOf": [
@@ -16798,6 +16805,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueOneComponentPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueOneComponentPerFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTemplateRefOptions": {
 			"type": "object",
 			"properties": {
@@ -22293,6 +22309,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueOneComponentPerFileConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueOneComponentPerFileOptions" }
+			]
+		},
+		"UseVueOneComponentPerFileOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

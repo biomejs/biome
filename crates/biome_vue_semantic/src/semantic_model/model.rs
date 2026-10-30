@@ -730,6 +730,12 @@ pub(crate) struct ComponentData {
     pub(crate) macro_options: MacroOptions,
     /// The function the `data` option is written as.
     pub(crate) data_function: Option<TextRange>,
+    /// Whether the definition is written in place rather than reused from a
+    /// value defined elsewhere.
+    pub(crate) is_defined_in_place: bool,
+    /// Whether the component is the default export of the plain `<script>`
+    /// block of a single-file component.
+    pub(crate) is_default_export: bool,
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
@@ -1983,6 +1989,26 @@ impl Component {
     pub fn data_function_range(&self) -> Option<TextRange> {
         let range = self.row().data_function?;
         Some(self.data.local(range, self.row().snippet))
+    }
+
+    /// Whether the definition is written where the component is created: a
+    /// `<script setup>` block, an options object, or the setup function
+    /// passed to `defineComponent()`.
+    ///
+    /// `false` when the component reuses a value defined elsewhere, as in
+    /// `createApp(App)` or `export default options`.
+    pub fn is_defined_in_place(&self) -> bool {
+        self.row().is_defined_in_place
+    }
+
+    /// Whether the component is the default export of the plain `<script>`
+    /// block of a single-file component, as in `export default { ... }` or
+    /// `export default defineComponent({ ... })`.
+    ///
+    /// Unlike [`Self::has_template`], this is known when the model is built
+    /// from the block alone.
+    pub fn is_default_export(&self) -> bool {
+        self.row().is_default_export
     }
 
     /// For a `<script setup>` component, the component defined by the default

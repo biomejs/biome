@@ -66,6 +66,65 @@ fn options_export_only_in_vue_files() {
 }
 
 #[test]
+fn definitions_written_in_place() {
+    fn in_place(code: &str, source: JsFileSource) -> Vec<bool> {
+        js_model(code, source)
+            .components()
+            .map(|component| component.is_defined_in_place())
+            .collect()
+    }
+    let vue_import = r#"import { createApp, defineComponent } from "vue";"#;
+    let js = |calls: &str| format!("{vue_import} {calls}");
+
+    assert_eq!(
+        in_place(
+            &js("createApp({}); createApp(App); createApp(App, { msg: 'hi' });"),
+            JsFileSource::js_module()
+        ),
+        [true, false, false]
+    );
+    assert_eq!(
+        in_place(
+            &js(
+                "defineComponent({}); defineComponent(() => () => null); defineComponent(setup, {}); defineComponent(() => () => null, options); defineComponent(Foo);"
+            ),
+            JsFileSource::js_module()
+        ),
+        [true, true, true, true, false]
+    );
+    assert_eq!(in_place("export default {}", JsFileSource::vue()), [true]);
+    assert_eq!(
+        in_place("export default options", JsFileSource::vue()),
+        [false]
+    );
+    assert_eq!(in_place("const count = 0;", setup_ts()), [true]);
+}
+
+#[test]
+fn default_export_of_the_plain_block() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+const Helper = defineComponent({});
+export default defineComponent({ components: { Helper } });"#,
+        JsFileSource::vue(),
+    );
+    let defaults: Vec<_> = model
+        .components()
+        .map(|component| component.is_default_export())
+        .collect();
+    assert_eq!(defaults, [false, true]);
+
+    let model = js_model("export default { name: 'A' }", JsFileSource::vue());
+    assert!(
+        model
+            .components()
+            .next()
+            .expect("a component")
+            .is_default_export()
+    );
+}
+
+#[test]
 fn every_prop_form_has_the_same_shape() {
     let options = js_model(
         "export default { props: { enabled: { type: Boolean, default: true } } }",
