@@ -11,7 +11,7 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunction, AnyJsParameter,
     JsAssignmentExpression,
     JsCallExpression, JsFunctionExpression, JsInitializerClause, JsPropertyClassMember,
-    JsPropertyObjectMember, JsSyntaxNode, JsSyntaxToken,
+    JsPropertyObjectMember, JsSyntaxNode, JsSyntaxToken, JsxTagExpression,
 };
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 use biome_rule_options::no_component_hook_factories::NoComponentHookFactoriesOptions;
@@ -115,6 +115,16 @@ impl Rule for NoComponentHookFactories {
                     AnyPotentialReactComponentDeclaration::JsMethodObjectMember(_)
                         | AnyPotentialReactComponentDeclaration::JsMethodClassMember(_)
                 ) {
+                    return None;
+                }
+
+                // Capitalised object keys are often fixed API names, so require the function to render JSX.
+                if matches!(decl, AnyPotentialReactComponentDeclaration::JsPropertyObjectMember(_))
+                    && !syntax
+                        .descendants()
+                        .skip(1)
+                        .any(|node| JsxTagExpression::can_cast(node.kind()))
+                {
                     return None;
                 }
 
