@@ -1,0 +1,22 @@
+/* should generate diagnostics */
+window.removeEventListener("scroll", handler.bind(abc));
+window.removeEventListener("scroll", this.handler.bind(abc));
+window.removeEventListener("click", () => {});
+window.removeEventListener("keydown", function () {});
+el.removeEventListener("click", function handleClick() {});
+el.removeEventListener("click", async () => {});
+el.removeEventListener("click", (e) => { e.preventDefault(); });
+el.removeEventListener("click", (e) => e.preventDefault());
+el.removeEventListener("mouseover", fn.bind(abc));
+el?.removeEventListener("mouseover", fn.bind(abc));
+el.removeEventListener("mouseout", function (e) {});
+el?.removeEventListener("mouseout", function (e) {});
+el.removeEventListener("mouseout", function (e) {}, true);
+el.removeEventListener("click", function (e) {}, ...moreArguments);
+el.removeEventListener(() => {}, () => {}, () => {});
+el.removeEventListener("click", this.handler["bind"](this));
+el.removeEventListener("click", this.handler[`bind`](this));
+el.removeEventListener("click", (() => {}));
+el.removeEventListener("click", (handler.bind)(this));
+(el.removeEventListener)("click", () => {});
+el.removeEventListener("click", obj?.handler.bind(this));

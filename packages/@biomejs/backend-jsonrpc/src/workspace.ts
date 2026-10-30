@@ -3058,6 +3058,11 @@ export interface Nursery {
 	 */
 	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
 	/**
+	 * Disallow passing a newly created function to removeEventListener().
+	 * See https://biomejs.dev/linter/rules/no-invalid-remove-event-listener
+	 */
+	noInvalidRemoveEventListener?: NoInvalidRemoveEventListenerConfiguration;
+	/**
 	 * Disallow this in places where it is undefined.
 	 * See https://biomejs.dev/linter/rules/no-invalid-this
 	 */
@@ -6434,6 +6439,9 @@ export type NoInvalidFileInputAcceptConfiguration =
 export type NoInvalidPropertyInitValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidPropertyInitValueOptions;
+export type NoInvalidRemoveEventListenerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidRemoveEventListenerOptions;
 export type NoInvalidThisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidThisOptions;
@@ -9324,6 +9332,10 @@ export interface RuleWithNoInvalidFileInputAcceptOptions {
 export interface RuleWithNoInvalidPropertyInitValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoInvalidPropertyInitValueOptions;
+}
+export interface RuleWithNoInvalidRemoveEventListenerOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidRemoveEventListenerOptions;
 }
 export interface RuleWithNoInvalidThisOptions {
 	level: RulePlainConfiguration;
@@ -12567,6 +12579,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
+export type NoInvalidRemoveEventListenerOptions = {};
 export type NoInvalidThisOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
@@ -14720,6 +14733,7 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
+	| "lint/nursery/noInvalidRemoveEventListener"
 	| "lint/nursery/noInvalidThis"
 	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
