@@ -7,24 +7,24 @@ expression: nested_tail.invalid.css
 /* should generate diagnostics */
 
 /* Nested and explicit selectors with the same resolved target are compared. */
-a b:hover {}
+a b:hover { color: red; }
 b {
-  &:hover {}
+  &:hover { color: red; }
 }
 
 /* A nested selector expanded through a parent selector list is reported once. */
 .high .target {
-  #theme &:hover {}
+  #theme &:hover { color: red; }
 }
 .low-a.one .target,
 .low-b.two .target,
 .low-c.three .target {
-  &:hover {}
+  &:hover { color: red; }
 }
 
 /* Combinators inside functional pseudo-classes do not split the target compound. */
-.parent .target:has(.x > .y) {}
-.target:has(.x > .y) {}
+.parent .target:has(.x > .y) { color: red; }
+.target:has(.x > .y) { color: red; }
 
 ```
 
@@ -34,9 +34,9 @@ nested_tail.invalid.css:6:3 lint/style/noDescendingSpecificity ━━━━━�
 
   ! Descending specificity selector found. This selector specificity is (0, 1, 1)
   
-    4 │ a b:hover {}
+    4 │ a b:hover { color: red; }
     5 │ b {
-  > 6 │   &:hover {}
+  > 6 │   &:hover { color: red; }
       │   ^^^^^^^
     7 │ }
     8 │ 
@@ -44,10 +44,10 @@ nested_tail.invalid.css:6:3 lint/style/noDescendingSpecificity ━━━━━�
   i This selector specificity is (0, 1, 2)
   
     3 │ /* Nested and explicit selectors with the same resolved target are compared. */
-  > 4 │ a b:hover {}
+  > 4 │ a b:hover { color: red; }
       │ ^^^^^^^^^
     5 │ b {
-    6 │   &:hover {}
+    6 │   &:hover { color: red; }
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   
@@ -61,7 +61,7 @@ nested_tail.invalid.css:16:3 lint/style/noDescendingSpecificity ━━━━━�
   
     14 │ .low-b.two .target,
     15 │ .low-c.three .target {
-  > 16 │   &:hover {}
+  > 16 │   &:hover { color: red; }
        │   ^^^^^^^
     17 │ }
     18 │ 
@@ -70,7 +70,32 @@ nested_tail.invalid.css:16:3 lint/style/noDescendingSpecificity ━━━━━�
   
      9 │ /* A nested selector expanded through a parent selector list is reported once. */
     10 │ .high .target {
-  > 11 │   #theme &:hover {}
+  > 11 │   #theme &:hover { color: red; }
+       │   ^^^^^^^^^^^^^^
+    12 │ }
+    13 │ .low-a.one .target,
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+nested_tail.invalid.css:20:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 4, 0)
+  
+    19 │ /* Combinators inside functional pseudo-classes do not split the target compound. */
+  > 20 │ .parent .target:has(.x > .y) { color: red; }
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ .target:has(.x > .y) { color: red; }
+    22 │ 
+  
+  i This selector specificity is (1, 3, 0)
+  
+     9 │ /* A nested selector expanded through a parent selector list is reported once. */
+    10 │ .high .target {
+  > 11 │   #theme &:hover { color: red; }
        │   ^^^^^^^^^^^^^^
     12 │ }
     13 │ .low-a.one .target,
@@ -86,18 +111,19 @@ nested_tail.invalid.css:21:1 lint/style/noDescendingSpecificity ━━━━━�
   ! Descending specificity selector found. This selector specificity is (0, 3, 0)
   
     19 │ /* Combinators inside functional pseudo-classes do not split the target compound. */
-    20 │ .parent .target:has(.x > .y) {}
-  > 21 │ .target:has(.x > .y) {}
+    20 │ .parent .target:has(.x > .y) { color: red; }
+  > 21 │ .target:has(.x > .y) { color: red; }
        │ ^^^^^^^^^^^^^^^^^^^^
     22 │ 
   
-  i This selector specificity is (0, 4, 0)
+  i This selector specificity is (1, 3, 0)
   
-    19 │ /* Combinators inside functional pseudo-classes do not split the target compound. */
-  > 20 │ .parent .target:has(.x > .y) {}
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ .target:has(.x > .y) {}
-    22 │ 
+     9 │ /* A nested selector expanded through a parent selector list is reported once. */
+    10 │ .high .target {
+  > 11 │   #theme &:hover { color: red; }
+       │   ^^^^^^^^^^^^^^
+    12 │ }
+    13 │ .low-a.one .target,
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   
