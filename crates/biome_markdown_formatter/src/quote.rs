@@ -193,32 +193,53 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
                     prev_content = PrevContentBlock::Other;
                 }
 
-                AnyMdBlock::MdQuotePrefix(prefix)
-                    if prev_content == PrevContentBlock::Paragraph
-                        && iter.peek().is_some_and(|(_, next)| next.is_fenced_block()) =>
-                {
-                    prev_content = PrevContentBlock::Other;
+                // The source prefixes would take the indentation that the
+                // previous block, such as a list, leaves for the next line.
+                // Printing the line prefix from the root keeps the `>` in
+                // place. A line holds one prefix per quote level.
+                //
+                // When the quote's empty first line is removed, its first
+                // content line takes the place of the quote's own prefix. The
+                // markers of the enclosing containers are already printed, so
+                // only this quote's marker continues the line.
+                AnyMdBlock::MdQuotePrefix(prefix) => {
+                    let continues_quote_start = index > 0 && index == quote_trim_range.start;
+                    let mut prefixes = vec![prefix.clone()];
+                    while let Some((_, AnyMdBlock::MdQuotePrefix(prefix))) =
+                        iter.next_if(|(index, next)| {
+                            quote_trim_range.contains(index)
+                                && matches!(next, AnyMdBlock::MdQuotePrefix(_))
+                        })
+                    {
+                        prefixes.push(prefix);
+                    }
                     let line_prefix = quote_line_prefix(self.content.syntax())?;
-                    let prefix = prefix.clone();
+                    let trailing_space = !iter.peek().is_some_and(|(_, next)| next.is_newline());
                     let entry = format_with(move |f| {
+                        for prefix in &prefixes {
+                            write!(
+                                f,
+                                [prefix.format().with_options(FormatMdQuotePrefixOptions {
+                                    should_remove: true,
+                                })]
+                            )?;
+                        }
+                        if continues_quote_start {
+                            write!(f, [token(">")])?;
+                            if trailing_space {
+                                write!(f, [space()])?;
+                            }
+                            return Ok(());
+                        }
                         write!(
                             f,
-                            [
-                                prefix.format().with_options(FormatMdQuotePrefixOptions {
-                                    should_remove: true,
-                                }),
-                                dedent_to_root(&format_args![
-                                    hard_line_break(),
-                                    line_prefix.format(true)
-                                ])
-                            ]
+                            [dedent_to_root(&format_args![
+                                hard_line_break(),
+                                line_prefix.format(trailing_space)
+                            ])]
                         )
                     });
                     joiner.entry(&entry);
-                }
-
-                AnyMdBlock::MdQuotePrefix(prefix) => {
-                    joiner.entry(&prefix.format());
                 }
 
                 _ => {
