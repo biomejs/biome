@@ -296,6 +296,16 @@ impl<'db> InferredType<'db> {
         matches!(self.data, TypeData::InstanceOf(instance) if instance.ty(self.db).is_array_class(self.db))
     }
 
+    /// Returns whether every variant of this type is an indexed collection:
+    /// an array, a tuple, a typed array, or an iterator that provides `some()`.
+    ///
+    /// Returns `false` when a variant is not an indexed collection or cannot be
+    /// resolved conclusively.
+    pub fn is_all_indexed_collection(self) -> bool {
+        self.try_all_variants_match(|data| data.is_indexed_collection_class(self.db))
+            .unwrap_or(false)
+    }
+
     /// Returns `Some(true)` for arrays whose element type resolves to a
     /// `Promise` or `PromiseLike` instance, and `Some(false)` for conclusive
     /// non-matches.

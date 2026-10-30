@@ -36,6 +36,39 @@ pub type ReferenceResolver<'db, 'resolver> =
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
+/// Built-in classes whose instances provide an array-like `some()` method.
+///
+/// Sorted for binary search.
+const INDEXED_COLLECTION_CLASS_NAMES: &[&str] = &[
+    "BigInt64Array",
+    "BigUint64Array",
+    "Float16Array",
+    "Float32Array",
+    "Float64Array",
+    "Int16Array",
+    "Int32Array",
+    "Int8Array",
+    "ReadonlyArray",
+    "Uint16Array",
+    "Uint32Array",
+    "Uint8Array",
+    "Uint8ClampedArray",
+];
+
+/// Built-in interfaces that represent iterators with an array-like `some()`.
+///
+/// Sorted for binary search.
+const INDEXED_COLLECTION_INTERFACE_NAMES: &[&str] = &[
+    "ArrayIterator",
+    "IterableIterator",
+    "Iterator",
+    "IteratorObject",
+    "MapIterator",
+    "ReadonlyArray",
+    "SetIterator",
+    "StringIterator",
+];
+
 /// Expands `local` and any supporting-type handle that it resolves to.
 ///
 /// Supporting types are ordered so that each only refers to earlier entries,
@@ -686,6 +719,33 @@ impl<'db> TypeData<'db> {
     pub fn is_array_class(self, db: &'db dyn TypeDb) -> bool {
         self == Self::GlobalType(ARRAY_ID_GLOBAL_TYPE_ID)
             || self.is_builtin_class_named(db, "Array")
+    }
+
+    pub fn is_indexed_collection_class(self, db: &'db dyn TypeDb) -> bool {
+        if self.is_array_class(db) {
+            return true;
+        }
+
+        match self.expand_canonical_global(db) {
+            Self::Tuple(_) => true,
+            Self::Class(class) if class.is_builtin(db) => {
+                class.name(db).as_ref().is_some_and(|name| {
+                    INDEXED_COLLECTION_CLASS_NAMES
+                        .binary_search(&name.text())
+                        .is_ok()
+                })
+            }
+            Self::Interface(interface) => INDEXED_COLLECTION_INTERFACE_NAMES
+                .binary_search(&interface.name(db).text())
+                .is_ok(),
+            Self::InstanceOf(instance) => instance.ty(db).is_indexed_collection_class(db),
+            Self::TypeOperator(operator)
+                if operator.operator(db) == raw::TypeOperator::Readonly =>
+            {
+                operator.ty(db).is_indexed_collection_class(db)
+            }
+            _ => false,
+        }
     }
 
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {

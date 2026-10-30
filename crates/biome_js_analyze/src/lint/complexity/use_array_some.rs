@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
+use crate::services::typed::Typed;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -54,6 +55,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("prefer-array-some").inspired()],
+        domains: &[RuleDomain::Types],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -82,7 +84,7 @@ pub enum UseArraySomeState {
 }
 
 impl Rule for UseArraySome {
-    type Query = Ast<JsCallExpression>;
+    type Query = Typed<JsCallExpression>;
     type State = UseArraySomeState;
     type Signals = Option<Self::State>;
     type Options = UseArraySomeOptions;
@@ -90,6 +92,10 @@ impl Rule for UseArraySome {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
         let method_name = call_method_name(call)?;
+
+        if !has_indexed_collection_receiver(ctx, call) {
+            return None;
+        }
 
         if method_name == "filter" {
             return detect_filter_length_pattern(call);
@@ -220,6 +226,30 @@ fn call_method_name(call: &JsCallExpression) -> Option<String> {
     let member_name = member.member().ok()?;
     let name = member_name.as_js_name()?;
     Some(name.value_token().ok()?.text_trimmed().to_string())
+}
+
+fn call_receiver(call: &JsCallExpression) -> Option<AnyJsExpression> {
+    let callee = call.callee().ok()?;
+    let member = callee.as_js_static_member_expression()?;
+    member.object().ok()
+}
+
+/// Returns `true` unless the receiver is known to be something other than an
+/// array, a typed array, or an iterator that provides `some()`.
+///
+/// Inference may be unable to resolve the receiver, in which case the rule keeps
+/// its previous behavior and reports the call.
+fn has_indexed_collection_receiver(
+    ctx: &RuleContext<UseArraySome>,
+    call: &JsCallExpression,
+) -> bool {
+    let Some(receiver) = call_receiver(call) else {
+        return false;
+    };
+    let Some(ty) = ctx.type_of_expression(&receiver) else {
+        return true;
+    };
+    !ty.is_inferred() || ty.is_any_or_unknown_keyword() || ty.is_all_indexed_collection()
 }
 
 fn detect_filter_length_pattern(call: &JsCallExpression) -> Option<UseArraySomeState> {
