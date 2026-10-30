@@ -1,14 +1,17 @@
 use crate::comments::is_type_comment;
 use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType, JsLanguage,
-    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia, misc_ext::AnyJsParenthesized,
+    AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType,
+    JsComputedMemberAssignment, JsLanguage, JsLogicalExpression, JsNewExpression,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxTrivia, JsTemplateExpression,
+    misc_ext::AnyJsParenthesized,
 };
 use biome_rowan::{
     AstNode, SyntaxKind, SyntaxRewriter, SyntaxToken, TextSize, VisitNodeSignal,
     chain_trivia_pieces,
 };
 use std::collections::BTreeSet;
+use std::iter;
 
 pub(super) fn transform(root: JsSyntaxNode) -> (JsSyntaxNode, TransformSourceMap) {
     let mut rewriter = JsFormatSyntaxRewriter::with_offset(root.text_range_with_trivia().start());
@@ -153,7 +156,7 @@ impl JsFormatSyntaxRewriter {
                     || has_type_cast_comment_or_skipped(&l_paren.leading_trivia())
                     || prev_token.is_some_and(|prev_token| has_type_cast_comment_or_skipped(&prev_token.trailing_trivia()))
                     || r_paren.leading_trivia().has_skipped()
-                    || optional_chain_needs_parens(parenthesized.syntax(), &inner)
+                    || optional_chain_needs_parens(&parenthesized, &inner)
                 {
                     return VisitNodeSignal::Traverse(parenthesized.into_syntax());
                 } else {
@@ -457,80 +460,68 @@ impl SyntaxRewriter for JsFormatSyntaxRewriter {
 /// The joined chain either short-circuits more than the original, or doesn't parse:
 ///
 /// ```js
-/// (a?.b).c;        // `a?.b.c` returns `undefined` instead of throwing when `a` is nullish
-/// (a?.b)!.c;       // same for `a?.b!.c`, and for `a?.b!()`
-/// ((a?.b)).c;      // same once both parentheses are removed
-/// new (a?.b)!();   // `new a?.b!()` doesn't parse
+/// (a?.b).c;         // `a?.b.c` returns `undefined` instead of throwing when `a` is nullish
+/// (a?.b)!.c;        // same for `a?.b!.c`, and for `a?.b!()`
+/// ((a?.b)).c;       // same once both parentheses are removed
+/// new (a?.b)!();    // `new a?.b!()` doesn't parse
 /// new (a?.b)!<T>(); // `new a?.b!<T>()` doesn't parse
-/// (a?.b)`t`;       // `a?.b`t`` doesn't parse
-/// (a?.b).c = 1;    // `a?.b.c = 1` doesn't parse
+/// (a?.b)`t`;        // `a?.b`t`` doesn't parse
+/// (a?.b).c = 1;     // `a?.b.c = 1` doesn't parse
 /// ```
-fn optional_chain_needs_parens(parenthesized: &JsSyntaxNode, inner: &JsSyntaxNode) -> bool {
-    if !is_optional_chain_through_non_null(inner) {
+fn optional_chain_needs_parens(parenthesized: &AnyJsParenthesized, inner: &JsSyntaxNode) -> bool {
+    if !AnyJsExpression::cast_ref(inner).is_some_and(is_optional_chain_through_non_null) {
         return false;
     }
 
-    // The outermost of the parentheses and the wrappers around them, and the node containing it
-    let Some((chain_element, parent)) = parenthesized
-        .ancestors()
-        .zip(parenthesized.ancestors().skip(1))
-        .find(|(_, parent)| {
-            !matches!(
-                parent.kind(),
-                JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
-                    | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
-                    | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
-            )
-        })
-    else {
-        return false;
-    };
-
-    let continues_chain = |object: Option<AnyJsExpression>| {
-        object.is_some_and(|object| object.syntax() == &chain_element)
-    };
-    if let Some(chain) = AnyJsOptionalChainExpression::cast_ref(&parent) {
-        return chain.optional_chain_token().is_none() && continues_chain(chain.object().ok());
-    }
-    match parent.kind() {
-        JsSyntaxKind::JS_NEW_EXPRESSION => continues_chain(
-            biome_js_syntax::JsNewExpression::unwrap_cast(parent)
-                .callee()
-                .ok(),
-        ),
-        JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
-            continues_chain(biome_js_syntax::JsTemplateExpression::unwrap_cast(parent).tag())
+    let mut chain_element = parenthesized.syntax().clone();
+    for ancestor in parenthesized.syntax().ancestors().skip(1) {
+        if !matches!(
+            ancestor.kind(),
+            JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+                | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+                | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+        ) {
+            return continues_optional_chain(&ancestor, &chain_element);
         }
-        JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => continues_chain(
-            biome_js_syntax::JsStaticMemberAssignment::unwrap_cast(parent)
-                .object()
-                .ok(),
-        ),
-        JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => continues_chain(
-            biome_js_syntax::JsComputedMemberAssignment::unwrap_cast(parent)
-                .object()
-                .ok(),
-        ),
-        _ => false,
+        chain_element = ancestor;
     }
+    false
+}
+
+/// Returns `true` if `parent` continues an optional chain from its child `chain_element`: as the
+/// object of a member or call expression without its own `?.`, a `new` callee, a template tag, or
+/// the object of a member assignment.
+fn continues_optional_chain(parent: &JsSyntaxNode, chain_element: &JsSyntaxNode) -> bool {
+    let object = if let Some(chain) = AnyJsOptionalChainExpression::cast_ref(parent) {
+        if chain.optional_chain_token().is_some() {
+            return false;
+        }
+        chain.object().ok()
+    } else if let Some(new_expression) = JsNewExpression::cast_ref(parent) {
+        new_expression.callee().ok()
+    } else if let Some(template) = JsTemplateExpression::cast_ref(parent) {
+        template.tag()
+    } else if let Some(assignment) = JsStaticMemberAssignment::cast_ref(parent) {
+        assignment.object().ok()
+    } else if let Some(assignment) = JsComputedMemberAssignment::cast_ref(parent) {
+        assignment.object().ok()
+    } else {
+        None
+    };
+    object.is_some_and(|object| object.syntax() == chain_element)
 }
 
 /// Returns `true` if `expression` is an optional chain, including one that a non-null assertion
 /// wraps or interrupts, such as `a?.b!` or `a?.b!.c`.
-fn is_optional_chain_through_non_null(expression: &JsSyntaxNode) -> bool {
-    std::iter::successors(
-        AnyJsExpression::cast_ref(expression),
-        |expression| match expression {
-            AnyJsExpression::TsNonNullAssertionExpression(non_null) => non_null.expression().ok(),
-            expression => AnyJsOptionalChainExpression::cast_ref(expression.syntax())?
-                .object()
-                .ok(),
-        },
-    )
-    .any(|expression| {
-        AnyJsOptionalChainExpression::cast_ref(expression.syntax())
-            .is_some_and(|chain| chain.is_optional())
+fn is_optional_chain_through_non_null(expression: AnyJsExpression) -> bool {
+    iter::successors(Some(expression), |expression| match expression {
+        AnyJsExpression::TsNonNullAssertionExpression(non_null) => non_null.expression().ok(),
+        expression => AnyJsOptionalChainExpression::cast_ref(expression.syntax())?
+            .object()
+            .ok(),
     })
+    .filter_map(|expression| AnyJsOptionalChainExpression::cast(expression.into_syntax()))
+    .any(|chain| chain.is_optional())
 }
 
 fn has_type_cast_comment_or_skipped(trivia: &JsSyntaxTrivia) -> bool {
