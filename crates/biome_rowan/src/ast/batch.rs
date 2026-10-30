@@ -4,11 +4,7 @@ use crate::{
 };
 use biome_text_edit::{TextEdit, TextEditBuilder};
 use biome_text_size::{TextRange, TextSize};
-use std::{
-    cmp,
-    collections::BinaryHeap,
-    iter::{empty, once},
-};
+use std::{cmp, collections::BinaryHeap, iter::empty};
 
 pub trait BatchMutationExt<L>: AstNode<Language = L>
 where
@@ -524,6 +520,9 @@ where
             // overwrite each other, so the total number of the finalized
             // text mutations will only be less.
             Vec::with_capacity(changes.len());
+        // Until a text mutation overwrites another one, every range in
+        // `text_mutation_list` ends before the next one starts
+        let mut has_overwritten_text_mutation = false;
 
         // Collect all commit changes
         while let Some(CommitChange {
@@ -578,44 +577,103 @@ where
                 // Collect text mutations, this has to be done before the detach below,
                 // or we'll lose the "deleted_text_range" info
                 if with_text_range_and_edit {
-                    for (new_node_slot, new_node, is_from_action) in &modifications {
-                        if !is_from_action {
-                            continue;
-                        }
-                        let deleted_text_range = match curr_parent.slots().nth(*new_node_slot) {
-                            Some(SyntaxSlot::Node(node)) => node.text_range_with_trivia(),
-                            Some(SyntaxSlot::Token(token)) => token.text_range(),
-                            Some(SyntaxSlot::Empty { index }) => {
-                                TextRange::new(index.into(), index.into())
-                            }
-                            None => continue,
-                        };
-                        // We use binary search to keep the text mutations in order
-                        match text_mutation_list
-                            .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
+                    let mutations: Vec<_> = modifications
+                        .iter()
+                        .filter(|(.., is_from_action)| *is_from_action)
+                        .filter_map(|(new_node_slot, new_node, _)| {
+                            let deleted_text_range =
+                                match curr_parent.slots().nth(*new_node_slot)? {
+                                    SyntaxSlot::Node(node) => node.text_range_with_trivia(),
+                                    SyntaxSlot::Token(token) => token.text_range(),
+                                    SyntaxSlot::Empty { index } => {
+                                        TextRange::new(index.into(), index.into())
+                                    }
+                                };
+                            Some((deleted_text_range, new_node.clone()))
+                        })
+                        .collect();
+
+                    // `mutations` is in descending order, so inserting them one by one
+                    // shifts the ones inserted before, which is quadratic in the number
+                    // of changed siblings. While no mutation has been overwritten, every
+                    // range in the list ends before the next one starts, so a range that
+                    // overlaps none of them has a single insertion point. If every range
+                    // in `mutations` also ends before the previous one starts, inserting
+                    // them one by one is the same as merging the reversed `mutations`
+                    // into the list at those points.
+                    let is_strictly_descending = mutations.windows(2).all(|pair| {
+                        let (next, prev) = (pair[1].0, pair[0].0);
+                        next.ordering(prev) == cmp::Ordering::Less
+                            && prev.ordering(next) == cmp::Ordering::Greater
+                    });
+                    let insertion_points = (!has_overwritten_text_mutation
+                        && mutations.len() > 1
+                        && is_strictly_descending)
+                        .then(|| {
+                            mutations
+                                .iter()
+                                .rev()
+                                .map(|(range, _)| {
+                                    text_mutation_list
+                                        .binary_search_by(|(existing, _)| existing.ordering(*range))
+                                        .err()
+                                })
+                                .collect::<Option<Vec<_>>>()
+                        })
+                        .flatten();
+
+                    if let Some(insertion_points) = insertion_points {
+                        let mut merged =
+                            Vec::with_capacity(text_mutation_list.len() + mutations.len());
+                        let mut existing = text_mutation_list.into_iter();
+                        let mut copied = 0;
+                        for (pos, mutation) in insertion_points
+                            .into_iter()
+                            .zip(mutations.into_iter().rev())
                         {
-                            // Overwrite the text mutation with an overlapping text range
-                            Ok(pos) => {
-                                text_mutation_list[pos] = (deleted_text_range, new_node.clone())
+                            merged.extend(existing.by_ref().take(pos - copied));
+                            merged.push(mutation);
+                            copied = pos;
+                        }
+                        merged.extend(existing);
+                        text_mutation_list = merged;
+                    } else {
+                        for (deleted_text_range, new_node) in mutations {
+                            // We use binary search to keep the text mutations in order
+                            match text_mutation_list
+                                .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
+                            {
+                                // Overwrite the text mutation with an overlapping text range
+                                Ok(pos) => {
+                                    has_overwritten_text_mutation = true;
+                                    text_mutation_list[pos] = (deleted_text_range, new_node)
+                                }
+                                // Insert the text mutation at the correct position
+                                Err(pos) => {
+                                    text_mutation_list.insert(pos, (deleted_text_range, new_node))
+                                }
                             }
-                            // Insert the text mutation at the correct position
-                            Err(pos) => text_mutation_list
-                                .insert(pos, (deleted_text_range, new_node.clone())),
                         }
                     }
                 }
 
                 // Now we detach the current parent, commit all the modifications
                 // and push a pending change to its parent
-                let mut current_parent = curr_parent.detach();
+                let current_parent = curr_parent.detach();
                 let is_list = current_parent.kind().is_list();
-                for (new_node_slot, new_node, ..) in modifications.clone() {
-                    current_parent = if is_list && new_node.is_none() {
-                        current_parent.splice_slots(new_node_slot..=new_node_slot, empty())
-                    } else {
-                        current_parent.splice_slots(new_node_slot..=new_node_slot, once(new_node))
-                    }
-                }
+                // `modifications` is sorted by slot in descending order, but
+                // `splice_many_slots` expects ascending order
+                let current_parent =
+                    current_parent.splice_many_slots(modifications.into_iter().rev().map(
+                        |(new_node_slot, new_node, ..)| {
+                            let replacement = if is_list && new_node.is_none() {
+                                None
+                            } else {
+                                Some(new_node)
+                            };
+                            (new_node_slot, replacement)
+                        },
+                    ));
 
                 changes.push(CommitChange {
                     parent_depth: curr_parent_depth - 1,
@@ -735,7 +793,7 @@ where
 #[cfg(test)]
 pub mod test {
     use crate::{
-        AstNode, BatchMutationExt, SyntaxNodeCast, TriviaPiece,
+        AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxSlot, TriviaPiece,
         raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
 
@@ -775,6 +833,30 @@ pub mod test {
             .token(RawLanguageKind::STRING_TOKEN, b)
             .finish_node()
             .finish_node();
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+        let s = format!("{:#?}", root.syntax());
+        (root, s)
+    }
+
+    /// ```
+    /// 0: ROOT
+    ///     0: EXPRESSION_LIST
+    ///         0: LITERAL_EXPRESSION
+    ///             0: STRING_TOKEN items[0]
+    ///         ...
+    /// ```
+    fn tree_list(items: &[&str]) -> (RawLanguageRoot, String) {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder
+            .start_node(RawLanguageKind::ROOT)
+            .start_node(RawLanguageKind::EXPRESSION_LIST);
+        for item in items {
+            builder
+                .start_node(RawLanguageKind::LITERAL_EXPRESSION)
+                .token(RawLanguageKind::STRING_TOKEN, item)
+                .finish_node();
+        }
+        builder.finish_node().finish_node();
         let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
         let s = format!("{:#?}", root.syntax());
         (root, s)
@@ -960,5 +1042,98 @@ pub mod test {
             .descendants_tokens(crate::Direction::Next)
             .any(|t: crate::SyntaxToken<_>| t.text_trimmed() == "a");
         assert!(!has_a, "node 'a' should have been removed");
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_multiple_changes_same_list() {
+        let (before, _) = tree_list(&["a", "b", "c", "d", "e", "f"]);
+        let (expected, expected_debug) = tree_list(&["a", "x", "y", "e"]);
+
+        let mut batch = before.clone().begin();
+        batch.replace_node(find(&before, "b"), clone_detach(&expected, "x"));
+        batch.remove_node(find(&before, "c"));
+        batch.replace_node(find(&before, "d"), clone_detach(&expected, "y"));
+        batch.remove_node(find(&before, "f"));
+        let (after, text_range_and_edit) = batch.commit_with_text_range_and_edit(true);
+
+        assert_eq!(expected_debug, format!("{after:#?}"));
+
+        let (_, text_edit) = text_range_and_edit.unwrap();
+        assert_eq!(text_edit.new_string("abcdef"), "axye");
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_multiple_changes_same_node_keeps_empty_slot() {
+        let (before, _) = tree_two("a", "b");
+        let (expected, _) = tree_one("c");
+
+        let mut batch = before.clone().begin();
+        batch.remove_node(find(&before, "a"));
+        batch.replace_node(find(&before, "b"), clone_detach(&expected, "c"));
+        let after = batch.commit();
+
+        let slots: Vec<_> = after.slots().collect();
+        assert_eq!(slots.len(), 2);
+        assert!(matches!(slots[0], SyntaxSlot::Empty { .. }));
+        assert_eq!(after.text_with_trivia().to_string(), "c");
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_multiple_changes_same_list_after_deeper_change() {
+        let (before, _) = tree_list(&["a", "b", "c", "d", "e"]);
+        let (expected, expected_debug) = tree_list(&["z", "x", "e"]);
+
+        let a_token = find(&before, "a").syntax().first_token().unwrap();
+        let z_token = clone_detach(&expected, "z").syntax().first_token().unwrap();
+
+        let mut batch = before.clone().begin();
+        batch.replace_token(a_token, z_token);
+        batch.remove_node(find(&before, "b"));
+        batch.replace_node(find(&before, "c"), clone_detach(&expected, "x"));
+        batch.remove_node(find(&before, "d"));
+        let (after, text_range_and_edit) = batch.commit_with_text_range_and_edit(true);
+
+        assert_eq!(expected_debug, format!("{after:#?}"));
+
+        let (_, text_edit) = text_range_and_edit.unwrap();
+        assert_eq!(text_edit.new_string("abcde"), "zxe");
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_same_node_replaced_twice() {
+        let (before, _) = tree_list(&["a", "b", "c"]);
+        let (expected, expected_debug) = tree_list(&["a", "y", "c"]);
+        let (replaced, _) = tree_one("x");
+
+        let mut batch = before.clone().begin();
+        batch.replace_node(find(&before, "b"), clone_detach(&replaced, "x"));
+        batch.replace_node(find(&before, "b"), clone_detach(&expected, "y"));
+        let (after, text_range_and_edit) = batch.commit_with_text_range_and_edit(true);
+
+        assert_eq!(expected_debug, format!("{after:#?}"));
+
+        let (_, text_edit) = text_range_and_edit.unwrap();
+        assert_eq!(text_edit.new_string("abc"), "ayc");
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_same_list_changes_around_deeper_change() {
+        let (before, _) = tree_list(&["a", "b", "c", "d", "e"]);
+        let (expected, expected_debug) = tree_list(&["a", "z", "y"]);
+
+        let c_token = find(&before, "c").syntax().first_token().unwrap();
+        let z_token = clone_detach(&expected, "z").syntax().first_token().unwrap();
+
+        let mut batch = before.clone().begin();
+        batch.replace_token(c_token, z_token);
+        batch.remove_node(find(&before, "b"));
+        batch.remove_node(find(&before, "d"));
+        batch.replace_node(find(&before, "e"), clone_detach(&expected, "y"));
+        let (after, text_range_and_edit) = batch.commit_with_text_range_and_edit(true);
+
+        assert_eq!(expected_debug, format!("{after:#?}"));
+
+        let (_, text_edit) = text_range_and_edit.unwrap();
+        assert_eq!(text_edit.new_string("abcde"), "azy");
     }
 }

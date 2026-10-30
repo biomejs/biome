@@ -555,6 +555,29 @@ impl SyntaxNode {
     }
 
     #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(self, edits: E) -> Self
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<SyntaxElement>>,
+    {
+        Self {
+            ptr: self
+                .ptr
+                .splice_many_slots(edits.into_iter().map(|(index, replacement)| {
+                    (
+                        index,
+                        replacement.into_iter().map(|element| {
+                            element.map(|child| match child.detach() {
+                                NodeOrToken::Node(it) => it.ptr.into_green(),
+                                NodeOrToken::Token(it) => it.into_green(),
+                            })
+                        }),
+                    )
+                })),
+        }
+    }
+
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
     pub fn replace_child(self, prev_elem: SyntaxElement, next_elem: SyntaxElement) -> Option<Self> {
         Some(Self {
             ptr: self.ptr.replace_child(prev_elem, next_elem)?,
