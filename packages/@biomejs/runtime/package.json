@@ -3,22 +3,26 @@
   "version": "2.6.4",
   "description": "JavaScript APIs for Biome JS plugins",
   "scripts": {
-    "test:types": "tsc --project tsconfig.json"
+    "build": "tsc --project tsconfig.build.json",
+    "test:types": "pnpm run build && tsc --project tsconfig.json",
+    "test": "pnpm run build && node --import ./tests/setup.ts --test \"tests/**/*.test.ts\""
   },
   "files": [
     "README.md",
     "LICENSE-APACHE",
     "LICENSE-MIT",
-    "diagnostics.d.ts",
-    "plugin.d.ts",
-    "plugin.js",
-    "js_ast.d.ts",
-    "semantic.d.ts"
+    "lib",
+    "src"
   ],
+  "type": "module",
   "exports": {
     "./plugin": {
-      "types": "./plugin.d.ts",
-      "default": "./plugin.js"
+      "types": "./lib/plugin/index.d.ts",
+      "default": "./lib/plugin/index.js"
+    },
+    "./plugin/testing": {
+      "types": "./lib/plugin/testing/rule-tester.d.ts",
+      "default": "./lib/plugin/testing/rule-tester.js"
     }
   },
   "license": "MIT OR Apache-2.0",
@@ -30,7 +34,11 @@
   },
   "author": "Biome Developers and Contributors",
   "bugs": "https://github.com/biomejs/biome/issues",
+  "dependencies": {
+    "@biomejs/backend-jsonrpc": "workspace:*"
+  },
   "devDependencies": {
+    "@types/node": "24.13.6",
     "typescript": "7.0.2"
   },
   "peerDependencies": {
