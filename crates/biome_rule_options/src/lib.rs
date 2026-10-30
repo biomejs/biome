@@ -21,6 +21,7 @@ pub mod no_astro_set_html_directive;
 pub mod no_async_promise_executor;
 pub mod no_autofocus;
 pub mod no_await_in_loops;
+pub mod no_await_in_promise_methods;
 pub mod no_banned_types;
 pub mod no_barrel_file;
 pub mod no_base_to_string;
