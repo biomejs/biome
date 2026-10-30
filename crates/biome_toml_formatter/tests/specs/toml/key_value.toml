@@ -1,0 +1,10 @@
+key="value"
+spaced     =     1
+	indented = true
+"quoted key"='literal'
+dotted . key . "with quotes" = 1.5
+site."google.com"=true
+date = 1979-05-27 07:32:00Z
+time=07:32
+hex = 0xDEAD_BEEF
+inf=-inf

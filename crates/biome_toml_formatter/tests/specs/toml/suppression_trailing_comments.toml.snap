@@ -1,0 +1,50 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+a = [
+# biome-ignore format: preserve
+1 # one
+, # two
+2
+]
+# biome-ignore format: preserve
+b   =   1 # one
+# two
+c = 2
+# biome-ignore format: preserve
+[  t  ] # one
+d = 1 # two
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+a = [
+	# biome-ignore format: preserve
+	1, # one
+	# two
+	2,
+]
+# biome-ignore format: preserve
+b   =   1 # one
+# two
+c = 2
+# biome-ignore format: preserve
+[  t  ] # one
+d = 1 # two
+```

@@ -1,0 +1,23 @@
+short = [ 1,2 , 3 ]
+trailing_comma = [1, 2, 3,]
+empty = [ ]
+nested = [[1, 2], [3, 4], ["a", "b"]]
+long = ["alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota"]
+expanded_in_source = [
+  "a", "b"
+]
+collapsed_after_first = ["a",
+  "b"]
+with_comments = [
+  1, # one
+  # before two
+  2,
+]
+empty_with_comment = [ # nothing here
+]
+tables = [ { name = "a", value = 1 }, { name = "b", value = 2 }, { name = "c", value = 3 } ]
+blank_lines = [
+  1,
+
+  2,
+]
