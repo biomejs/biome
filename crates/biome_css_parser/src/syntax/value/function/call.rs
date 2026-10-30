@@ -1,5 +1,6 @@
+use crate::lexer::CssCustomPropertyCommentMode;
 use crate::parser::CssParser;
-use crate::state::IfFunctionKind;
+use crate::state::{IfFunctionKind, IfFunctionSite};
 use crate::syntax::css_modules::v_bind_not_allowed;
 use crate::syntax::parse_error::{expected_identifier, scss_only_syntax_error};
 use crate::syntax::scss::{
@@ -7,7 +8,9 @@ use crate::syntax::scss::{
     is_nth_at_scss_module_member_access, parse_scss_function_name,
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
-use crate::syntax::value::r#if::{is_at_if_function, parse_if_function};
+use crate::syntax::value::r#if::{
+    is_at_if_function, parse_custom_property_if_function, parse_if_function,
+};
 use crate::syntax::value::url::{is_at_url_function, parse_url_function_with_context};
 use crate::syntax::{
     CssSyntaxFeatures, FunctionCallContext, ValueParsingContext, ValueParsingMode,
@@ -110,12 +113,12 @@ pub(crate) fn is_at_css_if_function_in_context(
 /// call without repeating its failed modern attempt.
 fn parse_scss_if_function(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     let outermost = p.state().if_function_kinds.is_none();
-    let start = p.cur_range().start();
+    let key = (p.cur_range().start(), IfFunctionSite::Value);
     let cached = p
         .state_mut()
         .if_function_kinds
         .get_or_insert_with(Default::default)
-        .get(&start)
+        .get(&key)
         .copied();
 
     let function = match cached {
@@ -137,7 +140,47 @@ fn parse_scss_if_function(p: &mut CssParser, context: ValueParsingContext) -> Pa
                 }
             };
             if let Some(kinds) = &mut p.state_mut().if_function_kinds {
-                kinds.insert(start, kind);
+                kinds.insert(key, kind);
+            }
+            function
+        }
+    };
+    if outermost {
+        p.state_mut().if_function_kinds = None;
+    }
+    function
+}
+
+/// Parses a complete modern `if()` in an SCSS custom property, or returns `Absent` so the caller
+/// keeps the call raw, as for Sass's legacy `if($condition, $a, $b)`.
+///
+/// The choice is cached like [parse_scss_if_function], so a rewind of an enclosing call doesn't
+/// repeat both attempts for nested calls.
+pub(crate) fn try_parse_custom_property_if_function(
+    p: &mut CssParser,
+    comment_mode: CssCustomPropertyCommentMode,
+) -> ParsedSyntax {
+    let outermost = p.state().if_function_kinds.is_none();
+    let key = (p.cur_range().start(), IfFunctionSite::CustomProperty);
+    let cached = p
+        .state_mut()
+        .if_function_kinds
+        .get_or_insert_with(Default::default)
+        .get(&key)
+        .copied();
+
+    let function = match cached {
+        Some(IfFunctionKind::Modern) => parse_custom_property_if_function(p, comment_mode),
+        Some(IfFunctionKind::Legacy) => Absent,
+        None => {
+            let (function, kind) =
+                match try_parse_function(p, |p| parse_custom_property_if_function(p, comment_mode))
+                {
+                    Ok(function) => (function, IfFunctionKind::Modern),
+                    Err(_) => (Absent, IfFunctionKind::Legacy),
+                };
+            if let Some(kinds) = &mut p.state_mut().if_function_kinds {
+                kinds.insert(key, kind);
             }
             function
         }
