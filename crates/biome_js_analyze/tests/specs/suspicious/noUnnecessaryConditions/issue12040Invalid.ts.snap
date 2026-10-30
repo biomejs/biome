@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12040Invalid.ts
+---
+# Input
+```ts
+declare function identity<T>(value: T): T;
+declare function pick<T>(value: T, label: string): T;
+declare function either<T>(first: T, second: T): T;
+declare function maybe<T>(first: T, second?: T): T;
+
+export function identityLoading() {
+	const loading = identity(undefined);
+
+	if (loading) {
+		return loading;
+	}
+}
+
+export function pickedLoading() {
+	const loading = pick(undefined, "loading");
+
+	if (loading) {
+		return loading;
+	}
+}
+
+export function eitherLoading() {
+	const loading = either(undefined, undefined);
+
+	if (loading) {
+		return loading;
+	}
+}
+
+export function maybeLoading() {
+	const loading = maybe(undefined);
+
+	if (loading) {
+		return loading;
+	}
+}
+
+```
+
+# Diagnostics
+```
+issue12040Invalid.ts:9:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+     7 │ 	const loading = identity(undefined);
+     8 │ 
+   > 9 │ 	if (loading) {
+       │ 	    ^^^^^^^
+    10 │ 		return loading;
+    11 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+issue12040Invalid.ts:17:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    15 │ 	const loading = pick(undefined, "loading");
+    16 │ 
+  > 17 │ 	if (loading) {
+       │ 	    ^^^^^^^
+    18 │ 		return loading;
+    19 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+issue12040Invalid.ts:25:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    23 │ 	const loading = either(undefined, undefined);
+    24 │ 
+  > 25 │ 	if (loading) {
+       │ 	    ^^^^^^^
+    26 │ 		return loading;
+    27 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+issue12040Invalid.ts:33:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    31 │ 	const loading = maybe(undefined);
+    32 │ 
+  > 33 │ 	if (loading) {
+       │ 	    ^^^^^^^
+    34 │ 		return loading;
+    35 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
