@@ -23,9 +23,18 @@ expression: parity-keyframe-at-root.invalid.scss
 
 # Diagnostics
 ```
-parity-keyframe-at-root.invalid.scss:11:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━
+parity-keyframe-at-root.invalid.scss:3:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━
 
-  × The duplicate keyframe selector is overwritten by later one.
+  × The keyframe selector from is used more than once.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @keyframes fade-in {
+  > 3 │   from {
+      │   ^^^^
+    4 │     opacity: 0;
+    5 │   }
+  
+  i This selector is repeated here and overwrites the earlier one.
   
      9 │     }
     10 │   }

@@ -14,18 +14,9 @@ expression: invalid.scss
 
 # Diagnostics
 ```
-invalid.scss:3:23 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:3:16 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate font names are redundant and unnecessary: Arial
-  
-    1 │ /* should generate diagnostics */
-    2 │ .typography {
-  > 3 │   font-family: Arial, Arial, sans-serif;
-      │                       ^^^^^
-    4 │   font: normal 14px/32px Arial, Arial, serif;
-    5 │ }
-  
-  i This is where the duplicate font name is found:
+  × The font name Arial is used more than once in the same property.
   
     1 │ /* should generate diagnostics */
     2 │ .typography {
@@ -34,24 +25,24 @@ invalid.scss:3:23 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
     4 │   font: normal 14px/32px Arial, Arial, serif;
     5 │ }
   
-  i Remove duplicate font names within the property.
+  i The font name Arial is repeated here.
   
-
-```
-
-```
-invalid.scss:4:33 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: Arial
-  
+    1 │ /* should generate diagnostics */
     2 │ .typography {
-    3 │   font-family: Arial, Arial, sans-serif;
-  > 4 │   font: normal 14px/32px Arial, Arial, serif;
-      │                                 ^^^^^
+  > 3 │   font-family: Arial, Arial, sans-serif;
+      │                       ^^^^^
+    4 │   font: normal 14px/32px Arial, Arial, serif;
     5 │ }
-    6 │ 
   
-  i This is where the duplicate font name is found:
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalid.scss:4:26 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name Arial is used more than once in the same property.
   
     2 │ .typography {
     3 │   font-family: Arial, Arial, sans-serif;
@@ -60,7 +51,16 @@ invalid.scss:4:33 lint/suspicious/noDuplicateFontNames ━━━━━━━━�
     5 │ }
     6 │ 
   
-  i Remove duplicate font names within the property.
+  i The font name Arial is repeated here.
+  
+    2 │ .typography {
+    3 │   font-family: Arial, Arial, sans-serif;
+  > 4 │   font: normal 14px/32px Arial, Arial, serif;
+      │                                 ^^^^^
+    5 │ }
+    6 │ 
+  
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
   
 
 ```

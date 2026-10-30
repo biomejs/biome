@@ -154,9 +154,18 @@ file.md:13:10 parse ━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-file.md:19:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.md:18:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The property color is declared more than once in the same block.
+  
+    16 │ ```css
+    17 │ a {
+  > 18 │   color: red;
+       │   ^^^^^
+    19 │   color: blue;
+    20 │ }
+  
+  i color is declared again here.
   
     17 │ a {
     18 │   color: red;
@@ -165,14 +174,7 @@ file.md:19:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━�
     20 │ }
     21 │ ```
   
-  i color is already defined here.
-  
-    16 │ ```css
-    17 │ a {
-  > 18 │   color: red;
-       │   ^^^^^
-    19 │   color: blue;
-    20 │ }
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

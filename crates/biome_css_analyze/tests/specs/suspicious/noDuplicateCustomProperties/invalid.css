@@ -1,8 +1,96 @@
-a { --custom-property: 1; --custom-property: 2; }
-a { --custom-property: 1; color: pink; --custom-property: 1; }
-a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
-a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
-a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
-@media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
-a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
-a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }
+a {
+    --custom-property: 1;
+    --custom-property: 2;
+}
+
+a {
+    --custom-property: 1;
+    color: pink;
+    --custom-property: 1;
+}
+
+a {
+    --custom-property: 1;
+    --cUstOm-prOpErtY: 1;
+    color: pink;
+    --cUstOm-prOpErtY: 1;
+}
+
+a {
+    --custom-property: pink;
+
+        {
+        &:hover {
+            --custom-property: orange;
+            --custom-property: black;
+        }
+    }
+}
+
+a {
+    --custom-property: pink;
+
+    @media {
+        --custom-property: orange;
+        --custom-property: black;
+    }
+}
+
+@media {
+    --custom-property: orange;
+
+    .foo {
+        --custom-property: black;
+        --custom-property: white;
+    }
+}
+
+a {
+    --custom-property: pink;
+
+    @media {
+        --custom-property: orange;
+
+        &::before {
+            --custom-property: black;
+            --custom-property: white;
+        }
+    }
+}
+
+a {
+    --custom-property: pink;
+
+    @media {
+        --custom-property: orange;
+
+        .foo {
+            --custom-property: black;
+            --custom-property: white;
+        }
+    }
+}
+
+a {
+    --a: 1;
+    --b: 2;
+    --a: 3;
+    --b: 4;
+}
+
+a {
+    --a: 1;
+    --a: 2;
+    --a: 3;
+}
+
+a {
+    --a: 1;
+    color: pink;
+    --a: 2;
+
+    &:hover {
+        --b: 1;
+        --b: 2;
+    }
+}

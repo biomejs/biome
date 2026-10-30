@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 154
 expression: invalid.scss
 ---
 # Input
@@ -16,9 +15,18 @@ expression: invalid.scss
 
 # Diagnostics
 ```
-invalid.scss:5:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:4:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The duplicate keyframe selector is overwritten by later one.
+  × The keyframe selector from is used more than once.
+  
+    2 │   $stop: 50%;
+    3 │   @include frames;
+  > 4 │   from {}
+      │   ^^^^
+    5 │   from {}
+    6 │ }
+  
+  i This selector is repeated here and overwrites the earlier one.
   
     3 │   @include frames;
     4 │   from {}
