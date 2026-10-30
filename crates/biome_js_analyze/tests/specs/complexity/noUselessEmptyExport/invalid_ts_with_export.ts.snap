@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_ts_with_export.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type PrivateType = 1;
+export type PublicType = PrivateType;
+
+export {};
+
+```
+
+# Diagnostics
+```
+invalid_ts_with_export.ts:5:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This empty export is useless because there's another export or import.
+  
+    3 │ export type PublicType = PrivateType;
+    4 │ 
+  > 5 │ export {};
+      │ ^^^^^^^^^^
+    6 │ 
+  
+  i This export makes useless the empty export.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type PrivateType = 1;
+  > 3 │ export type PublicType = PrivateType;
+      │ ^^^^^^
+    4 │ 
+    5 │ export {};
+  
+  i Safe fix: Remove this useless empty export.
+  
+    2 2 │   type PrivateType = 1;
+    3 3 │   export type PublicType = PrivateType;
+    4   │ - 
+    5   │ - export·{};
+    6 4 │   
+  
+
+```
