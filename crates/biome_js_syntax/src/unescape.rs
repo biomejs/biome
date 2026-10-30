@@ -79,6 +79,43 @@ fn hex_value(byte: u8) -> Option<u32> {
     }
 }
 
+/// Returns the value of the string whose source text, without quotes, is
+/// `text`.
+///
+/// Returns `None` if `text` contains an escape sequence that
+/// [`unescape_js_string`] can't decode correctly: a legacy octal escape such
+/// as `\1` or `\01`, or an escape for half of a surrogate pair such as
+/// `\uD83D`.
+///
+/// Like [`unescape_js_string`], this function must be called on the
+/// `inner_string_text()` of a valid string token.
+pub fn try_unescape_js_string(text: TokenText) -> Option<Text> {
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c != '\\' {
+            continue;
+        }
+        match chars.next() {
+            Some('1'..='7') => return None,
+            Some('0') if chars.peek().is_some_and(char::is_ascii_digit) => return None,
+            Some('u') => {
+                let code_point = if chars.next_if_eq(&'{').is_some() {
+                    let digits: String = chars.by_ref().take_while(|c| *c != '}').collect();
+                    u32::from_str_radix(&digits, 16).ok()
+                } else {
+                    let digits: String = chars.by_ref().take(4).collect();
+                    u32::from_str_radix(&digits, 16).ok()
+                };
+                if code_point.is_none_or(|code_point| (0xD800..=0xDFFF).contains(&code_point)) {
+                    return None;
+                }
+            }
+            _ => {}
+        }
+    }
+    Some(unescape_js_string(text))
+}
+
 /// Returns `text` with escape sequences processed.
 ///
 /// If nothing is escaped, `text` is returned without any allocation. If at
@@ -87,6 +124,9 @@ fn hex_value(byte: u8) -> Option<u32> {
 ///
 /// This function must be called on the `inner_string_text()` of a token,
 /// meaning the outer quotes are already expected to be trimmed.
+///
+/// Legacy octal escapes such as `\01` aren't supported. See
+/// [`try_unescape_js_string`] for text that may contain one.
 pub fn unescape_js_string(text: TokenText) -> Text {
     enum State {
         // Consume characters until an escape sequence is discovered.
