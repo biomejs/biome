@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNested.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+class InConstructor {
+	constructor(private foo: string) {
+		class Bar {
+			constructor(private foo: string) {
+				this.foo = foo;
+			}
+		}
+	}
+}
+
+class InField {
+	constructor(private foo: string) {}
+	init = class Bar {
+		constructor(private foo: string) {
+			this.foo = foo;
+		}
+	};
+}
+
+```
+
+# Diagnostics
+```
+invalidNested.ts:6:5 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    4 │ 		class Bar {
+    5 │ 			constructor(private foo: string) {
+  > 6 │ 				this.foo = foo;
+      │ 				^^^^^^^^^^^^^^
+    7 │ 			}
+    8 │ 		}
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNested.ts:16:4 lint/nursery/noUselessParameterPropertyAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This assignment sets the property to the value it already has.
+  
+    14 │ 	init = class Bar {
+    15 │ 		constructor(private foo: string) {
+  > 16 │ 			this.foo = foo;
+       │ 			^^^^^^^^^^^^^^
+    17 │ 		}
+    18 │ 	};
+  
+  i The parameter property already sets this property to the parameter's value before the constructor body runs.
+  
+  i Remove the assignment.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
