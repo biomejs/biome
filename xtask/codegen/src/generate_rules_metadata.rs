@@ -169,7 +169,7 @@ fn unsupported_reason(reason: &UnsupportedRuleReason) -> Option<UnsupportedReaso
 /// rule name and ID. The export checks the order against
 /// `RuleSource::variant_index`, and fails if a rule references a variant
 /// missing here.
-const ALL_SOURCES: [RuleSource<'static>; 62] = {
+const ALL_SOURCES: [RuleSource<'static>; 63] = {
     use RuleSource::*;
     const RULE: &str = "{rule}";
     [
@@ -235,6 +235,7 @@ const ALL_SOURCES: [RuleSource<'static>; 62] = {
         MarkdownLint("{id}", RULE),
         EslintTanstackQuery(RULE),
         StylelintScss(RULE),
+        Oxc(RULE),
     ]
 };
 
