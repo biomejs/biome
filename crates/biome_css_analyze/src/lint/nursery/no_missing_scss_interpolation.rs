@@ -208,7 +208,7 @@ impl Rule for NoMissingScssInterpolation {
                 let Ok(name) = function.name() else {
                     continue;
                 };
-                let namespace = module_namespace(function.syntax());
+                let namespace = module_namespace(&function.clone().into());
                 if namespace.is_none() {
                     let Ok(token) = name.value_token() else {
                         continue;
@@ -258,7 +258,7 @@ impl Rule for NoMissingScssInterpolation {
                 continue;
             };
             signals.push(RuleState::Component(ComponentVariable {
-                namespace: module_namespace(dollar.syntax()),
+                namespace: module_namespace(&dollar.clone().into()),
                 dollar,
                 name,
             }));
@@ -407,13 +407,14 @@ fn without_trivia(token: &CssSyntaxToken) -> CssSyntaxToken {
 /// Returns `ns` and `.` when `member` is the `$` of a module variable written as `ns.$name`, or
 /// the call of a module function written as `ns.name()`.
 fn module_namespace(
-    member: &CssSyntaxNode,
+    member: &AnyCssCustomPropertyComponent,
 ) -> Option<(CssCustomIdentifier, CssCustomPropertyDelimiter)> {
     let dot = member
+        .syntax()
         .prev_sibling()
         .and_then(CssCustomPropertyDelimiter::cast)
         .filter(|dot| dot.value().is_ok_and(|token| token.kind() == T![.]))
-        .filter(|dot| are_adjacent(dot.syntax(), member))?;
+        .filter(|dot| are_adjacent(dot.syntax(), member.syntax()))?;
     let namespace = dot
         .syntax()
         .prev_sibling()
