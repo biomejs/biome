@@ -3163,6 +3163,11 @@ export interface Nursery {
 	 */
 	noObjectConstructor?: NoObjectConstructorConfiguration;
 	/**
+	 * Disallow comparing a value with an empty object {} or an empty array \[].
+	 * See https://biomejs.dev/linter/rules/no-object-literal-comparison
+	 */
+	noObjectLiteralComparison?: NoObjectLiteralComparisonConfiguration;
+	/**
 	 * Disallow obsolete attributes on HTML elements.
 	 * See https://biomejs.dev/linter/rules/no-obsolete-attributes
 	 */
@@ -6532,6 +6537,9 @@ export type NoNullConfiguration =
 export type NoObjectConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObjectConstructorOptions;
+export type NoObjectLiteralComparisonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObjectLiteralComparisonOptions;
 export type NoObsoleteAttributesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteAttributesOptions;
@@ -9492,6 +9500,10 @@ export interface RuleWithNoObjectConstructorOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoObjectConstructorOptions;
+}
+export interface RuleWithNoObjectLiteralComparisonOptions {
+	level: RulePlainConfiguration;
+	options?: NoObjectLiteralComparisonOptions;
 }
 export interface RuleWithNoObsoleteAttributesOptions {
 	level: RulePlainConfiguration;
@@ -12708,6 +12720,7 @@ export type NoNewRequireOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoNullOptions = {};
 export type NoObjectConstructorOptions = {};
+export type NoObjectLiteralComparisonOptions = {};
 export type NoObsoleteAttributesOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
@@ -14856,6 +14869,7 @@ export type Category =
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noNull"
 	| "lint/nursery/noObjectConstructor"
+	| "lint/nursery/noObjectLiteralComparison"
 	| "lint/nursery/noObsoleteAttributes"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
