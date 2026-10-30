@@ -1394,6 +1394,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_switch_declarations::NoSwitchDeclarationsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noSyncMethods",
+        TypeId::of::<biome_rule_options::no_sync_methods::NoSyncMethodsOptions>(),
+    ));
+    result.push((
         "performance",
         "noSyncScripts",
         TypeId::of::<biome_rule_options::no_sync_scripts::NoSyncScriptsOptions>(),

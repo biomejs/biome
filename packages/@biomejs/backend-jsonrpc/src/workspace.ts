@@ -3243,6 +3243,11 @@ export interface Nursery {
 	 */
 	noSvelteUselessDerivedBy?: NoSvelteUselessDerivedByConfiguration;
 	/**
+	 * Disallow calling synchronous methods, such as fs.readFileSync().
+	 * See https://biomejs.dev/linter/rules/no-sync-methods
+	 */
+	noSyncMethods?: NoSyncMethodsConfiguration;
+	/**
 	 * Disallow arbitrary values in Tailwind CSS utility classes.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value
 	 */
@@ -6195,6 +6200,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoSvelteUselessDerivedByConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUselessDerivedByOptions;
+export type NoSyncMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSyncMethodsOptions;
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
@@ -8953,6 +8961,10 @@ export interface RuleWithNoSvelteUselessDerivedByOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteUselessDerivedByOptions;
 }
+export interface RuleWithNoSyncMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSyncMethodsOptions;
+}
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
@@ -11690,6 +11702,23 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	allowReassign?: boolean;
 }
 export type NoSvelteUselessDerivedByOptions = {};
+/**
+ * Options for the `noSyncMethods` rule.
+ */
+export interface NoSyncMethodsOptions {
+	/**
+	 * Allows synchronous calls at the top level of a file, outside of any function.
+	 *
+	 * Defaults to `false`.
+	 */
+	allowAtRootLevel?: boolean;
+	/**
+	 * Names of synchronous functions that the rule doesn't report, such as `readFileSync`.
+	 *
+	 * Defaults to `[]`.
+	 */
+	ignore?: string[];
+}
 export interface NoTailwindArbitraryValueOptions {
 	/**
 	 * Categories of utilities that may use arbitrary values. Defaults to an empty list.
@@ -13448,15 +13477,15 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13524,6 +13553,7 @@ export type Category =
 	| "lint/nursery/noSvelteObjectInTextMustaches"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noSvelteUselessDerivedBy"
+	| "lint/nursery/noSyncMethods"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
@@ -13556,13 +13586,13 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
-	| "lint/nursery/noVueRootVIf"
-	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
@@ -13655,25 +13685,25 @@ export type Category =
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
-	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVModel"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineProps"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVModel"
-	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
 	| "lint/nursery/useVueValidVSlot"
+	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

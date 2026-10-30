@@ -295,6 +295,7 @@ pub mod no_svelte_unnecessary_state_wrap;
 pub mod no_svelte_useless_derived_by;
 pub mod no_svg_without_title;
 pub mod no_switch_declarations;
+pub mod no_sync_methods;
 pub mod no_sync_scripts;
 pub mod no_tailwind_arbitrary_value;
 pub mod no_tailwind_legacy_utilities;
