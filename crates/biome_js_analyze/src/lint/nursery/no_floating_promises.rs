@@ -295,30 +295,26 @@ impl Rule for NoFloatingPromises {
                         AnyJsName::JsName(make::js_name(make::ident("all"))),
                     ));
 
-                let call_expression = AnyJsExpression::JsCallExpression(
-                    make::js_call_expression(
-                        callee_expression,
-                        make::js_call_arguments(
-                            make::token(T!['(']),
-                            make::js_call_argument_list(
-                                [AnyJsCallArgument::AnyJsExpression(
-                                    expression.clone().trim_trivia()?,
-                                )],
-                                [],
+                mutation.wrap_node(expression, |expression| {
+                    let call_expression = AnyJsExpression::JsCallExpression(
+                        make::js_call_expression(
+                            callee_expression,
+                            make::js_call_arguments(
+                                make::token(T!['(']),
+                                make::js_call_argument_list(
+                                    [AnyJsCallArgument::AnyJsExpression(expression)],
+                                    [],
+                                ),
+                                make::token(T![')']),
                             ),
-                            make::token(T![')']),
-                        ),
-                    )
-                    .build(),
-                );
-
-                let await_expression =
+                        )
+                        .build(),
+                    );
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
                         make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                         call_expression,
-                    ));
-
-                mutation.replace_node(expression, await_expression);
+                    ))
+                });
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -327,13 +323,12 @@ impl Rule for NoFloatingPromises {
                 ))
             }
             NoFloatingPromisesState::UnhandledPromise => {
-                let await_expression =
+                mutation.wrap_node(expression, |expression| {
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
                         make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
-                        expression.clone().trim_comments_and_trivia()?,
-                    ));
-
-                mutation.replace_node_transfer_trivia(expression, await_expression);
+                        expression,
+                    ))
+                });
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
