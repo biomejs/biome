@@ -479,6 +479,52 @@ impl ProseItemList {
         &self.0
     }
 
+    /// Returns the indices of the lines that follow a soft break and start with
+    /// a block marker after indentation, such as `- item` in `text\n    - item`.
+    ///
+    /// Lines are counted from 0, and every soft or hard break starts a new line.
+    /// The indentation keeps such a line in the paragraph. The formatter removes
+    /// it, so the marker would start a block at the start of a line.
+    ///
+    /// Inside a list item, the formatter prints the item's content indentation
+    /// again, so only the indentation past it counts.
+    pub(crate) fn indented_block_marker_lines(&self, inside_list: bool) -> Vec<usize> {
+        let mut lines = Vec::new();
+        let mut line_index = 0;
+
+        for (index, item) in self.0.iter().enumerate() {
+            match item {
+                ProseItem::SoftBreak => {
+                    line_index += 1;
+                    let mut line = self.0[index + 1..].iter().peekable();
+                    let mut has_indent = false;
+                    while let Some(item) = line.next_if(|item| {
+                        matches!(item, ProseItem::OutdentedLineStart | ProseItem::Space)
+                    }) {
+                        has_indent |= !inside_list || matches!(item, ProseItem::Space);
+                    }
+                    // An escaped marker, such as `\-` for a setext-like line,
+                    // no longer starts a block.
+                    if has_indent
+                        && line
+                            .next()
+                            .and_then(ProseItem::as_word_group)
+                            .is_some_and(|group| {
+                                group.starts_with_block_marker()
+                                    && !matches!(group.escape, WordGroupEscape::EscapeLeadingMarker)
+                            })
+                    {
+                        lines.push(line_index);
+                    }
+                }
+                ProseItem::HardBreak(_) => line_index += 1,
+                _ => {}
+            }
+        }
+
+        lines
+    }
+
     pub(crate) fn remove_spaces_after_soft_breaks(&mut self) {
         let mut index = 0;
         while index < self.0.len() {
