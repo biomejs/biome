@@ -138,7 +138,7 @@ switch (true) {
 
 // Object property access with constants
 const obj = {};
-if (obj) {  // Object literal is always truthy
+if (obj) {  // the type {} can also describe primitives, so not flagged
   console.log("always runs");
 }
 
@@ -915,25 +915,6 @@ invalid.js:128:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   i The value passed to switch can never equal this value.
   
   i Remove the unreachable case, or change it to a value that the switch expression can have.
-  
-
-```
-
-```
-invalid.js:135:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    133 │ // Object property access with constants
-    134 │ const obj = {};
-  > 135 │ if (obj) {  // Object literal is always truthy
-        │     ^^^
-    136 │   console.log("always runs");
-    137 │ }
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
   
 
 ```

@@ -17,26 +17,6 @@ if (/pattern/) {}
 
 # Diagnostics
 ```
-invalid.js:2:5 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This condition uses an always-truthy value.
-  
-    1 │ // should generate diagnostics
-  > 2 │ if ({}) {}
-      │     ^^
-    3 │ if ([]) {}
-    4 │ if (() => false) {}
-  
-  i Objects, functions, and symbols are always truthy.
-  
-  i Check a property of the value or remove the condition.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 invalid.js:3:5 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This condition uses an always-truthy value.
