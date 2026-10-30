@@ -560,6 +560,7 @@ pub mod use_number_namespace;
 pub mod use_number_to_fixed_digits_argument;
 pub mod use_numeric_literals;
 pub mod use_numeric_separators;
+pub mod use_object_from_entries;
 pub mod use_object_spread;
 pub mod use_optional_chain;
 pub mod use_package_json_valid_cpu;

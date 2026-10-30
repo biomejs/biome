@@ -3648,6 +3648,11 @@ export interface Nursery {
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
 	/**
+	 * Enforce using Object.fromEntries() to build an object from a list of key-value pairs.
+	 * See https://biomejs.dev/linter/rules/use-object-from-entries
+	 */
+	useObjectFromEntries?: UseObjectFromEntriesConfiguration;
+	/**
 	 * Require the cpu field in package.json to be a valid list of processor types.
 	 * See https://biomejs.dev/linter/rules/use-package-json-valid-cpu
 	 */
@@ -6438,6 +6443,9 @@ export type UseNamedLayerConfiguration =
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
+export type UseObjectFromEntriesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseObjectFromEntriesOptions;
 export type UsePackageJsonValidCpuConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePackageJsonValidCpuOptions;
@@ -9389,6 +9397,14 @@ export interface RuleWithUseNullishCoalescingOptions {
 	level: RulePlainConfiguration;
 	options?: UseNullishCoalescingOptions;
 }
+export interface RuleWithUseObjectFromEntriesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseObjectFromEntriesOptions;
+}
 export interface RuleWithUsePackageJsonValidCpuOptions {
 	level: RulePlainConfiguration;
 	options?: UsePackageJsonValidCpuOptions;
@@ -11937,6 +11953,13 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreTernaryTests?: boolean;
 }
+export interface UseObjectFromEntriesOptions {
+	/**
+	 * Extra functions that build an object from key-value pairs, such as `utils.fromPairs`.
+	 * A name can contain dots to match a function accessed through an object.
+	 */
+	functions?: string[];
+}
 export type UsePackageJsonValidCpuOptions = {};
 export type UsePackageJsonValidEnginesOptions = {};
 export type UsePromiseRejectErrorsOptions = {};
@@ -13448,15 +13471,15 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13556,13 +13579,13 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
-	| "lint/nursery/noVueRootVIf"
-	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
@@ -13619,6 +13642,7 @@ export type Category =
 	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/useObjectFromEntries"
 	| "lint/nursery/usePackageJsonValidCpu"
 	| "lint/nursery/usePackageJsonValidEngines"
 	| "lint/nursery/usePromiseRejectErrors"
@@ -13655,25 +13679,25 @@ export type Category =
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
-	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVModel"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineProps"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVModel"
-	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
 	| "lint/nursery/useVueValidVSlot"
+	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
