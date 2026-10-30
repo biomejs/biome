@@ -1,6 +1,6 @@
 use biome_diagnostics::Severity;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsCallExpression};
@@ -8,6 +8,7 @@ use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions;
 
 use crate::frameworks::playwright::{collect_member_names, is_describe_mode, is_describe_modifier};
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Enforce valid `describe()` callback.
@@ -58,7 +59,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UsePlaywrightValidDescribeCallback {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = InvalidReason;
     type Signals = Option<Self::State>;
     type Options = UsePlaywrightValidDescribeCallbackOptions;
@@ -69,6 +70,14 @@ impl Rule for UsePlaywrightValidDescribeCallback {
 
         // Check if this is a describe call
         if !is_playwright_describe_call(&callee)? {
+            return None;
+        }
+
+        // A `describe` declared in this file is the user's own function, not Playwright's.
+        if let AnyJsExpression::JsIdentifierExpression(id) = &callee
+            && let Some(binding) = ctx.model().binding(&id.name().ok()?)
+            && !binding.is_imported()
+        {
             return None;
         }
 
