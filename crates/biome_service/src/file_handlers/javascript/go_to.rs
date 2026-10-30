@@ -13,8 +13,9 @@ use biome_js_syntax::{
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
     JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo,
-    find_js_exported_symbol,
+    ambient_module_declaring_file, find_js_exported_symbol,
 };
+use biome_resolver::ResolutionKind;
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, AstSeparatedList, TextSize, TokenAtOffset, TokenText};
@@ -229,6 +230,13 @@ fn resolve_import_definition(
             }
 
             let target_module = module_db.module_for_path(target_path)?;
+            // No file exists at the path of a module that a framework
+            // declares. Its ranges are ranges of the file that declares it.
+            let target_path = if resolved.kind() == ResolutionKind::FrameworkModule {
+                ambient_module_declaring_file(target_path)?
+            } else {
+                target_path
+            };
 
             let mut lookup = find_js_exported_symbol(
                 module_db,

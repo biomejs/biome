@@ -89,8 +89,9 @@ pub(super) struct JsModuleInfoCollector {
     /// (static string literals only).
     pub(super) referenced_classes: Vec<CssClassReference>,
 
-    /// Scope that exported names resolve in: the global scope of a file, or
-    /// the scope of a `declare module "name"` block for an ambient module.
+    /// Scope that the exports being visited declare names in: the global
+    /// scope, or the scope of the `declare module "name"` block that
+    /// contains them.
     pub(super) export_scope: ScopeId,
 
     /// Modules that the file declares with `declare module "name"`.
@@ -104,17 +105,24 @@ pub(super) enum JsCollectedExport {
         /// Name under which the symbol will be exported.
         export_name: Text,
 
-        /// Local name of the symbol in [JsModuleInfoCollector::export_scope].
+        /// Local name of the symbol in `scope`.
         local_name: TokenText,
+
+        /// The scope of the declaration that exports the symbol: the global
+        /// scope, or the scope of a `declare module "name"` block.
+        scope: ScopeId,
     },
     ExportDefault {
         /// Reference to the type being exported.
         ty: TypeReference,
     },
     ExportNamedDefault {
-        /// Local name of the symbol in [JsModuleInfoCollector::export_scope]
-        /// or in one of its parent scopes.
+        /// Local name of the symbol in `scope` or in one of its parent
+        /// scopes.
         local_name: TokenText,
+
+        /// See [JsCollectedExport::ExportNamedSymbol].
+        scope: ScopeId,
     },
     ExportDefaultAssignment {
         /// Reference to the type assigned to the export.
@@ -357,6 +365,7 @@ impl JsModuleInfoCollector {
         self.register_export(JsCollectedExport::ExportNamedSymbol {
             export_name: export_name.into(),
             local_name,
+            scope: self.export_scope,
         })
     }
 
@@ -725,23 +734,22 @@ impl JsModuleInfoCollector {
                 JsCollectedExport::ExportNamedSymbol {
                     export_name,
                     local_name,
+                    scope,
                 } => {
                     if let Some(binding_ref) = self
                         .semantic_model
-                        .scope_from_id(self.export_scope)
+                        .scope_from_id(scope)
                         .get_binding_reference(&local_name)
                     {
                         let export = self.export_for_binding_reference(binding_ref);
                         finalised_exports.insert(export_name, JsExport::Own(export));
                     }
                 }
-                JsCollectedExport::ExportNamedDefault { local_name } => {
+                JsCollectedExport::ExportNamedDefault { local_name, scope } => {
                     // `export default name` evaluates `name` as an
                     // expression, so an ambient module can export a
                     // declaration of the enclosing file.
-                    if let Some(binding_ref) =
-                        self.find_binding_in_scope(&local_name, self.export_scope)
-                    {
+                    if let Some(binding_ref) = self.find_binding_in_scope(&local_name, scope) {
                         let export = self.export_for_binding_reference(binding_ref);
                         finalised_exports
                             .insert(Text::new_static("default"), JsExport::Own(export));
