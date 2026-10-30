@@ -128,7 +128,6 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
   </tbody>
 </table>
 
-
 ### Patrocinadores Prata
 
 <table>
