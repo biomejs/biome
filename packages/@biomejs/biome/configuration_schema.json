@@ -5586,6 +5586,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoObjectLiteralComparisonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoObjectLiteralComparisonOptions" }
+			]
+		},
+		"NoObjectLiteralComparisonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoObsoleteAttributesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8286,6 +8296,13 @@
 					"description": "Disallow calling Object without arguments to create an empty object.\nSee https://biomejs.dev/linter/rules/no-object-constructor",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoObjectConstructorConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noObjectLiteralComparison": {
+					"description": "Disallow comparing a value with an empty object {} or an empty array \\[].\nSee https://biomejs.dev/linter/rules/no-object-literal-comparison",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoObjectLiteralComparisonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12240,6 +12257,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoObjectConstructorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoObjectLiteralComparisonOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoObjectLiteralComparisonOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

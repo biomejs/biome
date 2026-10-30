@@ -209,6 +209,7 @@ pub mod no_noninteractive_tabindex;
 pub mod no_nonoctal_decimal_escape;
 pub mod no_null;
 pub mod no_object_constructor;
+pub mod no_object_literal_comparison;
 pub mod no_obsolete_attributes;
 pub mod no_obsolete_tags;
 pub mod no_octal;
