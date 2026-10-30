@@ -10013,6 +10013,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueDefaultExport": {
+					"description": "Require the \\<script> block of a Vue component to have a default export.\nSee https://biomejs.dev/linter/rules/use-vue-default-export",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueDefaultExportConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefaultProp": {
 					"description": "Require a default value for optional props in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-default-prop",
 					"anyOf": [
@@ -18256,6 +18263,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueDefaultExportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueDefaultExportOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefaultPropOptions": {
 			"type": "object",
 			"properties": {
@@ -24086,6 +24102,16 @@
 					"anyOf": [{ "$ref": "#/$defs/VueNamedSlotStyle" }, { "type": "null" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueDefaultExportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueDefaultExportOptions" }
+			]
+		},
+		"UseVueDefaultExportOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueDefaultPropConfiguration": {

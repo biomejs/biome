@@ -311,6 +311,14 @@ impl VueSemanticServices {
         &self.model
     }
 
+    /// The Vue semantic model of the file the analyzed tree belongs to.
+    ///
+    /// When the analyzed tree is not the one stored for the file, as in a fix
+    /// pass, the model covers the analyzed tree only.
+    pub fn vue_model(&self) -> &VueSemanticModel {
+        self.vue.model()
+    }
+
     /// The snippet of a single-file component that the analyzed tree is.
     ///
     /// Returns `None` when the analyzed tree is a whole JavaScript file, or

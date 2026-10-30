@@ -4028,6 +4028,11 @@ export interface Nursery {
 	 */
 	useVueConsistentVSlotStyle?: UseVueConsistentVSlotStyleConfiguration;
 	/**
+	 * Require the \<script> block of a Vue component to have a default export.
+	 * See https://biomejs.dev/linter/rules/use-vue-default-export
+	 */
+	useVueDefaultExport?: UseVueDefaultExportConfiguration;
+	/**
 	 * Require a default value for optional props in Vue components.
 	 * See https://biomejs.dev/linter/rules/use-vue-default-prop
 	 */
@@ -6981,6 +6986,9 @@ export type UseVueConsistentVForDelimiterConfiguration =
 export type UseVueConsistentVSlotStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentVSlotStyleOptions;
+export type UseVueDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefaultExportOptions;
 export type UseVueDefaultPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefaultPropOptions;
@@ -10313,6 +10321,10 @@ export interface RuleWithUseVueConsistentVSlotStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentVSlotStyleOptions;
 }
+export interface RuleWithUseVueDefaultExportOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefaultExportOptions;
+}
 export interface RuleWithUseVueDefaultPropOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefaultPropOptions;
@@ -13044,6 +13056,7 @@ export interface UseVueConsistentVSlotStyleOptions {
 	 */
 	named?: VueNamedSlotStyle;
 }
+export type UseVueDefaultExportOptions = {};
 export type UseVueDefaultPropOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
@@ -14826,6 +14839,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentPropNameCasing"
 	| "lint/nursery/useVueConsistentVForDelimiter"
 	| "lint/nursery/useVueConsistentVSlotStyle"
+	| "lint/nursery/useVueDefaultExport"
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
