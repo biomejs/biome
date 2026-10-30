@@ -48,6 +48,36 @@ impl AngularEventBindingBuilder {
         ))
     }
 }
+pub fn angular_let_block(
+    at_token: SyntaxToken,
+    let_token: SyntaxToken,
+    name: AngularBindingName,
+    initializer: AngularLetInitializerClause,
+    semicolon_token: SyntaxToken,
+) -> AngularLetBlock {
+    AngularLetBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_LET_BLOCK,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(let_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(initializer.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
+pub fn angular_let_initializer_clause(
+    eq_token: SyntaxToken,
+    expression: HtmlTextExpression,
+) -> AngularLetInitializerClause {
+    AngularLetInitializerClause::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANGULAR_LET_INITIALIZER_CLAUSE,
+        [
+            Some(SyntaxElement::Token(eq_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+        ],
+    ))
+}
 pub fn angular_property_binding(
     l_brack_token: SyntaxToken,
     name: AngularBindingName,
@@ -183,6 +213,12 @@ impl AngularTwoWayBindingBuilder {
             ],
         ))
     }
+}
+pub fn any_angular_block(angular_let_block: AngularLetBlock) -> AnyAngularBlock {
+    AnyAngularBlock::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::ANY_ANGULAR_BLOCK,
+        [Some(SyntaxElement::Node(angular_let_block.into_syntax()))],
+    ))
 }
 pub fn astro_class_directive(
     class_token: SyntaxToken,
