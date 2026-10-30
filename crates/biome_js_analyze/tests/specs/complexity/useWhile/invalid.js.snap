@@ -16,6 +16,18 @@ for /*a*/ ( /*init*/; /*test before*/ true /*test after*/; /*update*/ ) /*b*/ {
     // body
 }
 
+for (;;) {}
+
+let j = 0;
+for(;;) {
+    if (j >= 10) {
+        break;
+    }
+    j++
+}
+
+for (/*a*/;/*b*/;/*c*/) {}
+
 ```
 
 # Diagnostics
@@ -87,6 +99,81 @@ invalid.js:9:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━
         9 │ + while·/*a*/·(/*test·before*/·true·/*test·after*/)·/*b*/·{
     10 10 │       // body
     11 11 │   }
+  
+
+```
+
+```
+invalid.js:13:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+    11 │ }
+    12 │ 
+  > 13 │ for (;;) {}
+       │ ^^^^^^^^
+    14 │ 
+    15 │ let j = 0;
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+    11 11 │   }
+    12 12 │   
+    13    │ - for·(;;)·{}
+       13 │ + while·(true)·{}
+    14 14 │   
+    15 15 │   let j = 0;
+  
+
+```
+
+```
+invalid.js:16:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+    15 │ let j = 0;
+  > 16 │ for(;;) {
+       │ ^^^^^^^
+    17 │     if (j >= 10) {
+    18 │         break;
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+    14 14 │   
+    15 15 │   let j = 0;
+    16    │ - for(;;)·{
+       16 │ + while(true)·{
+    17 17 │       if (j >= 10) {
+    18 18 │           break;
+  
+
+```
+
+```
+invalid.js:23:1 lint/complexity/useWhile  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a while loop instead of a for loop.
+  
+    21 │ }
+    22 │ 
+  > 23 │ for (/*a*/;/*b*/;/*c*/) {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+  
+  i Prefer a while loop over a for loop without initialization and update.
+  
+  i Safe fix: Use a while loop.
+  
+    21 21 │   }
+    22 22 │   
+    23    │ - for·(/*a*/;/*b*/;/*c*/)·{}
+       23 │ + while·(/*b*/true)·{}
+    24 24 │   
   
 
 ```
