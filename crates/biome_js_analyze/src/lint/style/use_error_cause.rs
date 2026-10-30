@@ -2,8 +2,8 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsBindingPattern, AnyJsObjectMember, JsCatchClause, JsIdentifierBinding,
-    JsReferenceIdentifier, JsThrowStatement,
+    AnyJsBindingPattern, AnyJsExpression, AnyJsObjectMember, JsCallArgumentList, JsCatchClause,
+    JsIdentifierBinding, JsReferenceIdentifier, JsThrowStatement, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_error_cause::UseErrorCauseOptions;
@@ -187,14 +187,19 @@ impl Rule for UseErrorCause {
                     };
                     let args = arguments.args();
 
-                    if args.len() < 2 {
-                        return Some(State::WithoutCause(throw_statement.range()));
-                    }
-
-                    let Some(Ok(second_arg_expr)) = args.iter().nth(1) else {
+                    let Some(options_position) = new_expression
+                        .callee()
+                        .ok()
+                        .and_then(|callee| builtin_error_options_position(callee, model))
+                        .or_else(|| custom_error_options_position(&args))
+                    else {
                         return Some(State::WithoutCause(throw_statement.range()));
                     };
-                    let Some(expr) = second_arg_expr.as_any_js_expression() else {
+
+                    let Some(Ok(options_arg)) = args.iter().nth(options_position) else {
+                        return Some(State::WithoutCause(throw_statement.range()));
+                    };
+                    let Some(expr) = options_arg.as_any_js_expression() else {
                         return Some(State::WithoutCause(throw_statement.range()));
                     };
                     let Some(obj_expr) = expr.as_js_object_expression() else {
@@ -353,6 +358,43 @@ enum CauseValueCheckResult {
     Correct,
     Shadowed,
     Incorrect,
+}
+
+/// Returns the index of the options argument when `callee` is a global built-in error
+/// constructor, such as `Error` or `globalThis.AggregateError`.
+fn builtin_error_options_position(
+    callee: AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<usize> {
+    let (reference, name) = callee
+        .omit_parentheses()
+        .as_any_global_identifier_expression()
+        .and_then(|expr| global_identifier(&expr))?;
+    if model.binding(&reference).is_some() {
+        return None;
+    }
+    match name.text() {
+        "Error" | "EvalError" | "RangeError" | "ReferenceError" | "SyntaxError" | "TypeError"
+        | "URIError" => Some(1),
+        "AggregateError" => Some(2),
+        _ => None,
+    }
+}
+
+/// Returns the index of the options argument of a constructor with an unknown signature: the
+/// second argument when it is an object literal, otherwise the last argument. Returns `None`
+/// when there are fewer than two arguments.
+fn custom_error_options_position(args: &JsCallArgumentList) -> Option<usize> {
+    if args.len() < 2 {
+        return None;
+    }
+    let second_is_object = args.iter().nth(1).is_some_and(|arg| {
+        arg.is_ok_and(|arg| {
+            arg.as_any_js_expression()
+                .is_some_and(|expr| expr.as_js_object_expression().is_some())
+        })
+    });
+    Some(if second_is_object { 1 } else { args.len() - 1 })
 }
 
 fn is_cause_value_correct_error(
