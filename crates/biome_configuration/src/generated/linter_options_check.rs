@@ -133,6 +133,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_catch_assign::NoCatchAssignOptions>(),
     ));
     result.push((
+        "nursery",
+        "noChainedComparison",
+        TypeId::of::<biome_rule_options::no_chained_comparison::NoChainedComparisonOptions>(),
+    ));
+    result.push((
         "correctness",
         "noChildrenProp",
         TypeId::of::<biome_rule_options::no_children_prop::NoChildrenPropOptions>(),

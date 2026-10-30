@@ -225,6 +225,8 @@ pub enum RuleSource<'a> {
     MarkdownLint(&'a str, &'a str),
     /// Rules from [TanStack Query ESLint Plugin](https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query)
     EslintTanstackQuery(&'a str),
+    /// Rules from the `oxc` plugin of [Oxlint](https://oxc.rs/docs/guide/usage/linter)
+    Oxc(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -297,6 +299,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
             Self::MarkdownLint(_, _) => write!(f, "markdownlint"),
             Self::EslintTanstackQuery(_) => write!(f, "@tanstack/eslint-plugin-query"),
+            Self::Oxc(_) => write!(f, "Oxlint"),
         }
     }
 }
@@ -388,6 +391,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintDrizzle(rule_name)
             | Self::EslintTypescriptSortKeys(rule_name)
             | Self::EslintTanstackQuery(rule_name)
+            | Self::Oxc(rule_name)
             | Self::MarkdownLint(_, rule_name)
             | Self::Sherif(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
@@ -457,6 +461,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintDrizzle(_) => "drizzle",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
             Self::EslintTanstackQuery(_) => "@tanstack/query",
+            Self::Oxc(_) => "oxc",
         }
     }
 
@@ -531,6 +536,7 @@ impl<'a> RuleSource<'a> {
             Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintTanstackQuery(rule_name) => format!("https://tanstack.com/query/latest/docs/eslint/{rule_name}"),
+            Self::Oxc(rule_name) => format!("https://oxc.rs/docs/guide/usage/linter/rules/oxc/{rule_name}"),
         }
     }
 
@@ -570,6 +576,7 @@ impl<'a> RuleSource<'a> {
                 | Self::SortPackageJson
                 | Self::Sherif(_)
                 | Self::MarkdownLint(_, _)
+                | Self::Oxc(_)
         )
     }
 
