@@ -18,3 +18,5 @@ minimumReleaseAgeExclude:
   - vite@7.3.5
   # Renovate security update: vitest@4.1.11
   - vitest@4.1.11
+  # Renovate security update: happy-dom@21.0.4
+  - happy-dom@21.0.4
