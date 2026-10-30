@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+async function f1() { return await (a as Promise<number>); }
+async function f2() { return await (a!); }
+async function f3() { return await (<Promise<number>>a); }
+
+```
