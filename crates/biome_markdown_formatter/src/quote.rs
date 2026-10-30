@@ -1,4 +1,4 @@
-use crate::bullet_list::{FmtAnyList, list_marker_alignment};
+use crate::bullet_list::{FmtAnyList, list_ends_with_quote_prefix, list_marker_alignment};
 use crate::context::ProseWrap;
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
 use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
@@ -100,6 +100,7 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
         let quote_trim_range = quote_boundary_trim_range(&self.content, self.quote_boundary_trim);
         let prose_wrap = f.options().prose_wrap();
         let mut prev_content = PrevContentBlock::None;
+        let mut prev_list_removed_quote_prefix = false;
         let mut iter = self.content.iter().enumerate().peekable();
         let mut joiner = f.join();
 
@@ -107,6 +108,20 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
             if !quote_trim_range.contains(&index) {
                 joiner.entry(&format_with(|f| format_removed_quote_boundary(&block, f)));
                 continue;
+            }
+
+            if prev_list_removed_quote_prefix {
+                prev_list_removed_quote_prefix = false;
+                let line_prefix = quote_line_prefix(block.syntax())?;
+                joiner.entry(&format_with(|f| {
+                    write!(
+                        f,
+                        [dedent_to_root(&format_args![
+                            hard_line_break(),
+                            line_prefix.format(true)
+                        ])]
+                    )
+                }));
             }
 
             match &block {
@@ -209,6 +224,7 @@ impl Format<MarkdownFormatContext> for QuoteBlockList {
                 _ => {
                     prev_content = PrevContentBlock::Other;
                     if let Some(list_item) = block.as_any_list_item() {
+                        prev_list_removed_quote_prefix = list_ends_with_quote_prefix(&list_item);
                         joiner.entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                     } else if block.is_fenced_block() {
                         joiner.entry(&dedent_to_root(&block.format()));
