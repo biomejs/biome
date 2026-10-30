@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-type-export-default-from.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script lang="ts">
+export type { default } from "./types";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-type-export-default-from.vue:3:1 lint/nursery/useVueDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <script> block has no default export.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script lang="ts">
+  > 3 │ export type { default } from "./types";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Vue builds the component from the default export of the <script> block. Without one, the component can't use anything this block declares.
+  
+  i Export the component with export default, or move the code to a <script setup> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

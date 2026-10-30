@@ -3788,6 +3788,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Require the \<script> block of a Vue component to have a default export.
+	 * See https://biomejs.dev/linter/rules/use-vue-default-export
+	 */
+	useVueDefaultExport?: UseVueDefaultExportConfiguration;
+	/**
 	 * Enforce defineOptions() instead of a default export in components that use \<script setup>.
 	 * See https://biomejs.dev/linter/rules/use-vue-define-options
 	 */
@@ -6522,6 +6527,9 @@ export type UseVueConsistentDefineEmitsDeclarationConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueDefaultExportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefaultExportOptions;
 export type UseVueDefineOptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineOptionsOptions;
@@ -9541,6 +9549,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueDefaultExportOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefaultExportOptions;
+}
 export interface RuleWithUseVueDefineOptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefineOptionsOptions;
@@ -12022,6 +12034,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueDefaultExportOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
@@ -13657,6 +13670,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefaultExport"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueTemplateRef"
