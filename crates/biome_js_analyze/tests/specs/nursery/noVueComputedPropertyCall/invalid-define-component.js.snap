@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  computed: {
+    total() {
+      return 1 + 2;
+    },
+  },
+  methods: {
+    log() {
+      console.log(this.total());
+    },
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:12:19 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property total is called like a method, but its value is not a function.
+  
+    10 │   methods: {
+    11 │     log() {
+  > 12 │       console.log(this.total());
+       │                   ^^^^^^^^^^^^
+    13 │     },
+    14 │   },
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

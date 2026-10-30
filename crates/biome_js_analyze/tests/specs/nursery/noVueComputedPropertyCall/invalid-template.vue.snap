@@ -1,0 +1,92 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-template.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <p>{{ total() }}</p>
+  <button @click="total()">Log</button>
+  <p v-if="label()">{{ label }}</p>
+</template>
+
+<script>
+export default {
+  props: { title: String },
+  computed: {
+    total() {
+      return 42;
+    },
+    label() {
+      return this.title;
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-template.vue:3:9 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property total is called like a method, but its value is not a function.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <p>{{ total() }}</p>
+      │         ^^^^^^^
+    4 │   <button @click="total()">Log</button>
+    5 │   <p v-if="label()">{{ label }}</p>
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:4:19 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property total is called like a method, but its value is not a function.
+  
+    2 │ <template>
+    3 │   <p>{{ total() }}</p>
+  > 4 │   <button @click="total()">Log</button>
+      │                   ^^^^^^^
+    5 │   <p v-if="label()">{{ label }}</p>
+    6 │ </template>
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-template.vue:5:12 lint/nursery/noVueComputedPropertyCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property label is called like a method, but its value is not a function.
+  
+    3 │   <p>{{ total() }}</p>
+    4 │   <button @click="total()">Log</button>
+  > 5 │   <p v-if="label()">{{ label }}</p>
+      │            ^^^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i Vue gives you the value that the getter of a computed property returns. Calling a value that is not a function throws an error when the code runs.
+  
+  i Remove the parentheses and the arguments to read the value of the computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
