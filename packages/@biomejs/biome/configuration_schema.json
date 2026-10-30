@@ -7859,6 +7859,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUselessTemplateAttributesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUselessTemplateAttributesOptions" }
+			]
+		},
+		"NoVueUselessTemplateAttributesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueVHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8712,6 +8722,13 @@
 					"description": "Disallow template refs that are never used.\nSee https://biomejs.dev/linter/rules/no-vue-unused-refs",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUnusedRefsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUselessTemplateAttributes": {
+					"description": "Disallow attributes and directives that have no effect on \\<template> elements.\nSee https://biomejs.dev/linter/rules/no-vue-useless-template-attributes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUselessTemplateAttributesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14270,6 +14287,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUnusedRefsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUselessTemplateAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUselessTemplateAttributesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

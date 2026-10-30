@@ -1,0 +1,367 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <template v-if="foo" class="heading">...</template>
+  <template v-for="i in foo" :bar="i">...</template>
+  <template v-slot:foo="foo" ref="input">...</template>
+  <template v-if="foo" @click="click">...</template>
+  <template v-else-if="bar" id="second">...</template>
+  <template v-else v-bind:title="title">...</template>
+  <template v-if="foo" v-show="visible">...</template>
+  <template v-if="foo" v-memo="[foo]">...</template>
+  <template v-if="foo" :[name]="value">...</template>
+  <template v-if="foo" v-bind="attrs">...</template>
+  <template v-if="foo" v-custom="value">...</template>
+  <template v-if="foo" slot="header">...</template>
+  <MyList>
+    <template #header v-once>...</template>
+    <template #item="{ name }" class="item" :data-name="name">{{ name }}</template>
+  </MyList>
+  <div>
+    <template v-for="item in items" :key="item.id" style="color: red">...</template>
+  </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This attribute has no effect on a <template> element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <template v-if="foo" class="heading">...</template>
+      │                        ^^^^^^^^^^^^^^^
+    4 │   <template v-for="i in foo" :bar="i">...</template>
+    5 │   <template v-slot:foo="foo" ref="input">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:30 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+    2 │ <template>
+    3 │   <template v-if="foo" class="heading">...</template>
+  > 4 │   <template v-for="i in foo" :bar="i">...</template>
+      │                              ^^^^^^^^
+    5 │   <template v-slot:foo="foo" ref="input">...</template>
+    6 │   <template v-if="foo" @click="click">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:30 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This attribute has no effect on a <template> element.
+  
+    3 │   <template v-if="foo" class="heading">...</template>
+    4 │   <template v-for="i in foo" :bar="i">...</template>
+  > 5 │   <template v-slot:foo="foo" ref="input">...</template>
+      │                              ^^^^^^^^^^^
+    6 │   <template v-if="foo" @click="click">...</template>
+    7 │   <template v-else-if="bar" id="second">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+    4 │   <template v-for="i in foo" :bar="i">...</template>
+    5 │   <template v-slot:foo="foo" ref="input">...</template>
+  > 6 │   <template v-if="foo" @click="click">...</template>
+      │                        ^^^^^^^^^^^^^^
+    7 │   <template v-else-if="bar" id="second">...</template>
+    8 │   <template v-else v-bind:title="title">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:29 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This attribute has no effect on a <template> element.
+  
+    5 │   <template v-slot:foo="foo" ref="input">...</template>
+    6 │   <template v-if="foo" @click="click">...</template>
+  > 7 │   <template v-else-if="bar" id="second">...</template>
+      │                             ^^^^^^^^^^^
+    8 │   <template v-else v-bind:title="title">...</template>
+    9 │   <template v-if="foo" v-show="visible">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:20 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+     6 │   <template v-if="foo" @click="click">...</template>
+     7 │   <template v-else-if="bar" id="second">...</template>
+   > 8 │   <template v-else v-bind:title="title">...</template>
+       │                    ^^^^^^^^^^^^^^^^^^^^
+     9 │   <template v-if="foo" v-show="visible">...</template>
+    10 │   <template v-if="foo" v-memo="[foo]">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+     7 │   <template v-else-if="bar" id="second">...</template>
+     8 │   <template v-else v-bind:title="title">...</template>
+   > 9 │   <template v-if="foo" v-show="visible">...</template>
+       │                        ^^^^^^^^^^^^^^^^
+    10 │   <template v-if="foo" v-memo="[foo]">...</template>
+    11 │   <template v-if="foo" :[name]="value">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+     8 │   <template v-else v-bind:title="title">...</template>
+     9 │   <template v-if="foo" v-show="visible">...</template>
+  > 10 │   <template v-if="foo" v-memo="[foo]">...</template>
+       │                        ^^^^^^^^^^^^^^
+    11 │   <template v-if="foo" :[name]="value">...</template>
+    12 │   <template v-if="foo" v-bind="attrs">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+     9 │   <template v-if="foo" v-show="visible">...</template>
+    10 │   <template v-if="foo" v-memo="[foo]">...</template>
+  > 11 │   <template v-if="foo" :[name]="value">...</template>
+       │                        ^^^^^^^^^^^^^^^
+    12 │   <template v-if="foo" v-bind="attrs">...</template>
+    13 │   <template v-if="foo" v-custom="value">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+    10 │   <template v-if="foo" v-memo="[foo]">...</template>
+    11 │   <template v-if="foo" :[name]="value">...</template>
+  > 12 │   <template v-if="foo" v-bind="attrs">...</template>
+       │                        ^^^^^^^^^^^^^^
+    13 │   <template v-if="foo" v-custom="value">...</template>
+    14 │   <template v-if="foo" slot="header">...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+    11 │   <template v-if="foo" :[name]="value">...</template>
+    12 │   <template v-if="foo" v-bind="attrs">...</template>
+  > 13 │   <template v-if="foo" v-custom="value">...</template>
+       │                        ^^^^^^^^^^^^^^^^
+    14 │   <template v-if="foo" slot="header">...</template>
+    15 │   <MyList>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:24 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This attribute has no effect on a <template> element.
+  
+    12 │   <template v-if="foo" v-bind="attrs">...</template>
+    13 │   <template v-if="foo" v-custom="value">...</template>
+  > 14 │   <template v-if="foo" slot="header">...</template>
+       │                        ^^^^^^^^^^^^^
+    15 │   <MyList>
+    16 │     <template #header v-once>...</template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:23 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+    14 │   <template v-if="foo" slot="header">...</template>
+    15 │   <MyList>
+  > 16 │     <template #header v-once>...</template>
+       │                       ^^^^^^
+    17 │     <template #item="{ name }" class="item" :data-name="name">{{ name }}</template>
+    18 │   </MyList>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:32 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This attribute has no effect on a <template> element.
+  
+    15 │   <MyList>
+    16 │     <template #header v-once>...</template>
+  > 17 │     <template #item="{ name }" class="item" :data-name="name">{{ name }}</template>
+       │                                ^^^^^^^^^^^^
+    18 │   </MyList>
+    19 │   <div>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:45 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This directive has no effect on a <template> element.
+  
+    15 │   <MyList>
+    16 │     <template #header v-once>...</template>
+  > 17 │     <template #item="{ name }" class="item" :data-name="name">{{ name }}</template>
+       │                                             ^^^^^^^^^^^^^^^^^
+    18 │   </MyList>
+    19 │   <div>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:52 lint/nursery/noVueUselessTemplateAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This attribute has no effect on a <template> element.
+  
+    18 │   </MyList>
+    19 │   <div>
+  > 20 │     <template v-for="item in items" :key="item.id" style="color: red">...</template>
+       │                                                    ^^^^^^^^^^^^^^^^^^
+    21 │   </div>
+    22 │ </template>
+  
+  i Vue doesn't render a <template> element that has v-if, v-else-if, v-else, v-for, or v-slot, only its content, so it ignores this.
+  
+  i Move it to an element inside the <template>, or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

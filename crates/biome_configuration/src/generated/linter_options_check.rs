@@ -1946,6 +1946,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueUnusedRefs",
         TypeId::of::<biome_rule_options::no_vue_unused_refs::NoVueUnusedRefsOptions>(),
     ));
+    result.push(("nursery", "noVueUselessTemplateAttributes", TypeId::of::<biome_rule_options::no_vue_useless_template_attributes::NoVueUselessTemplateAttributesOptions>()));
     result.push((
         "nursery",
         "noVueVHtml",
