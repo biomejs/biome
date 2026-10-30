@@ -270,10 +270,7 @@ impl MdParagraph {
     }
 
     pub fn ends_with_newline(&self) -> bool {
-        self.list().last().is_some_and(|item| {
-            item.as_md_textual()
-                .is_some_and(|textual| textual.is_newline().unwrap_or_default())
-        })
+        self.list().ends_with_newline()
     }
 
     pub fn ends_with_double_newline(&self) -> bool {

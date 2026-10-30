@@ -10,7 +10,8 @@ use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::{format_args, write};
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet, MdQuote,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdInline, AnyMdLeafBlock, GfmTable,
+    MdBlockList, MdBullet, MdQuote,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -326,6 +327,14 @@ impl PreviousBlock {
             .is_some_and(|item| list_ends_with_line_break(&item))
     }
 
+    /// Whether the block terminates its own last line. Otherwise the first
+    /// [MdNewline] that follows the block is its line terminator.
+    ///
+    /// [MdNewline]: biome_markdown_syntax::MdNewline
+    fn terminates_last_line(&self) -> bool {
+        self.0.as_ref().is_some_and(block_ends_with_line_break)
+    }
+
     fn needs_empty_line_before_list(&self) -> bool {
         self.0.as_ref().is_some_and(|block| {
             matches!(
@@ -513,10 +522,25 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                                 ));
                             }
                         }
-                        // The remaining newlines are real blank lines, kept as
-                        // they are.
-                        for blank_line in blank_lines {
-                            joiner.entry(&blank_line.format());
+                        // The remaining newlines are real blank lines. They
+                        // collapse into one, or into two before an indented
+                        // code block so that it can't be read as part of the
+                        // list.
+                        let kept = if iter.peek().is_some_and(|(_, next)| next.is_indent_block()) {
+                            2
+                        } else {
+                            1
+                        };
+                        for (position, blank_line) in blank_lines.enumerate() {
+                            joiner.entry(&blank_line.format().with_options(
+                                FormatMdNewlineOptions {
+                                    print_mode: if position < kept {
+                                        TextPrintMode::Pristine
+                                    } else {
+                                        TextPrintMode::Remove
+                                    },
+                                },
+                            ));
                         }
                     }
                 } else if previous_block.is_fenced_code_block()
@@ -559,14 +583,55 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                             joiner.entry(&hard_line_break());
                         }
                     }
-                } else {
+                } else if is_leading || is_trailing {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        print_mode: if is_leading || is_trailing {
-                            TextPrintMode::Remove
-                        } else {
-                            TextPrintMode::Pristine
-                        },
+                        print_mode: TextPrintMode::Remove,
                     }));
+                } else {
+                    let mut newlines = vec![newline.clone()];
+                    while iter
+                        .peek()
+                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
+                    {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(next_newline)),
+                        )) = iter.next()
+                        {
+                            newlines.push(next_newline);
+                        }
+                    }
+                    if iter.peek().is_some_and(|(_, next)| next.is_list()) {
+                        // Same separator as a single newline before a list.
+                        for newline in &newlines {
+                            joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                        if previous_block.needs_empty_line_before_list() {
+                            joiner.entry(&empty_line());
+                        } else {
+                            joiner.entry(&hard_line_break());
+                        }
+                    } else {
+                        // Consecutive blank lines collapse into one. When the
+                        // previous block doesn't terminate its last line, the
+                        // first newline is that terminator.
+                        let kept = if previous_block.terminates_last_line() {
+                            1
+                        } else {
+                            2
+                        };
+                        for (position, newline) in newlines.iter().enumerate() {
+                            joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
+                                print_mode: if position < kept {
+                                    TextPrintMode::Pristine
+                                } else {
+                                    TextPrintMode::Remove
+                                },
+                            }));
+                        }
+                    }
                 }
                 after_newline = true;
             } else {
@@ -720,6 +785,36 @@ pub(crate) fn list_ends_with_line_break(item: &AnyListItem) -> bool {
             },
             None => return false,
         }
+    }
+}
+
+/// Whether the block carries the line ending of its last line.
+///
+/// Paragraphs and indented code blocks end with a newline or a hard line
+/// break in their inline content, and table rows own their newline. A quote or
+/// list delegates to its last block. Other blocks, like headers and fenced code
+/// blocks, end with their last visible character.
+fn block_ends_with_line_break(block: &AnyMdBlock) -> bool {
+    match block {
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(_)) => true,
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
+            paragraph.ends_with_newline()
+                || matches!(paragraph.list().last(), Some(AnyMdInline::MdHardLine(_)))
+        }
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::AnyMdCodeBlock(
+            AnyMdCodeBlock::MdIndentCodeBlock(code),
+        )) => code.content().ends_with_newline(),
+        AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::GfmTable(table)) => {
+            table_ends_with_line_break(table)
+        }
+        AnyMdBlock::AnyMdContainerBlock(AnyMdContainerBlock::MdQuote(quote)) => quote
+            .content()
+            .iter()
+            .last()
+            .is_some_and(|last| block_ends_with_line_break(&last)),
+        _ => block
+            .as_any_list_item()
+            .is_some_and(|item| list_ends_with_line_break(&item)),
     }
 }
 
