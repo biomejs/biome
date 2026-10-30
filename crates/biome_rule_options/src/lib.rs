@@ -274,6 +274,7 @@ pub mod no_shadow_restricted_names;
 pub mod no_short_time_values;
 pub mod no_shorthand_property_overrides;
 pub mod no_shouty_constants;
+pub mod no_single_promise_in_promise_methods;
 pub mod no_skipped_tests;
 pub mod no_solid_destructured_props;
 pub mod no_sparse_array;
