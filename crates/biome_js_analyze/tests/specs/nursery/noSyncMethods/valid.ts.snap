@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare function fooSync(): void;
+type Reader = typeof fs.readFileSync;
+(fs.readFileSync as Reader);
+
+```

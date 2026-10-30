@@ -3263,6 +3263,11 @@ export interface Nursery {
 	 */
 	noSvelteUselessDerivedBy?: NoSvelteUselessDerivedByConfiguration;
 	/**
+	 * Disallow calling synchronous methods, such as fs.readFileSync().
+	 * See https://biomejs.dev/linter/rules/no-sync-methods
+	 */
+	noSyncMethods?: NoSyncMethodsConfiguration;
+	/**
 	 * Disallow arbitrary values in Tailwind CSS utility classes.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value
 	 */
@@ -6542,6 +6547,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoSvelteUselessDerivedByConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUselessDerivedByOptions;
+export type NoSyncMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSyncMethodsOptions;
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
@@ -9508,6 +9516,10 @@ export interface RuleWithNoSvelteUselessDerivedByOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoSvelteUselessDerivedByOptions;
+}
+export interface RuleWithNoSyncMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: NoSyncMethodsOptions;
 }
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
@@ -12594,6 +12606,23 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	allowReassign?: boolean;
 }
 export type NoSvelteUselessDerivedByOptions = {};
+/**
+ * Options for the `noSyncMethods` rule.
+ */
+export interface NoSyncMethodsOptions {
+	/**
+	 * Allows synchronous calls at the top level of a file, outside of any function.
+	 *
+	 * Defaults to `false`.
+	 */
+	allowAtRootLevel?: boolean;
+	/**
+	 * Names of synchronous functions that the rule doesn't report, such as `readFileSync`.
+	 *
+	 * Defaults to `[]`.
+	 */
+	ignore?: string[];
+}
 export interface NoTailwindArbitraryValueOptions {
 	/**
 	 * Categories of utilities that may use arbitrary values. Defaults to an empty list.
@@ -14713,6 +14742,7 @@ export type Category =
 	| "lint/nursery/noSvelteObjectInTextMustaches"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noSvelteUselessDerivedBy"
+	| "lint/nursery/noSyncMethods"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
