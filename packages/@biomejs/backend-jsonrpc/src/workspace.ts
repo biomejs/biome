@@ -2998,6 +2998,11 @@ export interface Nursery {
 	 */
 	noBunModules?: NoBunModulesConfiguration;
 	/**
+	 * Disallow chaining comparisons, as in a \< b \< c.
+	 * See https://biomejs.dev/linter/rules/no-chained-comparison
+	 */
+	noChainedComparison?: NoChainedComparisonConfiguration;
+	/**
 	 * Disallow leading and trailing spaces in console method arguments.
 	 * See https://biomejs.dev/linter/rules/no-console-spaces
 	 */
@@ -6403,6 +6408,9 @@ export type NoBooleanSortComparatorConfiguration =
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
+export type NoChainedComparisonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoChainedComparisonOptions;
 export type NoConsoleSpacesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConsoleSpacesOptions;
@@ -9268,6 +9276,10 @@ export interface RuleWithNoBooleanSortComparatorOptions {
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
 	options?: NoBunModulesOptions;
+}
+export interface RuleWithNoChainedComparisonOptions {
+	level: RulePlainConfiguration;
+	options?: NoChainedComparisonOptions;
 }
 export interface RuleWithNoConsoleSpacesOptions {
 	/**
@@ -12548,6 +12560,7 @@ export interface NoBaseToStringOptions {
 }
 export type NoBooleanSortComparatorOptions = {};
 export type NoBunModulesOptions = {};
+export type NoChainedComparisonOptions = {};
 export type NoConsoleSpacesOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
@@ -14710,6 +14723,7 @@ export type Category =
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
+	| "lint/nursery/noChainedComparison"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noConsoleSpaces"

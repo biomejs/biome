@@ -1,0 +1,760 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+if (a < b < c) {}
+if (a > b > c) {}
+if (a <= b >= c) {}
+if (a >= b < c) {}
+if (a == b == c) {}
+if (a === b === c) {}
+if (a != b !== c) {}
+if (a !== b == c) {}
+
+// Parentheses don't change the result, and the formatter adds them to equality chains.
+if ((a == b) == c) {}
+if ((a < b) < c) {}
+
+// One diagnostic for the whole chain.
+if (a == b == c == d) {}
+if ((a == b == c) == d) {}
+if (a < b < c < d) {}
+
+// The right side is not clearly a boolean.
+if (a === b === foo()) {}
+if (a === b === c.d) {}
+const x = a < b < 10;
+
+// Comparing booleans with `<` or `>` is still reported.
+if ((a < b) < (c < d)) {}
+if (a < b < !c) {}
+if (a < b < true) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (a < b < c) {}
+      │     ^^^^^^^^^
+    3 │ if (a > b > c) {}
+    4 │ if (a <= b >= c) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (a < b < c) {}
+      │     ^^^^^
+    3 │ if (a > b > c) {}
+    4 │ if (a <= b >= c) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (a < b < c) {}
+      │             ^
+    3 │ if (a > b > c) {}
+    4 │ if (a <= b >= c) {}
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (a < b < c) {}
+  > 3 │ if (a > b > c) {}
+      │     ^^^^^^^^^
+    4 │ if (a <= b >= c) {}
+    5 │ if (a >= b < c) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (a < b < c) {}
+  > 3 │ if (a > b > c) {}
+      │     ^^^^^
+    4 │ if (a <= b >= c) {}
+    5 │ if (a >= b < c) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (a < b < c) {}
+  > 3 │ if (a > b > c) {}
+      │             ^
+    4 │ if (a <= b >= c) {}
+    5 │ if (a >= b < c) {}
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    2 │ if (a < b < c) {}
+    3 │ if (a > b > c) {}
+  > 4 │ if (a <= b >= c) {}
+      │     ^^^^^^^^^^^
+    5 │ if (a >= b < c) {}
+    6 │ if (a == b == c) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    2 │ if (a < b < c) {}
+    3 │ if (a > b > c) {}
+  > 4 │ if (a <= b >= c) {}
+      │     ^^^^^^
+    5 │ if (a >= b < c) {}
+    6 │ if (a == b == c) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    2 │ if (a < b < c) {}
+    3 │ if (a > b > c) {}
+  > 4 │ if (a <= b >= c) {}
+      │               ^
+    5 │ if (a >= b < c) {}
+    6 │ if (a == b == c) {}
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    3 │ if (a > b > c) {}
+    4 │ if (a <= b >= c) {}
+  > 5 │ if (a >= b < c) {}
+      │     ^^^^^^^^^^
+    6 │ if (a == b == c) {}
+    7 │ if (a === b === c) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    3 │ if (a > b > c) {}
+    4 │ if (a <= b >= c) {}
+  > 5 │ if (a >= b < c) {}
+      │     ^^^^^^
+    6 │ if (a == b == c) {}
+    7 │ if (a === b === c) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    3 │ if (a > b > c) {}
+    4 │ if (a <= b >= c) {}
+  > 5 │ if (a >= b < c) {}
+      │              ^
+    6 │ if (a == b == c) {}
+    7 │ if (a === b === c) {}
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    4 │ if (a <= b >= c) {}
+    5 │ if (a >= b < c) {}
+  > 6 │ if (a == b == c) {}
+      │     ^^^^^^^^^^^
+    7 │ if (a === b === c) {}
+    8 │ if (a != b !== c) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    4 │ if (a <= b >= c) {}
+    5 │ if (a >= b < c) {}
+  > 6 │ if (a == b == c) {}
+      │     ^^^^^^
+    7 │ if (a === b === c) {}
+    8 │ if (a != b !== c) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    4 │ if (a <= b >= c) {}
+    5 │ if (a >= b < c) {}
+  > 6 │ if (a == b == c) {}
+      │               ^
+    7 │ if (a === b === c) {}
+    8 │ if (a != b !== c) {}
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    5 │ if (a >= b < c) {}
+    6 │ if (a == b == c) {}
+  > 7 │ if (a === b === c) {}
+      │     ^^^^^^^^^^^^^
+    8 │ if (a != b !== c) {}
+    9 │ if (a !== b == c) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    5 │ if (a >= b < c) {}
+    6 │ if (a == b == c) {}
+  > 7 │ if (a === b === c) {}
+      │     ^^^^^^^
+    8 │ if (a != b !== c) {}
+    9 │ if (a !== b == c) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    5 │ if (a >= b < c) {}
+    6 │ if (a == b == c) {}
+  > 7 │ if (a === b === c) {}
+      │                 ^
+    8 │ if (a != b !== c) {}
+    9 │ if (a !== b == c) {}
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+     6 │ if (a == b == c) {}
+     7 │ if (a === b === c) {}
+   > 8 │ if (a != b !== c) {}
+       │     ^^^^^^^^^^^^
+     9 │ if (a !== b == c) {}
+    10 │ 
+  
+  i This comparison runs first and produces true or false.
+  
+     6 │ if (a == b == c) {}
+     7 │ if (a === b === c) {}
+   > 8 │ if (a != b !== c) {}
+       │     ^^^^^^
+     9 │ if (a !== b == c) {}
+    10 │ 
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+     6 │ if (a == b == c) {}
+     7 │ if (a === b === c) {}
+   > 8 │ if (a != b !== c) {}
+       │                ^
+     9 │ if (a !== b == c) {}
+    10 │ 
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+     7 │ if (a === b === c) {}
+     8 │ if (a != b !== c) {}
+   > 9 │ if (a !== b == c) {}
+       │     ^^^^^^^^^^^^
+    10 │ 
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+  
+  i This comparison runs first and produces true or false.
+  
+     7 │ if (a === b === c) {}
+     8 │ if (a != b !== c) {}
+   > 9 │ if (a !== b == c) {}
+       │     ^^^^^^^
+    10 │ 
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+     7 │ if (a === b === c) {}
+     8 │ if (a != b !== c) {}
+   > 9 │ if (a !== b == c) {}
+       │                ^
+    10 │ 
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+  > 12 │ if ((a == b) == c) {}
+       │     ^^^^^^^^^^^^^
+    13 │ if ((a < b) < c) {}
+    14 │ 
+  
+  i This comparison runs first and produces true or false.
+  
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+  > 12 │ if ((a == b) == c) {}
+       │      ^^^^^^
+    13 │ if ((a < b) < c) {}
+    14 │ 
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+  > 12 │ if ((a == b) == c) {}
+       │                 ^
+    13 │ if ((a < b) < c) {}
+    14 │ 
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+    12 │ if ((a == b) == c) {}
+  > 13 │ if ((a < b) < c) {}
+       │     ^^^^^^^^^^^
+    14 │ 
+    15 │ // One diagnostic for the whole chain.
+  
+  i This comparison runs first and produces true or false.
+  
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+    12 │ if ((a == b) == c) {}
+  > 13 │ if ((a < b) < c) {}
+       │      ^^^^^
+    14 │ 
+    15 │ // One diagnostic for the whole chain.
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    11 │ // Parentheses don't change the result, and the formatter adds them to equality chains.
+    12 │ if ((a == b) == c) {}
+  > 13 │ if ((a < b) < c) {}
+       │               ^
+    14 │ 
+    15 │ // One diagnostic for the whole chain.
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    15 │ // One diagnostic for the whole chain.
+  > 16 │ if (a == b == c == d) {}
+       │     ^^^^^^^^^^^^^^^^
+    17 │ if ((a == b == c) == d) {}
+    18 │ if (a < b < c < d) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    15 │ // One diagnostic for the whole chain.
+  > 16 │ if (a == b == c == d) {}
+       │     ^^^^^^^^^^^
+    17 │ if ((a == b == c) == d) {}
+    18 │ if (a < b < c < d) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    15 │ // One diagnostic for the whole chain.
+  > 16 │ if (a == b == c == d) {}
+       │                    ^
+    17 │ if ((a == b == c) == d) {}
+    18 │ if (a < b < c < d) {}
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    15 │ // One diagnostic for the whole chain.
+    16 │ if (a == b == c == d) {}
+  > 17 │ if ((a == b == c) == d) {}
+       │     ^^^^^^^^^^^^^^^^^^
+    18 │ if (a < b < c < d) {}
+    19 │ 
+  
+  i This comparison runs first and produces true or false.
+  
+    15 │ // One diagnostic for the whole chain.
+    16 │ if (a == b == c == d) {}
+  > 17 │ if ((a == b == c) == d) {}
+       │      ^^^^^^^^^^^
+    18 │ if (a < b < c < d) {}
+    19 │ 
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    15 │ // One diagnostic for the whole chain.
+    16 │ if (a == b == c == d) {}
+  > 17 │ if ((a == b == c) == d) {}
+       │                      ^
+    18 │ if (a < b < c < d) {}
+    19 │ 
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    16 │ if (a == b == c == d) {}
+    17 │ if ((a == b == c) == d) {}
+  > 18 │ if (a < b < c < d) {}
+       │     ^^^^^^^^^^^^^
+    19 │ 
+    20 │ // The right side is not clearly a boolean.
+  
+  i This comparison runs first and produces true or false.
+  
+    16 │ if (a == b == c == d) {}
+    17 │ if ((a == b == c) == d) {}
+  > 18 │ if (a < b < c < d) {}
+       │     ^^^^^^^^^
+    19 │ 
+    20 │ // The right side is not clearly a boolean.
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    16 │ if (a == b == c == d) {}
+    17 │ if ((a == b == c) == d) {}
+  > 18 │ if (a < b < c < d) {}
+       │                 ^
+    19 │ 
+    20 │ // The right side is not clearly a boolean.
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    20 │ // The right side is not clearly a boolean.
+  > 21 │ if (a === b === foo()) {}
+       │     ^^^^^^^^^^^^^^^^^
+    22 │ if (a === b === c.d) {}
+    23 │ const x = a < b < 10;
+  
+  i This comparison runs first and produces true or false.
+  
+    20 │ // The right side is not clearly a boolean.
+  > 21 │ if (a === b === foo()) {}
+       │     ^^^^^^^
+    22 │ if (a === b === c.d) {}
+    23 │ const x = a < b < 10;
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    20 │ // The right side is not clearly a boolean.
+  > 21 │ if (a === b === foo()) {}
+       │                 ^^^^^
+    22 │ if (a === b === c.d) {}
+    23 │ const x = a < b < 10;
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    20 │ // The right side is not clearly a boolean.
+    21 │ if (a === b === foo()) {}
+  > 22 │ if (a === b === c.d) {}
+       │     ^^^^^^^^^^^^^^^
+    23 │ const x = a < b < 10;
+    24 │ 
+  
+  i This comparison runs first and produces true or false.
+  
+    20 │ // The right side is not clearly a boolean.
+    21 │ if (a === b === foo()) {}
+  > 22 │ if (a === b === c.d) {}
+       │     ^^^^^^^
+    23 │ const x = a < b < 10;
+    24 │ 
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    20 │ // The right side is not clearly a boolean.
+    21 │ if (a === b === foo()) {}
+  > 22 │ if (a === b === c.d) {}
+       │                 ^^^
+    23 │ const x = a < b < 10;
+    24 │ 
+  
+  i For example, 2 === 2 === 2 is false, because 2 === 2 is true, and true === 2 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a === b && b === c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:11 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    21 │ if (a === b === foo()) {}
+    22 │ if (a === b === c.d) {}
+  > 23 │ const x = a < b < 10;
+       │           ^^^^^^^^^^
+    24 │ 
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+  
+  i This comparison runs first and produces true or false.
+  
+    21 │ if (a === b === foo()) {}
+    22 │ if (a === b === c.d) {}
+  > 23 │ const x = a < b < 10;
+       │           ^^^^^
+    24 │ 
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    21 │ if (a === b === foo()) {}
+    22 │ if (a === b === c.d) {}
+  > 23 │ const x = a < b < 10;
+       │                   ^^
+    24 │ 
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+  > 26 │ if ((a < b) < (c < d)) {}
+       │     ^^^^^^^^^^^^^^^^^
+    27 │ if (a < b < !c) {}
+    28 │ if (a < b < true) {}
+  
+  i This comparison runs first and produces true or false.
+  
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+  > 26 │ if ((a < b) < (c < d)) {}
+       │      ^^^^^
+    27 │ if (a < b < !c) {}
+    28 │ if (a < b < true) {}
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+  > 26 │ if ((a < b) < (c < d)) {}
+       │               ^^^^^^^
+    27 │ if (a < b < !c) {}
+    28 │ if (a < b < true) {}
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+    26 │ if ((a < b) < (c < d)) {}
+  > 27 │ if (a < b < !c) {}
+       │     ^^^^^^^^^^
+    28 │ if (a < b < true) {}
+    29 │ 
+  
+  i This comparison runs first and produces true or false.
+  
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+    26 │ if ((a < b) < (c < d)) {}
+  > 27 │ if (a < b < !c) {}
+       │     ^^^^^
+    28 │ if (a < b < true) {}
+    29 │ 
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    25 │ // Comparing booleans with `<` or `>` is still reported.
+    26 │ if ((a < b) < (c < d)) {}
+  > 27 │ if (a < b < !c) {}
+       │             ^^
+    28 │ if (a < b < true) {}
+    29 │ 
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:5 lint/nursery/noChainedComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This compares the result of another comparison with a value.
+  
+    26 │ if ((a < b) < (c < d)) {}
+    27 │ if (a < b < !c) {}
+  > 28 │ if (a < b < true) {}
+       │     ^^^^^^^^^^^^
+    29 │ 
+  
+  i This comparison runs first and produces true or false.
+  
+    26 │ if ((a < b) < (c < d)) {}
+    27 │ if (a < b < !c) {}
+  > 28 │ if (a < b < true) {}
+       │     ^^^^^
+    29 │ 
+  
+  i This value is then compared with that true or false, not with the values of the first comparison.
+  
+    26 │ if ((a < b) < (c < d)) {}
+    27 │ if (a < b < !c) {}
+  > 28 │ if (a < b < true) {}
+       │             ^^^^
+    29 │ 
+  
+  i For example, 3 > 2 > 1 is false, because 3 > 2 is true, and true > 1 is false.
+  
+  i To compare each pair of values, join separate comparisons with &&, as in a < b && b < c.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
