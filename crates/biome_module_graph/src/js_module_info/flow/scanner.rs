@@ -59,6 +59,9 @@ pub(crate) struct FlowRootScanner {
     /// the current node.
     type_region: Option<usize>,
     selected: Vec<SelectedRoot>,
+    /// Whether some root of the module may read the global `eval` or the
+    /// implicit `arguments` object.
+    has_dynamic_scope: bool,
 }
 
 /// An execution root that may need flow.
@@ -156,8 +159,9 @@ impl FlowRootScanner {
             return;
         };
         if root.has_dynamic_scope {
-            if let Some(parent) = self.open.last_mut() {
-                parent.has_dynamic_scope = true;
+            match self.open.last_mut() {
+                Some(parent) => parent.has_dynamic_scope = true,
+                None => self.has_dynamic_scope = true,
             }
         } else if root.has_condition
             && !root.is_unsupported
@@ -175,6 +179,12 @@ impl FlowRootScanner {
     /// Returns the selected roots, each after its nested roots.
     pub(super) fn selected(&self) -> &[SelectedRoot] {
         &self.selected
+    }
+
+    /// Returns whether some root of the module, at any depth, may read the
+    /// global `eval` or the implicit `arguments` object.
+    pub(super) fn has_dynamic_scope(&self) -> bool {
+        self.has_dynamic_scope
     }
 
     /// Returns whether `reference` may read the global `eval` or the implicit
