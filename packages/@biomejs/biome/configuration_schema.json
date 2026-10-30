@@ -3482,6 +3482,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArrayForEachConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArrayForEachOptions" }
+			]
+		},
+		"NoArrayForEachOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoArrayIndexKeyConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8036,6 +8046,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noArrayForEach": {
+					"description": "Disallow the forEach() method in favor of for...of loops.\nSee https://biomejs.dev/linter/rules/no-array-for-each",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArrayForEachConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noArraySortForMinMax": {
 					"description": "Disallow sorting an array only to read its smallest or largest value.\nSee https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
 					"anyOf": [
@@ -10207,6 +10224,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAriaUnsupportedElementsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoArrayForEachOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArrayForEachOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
