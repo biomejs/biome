@@ -23,6 +23,49 @@ use crate::{
 use super::*;
 
 #[test]
+fn dependency_link_event_reindexes_project_manifest() {
+    let mut fs = TemporaryFs::new("dependency_link_event_reindexes_project_manifest");
+    fs.create_file("package.json", r#"{"name":"project"}"#);
+    fs.create_file("packages/app/index.js", "");
+    let os_fs = fs.create_os();
+    let project_path = Utf8Path::new(fs.cli_path());
+    let link = project_path.join("packages/app/node_modules/dependency");
+    let manifest = project_path.join("package.json");
+    let (mut workspace, _bridge_rx) =
+        MockWorkspaceWatcherBridge::new(&os_fs, ProjectKey::new(), ScanKind::Project);
+    workspace.ignored_paths.insert(link.clone());
+
+    Watcher::handle_notify_event(
+        &workspace,
+        NotifyEvent::new(EventKind::Create(CreateKind::Any))
+            .add_path(link.as_std_path().to_path_buf()),
+    );
+
+    assert!(workspace.indexed_files.pin().contains(&manifest));
+}
+
+#[test]
+fn dependency_file_event_does_not_reindex_project_manifest() {
+    let mut fs = TemporaryFs::new("dependency_file_event_does_not_reindex_project_manifest");
+    fs.create_file("package.json", r#"{"name":"project"}"#);
+    let os_fs = fs.create_os();
+    let project_path = Utf8Path::new(fs.cli_path());
+    let dependency_manifest = project_path.join("node_modules/unused/package.json");
+    let project_manifest = project_path.join("package.json");
+    let (mut workspace, _bridge_rx) =
+        MockWorkspaceWatcherBridge::new(&os_fs, ProjectKey::new(), ScanKind::Project);
+    workspace.ignored_paths.insert(dependency_manifest.clone());
+
+    Watcher::handle_notify_event(
+        &workspace,
+        NotifyEvent::new(EventKind::Create(CreateKind::File))
+            .add_path(dependency_manifest.as_std_path().to_path_buf()),
+    );
+
+    assert!(!workspace.indexed_files.pin().contains(&project_manifest));
+}
+
+#[test]
 #[cfg_attr(target_os = "macos", ignore = "flaky on macOS")]
 fn should_index_on_write_but_not_on_read() {
     let file_path = Utf8Path::new("foo.js");
