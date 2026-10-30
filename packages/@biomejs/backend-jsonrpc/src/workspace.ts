@@ -3438,6 +3438,11 @@ export interface Nursery {
 	 */
 	noVueSideEffectsInComputed?: NoVueSideEffectsInComputedConfiguration;
 	/**
+	 * Disallow this in the beforeRouteEnter navigation guard of a Vue component.
+	 * See https://biomejs.dev/linter/rules/no-vue-this-in-before-route-enter
+	 */
+	noVueThisInBeforeRouteEnter?: NoVueThisInBeforeRouteEnterConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
@@ -6332,6 +6337,9 @@ export type NoVueShadowNativeEventsConfiguration =
 export type NoVueSideEffectsInComputedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueSideEffectsInComputedOptions;
+export type NoVueThisInBeforeRouteEnterConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueThisInBeforeRouteEnterOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -9169,6 +9177,10 @@ export interface RuleWithNoVueSideEffectsInComputedOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueSideEffectsInComputedOptions;
 }
+export interface RuleWithNoVueThisInBeforeRouteEnterOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueThisInBeforeRouteEnterOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -11816,6 +11828,7 @@ export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export type NoVueSideEffectsInComputedOptions = {};
+export type NoVueThisInBeforeRouteEnterOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -13631,6 +13644,7 @@ export type Category =
 	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
+	| "lint/nursery/noVueThisInBeforeRouteEnter"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"
