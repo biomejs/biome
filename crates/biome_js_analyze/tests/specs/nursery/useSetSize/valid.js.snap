@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+new Set(foo).size;
+for (const foo of bar) console.log([...foo].length);
+[...new Set(array), foo].length;
+[foo, ...new Set(array)].length;
+[...new Set(array)].notLength;
+[...new Set(array)]?.length;
+[...new Set(array)][length];
+[...new Set(array)]["length"];
+[...new NotSet(array)].length;
+[...Set(array)].length;
+[...foo].length;
+[,].length;
+[].length;
+Array.from(foo).length;
+Array.from(new NotSet(array)).length;
+Array.from(Set(array)).length;
+Array.from(new Set(array)).notLength;
+Array.from(new Set(array))?.length;
+Array.from(new Set(array), mapFn).length;
+Array.from(...sets).length;
+Array?.from(new Set(array)).length;
+Array.from?.(new Set(array)).length;
+NotArray.from(new Set(array)).length;
+Array.of(new Set(array)).length;
+
+// Variables that may hold something other than a `Set`.
+{
+	const foo = new NotSet([]);
+	[...foo].length;
+	Array.from(foo).length;
+}
+{
+	let foo = new Set([]);
+	[...foo].length;
+	Array.from(foo).length;
+}
+{
+	var foo = new Set([]);
+	[...foo].length;
+}
+{
+	const { foo } = new Set([]);
+	[...foo].length;
+}
+{
+	const [foo] = new Set([]);
+	[...foo].length;
+}
+{
+	const original = new Set([]);
+	const alias = original;
+	[...alias].length;
+}
+
+// `Set` and `Array` are local variables, not the built-ins.
+{
+	const Set = Array;
+	[...new Set(array)].length;
+}
+{
+	const Array = { from: (value) => [value] };
+	Array.from(new Set(array)).length;
+}
+
+// Writing to or deleting `length` changes the temporary array, not the `Set`.
+{
+	const set = new Set();
+	[...set].length = 1;
+	[...set].length++;
+	for ([...set].length of values) {}
+	[[...set].length] = values;
+	({ value: Array.from(set).length } = object);
+	delete [...set].length;
+	delete ([...set].length);
+}
+
+```
