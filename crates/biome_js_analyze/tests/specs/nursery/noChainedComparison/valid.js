@@ -1,0 +1,24 @@
+/* should not generate diagnostics */
+if (a < b && b < c) {}
+if (a === b && b === c) {}
+
+// Mixed relational and equality operators.
+if (a == b > c) {}
+if (a !== b <= c) {}
+if (a > b == c) {}
+if (a <= b !== c) {}
+if ((a < b) === c) {}
+
+// The right side is clearly a boolean.
+if ((a === null) === (b === null)) {}
+if (a === b === true) {}
+if ((a === b) === false) {}
+if ((a === b) === !c) {}
+if ((a === b) === (c instanceof D)) {}
+if ((a === b) === ("key" in c)) {}
+
+// Other operators.
+if (a + b < c) {}
+if (a < b + c) {}
+if ((a & b) === c) {}
+if (a instanceof B === c) {}
