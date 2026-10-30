@@ -251,6 +251,13 @@ const REACT_19_PROPS: &[&str] = &[
     "popoverTargetAction",
 ];
 
+const POPOVER_API_PROPS: &[&str] = &[
+    "onBeforeToggle",
+    "popover",
+    "popoverTarget",
+    "popoverTargetAction",
+];
+
 const POPOVER_API_PROPS_LOWERCASE: &[&str] = &[
     "onbeforetoggle",
     "popover",
@@ -1069,6 +1076,15 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
     if let Some(&standard_name) = DOM_ATTRIBUTE_LOOKUP.get(name) {
         return Some(standard_name);
     }
+    // Without a manifest, the installed React version is unknown. Accept both
+    // the camelCase and lowercase spellings of the Popover API attributes.
+    if ctx.manifest.is_none()
+        && let Some(prop) = find_ignore_ascii_case(POPOVER_API_PROPS, name)
+        && prop == name
+    {
+        return Some(prop);
+    }
+
     let is_react_19_or_later = ctx
         .manifest
         .as_ref()
@@ -1115,6 +1131,7 @@ mod tests {
 
     #[test]
     fn props_are_sorted() {
+        assert_sorted_ignore_ascii_case(POPOVER_API_PROPS);
         assert_sorted_ignore_ascii_case(REACT_19_PROPS);
         assert_sorted_ignore_ascii_case(REACT_19_3_PROPS);
         assert_sorted_ignore_ascii_case(DOM_PROPERTY_NAMES);
