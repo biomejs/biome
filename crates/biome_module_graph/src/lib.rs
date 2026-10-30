@@ -49,9 +49,9 @@ pub use html_module_info::{
 };
 pub use import_path_map::{ImportPathMap, ImportPathMapIterator};
 pub use js_module_info::{
-    JsExport, JsExportedSymbolLookup, JsImport, JsImportKind, JsImportPath, JsImportPhase,
-    JsModuleInfo, JsModuleInfoDiagnostic, JsOwnExport, JsReexport, SerializedJsModuleInfo,
-    TypeInferenceMode,
+    JsAmbientModule, JsExport, JsExportedSymbolLookup, JsImport, JsImportKind, JsImportPath,
+    JsImportPhase, JsModuleInfo, JsModuleInfoDiagnostic, JsOwnExport, JsReexport,
+    SerializedJsModuleInfo, TypeInferenceMode,
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,

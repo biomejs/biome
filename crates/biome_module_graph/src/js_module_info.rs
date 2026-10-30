@@ -269,6 +269,36 @@ pub struct JsModuleInfoInner {
     /// which may contain multiple space-separated class names.
     /// Only static string literals are collected; dynamic values are excluded.
     pub referenced_classes: Vec<CssClassReference>,
+
+    /// Modules that this file declares with `declare module "name"`, in
+    /// source order.
+    ///
+    /// Only a file without top-level imports or exports declares ambient
+    /// modules. In other files, such a declaration augments an existing
+    /// module, so it isn't collected.
+    pub ambient_modules: Box<[JsAmbientModule]>,
+}
+
+/// A module that a TypeScript file declares with `declare module "name"`.
+///
+/// A name can be declared by more than one declaration. Each declaration is a
+/// separate [JsAmbientModule], and TypeScript merges their exports.
+#[derive(Debug)]
+pub struct JsAmbientModule {
+    /// The module name, as written. It may contain a `*` wildcard, as in
+    /// `declare module "*.svg"`.
+    pub name: Text,
+
+    /// The range of the declaration.
+    pub range: TextRange,
+
+    /// The imports and exports of the declaration body. Type inference is
+    /// disabled for this module info.
+    ///
+    /// `None` for a declaration without a body, such as
+    /// `declare module "name";`, which gives every import from the module
+    /// the type `any`.
+    pub info: Option<JsModuleInfo>,
 }
 
 /// A binding declared directly inside a `namespace` or `module` declaration.
