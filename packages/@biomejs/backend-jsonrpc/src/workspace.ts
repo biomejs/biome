@@ -3763,6 +3763,11 @@ export interface Nursery {
 	 */
 	useTailwindStaticClassStrings?: UseTailwindStaticClassStringsConfiguration;
 	/**
+	 * Enforce the shorthand syntax for CSS variables in Tailwind CSS classes.
+	 * See https://biomejs.dev/linter/rules/use-tailwind-variables-shorthand
+	 */
+	useTailwindVariablesShorthand?: UseTailwindVariablesShorthandConfiguration;
+	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
 	 */
@@ -6522,6 +6527,9 @@ export type UseTailwindSortedClassesConfiguration =
 export type UseTailwindStaticClassStringsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindStaticClassStringsOptions;
+export type UseTailwindVariablesShorthandConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindVariablesShorthandOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
@@ -9533,6 +9541,14 @@ export interface RuleWithUseTailwindStaticClassStringsOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindStaticClassStringsOptions;
 }
+export interface RuleWithUseTailwindVariablesShorthandOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindVariablesShorthandOptions;
+}
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
@@ -12036,6 +12052,7 @@ export type UseSvelteShorthandDirectiveOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
+export type UseTailwindVariablesShorthandOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export type UseUnaryMinusOptions = {};
 export interface UseValidTestTitleOptions {
@@ -13691,6 +13708,7 @@ export type Category =
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
+	| "lint/nursery/useTailwindVariablesShorthand"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
