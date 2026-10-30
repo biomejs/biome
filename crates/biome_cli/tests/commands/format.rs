@@ -6,9 +6,10 @@ use crate::configs::{
 use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED, assert_cli_snapshot, run_cli,
+    run_cli_with_dyn_fs,
 };
 use biome_console::{BufferConsole, MarkupBuf, markup};
-use biome_fs::{FileSystemExt, MemoryFileSystem};
+use biome_fs::{FileSystemExt, MemoryFileSystem, TemporaryFs};
 use camino::{Utf8Path, Utf8PathBuf};
 
 // six spaces
@@ -1337,6 +1338,35 @@ fn format_stdin_with_errors() {
         module_path!(),
         "format_stdin_with_errors",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_stdin_diagnostics_use_paths_relative_to_the_working_directory() {
+    let mut console = BufferConsole::default();
+    let fs = TemporaryFs::new("format_stdin_diagnostics_use_relative_paths");
+    console.in_buffer.push("const value = {".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--stdin-file-path=src/example.js"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli_with_dyn_fs returned {result:?}");
+    assert!(console.out_buffer.iter().any(|message| {
+        markup_to_string(markup! {{message.content}}).contains("src/example.js:1:16")
+    }));
+    assert!(!console.out_buffer.iter().any(|message| {
+        markup_to_string(markup! {{message.content}}).contains(fs.working_directory.as_str())
+    }));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_stdin_diagnostics_use_paths_relative_to_the_working_directory",
+        fs.create_mem(),
         console,
         result,
     ));
