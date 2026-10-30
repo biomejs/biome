@@ -5,6 +5,7 @@ use std::hash::{Hash, Hasher};
 use std::iter;
 
 pub mod batch;
+pub mod module_constant;
 pub mod rename;
 pub mod same_reference;
 #[cfg(test)]
