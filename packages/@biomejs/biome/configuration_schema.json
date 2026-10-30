@@ -3522,6 +3522,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroDeprecatedGetEntryBySlugConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroDeprecatedGetEntryBySlugOptions" }
+			]
+		},
+		"NoAstroDeprecatedGetEntryBySlugOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroSetHtmlDirectiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8072,6 +8082,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroDeprecatedGetEntryBySlug": {
+					"description": "Disallow importing the deprecated getEntryBySlug() function from astro:content.\nSee https://biomejs.dev/linter/rules/no-astro-deprecated-get-entry-by-slug",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroDeprecatedGetEntryBySlugConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroSetHtmlDirective": {
 					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
 					"anyOf": [
@@ -10292,6 +10309,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAstroConflictingSetDirectivesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroDeprecatedGetEntryBySlugOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroDeprecatedGetEntryBySlugOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -6,6 +6,7 @@ use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
+        RuleFilter::Rule("nursery", "noAstroDeprecatedGetEntryBySlug"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
     ]
