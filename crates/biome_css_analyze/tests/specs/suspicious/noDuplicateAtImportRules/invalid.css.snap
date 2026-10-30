@@ -12,9 +12,16 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:3:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Each @import should be unique unless differing by media queries.
+  × The stylesheet "a.css" is imported more than once.
+  
+  > 1 │ @import "a.css";
+      │  ^^^^^^^^^^^^^^^
+    2 │ @import "b.css";
+    3 │ @import "a.css";
+  
+  i The same stylesheet is imported again here.
   
     1 │ @import "a.css";
     2 │ @import "b.css";
@@ -22,9 +29,11 @@ invalid.css:3:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━�
       │  ^^^^^^^^^^^^^^^
     4 │ 
   
+  i Each @import should be unique unless differing by media queries.
+  
   i Importing the same stylesheet more than once is redundant and can cause an extra request.
   
-  i Consider removing one of the duplicated imports.
+  i Consider removing the duplicated imports.
   
 
 ```

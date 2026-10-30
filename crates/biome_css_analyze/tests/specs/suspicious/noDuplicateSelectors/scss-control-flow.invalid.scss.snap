@@ -26,18 +26,9 @@ $condition: true;
 
 # Diagnostics
 ```
-scss-control-flow.invalid.scss:5:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss-control-flow.invalid.scss:4:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".conditional".
-  
-    3 │ @if $condition {
-    4 │   .conditional {}
-  > 5 │   .conditional {}
-      │   ^^^^^^^^^^^^^^^
-    6 │ }
-    7 │ 
-  
-  i It was first defined here.
+  ! The selector list ".conditional" is defined more than once.
   
     2 │ $condition: true;
     3 │ @if $condition {
@@ -46,17 +37,34 @@ scss-control-flow.invalid.scss:5:3 lint/suspicious/noDuplicateSelectors ━━�
     5 │   .conditional {}
     6 │ }
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    3 │ @if $condition {
+    4 │   .conditional {}
+  > 5 │   .conditional {}
+      │   ^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-scss-control-flow.invalid.scss:10:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss-control-flow.invalid.scss:9:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".mixin-selector".
+  ! The selector list ".mixin-selector" is defined more than once.
+  
+     8 │ @mixin duplicates {
+   > 9 │   .mixin-selector {}
+       │   ^^^^^^^^^^^^^^^^^^
+    10 │   .mixin-selector {}
+    11 │ }
+  
+  i This rule repeats the same selector list.
   
      8 │ @mixin duplicates {
      9 │   .mixin-selector {}
@@ -65,25 +73,25 @@ scss-control-flow.invalid.scss:10:3 lint/suspicious/noDuplicateSelectors ━━�
     11 │ }
     12 │ @include duplicates;
   
-  i It was first defined here.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-     8 │ @mixin duplicates {
-   > 9 │   .mixin-selector {}
-       │   ^^^^^^^^^^^^^^^^^^
-    10 │   .mixin-selector {}
-    11 │ }
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-scss-control-flow.invalid.scss:16:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss-control-flow.invalid.scss:15:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".loop-selector".
+  ! The selector list ".loop-selector" is defined more than once.
+  
+    14 │ @for $index from 1 through 2 {
+  > 15 │   .loop-selector {}
+       │   ^^^^^^^^^^^^^^^^^
+    16 │   .loop-selector {}
+    17 │ }
+  
+  i This rule repeats the same selector list.
   
     14 │ @for $index from 1 through 2 {
     15 │   .loop-selector {}
@@ -92,17 +100,9 @@ scss-control-flow.invalid.scss:16:3 lint/suspicious/noDuplicateSelectors ━━�
     17 │ }
     18 │ 
   
-  i It was first defined here.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-    14 │ @for $index from 1 through 2 {
-  > 15 │   .loop-selector {}
-       │   ^^^^^^^^^^^^^^^^^
-    16 │   .loop-selector {}
-    17 │ }
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```

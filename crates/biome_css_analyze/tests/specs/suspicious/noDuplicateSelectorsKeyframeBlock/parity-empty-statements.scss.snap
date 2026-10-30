@@ -12,9 +12,17 @@ expression: parity-empty-statements.scss
 
 # Diagnostics
 ```
-parity-empty-statements.scss:3:48 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━
+parity-empty-statements.scss:3:25 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━
 
-  × The duplicate keyframe selector is overwritten by later one.
+  × The keyframe selector from is used more than once.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @keyframes valid { ; from { opacity: 0 }; ; to { opacity: 1 }; }
+  > 3 │ @keyframes invalid { ;; from { opacity: 0 }; ; from { opacity: 1 }; }
+      │                         ^^^^
+    4 │ 
+  
+  i This selector is repeated here and overwrites the earlier one.
   
     1 │ /* should generate diagnostics */
     2 │ @keyframes valid { ; from { opacity: 0 }; ; to { opacity: 1 }; }

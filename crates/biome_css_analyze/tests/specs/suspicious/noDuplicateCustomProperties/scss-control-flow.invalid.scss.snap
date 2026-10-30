@@ -17,9 +17,18 @@ $condition: true;
 
 # Diagnostics
 ```
-scss-control-flow.invalid.scss:6:5 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━
+scss-control-flow.invalid.scss:5:5 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The custom property --theme is declared more than once in the same block.
+  
+    3 │ .selector {
+    4 │   @if $condition {
+  > 5 │     --theme: red;
+      │     ^^^^^^^
+    6 │     --theme: blue;
+    7 │   }
+  
+  i --theme is declared again here.
   
     4 │   @if $condition {
     5 │     --theme: red;
@@ -28,14 +37,7 @@ scss-control-flow.invalid.scss:6:5 lint/suspicious/noDuplicateCustomProperties �
     7 │   }
     8 │ }
   
-  i --theme is already defined here.
-  
-    3 │ .selector {
-    4 │   @if $condition {
-  > 5 │     --theme: red;
-      │     ^^^^^^^
-    6 │     --theme: blue;
-    7 │   }
+  i Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate custom property to ensure consistent styling.
   

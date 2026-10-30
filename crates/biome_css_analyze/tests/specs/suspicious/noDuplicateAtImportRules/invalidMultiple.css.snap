@@ -1,0 +1,146 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidMultiple.css
+---
+# Input
+```css
+@import "a.css";
+@import 'a.css';
+@import url(a.css);
+@import "b.css";
+@import "c.css";
+@import 'b.css';
+@import "d.css" screen;
+@import "d.css" print;
+@import "d.css" screen;
+@import "d.css" print;
+@import "d.css" tv;
+@import "d.css";
+
+```
+
+# Diagnostics
+```
+invalidMultiple.css:1:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The stylesheet "a.css" is imported more than once.
+  
+  > 1 │ @import "a.css";
+      │  ^^^^^^^^^^^^^^^
+    2 │ @import 'a.css';
+    3 │ @import url(a.css);
+  
+  i The same stylesheet is imported again here.
+  
+    1 │ @import "a.css";
+  > 2 │ @import 'a.css';
+      │  ^^^^^^^^^^^^^^^
+    3 │ @import url(a.css);
+    4 │ @import "b.css";
+  
+  i Each @import should be unique unless differing by media queries.
+  
+  i Importing the same stylesheet more than once is redundant and can cause an extra request.
+  
+  i Consider removing the duplicated imports.
+  
+
+```
+
+```
+invalidMultiple.css:4:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The stylesheet "b.css" is imported more than once.
+  
+    2 │ @import 'a.css';
+    3 │ @import url(a.css);
+  > 4 │ @import "b.css";
+      │  ^^^^^^^^^^^^^^^
+    5 │ @import "c.css";
+    6 │ @import 'b.css';
+  
+  i The same stylesheet is imported again here.
+  
+    4 │ @import "b.css";
+    5 │ @import "c.css";
+  > 6 │ @import 'b.css';
+      │  ^^^^^^^^^^^^^^^
+    7 │ @import "d.css" screen;
+    8 │ @import "d.css" print;
+  
+  i Each @import should be unique unless differing by media queries.
+  
+  i Importing the same stylesheet more than once is redundant and can cause an extra request.
+  
+  i Consider removing the duplicated imports.
+  
+
+```
+
+```
+invalidMultiple.css:7:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The stylesheet "d.css" is imported more than once.
+  
+    5 │ @import "c.css";
+    6 │ @import 'b.css';
+  > 7 │ @import "d.css" screen;
+      │  ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ @import "d.css" print;
+    9 │ @import "d.css" screen;
+  
+  i The same stylesheet is imported again here.
+  
+     7 │ @import "d.css" screen;
+     8 │ @import "d.css" print;
+   > 9 │ @import "d.css" screen;
+       │  ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ @import "d.css" print;
+    11 │ @import "d.css" tv;
+  
+  i The same stylesheet is imported again here.
+  
+    10 │ @import "d.css" print;
+    11 │ @import "d.css" tv;
+  > 12 │ @import "d.css";
+       │  ^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Each @import should be unique unless differing by media queries.
+  
+  i Importing the same stylesheet more than once is redundant and can cause an extra request.
+  
+  i Consider removing the duplicated imports.
+  
+
+```
+
+```
+invalidMultiple.css:8:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The stylesheet "d.css" is imported more than once.
+  
+     6 │ @import 'b.css';
+     7 │ @import "d.css" screen;
+   > 8 │ @import "d.css" print;
+       │  ^^^^^^^^^^^^^^^^^^^^^
+     9 │ @import "d.css" screen;
+    10 │ @import "d.css" print;
+  
+  i The same stylesheet is imported again here.
+  
+     8 │ @import "d.css" print;
+     9 │ @import "d.css" screen;
+  > 10 │ @import "d.css" print;
+       │  ^^^^^^^^^^^^^^^^^^^^^
+    11 │ @import "d.css" tv;
+    12 │ @import "d.css";
+  
+  i Each @import should be unique unless differing by media queries.
+  
+  i Importing the same stylesheet more than once is redundant and can cause an extra request.
+  
+  i Consider removing the duplicated imports.
+  
+
+```

@@ -102,9 +102,17 @@ file.html:2:9 parse ━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-file.html:3:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.html:3:25 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The property background-color is declared more than once in the same block.
+  
+    1 │ <script>debugger</script>
+    2 │ <script>import z from "zod"</script>
+  > 3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
+      │                         ^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i background-color is declared again here.
   
     1 │ <script>debugger</script>
     2 │ <script>import z from "zod"</script>
@@ -112,13 +120,7 @@ file.html:3:48 lint/suspicious/noDuplicateProperties ━━━━━━━━━
       │                                                ^^^^^^^^^^^^^^^^
     4 │ 
   
-  i background-color is already defined here.
-  
-    1 │ <script>debugger</script>
-    2 │ <script>import z from "zod"</script>
-  > 3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
-      │                         ^^^^^^^^^^^^^^^^
-    4 │ 
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

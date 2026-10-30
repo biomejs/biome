@@ -1,12 +1,11 @@
 use crate::services::semantic::Semantic;
+use crate::utils::{DuplicateGroup, collect_duplicates};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_duplicate_custom_properties::NoDuplicateCustomPropertiesOptions;
-use rustc_hash::FxHashMap;
-use std::collections::hash_map::Entry;
 
 declare_lint_rule! {
     /// Disallow duplicate custom properties within declaration blocks.
@@ -52,66 +51,75 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateCustomProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
-    type State = (TextRange, (TextRange, TokenText));
-    type Signals = Option<Self::State>;
+    type State = DuplicateGroup<TokenText>;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateCustomPropertiesOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
 
-        let rule = model.get_rule_by_range(node.range())?;
+        let Some(rule) = model.get_rule_by_range(node.range()) else {
+            return Box::default();
+        };
 
-        let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
+        collect_duplicates(
+            rule.declarations()
+                .iter()
+                .filter(|declaration| {
+                    declaration
+                        .declaration()
+                        .syntax()
+                        .parent()
+                        .and_then(|parent| parent.parent())
+                        .as_ref()
+                        == Some(node.syntax())
+                })
+                .filter_map(|declaration| {
+                    let prop = declaration.property();
+                    let prop_name = prop.value().ok()?;
 
-        for declaration in rule.declarations().iter().filter(|declaration| {
-            declaration
-                .declaration()
-                .syntax()
-                .parent()
-                .and_then(|parent| parent.parent())
-                .as_ref()
-                == Some(node.syntax())
-        }) {
-            let prop = declaration.property();
-            let prop_text = prop.value().ok()?;
-            let prop_range = prop.range();
+                    if !prop_name.text().starts_with("--") {
+                        return None;
+                    }
 
-            let is_custom_property = prop_text.text().starts_with("--");
-
-            if !is_custom_property {
-                continue;
-            }
-
-            match seen.entry(prop_text.clone()) {
-                Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_text)));
-                }
-                Entry::Vacant(entry) => {
-                    entry.insert(prop_range);
-                }
-            }
-        }
-
-        None
+                    Some((prop_name.clone(), prop_name, prop.range()))
+                }),
+        )
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let (first_occurrence_range, (duplicate_range, duplicate_property_name)) = state;
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                duplicate_range,
+        let DuplicateGroup {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The custom property "<Emphasis>{name}</Emphasis>" is declared more than once in the same block."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally."
+                    <Emphasis>{name}</Emphasis>" is declared again here."
                 },
-            )
-            .detail(first_occurrence_range, markup! {
-                <Emphasis>{duplicate_property_name.text()}</Emphasis> " is already defined here."
-            })
-            .note(markup! {
-                "Remove or rename the duplicate custom property to ensure consistent styling."
-            }),
+            );
+        }
+
+        Some(
+            diagnostic
+                .note(markup! {
+                    "Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally."
+                })
+                .note(markup! {
+                    "Remove or rename the duplicate custom property to ensure consistent styling."
+                }),
         )
     }
 }

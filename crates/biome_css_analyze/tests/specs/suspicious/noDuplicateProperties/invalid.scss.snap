@@ -6,33 +6,171 @@ expression: invalid.scss
 ```css
 /* should generate diagnostics */
 .themed {
-  color: red;
-  color: blue;
+	color: red;
+	color: blue;
+}
+
+.multiple {
+	color: red;
+	background: blue;
+	color: green;
+	background: yellow;
+	color: black;
+}
+
+.nested {
+	color: red;
+	color: blue;
+
+	&:hover {
+		background: red;
+		background: blue;
+	}
 }
 
 ```
 
 # Diagnostics
 ```
-invalid.scss:4:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:3:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
-  
-    2 │ .themed {
-    3 │   color: red;
-  > 4 │   color: blue;
-      │   ^^^^^
-    5 │ }
-    6 │ 
-  
-  i color is already defined here.
+  × The property color is declared more than once in the same block.
   
     1 │ /* should generate diagnostics */
     2 │ .themed {
-  > 3 │   color: red;
-      │   ^^^^^
-    4 │   color: blue;
+  > 3 │ 	color: red;
+      │ 	^^^^^
+    4 │ 	color: blue;
     5 │ }
+  
+  i color is declared again here.
+  
+    2 │ .themed {
+    3 │ 	color: red;
+  > 4 │ 	color: blue;
+      │ 	^^^^^
+    5 │ }
+    6 │ 
+  
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.scss:8:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property color is declared more than once in the same block.
+  
+     7 │ .multiple {
+   > 8 │ 	color: red;
+       │ 	^^^^^
+     9 │ 	background: blue;
+    10 │ 	color: green;
+  
+  i color is declared again here.
+  
+     8 │ 	color: red;
+     9 │ 	background: blue;
+  > 10 │ 	color: green;
+       │ 	^^^^^
+    11 │ 	background: yellow;
+    12 │ 	color: black;
+  
+  i color is declared again here.
+  
+    10 │ 	color: green;
+    11 │ 	background: yellow;
+  > 12 │ 	color: black;
+       │ 	^^^^^
+    13 │ }
+    14 │ 
+  
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.scss:9:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property background is declared more than once in the same block.
+  
+     7 │ .multiple {
+     8 │ 	color: red;
+   > 9 │ 	background: blue;
+       │ 	^^^^^^^^^^
+    10 │ 	color: green;
+    11 │ 	background: yellow;
+  
+  i background is declared again here.
+  
+     9 │ 	background: blue;
+    10 │ 	color: green;
+  > 11 │ 	background: yellow;
+       │ 	^^^^^^^^^^
+    12 │ 	color: black;
+    13 │ }
+  
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.scss:16:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property color is declared more than once in the same block.
+  
+    15 │ .nested {
+  > 16 │ 	color: red;
+       │ 	^^^^^
+    17 │ 	color: blue;
+    18 │ 
+  
+  i color is declared again here.
+  
+    15 │ .nested {
+    16 │ 	color: red;
+  > 17 │ 	color: blue;
+       │ 	^^^^^
+    18 │ 
+    19 │ 	&:hover {
+  
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.scss:20:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property background is declared more than once in the same block.
+  
+    19 │ 	&:hover {
+  > 20 │ 		background: red;
+       │ 		^^^^^^^^^^
+    21 │ 		background: blue;
+    22 │ 	}
+  
+  i background is declared again here.
+  
+    19 │ 	&:hover {
+    20 │ 		background: red;
+  > 21 │ 		background: blue;
+       │ 		^^^^^^^^^^
+    22 │ 	}
+    23 │ }
+  
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate property to ensure consistent styling.
   
