@@ -13,6 +13,9 @@
 //! - [`VueReference`] runs the rule once per use of a name. Use it when the
 //!   rule judges what a use does, wherever it is written: the diagnostic can
 //!   then point at a template expression.
+//! - [`VueSemantic`] runs the rule once per syntax node of a given kind, and
+//!   gives it the whole model. Use it when the rule judges syntax, such as a
+//!   script block, against the rest of the file.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -24,7 +27,8 @@
 
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
-    AddVisitor, Phases, QueryMatch, Queryable, ServiceBag, Visitor, VisitorContext,
+    AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
+    RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorStartContext,
 };
 use biome_js_semantic::SemanticModel;
@@ -206,6 +210,82 @@ macro_rules! define_vue_query {
             }
         }
     };
+}
+
+/// The services of a rule that queries [`VueSemantic`].
+pub struct VueSemanticServices {
+    service: VueSemanticService,
+}
+
+impl VueSemanticServices {
+    /// The Vue semantic model of the analyzed file.
+    ///
+    /// When the analyzed tree is a script block of a `.vue` file, the model
+    /// covers the whole file. It covers the analyzed tree only when the tree
+    /// is not the one stored for the file, as in a fix pass.
+    pub fn model(&self) -> &VueSemanticModel {
+        &self.service.model
+    }
+
+    /// The snippet of the `.vue` file that the analyzed tree is.
+    ///
+    /// Returns `None` when the analyzed tree is a whole JavaScript file, and
+    /// when [`Self::model`] does not cover the rest of the `.vue` file.
+    pub fn snippet(&self) -> Option<Snippet> {
+        self.service
+            .snippet
+            .map(|snippet| self.service.model.snippet(snippet))
+    }
+}
+
+impl FromServices for VueSemanticServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        let service: &VueSemanticService = services.get_service().ok_or_else(|| {
+            ServicesDiagnostic::new(rule_key.rule_name(), &["VueSemanticService"])
+        })?;
+        Ok(Self {
+            service: service.clone(),
+        })
+    }
+}
+
+impl Phase for VueSemanticServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
+/// Query type for lint rules that match AST nodes and read the Vue semantic
+/// model through `ctx.model()`.
+#[derive(Clone)]
+pub struct VueSemantic<N>(pub N);
+
+impl<N> Queryable for VueSemantic<N>
+where
+    N: AstNode<Language = JsLanguage> + 'static,
+{
+    type Input = JsSyntaxNode;
+    type Output = N;
+    type Language = JsLanguage;
+    type Services = VueSemanticServices;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+        analyzer.add_visitor(Phases::Semantic, || VueSemanticVisitor);
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(N::KIND_SET)
+    }
+
+    fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
+        N::unwrap_cast(node.clone())
+    }
 }
 
 define_vue_query!(

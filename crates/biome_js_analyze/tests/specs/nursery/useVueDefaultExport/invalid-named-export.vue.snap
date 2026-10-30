@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-named-export.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export const foo = "foo";
+export const bar = "bar";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-named-export.vue:3:1 lint/nursery/useVueDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <script> block has no default export.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ export const foo = "foo";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ export const bar = "bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Vue builds the component from the default export of the <script> block. Without one, the component can't use anything this block declares.
+  
+  i Export the component with export default, or move the code to a <script setup> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
