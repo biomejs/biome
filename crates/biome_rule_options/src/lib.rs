@@ -328,6 +328,7 @@ pub mod no_unknown_unit;
 pub mod no_unmatchable_anb_selector;
 pub mod no_unmodified_loop_condition;
 pub mod no_unnecessary_conditions;
+pub mod no_unnecessary_string_trim;
 pub mod no_unnecessary_template_expression;
 pub mod no_unreachable;
 pub mod no_unreachable_super;
