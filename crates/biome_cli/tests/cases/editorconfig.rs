@@ -849,3 +849,55 @@ indent_size = 2
         result,
     ));
 }
+
+#[test]
+fn should_treat_unbalanced_braces_literally() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Utf8Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{a,b}}.json]
+indent_size = 2
+"#,
+    );
+
+    let test_file = Utf8Path::new("{a,b}}.json");
+    let contents = r#"{
+    "test": 1
+}
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--use-editorconfig=true",
+                test_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_treat_unbalanced_braces_literally",
+        fs,
+        console,
+        result,
+    ));
+}
