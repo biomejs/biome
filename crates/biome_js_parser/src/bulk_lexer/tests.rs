@@ -30,24 +30,39 @@ const TSX: BulkLexOptions = BulkLexOptions {
 /// be what `JsLexer` re-lexes the `/` into.
 fn check_with(source: &str, options: BulkLexOptions) -> BulkTokens {
     let tokens = BulkTokens::new(&mut JsLexer::from_str(source), options);
-    let portable = BulkTokens::new_portable(&mut JsLexer::from_str(source), options);
+    let portable = BulkTokens::new_portable(
+        &mut JsLexer::from_str(source),
+        options,
+        super::compress::ScalarExtract,
+    );
     assert!(
-        tokens.starts == portable.starts && tokens.kinds == portable.kinds,
+        tokens.iter().eq(portable.iter()),
         "the portable passes disagree on {source:?}"
     );
+    // `new` may use AVX-512, and skip the build of the passes for the CPUs without it.
+    #[cfg(target_arch = "x86_64")]
+    if std::arch::is_x86_feature_detected!("avx2")
+        && std::arch::is_x86_feature_detected!("bmi1")
+        && std::arch::is_x86_feature_detected!("bmi2")
+        && std::arch::is_x86_feature_detected!("lzcnt")
+        && std::arch::is_x86_feature_detected!("popcnt")
+    {
+        // SAFETY: the CPU supports the features.
+        let bit_instructions = unsafe {
+            BulkTokens::new_with_bit_instructions(&mut JsLexer::from_str(source), options)
+        };
+        assert!(
+            tokens.iter().eq(bit_instructions.iter()),
+            "the passes with bit instructions disagree on {source:?}"
+        );
+    }
     let mut reference = JsLexer::from_str(source);
     let len = source.len() as u32;
 
     let mut expected_start = 0;
     let all: Vec<_> = tokens.iter().collect();
-    let (all, eof) = all.split_at(all.len() - 2);
-    assert_eq!(
-        eof,
-        [
-            (len, len, EOF as u16 | REGULAR),
-            (len, len, EOF as u16 | REGULAR)
-        ]
-    );
+    let (all, eof) = all.split_at(all.len() - 1);
+    assert_eq!(eof, [(len, len, EOF as u16 | REGULAR)]);
 
     for &(start, end, raw) in all {
         let describe = || {
