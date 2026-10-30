@@ -7282,6 +7282,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessAwaitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessAwaitOptions" }
+			]
+		},
+		"NoUselessAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessCallConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8558,6 +8568,13 @@
 					"description": "Disallow assignments whose value is never read.\nSee https://biomejs.dev/linter/rules/no-useless-assignment",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessAssignmentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessAwait": {
+					"description": "Disallow await on values that are never promises.\nSee https://biomejs.dev/linter/rules/no-useless-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessAwaitConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13636,6 +13653,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessAssignmentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessAwaitOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

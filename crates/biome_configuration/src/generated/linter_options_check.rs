@@ -1679,6 +1679,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noUselessAwait",
+        TypeId::of::<biome_rule_options::no_useless_await::NoUselessAwaitOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUselessCall",
         TypeId::of::<biome_rule_options::no_useless_call::NoUselessCallOptions>(),
     ));

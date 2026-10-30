@@ -1,0 +1,14 @@
+/* should not generate diagnostics */
+await {then};
+await (a ? b : c);
+await (a || b);
+await (a && b);
+await (a ?? b);
+await new Foo();
+await tagged``;
+await foo();
+await foo.bar;
+await foo;
+class A { async foo() { await this } }
+async function* foo() { await (yield bar); }
+await (1, Promise.resolve());
