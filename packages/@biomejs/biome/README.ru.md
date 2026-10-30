@@ -140,7 +140,6 @@ Biome предлагает простую спонсорскую програм�
   </tbody>
 </table>
 
-
 ### Серебряные спонсоры
 
 <table>
@@ -191,7 +190,6 @@ Biome предлагает простую спонсорскую програм�
     </tr>
   </tbody>
 </table>
-
 
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/

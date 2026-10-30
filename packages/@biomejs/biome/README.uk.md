@@ -189,7 +189,6 @@ Biome пропонує просту програму спонсорства, я�
   </tbody>
 </table>
 
-
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/
 [language-support]: https://biomejs.dev/internals/language-support/
