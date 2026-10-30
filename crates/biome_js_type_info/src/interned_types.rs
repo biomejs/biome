@@ -3860,7 +3860,10 @@ mod tests {
                 &db,
                 TypeofExpression::Destructure(TypeofDestructureExpression {
                     ty: s.next(),
-                    destructure_field: raw::DestructureField::Index(0),
+                    destructure_field: raw::DestructureField::Index {
+                        index: 0,
+                        has_initializer: true,
+                    },
                 }),
             )
         });
