@@ -3343,6 +3343,11 @@ export interface Nursery {
 	 */
 	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
 	/**
+	 * Disallow checking the length of an array when the result doesn't depend on it.
+	 * See https://biomejs.dev/linter/rules/no-useless-length-check
+	 */
+	noUselessLengthCheck?: NoUselessLengthCheckConfiguration;
+	/**
 	 * Disallow functions that return a call to themselves when a loop can do the same work.
 	 * See https://biomejs.dev/linter/rules/no-useless-recursion
 	 */
@@ -6255,6 +6260,9 @@ export type NoUselessCallConfiguration =
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
+export type NoUselessLengthCheckConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessLengthCheckOptions;
 export type NoUselessRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessRecursionOptions;
@@ -9045,6 +9053,14 @@ export interface RuleWithNoUselessDateGetTimeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessDateGetTimeOptions;
 }
+export interface RuleWithNoUselessLengthCheckOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessLengthCheckOptions;
+}
 export interface RuleWithNoUselessRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessRecursionOptions;
@@ -11732,6 +11748,7 @@ export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
+export type NoUselessLengthCheckOptions = {};
 export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
@@ -13546,6 +13563,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
+	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeConversion"
