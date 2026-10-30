@@ -1,0 +1,634 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const length1 = array.push(value);
+const length2 = routerItems.push(value);
+const length3 = array.unshift(value);
+const length4 = stream.unshift(chunk);
+console.log(array.push(value));
+const length5 = await array.push(value);
+async function f1() { await array.push(value); }
+(array.push(value), sideEffect());
+(sideEffect(), array.unshift(value));
+condition && array.push(value);
+array.unshift(value) || sideEffect();
+condition ?? array.push(value);
+condition ? array.push(value) : sideEffect();
+array.unshift(value) ? sideEffect() : other();
+for (array.push(value); condition; ) {}
+for (; condition; array.unshift(value)) {}
+const length6 = array.push(...values);
+const length7 = new Array().push(value);
+const f2 = (value) => array.push(value);
+const f3 = async (value) => array.unshift(await value);
+source.forEach((item) => target.push(item));
+function f4() {
+	if (condition) return array.push(value);
+}
+function f5() {
+	return condition && array.push(value);
+}
+function f6() {
+	return condition ? value : array.unshift(value);
+}
+function f7() {
+	return (sideEffect(), array.push(value));
+}
+async function f8() {
+	return await array.push(value);
+}
+const length8 = (array.push)(value);
+const length9 = tag`items`.push(value);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:23 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const length1 = array.push(value);
+      │                       ^^^^
+    3 │ const length2 = routerItems.push(value);
+    4 │ const length3 = array.unshift(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:29 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const length1 = array.push(value);
+  > 3 │ const length2 = routerItems.push(value);
+      │                             ^^^^
+    4 │ const length3 = array.unshift(value);
+    5 │ const length4 = stream.unshift(chunk);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:23 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    2 │ const length1 = array.push(value);
+    3 │ const length2 = routerItems.push(value);
+  > 4 │ const length3 = array.unshift(value);
+      │                       ^^^^^^^
+    5 │ const length4 = stream.unshift(chunk);
+    6 │ console.log(array.push(value));
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:24 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    3 │ const length2 = routerItems.push(value);
+    4 │ const length3 = array.unshift(value);
+  > 5 │ const length4 = stream.unshift(chunk);
+      │                        ^^^^^^^
+    6 │ console.log(array.push(value));
+    7 │ const length5 = await array.push(value);
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:19 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    4 │ const length3 = array.unshift(value);
+    5 │ const length4 = stream.unshift(chunk);
+  > 6 │ console.log(array.push(value));
+      │                   ^^^^
+    7 │ const length5 = await array.push(value);
+    8 │ async function f1() { await array.push(value); }
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:29 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    5 │ const length4 = stream.unshift(chunk);
+    6 │ console.log(array.push(value));
+  > 7 │ const length5 = await array.push(value);
+      │                             ^^^^
+    8 │ async function f1() { await array.push(value); }
+    9 │ (array.push(value), sideEffect());
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:35 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+     6 │ console.log(array.push(value));
+     7 │ const length5 = await array.push(value);
+   > 8 │ async function f1() { await array.push(value); }
+       │                                   ^^^^
+     9 │ (array.push(value), sideEffect());
+    10 │ (sideEffect(), array.unshift(value));
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:8 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+     7 │ const length5 = await array.push(value);
+     8 │ async function f1() { await array.push(value); }
+   > 9 │ (array.push(value), sideEffect());
+       │        ^^^^
+    10 │ (sideEffect(), array.unshift(value));
+    11 │ condition && array.push(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:22 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+     8 │ async function f1() { await array.push(value); }
+     9 │ (array.push(value), sideEffect());
+  > 10 │ (sideEffect(), array.unshift(value));
+       │                      ^^^^^^^
+    11 │ condition && array.push(value);
+    12 │ array.unshift(value) || sideEffect();
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:20 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+     9 │ (array.push(value), sideEffect());
+    10 │ (sideEffect(), array.unshift(value));
+  > 11 │ condition && array.push(value);
+       │                    ^^^^
+    12 │ array.unshift(value) || sideEffect();
+    13 │ condition ?? array.push(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    10 │ (sideEffect(), array.unshift(value));
+    11 │ condition && array.push(value);
+  > 12 │ array.unshift(value) || sideEffect();
+       │       ^^^^^^^
+    13 │ condition ?? array.push(value);
+    14 │ condition ? array.push(value) : sideEffect();
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:20 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    11 │ condition && array.push(value);
+    12 │ array.unshift(value) || sideEffect();
+  > 13 │ condition ?? array.push(value);
+       │                    ^^^^
+    14 │ condition ? array.push(value) : sideEffect();
+    15 │ array.unshift(value) ? sideEffect() : other();
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:19 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    12 │ array.unshift(value) || sideEffect();
+    13 │ condition ?? array.push(value);
+  > 14 │ condition ? array.push(value) : sideEffect();
+       │                   ^^^^
+    15 │ array.unshift(value) ? sideEffect() : other();
+    16 │ for (array.push(value); condition; ) {}
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    13 │ condition ?? array.push(value);
+    14 │ condition ? array.push(value) : sideEffect();
+  > 15 │ array.unshift(value) ? sideEffect() : other();
+       │       ^^^^^^^
+    16 │ for (array.push(value); condition; ) {}
+    17 │ for (; condition; array.unshift(value)) {}
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:12 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    14 │ condition ? array.push(value) : sideEffect();
+    15 │ array.unshift(value) ? sideEffect() : other();
+  > 16 │ for (array.push(value); condition; ) {}
+       │            ^^^^
+    17 │ for (; condition; array.unshift(value)) {}
+    18 │ const length6 = array.push(...values);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:25 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    15 │ array.unshift(value) ? sideEffect() : other();
+    16 │ for (array.push(value); condition; ) {}
+  > 17 │ for (; condition; array.unshift(value)) {}
+       │                         ^^^^^^^
+    18 │ const length6 = array.push(...values);
+    19 │ const length7 = new Array().push(value);
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:23 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    16 │ for (array.push(value); condition; ) {}
+    17 │ for (; condition; array.unshift(value)) {}
+  > 18 │ const length6 = array.push(...values);
+       │                       ^^^^
+    19 │ const length7 = new Array().push(value);
+    20 │ const f2 = (value) => array.push(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:29 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    17 │ for (; condition; array.unshift(value)) {}
+    18 │ const length6 = array.push(...values);
+  > 19 │ const length7 = new Array().push(value);
+       │                             ^^^^
+    20 │ const f2 = (value) => array.push(value);
+    21 │ const f3 = async (value) => array.unshift(await value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:29 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    18 │ const length6 = array.push(...values);
+    19 │ const length7 = new Array().push(value);
+  > 20 │ const f2 = (value) => array.push(value);
+       │                             ^^^^
+    21 │ const f3 = async (value) => array.unshift(await value);
+    22 │ source.forEach((item) => target.push(item));
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:35 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    19 │ const length7 = new Array().push(value);
+    20 │ const f2 = (value) => array.push(value);
+  > 21 │ const f3 = async (value) => array.unshift(await value);
+       │                                   ^^^^^^^
+    22 │ source.forEach((item) => target.push(item));
+    23 │ function f4() {
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:33 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    20 │ const f2 = (value) => array.push(value);
+    21 │ const f3 = async (value) => array.unshift(await value);
+  > 22 │ source.forEach((item) => target.push(item));
+       │                                 ^^^^
+    23 │ function f4() {
+    24 │ 	if (condition) return array.push(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:30 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    22 │ source.forEach((item) => target.push(item));
+    23 │ function f4() {
+  > 24 │ 	if (condition) return array.push(value);
+       │ 	                            ^^^^
+    25 │ }
+    26 │ function f5() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:28 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    25 │ }
+    26 │ function f5() {
+  > 27 │ 	return condition && array.push(value);
+       │ 	                          ^^^^
+    28 │ }
+    29 │ function f6() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:35 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    28 │ }
+    29 │ function f6() {
+  > 30 │ 	return condition ? value : array.unshift(value);
+       │ 	                                 ^^^^^^^
+    31 │ }
+    32 │ function f7() {
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:30 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    31 │ }
+    32 │ function f7() {
+  > 33 │ 	return (sideEffect(), array.push(value));
+       │ 	                            ^^^^
+    34 │ }
+    35 │ async function f8() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:21 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    34 │ }
+    35 │ async function f8() {
+  > 36 │ 	return await array.push(value);
+       │ 	                   ^^^^
+    37 │ }
+    38 │ const length8 = (array.push)(value);
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:24 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    36 │ 	return await array.push(value);
+    37 │ }
+  > 38 │ const length8 = (array.push)(value);
+       │                        ^^^^
+    39 │ const length9 = tag`items`.push(value);
+    40 │ 
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:28 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    37 │ }
+    38 │ const length8 = (array.push)(value);
+  > 39 │ const length9 = tag`items`.push(value);
+       │                            ^^^^
+    40 │ 
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

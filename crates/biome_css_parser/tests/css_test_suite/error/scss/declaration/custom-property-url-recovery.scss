@@ -1,0 +1,16 @@
+.missing-interpolation-end {
+  --image: url(/icons/#{$asset);
+  color: red;
+}
+.after-interpolation { color: blue; }
+
+.missing-url-end {
+  --image: url(/icons/mark.svg;
+}
+.after-url { color: green; }
+
+.mismatched-block {
+  --image: url(var(--image]);
+  color: red;
+}
+.after-block { color: blue; }

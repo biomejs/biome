@@ -32,6 +32,8 @@ invalid.js:5:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
     6 │ }
     7 │ 
   
+  i A constructor that only does what the default constructor already does adds code without changing behavior.
+  
   i Unsafe fix: Remove the unnecessary constructor.
   
      1 1 │   class WithDocs {
@@ -58,6 +60,8 @@ invalid.js:9:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━
        │     ^
     12 │ }
     13 │ 
+  
+  i A constructor that only does what the default constructor already does adds code without changing behavior.
   
   i Unsafe fix: Remove the unnecessary constructor.
   

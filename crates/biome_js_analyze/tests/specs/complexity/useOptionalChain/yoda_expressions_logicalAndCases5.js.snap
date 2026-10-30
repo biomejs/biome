@@ -84,6 +84,8 @@ yoda_expressions_logicalAndCases5.js:2:1 lint/complexity/useOptionalChain  FIXAB
     3 │ null != foo.bar && foo.bar.baz.buzz
     4 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      1  1 │   // case with a jump (i.e. a non-nullish prop)
@@ -107,6 +109,8 @@ yoda_expressions_logicalAndCases5.js:3:1 lint/complexity/useOptionalChain  FIXAB
     4 │ 
     5 │ // case where for some reason there is a doubled up expression
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      1  1 │   // case with a jump (i.e. a non-nullish prop)
@@ -129,6 +133,8 @@ yoda_expressions_logicalAndCases5.js:6:1 lint/complexity/useOptionalChain  FIXAB
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ null != foo.bar && null != foo.bar.baz && null != foo.bar.baz && foo.bar.baz.buzz
     8 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -154,6 +160,8 @@ yoda_expressions_logicalAndCases5.js:7:1 lint/complexity/useOptionalChain  FIXAB
     8 │ 
     9 │ // chained members with element access
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      5  5 │   // case where for some reason there is a doubled up expression
@@ -176,6 +184,8 @@ yoda_expressions_logicalAndCases5.js:10:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ 
     12 │ // case with a jump (i.e. a non-nullish prop)
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -200,6 +210,8 @@ yoda_expressions_logicalAndCases5.js:13:1 lint/complexity/useOptionalChain  FIXA
     14 │ 
     15 │ // chained calls
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     11 11 │   
@@ -222,6 +234,8 @@ yoda_expressions_logicalAndCases5.js:16:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ null != foo && null != foo.bar && null != foo.bar.baz && null != foo.bar.baz.buzz && foo.bar.baz.buzz()
     18 │ null != foo.bar && null != foo.bar.baz && null != foo.bar.baz.buzz && foo.bar.baz.buzz()
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -247,6 +261,8 @@ yoda_expressions_logicalAndCases5.js:17:1 lint/complexity/useOptionalChain  FIXA
     18 │ null != foo.bar && null != foo.bar.baz && null != foo.bar.baz.buzz && foo.bar.baz.buzz()
     19 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     15 15 │   // chained calls
@@ -271,6 +287,8 @@ yoda_expressions_logicalAndCases5.js:18:1 lint/complexity/useOptionalChain  FIXA
     19 │ 
     20 │ // case with a jump (i.e. a non-nullish prop)
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     16 16 │   null != foo && null != foo.bar && null != foo.bar.baz && foo.bar.baz.buzz()
@@ -293,6 +311,8 @@ yoda_expressions_logicalAndCases5.js:21:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ null != foo.bar && foo.bar.baz.buzz()
     23 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -318,6 +338,8 @@ yoda_expressions_logicalAndCases5.js:22:1 lint/complexity/useOptionalChain  FIXA
     23 │ 
     24 │ // case with a jump (i.e. a non-nullish prop)
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     20 20 │   // case with a jump (i.e. a non-nullish prop)
@@ -340,6 +362,8 @@ yoda_expressions_logicalAndCases5.js:25:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     26 │ 
     27 │ // case with a call expr inside the chain for some inefficient reason
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -364,6 +388,8 @@ yoda_expressions_logicalAndCases5.js:28:1 lint/complexity/useOptionalChain  FIXA
     29 │ 
     30 │ // chained calls with element access
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     26 26 │   
@@ -386,6 +412,8 @@ yoda_expressions_logicalAndCases5.js:31:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │ null != foo && null != foo.bar && null != foo.bar.baz && null != foo.bar.baz[buzz] && foo.bar.baz[buzz]()
     33 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -411,6 +439,8 @@ yoda_expressions_logicalAndCases5.js:32:1 lint/complexity/useOptionalChain  FIXA
     33 │ 
     34 │ // (partially) pre-optional chained
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     30 30 │   // chained calls with element access
@@ -433,6 +463,8 @@ yoda_expressions_logicalAndCases5.js:35:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ null != foo && null != foo?.bar.baz && foo?.bar.baz[buzz]
     37 │ null != foo && null != foo?.() && foo?.().bar
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -458,6 +490,8 @@ yoda_expressions_logicalAndCases5.js:36:1 lint/complexity/useOptionalChain  FIXA
     37 │ null != foo && null != foo?.() && foo?.().bar
     38 │ null != foo.bar && null != foo.bar?.() && foo.bar?.().baz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     36 │ null·!=·foo·&&·null·!=·foo?.bar.baz·&&·foo?.bar.baz[buzz]
@@ -476,6 +510,8 @@ yoda_expressions_logicalAndCases5.js:37:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     38 │ null != foo.bar && null != foo.bar?.() && foo.bar?.().baz
     39 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -496,6 +532,8 @@ yoda_expressions_logicalAndCases5.js:38:1 lint/complexity/useOptionalChain  FIXA
     39 │ 
     40 │ // chained members
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     38 │ null·!=·foo.bar·&&·null·!=·foo.bar?.()·&&·foo.bar?.().baz
@@ -513,6 +551,8 @@ yoda_expressions_logicalAndCases5.js:41:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ undefined != foo.bar && foo.bar.baz
     43 │ undefined != foo && foo()
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -538,6 +578,8 @@ yoda_expressions_logicalAndCases5.js:42:1 lint/complexity/useOptionalChain  FIXA
     43 │ undefined != foo && foo()
     44 │ undefined != foo.bar && foo.bar()
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     40 40 │   // chained members
@@ -561,6 +603,8 @@ yoda_expressions_logicalAndCases5.js:43:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ undefined != foo.bar && foo.bar()
     45 │ undefined != foo && undefined != foo.bar && undefined != foo.bar.baz && foo.bar.baz.buzz
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -586,6 +630,8 @@ yoda_expressions_logicalAndCases5.js:44:1 lint/complexity/useOptionalChain  FIXA
     45 │ undefined != foo && undefined != foo.bar && undefined != foo.bar.baz && foo.bar.baz.buzz
     46 │ undefined != foo.bar && undefined != foo.bar.baz && foo.bar.baz.buzz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     42 42 │   undefined != foo.bar && foo.bar.baz
@@ -609,6 +655,8 @@ yoda_expressions_logicalAndCases5.js:45:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     46 │ undefined != foo.bar && undefined != foo.bar.baz && foo.bar.baz.buzz
     47 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -634,6 +682,8 @@ yoda_expressions_logicalAndCases5.js:46:1 lint/complexity/useOptionalChain  FIXA
     47 │ 
     48 │ // case with a jump (i.e. a non-nullish prop)
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     44 44 │   undefined != foo.bar && foo.bar()
@@ -656,6 +706,8 @@ yoda_expressions_logicalAndCases5.js:49:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ undefined != foo.bar && foo.bar.baz.buzz
     51 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -681,6 +733,8 @@ yoda_expressions_logicalAndCases5.js:50:1 lint/complexity/useOptionalChain  FIXA
     51 │ 
     52 │ // case where for some reason there is a doubled up expression
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     48 48 │   // case with a jump (i.e. a non-nullish prop)
@@ -703,6 +757,8 @@ yoda_expressions_logicalAndCases5.js:53:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     54 │ undefined != foo.bar && undefined != foo.bar.baz && undefined != foo.bar.baz && foo.bar.baz.buzz
     55 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -728,6 +784,8 @@ yoda_expressions_logicalAndCases5.js:54:1 lint/complexity/useOptionalChain  FIXA
     55 │ 
     56 │ // chained members with element access
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     52 52 │   // case where for some reason there is a doubled up expression
@@ -750,6 +808,8 @@ yoda_expressions_logicalAndCases5.js:57:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     58 │ 
     59 │ // case with a jump (i.e. a non-nullish prop)
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -774,6 +834,8 @@ yoda_expressions_logicalAndCases5.js:60:1 lint/complexity/useOptionalChain  FIXA
     61 │ 
     62 │ // chained calls
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     58 58 │   
@@ -796,6 +858,8 @@ yoda_expressions_logicalAndCases5.js:63:1 lint/complexity/useOptionalChain  FIXA
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     64 │ undefined != foo && undefined != foo.bar && undefined != foo.bar.baz && undefined != foo.bar.baz.buzz && foo.bar.baz.buzz()
     65 │ undefined != foo.bar && undefined != foo.bar.baz && undefined != foo.bar.baz.buzz && foo.bar.baz.buzz()
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -821,6 +885,8 @@ yoda_expressions_logicalAndCases5.js:64:1 lint/complexity/useOptionalChain  FIXA
     65 │ undefined != foo.bar && undefined != foo.bar.baz && undefined != foo.bar.baz.buzz && foo.bar.baz.buzz()
     66 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     62 62 │   // chained calls
@@ -843,6 +909,8 @@ yoda_expressions_logicalAndCases5.js:65:1 lint/complexity/useOptionalChain  FIXA
   > 65 │ undefined != foo.bar && undefined != foo.bar.baz && undefined != foo.bar.baz.buzz && foo.bar.baz.buzz()
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     66 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   

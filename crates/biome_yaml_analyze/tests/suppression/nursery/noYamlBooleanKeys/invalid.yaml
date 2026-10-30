@@ -1,0 +1,26 @@
+# should generate diagnostics
+true: 1
+
+nested:
+  false: 2
+
+flow: { True: 3 }
+
+sequence:
+  - FALSE: 4
+
+explicit:
+  ? TRUE
+  : 5
+
+tagged:
+  !!bool "text": 6
+
+anchored: &flag False
+aliased:
+  ? *flag
+  : 7
+
+items:
+  - &item
+    True: 8

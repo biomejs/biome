@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/line_ending/javascript.md
+---
+
+# Input
+
+```md
+# Line ending
+
+```js
+function greet(name){if(name){return name}return "stranger"}
+```
+
+```
+
+
+# Options
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "lineEnding": "cr"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+# Line ending
+
+```js
+function greet(name) {
+	if (name) {
+		return name;
+	}
+	return "stranger";
+}
+```
+
+```

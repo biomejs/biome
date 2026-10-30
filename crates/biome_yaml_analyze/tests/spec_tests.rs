@@ -101,6 +101,10 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
     } else {
+        // JSON files that aren't lists of snippets, such as `.options.json`, aren't test inputs.
+        if extension != "yaml" {
+            return;
+        }
         analyze_and_snap(
             &mut snapshot,
             &input_code,

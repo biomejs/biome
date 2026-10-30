@@ -11,10 +11,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, JsCallArgumentList, JsCallArguments, JsCallExpression, JsLanguage,
     JsParenthesizedExpression, JsSyntaxElement, T, global_identifier,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, Direction, TriviaPieceKind, WalkEvent,
-    syntax::Preorder,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, WalkEvent, syntax::Preorder};
 use biome_rule_options::use_flat_math_min_max::UseFlatMathMinMaxOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
@@ -91,7 +88,7 @@ impl Rule for UseFlatMathMinMax {
 
     fn action(ctx: &RuleContext<Self>, method: &Self::State) -> Option<JsRuleAction> {
         let call = ctx.query();
-        if has_comments_inside(call) {
+        if call.syntax().has_inner_comments() {
             return None;
         }
 
@@ -99,25 +96,20 @@ impl Rule for UseFlatMathMinMax {
         let mut failed = false;
         let new_argument_list = {
             let flattened_arguments = FlattenedArguments::new(call, *method, ctx.model())?;
-            let flattened_arguments =
-                flattened_arguments.map_while(|argument| match argument {
-                    Ok(argument) => Some(argument),
-                    Err(()) => {
-                        failed = true;
-                        None
-                    }
-                });
+            let flattened_arguments = flattened_arguments.map_while(|argument| match argument {
+                Ok(argument) => Some(argument),
+                Err(()) => {
+                    failed = true;
+                    None
+                }
+            });
             let mut first = true;
             let slots = flattened_arguments.flat_map(move |argument| {
                 let separator: Option<JsSyntaxElement> = if first {
                     first = false;
                     None
                 } else {
-                    Some(
-                        make::token(T![,])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
-                            .into(),
-                    )
+                    Some(make::token(T![,]).with_trailing_space().into())
                 };
                 separator
                     .into_iter()
@@ -125,10 +117,7 @@ impl Rule for UseFlatMathMinMax {
                     .map(Some)
             });
             JsCallArgumentList::unwrap_cast(
-                old_arguments
-                    .args()
-                    .into_syntax()
-                    .splice_slots(.., slots),
+                old_arguments.args().into_syntax().splice_slots(.., slots),
             )
         };
         if failed {
@@ -233,8 +222,7 @@ fn is_nested_in_same_call(
     method: MathMethod,
     model: &SemanticModel,
 ) -> bool {
-    call
-        .syntax()
+    call.syntax()
         .ancestors()
         .skip(1)
         .find(|parent| !JsParenthesizedExpression::can_cast(parent.kind()))
@@ -252,11 +240,7 @@ struct FlattenedArguments<'a> {
 }
 
 impl<'a> FlattenedArguments<'a> {
-    fn new(
-        call: &JsCallExpression,
-        method: MathMethod,
-        model: &'a SemanticModel,
-    ) -> Option<Self> {
+    fn new(call: &JsCallExpression, method: MathMethod, model: &'a SemanticModel) -> Option<Self> {
         let arguments = call.arguments().ok()?.args();
         Some(Self {
             preorder: arguments.syntax().preorder(),
@@ -315,19 +299,3 @@ impl Iterator for FlattenedArguments<'_> {
 }
 
 impl FusedIterator for FlattenedArguments<'_> {}
-
-fn has_comments_inside(call: &JsCallExpression) -> bool {
-    let Some(first_token) = call.syntax().first_token() else {
-        return false;
-    };
-    let Some(last_token) = call.syntax().last_token() else {
-        return false;
-    };
-
-    call.syntax()
-        .descendants_tokens(Direction::Next)
-        .any(|token| {
-            (token != first_token && token.has_leading_comments())
-                || (token != last_token && token.has_trailing_comments())
-        })
-}

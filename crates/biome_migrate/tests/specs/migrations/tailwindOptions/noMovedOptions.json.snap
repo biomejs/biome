@@ -1,0 +1,18 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: noMovedOptions.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSortedClasses": { "level": "warn", "options": {} }
+      }
+    }
+  },
+  "javascript": { "useSortedClasses": { "options": { "functions": ["clsx"] } } }
+}
+
+```

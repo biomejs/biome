@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect plugins '--path=<TEMP_DIR>/absolute_target_matches_includes_relative_to_configuration_directory/src/file.ts'
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**"] },
+    { "path": "./other-only.grit", "includes": ["other/**"] }
+  ]
+}
+```
+
+## `base.grit`
+
+```grit
+`unterminated
+```
+
+## `other-only.grit`
+
+```grit
+`unterminated
+```
+
+## `src-only.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration enables 2 plugin rules for src/file.ts.
+  
+  Local plugins
+  
+  - base.grit (rule name: base)
+  - src-only.grit (rule name: src-only)
+  
+
+```

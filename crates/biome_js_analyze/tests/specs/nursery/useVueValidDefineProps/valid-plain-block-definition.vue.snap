@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-plain-block-definition.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const definition = { msg: String };
+</script>
+<script setup>
+defineProps(definition);
+</script>
+
+```

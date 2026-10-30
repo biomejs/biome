@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/expression/new_expression_import_call.js
+---
+
+# Input
+
+```js
+// `new import("foo").bar()` is a syntax error, so the parentheses must stay.
+new (import("foo"))();
+new (import("foo").bar)();
+new (import("foo")["bar"])();
+new (import("foo")`bar`)();
+
+```
+
+
+# Formatted
+
+```js
+// `new import("foo").bar()` is a syntax error, so the parentheses must stay.
+new (import("foo"))();
+new (import("foo").bar)();
+new (import("foo")["bar"])();
+new (import("foo")`bar`)();
+
+```

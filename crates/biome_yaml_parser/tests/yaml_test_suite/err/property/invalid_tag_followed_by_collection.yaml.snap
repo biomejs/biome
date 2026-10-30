@@ -45,15 +45,15 @@ YamlRoot {
                 flow: YamlFlowYamlNode {
                     properties: YamlPropertyList [],
                     content: YamlPlainScalar {
-                        value_token: PLAIN_LITERAL@14..25 "tag scalar\n" [] [],
+                        value_token: PLAIN_LITERAL@14..24 "tag scalar" [] [],
                     },
                 },
-                flow_end_token: FLOW_END@25..25 "" [] [],
+                flow_end_token: FLOW_END@24..24 "" [] [],
             },
             dotdotdot_token: missing (optional),
         },
     ],
-    eof_token: EOF@25..25 "" [] [],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
 }
 ```
 
@@ -61,7 +61,7 @@ YamlRoot {
 
 ```
 0: YAML_ROOT@0..25
-  0: YAML_DOCUMENT_LIST@0..25
+  0: YAML_DOCUMENT_LIST@0..24
     0: YAML_DOCUMENT@0..14
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
@@ -78,19 +78,19 @@ YamlRoot {
             2: R_CURLY@13..14 "}" [] []
         2: FLOW_END@14..14 "" [] []
       4: (empty)
-    1: YAML_DOCUMENT@14..25
+    1: YAML_DOCUMENT@14..24
       0: (empty)
       1: YAML_DIRECTIVE_LIST@14..14
       2: (empty)
-      3: YAML_FLOW_IN_BLOCK_NODE@14..25
+      3: YAML_FLOW_IN_BLOCK_NODE@14..24
         0: FLOW_START@14..14 "" [] []
-        1: YAML_FLOW_YAML_NODE@14..25
+        1: YAML_FLOW_YAML_NODE@14..24
           0: YAML_PROPERTY_LIST@14..14
-          1: YAML_PLAIN_SCALAR@14..25
-            0: PLAIN_LITERAL@14..25 "tag scalar\n" [] []
-        2: FLOW_END@25..25 "" [] []
+          1: YAML_PLAIN_SCALAR@14..24
+            0: PLAIN_LITERAL@14..24 "tag scalar" [] []
+        2: FLOW_END@24..24 "" [] []
       4: (empty)
-  1: EOF@25..25 "" [] []
+  1: EOF@24..25 "" [Newline("\n")] []
 
 ```
 

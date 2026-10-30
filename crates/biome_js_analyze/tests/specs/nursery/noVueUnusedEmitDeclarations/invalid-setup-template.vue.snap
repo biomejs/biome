@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-template.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <button @click="emit('bar')">Bar</button>
+</template>
+
+<script setup>
+const emit = defineEmits(["foo", "bar"]);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-template.vue:7:27 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared but never emitted.
+  
+    6 │ <script setup>
+  > 7 │ const emit = defineEmits(["foo", "bar"]);
+      │                           ^^^^^
+    8 │ </script>
+    9 │ 
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

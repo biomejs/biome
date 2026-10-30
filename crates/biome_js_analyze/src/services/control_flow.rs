@@ -3,14 +3,14 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, Queryable, RuleKey, RuleMetadata, ServiceBag,
     ServicesDiagnostic, Visitor, VisitorContext,
 };
-use biome_db::AnyParsedSource;
 use biome_js_control_flow::{control_flow_model, js_control_flow_model};
 use biome_js_syntax::AnyJsRoot;
 use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::TextRange;
 use biome_languages::LanguageDb;
-use biome_rowan::WalkEvent;
+use biome_parser::db::AnalyzedSource;
+use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 
 pub(crate) use biome_js_control_flow::AnyJsControlFlowRoot;
@@ -75,9 +75,10 @@ impl Visitor for ControlFlowGraphVisitor {
         }
         let db = ctx.services.get_service::<Rc<dyn LanguageDb>>();
         let model = if let Some(db) = db
-            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(source) = ctx.services.get_service::<AnalyzedSource>()
+            && let Some(model) = js_control_flow_model(db.as_ref(), source)
         {
-            js_control_flow_model(db.as_ref(), source).clone()
+            model.clone()
         } else {
             // Fix passes and standalone callers can analyze trees that are not stored
             // in the database. A graph for the file's previous tree would have stale nodes.
@@ -88,5 +89,12 @@ impl Visitor for ControlFlowGraphVisitor {
         for graph in model.graphs() {
             ctx.match_query(ControlFlowGraph { graph });
         }
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsRoot::KIND_SET)
     }
 }

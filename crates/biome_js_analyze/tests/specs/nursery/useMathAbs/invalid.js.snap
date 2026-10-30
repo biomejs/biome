@@ -1,0 +1,1187 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+value < 0 ? -value : value;
+value <= 0 ? -value : value;
+value > 0 ? value : -value;
+value >= 0 ? value : -value;
+value < 0 ? 0 - value : value;
+value <= 0 ? 0 - value : value;
+value < 0 ? value * -1 : value;
+value < 0 ? -1 * value : value;
+object.value < 0 ? -object.value : object.value;
+object["value"] < 0 ? -object.value : object[`value`];
+this.value < 0 ? -this.value : this.value;
+0 > value ? -value : value;
+0 >= value ? -value : value;
+0 < value ? value : -value;
+0 <= value ? value : -value;
+(value) < (0) ? (-(value)) : (value);
+function returned() {return value < 0 ? -value : value;}
+function returnedInParentheses() {return(value < 0 ? -value : value);}
+function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+const absolute = value > limit || value < -limit;
+const absoluteInclusive = value >= limit || value <= -limit;
+const absoluteReversed = value < -limit || value > limit;
+const absoluteReversedInclusive = value <= -limit || value >= limit;
+const absoluteFlipped = limit < value || -limit > value;
+const absoluteFlippedInclusive = limit <= value || -limit >= value;
+const absoluteSubtracted = value > limit || value < 0 - limit;
+const absoluteMultiplied = value > limit || value < limit * -1;
+const absoluteLiteral = value > 10 || value < -10;
+const absoluteChained = value > limit || value < -limit || other;
+function rangeReturned() {return value > limit || value < -limit;}
+function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+const absoluteMember = object.value > limit || object.value < -limit;
+const absoluteMemberLimit = value > object.limit || value < -object.limit;
+if (number > POSITIVE_CONSTANT || number < -POSITIVE_CONSTANT) {
+	console.log(number);
+}
+if (number >= POSITIVE_CONSTANT || number <= -POSITIVE_CONSTANT) {
+	console.log(number);
+}
+function numberVariable() {
+	const value = 1;
+	return value < 0 ? -value : value;
+}
+
+// The comments at the edges are kept.
+/* before */ value < 0 ? -value : value; /* after */
+/* before */ value > limit || value < -limit; /* after */
+
+// No fix is offered, because it would remove the comments.
+value < 0 ? -/* comment */value : value;
+value > limit || value < -/* comment */limit;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ value < 0 ? -value : value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ value <= 0 ? -value : value;
+    4 │ value > 0 ? value : -value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - value·<·0·?·-value·:·value;
+        2 │ + Math.abs(value);
+     3  3 │   value <= 0 ? -value : value;
+     4  4 │   value > 0 ? value : -value;
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ value < 0 ? -value : value;
+  > 3 │ value <= 0 ? -value : value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ value > 0 ? value : -value;
+    5 │ value >= 0 ? value : -value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   value < 0 ? -value : value;
+     3    │ - value·<=·0·?·-value·:·value;
+        3 │ + Math.abs(value);
+     4  4 │   value > 0 ? value : -value;
+     5  5 │   value >= 0 ? value : -value;
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    2 │ value < 0 ? -value : value;
+    3 │ value <= 0 ? -value : value;
+  > 4 │ value > 0 ? value : -value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ value >= 0 ? value : -value;
+    6 │ value < 0 ? 0 - value : value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     2  2 │   value < 0 ? -value : value;
+     3  3 │   value <= 0 ? -value : value;
+     4    │ - value·>·0·?·value·:·-value;
+        4 │ + Math.abs(value);
+     5  5 │   value >= 0 ? value : -value;
+     6  6 │   value < 0 ? 0 - value : value;
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    3 │ value <= 0 ? -value : value;
+    4 │ value > 0 ? value : -value;
+  > 5 │ value >= 0 ? value : -value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ value < 0 ? 0 - value : value;
+    7 │ value <= 0 ? 0 - value : value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     3  3 │   value <= 0 ? -value : value;
+     4  4 │   value > 0 ? value : -value;
+     5    │ - value·>=·0·?·value·:·-value;
+        5 │ + Math.abs(value);
+     6  6 │   value < 0 ? 0 - value : value;
+     7  7 │   value <= 0 ? 0 - value : value;
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    4 │ value > 0 ? value : -value;
+    5 │ value >= 0 ? value : -value;
+  > 6 │ value < 0 ? 0 - value : value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ value <= 0 ? 0 - value : value;
+    8 │ value < 0 ? value * -1 : value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     4  4 │   value > 0 ? value : -value;
+     5  5 │   value >= 0 ? value : -value;
+     6    │ - value·<·0·?·0·-·value·:·value;
+        6 │ + Math.abs(value);
+     7  7 │   value <= 0 ? 0 - value : value;
+     8  8 │   value < 0 ? value * -1 : value;
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    5 │ value >= 0 ? value : -value;
+    6 │ value < 0 ? 0 - value : value;
+  > 7 │ value <= 0 ? 0 - value : value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ value < 0 ? value * -1 : value;
+    9 │ value < 0 ? -1 * value : value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     5  5 │   value >= 0 ? value : -value;
+     6  6 │   value < 0 ? 0 - value : value;
+     7    │ - value·<=·0·?·0·-·value·:·value;
+        7 │ + Math.abs(value);
+     8  8 │   value < 0 ? value * -1 : value;
+     9  9 │   value < 0 ? -1 * value : value;
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+     6 │ value < 0 ? 0 - value : value;
+     7 │ value <= 0 ? 0 - value : value;
+   > 8 │ value < 0 ? value * -1 : value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ value < 0 ? -1 * value : value;
+    10 │ object.value < 0 ? -object.value : object.value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     6  6 │   value < 0 ? 0 - value : value;
+     7  7 │   value <= 0 ? 0 - value : value;
+     8    │ - value·<·0·?·value·*·-1·:·value;
+        8 │ + Math.abs(value);
+     9  9 │   value < 0 ? -1 * value : value;
+    10 10 │   object.value < 0 ? -object.value : object.value;
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+     7 │ value <= 0 ? 0 - value : value;
+     8 │ value < 0 ? value * -1 : value;
+   > 9 │ value < 0 ? -1 * value : value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ object.value < 0 ? -object.value : object.value;
+    11 │ object["value"] < 0 ? -object.value : object[`value`];
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     7  7 │   value <= 0 ? 0 - value : value;
+     8  8 │   value < 0 ? value * -1 : value;
+     9    │ - value·<·0·?·-1·*·value·:·value;
+        9 │ + Math.abs(value);
+    10 10 │   object.value < 0 ? -object.value : object.value;
+    11 11 │   object["value"] < 0 ? -object.value : object[`value`];
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+     8 │ value < 0 ? value * -1 : value;
+     9 │ value < 0 ? -1 * value : value;
+  > 10 │ object.value < 0 ? -object.value : object.value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ object["value"] < 0 ? -object.value : object[`value`];
+    12 │ this.value < 0 ? -this.value : this.value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     8  8 │   value < 0 ? value * -1 : value;
+     9  9 │   value < 0 ? -1 * value : value;
+    10    │ - object.value·<·0·?·-object.value·:·object.value;
+       10 │ + Math.abs(object.value);
+    11 11 │   object["value"] < 0 ? -object.value : object[`value`];
+    12 12 │   this.value < 0 ? -this.value : this.value;
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+     9 │ value < 0 ? -1 * value : value;
+    10 │ object.value < 0 ? -object.value : object.value;
+  > 11 │ object["value"] < 0 ? -object.value : object[`value`];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ this.value < 0 ? -this.value : this.value;
+    13 │ 0 > value ? -value : value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+     9  9 │   value < 0 ? -1 * value : value;
+    10 10 │   object.value < 0 ? -object.value : object.value;
+    11    │ - object["value"]·<·0·?·-object.value·:·object[`value`];
+       11 │ + Math.abs(object["value"]);
+    12 12 │   this.value < 0 ? -this.value : this.value;
+    13 13 │   0 > value ? -value : value;
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    10 │ object.value < 0 ? -object.value : object.value;
+    11 │ object["value"] < 0 ? -object.value : object[`value`];
+  > 12 │ this.value < 0 ? -this.value : this.value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 0 > value ? -value : value;
+    14 │ 0 >= value ? -value : value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    10 10 │   object.value < 0 ? -object.value : object.value;
+    11 11 │   object["value"] < 0 ? -object.value : object[`value`];
+    12    │ - this.value·<·0·?·-this.value·:·this.value;
+       12 │ + Math.abs(this.value);
+    13 13 │   0 > value ? -value : value;
+    14 14 │   0 >= value ? -value : value;
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    11 │ object["value"] < 0 ? -object.value : object[`value`];
+    12 │ this.value < 0 ? -this.value : this.value;
+  > 13 │ 0 > value ? -value : value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 0 >= value ? -value : value;
+    15 │ 0 < value ? value : -value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    11 11 │   object["value"] < 0 ? -object.value : object[`value`];
+    12 12 │   this.value < 0 ? -this.value : this.value;
+    13    │ - 0·>·value·?·-value·:·value;
+       13 │ + Math.abs(value);
+    14 14 │   0 >= value ? -value : value;
+    15 15 │   0 < value ? value : -value;
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    12 │ this.value < 0 ? -this.value : this.value;
+    13 │ 0 > value ? -value : value;
+  > 14 │ 0 >= value ? -value : value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 0 < value ? value : -value;
+    16 │ 0 <= value ? value : -value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    12 12 │   this.value < 0 ? -this.value : this.value;
+    13 13 │   0 > value ? -value : value;
+    14    │ - 0·>=·value·?·-value·:·value;
+       14 │ + Math.abs(value);
+    15 15 │   0 < value ? value : -value;
+    16 16 │   0 <= value ? value : -value;
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    13 │ 0 > value ? -value : value;
+    14 │ 0 >= value ? -value : value;
+  > 15 │ 0 < value ? value : -value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 0 <= value ? value : -value;
+    17 │ (value) < (0) ? (-(value)) : (value);
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    13 13 │   0 > value ? -value : value;
+    14 14 │   0 >= value ? -value : value;
+    15    │ - 0·<·value·?·value·:·-value;
+       15 │ + Math.abs(value);
+    16 16 │   0 <= value ? value : -value;
+    17 17 │   (value) < (0) ? (-(value)) : (value);
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    14 │ 0 >= value ? -value : value;
+    15 │ 0 < value ? value : -value;
+  > 16 │ 0 <= value ? value : -value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ (value) < (0) ? (-(value)) : (value);
+    18 │ function returned() {return value < 0 ? -value : value;}
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    14 14 │   0 >= value ? -value : value;
+    15 15 │   0 < value ? value : -value;
+    16    │ - 0·<=·value·?·value·:·-value;
+       16 │ + Math.abs(value);
+    17 17 │   (value) < (0) ? (-(value)) : (value);
+    18 18 │   function returned() {return value < 0 ? -value : value;}
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    15 │ 0 < value ? value : -value;
+    16 │ 0 <= value ? value : -value;
+  > 17 │ (value) < (0) ? (-(value)) : (value);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ function returned() {return value < 0 ? -value : value;}
+    19 │ function returnedInParentheses() {return(value < 0 ? -value : value);}
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    15 15 │   0 < value ? value : -value;
+    16 16 │   0 <= value ? value : -value;
+    17    │ - (value)·<·(0)·?·(-(value))·:·(value);
+       17 │ + Math.abs(value);
+    18 18 │   function returned() {return value < 0 ? -value : value;}
+    19 19 │   function returnedInParentheses() {return(value < 0 ? -value : value);}
+  
+
+```
+
+```
+invalid.js:18:29 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    16 │ 0 <= value ? value : -value;
+    17 │ (value) < (0) ? (-(value)) : (value);
+  > 18 │ function returned() {return value < 0 ? -value : value;}
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ function returnedInParentheses() {return(value < 0 ? -value : value);}
+    20 │ function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    16 16 │   0 <= value ? value : -value;
+    17 17 │   (value) < (0) ? (-(value)) : (value);
+    18    │ - function·returned()·{return·value·<·0·?·-value·:·value;}
+       18 │ + function·returned()·{return·Math.abs(value);}
+    19 19 │   function returnedInParentheses() {return(value < 0 ? -value : value);}
+    20 20 │   function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+  
+
+```
+
+```
+invalid.js:19:42 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    17 │ (value) < (0) ? (-(value)) : (value);
+    18 │ function returned() {return value < 0 ? -value : value;}
+  > 19 │ function returnedInParentheses() {return(value < 0 ? -value : value);}
+       │                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+    21 │ const absolute = value > limit || value < -limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    17 17 │   (value) < (0) ? (-(value)) : (value);
+    18 18 │   function returned() {return value < 0 ? -value : value;}
+    19    │ - function·returnedInParentheses()·{return(value·<·0·?·-value·:·value);}
+       19 │ + function·returnedInParentheses()·{return(Math.abs(value));}
+    20 20 │   function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+    21 21 │   const absolute = value > limit || value < -limit;
+  
+
+```
+
+```
+invalid.js:20:40 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    18 │ function returned() {return value < 0 ? -value : value;}
+    19 │ function returnedInParentheses() {return(value < 0 ? -value : value);}
+  > 20 │ function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+       │                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ const absolute = value > limit || value < -limit;
+    22 │ const absoluteInclusive = value >= limit || value <= -limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    18 18 │   function returned() {return value < 0 ? -value : value;}
+    19 19 │   function returnedInParentheses() {return(value < 0 ? -value : value);}
+    20    │ - function·returnedAfterKeyword()·{return(value)·<·0·?·-value·:·value;}
+       20 │ + function·returnedAfterKeyword()·{return·Math.abs(value);}
+    21 21 │   const absolute = value > limit || value < -limit;
+    22 22 │   const absoluteInclusive = value >= limit || value <= -limit;
+  
+
+```
+
+```
+invalid.js:21:18 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    19 │ function returnedInParentheses() {return(value < 0 ? -value : value);}
+    20 │ function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+  > 21 │ const absolute = value > limit || value < -limit;
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ const absoluteInclusive = value >= limit || value <= -limit;
+    23 │ const absoluteReversed = value < -limit || value > limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    19 19 │   function returnedInParentheses() {return(value < 0 ? -value : value);}
+    20 20 │   function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+    21    │ - const·absolute·=·value·>·limit·||·value·<·-limit;
+       21 │ + const·absolute·=·Math.abs(value)·>·limit;
+    22 22 │   const absoluteInclusive = value >= limit || value <= -limit;
+    23 23 │   const absoluteReversed = value < -limit || value > limit;
+  
+
+```
+
+```
+invalid.js:22:27 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    20 │ function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+    21 │ const absolute = value > limit || value < -limit;
+  > 22 │ const absoluteInclusive = value >= limit || value <= -limit;
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ const absoluteReversed = value < -limit || value > limit;
+    24 │ const absoluteReversedInclusive = value <= -limit || value >= limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    20 20 │   function returnedAfterKeyword() {return(value) < 0 ? -value : value;}
+    21 21 │   const absolute = value > limit || value < -limit;
+    22    │ - const·absoluteInclusive·=·value·>=·limit·||·value·<=·-limit;
+       22 │ + const·absoluteInclusive·=·Math.abs(value)·>=·limit;
+    23 23 │   const absoluteReversed = value < -limit || value > limit;
+    24 24 │   const absoluteReversedInclusive = value <= -limit || value >= limit;
+  
+
+```
+
+```
+invalid.js:23:26 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    21 │ const absolute = value > limit || value < -limit;
+    22 │ const absoluteInclusive = value >= limit || value <= -limit;
+  > 23 │ const absoluteReversed = value < -limit || value > limit;
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ const absoluteReversedInclusive = value <= -limit || value >= limit;
+    25 │ const absoluteFlipped = limit < value || -limit > value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    21 21 │   const absolute = value > limit || value < -limit;
+    22 22 │   const absoluteInclusive = value >= limit || value <= -limit;
+    23    │ - const·absoluteReversed·=·value·<·-limit·||·value·>·limit;
+       23 │ + const·absoluteReversed·=·Math.abs(value)·>·limit;
+    24 24 │   const absoluteReversedInclusive = value <= -limit || value >= limit;
+    25 25 │   const absoluteFlipped = limit < value || -limit > value;
+  
+
+```
+
+```
+invalid.js:24:35 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    22 │ const absoluteInclusive = value >= limit || value <= -limit;
+    23 │ const absoluteReversed = value < -limit || value > limit;
+  > 24 │ const absoluteReversedInclusive = value <= -limit || value >= limit;
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ const absoluteFlipped = limit < value || -limit > value;
+    26 │ const absoluteFlippedInclusive = limit <= value || -limit >= value;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    22 22 │   const absoluteInclusive = value >= limit || value <= -limit;
+    23 23 │   const absoluteReversed = value < -limit || value > limit;
+    24    │ - const·absoluteReversedInclusive·=·value·<=·-limit·||·value·>=·limit;
+       24 │ + const·absoluteReversedInclusive·=·Math.abs(value)·>=·limit;
+    25 25 │   const absoluteFlipped = limit < value || -limit > value;
+    26 26 │   const absoluteFlippedInclusive = limit <= value || -limit >= value;
+  
+
+```
+
+```
+invalid.js:25:25 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    23 │ const absoluteReversed = value < -limit || value > limit;
+    24 │ const absoluteReversedInclusive = value <= -limit || value >= limit;
+  > 25 │ const absoluteFlipped = limit < value || -limit > value;
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ const absoluteFlippedInclusive = limit <= value || -limit >= value;
+    27 │ const absoluteSubtracted = value > limit || value < 0 - limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    23 23 │   const absoluteReversed = value < -limit || value > limit;
+    24 24 │   const absoluteReversedInclusive = value <= -limit || value >= limit;
+    25    │ - const·absoluteFlipped·=·limit·<·value·||·-limit·>·value;
+       25 │ + const·absoluteFlipped·=·Math.abs(value)·>·limit;
+    26 26 │   const absoluteFlippedInclusive = limit <= value || -limit >= value;
+    27 27 │   const absoluteSubtracted = value > limit || value < 0 - limit;
+  
+
+```
+
+```
+invalid.js:26:34 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    24 │ const absoluteReversedInclusive = value <= -limit || value >= limit;
+    25 │ const absoluteFlipped = limit < value || -limit > value;
+  > 26 │ const absoluteFlippedInclusive = limit <= value || -limit >= value;
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ const absoluteSubtracted = value > limit || value < 0 - limit;
+    28 │ const absoluteMultiplied = value > limit || value < limit * -1;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    24 24 │   const absoluteReversedInclusive = value <= -limit || value >= limit;
+    25 25 │   const absoluteFlipped = limit < value || -limit > value;
+    26    │ - const·absoluteFlippedInclusive·=·limit·<=·value·||·-limit·>=·value;
+       26 │ + const·absoluteFlippedInclusive·=·Math.abs(value)·>=·limit;
+    27 27 │   const absoluteSubtracted = value > limit || value < 0 - limit;
+    28 28 │   const absoluteMultiplied = value > limit || value < limit * -1;
+  
+
+```
+
+```
+invalid.js:27:28 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    25 │ const absoluteFlipped = limit < value || -limit > value;
+    26 │ const absoluteFlippedInclusive = limit <= value || -limit >= value;
+  > 27 │ const absoluteSubtracted = value > limit || value < 0 - limit;
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ const absoluteMultiplied = value > limit || value < limit * -1;
+    29 │ const absoluteLiteral = value > 10 || value < -10;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    25 25 │   const absoluteFlipped = limit < value || -limit > value;
+    26 26 │   const absoluteFlippedInclusive = limit <= value || -limit >= value;
+    27    │ - const·absoluteSubtracted·=·value·>·limit·||·value·<·0·-·limit;
+       27 │ + const·absoluteSubtracted·=·Math.abs(value)·>·limit;
+    28 28 │   const absoluteMultiplied = value > limit || value < limit * -1;
+    29 29 │   const absoluteLiteral = value > 10 || value < -10;
+  
+
+```
+
+```
+invalid.js:28:28 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    26 │ const absoluteFlippedInclusive = limit <= value || -limit >= value;
+    27 │ const absoluteSubtracted = value > limit || value < 0 - limit;
+  > 28 │ const absoluteMultiplied = value > limit || value < limit * -1;
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ const absoluteLiteral = value > 10 || value < -10;
+    30 │ const absoluteChained = value > limit || value < -limit || other;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    26 26 │   const absoluteFlippedInclusive = limit <= value || -limit >= value;
+    27 27 │   const absoluteSubtracted = value > limit || value < 0 - limit;
+    28    │ - const·absoluteMultiplied·=·value·>·limit·||·value·<·limit·*·-1;
+       28 │ + const·absoluteMultiplied·=·Math.abs(value)·>·limit;
+    29 29 │   const absoluteLiteral = value > 10 || value < -10;
+    30 30 │   const absoluteChained = value > limit || value < -limit || other;
+  
+
+```
+
+```
+invalid.js:29:25 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    27 │ const absoluteSubtracted = value > limit || value < 0 - limit;
+    28 │ const absoluteMultiplied = value > limit || value < limit * -1;
+  > 29 │ const absoluteLiteral = value > 10 || value < -10;
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ const absoluteChained = value > limit || value < -limit || other;
+    31 │ function rangeReturned() {return value > limit || value < -limit;}
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    27 27 │   const absoluteSubtracted = value > limit || value < 0 - limit;
+    28 28 │   const absoluteMultiplied = value > limit || value < limit * -1;
+    29    │ - const·absoluteLiteral·=·value·>·10·||·value·<·-10;
+       29 │ + const·absoluteLiteral·=·Math.abs(value)·>·10;
+    30 30 │   const absoluteChained = value > limit || value < -limit || other;
+    31 31 │   function rangeReturned() {return value > limit || value < -limit;}
+  
+
+```
+
+```
+invalid.js:30:25 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    28 │ const absoluteMultiplied = value > limit || value < limit * -1;
+    29 │ const absoluteLiteral = value > 10 || value < -10;
+  > 30 │ const absoluteChained = value > limit || value < -limit || other;
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ function rangeReturned() {return value > limit || value < -limit;}
+    32 │ function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    28 28 │   const absoluteMultiplied = value > limit || value < limit * -1;
+    29 29 │   const absoluteLiteral = value > 10 || value < -10;
+    30    │ - const·absoluteChained·=·value·>·limit·||·value·<·-limit·||·other;
+       30 │ + const·absoluteChained·=·Math.abs(value)·>·limit·||·other;
+    31 31 │   function rangeReturned() {return value > limit || value < -limit;}
+    32 32 │   function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+  
+
+```
+
+```
+invalid.js:31:34 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    29 │ const absoluteLiteral = value > 10 || value < -10;
+    30 │ const absoluteChained = value > limit || value < -limit || other;
+  > 31 │ function rangeReturned() {return value > limit || value < -limit;}
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+    33 │ function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    29 29 │   const absoluteLiteral = value > 10 || value < -10;
+    30 30 │   const absoluteChained = value > limit || value < -limit || other;
+    31    │ - function·rangeReturned()·{return·value·>·limit·||·value·<·-limit;}
+       31 │ + function·rangeReturned()·{return·Math.abs(value)·>·limit;}
+    32 32 │   function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+    33 33 │   function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+  
+
+```
+
+```
+invalid.js:32:47 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    30 │ const absoluteChained = value > limit || value < -limit || other;
+    31 │ function rangeReturned() {return value > limit || value < -limit;}
+  > 32 │ function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+       │                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+    34 │ const absoluteMember = object.value > limit || object.value < -limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    30 30 │   const absoluteChained = value > limit || value < -limit || other;
+    31 31 │   function rangeReturned() {return value > limit || value < -limit;}
+    32    │ - function·rangeReturnedInParentheses()·{return(value·>·limit·||·value·<·-limit);}
+       32 │ + function·rangeReturnedInParentheses()·{return(Math.abs(value)·>·limit);}
+    33 33 │   function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+    34 34 │   const absoluteMember = object.value > limit || object.value < -limit;
+  
+
+```
+
+```
+invalid.js:33:45 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    31 │ function rangeReturned() {return value > limit || value < -limit;}
+    32 │ function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+  > 33 │ function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+       │                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ const absoluteMember = object.value > limit || object.value < -limit;
+    35 │ const absoluteMemberLimit = value > object.limit || value < -object.limit;
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    31 31 │   function rangeReturned() {return value > limit || value < -limit;}
+    32 32 │   function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+    33    │ - function·rangeReturnedAfterKeyword()·{return(value)·>·limit·||·value·<·-limit;}
+       33 │ + function·rangeReturnedAfterKeyword()·{return·Math.abs(value)·>·limit;}
+    34 34 │   const absoluteMember = object.value > limit || object.value < -limit;
+    35 35 │   const absoluteMemberLimit = value > object.limit || value < -object.limit;
+  
+
+```
+
+```
+invalid.js:34:24 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    32 │ function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+    33 │ function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+  > 34 │ const absoluteMember = object.value > limit || object.value < -limit;
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ const absoluteMemberLimit = value > object.limit || value < -object.limit;
+    36 │ if (number > POSITIVE_CONSTANT || number < -POSITIVE_CONSTANT) {
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    32 32 │   function rangeReturnedInParentheses() {return(value > limit || value < -limit);}
+    33 33 │   function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+    34    │ - const·absoluteMember·=·object.value·>·limit·||·object.value·<·-limit;
+       34 │ + const·absoluteMember·=·Math.abs(object.value)·>·limit;
+    35 35 │   const absoluteMemberLimit = value > object.limit || value < -object.limit;
+    36 36 │   if (number > POSITIVE_CONSTANT || number < -POSITIVE_CONSTANT) {
+  
+
+```
+
+```
+invalid.js:35:29 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    33 │ function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+    34 │ const absoluteMember = object.value > limit || object.value < -limit;
+  > 35 │ const absoluteMemberLimit = value > object.limit || value < -object.limit;
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ if (number > POSITIVE_CONSTANT || number < -POSITIVE_CONSTANT) {
+    37 │ 	console.log(number);
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    33 33 │   function rangeReturnedAfterKeyword() {return(value) > limit || value < -limit;}
+    34 34 │   const absoluteMember = object.value > limit || object.value < -limit;
+    35    │ - const·absoluteMemberLimit·=·value·>·object.limit·||·value·<·-object.limit;
+       35 │ + const·absoluteMemberLimit·=·Math.abs(value)·>·object.limit;
+    36 36 │   if (number > POSITIVE_CONSTANT || number < -POSITIVE_CONSTANT) {
+    37 37 │   	console.log(number);
+  
+
+```
+
+```
+invalid.js:36:5 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    34 │ const absoluteMember = object.value > limit || object.value < -limit;
+    35 │ const absoluteMemberLimit = value > object.limit || value < -object.limit;
+  > 36 │ if (number > POSITIVE_CONSTANT || number < -POSITIVE_CONSTANT) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 	console.log(number);
+    38 │ }
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    34 34 │   const absoluteMember = object.value > limit || object.value < -limit;
+    35 35 │   const absoluteMemberLimit = value > object.limit || value < -object.limit;
+    36    │ - if·(number·>·POSITIVE_CONSTANT·||·number·<·-POSITIVE_CONSTANT)·{
+       36 │ + if·(Math.abs(number)·>·POSITIVE_CONSTANT)·{
+    37 37 │   	console.log(number);
+    38 38 │   }
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    37 │ 	console.log(number);
+    38 │ }
+  > 39 │ if (number >= POSITIVE_CONSTANT || number <= -POSITIVE_CONSTANT) {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 	console.log(number);
+    41 │ }
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    37 37 │   	console.log(number);
+    38 38 │   }
+    39    │ - if·(number·>=·POSITIVE_CONSTANT·||·number·<=·-POSITIVE_CONSTANT)·{
+       39 │ + if·(Math.abs(number)·>=·POSITIVE_CONSTANT)·{
+    40 40 │   	console.log(number);
+    41 41 │   }
+  
+
+```
+
+```
+invalid.js:44:9 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    42 │ function numberVariable() {
+    43 │ 	const value = 1;
+  > 44 │ 	return value < 0 ? -value : value;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ }
+    46 │ 
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    42 42 │   function numberVariable() {
+    43 43 │     const value = 1;
+    44    │ - → return·value·<·0·?·-value·:·value;
+       44 │ + → return·Math.abs(value);
+    45 45 │   }
+    46 46 │   
+  
+
+```
+
+```
+invalid.js:48:14 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    47 │ // The comments at the edges are kept.
+  > 48 │ /* before */ value < 0 ? -value : value; /* after */
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ /* before */ value > limit || value < -limit; /* after */
+    50 │ 
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    46 46 │   
+    47 47 │   // The comments at the edges are kept.
+    48    │ - /*·before·*/·value·<·0·?·-value·:·value;·/*·after·*/
+       48 │ + /*·before·*/·Math.abs(value);·/*·after·*/
+    49 49 │   /* before */ value > limit || value < -limit; /* after */
+    50 50 │   
+  
+
+```
+
+```
+invalid.js:49:14 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    47 │ // The comments at the edges are kept.
+    48 │ /* before */ value < 0 ? -value : value; /* after */
+  > 49 │ /* before */ value > limit || value < -limit; /* after */
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ // No fix is offered, because it would remove the comments.
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    47 47 │   // The comments at the edges are kept.
+    48 48 │   /* before */ value < 0 ? -value : value; /* after */
+    49    │ - /*·before·*/·value·>·limit·||·value·<·-limit;·/*·after·*/
+       49 │ + /*·before·*/·Math.abs(value)·>·limit;·/*·after·*/
+    50 50 │   
+    51 51 │   // No fix is offered, because it would remove the comments.
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/useMathAbs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    51 │ // No fix is offered, because it would remove the comments.
+  > 52 │ value < 0 ? -/* comment */value : value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ value > limit || value < -/* comment */limit;
+    54 │ 
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:1 lint/nursery/useMathAbs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition manually compares an absolute value with a limit.
+  
+    51 │ // No fix is offered, because it would remove the comments.
+    52 │ value < 0 ? -/* comment */value : value;
+  > 53 │ value > limit || value < -/* comment */limit;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

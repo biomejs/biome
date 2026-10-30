@@ -129,7 +129,14 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
             markup! {
                 "Don't use "<Emphasis>"next/script"</Emphasis>" component with the `"<Emphasis>"beforeInteractive"</Emphasis>"` strategy outside of "<Emphasis>"pages/_document.js"</Emphasis>"."
             },
-        ).note(markup! {
+        )
+        .note(markup! {
+            "The "<Emphasis>"beforeInteractive"</Emphasis>" strategy only works when the script is loaded from the custom document. Anywhere else, the script does not load before the page becomes interactive."
+        })
+        .note(markup! {
+            "Move this script to "<Emphasis>"pages/_document.js"</Emphasis>", or use a different strategy such as "<Emphasis>"afterInteractive"</Emphasis>"."
+        })
+        .note(markup! {
             "See the "<Hyperlink href="https://nextjs.org/docs/messages/no-before-interactive-script-outside-document">"Next.js docs"</Hyperlink>" for more details."
         }))
     }

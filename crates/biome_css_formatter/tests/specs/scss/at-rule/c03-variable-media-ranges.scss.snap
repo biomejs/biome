@@ -1,0 +1,92 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/c03-variable-media-ranges.scss
+---
+
+# Input
+
+```scss
+@use "tokens";
+$min:40rem;$max:80rem;$feature:width;
+@media($min<width){.reverse{color:red}}
+@media($min<width<$max){.interval{display:block}}
+@media($min + 1rem<width<$max - 1rem){.arithmetic{display:grid}}
+@media(tokens.$min + 1rem<width<tokens.$max - 1rem){.module{display:flex}}
+@media(- $min<width<=+$max){.unary{color:blue}}
+@media(#{$min}<width<#{$max}){.interpolation{color:green}}
+@media($feature){.boolean{color:red}}
+@media($feature:$min){.plain{color:red}}
+@media($feature<80rem),($feature<$max){.name-first{color:red}}
+@media(40rem<$feature<80rem),($min<$feature<$max),($min<#{$feature}<$max){.dynamic-middle{color:red}}
+@media(/*lower*/$min/*left*/</*name*/width/*right*/</*upper*/$max/*close*/){.comments{color:red}}
+
+```
+
+
+# Formatted
+
+```scss
+@use "tokens";
+$min: 40rem;
+$max: 80rem;
+$feature: width;
+@media ($min < width) {
+	.reverse {
+		color: red;
+	}
+}
+@media ($min < width < $max) {
+	.interval {
+		display: block;
+	}
+}
+@media ($min + 1rem < width < $max - 1rem) {
+	.arithmetic {
+		display: grid;
+	}
+}
+@media (tokens.$min + 1rem < width < tokens.$max - 1rem) {
+	.module {
+		display: flex;
+	}
+}
+@media (-$min < width <= +$max) {
+	.unary {
+		color: blue;
+	}
+}
+@media (#{$min} < width < #{$max}) {
+	.interpolation {
+		color: green;
+	}
+}
+@media ($feature) {
+	.boolean {
+		color: red;
+	}
+}
+@media ($feature: $min) {
+	.plain {
+		color: red;
+	}
+}
+@media ($feature < 80rem), ($feature < $max) {
+	.name-first {
+		color: red;
+	}
+}
+@media (40rem < $feature < 80rem), ($min < $feature < $max),
+	($min < #{$feature} < $max) {
+	.dynamic-middle {
+		color: red;
+	}
+}
+@media (
+		/*lower*/ $min /*left*/ < /*name*/ /*right*/ width < /*upper*/ $max /*close*/
+	) {
+	.comments {
+		color: red;
+	}
+}
+
+```

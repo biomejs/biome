@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSuppressed.js
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+// biome-ignore lint/nursery/noUnreadableForOfExpression: test
+for (const item of getItems(createArgument(seed))) {}
+
+// biome-ignore lint/nursery/noUnreadableForOfExpression: test
+for (const item of getItems(
+	createArgument(seed),
+)) {}
+
+for (
+	// biome-ignore lint/nursery/noUnreadableForOfExpression: test
+	const item of getItems(createArgument(seed))
+) {}
+
+```

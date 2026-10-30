@@ -35,9 +35,9 @@
 
 **Biome** es una toolchain de alto rendimiento para proyectos web. Su objetivo es proveer herramientas que mantengan la salud de dichos proyectos.
 
-**Biome es un [formatter rápido](https://github.com/biomejs/benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ y _GraphQL_ que alcanza un **[97% de compatibilidad con _Prettier_](https://algora.io/challenges/prettier)**.
+**Biome es un [formatter rápido](https://github.com/biomejs/benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ y _SCSS_ que alcanza un **[97% de compatibilidad con _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome es un [linter de alto rendimiento](https://github.com/biomejs/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, y _GraphQL_ que incluye **[más de 500 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
+**Biome es un [linter de alto rendimiento](https://github.com/biomejs/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ y _SCSS_ que incluye **[más de 500 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
 Produce **diagnósticos detallados y contextualizados** que ayudan a mejorar tu código y convertirte en un mejor programador!
 
 **Biome** fue diseñado desde cero para usarse [interactivamente dentro de un editor](https://biomejs.dev/es/editors/first-party-extensions/).
@@ -150,6 +150,9 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
       <td align="center" valign="middle">
         <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://github.com/syntaxfm" target="_blank"><img src="https://avatars.githubusercontent.com/u/130389858?s=200&v=4" height="100" alt="SyntaxFM logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -164,9 +167,6 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>

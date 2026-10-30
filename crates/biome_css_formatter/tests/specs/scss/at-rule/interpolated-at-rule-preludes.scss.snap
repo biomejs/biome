@@ -1,0 +1,147 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/interpolated-at-rule-preludes.scss
+---
+
+# Input
+
+```scss
+$name:Brand;$pseudo:first;
+@counter-style counter-#{ $name }2{system:cyclic;symbols:"*"}
+@position-try   --try-#{ $name }{top:0}
+@color-profile --profile-#{ $name }{src:url("a.icc")}
+@custom-media --media-#{ $name }   (min-width:1px);
+@custom-media --#{ $name } true;
+@counter-style counter-#{ $name } {system:cyclic;symbols:"*"}
+@counter-style #{ $name }{system:cyclic;symbols:"*"}
+@counter-style -#{ $name }{system:cyclic;symbols:"*"}
+@font-feature-values Font #{ $name },#{ $name }-Sans,"Font #{ $name }"{@swash{fancy:1}}
+@page page-#{ $name }:#{ $pseudo },#{ $name }:left{margin:1in}
+@page :#{ $pseudo }{margin:1in}
+@namespace ns-#{ $name } url("http://example.com");
+@namespace #{ $name } "http://example.com";
+
+@position-try /* before */ --try-#{ $name } /* after */ {top:1px}
+@counter-style /* before */ #{ $name } /* after */ {symbols:"*"}
+@font-feature-values Font /* between */ #{ $name } /* after */ {@swash{fancy:1}}
+@page /* before */ page-#{ $name } /* before pseudo */ :#{ $pseudo } /* after */ {margin:1in}
+@namespace /* before */ ns-#{ $name } /* after */ url("http://example.com");
+
+@page page-#{ $name } // before pseudo
+:#{ $pseudo } {margin:1in}
+@namespace ns-#{ $name } // before URL
+url("http://example.com");
+@namespace ns-#{ $name }
+/* own line */ url("http://example.com");
+@page page-#{ $name }
+/* own line */ :#{ $pseudo } {margin:1in}
+@namespace ns-#{ $name } /* multi
+line */ url("http://example.com");
+@page page-#{ $name } /* multi
+line */ :#{ $pseudo } {margin:1in}
+@page page-#{ $name } /* biome-ignore format: preserve pseudo */ :#{ $pseudo } {margin:1in}
+@namespace ns-#{ $name } /* biome-ignore format: preserve URL */ url( "http://example.com" );
+@page page-#{ $name } /* first */ /* biome-ignore format: preserve pseudo */ /* last */ :#{ $pseudo } {margin:1in}
+@namespace ns-#{ $name } /* first */ /* biome-ignore format: preserve URL */ /* last */ url( "http://example.com" );
+
+// biome-ignore format: preserve the source layout
+@counter-style counter-#{ $name } {system:cyclic;symbols:"*"}
+
+```
+
+
+# Formatted
+
+```scss
+$name: Brand;
+$pseudo: first;
+@counter-style counter-#{$name}2 {
+	system: cyclic;
+	symbols: "*";
+}
+@position-try --try-#{$name} {
+	top: 0;
+}
+@color-profile --profile-#{$name} {
+	src: url("a.icc");
+}
+@custom-media --media-#{$name} (min-width: 1px);
+@custom-media --#{$name} true;
+@counter-style counter-#{$name} {
+	system: cyclic;
+	symbols: "*";
+}
+@counter-style #{$name} {
+	system: cyclic;
+	symbols: "*";
+}
+@counter-style -#{$name} {
+	system: cyclic;
+	symbols: "*";
+}
+@font-feature-values Font #{$name}, #{$name}-Sans, "Font #{ $name }" {
+	@swash {
+		fancy: 1;
+	}
+}
+@page page-#{$name}:#{$pseudo}, #{$name}:left {
+	margin: 1in;
+}
+@page :#{$pseudo} {
+	margin: 1in;
+}
+@namespace ns-#{$name} url("http://example.com");
+@namespace #{$name} "http://example.com";
+
+@position-try /* before */ --try-#{$name} /* after */ {
+	top: 1px;
+}
+@counter-style /* before */ #{$name} /* after */ {
+	symbols: "*";
+}
+@font-feature-values Font /* between */ #{$name} /* after */ {
+	@swash {
+		fancy: 1;
+	}
+}
+@page /* before */ page-#{$name} /* before pseudo */ :#{$pseudo} /* after */ {
+	margin: 1in;
+}
+@namespace /* before */ ns-#{$name} /* after */ url("http://example.com");
+
+@page page-#{$name} // before pseudo
+		:#{$pseudo} {
+	margin: 1in;
+}
+@namespace ns-#{$name} // before URL
+url("http://example.com");
+@namespace ns-#{$name} /* own line */ url("http://example.com");
+@page page-#{$name} /* own line */ :#{$pseudo} {
+	margin: 1in;
+}
+@namespace ns-#{$name} /* multi
+line */ url("http://example.com");
+@page page-#{$name} /* multi
+line */ :#{$pseudo} {
+	margin: 1in;
+}
+@page page-#{$name} /* biome-ignore format: preserve pseudo */ :#{ $pseudo } {
+	margin: 1in;
+}
+@namespace ns-#{$name} /* biome-ignore format: preserve URL */ url( "http://example.com" );
+@page page-#{$name} /* first */ /* biome-ignore format: preserve pseudo */ /* last */ :#{ $pseudo } {
+	margin: 1in;
+}
+@namespace ns-#{$name} /* first */ /* biome-ignore format: preserve URL */ /* last */ url( "http://example.com" );
+
+// biome-ignore format: preserve the source layout
+@counter-style counter-#{ $name } {system:cyclic;symbols:"*"}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   76: @namespace ns-#{$name} /* biome-ignore format: preserve URL */ url( "http://example.com" );
+   77: @page page-#{$name} /* first */ /* biome-ignore format: preserve pseudo */ /* last */ :#{ $pseudo } {
+   80: @namespace ns-#{$name} /* first */ /* biome-ignore format: preserve URL */ /* last */ url( "http://example.com" );
+```

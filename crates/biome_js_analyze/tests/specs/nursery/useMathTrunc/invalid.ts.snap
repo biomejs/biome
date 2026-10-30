@@ -1,0 +1,347 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const a = parseInt(String(number as number), 10);
+const b = parseInt(String<() => number>(number), 10);
+const c = parseInt(String(number!), 10);
+const d = ~~bar!;
+const e = (bar as number) | 0;
+foo! |= 0;
+(foo as number) |= 0;
+(foo satisfies number) |= 0;
+(<number>foo) |= 0;
+(foo as Bar).x |= 0;
+foo[key!] |= 0;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of parseInt(String(...), 10).
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = parseInt(String(number as number), 10);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const b = parseInt(String<() => number>(number), 10);
+    4 │ const c = parseInt(String(number!), 10);
+  
+  i Very large and very small numbers turn into strings such as "1e+21", which parseInt() reads as 1.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·parseInt(String(number·as·number),·10);
+        2 │ + const·a·=·Math.trunc(number·as·number);
+     3  3 │   const b = parseInt(String<() => number>(number), 10);
+     4  4 │   const c = parseInt(String(number!), 10);
+  
+
+```
+
+```
+invalid.ts:3:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of parseInt(String(...), 10).
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = parseInt(String(number as number), 10);
+  > 3 │ const b = parseInt(String<() => number>(number), 10);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const c = parseInt(String(number!), 10);
+    5 │ const d = ~~bar!;
+  
+  i Very large and very small numbers turn into strings such as "1e+21", which parseInt() reads as 1.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = parseInt(String(number as number), 10);
+     3    │ - const·b·=·parseInt(String<()·=>·number>(number),·10);
+        3 │ + const·b·=·Math.trunc(number);
+     4  4 │   const c = parseInt(String(number!), 10);
+     5  5 │   const d = ~~bar!;
+  
+
+```
+
+```
+invalid.ts:4:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of parseInt(String(...), 10).
+  
+    2 │ const a = parseInt(String(number as number), 10);
+    3 │ const b = parseInt(String<() => number>(number), 10);
+  > 4 │ const c = parseInt(String(number!), 10);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const d = ~~bar!;
+    6 │ const e = (bar as number) | 0;
+  
+  i Very large and very small numbers turn into strings such as "1e+21", which parseInt() reads as 1.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     2  2 │   const a = parseInt(String(number as number), 10);
+     3  3 │   const b = parseInt(String<() => number>(number), 10);
+     4    │ - const·c·=·parseInt(String(number!),·10);
+        4 │ + const·c·=·Math.trunc(number!);
+     5  5 │   const d = ~~bar!;
+     6  6 │   const e = (bar as number) | 0;
+  
+
+```
+
+```
+invalid.ts:5:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of ~~.
+  
+    3 │ const b = parseInt(String<() => number>(number), 10);
+    4 │ const c = parseInt(String(number!), 10);
+  > 5 │ const d = ~~bar!;
+      │           ^^^^^^
+    6 │ const e = (bar as number) | 0;
+    7 │ foo! |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     3  3 │   const b = parseInt(String<() => number>(number), 10);
+     4  4 │   const c = parseInt(String(number!), 10);
+     5    │ - const·d·=·~~bar!;
+        5 │ + const·d·=·Math.trunc(bar!);
+     6  6 │   const e = (bar as number) | 0;
+     7  7 │   foo! |= 0;
+  
+
+```
+
+```
+invalid.ts:6:11 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of | 0.
+  
+    4 │ const c = parseInt(String(number!), 10);
+    5 │ const d = ~~bar!;
+  > 6 │ const e = (bar as number) | 0;
+      │           ^^^^^^^^^^^^^^^^^^^
+    7 │ foo! |= 0;
+    8 │ (foo as number) |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     4  4 │   const c = parseInt(String(number!), 10);
+     5  5 │   const d = ~~bar!;
+     6    │ - const·e·=·(bar·as·number)·|·0;
+        6 │ + const·e·=·Math.trunc(bar·as·number);
+     7  7 │   foo! |= 0;
+     8  8 │   (foo as number) |= 0;
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    5 │ const d = ~~bar!;
+    6 │ const e = (bar as number) | 0;
+  > 7 │ foo! |= 0;
+      │ ^^^^^^^^^
+    8 │ (foo as number) |= 0;
+    9 │ (foo satisfies number) |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     5  5 │   const d = ~~bar!;
+     6  6 │   const e = (bar as number) | 0;
+     7    │ - foo!·|=·0;
+        7 │ + foo!·=·Math.trunc(foo!);
+     8  8 │   (foo as number) |= 0;
+     9  9 │   (foo satisfies number) |= 0;
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     6 │ const e = (bar as number) | 0;
+     7 │ foo! |= 0;
+   > 8 │ (foo as number) |= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^
+     9 │ (foo satisfies number) |= 0;
+    10 │ (<number>foo) |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     6  6 │   const e = (bar as number) | 0;
+     7  7 │   foo! |= 0;
+     8    │ - (foo·as·number)·|=·0;
+        8 │ + (foo·as·number)·=·Math.trunc(foo·as·number);
+     9  9 │   (foo satisfies number) |= 0;
+    10 10 │   (<number>foo) |= 0;
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     7 │ foo! |= 0;
+     8 │ (foo as number) |= 0;
+   > 9 │ (foo satisfies number) |= 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ (<number>foo) |= 0;
+    11 │ (foo as Bar).x |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     7  7 │   foo! |= 0;
+     8  8 │   (foo as number) |= 0;
+     9    │ - (foo·satisfies·number)·|=·0;
+        9 │ + (foo·satisfies·number)·=·Math.trunc(foo·satisfies·number);
+    10 10 │   (<number>foo) |= 0;
+    11 11 │   (foo as Bar).x |= 0;
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     8 │ (foo as number) |= 0;
+     9 │ (foo satisfies number) |= 0;
+  > 10 │ (<number>foo) |= 0;
+       │ ^^^^^^^^^^^^^^^^^^
+    11 │ (foo as Bar).x |= 0;
+    12 │ foo[key!] |= 0;
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     8  8 │   (foo as number) |= 0;
+     9  9 │   (foo satisfies number) |= 0;
+    10    │ - (<number>foo)·|=·0;
+       10 │ + (<number>foo)·=·Math.trunc(<number>foo);
+    11 11 │   (foo as Bar).x |= 0;
+    12 12 │   foo[key!] |= 0;
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+     9 │ (foo satisfies number) |= 0;
+    10 │ (<number>foo) |= 0;
+  > 11 │ (foo as Bar).x |= 0;
+       │ ^^^^^^^^^^^^^^^^^^^
+    12 │ foo[key!] |= 0;
+    13 │ 
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+     9  9 │   (foo satisfies number) |= 0;
+    10 10 │   (<number>foo) |= 0;
+    11    │ - (foo·as·Bar).x·|=·0;
+       11 │ + (foo·as·Bar).x·=·Math.trunc((foo·as·Bar).x);
+    12 12 │   foo[key!] |= 0;
+    13 13 │   
+  
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/useMathTrunc  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Math.trunc() instead of |= 0.
+  
+    10 │ (<number>foo) |= 0;
+    11 │ (foo as Bar).x |= 0;
+  > 12 │ foo[key!] |= 0;
+       │ ^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Bitwise operations turn the number into a 32-bit integer first, so numbers above 2147483647 or below -2147483648 give wrong results.
+  
+  i Math.trunc() removes the decimal part of any number and states the intent clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.trunc() instead.
+  
+    10 10 │   (<number>foo) |= 0;
+    11 11 │   (foo as Bar).x |= 0;
+    12    │ - foo[key!]·|=·0;
+       12 │ + foo[key!]·=·Math.trunc(foo[key!]);
+    13 13 │   
+  
+
+```

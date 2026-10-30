@@ -10,6 +10,7 @@ impl FormatRule<AnyCssDeclarationName> for FormatAnyCssDeclarationName {
         match node {
             AnyCssDeclarationName::AnyCssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssDeclarationName::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssDeclarationName::CssMetavariable(node) => node.format().fmt(f),
             AnyCssDeclarationName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
             AnyCssDeclarationName::TwValueThemeReference(node) => node.format().fmt(f),
         }

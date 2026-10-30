@@ -1,5 +1,6 @@
 use crate::model::{Selector, SemanticModel, Specificity};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -49,6 +50,7 @@ struct FormatSemanticModelContext {
 
 impl FormatContext for FormatSemanticModelContext {
     type Options = FormatSemanticModelOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options
@@ -75,7 +77,7 @@ impl std::fmt::Display for SemanticModel {
 impl Format<FormatSemanticModelContext> for SemanticModel {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let mut selectors: Vec<Selector> = self
-            .rules()
+            .all_rules()
             .into_iter()
             .flat_map(|rule| rule.selectors().to_vec())
             .collect();
@@ -156,5 +158,35 @@ mod tests {
         let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let model = semantic_model(&parsed.tree());
         eprintln!("{}", model);
+    }
+
+    #[test]
+    fn prints_nested_selectors() {
+        let source = r#".card {
+  :root[data-theme="dark"] & {}
+  code {
+    html body & {}
+    & & > span {}
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] & {}
+  }
+  @container (min-width: 1px) {
+    & > p {}
+  }
+  @starting-style {
+    &:hover {}
+  }
+}"#;
+
+        let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let model = semantic_model(&parsed.tree());
+        let formatted = model.to_string();
+        let snapshot = format!(
+            "## Input\n\n```css\n{source}\n```\n\n## Formatted\n\n```text\n{}\n```",
+            formatted.trim_end()
+        );
+
+        insta::assert_snapshot!(snapshot);
     }
 }

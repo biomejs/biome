@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+$condition: true;
+@if $condition {
+  .conditional {}
+} @else {
+  .conditional {}
+}
+
+@mixin conditional-output {
+  .external-selector {}
+}
+.external-selector {}
+
+%placeholder {}
+%placeholder {}
+
+#{$dynamic-selector} {}
+#{$dynamic-selector} {}

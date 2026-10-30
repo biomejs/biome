@@ -37,6 +37,10 @@ invalid-01.jsx:7:7 lint/correctness/noBeforeInteractiveScriptOutsideDocument ━
     11 │     </div>
     12 │   )
   
+  i The beforeInteractive strategy only works when the script is loaded from the custom document. Anywhere else, the script does not load before the page becomes interactive.
+  
+  i Move this script to pages/_document.js, or use a different strategy such as afterInteractive.
+  
   i See the Next.js docs for more details.
   
 

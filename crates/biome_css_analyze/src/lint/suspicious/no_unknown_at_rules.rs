@@ -81,7 +81,7 @@ declare_node_union! {
   pub AnyUnknownAtRule = CssUnknownBlockAtRule | CssUnknownValueAtRule
 }
 
-/// Returns a static name for rules like `@unknown`; dynamic Sass names such as
+/// Returns a static name for rules like `@unknown`; dynamic SCSS names such as
 /// `@#{$rule-name}` are not comparable with the configured ignore list.
 fn static_unknown_at_rule_name(name: AnyCssUnknownAtRuleName) -> Option<(TextRange, String)> {
     let identifier = name.as_css_identifier()?;

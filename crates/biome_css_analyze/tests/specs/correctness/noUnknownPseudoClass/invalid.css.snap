@@ -29,12 +29,16 @@ _Note: The parser emitted 5 diagnostics which are not shown here._
 ```
 invalid.css:1:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class unknown 
+  × Unexpected unknown pseudo-class unknown.
   
   > 1 │ a:unknown { }
       │   ^^^^^^^
     2 │ a:Unknown { }
     3 │ a:uNkNoWn { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -44,13 +48,17 @@ invalid.css:1:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:2:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class Unknown 
+  × Unexpected unknown pseudo-class Unknown.
   
     1 │ a:unknown { }
   > 2 │ a:Unknown { }
       │   ^^^^^^^
     3 │ a:uNkNoWn { }
     4 │ a:UNKNOWN { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -60,7 +68,7 @@ invalid.css:2:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:3:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class uNkNoWn 
+  × Unexpected unknown pseudo-class uNkNoWn.
   
     1 │ a:unknown { }
     2 │ a:Unknown { }
@@ -68,6 +76,10 @@ invalid.css:3:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
       │   ^^^^^^^
     4 │ a:UNKNOWN { }
     5 │ a:pseudo-class { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -77,7 +89,7 @@ invalid.css:3:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:4:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class UNKNOWN 
+  × Unexpected unknown pseudo-class UNKNOWN.
   
     2 │ a:Unknown { }
     3 │ a:uNkNoWn { }
@@ -85,6 +97,10 @@ invalid.css:4:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
       │   ^^^^^^^
     5 │ a:pseudo-class { }
     6 │ body:not(div):noot(span) {}
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -94,7 +110,7 @@ invalid.css:4:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:5:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class pseudo-class 
+  × Unexpected unknown pseudo-class pseudo-class.
   
     3 │ a:uNkNoWn { }
     4 │ a:UNKNOWN { }
@@ -102,6 +118,10 @@ invalid.css:5:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
       │   ^^^^^^^^^^^^
     6 │ body:not(div):noot(span) {}
     7 │ a:unknown::before { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -111,7 +131,7 @@ invalid.css:5:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:6:15 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class noot 
+  × Unexpected unknown pseudo-class noot.
   
     4 │ a:UNKNOWN { }
     5 │ a:pseudo-class { }
@@ -119,6 +139,10 @@ invalid.css:6:15 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
       │               ^^^^
     7 │ a:unknown::before { }
     8 │ a,
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -128,7 +152,7 @@ invalid.css:6:15 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:7:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class unknown 
+  × Unexpected unknown pseudo-class unknown.
   
     5 │ a:pseudo-class { }
     6 │ body:not(div):noot(span) {}
@@ -136,6 +160,10 @@ invalid.css:7:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
       │   ^^^^^^^
     8 │ a,
     9 │ b > .foo:error { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -145,7 +173,7 @@ invalid.css:7:3 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:9:10 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class error 
+  × Unexpected unknown pseudo-class error.
   
      7 │ a:unknown::before { }
      8 │ a,
@@ -153,6 +181,10 @@ invalid.css:9:10 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
        │          ^^^^^
     10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
     11 │ :first { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -162,7 +194,7 @@ invalid.css:9:10 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:10:39 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class unknown 
+  × Unexpected unknown pseudo-class unknown.
   
      8 │ a,
      9 │ b > .foo:error { }
@@ -170,6 +202,10 @@ invalid.css:10:39 lint/correctness/noUnknownPseudoClass ━━━━━━━━
        │                                       ^^^^^^^
     11 │ :first { }
     12 │ :slotted {}
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -179,7 +215,7 @@ invalid.css:10:39 lint/correctness/noUnknownPseudoClass ━━━━━━━━
 ```
 invalid.css:11:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class first 
+  × Unexpected unknown pseudo-class first.
   
      9 │ b > .foo:error { }
     10 │ ::-webkit-scrollbar-button:horizontal:unknown {}
@@ -187,6 +223,10 @@ invalid.css:11:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
        │  ^^^^^
     12 │ :slotted {}
     13 │ :placeholder {}
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -196,7 +236,7 @@ invalid.css:11:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:13:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class placeholder 
+  × Unexpected unknown pseudo-class placeholder.
   
     11 │ :first { }
     12 │ :slotted {}
@@ -204,6 +244,10 @@ invalid.css:13:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
        │  ^^^^^^^^^^^
     14 │ @page :blank:unknown { }
     15 │ @page foo:unknown { }
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -213,13 +257,17 @@ invalid.css:13:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:16:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class horizontal 
+  × Unexpected unknown pseudo-class horizontal.
   
     14 │ @page :blank:unknown { }
     15 │ @page foo:unknown { }
   > 16 │ :horizontal:decrement {}
        │  ^^^^^^^^^^
     17 │ 
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   
@@ -229,13 +277,17 @@ invalid.css:16:2 lint/correctness/noUnknownPseudoClass ━━━━━━━━�
 ```
 invalid.css:16:13 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unexpected unknown pseudo-class decrement 
+  × Unexpected unknown pseudo-class decrement.
   
     14 │ @page :blank:unknown { }
     15 │ @page foo:unknown { }
   > 16 │ :horizontal:decrement {}
        │             ^^^^^^^^^
     17 │ 
+  
+  i Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied.
+  
+  i Check the spelling of the pseudo-class, or replace it with one that exists.
   
   i See MDN web docs for more details.
   

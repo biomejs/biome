@@ -84,7 +84,7 @@ info: css/comments/at-rules.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,38 +1,31 @@
+@@ -1,26 +1,21 @@
  @charset "utf-8"; /* comment 1 */
  
 -@import /* comment 2 */ url("fineprint.css") /* comment 3 */ print
@@ -123,9 +123,8 @@ info: css/comments/at-rules.css
 +  ) /* comment 37 */;
  
  @namespace /* comment 38 */ url(http://www.w3.org/1999/xhtml) /* comment 39 */;
--@namespace /* comment 40 */ svg /* comment 41 */ url(http://www.w3.org/2000/svg) /* comment 42 */;
-+@namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
- 
+ @namespace /* comment 40 */ svg /* comment 41 */ url(http://www.w3.org/2000/svg) /* comment 42 */;
+@@ -28,11 +23,9 @@
  @keyframes /* comment 43 */ slidein /* comment 44 */ {
  }
  
@@ -321,7 +320,7 @@ info: css/comments/at-rules.css
   ) /* comment 37 */;
 
 @namespace /* comment 38 */ url(http://www.w3.org/1999/xhtml) /* comment 39 */;
-@namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
+@namespace /* comment 40 */ svg /* comment 41 */ url(http://www.w3.org/2000/svg) /* comment 42 */;
 
 @keyframes /* comment 43 */ slidein /* comment 44 */ {
 }
@@ -430,7 +429,7 @@ info: css/comments/at-rules.css
 # Lines exceeding max width of 80 characters
 ```
    17:     /* comment 33 */ /* comment 34 */ /* comment 35 */ orientation: landscape /* comment 36 */
-   21: @namespace /* comment 40 */ /* comment 41 */ svg url(http://www.w3.org/2000/svg) /* comment 42 */;
+   21: @namespace /* comment 40 */ svg /* comment 41 */ url(http://www.w3.org/2000/svg) /* comment 42 */;
    26: /* comment 45 */ @font-feature-values /* comment 46 */ Font Two /* comment 47 */ {
    51: @media /* comment 69 */ screen /* comment 70 */, /* comment 71 */ print /* comment 72 */ {
    53: @media /* comment 74 */ only /* comment 75 */ screen /* comment 76 */ and /* comment 77 */ (

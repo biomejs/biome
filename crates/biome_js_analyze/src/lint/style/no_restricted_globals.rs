@@ -98,7 +98,11 @@ impl Rule for NoRestrictedGlobals {
         );
 
         if let Some(message) = message {
-            diag = diag.note(message);
+            diag = diag
+                .note(markup! {
+                    "This global variable is listed in the "<Emphasis>"deniedGlobals"</Emphasis>" option."
+                })
+                .note(message);
         } else {
             diag = diag.note(markup! { "Use a local variable instead." });
         }

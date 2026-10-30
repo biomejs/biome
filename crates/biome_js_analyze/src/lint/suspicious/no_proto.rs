@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsAssignment, AnyJsMemberExpression};
+use biome_js_syntax::{AnyJsAssignment, AnyJsExpression, AnyJsMemberExpression};
 use biome_rowan::{AstNode, declare_node_union};
 use biome_rule_options::no_proto::NoProtoOptions;
 
@@ -71,11 +71,11 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub NoProtoQuery = AnyJsAssignment | AnyJsMemberExpression
+    pub AnyNoProtoQuery = AnyJsAssignment | AnyJsMemberExpression
 }
 
 impl Rule for NoProto {
-    type Query = Ast<NoProtoQuery>;
+    type Query = Ast<AnyNoProtoQuery>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoProtoOptions;
@@ -83,46 +83,40 @@ impl Rule for NoProto {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        match node {
-            NoProtoQuery::AnyJsAssignment(assignment) => match assignment {
-                AnyJsAssignment::JsComputedMemberAssignment(assignment)
-                    if assignment
+        let is_proto = match node {
+            AnyNoProtoQuery::AnyJsAssignment(assignment) => match assignment {
+                AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
+                    is_proto_member(&assignment.member().ok()?)
+                }
+                AnyJsAssignment::JsStaticMemberAssignment(assignment) => {
+                    assignment
                         .member()
                         .ok()?
-                        .to_trimmed_text()
-                        .trim_matches(['\'', '"', '`'])
-                        == "__proto__" =>
-                {
-                    return Some(());
-                }
-                AnyJsAssignment::JsStaticMemberAssignment(assignment)
-                    if assignment.member().ok()?.to_trimmed_text() == "__proto__" =>
-                {
-                    return Some(());
-                }
-                _ => {}
-            },
-            NoProtoQuery::AnyJsMemberExpression(expr) => match expr {
-                AnyJsMemberExpression::JsComputedMemberExpression(expr) => {
-                    if expr
-                        .member()
+                        .as_js_name()?
+                        .value_token()
                         .ok()?
-                        .to_trimmed_text()
-                        .trim_matches(['\'', '"', '`'])
+                        .text_trimmed()
                         == "__proto__"
-                    {
-                        return Some(());
-                    }
+                }
+                _ => false,
+            },
+            AnyNoProtoQuery::AnyJsMemberExpression(expr) => match expr {
+                AnyJsMemberExpression::JsComputedMemberExpression(expr) => {
+                    is_proto_member(&expr.member().ok()?)
                 }
                 AnyJsMemberExpression::JsStaticMemberExpression(expr) => {
-                    if expr.member().ok()?.to_trimmed_text() == "__proto__" {
-                        return Some(());
-                    }
+                    expr.member()
+                        .ok()?
+                        .as_js_name()?
+                        .value_token()
+                        .ok()?
+                        .text_trimmed()
+                        == "__proto__"
                 }
             },
-        }
+        };
 
-        None
+        is_proto.then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -144,4 +138,19 @@ impl Rule for NoProto {
             })
         )
     }
+}
+
+fn is_proto_member(member: &AnyJsExpression) -> bool {
+    let Some(member) = member.inner_expression() else {
+        return false;
+    };
+    if let AnyJsExpression::JsTemplateExpression(template) = &member
+        && template.tag().is_some()
+    {
+        return false;
+    }
+
+    member
+        .as_static_value()
+        .is_some_and(|value| value.as_string_constant() == Some("__proto__"))
 }

@@ -50,6 +50,8 @@ invalidImport.tsx:3:11 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -66,6 +68,8 @@ invalidImport.tsx:4:20 lint/correctness/noRenderReturnValue ━━━━━━�
   
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
+  
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
   
 
 ```
@@ -85,6 +89,8 @@ invalidImport.tsx:5:19 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -102,6 +108,8 @@ invalidImport.tsx:6:19 lint/correctness/noRenderReturnValue ━━━━━━�
   
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
+  
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
   
 
 ```
@@ -121,6 +129,8 @@ invalidImport.tsx:8:12 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -138,6 +148,8 @@ invalidImport.tsx:11:9 lint/correctness/noRenderReturnValue ━━━━━━�
   
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
+  
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
   
 
 ```
@@ -157,6 +169,8 @@ invalidImport.tsx:13:12 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -175,6 +189,8 @@ invalidImport.tsx:16:11 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -191,6 +207,8 @@ invalidImport.tsx:17:20 lint/correctness/noRenderReturnValue ━━━━━━�
   
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
+  
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
   
 
 ```
@@ -210,6 +228,8 @@ invalidImport.tsx:18:19 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -227,6 +247,8 @@ invalidImport.tsx:19:19 lint/correctness/noRenderReturnValue ━━━━━━�
   
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
+  
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
   
 
 ```
@@ -246,6 +268,8 @@ invalidImport.tsx:21:12 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -264,6 +288,8 @@ invalidImport.tsx:24:9 lint/correctness/noRenderReturnValue ━━━━━━�
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
   
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
+  
 
 ```
 
@@ -281,6 +307,8 @@ invalidImport.tsx:26:12 lint/correctness/noRenderReturnValue ━━━━━━�
   
   i The returned value is legacy and future versions of React might return that value asynchronously.
     Check the React documentation for more information.
+  
+  i Do not use the returned value. To get a reference to the rendered component, use a callback ref instead.
   
 
 ```

@@ -1,0 +1,1457 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAsi.jsonc
+---
+# Input
+```cjs
+/* should generate diagnostics */
+foo
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo()
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo()
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo()
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+new foo
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ new foo
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   new foo
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+(a++)
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (a++)
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   (a++)
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+++a
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ ++a
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   ++a
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const foo = function() {}
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo = function() {}
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const foo = function() {}
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const foo = class {}
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo = class {}
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const foo = class {}
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo = this.return
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo = this.return
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo = this.return
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+var yield = bar.yield
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var yield = bar.yield
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   var yield = bar.yield
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+var foo = { bar: baz }
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var foo = { bar: baz }
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   var foo = { bar: baz }
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const foo = () => a
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo = () => a
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const foo = () => a
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+if (a) foo
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (a) foo
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   if (a) foo
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+"use strict"
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ "use strict"
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   "use strict"
+    3   │ - Object()
+      3 │ + ;({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo
+new Object().toString()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo
+  > 3 │ new Object().toString()
+      │ ^^^^^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo
+    3   │ - new·Object().toString()
+      3 │ + ;({}).toString()
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo
+Object() instanceof Object
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo
+  > 3 │ Object() instanceof Object
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo
+    3   │ - Object()·instanceof·Object
+      3 │ + ;({})·instanceof·Object
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - Object()
+      2 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+new Object
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new Object
+      │ ^^^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - new·Object
+      2 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+Object() instanceof Object;
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Object() instanceof Object;
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - Object()·instanceof·Object;
+      2 │ + ({})·instanceof·Object;
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+{}
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ {}
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   {}
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+function foo() {}
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function foo() {}
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   function foo() {}
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+class Foo {}
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ class Foo {}
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   class Foo {}
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo: Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:6 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ foo: Object();
+      │      ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - foo:·Object();
+      2 │ + foo:·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo();Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:7 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ foo();Object();
+      │       ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - foo();Object();
+      2 │ + foo();({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+{ Object(); }
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:3 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ { Object(); }
+      │   ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - {·Object();·}
+      2 │ + {·({});·}
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+if (a) Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:8 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (a) Object();
+      │        ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - if·(a)·Object();
+      2 │ + if·(a)·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+if (a); else Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:14 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (a); else Object();
+      │              ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - if·(a);·else·Object();
+      2 │ + if·(a);·else·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+while (a) Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ while (a) Object();
+      │           ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - while·(a)·Object();
+      2 │ + while·(a)·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+do Object();
+while (a);
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:4 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ do Object();
+      │    ^^^^^^^^
+    3 │ while (a);
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - do·Object();
+      2 │ + do·({});
+    3 3 │   while (a);
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+for (let i = 0; i < 10; i++) Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:30 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ for (let i = 0; i < 10; i++) Object();
+      │                              ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - for·(let·i·=·0;·i·<·10;·i++)·Object();
+      2 │ + for·(let·i·=·0;·i·<·10;·i++)·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+for (const prop in obj) Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:25 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ for (const prop in obj) Object();
+      │                         ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - for·(const·prop·in·obj)·Object();
+      2 │ + for·(const·prop·in·obj)·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+for (const element of iterable) Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:33 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ for (const element of iterable) Object();
+      │                                 ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - for·(const·element·of·iterable)·Object();
+      2 │ + for·(const·element·of·iterable)·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+with (obj) Object();
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:2:12 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ with (obj) Object();
+      │            ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - with·(obj)·Object();
+      2 │ + with·(obj)·({});
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const foo = () => {}
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo = () => {}
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const foo = () => {}
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+a++
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a++
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   a++
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+a--
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a--
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   a--
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+function foo() {
+	return
+	Object();
+}
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:4:2 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ function foo() {
+    3 │ 	return
+  > 4 │ 	Object();
+      │ 	^^^^^^^^
+    5 │ }
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    2 2 │   function foo() {
+    3 3 │     return
+    4   │ - → Object();
+      4 │ + → ({});
+    5 5 │   }
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+function * foo() {
+	yield
+	Object();
+}
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:4:2 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ function * foo() {
+    3 │ 	yield
+  > 4 │ 	Object();
+      │ 	^^^^^^^^
+    5 │ }
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    2 2 │   function * foo() {
+    3 3 │     yield
+    4   │ - → Object();
+      4 │ + → ({});
+    5 5 │   }
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+do {}
+while (a)
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:4:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ do {}
+    3 │ while (a)
+  > 4 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    2 2 │   do {}
+    3 3 │   while (a)
+    4   │ - Object()
+      4 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+debugger
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ debugger
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   debugger
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+for (;;) {
+	break
+	Object()
+}
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:4:2 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ for (;;) {
+    3 │ 	break
+  > 4 │ 	Object()
+      │ 	^^^^^^^^
+    5 │ }
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    2 2 │   for (;;) {
+    3 3 │     break
+    4   │ - → Object()
+      4 │ + → ({})
+    5 5 │   }
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+for (;;) {
+	continue
+	Object()
+}
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:4:2 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ for (;;) {
+    3 │ 	continue
+  > 4 │ 	Object()
+      │ 	^^^^^^^^
+    5 │ }
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    2 2 │   for (;;) {
+    3 3 │     continue
+    4   │ - → Object()
+      4 │ + → ({})
+    5 5 │   }
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo: break foo
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo: break foo
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo: break foo
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+foo: while (true) continue foo
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo: while (true) continue foo
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   foo: while (true) continue foo
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+var foo
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var foo
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   var foo
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+let bar
+Object()
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:3:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ let bar
+  > 3 │ Object()
+      │ ^^^^^^^^
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   let bar
+    3   │ - Object()
+      3 │ + ({})
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+switch (a) {
+	case 1:
+		Object()
+}
+```
+
+# Diagnostics
+```
+invalidAsi.jsonc:4:3 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ switch (a) {
+    3 │ 	case 1:
+  > 4 │ 		Object()
+      │ 		^^^^^^^^
+    5 │ }
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use an object literal.
+  
+    2 2 │   switch (a) {
+    3 3 │     case 1:
+    4   │ - → → Object()
+      4 │ + → → ({})
+    5 5 │   }
+  
+
+```

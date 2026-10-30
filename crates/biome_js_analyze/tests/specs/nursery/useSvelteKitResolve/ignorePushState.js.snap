@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ignorePushState.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { goto, pushState, replaceState } from "$app/navigation";
+
+pushState("/foo", {});
+
+```

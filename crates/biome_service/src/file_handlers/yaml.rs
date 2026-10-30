@@ -16,20 +16,23 @@ use crate::settings::{
 };
 use crate::workspace::{CodeAction, FixFileMode, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::AnalyzerOptions;
-use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerConfiguration, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, ControlFlow, EmbeddedSignalInspector,
+    Never,
+};
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::yaml::YamlLinterEnabled;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
-use biome_db::AnyParsedSource;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
-    TrailingNewline,
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::NodeParse;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache};
-use biome_yaml_analyze::analyze;
+use biome_yaml_analyze::{analyze, analyze_snippet};
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
@@ -405,7 +408,7 @@ fn parse(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: YamlSyntaxNode = parse.syntax(&workspace_db);
@@ -419,7 +422,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -453,6 +456,15 @@ pub(crate) fn format(
 }
 
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+/// Lints YAML. When `inspector` is set, the YAML is embedded in another file,
+/// whose ignore comments can also apply to the findings.
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let _ = debug_span!("Linting YAML file", path =? params.path, language =? params.language)
         .entered();
     let root: YamlRoot = params.parsed_source.tree(&params.workspace_db);
@@ -486,11 +498,16 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(params);
 
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(&root, filter, &analyzer_options, inspector, |signal| {
+            process_lint.process_signal(signal)
+        }),
+        None => analyze(&root, filter, &analyzer_options, |signal| {
+            process_lint.process_signal(signal)
+        }),
+    };
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
@@ -547,7 +564,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     analyze(&tree, filter, &analyzer_options, |signal| {
         if compute_actions {
             actions.extend(

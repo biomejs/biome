@@ -1,6 +1,6 @@
 @keyframes fade {
   $stop: 50%;
-
+  @include frames;
   to {
     opacity: 1 !important;
   }

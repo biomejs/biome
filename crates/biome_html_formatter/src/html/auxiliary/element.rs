@@ -1,5 +1,6 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display_from_tag};
+use crate::utils::markdown::starts_markdown_block;
 use crate::utils::metadata::{get_css_whitespace, get_element_css_display};
 use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
@@ -218,7 +219,10 @@ impl FormatHtmlElement {
                 .first_token()
                 .is_some_and(|tok| tok.leading_trivia().pieces().any(|p| p.is_newline()));
 
-        let forces_break_children = should_force_break_content
+        let starts_markdown_block = starts_markdown_block(node.syntax(), f);
+
+        let forces_break_children = (starts_markdown_block && content_has_leading_newline)
+            || should_force_break_content
             // If `<template>` is at the root level, always force multiline formatting of its children.
             || (is_root_element_list && is_template_element)
             // Elements with a leading newline and direct element children should force
@@ -288,6 +292,7 @@ impl FormatHtmlElement {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
                 attr_group_id,
                 borrowed_sibling_r_angle: self.borrowed_sibling_r_angle.clone(),
+                is_single_line: starts_markdown_block,
             }),
             &opening_element,
             f,

@@ -104,9 +104,11 @@ impl Rule for UseSolidForComponent {
             rule_category!(),
             node.syntax().text_trimmed_range(),
             markup! {
-            "Array.prototype.map will cause DOM elements to be recreated, it is not recommended to use it in Solid here."
+            "Avoid using "<Emphasis>"Array.prototype.map"</Emphasis>" to render a list in Solid."
             },
         ).note(markup! {
+            <Emphasis>"Array.prototype.map"</Emphasis>" causes the DOM elements to be recreated instead of updated."
+        }).note(markup! {
             "Use Solid's "<Emphasis>"<For />"</Emphasis>" component for efficiently rendering lists. See \
             "<Hyperlink href="https://docs.solidjs.com/reference/components/for">"Solid docs"</Hyperlink>" for more details."
         }))

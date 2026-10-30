@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validDecorators.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+@Component({ selector: "app-root" })
+class AppComponent {
+	@Input() name: string;
+	@(Output()) changed;
+
+	constructor(@Inject(TOKEN) private readonly token: string) {}
+}
+
+@decorators.Injectable()
+class Service {}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._

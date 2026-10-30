@@ -5288,6 +5288,44 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsVueGenericRoot>
+    for crate::js::auxiliary::vue_generic_root::FormatJsVueGenericRoot
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsVueGenericRoot,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsVueGenericRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsVueGenericRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsVueGenericRoot,
+        crate::js::auxiliary::vue_generic_root::FormatJsVueGenericRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::vue_generic_root::FormatJsVueGenericRoot::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVueGenericRoot {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsVueGenericRoot,
+        crate::js::auxiliary::vue_generic_root::FormatJsVueGenericRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::vue_generic_root::FormatJsVueGenericRoot::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsVueSlotPropsRoot>
     for crate::js::auxiliary::vue_slot_props_root::FormatJsVueSlotPropsRoot
 {
@@ -12623,6 +12661,25 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsTemplateElement {
             self,
             crate::js::any::template_element::FormatAnyJsTemplateElement::default(),
         )
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsVueGenericTypeParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyJsVueGenericTypeParameters,
+        crate::js::any::vue_generic_type_parameters::FormatAnyJsVueGenericTypeParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: js :: any :: vue_generic_type_parameters :: FormatAnyJsVueGenericTypeParameters :: default ())
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsVueGenericTypeParameters {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyJsVueGenericTypeParameters,
+        crate::js::any::vue_generic_type_parameters::FormatAnyJsVueGenericTypeParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: js :: any :: vue_generic_type_parameters :: FormatAnyJsVueGenericTypeParameters :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsxAttribute {

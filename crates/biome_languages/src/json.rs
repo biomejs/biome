@@ -7,6 +7,7 @@ use directories::ProjectDirs;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -342,9 +343,11 @@ impl JsonFileSource {
             return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
 
-        if zed_global_directory().is_some_and(|dir| path.starts_with(&dir))
-            || vscode_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
-            || cursor_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
+        // Only `.json` files in these directories are JSONC.
+        if extension == "json"
+            && EDITOR_GLOBAL_DIRECTORIES
+                .iter()
+                .any(|dir| path.starts_with(dir))
         {
             return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
@@ -418,6 +421,22 @@ impl TryFrom<&Utf8Path> for JsonFileSource {
     }
 }
 
+/// The global settings directories of Zed, VS Code, and Cursor. JSON files
+/// inside them allow comments and trailing commas.
+///
+/// Resolving these requires looking up environment variables and allocating buffers.
+/// So, we do it once here to share that work across threads.
+static EDITOR_GLOBAL_DIRECTORIES: LazyLock<Box<[PathBuf]>> = LazyLock::new(|| {
+    [
+        zed_global_directory(),
+        vscode_global_directory().map(|dirs| dirs.config_dir().to_path_buf()),
+        cursor_global_directory().map(|dirs| dirs.config_dir().to_path_buf()),
+    ]
+    .into_iter()
+    .flatten()
+    .collect()
+});
+
 fn cursor_global_directory() -> Option<ProjectDirs> {
     ProjectDirs::from("", "Cursor", "User")
 }
@@ -428,9 +447,13 @@ fn vscode_global_directory() -> Option<ProjectDirs> {
 
 fn zed_global_directory() -> Option<PathBuf> {
     cfg_select! {
-        target_os = "macos" => directories::BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed")) ,
-        target_os = "windows" => directories::BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed")),
-        _ =>  directories::ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf())
+        target_os = "macos" => {
+            directories::BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed"))
+        }
+        target_os = "windows" => {
+            directories::BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed"))
+        }
+        _ => directories::ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf()),
     }
 }
 
@@ -527,5 +550,44 @@ mod tests {
         let file_source =
             JsonFileSource::try_from_well_known(path).expect("Failed to create JsonFileSource");
         assert!(file_source.allow_comments());
+    }
+
+    #[test]
+    fn test_global_vscode_settings() {
+        let path = vscode_global_directory()
+            .expect("Failed to get config directory")
+            .config_dir()
+            .join("settings.json");
+        let path = Utf8Path::from_path(path.as_path()).expect("Failed to create Utf8Path");
+        let file_source =
+            JsonFileSource::try_from_well_known(path).expect("Failed to create JsonFileSource");
+        assert!(file_source.allow_comments());
+        assert!(file_source.allow_trailing_commas());
+    }
+
+    #[test]
+    fn test_settings_outside_global_directories() {
+        for dir in EDITOR_GLOBAL_DIRECTORIES.iter() {
+            let sibling = dir.with_file_name("not-an-editor").join("settings.json");
+            let path = Utf8Path::from_path(sibling.as_path()).expect("Failed to create Utf8Path");
+            assert!(
+                JsonFileSource::try_from_well_known(path).is_err(),
+                "{path} is outside the editor directories"
+            );
+        }
+    }
+
+    #[test]
+    fn test_non_json_files_inside_global_directories() {
+        for dir in EDITOR_GLOBAL_DIRECTORIES.iter() {
+            for file_name in ["script.ts", "style.css", "notes.md"] {
+                let path = dir.join(file_name);
+                let path = Utf8Path::from_path(path.as_path()).expect("Failed to create Utf8Path");
+                assert!(
+                    JsonFileSource::try_from_well_known(path).is_err(),
+                    "{path} is not a JSON file"
+                );
+            }
+        }
     }
 }

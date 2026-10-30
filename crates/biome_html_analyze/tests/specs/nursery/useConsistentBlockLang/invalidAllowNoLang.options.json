@@ -1,0 +1,1 @@
+{"linter":{"rules":{"nursery":{"useConsistentBlockLang":{"level":"error","options":{"blocks":{"i18n":{"lang":["json","yaml"],"allowNoLang":true},"docs":{"lang":["md"],"allowNoLang":true}}}}}}}}

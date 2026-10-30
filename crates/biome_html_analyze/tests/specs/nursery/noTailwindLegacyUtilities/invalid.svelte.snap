@@ -1,0 +1,120 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="flex-grow bg-gradient-to-r"></div>
+<div class='hover:start-4 max-w-screen-md'></div>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:13 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="flex-grow bg-gradient-to-r"></div>
+      │             ^^^^^^^^^
+    3 │ <div class='hover:start-4 max-w-screen-md'></div>
+    4 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    2 │ <div·class="flex-grow·bg-gradient-to-r"></div>
+      │             -----                             
+
+```
+
+```
+invalid.svelte:2:23 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-r is a legacy name.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="flex-grow bg-gradient-to-r"></div>
+      │                       ^^^^^^^^^^^^^^^^
+    3 │ <div class='hover:start-4 max-w-screen-md'></div>
+    4 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-r instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <div·class="flex-grow·bg-gradient-to-r"></div>
+      2 │ + <div·class="flex-grow·bg-linear-to-r"></div>
+    3 3 │   <div class='hover:start-4 max-w-screen-md'></div>
+    4 4 │   
+  
+
+```
+
+```
+invalid.svelte:3:19 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-4 is a legacy name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="flex-grow bg-gradient-to-r"></div>
+  > 3 │ <div class='hover:start-4 max-w-screen-md'></div>
+      │                   ^^^^^^^
+    4 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-4 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <div class="flex-grow bg-gradient-to-r"></div>
+    3   │ - <div·class='hover:start-4·max-w-screen-md'></div>
+      3 │ + <div·class='hover:inset-s-4·max-w-screen-md'></div>
+    4 4 │   
+  
+
+```
+
+```
+invalid.svelte:3:27 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class max-w-screen-md is a legacy name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="flex-grow bg-gradient-to-r"></div>
+  > 3 │ <div class='hover:start-4 max-w-screen-md'></div>
+      │                           ^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use max-w-(--breakpoint-md) instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <div class="flex-grow bg-gradient-to-r"></div>
+    3   │ - <div·class='hover:start-4·max-w-screen-md'></div>
+      3 │ + <div·class='hover:start-4·max-w-(--breakpoint-md)'></div>
+    4 4 │   
+  
+
+```

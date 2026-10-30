@@ -31,6 +31,8 @@ newlineTrivia.scss:2:1 lint/style/noExcessiveLinesPerFile ━━━━━━━�
     6 │ 
     7 │ /* footer */
   
+  i Long files are harder to read, navigate, and maintain.
+  
   i Consider splitting this file into smaller files.
   
 

@@ -1,0 +1,219 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const element: HTMLElement;
+element.innerText;
+
+declare const div: HTMLDivElement;
+div.innerText;
+
+declare const maybeElement: HTMLElement | null;
+maybeElement.innerText;
+
+declare const mixed: { innerText: string } | HTMLElement;
+mixed.innerText;
+
+function readElement({ innerText }: HTMLElement) {
+    return innerText;
+}
+
+function writeElement(element: HTMLElement) {
+    element.innerText = "Biome";
+}
+
+function readDestructuredElement({ item }: { item: HTMLElement }) {
+    return item.innerText;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:9 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+    1 │ /* should generate diagnostics */
+    2 │ declare const element: HTMLElement;
+  > 3 │ element.innerText;
+      │         ^^^^^^^^^
+    4 │ 
+    5 │ declare const div: HTMLDivElement;
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   declare const element: HTMLElement;
+     3    │ - element.innerText;
+        3 │ + element.textContent;
+     4  4 │   
+     5  5 │   declare const div: HTMLDivElement;
+  
+
+```
+
+```
+invalid.ts:6:5 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+    5 │ declare const div: HTMLDivElement;
+  > 6 │ div.innerText;
+      │     ^^^^^^^^^
+    7 │ 
+    8 │ declare const maybeElement: HTMLElement | null;
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     4  4 │   
+     5  5 │   declare const div: HTMLDivElement;
+     6    │ - div.innerText;
+        6 │ + div.textContent;
+     7  7 │   
+     8  8 │   declare const maybeElement: HTMLElement | null;
+  
+
+```
+
+```
+invalid.ts:9:14 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+     8 │ declare const maybeElement: HTMLElement | null;
+   > 9 │ maybeElement.innerText;
+       │              ^^^^^^^^^
+    10 │ 
+    11 │ declare const mixed: { innerText: string } | HTMLElement;
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+     7  7 │   
+     8  8 │   declare const maybeElement: HTMLElement | null;
+     9    │ - maybeElement.innerText;
+        9 │ + maybeElement.textContent;
+    10 10 │   
+    11 11 │   declare const mixed: { innerText: string } | HTMLElement;
+  
+
+```
+
+```
+invalid.ts:12:7 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+    11 │ declare const mixed: { innerText: string } | HTMLElement;
+  > 12 │ mixed.innerText;
+       │       ^^^^^^^^^
+    13 │ 
+    14 │ function readElement({ innerText }: HTMLElement) {
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    10 10 │   
+    11 11 │   declare const mixed: { innerText: string } | HTMLElement;
+    12    │ - mixed.innerText;
+       12 │ + mixed.textContent;
+    13 13 │   
+    14 14 │   function readElement({ innerText }: HTMLElement) {
+  
+
+```
+
+```
+invalid.ts:14:24 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+    12 │ mixed.innerText;
+    13 │ 
+  > 14 │ function readElement({ innerText }: HTMLElement) {
+       │                        ^^^^^^^^^
+    15 │     return innerText;
+    16 │ }
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    14 │ function·readElement({·textContent:·innerText·}:·HTMLElement)·{
+       │                        +++++++++++++                           
+
+```
+
+```
+invalid.ts:19:13 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+    18 │ function writeElement(element: HTMLElement) {
+  > 19 │     element.innerText = "Biome";
+       │             ^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    17 17 │   
+    18 18 │   function writeElement(element: HTMLElement) {
+    19    │ - ····element.innerText·=·"Biome";
+       19 │ + ····element.textContent·=·"Biome";
+    20 20 │   }
+    21 21 │   
+  
+
+```
+
+```
+invalid.ts:23:17 lint/performance/useDomNodeTextContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! innerText is not recommended for reading DOM node text.
+  
+    22 │ function readDestructuredElement({ item }: { item: HTMLElement }) {
+  > 23 │     return item.innerText;
+       │                 ^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i innerText depends on rendered layout and CSS, so it can be slower and produce different results from the DOM tree's text content.
+  
+  i Use textContent when you want the node's text without rendered-text behavior.
+  
+  i Unsafe fix: Use textContent instead.
+  
+    21 21 │   
+    22 22 │   function readDestructuredElement({ item }: { item: HTMLElement }) {
+    23    │ - ····return·item.innerText;
+       23 │ + ····return·item.textContent;
+    24 24 │   }
+    25 25 │   
+  
+
+```

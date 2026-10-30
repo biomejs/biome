@@ -1,0 +1,42 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-keyframe-at-root.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  @at-root (without: all) {
+    .fade-in {
+      animation: fade-in 200ms ease !important;
+    }
+  }
+  to {
+    opacity: 1 !important;
+  }
+}
+
+```
+
+# Diagnostics
+```
+parity-keyframe-at-root.invalid.scss:12:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected !important within a keyframes declaration.
+  
+    10 │   }
+    11 │   to {
+  > 12 │     opacity: 1 !important;
+       │                ^^^^^^^^^^
+    13 │   }
+    14 │ }
+  
+  i Declarations marked !important inside keyframes are completely ignored in some browsers, so they have no effect there.
+  
+  i Remove the !important annotation and keep the declaration.
+  
+
+```

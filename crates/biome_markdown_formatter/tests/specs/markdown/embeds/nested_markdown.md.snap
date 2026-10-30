@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/nested_markdown.md
+---
+
+# Input
+
+```md
+````md
+#   Nested
+
+```js
+const   nested = 1
+```
+````
+
+```md
+#   Tilde fence
+
+~~~js
+const   nested = 2
+~~~
+```
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+````md
+# Nested
+
+```js
+const   nested = 1
+```
+````
+
+```md
+#   Tilde fence
+
+~~~js
+const   nested = 2
+~~~
+```
+
+```

@@ -7,7 +7,8 @@ use biome_console::{
     fmt::{Display, Formatter as ConsoleFormatter},
     markup,
 };
-use biome_formatter::{Buffer, Format, FormatElement, FormatResult, prelude::*};
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::{Buffer, Format, FormatResult, rowan::prelude::*};
 use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlLanguage, HtmlSyntaxToken};
 use biome_rowan::{
     AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,

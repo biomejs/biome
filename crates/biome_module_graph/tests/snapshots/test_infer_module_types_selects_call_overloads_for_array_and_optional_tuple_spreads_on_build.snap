@@ -106,8 +106,7 @@ Expression "undefined as string | boolean" => string | boolean
 
 Binding numbers "numbers" => instanceof Array<number>
 
-Expression "[1, 2]" => [number: 1,
-number: 2]
+Expression "[1, 2]" => instanceof Array<number>
 
 Expression "1" => number: 1
 
@@ -236,7 +235,7 @@ Expression "undefined as string | number" => string | number
 Binding optionalTuple "optionalTuple" => instanceof [string,
 number?]
 
-Expression "[\"value\"]" => [string: value]
+Expression "[\"value\"]" => instanceof Array<string>
 
 Expression "\"value\"" => string: value
 

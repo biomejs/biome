@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallArgumentList,
     JsCallExpression, T, global_identifier, numbers::parse_js_number,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions;
 
 declare_lint_rule! {
@@ -153,10 +153,7 @@ impl Rule for UseParseIntRadix {
 
                 let args = make::js_call_argument_list(
                     [first_argument, arg],
-                    Some(
-                        make::token(T![,])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    ),
+                    Some(make::token(T![,]).with_trailing_space()),
                 );
 
                 (args, markup! { "Add a radix of 10" })
@@ -198,9 +195,7 @@ fn is_global_identifier(callee: &AnyJsExpression) -> bool {
     };
 
     object
-        .and_then(|expr| {
-            global_identifier(&expr.as_any_global_identifier_expression()?)
-        })
+        .and_then(|expr| global_identifier(&expr.as_any_global_identifier_expression()?))
         .is_some()
 }
 

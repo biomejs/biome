@@ -1,0 +1,4 @@
+/* should generate diagnostics */
+@foo "raw \z #{'inner \z'}";
+@foo 'raw \z #{"escaped \"quote\""}';
+@custom-#{"theme"} "before #{'inner \z'} after";

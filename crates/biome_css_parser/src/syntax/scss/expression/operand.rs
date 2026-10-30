@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_regular_identifier;
+use crate::syntax::property::is_at_generic_delimiter;
 use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_value_head,
     is_at_scss_interpolation, is_at_scss_namespaced_variable, parse_scss_function_call_from_name,
@@ -36,6 +37,11 @@ pub(super) fn parse_scss_expression_operand(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
+    // List separators cannot fill an operand slot, as in `10 % /2`.
+    if is_at_generic_delimiter(p) || options.boundary.is_some_and(|boundary| boundary(p, 0)) {
+        return Absent;
+    }
+
     if is_at_scss_interpolation(p) {
         return parse_scss_interpolated_function_or_value_until(
             p,

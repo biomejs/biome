@@ -9,7 +9,7 @@ use crate::interned_types::{
 };
 use crate::interned_types::{InternedMappedType, MappedTypeKeys};
 use crate::{DestructureField, MappedTypeModifier};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{FormatContext, TransformSourceMap, format_args, write};
 use biome_rowan::Text;
 use std::fmt::Display;
@@ -30,6 +30,7 @@ impl<'db> FormatInferredTypeContext<'db> {
 
 impl<'db> FormatContext for FormatInferredTypeContext<'db> {
     type Options = FormatTypeOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &FormatTypeOptions

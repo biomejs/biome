@@ -1,0 +1,10 @@
+$name: data-width;
+$unit: px;
+.card {
+  width: attr(data-width $unit, 10px);
+  min-width: attr($name$unit, 2px);
+  content: attr($name);
+  height: attr(#{$name}/**/#{$unit}, 1px);
+  padding: attr(data-padding units.$unit, 0);
+  plain-name: attr(data-width/* unit */#{$unit}, 0);
+}

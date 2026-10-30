@@ -35,6 +35,10 @@ invalid.jsx:2:31 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     3 │ var a = <span aria-autocomplete="test"></span>;
     4 │ var a = <span aria-invalid="foo"></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
+  
   i The only supported value for the aria-checked property one of the following:
   
   - false
@@ -55,6 +59,10 @@ invalid.jsx:3:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
       │               ^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ var a = <span aria-invalid="foo"></span>;
     5 │ var a = <span aria-invalid={`foo`}></span>;
+  
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
   
   i The only supported value for the aria-autocomplete property is one of the following:
   
@@ -78,6 +86,10 @@ invalid.jsx:4:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     5 │ var a = <span aria-invalid={`foo`}></span>;
     6 │ var a = <span aria-invalid={"foo"}></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
+  
   i The only supported value for the aria-invalid property is one of the following:
   
   - false
@@ -99,6 +111,10 @@ invalid.jsx:5:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
       │               ^^^^^^^^^^^^^^^^^^^^
     6 │ var a = <span aria-invalid={"foo"}></span>;
     7 │ var a = <span aria-errormessage=""></span>;
+  
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
   
   i The only supported value for the aria-invalid property is one of the following:
   
@@ -122,6 +138,10 @@ invalid.jsx:6:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     7 │ var a = <span aria-errormessage=""></span>;
     8 │ var a = <span aria-relevant="fancy"></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
+  
   i The only supported value for the aria-invalid property is one of the following:
   
   - false
@@ -144,7 +164,11 @@ invalid.jsx:7:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     8 │ var a = <span aria-relevant="fancy"></span>;
     9 │ var a = <span aria-labelledby=""></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only supported value is a space-separated list of HTML identifiers.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -160,6 +184,10 @@ invalid.jsx:8:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
        │               ^^^^^^^^^^^^^^^^^^^^^
      9 │ var a = <span aria-labelledby=""></span>;
     10 │ var a = <span aria-labelledby={``}></span>;
+  
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
   
   i The values supported for aria-relevant property are one or more of the following:
   
@@ -184,7 +212,11 @@ invalid.jsx:9:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     10 │ var a = <span aria-labelledby={``}></span>;
     11 │ var a = <span aria-labelledby={""}></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only supported value is a space-separated list of HTML identifiers.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -201,7 +233,11 @@ invalid.jsx:10:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     11 │ var a = <span aria-labelledby={""}></span>;
     12 │ var a = <span aria-details=""></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only supported value is a space-separated list of HTML identifiers.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -218,7 +254,11 @@ invalid.jsx:11:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     12 │ var a = <span aria-details=""></span>;
     13 │ var a = <span aria-setsize="hey"></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only supported value is a space-separated list of HTML identifiers.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -235,7 +275,11 @@ invalid.jsx:12:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     13 │ var a = <span aria-setsize="hey"></span>;
     14 │ var a = <span aria-valuemax="hey"></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only supported value is a space-separated list of HTML identifiers.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -252,7 +296,11 @@ invalid.jsx:13:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     14 │ var a = <span aria-valuemax="hey"></span>;
     15 │ var a = <span aria-dropeffect="hey"></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only value supported is a number without fractional components.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -269,7 +317,11 @@ invalid.jsx:14:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     15 │ var a = <span aria-dropeffect="hey"></span>;
     16 │ var a = <span aria-orientation="hey"></span>;
   
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
   i The only supported value is number.
+  
+  i Change the value of the attribute to one of the supported values.
   
 
 ```
@@ -285,6 +337,10 @@ invalid.jsx:15:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
        │               ^^^^^^^^^^^^^^^^^^^^^
     16 │ var a = <span aria-orientation="hey"></span>;
     17 │ 
+  
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
   
   i The values supported for aria-dropeffect property are one or more of the following:
   
@@ -308,6 +364,10 @@ invalid.jsx:16:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
   > 16 │ var a = <span aria-orientation="hey"></span>;
        │               ^^^^^^^^^^^^^^^^^^^^^^
     17 │ 
+  
+  i Assistive technologies may ignore an ARIA attribute with an invalid value, or report incorrect information to the user.
+  
+  i Change the value of the attribute to one of the supported values.
   
   i The only supported value for the aria-orientation property is one of the following:
   

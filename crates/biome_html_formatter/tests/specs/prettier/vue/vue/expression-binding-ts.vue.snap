@@ -1,0 +1,91 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/expression-binding-ts.vue
+---
+
+# Input
+
+```vue
+<!-- #7396 -->
+<template>
+<MyComponent
+:foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+:bar="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
++`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+:baz="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+:src="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+:add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+:num="100000000000000000000000000000000000000000000000000000000000000000000000000"
+/>
+</template>
+<script lang="ts"></script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,12 +2,19 @@
+ <template>
+   <MyComponent
+     :foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+-    :bar="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+-+`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+-    :baz="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
++    :bar="
++      `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
++      `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
++    "
++    :baz="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
+     :src="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+-    :add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+-    :num="100000000000000000000000000000000000000000000000000000000000000000000000000"
++    :add="
++      'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' +
++      'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'
++    "
++    :num="
++      100000000000000000000000000000000000000000000000000000000000000000000000000
++    "
+   />
+ </template>
+ <script lang="ts"></script>
+```
+
+# Output
+
+```vue
+<!-- #7396 -->
+<template>
+  <MyComponent
+    :foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+    :bar="
+      `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
+      `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+    "
+    :baz="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
+    :src="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+    :add="
+      'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' +
+      'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'
+    "
+    :num="
+      100000000000000000000000000000000000000000000000000000000000000000000000000
+    "
+  />
+</template>
+<script lang="ts"></script>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:     :foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+    6:       `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
+    7:       `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+    9:     :baz="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
+   10:     :src="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+   16:       100000000000000000000000000000000000000000000000000000000000000000000000000
+```

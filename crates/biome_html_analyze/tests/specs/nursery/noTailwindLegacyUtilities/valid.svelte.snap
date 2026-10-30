@@ -1,0 +1,11 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<div class="grow bg-linear-to-r hover:inset-s-4 max-w-(--breakpoint-md)"></div>
+<div class="start-date end-of-list flex-grow-wrapper max-w-screen-wrapper"></div>
+
+```

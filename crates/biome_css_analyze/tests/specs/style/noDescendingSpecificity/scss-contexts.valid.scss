@@ -1,0 +1,33 @@
+/* should not generate diagnostics */
+$condition: true;
+@if $condition {
+  .branch-parent .branch-target {}
+} @else {
+  .branch-target {}
+}
+
+@mixin conditional-output {
+  .mixin-parent .mixin-external-target {}
+}
+.mixin-external-target {}
+
+%placeholder .placeholder-target {}
+.placeholder-target {}
+
+%nested-placeholder {
+  .nested-placeholder-target {}
+}
+.nested-placeholder-target {}
+
+.outer {
+  @at-root {
+    .at-root-target {}
+  }
+}
+.at-root-target {}
+
+#{$dynamic-selector} .dynamic-target {}
+.dynamic-target {}
+
+.#{$dynamic-parent} .dynamic-class-target {}
+.dynamic-class-target {}

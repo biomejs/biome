@@ -780,7 +780,7 @@ fn infer_expression_type<'db>(
     ctx: &'db RuleContext<NoMisleadingReturnType>,
     expr: &AnyJsExpression,
 ) -> Option<InferredType<'db>> {
-    let inner = unwrap_type_wrappers(expr);
+    let inner = unwrap_type_wrappers(expr, false);
 
     if let AnyJsExpression::JsIdentifierExpression(ref id_expr) = inner
         && let Some(init_type) = resolve_identifier_initializer_type(ctx, id_expr)
@@ -801,22 +801,28 @@ fn resolve_identifier_initializer_type<'db>(
     if !init_has_direct_const_assertion(&init_expr) {
         return None;
     }
-    let unwrapped = unwrap_type_wrappers(&init_expr);
+    let unwrapped = unwrap_type_wrappers(&init_expr, false);
     ctx.type_of_expression(&unwrapped)
 }
 
-/// Removes parentheses and type wrappers that preserve literal inference.
+/// Removes parentheses, `satisfies`, and, when `unwrap_const_assertions` is
+/// set, `as const` assertions.
 ///
 /// Widening `as T` and angle-bracket assertions remain intact so inference uses
-/// their asserted type.
-fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {
+/// their asserted type. Callers reading the expression's type keep `as const`,
+/// because the inner array expression of `["a", 1] as const` infers as
+/// `(string | number)[]` while the assertion infers as `readonly ["a", 1]`.
+fn unwrap_type_wrappers(
+    expr: &AnyJsExpression,
+    unwrap_const_assertions: bool,
+) -> AnyJsExpression {
     let mut current = expr.clone();
     loop {
         if let Some(cast) = AnyTsCastExpression::cast(current.syntax().clone()) {
-            // Only `satisfies` and `as const` are transparent; keep a widening
-            // `as T` so its target type is read, not the inner literal.
+            // Keep a widening `as T` so its target type is read, not the inner
+            // literal.
             let is_transparent = matches!(current, AnyJsExpression::TsSatisfiesExpression(_))
-                || is_const_reference_type(&cast.cast_type());
+                || (unwrap_const_assertions && is_const_reference_type(&cast.cast_type()));
             if is_transparent {
                 let Some(inner) = cast.inner_expression() else {
                     return current;
@@ -839,7 +845,7 @@ fn unwrap_type_wrappers(expr: &AnyJsExpression) -> AnyJsExpression {
 /// `as const` are unwrapped.
 fn is_pinned_by_assertion(expr: &AnyJsExpression) -> bool {
     matches!(
-        unwrap_type_wrappers(expr),
+        unwrap_type_wrappers(expr, true),
         AnyJsExpression::TsAsExpression(_) | AnyJsExpression::TsTypeAssertionExpression(_)
     )
 }

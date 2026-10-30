@@ -68,6 +68,37 @@ fn prettier_migrate_end_of_line() {
 }
 
 #[test]
+fn prettier_migrate_default_options() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{}"#;
+    let prettier = r#"{}"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_default_options",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn prettier_migrate_with_ignore() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -502,6 +533,109 @@ fn prettier_migrate_with_bad_top_level_print_width() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "prettier_migrate_with_bad_top_level_print_width",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_embedded_language_formatting() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{ "formatter": { "enabled": true } }"#;
+    let prettier = r#"{
+        "semi": true,
+        "singleQuote": false,
+        "embeddedLanguageFormatting": "off",
+        "overrides": [{
+            "files": ["docs/**/*.md"],
+            "options": { "embeddedLanguageFormatting": "auto" }
+        }]
+    }"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_embedded_language_formatting",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_override_bracket_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{}"#;
+    let prettier = r#"{
+        "overrides": [{ "files": ["*.js"], "options": { "bracketSpacing": false } }]
+    }"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_override_bracket_spacing",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn prettier_migrate_bracket_spacing() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = r#"{}"#;
+    let prettier = r#"{ "bracketSpacing": false }"#;
+
+    let configuration_path = Utf8Path::new("biome.json");
+    fs.insert(configuration_path.into(), configuration.as_bytes());
+
+    let prettier_path = Utf8Path::new(".prettierrc");
+    fs.insert(prettier_path.into(), prettier.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "prettier_migrate_bracket_spacing",
         fs,
         console,
         result,

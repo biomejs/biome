@@ -1,0 +1,324 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <component />
+  <component></component>
+  <component is="MyComponent" />
+  <component v-bind="props" />
+  <component :="props" />
+  <component :[name]="currentView" />
+  <component v-bind:[name]="currentView" />
+  <component :foo="currentView" />
+  <component v-on:is="currentView" />
+  <component @is="handler" />
+  <component :IS="currentView" />
+  <Component />
+  <Component></Component>
+  <div>
+    <component>
+      <span>child</span>
+    </component>
+  </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <component />
+      │   ^^^^^^^^^^^^^
+    4 │   <component></component>
+    5 │   <component is="MyComponent" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    2 │ <template>
+    3 │   <component />
+  > 4 │   <component></component>
+      │   ^^^^^^^^^^^
+    5 │   <component is="MyComponent" />
+    6 │   <component v-bind="props" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    3 │   <component />
+    4 │   <component></component>
+  > 5 │   <component is="MyComponent" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <component v-bind="props" />
+    7 │   <component :="props" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    4 │   <component></component>
+    5 │   <component is="MyComponent" />
+  > 6 │   <component v-bind="props" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <component :="props" />
+    8 │   <component :[name]="currentView" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    5 │   <component is="MyComponent" />
+    6 │   <component v-bind="props" />
+  > 7 │   <component :="props" />
+      │   ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <component :[name]="currentView" />
+    9 │   <component v-bind:[name]="currentView" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+     6 │   <component v-bind="props" />
+     7 │   <component :="props" />
+   > 8 │   <component :[name]="currentView" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <component v-bind:[name]="currentView" />
+    10 │   <component :foo="currentView" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+     7 │   <component :="props" />
+     8 │   <component :[name]="currentView" />
+   > 9 │   <component v-bind:[name]="currentView" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <component :foo="currentView" />
+    11 │   <component v-on:is="currentView" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+     8 │   <component :[name]="currentView" />
+     9 │   <component v-bind:[name]="currentView" />
+  > 10 │   <component :foo="currentView" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │   <component v-on:is="currentView" />
+    12 │   <component @is="handler" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+     9 │   <component v-bind:[name]="currentView" />
+    10 │   <component :foo="currentView" />
+  > 11 │   <component v-on:is="currentView" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   <component @is="handler" />
+    13 │   <component :IS="currentView" />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    10 │   <component :foo="currentView" />
+    11 │   <component v-on:is="currentView" />
+  > 12 │   <component @is="handler" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   <component :IS="currentView" />
+    14 │   <Component />
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    11 │   <component v-on:is="currentView" />
+    12 │   <component @is="handler" />
+  > 13 │   <component :IS="currentView" />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   <Component />
+    15 │   <Component></Component>
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    12 │   <component @is="handler" />
+    13 │   <component :IS="currentView" />
+  > 14 │   <Component />
+       │   ^^^^^^^^^^^^^
+    15 │   <Component></Component>
+    16 │   <div>
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:3 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    13 │   <component :IS="currentView" />
+    14 │   <Component />
+  > 15 │   <Component></Component>
+       │   ^^^^^^^^^^^
+    16 │   <div>
+    17 │     <component>
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:5 lint/nursery/useVueComponentIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <component> element doesn't bind the is attribute.
+  
+    15 │   <Component></Component>
+    16 │   <div>
+  > 17 │     <component>
+       │     ^^^^^^^^^^^
+    18 │       <span>child</span>
+    19 │     </component>
+  
+  i Vue renders the component passed to :is. Without it, there is no component to render.
+  
+  i Bind the component with :is, or use the component directly if it never changes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

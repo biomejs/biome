@@ -15,7 +15,7 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
     let mut builder = SemanticModelBuilder::new(root.clone());
 
     let root = root.syntax();
-    for node in root.preorder() {
+    for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {
         match node {
             biome_css_syntax::WalkEvent::Enter(node) => {
                 extractor.enter(&node);
@@ -226,6 +226,27 @@ mod tests {
         assert_eq!(global_custom_variables.len(), 2);
         assert!(global_custom_variables.contains_key("--literal"));
         assert!(global_custom_variables.contains_key("--computed"));
+    }
+
+    #[test]
+    fn test_scss_functions() {
+        let parse = parse_css(
+            r#"@function rem_from_px($px) { @return $px; }
+.card {
+  @function nested-spacing($n) { @return $n; }
+  padding: rem-from-px(16px);
+}"#,
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        assert!(model.has_scss_function("rem_from_px"));
+        assert!(model.has_scss_function("rem-from-px"));
+        assert!(model.has_scss_function("nested_spacing"));
+        assert!(!model.has_scss_function("rem"));
     }
 
     #[test]
@@ -901,10 +922,10 @@ mod specificity_tests {
         assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 0), ".div");
         assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "div");
         assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 2), "& > p");
-        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "& & > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(2, 2, 3), "& & > p");
         assert_eq!(
             specificity.next().unwrap(),
-            Specificity(1, 0, 1),
+            Specificity(3, 3, 4),
             "& & & > p"
         );
     }
@@ -941,5 +962,63 @@ mod specificity_tests {
         let mut specificity = specificity.into_iter();
 
         assert_eq!(specificity.next().unwrap(), Specificity(6, 0, 1));
+    }
+
+    #[test]
+    fn nested_complex_selector_uses_nearest_parent() {
+        let source = r#".card {
+    code {
+        :root[data-theme="dark"] & {}
+        html body & {}
+    }
+}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 0), ".card");
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 1), "code");
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 3, 1),
+            ":root[data-theme=\"dark\"] &"
+        );
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 1, 3),
+            "html body &"
+        );
+    }
+
+    #[test]
+    fn nested_selectors_with_container_and_starting_style() {
+        let source = r#".card {
+    @container (min-width: 1px) {
+        & > p {}
+    }
+    @starting-style {
+        &:hover {}
+    }
+}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 0), ".card");
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 1, 1),
+            "@container & > p"
+        );
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 2, 0),
+            "@starting-style &:hover"
+        );
+        assert_eq!(specificity.next(), None);
     }
 }

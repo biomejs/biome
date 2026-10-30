@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+%a%b%c {}
+%a.card:hover%b {}
+.card%a%b {}
+
+%a.card.active%b {}
+.normal-target.active {}

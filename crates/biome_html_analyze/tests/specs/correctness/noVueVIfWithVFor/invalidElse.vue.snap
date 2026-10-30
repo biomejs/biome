@@ -1,0 +1,121 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidElse.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-if="foo">foo</div>
+  <div v-else v-for="x in xs">{{ x }}</div>
+
+  <div v-if="foo">foo</div>
+  <div v-else-if="bar" v-for="x in xs">{{ x }}</div>
+
+  <div v-if="foo">foo</div>
+  <div v-for="x in xs" v-else>{{ x }}</div>
+
+  <div v-if="foo">foo</div>
+  <TodoItem v-for="todo in todos" v-else-if="bar" :todo="todo" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidElse.vue:4:15 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using v-else and v-for on the same element is discouraged.
+  
+    2 │ <template>
+    3 │   <div v-if="foo">foo</div>
+  > 4 │   <div v-else v-for="x in xs">{{ x }}</div>
+      │               ^^^^^^^^^^^^^^^
+    5 │ 
+    6 │   <div v-if="foo">foo</div>
+  
+  i Move this v-else to a wrapper element, such as a <template>.
+  
+    2 │ <template>
+    3 │   <div v-if="foo">foo</div>
+  > 4 │   <div v-else v-for="x in xs">{{ x }}</div>
+      │        ^^^^^^
+    5 │ 
+    6 │   <div v-if="foo">foo</div>
+  
+  i The v-else is checked before the v-for loop runs, which is hard to tell when reading the template.
+  
+
+```
+
+```
+invalidElse.vue:7:24 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using v-else-if and v-for on the same element is discouraged.
+  
+    6 │   <div v-if="foo">foo</div>
+  > 7 │   <div v-else-if="bar" v-for="x in xs">{{ x }}</div>
+      │                        ^^^^^^^^^^^^^^^
+    8 │ 
+    9 │   <div v-if="foo">foo</div>
+  
+  i Move this v-else-if to a wrapper element, such as a <template>.
+  
+    6 │   <div v-if="foo">foo</div>
+  > 7 │   <div v-else-if="bar" v-for="x in xs">{{ x }}</div>
+      │        ^^^^^^^^^^^^^^^
+    8 │ 
+    9 │   <div v-if="foo">foo</div>
+  
+  i The v-else-if is checked before the v-for loop runs, which is hard to tell when reading the template.
+  
+
+```
+
+```
+invalidElse.vue:10:8 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using v-else and v-for on the same element is discouraged.
+  
+     9 │   <div v-if="foo">foo</div>
+  > 10 │   <div v-for="x in xs" v-else>{{ x }}</div>
+       │        ^^^^^^^^^^^^^^^
+    11 │ 
+    12 │   <div v-if="foo">foo</div>
+  
+  i Move this v-else to a wrapper element, such as a <template>.
+  
+     9 │   <div v-if="foo">foo</div>
+  > 10 │   <div v-for="x in xs" v-else>{{ x }}</div>
+       │                        ^^^^^^
+    11 │ 
+    12 │   <div v-if="foo">foo</div>
+  
+  i The v-else is checked before the v-for loop runs, which is hard to tell when reading the template.
+  
+
+```
+
+```
+invalidElse.vue:13:13 lint/correctness/noVueVIfWithVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using v-else-if and v-for on the same element is discouraged.
+  
+    12 │   <div v-if="foo">foo</div>
+  > 13 │   <TodoItem v-for="todo in todos" v-else-if="bar" :todo="todo" />
+       │             ^^^^^^^^^^^^^^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i Move this v-else-if to a wrapper element, such as a <template>.
+  
+    12 │   <div v-if="foo">foo</div>
+  > 13 │   <TodoItem v-for="todo in todos" v-else-if="bar" :todo="todo" />
+       │                                   ^^^^^^^^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i The v-else-if is checked before the v-for loop runs, which is hard to tell when reading the template.
+  
+
+```

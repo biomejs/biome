@@ -125,11 +125,20 @@ impl<'db> ResolutionCtx<'db, '_> {
                 } else if binding_is_imported
                     && let Some(import) = self.js_info.static_imports.get(identifier.text())
                 {
-                    self.resolve_import(&TypeImportQualifier {
+                    let imported = self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
                         specifier: Arc::new(import.specifier.clone()),
                         type_only: qualifier.type_only,
-                    })
+                    });
+                    if qualifier.type_only
+                        && members.is_empty()
+                        && let InferredTypeData::MergedReference(reference) = imported
+                        && let Some(ty) = reference.ty(self.db)
+                    {
+                        ty
+                    } else {
+                        imported
+                    }
                 } else if resolves_declarations_directly {
                     self.resolve_local_binding(binding.range())
                 } else {

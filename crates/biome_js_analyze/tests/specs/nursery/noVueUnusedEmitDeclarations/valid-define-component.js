@@ -1,0 +1,222 @@
+/* should not generate diagnostics */
+import { createApp, defineComponent, h } from "vue";
+
+export const DestructuredEmit = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    const setFoo = () => {
+      emit("foo", newFoo);
+    };
+    return { setFoo };
+  },
+});
+
+export const RenamedEmit = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit: customName }) {
+    const setFoo = () => customName("foo");
+    return { setFoo };
+  },
+});
+
+export const NoDeclarations = defineComponent({
+  setup(_, { emit }) {
+    const setFoo = () => {
+      emit("foo", newFoo);
+    };
+    return { setFoo };
+  },
+});
+
+export const SetupContext = defineComponent({
+  emits: ["foo"],
+  setup(_, context) {
+    const setFoo = () => {
+      context.emit("foo", newFoo);
+    };
+    return { setFoo };
+  },
+});
+
+export const RenderFunction = defineComponent({
+  emits: ["foo"],
+  setup(_, ctx) {
+    return () => h("button", { onClick: () => ctx.emit("foo") });
+  },
+});
+
+export const SetupAndMethods = defineComponent({
+  emits: ["foo", "bar"],
+  setup(_, { emit }) {
+    const emitBar = () => {
+      emit("bar", newBar);
+    };
+    return { emitBar };
+  },
+  methods: {
+    setFoo() {
+      this.$emit("foo", newFoo);
+    },
+  },
+});
+
+// The emit function is handed to other code, which may emit any event.
+export const EmitAsArgument = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    useCustomComposable(emit);
+  },
+});
+
+export const ContextEmitAsArgument = defineComponent({
+  emits: ["foo"],
+  setup(_, context) {
+    useCustomComposable(context.emit);
+  },
+});
+
+export const ContextAsArgument = defineComponent({
+  emits: ["foo"],
+  setup(_, context) {
+    useCustomComposable(context);
+  },
+});
+
+export const EmitInArray = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    useCustomComposable([emit]);
+  },
+});
+
+export const ContextEmitInArray = defineComponent({
+  emits: ["foo"],
+  setup(_, context) {
+    useCustomComposable([context.emit]);
+  },
+});
+
+export const EmitInObject = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    useCustomComposable({ emit: emit });
+  },
+});
+
+export const EmitInShorthandObject = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    useCustomComposable({ emit });
+  },
+});
+
+export const ContextEmitInObject = defineComponent({
+  emits: ["foo"],
+  setup(_, context) {
+    useCustomComposable({ emit: context.emit });
+  },
+});
+
+export const EmitInConditional = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    const notify = enabled ? emit : noop;
+    return { notify };
+  },
+});
+
+export const EmitFromArrowFunction = defineComponent({
+  emits: ["foo"],
+  setup(_, { emit }) {
+    register(() => emit);
+  },
+});
+
+export const DestructuredInBody = defineComponent({
+  emits: ["foo"],
+  setup(_, context) {
+    const { emit } = context;
+    emit("foo");
+  },
+});
+
+export const DynamicEventName = defineComponent({
+  emits: ["foo", "bar"],
+  methods: {
+    send(name) {
+      this.$emit(name);
+    },
+  },
+});
+
+export const BuiltinEmitAsArgument = defineComponent({
+  emits: ["foo"],
+  mounted() {
+    register(this.$emit);
+  },
+});
+
+export const InstanceAsArgument = defineComponent({
+  emits: ["foo"],
+  mounted() {
+    register(this);
+  },
+});
+
+export const ArrowFunctionInMethod = defineComponent({
+  emits: ["foo"],
+  methods: {
+    click() {
+      return () => this.$emit("foo");
+    },
+  },
+});
+
+// The declarations cannot be read, so nothing is known to be unused.
+export const SpreadDeclarations = defineComponent({
+  emits: [...foo],
+});
+
+const emits = ["foo"];
+export const VariableDeclarations = defineComponent({
+  emits: emits,
+});
+
+// The template is a string that may emit any event.
+export const TemplateOption = defineComponent({
+  emits: ["foo"],
+  template: `<button @click="$emit('foo')">Foo</button>`,
+});
+
+// Mixins can emit the events the component declares.
+export const WithMixin = defineComponent({
+  mixins: [emitsFoo],
+  emits: ["foo"],
+});
+
+// A component this one extends can emit the events it declares.
+export const WithExtends = defineComponent({
+  extends: Base,
+  emits: ["foo"],
+});
+
+// The options copied in can hold code that emits the events.
+export const SpreadOptions = defineComponent({
+  ...base,
+  emits: ["foo"],
+});
+
+export const SpreadEmits = defineComponent({
+  emits: { ...sharedEmits, foo: null },
+});
+
+// The setup function is written elsewhere and may emit any event.
+export const SharedSetup = defineComponent({
+  emits: ["foo"],
+  setup: useSetup,
+});
+
+// The template of an app can be written in the page.
+createApp({
+  emits: ["foo"],
+}).mount("#app");

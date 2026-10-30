@@ -2,3 +2,4 @@
 query A($x: Int, $x: Int, $x: String) { __typename }
 query B($x: String, $x: Int) { __typename }
 query C($x: Int, $x: Int) { __typename }
+query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }

@@ -61,8 +61,11 @@ impl Rule for UseErrorMessage {
         let node = ctx.query();
         let callee = node.callee().ok()?;
 
-        let (reference, name) =
-            global_identifier(&callee.omit_parentheses().as_any_global_identifier_expression()?)?;
+        let (reference, name) = global_identifier(
+            &callee
+                .omit_parentheses()
+                .as_any_global_identifier_expression()?,
+        )?;
         let name_text = name.text();
 
         if BUILTIN_ERRORS.binary_search(&name_text).is_err()
@@ -125,7 +128,7 @@ impl Rule for UseErrorMessage {
         let node = ctx.query().arguments()?;
 
         let message = match state {
-            UseErrorMessageRule::MissingMessage => "Provide an error message for the error.",
+            UseErrorMessageRule::MissingMessage => "Missing error message.",
             UseErrorMessageRule::EmptyString => "Error message should not be an empty string.",
             UseErrorMessageRule::NotString => "Error message should be a string.",
         };
@@ -138,6 +141,9 @@ impl Rule for UseErrorMessage {
             )
             .note(markup! {
                 "Providing meaningful error messages leads to more readable and debuggable code."
+            })
+            .note(markup! {
+                "Pass a non-empty string that describes what went wrong as the error message."
             }),
         )
     }

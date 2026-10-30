@@ -35,9 +35,9 @@
 
 **Biome** - це високопродуктивний інструментарій для веб-проєктів, який має на меті надавати інструменти розробникам для підтримки здоров'я проєктів.
 
-**Biome - це [швидкий форматувальник](https://github.com/biomejs/benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ та _GraphQL_, який досягає **[97% сумісності з _Prettier_](https://algora.io/challenges/prettier)**.
+**Biome - це [швидкий форматувальник](https://github.com/biomejs/benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ та _SCSS_, який досягає **[97% сумісності з _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome - це [високопродуктивний лінтер](https://github.com/biomejs/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_ та _GraphQL_, який містить **[понад 500 правил](https://biomejs.dev/uk/linter/javascript/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
+**Biome - це [високопродуктивний лінтер](https://github.com/biomejs/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_, _GraphQL_, _Markdown_, _YAML_ та _SCSS_, який містить **[понад 500 правил](https://biomejs.dev/uk/linter/javascript/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
 Він **виводить детальні та контекстуалізовані діагностичні дані**, які допомагають вам покращити ваш код та стати кращим програмістом!
 
 **Biome** з самого початку розроблений для [інтерактивного використання в редакторі](https://biomejs.dev/uk/editors/first-party-extensions/). Він може форматувати та лінтити некоректний код під час його написання.
@@ -150,6 +150,9 @@ Biome пропонує просту програму спонсорства, я�
       <td align="center" valign="middle">
         <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://github.com/syntaxfm" target="_blank"><img src="https://avatars.githubusercontent.com/u/130389858?s=200&v=4" height="100" alt="SyntaxFM logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -163,9 +166,6 @@ Biome пропонує просту програму спонсорства, я�
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>

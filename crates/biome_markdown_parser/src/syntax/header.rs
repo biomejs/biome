@@ -24,7 +24,6 @@
 //! ---------
 //! ```
 
-use crate::MarkdownSyntaxFeatures;
 use crate::parser::{DeferredInlineFlavor, MarkdownParser, MarkdownParserCheckpoint};
 use crate::syntax::MAX_BLOCK_PREFIX_INDENT;
 use crate::syntax::inline::EmphasisContext;
@@ -33,7 +32,7 @@ use biome_markdown_syntax::{MarkdownSyntaxKind, T, kind::MarkdownSyntaxKind::*};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::{
-    Parser, SyntaxFeature,
+    Parser,
     prelude::ParsedSyntax::{self, *},
 };
 use std::rc::Rc;
@@ -289,12 +288,9 @@ fn set_header_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisCont
         source
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
-    let context = EmphasisContext::new(
-        inline_source,
-        base_offset,
-        MarkdownSyntaxFeatures::Gfm.is_supported(p),
-        |label| p.has_link_reference_definition(label),
-    );
+    let context = EmphasisContext::new(inline_source, base_offset, p.options(), |label| {
+        p.has_link_reference_definition(label)
+    });
     p.set_new_emphasis_context(context)
 }
 

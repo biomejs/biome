@@ -16,6 +16,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   > 1 │ for (var i = 0; i < 10; i--) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
+  
 
 ```
 
@@ -32,6 +36,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   
   > 1 │ for (var i = 0; i <= 10; i--) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
   
 
 ```
@@ -50,6 +58,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   > 1 │ for (var i = 10; i > 10; i++) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
+  
 
 ```
 
@@ -66,6 +78,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   
   > 1 │ for (var i = 10; i >= 0; i++) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
   
 
 ```
@@ -84,6 +100,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   > 1 │ for (var i = 0; i < 10; i -= 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
+  
 
 ```
 
@@ -100,6 +120,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   
   > 1 │ for (var i = 0; i <= 10; i -= 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
   
 
 ```
@@ -118,6 +142,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   > 1 │ for (var i = 10; i > 10; i += 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
+  
 
 ```
 
@@ -134,6 +162,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   
   > 1 │ for (var i = 10; i >= 0; i += 1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
   
 
 ```
@@ -152,6 +184,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   > 1 │ for (var i = 0; i < 10; i += -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
+  
 
 ```
 
@@ -168,6 +204,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   
   > 1 │ for (var i = 0; i <= 10; i += -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
   
 
 ```
@@ -186,6 +226,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   > 1 │ for (var i = 10; i > 10; i -= -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
+  
 
 ```
 
@@ -202,6 +246,10 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
   
   > 1 │ for (var i = 10; i >= 0; i -= -1) {}
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The variable moves away from the value that ends the loop, so the loop condition may never become false. This can cause an infinite loop.
+  
+  i Change the update clause so that it moves the variable toward the loop condition, or change the condition.
   
 
 ```

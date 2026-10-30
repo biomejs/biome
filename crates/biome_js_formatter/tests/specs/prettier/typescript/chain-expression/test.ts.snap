@@ -22,19 +22,17 @@ info: typescript/chain-expression/test.ts
 @@ -1,4 +1,4 @@
 -(a?.b)!.c;
 -(a?.())!.b;
--(a?.b)!.c;
--(a?.())!.b;
-+a?.b!.c;
-+a?.()!.b;
-+a?.b!.c;
-+a?.()!.b;
++(a?.b!).c;
++(a?.()!).b;
+ (a?.b)!.c;
+ (a?.())!.b;
 ```
 
 # Output
 
 ```ts
-a?.b!.c;
-a?.()!.b;
-a?.b!.c;
-a?.()!.b;
+(a?.b!).c;
+(a?.()!).b;
+(a?.b)!.c;
+(a?.())!.b;
 ```

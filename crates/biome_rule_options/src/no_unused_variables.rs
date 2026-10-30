@@ -11,16 +11,28 @@ pub struct NoUnusedVariablesOptions {
     /// An object defining ignored identifiers for different language constructs.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub ignore: Option<NoUnusedVariablesOptionsIgnore>,
+
+    /// Whether to ignore unused variables declared with `using` or `await using`.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub ignore_using_declarations: Option<bool>,
 }
 
 impl NoUnusedVariablesOptions {
     pub const DEFAULT_IGNORE_REST_SIBLINGS: bool = true;
+    pub const DEFAULT_IGNORE_USING_DECLARATIONS: bool = false;
 
     /// Returns [`Self::ignore_rest_siblings`] if it is set.
     /// Otherwise, returns [`Self::DEFAULT_IGNORE_REST_SIBLINGS`].
     pub fn ignore_rest_siblings(&self) -> bool {
         self.ignore_rest_siblings
             .unwrap_or(Self::DEFAULT_IGNORE_REST_SIBLINGS)
+    }
+
+    /// Returns [`Self::ignore_using_declarations`] if it is set.
+    /// Otherwise, returns [`Self::DEFAULT_IGNORE_USING_DECLARATIONS`].
+    pub fn ignore_using_declarations(&self) -> bool {
+        self.ignore_using_declarations
+            .unwrap_or(Self::DEFAULT_IGNORE_USING_DECLARATIONS)
     }
 
     /// Returns [`Self::ignore`] if it is set.

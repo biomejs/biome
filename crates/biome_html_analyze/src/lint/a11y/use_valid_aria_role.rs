@@ -126,6 +126,9 @@ impl Rule for UseValidAriaRole {
                 },
             )
             .note(markup! {
+                "Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user."
+            })
+            .note(markup! {
                 "Check "<Hyperlink href="https://www.w3.org/TR/wai-aria/#namefromauthor">"WAI-ARIA"</Hyperlink>" for valid roles or provide options accordingly."
             })
         )

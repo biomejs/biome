@@ -4,7 +4,7 @@ use crate::{
     matcher::{MatchQueryParams, Query},
     registry::{NodeLanguage, Phases},
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxKindSet, SyntaxNode, TextRange, WalkEvent};
 use std::collections::BinaryHeap;
 
 /// Mutable context objects shared by all visitors
@@ -65,6 +65,26 @@ pub trait Visitor {
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         ctx: VisitorContext<Self::Language>,
     );
+
+    /// Returns the kinds of the nodes whose [WalkEvent]s this visitor reads, or
+    /// `None` if it reads every event.
+    ///
+    /// When every visitor of a phase returns a set, the phase walks only the
+    /// nodes whose kind is in the union of these sets. A visitor still receives
+    /// the events of the other kinds in that union, so returning a set promises
+    /// that events for nodes outside it leave the visitor and its output
+    /// unchanged. The tree root is reached only if its kind is in the union.
+    ///
+    /// `syntax_query_kinds` holds the kinds of [SyntaxNode] queries that the
+    /// query matcher can match in this phase, or `None` if the matcher can't
+    /// tell. Visitors that emit every node as a query return it.
+    fn visited_kinds(
+        &self,
+        syntax_query_kinds: Option<SyntaxKindSet<Self::Language>>,
+    ) -> Option<SyntaxKindSet<Self::Language>> {
+        let _ = syntax_query_kinds;
+        None
+    }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<Self::Language>) {
         let _ = ctx;

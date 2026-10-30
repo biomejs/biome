@@ -158,6 +158,9 @@ const c = "b";
   <button @click="async $event => foo($event)"></button>
   <button @click="function($event) { foo($event) }"></button>
   <button v-on:click="counter++; counter++;"></button>
+  <button @click="if (counter) foo(); else bar()"></button>
+  <button @click="const next = counter + 1; foo(next)"></button>
+  <button @click="if (counter) { foo() }"></button>
 </template>
 "#;
 
@@ -212,6 +215,20 @@ const duration = 100;
 "#;
 
     assert_no_diagnostics(FILE_PATH, FILE_CONTENT);
+}
+
+#[test]
+fn vue_v_for_default_values_are_parsed_as_javascript() {
+    const FILE_PATH: &str = "/project/file.vue";
+
+    assert_no_diagnostics(
+        FILE_PATH,
+        r#"<template><div v-for="{ value = gt('v-for default') } in rows" /></template>"#,
+    );
+    assert_diagnostics(
+        FILE_PATH,
+        r#"<template><div v-for="{ value = gt('v-for default' + ) } in rows" /></template>"#,
+    );
 }
 
 #[test]

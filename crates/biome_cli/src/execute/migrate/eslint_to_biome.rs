@@ -11,7 +11,7 @@ use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
-use biome_rule_options::{no_js_restricted_properties, no_restricted_globals};
+use biome_rule_options::{no_js_restricted_properties, no_restricted_globals, no_unused_variables};
 use indexmap::IndexMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 
@@ -449,6 +449,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("svelte") => RuleSource::EslintSvelte,
             Some("sonarjs") => RuleSource::EslintSonarJs,
             Some("@stylistic") => RuleSource::EslintStylistic,
+            Some("tailwindcss") => RuleSource::EslintTailwindcss,
             Some("@typescript-eslint") => RuleSource::EslintTypeScript,
             Some("unicorn") => RuleSource::EslintUnicorn,
             Some("unused-imports") => RuleSource::EslintUnusedImports,
@@ -529,6 +530,7 @@ impl eslint_eslint::FlatConfigData {
             self.0.into_iter().next().unwrap()
         } else {
             let mut global_config_object = eslint_eslint::FlatConfigObject::default();
+            let mut override_config_objects = Vec::new();
             for flat_config_object in self.0 {
                 if flat_config_object.is_global_ignores() {
                     global_config_object
@@ -537,29 +539,50 @@ impl eslint_eslint::FlatConfigData {
                 } else if flat_config_object.is_global_config() {
                     global_config_object.merge_with(flat_config_object);
                 } else {
-                    let mut override_pat = biome_config::OverridePattern::default();
-                    if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options.globals.enabled().collect();
-                        let js_config = biome_config::JsConfiguration {
-                            globals: Some(globals),
-                            ..Default::default()
-                        };
-                        override_pat.javascript = Some(js_config)
-                    }
-                    let includes =
-                        to_biome_includes(&flat_config_object.files, &flat_config_object.ignores);
-                    override_pat.includes = (!includes.is_empty())
-                        .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
-                    if let Some(rules) = flat_config_object.rules
-                        && !rules.is_empty()
-                    {
-                        override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
-                            rules: Some(rules.into_biome_rules(options, &mut results)),
-                            ..Default::default()
-                        });
-                    }
-                    overrides.0.push(override_pat);
+                    override_config_objects.push(flat_config_object);
                 }
+            }
+            // The overrides are converted once all the global config objects are merged,
+            // because they inherit options from them.
+            let base_no_unused_vars = global_config_object
+                .rules
+                .as_ref()
+                .map(eslint_eslint::Rules::base_no_unused_vars_rules)
+                .unwrap_or_default();
+            let base_eqeqeq = global_config_object
+                .rules
+                .as_ref()
+                .and_then(eslint_eslint::Rules::eqeqeq_options);
+            for mut flat_config_object in override_config_objects {
+                if let Some(rules) = &mut flat_config_object.rules {
+                    rules.inherit_eqeqeq_options(base_eqeqeq);
+                }
+                let mut override_pat = biome_config::OverridePattern::default();
+                if let Some(language_options) = flat_config_object.language_options {
+                    let globals = language_options.globals.enabled().collect();
+                    let js_config = biome_config::JsConfiguration {
+                        globals: Some(globals),
+                        ..Default::default()
+                    };
+                    override_pat.javascript = Some(js_config)
+                }
+                let includes =
+                    to_biome_includes(&flat_config_object.files, &flat_config_object.ignores);
+                override_pat.includes = (!includes.is_empty())
+                    .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
+                if let Some(rules) = flat_config_object.rules
+                    && !rules.is_empty()
+                {
+                    override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
+                        rules: Some(rules.into_biome_rules(
+                            &base_no_unused_vars,
+                            options,
+                            &mut results,
+                        )),
+                        ..Default::default()
+                    });
+                }
+                overrides.0.push(override_pat);
             }
             if !overrides.0.is_empty() {
                 biome_config.overrides = Some(overrides);
@@ -567,7 +590,7 @@ impl eslint_eslint::FlatConfigData {
             global_config_object
         };
         let mut rules = if let Some(rules) = global_config_object.rules {
-            rules.into_biome_rules(options, &mut results)
+            rules.into_biome_rules(&Default::default(), options, &mut results)
         } else {
             biome_config::Rules::default()
         };
@@ -608,14 +631,19 @@ impl eslint_eslint::LegacyConfigData {
             biome_config.javascript = Some(js_config)
         }
         let mut linter = biome_config::LinterConfiguration::default();
-        let mut rules = self.rules.into_biome_rules(options, &mut results);
+        let base_no_unused_vars = self.rules.base_no_unused_vars_rules();
+        let base_eqeqeq = self.rules.eqeqeq_options();
+        let mut rules = self
+            .rules
+            .into_biome_rules(&Default::default(), options, &mut results);
         rules.preset = Some(PresetConfig::None);
         linter.rules = Some(rules);
         let includes = to_biome_includes(&[] as &[&str], self.ignore_patterns.as_slice());
         linter.includes = (!includes.is_empty()).then_some(includes);
         if !self.overrides.is_empty() {
             let mut overrides = biome_config::Overrides::default();
-            for override_elt in self.overrides {
+            for mut override_elt in self.overrides {
+                override_elt.rules.inherit_eqeqeq_options(base_eqeqeq);
                 let mut override_pattern = biome_config::OverridePattern::default();
                 if !override_elt.globals.is_empty() {
                     let globals = override_elt
@@ -633,7 +661,11 @@ impl eslint_eslint::LegacyConfigData {
                     .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
                 if !override_elt.rules.is_empty() {
                     override_pattern.linter = Some(biome_config::OverrideLinterConfiguration {
-                        rules: Some(override_elt.rules.into_biome_rules(options, &mut results)),
+                        rules: Some(override_elt.rules.into_biome_rules(
+                            &base_no_unused_vars,
+                            options,
+                            &mut results,
+                        )),
                         ..Default::default()
                     });
                 }
@@ -647,18 +679,39 @@ impl eslint_eslint::LegacyConfigData {
 }
 
 impl eslint_eslint::Rules {
+    /// `base_no_unused_vars` describes the configuration that these rules apply on top of.
+    /// It is empty for the rules of a root configuration.
     pub(crate) fn into_biome_rules(
         self,
+        base_no_unused_vars: &eslint_eslint::BaseNoUnusedVarsRules,
         options: &MigrationOptions,
         results: &mut MigrationResults,
     ) -> biome_config::Rules {
         let mut rules = biome_config::Rules::default();
         let mut restricted_elements = RestrictedElementsMigration::default();
+        // Both rules migrate to the options of `useConsistentBlockLang`, which
+        // can't differ between Vue and Svelte files. Migrating both would keep
+        // whichever rule happens to be processed last, so both are reported for
+        // manual migration instead.
+        let has_block_lang_conflict = self
+            .0
+            .iter()
+            .filter(|rule| is_block_lang_rule(rule))
+            .count()
+            > 1;
         for eslint_rule in self.0 {
+            if has_block_lang_conflict && is_block_lang_rule(&eslint_rule) {
+                results.unsupported.insert(
+                    EslintRuleName::from_str(&eslint_rule.name()),
+                    UnsupportedRuleReason::CoveredByRule("useConsistentBlockLang"),
+                );
+                continue;
+            }
             migrate_eslint_rule(
                 &mut rules,
                 &mut restricted_elements,
                 eslint_rule,
+                base_no_unused_vars,
                 options,
                 results,
             );
@@ -668,6 +721,47 @@ impl eslint_eslint::Rules {
     }
 }
 
+/// Migrates `vue/block-lang` or `svelte/block-lang` to `useConsistentBlockLang`.
+///
+/// When `options` is `None`, the ESLint rule only requires omitting `lang`,
+/// which `useConsistentBlockLang` doesn't enforce, so the rule isn't migrated
+/// and is reported as not applicable.
+fn migrate_block_lang(
+    rules: &mut biome_config::Rules,
+    name: &str,
+    severity: eslint_eslint::Severity,
+    options: Option<biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions>,
+    opts: &MigrationOptions,
+    results: &mut MigrationResults,
+) {
+    let Some(options) = options else {
+        results.unsupported.insert(
+            EslintRuleName::from_str(name),
+            UnsupportedRuleReason::NotApplicable,
+        );
+        return;
+    };
+    if migrate_eslint_any_rule(rules, name, severity, opts, results) {
+        let group = rules.nursery.get_or_insert_with(Default::default);
+        if let SeverityOrGroup::Group(group) = group {
+            group.use_consistent_block_lang = Some(
+                biome_config::RuleFixConfiguration::WithOptions(biome_config::RuleWithFixOptions {
+                    level: severity.into(),
+                    fix: None,
+                    options,
+                }),
+            );
+        }
+    }
+}
+
+fn is_block_lang_rule(rule: &eslint_eslint::Rule) -> bool {
+    matches!(
+        rule,
+        eslint_eslint::Rule::SvelteBlockLang(_) | eslint_eslint::Rule::VueBlockLang(_)
+    )
+}
+
 /// Look for an equivalent Biome rule for ESLint `rule`,
 /// and then mutate `rules` if an equivalent rule is found.
 /// Also, takes care of Biome's rules with options.
@@ -675,6 +769,7 @@ fn migrate_eslint_rule(
     rules: &mut biome_config::Rules,
     restricted_elements: &mut RestrictedElementsMigration,
     rule: eslint_eslint::Rule,
+    base_no_unused_vars: &eslint_eslint::BaseNoUnusedVarsRules,
     opts: &MigrationOptions,
     results: &mut MigrationResults,
 ) {
@@ -716,6 +811,22 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::Eqeqeq(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group
+                    && let Some(rule) = group.no_double_equals.as_mut()
+                {
+                    *rule = biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: rule.level(),
+                            fix: None,
+                            options: conf.into(),
+                        },
+                    );
+                }
+            }
+        }
         eslint_eslint::Rule::FuncStyle(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
@@ -749,6 +860,34 @@ fn migrate_eslint_rule(
                             biome_config::RuleWithOptions {
                                 level: conf.severity().into(),
                                 options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
+        eslint_eslint::Rule::MaxStatements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                // The ESLint and Biome defaults match, so options are only migrated when set.
+                let (severity, options) = match conf {
+                    eslint_eslint::RuleConf::Option(severity, options) => {
+                        (severity, options.into_biome_options(None))
+                    }
+                    eslint_eslint::RuleConf::Options(severity, options, top_level_options) => (
+                        severity,
+                        options.into_biome_options(Some(top_level_options)),
+                    ),
+                    eslint_eslint::RuleConf::Severity(_)
+                    | eslint_eslint::RuleConf::Spread(_, _) => {
+                        return;
+                    }
+                };
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_excessive_statements_per_function =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options,
                             },
                         ));
                 }
@@ -826,6 +965,63 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::NoUnusedVars(conf)
+        | eslint_eslint::Rule::TypeScriptNoUnusedVars(conf)
+        | eslint_eslint::Rule::UnusedImportsNoUnusedVars(conf) => {
+            // A disabled rule must not change the options of an enabled one
+            // that migrates to the same Biome rule.
+            if !migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                || matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                return;
+            }
+            let rule_options = match conf {
+                eslint_eslint::RuleConf::Option(_, rule_options) => rule_options,
+                // Without an options object, ESLint keeps the options that the base configuration
+                // provides for the same ESLint rule, and applies its defaults if there are none.
+                _ => {
+                    let base_rule = base_no_unused_vars.get(&name);
+                    // When the base configuration enables this ESLint rule,
+                    // the migrated base rule already carries its options.
+                    // An override replaces all the options of a Biome rule, so setting them again
+                    // would discard the options that other overrides set for the same files.
+                    if base_rule.is_enabled {
+                        return;
+                    }
+                    base_rule.options.unwrap_or_default()
+                }
+            };
+            let rule_options: no_unused_variables::NoUnusedVariablesOptions = rule_options.into();
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            if let SeverityOrGroup::Group(group) = group
+                && let Some(rule) = group.no_unused_variables.as_mut()
+            {
+                match rule {
+                    biome_config::RuleFixConfiguration::Plain(level) => {
+                        *rule = biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: *level,
+                                fix: None,
+                                options: rule_options,
+                            },
+                        );
+                    }
+                    // Another enabled ESLint rule already migrated to this rule.
+                    // ESLint reports a variable if any of them reports it,
+                    // so a variable is ignored only if all of them ignore it.
+                    biome_config::RuleFixConfiguration::WithOptions(existing) => {
+                        let existing = &mut existing.options;
+                        existing.ignore_rest_siblings = Some(
+                            existing.ignore_rest_siblings() && rule_options.ignore_rest_siblings(),
+                        );
+                        existing.ignore_using_declarations = Some(
+                            existing.ignore_using_declarations()
+                                && rule_options.ignore_using_declarations(),
+                        );
+                    }
+                }
+            }
+        }
         eslint_eslint::Rule::ReactForbidElements(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && !matches!(conf.severity(), eslint_eslint::Severity::Off)
@@ -849,6 +1045,24 @@ fn migrate_eslint_rule(
                 restricted_elements.add(
                     eslint_svelte::RestrictedHtmlElement::into_restricted_elements(conf.into_vec()),
                 );
+            }
+        }
+        eslint_eslint::Rule::UnicodeBom(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, bom) = conf
+            {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_unicode_bom = Some(biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: severity.into(),
+                            fix: None,
+                            options: biome_rule_options::use_consistent_unicode_bom::UseConsistentUnicodeBomOptions {
+                                bom: Some(bom),
+                            },
+                        },
+                    ));
+                }
             }
         }
         eslint_eslint::Rule::JestConsistentTestIt(conf) => {
@@ -1020,6 +1234,24 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::UnicornConsistentJsonFileRead(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                // A severity-only configuration uses the same default as Biome, so it needs no options.
+                && let eslint_eslint::RuleConf::Option(severity, option) = conf
+            {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_json_file_read =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: option.into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
@@ -1033,6 +1265,26 @@ fn migrate_eslint_rule(
                         ));
                 }
             }
+        }
+        eslint_eslint::Rule::SvelteBlockLang(conf) => {
+            let severity = conf.severity();
+            migrate_block_lang(
+                rules,
+                &name,
+                severity,
+                conf.option_or_default().into_biome_options(),
+                opts,
+                results,
+            );
+        }
+        eslint_eslint::Rule::VueBlockLang(conf) => {
+            let severity = conf.severity();
+            // Without options, eslint-plugin-vue only allows omitting `lang`.
+            let options = match conf {
+                eslint_eslint::RuleConf::Option(_, options) => options.into_biome_options(),
+                _ => None,
+            };
+            migrate_block_lang(rules, &name, severity, options, opts, results);
         }
         eslint_eslint::Rule::SvelteNoUnnecessaryStateWrap(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
@@ -1410,6 +1662,88 @@ mod tests {
     }
 
     #[test]
+    fn flat_config_severity_only_no_unused_vars_inherits_same_rule_options() {
+        let flat_config = FlatConfigData(vec![
+            FlatConfigObject {
+                files: vec!["*.ts".into()].into(),
+                ignores: vec![],
+                language_options: None,
+                rules: Some(Rules(
+                    [Rule::TypeScriptNoUnusedVars(RuleConf::Severity(
+                        Severity::Warn,
+                    ))]
+                    .into_iter()
+                    .collect(),
+                )),
+            },
+            FlatConfigObject {
+                files: vec!["*.js".into()].into(),
+                ignores: vec![],
+                language_options: None,
+                rules: Some(Rules(
+                    [Rule::NoUnusedVars(RuleConf::Severity(Severity::Error))]
+                        .into_iter()
+                        .collect(),
+                )),
+            },
+            // Global config objects that follow an override still provide its base options.
+            FlatConfigObject {
+                files: vec![].into(),
+                ignores: vec![],
+                language_options: None,
+                rules: Some(Rules(
+                    [
+                        Rule::NoUnusedVars(RuleConf::Severity(Severity::Off)),
+                        Rule::TypeScriptNoUnusedVars(RuleConf::Option(
+                            Severity::Off,
+                            NoUnusedVarsOptions {
+                                ignore_rest_siblings: Some(true),
+                                ignore_using_declarations: None,
+                            },
+                        )),
+                    ]
+                    .into_iter()
+                    .collect(),
+                )),
+            },
+        ]);
+        let (biome_config, _) = flat_config.into_biome_config(&MigrationOptions::default());
+
+        let mut overrides = biome_config
+            .overrides
+            .unwrap()
+            .0
+            .into_iter()
+            .map(|pattern| {
+                let rule = pattern
+                    .linter
+                    .unwrap()
+                    .rules
+                    .unwrap()
+                    .correctness
+                    .unwrap()
+                    .unwrap_group()
+                    .no_unused_variables
+                    .unwrap();
+                let biome_config::RuleFixConfiguration::WithOptions(rule) = rule else {
+                    panic!("the override should set the options of the rule");
+                };
+                (rule.level, rule.options.ignore_rest_siblings)
+            });
+        // `@typescript-eslint/no-unused-vars` inherits the options of the same rule.
+        assert_eq!(
+            overrides.next(),
+            Some((biome_config::RulePlainConfiguration::Warn, Some(true)))
+        );
+        // `no-unused-vars` has no options to inherit, so the ESLint default applies.
+        assert_eq!(
+            overrides.next(),
+            Some((biome_config::RulePlainConfiguration::Error, Some(false)))
+        );
+        assert_eq!(overrides.next(), None);
+    }
+
+    #[test]
     fn astro_and_markdown_unsupported_rule_lookup() {
         for (name, reason) in [
             (
@@ -1420,7 +1754,10 @@ mod tests {
                 "astro/semi",
                 UnsupportedRuleReason::FormatterOption("semicolons"),
             ),
-            ("astro/valid-compile", UnsupportedRuleReason::NotApplicable),
+            (
+                "astro/valid-compile",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
             (
                 "markdown/no-space-in-emphasis",
                 UnsupportedRuleReason::FormatterCovers,
@@ -1459,6 +1796,91 @@ mod tests {
                 reason
             );
         }
+    }
+
+    #[test]
+    fn scope_decisions_unsupported_rule_lookup() {
+        for (name, reason) in [
+            ("no-iterator", UnsupportedRuleReason::Legacy),
+            (
+                "svelte/no-unused-svelte-ignore",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "svelte/valid-compile",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "tailwindcss/important-modifier-suffix",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "@typescript-eslint/typedef",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "yml/flow-mapping-curly-newline",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
+    }
+
+    #[test]
+    fn vue_and_svelte_block_lang_require_manual_migration() {
+        let rules = Rules(
+            [
+                Rule::VueBlockLang(RuleConf::Severity(Severity::Error)),
+                Rule::SvelteBlockLang(RuleConf::Severity(Severity::Error)),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let options = MigrationOptions {
+            include_inspired: true,
+            include_nursery: true,
+        };
+        let mut results = MigrationResults::default();
+        let rules = rules.into_biome_rules(&Default::default(), &options, &mut results);
+
+        assert!(rules.nursery.is_none());
+        assert!(results.migrated.is_empty());
+        for name in ["vue/block-lang", "svelte/block-lang"] {
+            assert_eq!(
+                results.unsupported.get(&EslintRuleName::from_str(name)),
+                Some(&UnsupportedRuleReason::CoveredByRule(
+                    "useConsistentBlockLang"
+                )),
+            );
+        }
+    }
+
+    #[test]
+    fn block_lang_that_only_omits_lang_is_not_applicable() {
+        let rules = Rules(
+            [Rule::SvelteBlockLang(RuleConf::Severity(Severity::Error))]
+                .into_iter()
+                .collect(),
+        );
+        let options = MigrationOptions {
+            include_inspired: true,
+            include_nursery: true,
+        };
+        let mut results = MigrationResults::default();
+        let rules = rules.into_biome_rules(&Default::default(), &options, &mut results);
+
+        assert!(rules.nursery.is_none());
+        assert!(results.migrated.is_empty());
+        assert_eq!(
+            results
+                .unsupported
+                .get(&EslintRuleName::from_str("svelte/block-lang")),
+            Some(&UnsupportedRuleReason::NotApplicable),
+        );
     }
 
     #[test]

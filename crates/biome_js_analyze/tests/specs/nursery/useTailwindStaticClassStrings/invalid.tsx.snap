@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+// should generate diagnostics
+<div className={`bg-${color}` as string} />;
+<div className={("text-" + color) satisfies string} />;
+<div className={("border-" + color)!} />;
+
+```
+
+# Diagnostics
+```
+invalid.tsx:2:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className={`bg-${color}` as string} />;
+      │                 ^^^^^^^^^^^^^
+    3 │ <div className={("text-" + color) satisfies string} />;
+    4 │ <div className={("border-" + color)!} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:3:18 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className={`bg-${color}` as string} />;
+  > 3 │ <div className={("text-" + color) satisfies string} />;
+      │                  ^^^^^^^^^^^^^^^
+    4 │ <div className={("border-" + color)!} />;
+    5 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:4:18 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    2 │ <div className={`bg-${color}` as string} />;
+    3 │ <div className={("text-" + color) satisfies string} />;
+  > 4 │ <div className={("border-" + color)!} />;
+      │                  ^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

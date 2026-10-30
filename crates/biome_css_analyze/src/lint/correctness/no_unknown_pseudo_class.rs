@@ -33,6 +33,11 @@ declare_lint_rule! {
     /// in `:hover` or `:first-child`. Vendor-prefixed pseudo-classes are allowed. See
     /// [MDN's pseudo-class reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
     ///
+    /// ## SCSS limitations
+    ///
+    /// Pseudo-class names containing SCSS interpolation are ignored because the emitted name cannot
+    /// be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -195,9 +200,15 @@ impl Rule for NoUnknownPseudoClass {
             rule_category!(),
             span,
             markup! {
-                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>" "
+                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>"."
             },
-        );
+        )
+        .note(markup! {
+            "Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied."
+        })
+        .note(markup! {
+            "Check the spelling of the pseudo-class, or replace it with one that exists."
+        });
         match class_type {
             PseudoClassType::PagePseudoClass => {
                 diag = diag.note(markup! {
@@ -235,7 +246,9 @@ impl AnyPseudoLike {
                 return css_selector_identifier_token(ident.name().ok()?);
             }
             Self::ScssInterpolatedPseudoClassFunction(_) => return None,
-            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
+            Self::CssPageSelectorPseudo(page_pseudo) => {
+                return css_selector_identifier_token(page_pseudo.selector().ok()?);
+            }
         };
 
         ident.ok()?.value_token().ok()
@@ -247,7 +260,7 @@ impl AnyPseudoLike {
 }
 
 fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
-    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    // `:foo-#{$name}` cannot be validated before SCSS interpolation is resolved.
     name.as_css_identifier()?.value_token().ok()
 }
 

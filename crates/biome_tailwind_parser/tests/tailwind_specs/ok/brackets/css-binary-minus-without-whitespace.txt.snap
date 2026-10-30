@@ -1,0 +1,669 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+h-[calc(100svh-var(--header))] flex p-4
+w-[calc(1px-2px)] w-[calc(100%-1rem)] w-[calc(100-var(--a))] w-[calc((1px)-2px)] w-[calc(1e-2px)] w-[min(10vw-1rem,_2px)]
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..1 "h" [] [],
+                minus_token: DASH@1..2 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@2..3 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@3..7 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@7..8 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@8..11 "100" [] [],
+                                                unit_token: IDENT@11..14 "svh" [] [],
+                                            },
+                                        ],
+                                    },
+                                    operator: DASH@14..15 "-" [] [],
+                                    right: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssFunction {
+                                                name: CssIdentifier {
+                                                    ident_token: IDENT@15..18 "var" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@18..19 "(" [] [],
+                                                parameters: CssParameterList [
+                                                    CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssDashedIdentifier {
+                                                                ident_token: IDENT@19..27 "--header" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@27..28 ")" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@28..29 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@29..30 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@30..31 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@31..35 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@35..36 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@36..37 "p" [] [],
+                minus_token: DASH@37..38 "-" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@38..39 "4" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@39..40 "\n" [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@40..41 "w" [] [],
+                minus_token: DASH@41..42 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@42..43 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@43..47 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@47..48 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@48..49 "1" [] [],
+                                                unit_token: IDENT@49..51 "px" [] [],
+                                            },
+                                        ],
+                                    },
+                                    operator: DASH@51..52 "-" [] [],
+                                    right: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@52..53 "2" [] [],
+                                                unit_token: IDENT@53..55 "px" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@55..56 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@56..57 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@57..58 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@58..59 "w" [] [],
+                minus_token: DASH@59..60 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@60..61 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@61..65 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@65..66 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssPercentage {
+                                                value_token: CSS_NUMBER_LITERAL@66..69 "100" [] [],
+                                                remainder_token: PERCENT@69..70 "%" [] [],
+                                            },
+                                        ],
+                                    },
+                                    operator: DASH@70..71 "-" [] [],
+                                    right: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@71..72 "1" [] [],
+                                                unit_token: IDENT@72..75 "rem" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@75..76 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@76..77 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@77..78 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@78..79 "w" [] [],
+                minus_token: DASH@79..80 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@80..81 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@81..85 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@85..86 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@86..89 "100" [] [],
+                                            },
+                                        ],
+                                    },
+                                    operator: DASH@89..90 "-" [] [],
+                                    right: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssFunction {
+                                                name: CssIdentifier {
+                                                    ident_token: IDENT@90..93 "var" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@93..94 "(" [] [],
+                                                parameters: CssParameterList [
+                                                    CssListOfComponentValuesExpression {
+                                                        css_component_value_list: CssComponentValueList [
+                                                            CssDashedIdentifier {
+                                                                ident_token: IDENT@94..97 "--a" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@97..98 ")" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@98..99 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@99..100 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@100..101 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@101..102 "w" [] [],
+                minus_token: DASH@102..103 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@103..104 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@104..108 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@108..109 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssParenthesizedExpression {
+                                        l_paren_token: L_PAREN@109..110 "(" [] [],
+                                        expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@110..111 "1" [] [],
+                                                    unit_token: IDENT@111..113 "px" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@113..114 ")" [] [],
+                                    },
+                                    operator: DASH@114..115 "-" [] [],
+                                    right: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@115..116 "2" [] [],
+                                                unit_token: IDENT@116..118 "px" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@118..119 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@119..120 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@120..121 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@121..122 "w" [] [],
+                minus_token: DASH@122..123 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@123..124 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@124..128 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@128..129 "(" [] [],
+                            parameters: CssParameterList [
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@129..133 "1e-2" [] [],
+                                            unit_token: IDENT@133..135 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@135..136 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@136..137 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@137..138 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@138..139 "w" [] [],
+                minus_token: DASH@139..140 "-" [] [],
+                value: TwArbitraryValue {
+                    l_brack_token: L_BRACKET@140..141 "[" [] [],
+                    value: CssGenericComponentValueList [
+                        CssFunction {
+                            name: CssIdentifier {
+                                ident_token: IDENT@141..144 "min" [] [],
+                            },
+                            l_paren_token: L_PAREN@144..145 "(" [] [],
+                            parameters: CssParameterList [
+                                CssBinaryExpression {
+                                    left: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@145..147 "10" [] [],
+                                                unit_token: IDENT@147..149 "vw" [] [],
+                                            },
+                                        ],
+                                    },
+                                    operator: DASH@149..150 "-" [] [],
+                                    right: CssListOfComponentValuesExpression {
+                                        css_component_value_list: CssComponentValueList [
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@150..151 "1" [] [],
+                                                unit_token: IDENT@151..154 "rem" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                COMMA@154..156 "," [] [Whitespace("_")],
+                                CssListOfComponentValuesExpression {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@156..157 "2" [] [],
+                                            unit_token: IDENT@157..159 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@159..160 ")" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACKET@160..161 "]" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@161..162 "\n" [] [],
+    ],
+    eof_token: EOF@162..162 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..162
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..162
+    0: TW_FULL_CANDIDATE@0..30
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..30
+        0: TW_BASE@0..1 "h" [] []
+        1: DASH@1..2 "-" [] []
+        2: TW_ARBITRARY_VALUE@2..30
+          0: L_BRACKET@2..3 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@3..29
+            0: CSS_FUNCTION@3..29
+              0: CSS_IDENTIFIER@3..7
+                0: IDENT@3..7 "calc" [] []
+              1: L_PAREN@7..8 "(" [] []
+              2: CSS_PARAMETER_LIST@8..28
+                0: CSS_BINARY_EXPRESSION@8..28
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@8..14
+                    0: CSS_COMPONENT_VALUE_LIST@8..14
+                      0: CSS_REGULAR_DIMENSION@8..14
+                        0: CSS_NUMBER_LITERAL@8..11 "100" [] []
+                        1: IDENT@11..14 "svh" [] []
+                  1: DASH@14..15 "-" [] []
+                  2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@15..28
+                    0: CSS_COMPONENT_VALUE_LIST@15..28
+                      0: CSS_FUNCTION@15..28
+                        0: CSS_IDENTIFIER@15..18
+                          0: IDENT@15..18 "var" [] []
+                        1: L_PAREN@18..19 "(" [] []
+                        2: CSS_PARAMETER_LIST@19..27
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@19..27
+                            0: CSS_COMPONENT_VALUE_LIST@19..27
+                              0: CSS_DASHED_IDENTIFIER@19..27
+                                0: IDENT@19..27 "--header" [] []
+                        3: R_PAREN@27..28 ")" [] []
+              3: R_PAREN@28..29 ")" [] []
+          2: R_BRACKET@29..30 "]" [] []
+        3: (empty)
+      4: (empty)
+    1: WHITESPACE@30..31 " " [] []
+    2: TW_FULL_CANDIDATE@31..35
+      0: TW_VARIANT_LIST@31..31
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@31..35
+        0: TW_BASE@31..35 "flex" [] []
+        1: (empty)
+      4: (empty)
+    3: WHITESPACE@35..36 " " [] []
+    4: TW_FULL_CANDIDATE@36..39
+      0: TW_VARIANT_LIST@36..36
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@36..39
+        0: TW_BASE@36..37 "p" [] []
+        1: DASH@37..38 "-" [] []
+        2: TW_NUMBER_VALUE@38..39
+          0: TW_NUMBER@38..39 "4" [] []
+        3: (empty)
+      4: (empty)
+    5: WHITESPACE@39..40 "\n" [] []
+    6: TW_FULL_CANDIDATE@40..57
+      0: TW_VARIANT_LIST@40..40
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@40..57
+        0: TW_BASE@40..41 "w" [] []
+        1: DASH@41..42 "-" [] []
+        2: TW_ARBITRARY_VALUE@42..57
+          0: L_BRACKET@42..43 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@43..56
+            0: CSS_FUNCTION@43..56
+              0: CSS_IDENTIFIER@43..47
+                0: IDENT@43..47 "calc" [] []
+              1: L_PAREN@47..48 "(" [] []
+              2: CSS_PARAMETER_LIST@48..55
+                0: CSS_BINARY_EXPRESSION@48..55
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@48..51
+                    0: CSS_COMPONENT_VALUE_LIST@48..51
+                      0: CSS_REGULAR_DIMENSION@48..51
+                        0: CSS_NUMBER_LITERAL@48..49 "1" [] []
+                        1: IDENT@49..51 "px" [] []
+                  1: DASH@51..52 "-" [] []
+                  2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@52..55
+                    0: CSS_COMPONENT_VALUE_LIST@52..55
+                      0: CSS_REGULAR_DIMENSION@52..55
+                        0: CSS_NUMBER_LITERAL@52..53 "2" [] []
+                        1: IDENT@53..55 "px" [] []
+              3: R_PAREN@55..56 ")" [] []
+          2: R_BRACKET@56..57 "]" [] []
+        3: (empty)
+      4: (empty)
+    7: WHITESPACE@57..58 " " [] []
+    8: TW_FULL_CANDIDATE@58..77
+      0: TW_VARIANT_LIST@58..58
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@58..77
+        0: TW_BASE@58..59 "w" [] []
+        1: DASH@59..60 "-" [] []
+        2: TW_ARBITRARY_VALUE@60..77
+          0: L_BRACKET@60..61 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@61..76
+            0: CSS_FUNCTION@61..76
+              0: CSS_IDENTIFIER@61..65
+                0: IDENT@61..65 "calc" [] []
+              1: L_PAREN@65..66 "(" [] []
+              2: CSS_PARAMETER_LIST@66..75
+                0: CSS_BINARY_EXPRESSION@66..75
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@66..70
+                    0: CSS_COMPONENT_VALUE_LIST@66..70
+                      0: CSS_PERCENTAGE@66..70
+                        0: CSS_NUMBER_LITERAL@66..69 "100" [] []
+                        1: PERCENT@69..70 "%" [] []
+                  1: DASH@70..71 "-" [] []
+                  2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@71..75
+                    0: CSS_COMPONENT_VALUE_LIST@71..75
+                      0: CSS_REGULAR_DIMENSION@71..75
+                        0: CSS_NUMBER_LITERAL@71..72 "1" [] []
+                        1: IDENT@72..75 "rem" [] []
+              3: R_PAREN@75..76 ")" [] []
+          2: R_BRACKET@76..77 "]" [] []
+        3: (empty)
+      4: (empty)
+    9: WHITESPACE@77..78 " " [] []
+    10: TW_FULL_CANDIDATE@78..100
+      0: TW_VARIANT_LIST@78..78
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@78..100
+        0: TW_BASE@78..79 "w" [] []
+        1: DASH@79..80 "-" [] []
+        2: TW_ARBITRARY_VALUE@80..100
+          0: L_BRACKET@80..81 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@81..99
+            0: CSS_FUNCTION@81..99
+              0: CSS_IDENTIFIER@81..85
+                0: IDENT@81..85 "calc" [] []
+              1: L_PAREN@85..86 "(" [] []
+              2: CSS_PARAMETER_LIST@86..98
+                0: CSS_BINARY_EXPRESSION@86..98
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@86..89
+                    0: CSS_COMPONENT_VALUE_LIST@86..89
+                      0: CSS_NUMBER@86..89
+                        0: CSS_NUMBER_LITERAL@86..89 "100" [] []
+                  1: DASH@89..90 "-" [] []
+                  2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@90..98
+                    0: CSS_COMPONENT_VALUE_LIST@90..98
+                      0: CSS_FUNCTION@90..98
+                        0: CSS_IDENTIFIER@90..93
+                          0: IDENT@90..93 "var" [] []
+                        1: L_PAREN@93..94 "(" [] []
+                        2: CSS_PARAMETER_LIST@94..97
+                          0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@94..97
+                            0: CSS_COMPONENT_VALUE_LIST@94..97
+                              0: CSS_DASHED_IDENTIFIER@94..97
+                                0: IDENT@94..97 "--a" [] []
+                        3: R_PAREN@97..98 ")" [] []
+              3: R_PAREN@98..99 ")" [] []
+          2: R_BRACKET@99..100 "]" [] []
+        3: (empty)
+      4: (empty)
+    11: WHITESPACE@100..101 " " [] []
+    12: TW_FULL_CANDIDATE@101..120
+      0: TW_VARIANT_LIST@101..101
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@101..120
+        0: TW_BASE@101..102 "w" [] []
+        1: DASH@102..103 "-" [] []
+        2: TW_ARBITRARY_VALUE@103..120
+          0: L_BRACKET@103..104 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@104..119
+            0: CSS_FUNCTION@104..119
+              0: CSS_IDENTIFIER@104..108
+                0: IDENT@104..108 "calc" [] []
+              1: L_PAREN@108..109 "(" [] []
+              2: CSS_PARAMETER_LIST@109..118
+                0: CSS_BINARY_EXPRESSION@109..118
+                  0: CSS_PARENTHESIZED_EXPRESSION@109..114
+                    0: L_PAREN@109..110 "(" [] []
+                    1: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@110..113
+                      0: CSS_COMPONENT_VALUE_LIST@110..113
+                        0: CSS_REGULAR_DIMENSION@110..113
+                          0: CSS_NUMBER_LITERAL@110..111 "1" [] []
+                          1: IDENT@111..113 "px" [] []
+                    2: R_PAREN@113..114 ")" [] []
+                  1: DASH@114..115 "-" [] []
+                  2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@115..118
+                    0: CSS_COMPONENT_VALUE_LIST@115..118
+                      0: CSS_REGULAR_DIMENSION@115..118
+                        0: CSS_NUMBER_LITERAL@115..116 "2" [] []
+                        1: IDENT@116..118 "px" [] []
+              3: R_PAREN@118..119 ")" [] []
+          2: R_BRACKET@119..120 "]" [] []
+        3: (empty)
+      4: (empty)
+    13: WHITESPACE@120..121 " " [] []
+    14: TW_FULL_CANDIDATE@121..137
+      0: TW_VARIANT_LIST@121..121
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@121..137
+        0: TW_BASE@121..122 "w" [] []
+        1: DASH@122..123 "-" [] []
+        2: TW_ARBITRARY_VALUE@123..137
+          0: L_BRACKET@123..124 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@124..136
+            0: CSS_FUNCTION@124..136
+              0: CSS_IDENTIFIER@124..128
+                0: IDENT@124..128 "calc" [] []
+              1: L_PAREN@128..129 "(" [] []
+              2: CSS_PARAMETER_LIST@129..135
+                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@129..135
+                  0: CSS_COMPONENT_VALUE_LIST@129..135
+                    0: CSS_REGULAR_DIMENSION@129..135
+                      0: CSS_NUMBER_LITERAL@129..133 "1e-2" [] []
+                      1: IDENT@133..135 "px" [] []
+              3: R_PAREN@135..136 ")" [] []
+          2: R_BRACKET@136..137 "]" [] []
+        3: (empty)
+      4: (empty)
+    15: WHITESPACE@137..138 " " [] []
+    16: TW_FULL_CANDIDATE@138..161
+      0: TW_VARIANT_LIST@138..138
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@138..161
+        0: TW_BASE@138..139 "w" [] []
+        1: DASH@139..140 "-" [] []
+        2: TW_ARBITRARY_VALUE@140..161
+          0: L_BRACKET@140..141 "[" [] []
+          1: CSS_GENERIC_COMPONENT_VALUE_LIST@141..160
+            0: CSS_FUNCTION@141..160
+              0: CSS_IDENTIFIER@141..144
+                0: IDENT@141..144 "min" [] []
+              1: L_PAREN@144..145 "(" [] []
+              2: CSS_PARAMETER_LIST@145..159
+                0: CSS_BINARY_EXPRESSION@145..154
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@145..149
+                    0: CSS_COMPONENT_VALUE_LIST@145..149
+                      0: CSS_REGULAR_DIMENSION@145..149
+                        0: CSS_NUMBER_LITERAL@145..147 "10" [] []
+                        1: IDENT@147..149 "vw" [] []
+                  1: DASH@149..150 "-" [] []
+                  2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@150..154
+                    0: CSS_COMPONENT_VALUE_LIST@150..154
+                      0: CSS_REGULAR_DIMENSION@150..154
+                        0: CSS_NUMBER_LITERAL@150..151 "1" [] []
+                        1: IDENT@151..154 "rem" [] []
+                1: COMMA@154..156 "," [] [Whitespace("_")]
+                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@156..159
+                  0: CSS_COMPONENT_VALUE_LIST@156..159
+                    0: CSS_REGULAR_DIMENSION@156..159
+                      0: CSS_NUMBER_LITERAL@156..157 "2" [] []
+                      1: IDENT@157..159 "px" [] []
+              3: R_PAREN@159..160 ")" [] []
+          2: R_BRACKET@160..161 "]" [] []
+        3: (empty)
+      4: (empty)
+    17: WHITESPACE@161..162 "\n" [] []
+  3: EOF@162..162 "" [] []
+
+```

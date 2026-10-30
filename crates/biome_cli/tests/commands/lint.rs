@@ -134,18 +134,19 @@ fn maximum_diagnostics() {
             .iter()
             .filter(|m| m.level == LogLevel::Error)
             .count(),
-        20_usize
+        // 20 diagnostics, the max-diagnostics warning, and the summary
+        22_usize
     );
 
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
                     && content.contains("Diagnostics not shown")
-                    && content.contains("28")
+                    && content.contains("29")
             })
     );
 

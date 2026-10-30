@@ -1,13 +1,12 @@
 use biome_diagnostics::Severity;
-use std::collections::HashSet;
-
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlObjectValue;
-use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_duplicate_input_field_names::NoDuplicateInputFieldNamesOptions;
+
+use crate::utils::{DuplicateName, collect_duplicate_names};
 
 declare_lint_rule! {
     /// Require fields within an input object to be unique.
@@ -44,43 +43,44 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateInputFieldNames {
     type Query = Ast<GraphqlObjectValue>;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type State = DuplicateName;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateInputFieldNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let mut found: HashSet<TokenText> = HashSet::new();
-
-        for element in node.members() {
-            if let Some(name) = element.name().ok()
-                && let Some(value_token) = name.value_token().ok()
-            {
-                let string = value_token.token_text();
-                if found.contains(&string) {
-                    return Some(());
-                } else {
-                    found.insert(string);
-                }
-            }
-        }
-
-        None
+        collect_duplicate_names(ctx.query().members().into_iter().filter_map(|member| {
+            let token = member.name().ok()?.value_token().ok()?;
+            let name = token.token_text_trimmed();
+            Some((name.clone(), name, token.text_trimmed_range()))
+        }))
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = ctx.query().range();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                span,
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateName {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The input field name \""<Emphasis>{name}</Emphasis>"\" is used more than once."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Duplicate input field name."
+                    "The input field \""<Emphasis>{name}</Emphasis>"\" is repeated here."
                 },
-            )
-            .note(markup! {
-                "A GraphQL input object value is only valid if all supplied fields are uniquely named. Make sure to name every input field differently."
-            }),
-        )
+            );
+        }
+
+        Some(diagnostic.note(markup! {
+            "A GraphQL input object value is only valid if all supplied fields are uniquely named. Make sure to name every input field differently."
+        }))
     }
 }

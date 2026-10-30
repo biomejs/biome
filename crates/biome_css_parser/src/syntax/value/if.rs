@@ -12,7 +12,6 @@ use biome_parser::token_set;
 use biome_parser::{Parser, SyntaxFeature};
 
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::at_rule::container::error::expected_any_container_style_query;
 use crate::syntax::at_rule::container::parse_any_container_style_query;
 use crate::syntax::at_rule::error::AnyInParensParseRecovery;
@@ -22,17 +21,23 @@ use crate::syntax::at_rule::media::is_at_any_media_condition;
 use crate::syntax::at_rule::media::parse_any_media_condition;
 use crate::syntax::at_rule::supports::AnySupportsConditionParseRecovery;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
-use crate::syntax::at_rule::supports::{parse_any_supports_condition, parse_supports_declaration};
+use crate::syntax::at_rule::supports::{
+    SupportsContext, parse_any_supports_condition, parse_supports_declaration,
+};
 use crate::syntax::is_at_declaration;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, END_OF_PROPERTY_VALUE_TOKEN_SET,
     GenericComponentValueList,
 };
-use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
+use crate::syntax::scss::{
+    expected_scss_expression, is_at_scss_interpolation, parse_scss_expression_until,
+    parse_scss_optional_value_until_with_boundary, parse_scss_regular_interpolation,
+};
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 use crate::syntax::value::parse_error::expected_if_test_boolean_not_expr;
+use crate::syntax::{CssSyntaxFeatures, ValueParsingContext};
 
 const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T![')'], T!['}'], EOF];
@@ -41,6 +46,7 @@ const IF_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET.union(token_set!(T![')']));
 const IF_BRANCH_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![')'], T![else]));
+const SCSS_IF_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')'], T!['}']];
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
     p.at(T![if]) && p.nth_at(1, T!['('])
@@ -107,7 +113,7 @@ pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
 ///   sass( <expression> ) |
 ///   style( <style-query> )
 /// ```
-pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_if_function(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_if_function(p) {
         return Absent;
     }
@@ -123,7 +129,7 @@ pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![if]);
     p.expect(T!['(']);
 
-    CssIfBranchList.parse_list(p);
+    CssIfBranchList { context }.parse_list(p);
 
     p.expect(T![')']);
 
@@ -155,7 +161,7 @@ fn parse_if_supports_test(p: &mut CssParser) -> ParsedSyntax {
     if is_at_declaration(p) {
         parse_supports_declaration(p).ok();
     } else {
-        parse_any_supports_condition(p)
+        parse_any_supports_condition(p, SupportsContext::CssIf)
             .or_recover(
                 p,
                 &AnySupportsConditionParseRecovery,
@@ -261,6 +267,7 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![media]);
     p.bump(T!['(']);
 
+    let is_nested_media_test = std::mem::replace(&mut p.state_mut().is_in_if_media_test, true);
     if is_at_any_media_condition(p) {
         parse_any_media_condition(p)
             .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
@@ -270,6 +277,7 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
             .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
             .ok();
     }
+    p.state_mut().is_in_if_media_test = is_nested_media_test;
 
     p.expect(T![')']);
 
@@ -307,17 +315,32 @@ fn parse_if_test(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_if_test_boolean_expr_group(p: &mut CssParser) -> bool {
-    p.at(T!['(']) || is_at_if_test(p)
+    p.at(T!['(']) || is_at_if_test(p) || is_at_scss_interpolation(p)
 }
 
+/// Parses one condition operand, preserving interpolation as opaque Sass syntax.
+///
+/// The value context controls whether interpolation may be parsed, including
+/// unsupported-syntax recovery in CSS files. Parentheses remain part of the
+/// condition because interpolated text can itself contain logical operators:
+///
+/// ```scss
+/// $condition: "style(--ready: true) or media(print)";
+/// .card { color: if((#{$condition}) and style(--enabled: true): red; else: blue); }
+/// ```
+///
+/// See [Sass special functions](https://sass-lang.com/documentation/syntax/special-functions/#if).
 #[inline]
-fn parse_any_if_test_boolean_expr_group(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_if_test_boolean_expr_group(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
     // ( <boolean-expr> )
     if p.at(T!['(']) {
         let m = p.start();
         p.bump(T!['(']);
 
-        parse_any_if_test_boolean_expr(p)
+        parse_any_if_test_boolean_expr(p, context)
             .or_recover_with_token_set(
                 p,
                 &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR, token_set![T![')']]),
@@ -327,6 +350,15 @@ fn parse_any_if_test_boolean_expr_group(p: &mut CssParser) -> ParsedSyntax {
 
         p.expect(T![')']);
         return Present(m.complete(p, CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS));
+    }
+
+    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_interpolation(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+            p,
+            parse_scss_regular_interpolation,
+            |p, marker| scss_only_syntax_error(p, "SCSS interpolation", marker.range(p)),
+            Some(CSS_BOGUS_IF_TEST),
+        );
     }
 
     // <if-test>
@@ -345,7 +377,7 @@ fn is_at_if_test_boolean_not_expr(p: &mut CssParser) -> bool {
 /// not style(--color: green)
 /// ```
 #[inline]
-fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
+fn parse_if_test_boolean_not_expr(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_if_test_boolean_not_expr(p) {
         return Absent;
     }
@@ -354,7 +386,7 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![not]);
 
-    parse_any_if_test_boolean_expr_group(p)
+    parse_any_if_test_boolean_expr_group(p, context)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR, token_set![T![')'], T![:]]),
@@ -378,7 +410,11 @@ fn is_at_if_test_boolean_and_expr(p: &mut CssParser) -> bool {
 /// style(--color: green) and style(--color: yellow)
 /// ```
 #[inline]
-fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+fn parse_if_test_boolean_and_expr(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+    context: ValueParsingContext,
+) -> CompletedMarker {
     if !is_at_if_test_boolean_and_expr(p) {
         return lhs;
     }
@@ -386,13 +422,13 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
     let m = lhs.precede(p);
     p.bump(T![and]);
 
-    let recovery_result = parse_any_if_test_boolean_expr_group(p)
+    let recovery_result = parse_any_if_test_boolean_expr_group(p, context)
         .or_recover(
             p,
             &AnyIfTestBooleanExprChainParseRecovery,
             expected_if_test_boolean_expr_group,
         )
-        .map(|rhs| parse_if_test_boolean_and_expr(p, rhs));
+        .map(|rhs| parse_if_test_boolean_and_expr(p, rhs, context));
 
     if recovery_result.is_err() && p.at(T![and]) {
         // If we're here, it seems that we have
@@ -401,7 +437,7 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
         // but the parser is already at a recovered position.
         let m = p.start();
         let rhs = m.complete(p, CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
-        parse_if_test_boolean_and_expr(p, rhs);
+        parse_if_test_boolean_and_expr(p, rhs, context);
     }
 
     m.complete(p, CSS_IF_TEST_BOOLEAN_AND_EXPR)
@@ -420,7 +456,11 @@ fn is_at_if_test_boolean_or_expr(p: &mut CssParser) -> bool {
 /// style(--color: green) or style(--color: yellow)
 /// ```
 #[inline]
-fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+fn parse_if_test_boolean_or_expr(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+    context: ValueParsingContext,
+) -> CompletedMarker {
     if !is_at_if_test_boolean_or_expr(p) {
         return lhs;
     }
@@ -428,13 +468,13 @@ fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> Com
     let m = lhs.precede(p);
     p.bump(T![or]);
 
-    let recovery_result = parse_any_if_test_boolean_expr_group(p)
+    let recovery_result = parse_any_if_test_boolean_expr_group(p, context)
         .or_recover(
             p,
             &AnyIfTestBooleanExprChainParseRecovery,
             expected_if_test_boolean_expr_group,
         )
-        .map(|rhs| parse_if_test_boolean_or_expr(p, rhs));
+        .map(|rhs| parse_if_test_boolean_or_expr(p, rhs, context));
 
     if recovery_result.is_err() && p.at(T![or]) {
         // If we're here, it seems that we have
@@ -443,21 +483,21 @@ fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> Com
         // but the parser is already at a recovered position.
         let m = p.start();
         let rhs = m.complete(p, CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
-        parse_if_test_boolean_or_expr(p, rhs);
+        parse_if_test_boolean_or_expr(p, rhs, context);
     }
 
     m.complete(p, CSS_IF_TEST_BOOLEAN_OR_EXPR)
 }
 
 #[inline]
-fn parse_any_if_test_boolean_expr(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_if_test_boolean_expr(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if is_at_if_test_boolean_not_expr(p) {
-        return parse_if_test_boolean_not_expr(p);
+        return parse_if_test_boolean_not_expr(p, context);
     }
 
-    parse_any_if_test_boolean_expr_group(p).map(|lhs| match p.cur() {
-        T![and] => parse_if_test_boolean_and_expr(p, lhs),
-        T![or] => parse_if_test_boolean_or_expr(p, lhs),
+    parse_any_if_test_boolean_expr_group(p, context).map(|lhs| match p.cur() {
+        T![and] => parse_if_test_boolean_and_expr(p, lhs, context),
+        T![or] => parse_if_test_boolean_or_expr(p, lhs, context),
         _ => lhs,
     })
 }
@@ -468,25 +508,25 @@ fn is_at_any_if_condition(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_if_condition(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if p.at(T![else]) {
         let m = p.start();
         p.bump(T![else]);
         return Present(m.complete(p, CSS_ELSE_KEYWORD));
     }
 
-    parse_any_if_test_boolean_expr(p)
+    parse_any_if_test_boolean_expr(p, context)
 }
 
 #[inline]
-fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
+fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_any_if_condition(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    parse_any_if_condition(p)
+    parse_any_if_condition(p, context)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(
@@ -499,17 +539,35 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
 
     p.expect(T![:]);
 
-    GenericComponentValueList::new(IF_BRANCH_VALUE_END_SET, IF_BRANCH_VALUE_RECOVERY_SET)
-        .with_boundary(is_at_if_branch_boundary)
-        .parse_list(p);
+    let scss_value = if context.is_full_scss_parsing_allowed() {
+        parse_scss_optional_value_until_with_boundary(
+            p,
+            SCSS_IF_BRANCH_VALUE_END_SET,
+            is_nth_at_if_branch_boundary,
+        )
+    } else {
+        Absent
+    };
+
+    if scss_value.is_absent() {
+        GenericComponentValueList::new(IF_BRANCH_VALUE_END_SET, IF_BRANCH_VALUE_RECOVERY_SET)
+            .with_boundary(is_at_if_branch_boundary)
+            .with_context(context)
+            .parse_list(p);
+    }
 
     Present(m.complete(p, CSS_IF_BRANCH))
 }
 
 #[inline]
 fn is_at_if_branch_boundary(p: &mut CssParser) -> bool {
+    is_nth_at_if_branch_boundary(p, 0)
+}
+
+#[inline]
+fn is_nth_at_if_branch_boundary(p: &mut CssParser, n: usize) -> bool {
     // Treat `else:` as the start of the next branch when recovering.
-    p.at(T![else]) && p.nth_at(1, T![:])
+    p.nth_at(n, T![else]) && p.nth_at(n + 1, T![:])
 }
 
 struct AnyIfTestBooleanExprChainParseRecovery;
@@ -541,7 +599,9 @@ impl ParseRecovery for IfBranchListParseRecovery {
     }
 }
 
-struct CssIfBranchList;
+struct CssIfBranchList {
+    context: ValueParsingContext,
+}
 
 impl ParseSeparatedList for CssIfBranchList {
     type Kind = CssSyntaxKind;
@@ -549,7 +609,7 @@ impl ParseSeparatedList for CssIfBranchList {
     const LIST_KIND: Self::Kind = CSS_IF_BRANCH_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_if_branch(p)
+        parse_if_branch(p, self.context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

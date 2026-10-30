@@ -2667,6 +2667,11 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         match self.resolve_inferred_type(argument) {
             InferredTypeData::BigInt => InferredTypeData::BigInt,
+            InferredTypeData::Literal(literal)
+                if matches!(literal.literal(self.db), InferredLiteral::BigInt(_)) =>
+            {
+                InferredTypeData::BigInt
+            }
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)

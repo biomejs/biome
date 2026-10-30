@@ -2,14 +2,14 @@ use std::{
     backtrace::{Backtrace, BacktraceStatus},
     fmt::Write,
     io::{self, Write as _},
-    panic::{PanicHookInfo, set_hook},
+    panic::PanicHookInfo,
     thread,
 };
 
 /// Installs a global panic handler to show a user-friendly error message
 /// in case the CLI panics
 pub fn setup_panic_handler() {
-    set_hook(Box::new(panic_handler))
+    biome_diagnostics::panic::set_hook(Box::new(panic_handler))
 }
 
 fn panic_handler(info: &PanicHookInfo) {

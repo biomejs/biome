@@ -1,0 +1,112 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: nested_specificity.invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* The `&` resolves to `.x .y`, so `html body & .d` is (0,3,2), more specific than `.x .y .d` */
+.x {
+  .y {
+    html body & .d {}
+  }
+}
+.x .y .d {}
+
+/* Selectors nested inside `@container` are compared with each other */
+.a {
+  @container (min-width: 1px) {
+    & .b .c {}
+    & .c {}
+  }
+}
+
+/* Selectors nested inside `@starting-style` are compared with each other */
+.e {
+  @starting-style {
+    & .f .g {}
+    & .g {}
+  }
+}
+
+```
+
+# Diagnostics
+```
+nested_specificity.invalid.css:9:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 3, 0)
+  
+     7 │   }
+     8 │ }
+   > 9 │ .x .y .d {}
+       │ ^^^^^^^^
+    10 │ 
+    11 │ /* Selectors nested inside `@container` are compared with each other */
+  
+  i This selector specificity is (0, 3, 2)
+  
+    4 │ .x {
+    5 │   .y {
+  > 6 │     html body & .d {}
+      │     ^^^^^^^^^^^^^^
+    7 │   }
+    8 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+nested_specificity.invalid.css:15:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    13 │   @container (min-width: 1px) {
+    14 │     & .b .c {}
+  > 15 │     & .c {}
+       │     ^^^^
+    16 │   }
+    17 │ }
+  
+  i This selector specificity is (0, 3, 0)
+  
+    12 │ .a {
+    13 │   @container (min-width: 1px) {
+  > 14 │     & .b .c {}
+       │     ^^^^^^^
+    15 │     & .c {}
+    16 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+nested_specificity.invalid.css:23:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    21 │   @starting-style {
+    22 │     & .f .g {}
+  > 23 │     & .g {}
+       │     ^^^^
+    24 │   }
+    25 │ }
+  
+  i This selector specificity is (0, 3, 0)
+  
+    20 │ .e {
+    21 │   @starting-style {
+  > 22 │     & .f .g {}
+       │     ^^^^^^^
+    23 │     & .g {}
+    24 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

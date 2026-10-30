@@ -5,15 +5,49 @@ mod parser;
 mod syntax;
 mod token_source;
 
+use crate::lexer::BASENAME_STORE;
+pub use crate::lexer::BaseNameStore;
 use crate::parser::{TailwindLosslessTreeSink, TailwindParser};
 use crate::syntax::parse_root;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, NodeCache};
 use biome_tailwind_syntax::{TailwindSyntaxNode, TwRoot};
 
+/// Configuration for parsing Tailwind class strings.
+#[derive(Clone, Copy, Debug)]
+pub struct TailwindParserOptions<'a> {
+    base_names: &'a BaseNameStore,
+}
+
+impl Default for TailwindParserOptions<'static> {
+    fn default() -> Self {
+        Self {
+            base_names: &BASENAME_STORE,
+        }
+    }
+}
+
+impl<'a> TailwindParserOptions<'a> {
+    /// Matches dashed basenames against `base_names` instead of the built-in ones, so a store
+    /// that also holds a project's utilities, such as `slide-in-from-top`, parses
+    /// `slide-in-from-top-4` as that basename with the value `4`.
+    pub fn with_base_names(base_names: &'a BaseNameStore) -> Self {
+        Self { base_names }
+    }
+}
+
 /// Parses the provided string as Tailwind using the provided node cache.
 pub fn parse_tailwind_with_cache(source: &str, cache: &mut NodeCache) -> TailwindParse {
-    let mut parser = TailwindParser::new(source);
+    parse_tailwind_with_options(source, cache, TailwindParserOptions::default())
+}
+
+/// Parses the provided string as Tailwind using the provided node cache and options.
+pub fn parse_tailwind_with_options(
+    source: &str,
+    cache: &mut NodeCache,
+    options: TailwindParserOptions,
+) -> TailwindParse {
+    let mut parser = TailwindParser::new(source, options);
 
     parse_root(&mut parser);
 

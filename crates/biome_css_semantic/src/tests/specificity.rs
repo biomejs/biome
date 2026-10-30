@@ -369,7 +369,7 @@ fn test_specificity_deeply_nested_rules() {
         .child_ids
         .first()
         .expect("Expected '#id' child rule");
-    let _id_rule = model
+    let id_rule = model
         .get_rule_by_id(id_rule_id)
         .expect("Expected to retrieve '#id' rule");
 
@@ -384,17 +384,15 @@ fn test_specificity_deeply_nested_rules() {
     assert_eq!(div_selector.resolved().to_string(), "a div");
     assert_eq!(&div_selector.specificity, &Specificity(0, 0, 2));
 
-    // TODO: Bug. It should be (0, 1, 2) instead of (0, 1, 1)
     // 'a div .class'
-    // let class_selector = &class_rule.selectors[0];
-    // assert_eq!(class_selector.resolved().to_string(), ".class");
-    // assert_eq!(&class_selector.specificity, &Specificity(0, 1, 2));
+    let class_selector = &class_rule.selectors[0];
+    assert_eq!(class_selector.resolved().to_string(), "a div .class");
+    assert_eq!(&class_selector.specificity, &Specificity(0, 1, 2));
 
-    // TODO: Bug. It should be (1, 1, 2) instead of (1, 1, 0)
     // 'a div .class #id'
-    // let id_selector = &id_rule.selectors[0];
-    // assert_eq!(id_selector.resolved().to_string(), "#id");
-    // assert_eq!(&id_selector.specificity, &Specificity(1, 1, 2));
+    let id_selector = &id_rule.selectors[0];
+    assert_eq!(id_selector.resolved().to_string(), "a div .class #id");
+    assert_eq!(&id_selector.specificity, &Specificity(1, 1, 2));
 }
 
 #[test]
@@ -447,6 +445,40 @@ fn test_specificity_scss_interpolated_sub_selector() {
             Specificity(0, 1, 0),
             Specificity(0, 1, 0),
             Specificity(1, 2, 0),
+        ]
+    );
+}
+
+#[test]
+fn test_specificity_scss_compound_placeholders() {
+    let parse = parse_css(
+        "%a, %a%b, %a%b%c, %a.card:hover%b, .card%a%b, button%a%b {}",
+        CssFileSource::scss(),
+        CssParserOptions::default(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    let rule = rules
+        .first()
+        .expect("expected the compound placeholder selector rule");
+    let specificities = rule
+        .selectors
+        .iter()
+        .map(|selector| selector.specificity)
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        specificities,
+        [
+            Specificity(0, 1, 0),
+            Specificity(0, 2, 0),
+            Specificity(0, 3, 0),
+            Specificity(0, 4, 0),
+            Specificity(0, 3, 0),
+            Specificity(0, 2, 1),
         ]
     );
 }

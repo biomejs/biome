@@ -171,6 +171,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "plugin",
         "slot",
         "inline",
+        "prefix",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -662,6 +663,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "SCSS_KEYFRAMES_NAME",
         "SCSS_KEYFRAMES_SELECTOR",
         "SCSS_KEYFRAMES_VARIABLE_DECLARATION",
+        "SCSS_SUPPORTS_DECLARATION",
         "SCSS_SUPPORTS_FEATURE_DECLARATION",
         "SCSS_SUPPORTS_INTERPOLATED_CONDITION",
         "SCSS_CONTAINER_INTERPOLATED_QUERY",
@@ -705,6 +707,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "SCSS_INTERPOLATED_URL_VALUE_PART_LIST",
         "SCSS_INTERPOLATED_VALUE",
         "SCSS_INTERPOLATED_VALUE_PART_LIST",
+        "SCSS_HASH_VALUE",
         "SCSS_KEYWORD_ARGUMENT",
         "SCSS_ARBITRARY_ARGUMENT",
         "SCSS_LEGACY_IF_FUNCTION",
@@ -720,6 +723,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "SCSS_PARENT_SELECTOR_SUFFIX_PART_LIST",
         "SCSS_PARENT_SELECTOR_SUFFIX_HYPHEN",
         "SCSS_PARENT_SELECTOR_VALUE",
+        "SCSS_PERCENT_VALUE",
         "SCSS_PARENTHESIZED_EXPRESSION",
         "SCSS_STRING_TEXT",
         "SCSS_URL_TEXT",
@@ -745,6 +749,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_FUNCTIONAL_UTILITY_NAME",
         "TW_CUSTOM_VARIANT_SHORTHAND",
         "TW_SOURCE_INLINE",
+        "TW_THEME_OPTION_LIST",
+        "TW_THEME_PREFIX_OPTION",
         // Unknowns
         "CSS_UNKNOWN_BLOCK_AT_RULE",
         "CSS_UNKNOWN_VALUE_AT_RULE",

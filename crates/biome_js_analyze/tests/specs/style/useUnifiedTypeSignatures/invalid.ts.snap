@@ -186,12 +186,14 @@ function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", number>): void;
 ```
 invalid.ts:1:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
   > 1 │ function f1(a: number): void;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ function f1(b: string): void;
     3 │ function f1(a: number | string): void {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -208,7 +210,7 @@ invalid.ts:1:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━�
 ```
 invalid.ts:5:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     3 │ function f1(a: number | string): void {}
     4 │ 
@@ -216,6 +218,8 @@ invalid.ts:5:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ function f2(x: any): void;
     7 │ function f2(x: any): any {
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -234,7 +238,7 @@ invalid.ts:5:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━�
 ```
 invalid.ts:11:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
      9 │ }
     10 │ 
@@ -242,6 +246,8 @@ invalid.ts:11:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ function f3(x: string): void;
     13 │ function f3(x: any): any {
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -260,7 +266,7 @@ invalid.ts:11:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:17:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     15 │ }
     16 │ 
@@ -268,6 +274,8 @@ invalid.ts:17:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ function opt(xs: number[], y: string): void;
     19 │ function opt(...args: any[]) {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -286,13 +294,15 @@ invalid.ts:17:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:22:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     21 │ interface I1 {
   > 22 │     a0(): void;
        │     ^^^^^^^^^^^
     23 │     a0(x: string): string;
     24 │     a0(x: number): void;
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -311,13 +321,15 @@ invalid.ts:22:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:28:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     27 │ interface I2 {
   > 28 │     a1(): void;
        │     ^^^^^^^^^^^
     29 │     a1(x: number): void;
     30 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -335,13 +347,15 @@ invalid.ts:28:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:33:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     32 │ // Exported functions.
   > 33 │ export function f4(a: number): void;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     34 │ export function f4(a: string): void;
     35 │ export function f4(a: unknown): void {
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -363,13 +377,15 @@ invalid.ts:33:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:40:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     39 │ // Exported default functions.
   > 40 │ export default function f5(a: number): void;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     41 │ export default function f5(a: string): void;
     42 │ export default function f5(a: unknown): void {
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -391,7 +407,7 @@ invalid.ts:40:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:48:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     46 │ // The second signature is different by single required parameter.
     47 │ interface I3 {
@@ -399,6 +415,8 @@ invalid.ts:48:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^^^
     49 │     a3(x: number, y?: number, ...z: number[]): void;
     50 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -416,7 +434,7 @@ invalid.ts:48:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:54:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     52 │ // The difference is the rest parameter.
     53 │ interface I4 {
@@ -424,6 +442,8 @@ invalid.ts:54:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^^
     55 │     b(...x: number[]): void;
     56 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Remove the unnecessary overload signature.
   
@@ -439,7 +459,7 @@ invalid.ts:54:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:60:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     58 │ // Both parameters are optional.
     59 │ interface I5 {
@@ -447,6 +467,8 @@ invalid.ts:60:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^^^^^^^^^^^^^
     61 │     c2(x?: string): void;
     62 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -464,13 +486,15 @@ invalid.ts:60:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:65:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     64 │ interface I6 {
   > 65 │     d(x: number): void;
        │     ^^^^^^^^^^^^^^^^^^^
     66 │     d(x: string): void;
     67 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -488,7 +512,7 @@ invalid.ts:65:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:71:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     69 │ // Support call signatures in types.
     70 │ type T1 = {
@@ -496,6 +520,8 @@ invalid.ts:71:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^
     72 │     (x: number): void;
     73 │ };
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -513,7 +539,7 @@ invalid.ts:71:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:77:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     75 │ // Support call signatures in interfaces.
     76 │ interface I7 {
@@ -521,6 +547,8 @@ invalid.ts:77:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^
     78 │     (x: number): void;
     79 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -538,7 +566,7 @@ invalid.ts:77:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:83:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     81 │ // Supports private methods in classes.
     82 │ declare class Example {
@@ -546,6 +574,8 @@ invalid.ts:83:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     84 │     #privateMethod(a: number, b?: string): void;
     85 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Remove the unnecessary overload signature.
   
@@ -561,7 +591,7 @@ invalid.ts:83:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:89:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     87 │ // Supports class constructors.
     88 │ declare class C {
@@ -569,6 +599,8 @@ invalid.ts:89:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^^^^^^
     90 │     constructor(x: number);
     91 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads by making parameters optional.
   
@@ -586,7 +618,7 @@ invalid.ts:89:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:95:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     93 │ // Supports unions.
     94 │ interface I8 {
@@ -594,6 +626,8 @@ invalid.ts:95:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
        │     ^^^^^^^^^^^^^
     96 │     f(x: string | boolean);
     97 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -611,7 +645,7 @@ invalid.ts:95:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━
 ```
 invalid.ts:101:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
      99 │ // Supports tuples.
     100 │ interface I9 {
@@ -619,6 +653,8 @@ invalid.ts:101:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │     ^^^^^^^^^^^^^
     102 │     f(x: [string, boolean]);
     103 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -636,7 +672,7 @@ invalid.ts:101:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:107:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     105 │ // Supports generics.
     106 │ interface Generic<T> {
@@ -644,6 +680,8 @@ invalid.ts:107:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │     ^^^^^^^^^^^^^^^^
     108 │     y(x: T): void;
     109 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -661,13 +699,15 @@ invalid.ts:107:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:112:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     111 │ // Merges signatures when type parameters are the same.
   > 112 │ function f6<T extends number>(x: T[]): void;
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     113 │ function f6<T extends number>(x: T): void;
     114 │ function f6(x: unknown): void {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -689,7 +729,7 @@ invalid.ts:112:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:118:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     116 │ // Supports abstract methods.
     117 │ abstract class Foo {
@@ -697,6 +737,8 @@ invalid.ts:118:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     119 │     public abstract f(x: string): void;
     120 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -714,7 +756,7 @@ invalid.ts:118:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:124:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     122 │ // Supports literal names.
     123 │ interface I10 {
@@ -722,6 +764,8 @@ invalid.ts:124:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │     ^^^^^^^^^^^^^^^^^^^^^
     125 │     'f'(x: number): void;
     126 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -739,7 +783,7 @@ invalid.ts:124:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:130:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     128 │ // Supports constructor signatures.
     129 │ interface Foo {
@@ -747,6 +791,8 @@ invalid.ts:130:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │     ^^^^^^^^^^^^^^^^^^^^^
     131 │     new (x: number): Foo;
     132 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -764,7 +810,7 @@ invalid.ts:130:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:136:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     134 │ // Supports computed property names.
     135 │ interface IFoo {
@@ -772,6 +818,8 @@ invalid.ts:136:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     137 │     ['name'](x: number): void;
     138 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -789,13 +837,15 @@ invalid.ts:136:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:141:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     140 │ declare module 'foo' {
   > 141 │     export default function (foo: number): string[];
         │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     142 │     export default function (foo: number, bar?: string): string[];
     143 │ }
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Remove the unnecessary overload signature.
   
@@ -811,7 +861,7 @@ invalid.ts:141:5 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:145:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     143 │ }
     144 │ 
@@ -819,6 +869,8 @@ invalid.ts:145:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     146 │ declare function f7(x: number): void;
     147 │ declare function f7(x: boolean): void;
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -837,7 +889,7 @@ invalid.ts:145:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:151:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     149 │ // Transfers JsDoc comments to signatures.
     150 │ /** JsDoc 1 */
@@ -845,6 +897,8 @@ invalid.ts:151:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     152 │ /** JsDoc 2 */
     153 │ declare function f8(x: number): void;
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -869,7 +923,7 @@ invalid.ts:151:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:157:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     155 │ // Transfers JsDoc comments to signatures even if signatures are not adjacent.
     156 │ /** JsDoc 1 */
@@ -877,6 +931,8 @@ invalid.ts:157:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     158 │ declare function f9(x: boolean): boolean;
     159 │ /** JsDoc 2 */
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -902,13 +958,15 @@ invalid.ts:157:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:163:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     162 │ // Merges "this" params.
   > 163 │ declare function f10(this: string): void;
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     164 │ declare function f10(this: number): void;
     165 │ 
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -930,7 +988,7 @@ invalid.ts:163:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:166:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     164 │ declare function f10(this: number): void;
     165 │ 
@@ -938,6 +996,8 @@ invalid.ts:166:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     167 │ function tuple([c, d]: [number, string]): void;
     168 │ 
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -956,7 +1016,7 @@ invalid.ts:166:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:169:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     167 │ function tuple([c, d]: [number, string]): void;
     168 │ 
@@ -964,6 +1024,8 @@ invalid.ts:169:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     170 │ function f({ c, d }: Record<string, number>): void;
     171 │ function f(foo: Record<string, any>): void {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -982,13 +1044,15 @@ invalid.ts:169:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━�
 ```
 invalid.ts:174:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     173 │ // Merges latter 2 type parameters into 1
   > 174 │ function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", void>): void;
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     175 │ function fizzbuzz([a]: SomeType<string>, { c }: Record<"c", number>): void;
     176 │ 
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   

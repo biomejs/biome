@@ -53,6 +53,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::Eslint("no-console").same(),
             RuleSource::EslintVueJs("no-console").same(),
+            RuleSource::DenoLint("no-console").same(),
         ],
         recommended: false,
         severity: Severity::Warning,

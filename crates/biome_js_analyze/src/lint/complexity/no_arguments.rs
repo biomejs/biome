@@ -57,6 +57,7 @@ impl Rule for NoArguments {
             markup! {
                 "Use the "<Emphasis>"rest parameters"</Emphasis>" instead of "<Emphasis>"arguments"</Emphasis>"."
             },
-        ).note(markup! {<Emphasis>"arguments"</Emphasis>" does not have "<Emphasis>"Array.prototype"</Emphasis>" methods and can be inconvenient to use."}))
+        ).note(markup! {<Emphasis>"arguments"</Emphasis>" does not have "<Emphasis>"Array.prototype"</Emphasis>" methods and can be inconvenient to use."})
+        .note(markup! {"Declare a rest parameter, such as "<Emphasis>"...args"</Emphasis>", in the function signature and use it instead."}))
     }
 }

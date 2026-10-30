@@ -341,6 +341,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssForwardAsClause" => lang::ScssForwardAsClause::KIND_SET.iter().next(),
         "ScssForwardAtRule" => lang::ScssForwardAtRule::KIND_SET.iter().next(),
         "ScssFunctionAtRule" => lang::ScssFunctionAtRule::KIND_SET.iter().next(),
+        "ScssHashValue" => lang::ScssHashValue::KIND_SET.iter().next(),
         "ScssHideClause" => lang::ScssHideClause::KIND_SET.iter().next(),
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),
@@ -426,11 +427,13 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssPartialCombinatorSelector" => {
             lang::ScssPartialCombinatorSelector::KIND_SET.iter().next()
         }
+        "ScssPercentValue" => lang::ScssPercentValue::KIND_SET.iter().next(),
         "ScssPlaceholderSelector" => lang::ScssPlaceholderSelector::KIND_SET.iter().next(),
         "ScssPlainImport" => lang::ScssPlainImport::KIND_SET.iter().next(),
         "ScssReturnAtRule" => lang::ScssReturnAtRule::KIND_SET.iter().next(),
         "ScssShowClause" => lang::ScssShowClause::KIND_SET.iter().next(),
         "ScssStringText" => lang::ScssStringText::KIND_SET.iter().next(),
+        "ScssSupportsDeclaration" => lang::ScssSupportsDeclaration::KIND_SET.iter().next(),
         "ScssSupportsFeatureDeclaration" => {
             lang::ScssSupportsFeatureDeclaration::KIND_SET.iter().next()
         }
@@ -459,6 +462,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "TwSourceAtRule" => lang::TwSourceAtRule::KIND_SET.iter().next(),
         "TwSourceInline" => lang::TwSourceInline::KIND_SET.iter().next(),
         "TwThemeAtRule" => lang::TwThemeAtRule::KIND_SET.iter().next(),
+        "TwThemePrefixOption" => lang::TwThemePrefixOption::KIND_SET.iter().next(),
         "TwUtilityAtRule" => lang::TwUtilityAtRule::KIND_SET.iter().next(),
         "TwValueThemeReference" => lang::TwValueThemeReference::KIND_SET.iter().next(),
         "TwVariantAtRule" => lang::TwVariantAtRule::KIND_SET.iter().next(),
@@ -743,7 +747,8 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssPlainImport" => &[("url", 0), ("layer", 1), ("supports", 2), ("media", 3)],
         "ScssReturnAtRule" => &[("value", 1)],
         "ScssShowClause" => &[("members", 1)],
-        "ScssSupportsFeatureDeclaration" => &[("name", 1), ("value", 3), ("important", 4)],
+        "ScssSupportsDeclaration" => &[("name", 0), ("value", 2), ("important", 3)],
+        "ScssSupportsFeatureDeclaration" => &[("declaration", 1)],
         "ScssSupportsInterpolatedCondition" => &[("condition", 0)],
         "ScssUnaryExpression" => &[("expression", 1)],
         "ScssUseAsClause" => &[("namespace", 1)],
@@ -762,7 +767,8 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "TwReferenceAtRule" => &[("path", 1)],
         "TwSourceAtRule" => &[("source", 2)],
         "TwSourceInline" => &[("content", 2)],
-        "TwThemeAtRule" => &[("name", 1), ("block", 2)],
+        "TwThemeAtRule" => &[("options", 1), ("block", 2)],
+        "TwThemePrefixOption" => &[("name", 2)],
         "TwUtilityAtRule" => &[("name", 1), ("block", 2)],
         "TwValueThemeReference" => &[("reference", 0)],
         "TwVariantAtRule" => &[("name", 1), ("block", 2)],

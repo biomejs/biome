@@ -5,6 +5,7 @@ mod lint;
 mod registry;
 mod suppression;
 mod suppression_action;
+mod utils;
 
 pub use crate::registry::visit_registry;
 pub use crate::suppression::GraphqlSuppression;

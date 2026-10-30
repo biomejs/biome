@@ -1,0 +1,80 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noDuplicateMapKeys": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.md`
+
+```md
+---
+title: Biome
+title: Duplicate
+---
+
+# Embeds
+
+```js
+debugger;
+```
+
+```js
+function () {}
+```
+
+```css
+a {
+  color: red;
+  color: blue;
+}
+```
+
+```html
+<img src="code-block.png">
+```
+
+<img src="html-block.png">
+
+<!-- biome-ignore-start lint/suspicious/noDebugger: example -->
+
+```js
+debugger;
+```
+
+<!-- biome-ignore-end lint/suspicious/noDebugger: example -->
+
+```js
+// biome-ignore lint/suspicious/noDebugger: example
+debugger;
+```
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

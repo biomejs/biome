@@ -147,6 +147,12 @@ impl Rule for UseGetterReturn {
                         "This "<Emphasis>"getter"</Emphasis>" should "<Emphasis>"return"</Emphasis>" a value."
                     },
                 )
+                .note(markup! {
+                    "A getter without a "<Emphasis>"return"</Emphasis>" statement always evaluates to "<Emphasis>"undefined"</Emphasis>", so reading the property does not give the value the code intends."
+                })
+                .note(markup! {
+                    "Add a "<Emphasis>"return"</Emphasis>" statement that returns the value of the property."
+                })
             }
             InvalidGetterReturn::EmptyReturn(return_stmt_range) => RuleDiagnostic::new(
                 rule_category!(),
@@ -154,7 +160,13 @@ impl Rule for UseGetterReturn {
                 markup! {
                     "This "<Emphasis>"return"</Emphasis>" should return a value because it is located in a "<Emphasis>"getter"</Emphasis>"."
                 },
-            ),
+            )
+            .note(markup! {
+                "A "<Emphasis>"return"</Emphasis>" without a value makes the getter evaluate to "<Emphasis>"undefined"</Emphasis>", so reading the property does not give the value the code intends."
+            })
+            .note(markup! {
+                "Return the value of the property from this statement."
+            }),
         };
         Some(diagnostic)
     }

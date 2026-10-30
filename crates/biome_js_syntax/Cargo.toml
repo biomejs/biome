@@ -26,6 +26,7 @@ smallvec            = { workspace = true }
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }
 biome_js_parser  = { path = "../biome_js_parser" }
+biome_languages  = { path = "../biome_languages", features = ["lang_js"] }
 
 [features]
 schema = ["biome_rowan/serde", "schemars"]

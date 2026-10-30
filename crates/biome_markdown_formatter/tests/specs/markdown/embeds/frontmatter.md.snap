@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/frontmatter.md
+---
+
+# Input
+
+```md
+---
+title:    Biome
+tags: [markdown,   embeds]
+---
+
+# Frontmatter
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+---
+title: Biome
+tags: [markdown, embeds]
+---
+
+# Frontmatter
+
+```

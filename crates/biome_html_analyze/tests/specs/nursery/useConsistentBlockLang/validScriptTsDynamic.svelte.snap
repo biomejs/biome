@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validScriptTsDynamic.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts">
+</script>
+
+<script module lang={lang}>
+</script>
+
+<script {lang}>
+</script>
+
+```

@@ -1,0 +1,5 @@
+// should not generate diagnostics
+$pseudo: first;
+@page :#{$pseudo} { margin: 1in; }
+@page report:#{$pseudo} { margin: 1in; }
+@page :fi#{rst} { margin: 1in; }

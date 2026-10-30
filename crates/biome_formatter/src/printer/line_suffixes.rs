@@ -1,17 +1,17 @@
-use crate::FormatElement;
 use crate::printer::call_stack::PrintElementArgs;
+use crate::{FormatElement, Source};
 
 /// Stores the queued line suffixes.
 #[derive(Debug, Default)]
-pub(super) struct LineSuffixes<'a> {
-    suffixes: Vec<LineSuffixEntry<'a>>,
+pub(super) struct LineSuffixes<'a, S: Source> {
+    suffixes: Vec<LineSuffixEntry<'a, S>>,
 }
 
-impl<'a> LineSuffixes<'a> {
+impl<'a, S: Source> LineSuffixes<'a, S> {
     /// Extends the line suffixes with `elements`, storing their call stack arguments with them.
     pub(super) fn extend<I>(&mut self, args: PrintElementArgs, elements: I)
     where
-        I: IntoIterator<Item = &'a FormatElement>,
+        I: IntoIterator<Item = &'a FormatElement<S>>,
     {
         self.suffixes
             .extend(elements.into_iter().map(LineSuffixEntry::Suffix));
@@ -21,7 +21,7 @@ impl<'a> LineSuffixes<'a> {
     /// Takes all the pending line suffixes.
     pub(super) fn take_pending<'l>(
         &'l mut self,
-    ) -> impl DoubleEndedIterator<Item = LineSuffixEntry<'a>> + 'l + ExactSizeIterator {
+    ) -> impl DoubleEndedIterator<Item = LineSuffixEntry<'a, S>> + 'l + ExactSizeIterator {
         self.suffixes.drain(..)
     }
 
@@ -32,9 +32,9 @@ impl<'a> LineSuffixes<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub(super) enum LineSuffixEntry<'a> {
+pub(super) enum LineSuffixEntry<'a, S: Source> {
     /// A line suffix to print
-    Suffix(&'a FormatElement),
+    Suffix(&'a FormatElement<S>),
 
     /// Potentially changed call arguments that should be used to format any following items.
     Args(PrintElementArgs),

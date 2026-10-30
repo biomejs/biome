@@ -1,0 +1,21 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-plain-block-binding.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const shared = null;
+</script>
+
+<script setup>
+const input = null;
+</script>
+
+<template>
+  <input ref="input" />
+  <input ref="shared" />
+</template>
+
+```

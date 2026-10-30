@@ -50,6 +50,11 @@ declare_lint_rule! {
     /// [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element), and
     /// [MathML](https://developer.mozilla.org/en-US/docs/Web/MathML/Element).
     ///
+    /// ## SCSS limitations
+    ///
+    /// Type selector names containing SCSS interpolation are ignored because the emitted name cannot
+    /// be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -128,8 +133,13 @@ impl Rule for NoUnknownTypeSelector {
             )
             .note(markup! {
                 "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors">"MDN web docs"</Hyperlink>" for more details."
-            }).note(markup! {
-                "Consider replacing the unknown type selector with valid one."})
-            )
+            })
+            .note(markup! {
+                "A selector for an element that does not exist never matches, so its styles are never applied."
+            })
+            .note(markup! {
+                "Consider replacing the unknown type selector with valid one."
+            }),
+        )
     }
 }

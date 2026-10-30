@@ -1,21 +1,36 @@
 use super::*;
 use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use std::slice;
 
 #[salsa::db]
-#[derive(Default)]
 struct TestDb {
-    parsed: Option<ParsedSource>,
+    parsed: Option<Source>,
+    parse: ParseHandle,
     storage: Storage<Self>,
+}
+
+/// Returns the parse that the test made of the text, which is the tree the
+/// analyzer analyzes.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, _source: Source) -> SourceOutput {
+        SourceOutput {
+            parse: self.parse.clone(),
+            document_source_index: 0,
+            snippets: Vec::new(),
+        }
+    }
 }
 
 #[salsa::db]
@@ -27,7 +42,7 @@ impl LanguageDb for TestDb {
 
 #[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
         self.parsed
     }
 }
@@ -36,15 +51,13 @@ impl biome_db::Db for TestDb {
 impl salsa::Database for TestDb {}
 
 fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
-    let mut db = TestDb::default();
-    let parsed = ParsedSource::new(
-        &db,
-        Utf8PathBuf::new(),
-        parsed.syntax().as_send().unwrap().into(),
-        0,
-        vec![],
-    );
-    db.parsed = Some(parsed);
+    let mut db = TestDb {
+        parsed: None,
+        parse: AnyParse::from(parsed.syntax().as_send().unwrap()).into(),
+        storage: Storage::default(),
+    };
+    let text = parsed.syntax().text_with_trivia().to_string();
+    db.parsed = Some(Source::new(&db, Utf8PathBuf::new(), text.into(), 0));
     Rc::new(db)
 }
 
@@ -987,6 +1000,60 @@ console.log("should be suppressed");"#;
     });
 
     assert!(diagnostic_found, "must have diagnostics");
+}
+
+#[test]
+fn line_suppression_follows_line_breaks_in_tokens_and_comments() {
+    const SOURCE: &str = "// biome-ignore lint/suspicious/noDoubleEquals: template spans two lines
+a1 == `
+` + (b1 == c1);
+d1 == e1; // biome-ignore lint/suspicious/noDoubleEquals: trailing comment
+f1 == g1;
+h1 == /* biome-ignore lint/suspicious/noDoubleEquals: comment spans two lines
+*/ i1;
+j1 == k1;
+";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noDoubleEquals")]),
+        ..AnalysisFilter::default()
+    };
+
+    let mut reported = Vec::new();
+    let options = AnalyzerOptions::default();
+    analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        JsAnalyzerServices::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let code = diag.category().unwrap();
+                if code != category!("lint/suspicious/noDoubleEquals") {
+                    panic!("unexpected diagnostic {code:?}");
+                }
+                let range = diag.get_span().unwrap();
+                reported.push(&SOURCE[..usize::from(range.start())]);
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    // Each comment suppresses the line after the one it ends on, and only that line.
+    let reported: Vec<_> = reported
+        .into_iter()
+        .map(|before| before.rsplit(['\n', '(']).next().unwrap().trim_end())
+        .collect();
+    assert_eq!(reported, ["b1", "d1", "h1"]);
 }
 
 fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {

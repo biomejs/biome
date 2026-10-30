@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect plugins --config-path=packages/mobile --path=packages/mobile/src/file.ts
+```
+
+## `packages/mobile/biome.json`
+
+```json
+{
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**"] }
+  ],
+  "overrides": [{ "includes": ["src/**"], "plugins": ["./src-override.grit"] }]
+}
+```
+
+## `packages/mobile/base.grit`
+
+```grit
+`unterminated
+```
+
+## `packages/mobile/src-only.grit`
+
+```grit
+`unterminated
+```
+
+## `packages/mobile/src-override.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration enables 3 plugin rules for src/file.ts.
+  
+  Local plugins
+  
+  - base.grit (rule name: base)
+  - src-only.grit (rule name: src-only)
+  - src-override.grit (rule name: src-override)
+  
+
+```

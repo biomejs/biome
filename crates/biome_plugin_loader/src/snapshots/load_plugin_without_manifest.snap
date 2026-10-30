@@ -19,5 +19,5 @@ No input was analyzed.
 ```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Failed to resolve the Biome manifest from /my-plugin
+  × Biome couldn't find a biome-manifest.json or biome-manifest.jsonc file in /my-plugin.
 ```

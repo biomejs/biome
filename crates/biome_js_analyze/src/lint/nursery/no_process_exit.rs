@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// - If you want to disallow reading `process.env`, see [`noProcessEnv`](https://biomejs.dev/linter/rules/no-process-env/).
     ///
     pub NoProcessExit {
-        version: "next",
+        version: "2.6.0",
         name: "noProcessExit",
         language: "js",
         sources: &[

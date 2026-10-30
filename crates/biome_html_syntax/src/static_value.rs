@@ -106,10 +106,9 @@ impl StaticValue {
     /// ```
     /// use biome_html_syntax::static_value::StaticValue;
     /// use biome_html_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let str_literal = make::html_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+    ///     .with_leading_space();
     /// assert!(StaticValue::String(str_literal).is_not_string_constant("bar"));
     /// ```
     pub fn is_not_string_constant(&self, text: &str) -> bool {
@@ -128,10 +127,9 @@ impl StaticValue {
     /// ```
     /// use biome_html_syntax::static_value::StaticValue;
     /// use biome_html_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let str_literal = make::html_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+    ///     .with_leading_space();
     /// assert_eq!(StaticValue::String(str_literal).as_string_constant().unwrap(), "foo");
     /// ```
     pub fn as_string_constant(&self) -> Option<&str> {

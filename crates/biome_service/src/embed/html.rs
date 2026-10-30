@@ -74,6 +74,9 @@ pub(crate) enum EmbedCandidate {
         is_class_attribute: bool,
         /// Whether the value holds the props of a Vue slot (`v-slot="{ item }"`)
         is_slot_props: bool,
+        /// Whether the value holds the type parameters of a Vue `<script setup>`
+        /// (`generic="T extends Item"`)
+        is_generics_list: bool,
     },
     Attribute {
         name: TokenText,
@@ -84,6 +87,9 @@ pub(crate) enum EmbedCandidate {
 #[derive(Debug, Default)]
 pub(crate) enum EmbedBlockKind {
     Svelte(SvelteBlockKind),
+    /// A Svelte mustache whose value is rendered as text.
+    /// See [HtmlTextExpression::is_svelte_text_interpolation](biome_html_syntax::HtmlTextExpression::is_svelte_text_interpolation).
+    SvelteTextInterpolation,
     #[default]
     Neutral,
 }

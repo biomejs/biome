@@ -27,6 +27,8 @@ export const NAMESPACE_PROBE_VALUE: Record<ThemeNamespaceVariant, string> = {
 	Ease: "linear",
 	Animate: "spin 1s linear infinite",
 	BackgroundImage: "linear-gradient(#000, #fff)",
+	GridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+	GridTemplateRows: "repeat(2, minmax(0, 1fr))",
 };
 
 // Token used for the per-namespace probe class. Lowercase + variant
@@ -36,15 +38,28 @@ export function probeToken(variant: ThemeNamespaceVariant): string {
 }
 
 // Bare value samples used for the named-path predicate probe (no
-// brackets). Tailwind v4 only accepts these three predicate kinds in
+// brackets). Tailwind v4 only accepts numbers, percentages, and ratios in
 // named form; other CSS value types must be written as arbitrary
 // values (`[length:1rem]` etc.).
-export const NAMED_PREDICATE_PROBES: { type: NamedValueType; value: string }[] =
-	[
-		{ type: "Number", value: "7" },
-		{ type: "Percentage", value: "25%" },
-		{ type: "Ratio", value: "1/2" },
-	];
+//
+// A utility that takes `7` takes a bare number, and the other two samples
+// tell which numbers: `1.3` means any number, `1.25` alone means a
+// multiple of 0.25, and neither means integers only.
+export const NAMED_NUMBER_PROBES = {
+	integer: "7",
+	multiplier: "1.25",
+	number: "1.3",
+} as const;
+
+// A percentage gets a second sample because some utilities only take a
+// range (`font-stretch-*` takes 50% to 200%).
+export const NAMED_PREDICATE_PROBES: {
+	type: Exclude<NamedValueType, "Integer" | "Multiplier" | "Number">;
+	values: string[];
+}[] = [
+	{ type: "Percentage", values: ["25%", "100%"] },
+	{ type: "Ratio", values: ["1/2"] },
+];
 
 // Per-CssDataType samples used for the arbitrary-path probe. The
 // explicit `[<dataType-marker>:<value>]` syntax forces dispatch

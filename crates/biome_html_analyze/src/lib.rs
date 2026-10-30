@@ -9,18 +9,22 @@ mod services;
 mod suppression;
 mod suppression_action;
 mod tailwind;
+mod vue;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
+pub use crate::services::vue::{VueSemantic, VueSemanticServices};
 pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer, Suppression,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer,
+    Suppression,
 };
 use biome_aria::AriaRoles;
+use biome_db::Source;
 use biome_diagnostics::Error;
 use biome_embeds::EmbeddedData;
 use biome_html_syntax::HtmlLanguage;
@@ -29,6 +33,7 @@ use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::SuppressionDiagnostic;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
+use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -40,9 +45,17 @@ pub struct HtmlAnalyzerServices {
     pub language_db: Option<Rc<dyn LanguageDb>>,
     pub embedded_data: Option<Arc<EmbeddedData>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
+    /// The analyzed document, which the embedded queries of `language_db`
+    /// read.
+    pub document: Option<Source>,
 }
 
 impl HtmlAnalyzerServices {
+    pub fn with_document(mut self, document: Source) -> Self {
+        self.document = Some(document);
+        self
+    }
+
     pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
         self.module_db = Some(module_db);
         self
@@ -71,6 +84,7 @@ impl std::fmt::Debug for HtmlAnalyzerServices {
             .field("language_db", &self.language_db.as_ref().map(|_| "..."))
             .field("embedded_data", &self.embedded_data.as_ref().map(|_| "..."))
             .field("project_layout", &self.project_layout)
+            .field("document", &self.document)
             .finish()
     }
 }
@@ -107,6 +121,35 @@ where
         html_services,
         suppression,
         None,
+        None,
+        emit_signal,
+    )
+}
+
+/// Analyzes HTML embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets::<F, B, ()>(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        Some(inspector),
+        None,
         emit_signal,
     )
 }
@@ -134,6 +177,7 @@ where
         source_type,
         html_services,
         suppression,
+        None,
         Some(snippets),
         emit_signal,
     )
@@ -146,6 +190,7 @@ fn analyze_with_optional_snippets<'a, F, B, Output>(
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
     suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'_, '_>>,
     snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -166,6 +211,7 @@ where
         source_type,
         html_services,
         suppression,
+        snippet_inspector,
         snippets,
         emit_signal,
     )
@@ -201,6 +247,7 @@ where
         html_services,
         suppression,
         None,
+        None,
         emit_signal,
     )
 }
@@ -213,6 +260,7 @@ fn analyze_with_inspect_matcher_and_snippets<'a, V, F, B, Output>(
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
     suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'_, '_>>,
     snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
@@ -234,13 +282,26 @@ where
     services.insert_service(source_type);
     services.insert_service(TwSyntaxService::default());
     services.insert_service(Arc::new(AriaRoles));
+    services.insert_service(html_services.module_db.as_deref().map_or_else(
+        || Arc::new(TailwindDesignSystem::default()),
+        |module_db| TailwindDesignSystem::from_module_graph(module_db, options.tailwind()),
+    ));
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
     }
+    if let Some(language_db) = &html_services.language_db {
+        services.insert_service(language_db.clone());
+        services.insert_service(options.file_path.clone());
+    }
+    if let Some(document) = html_services.document {
+        services.insert_service(document);
+    }
     if let Some(embedded_data) = html_services.embedded_data {
         services.insert_service(EmbeddedService::from_data(embedded_data));
-    } else if let Some(language_db) = html_services.language_db {
-        services.insert_service(EmbeddedService::new(language_db, options.file_path.clone()));
+    } else if let Some(language_db) = html_services.language_db
+        && let Some(document) = html_services.document
+    {
+        services.insert_service(EmbeddedService::new(language_db, document));
     }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);
@@ -264,9 +325,10 @@ where
         services,
         options,
     };
-    let result = match snippets {
-        Some(snippets) => analyzer.run_with_snippets(ctx, snippets),
-        None => analyzer.run(ctx),
+    let result = match (snippet_inspector, snippets) {
+        (Some(inspector), _) => analyzer.run_snippet(ctx, inspector),
+        (None, Some(snippets)) => analyzer.run_with_snippets(ctx, snippets),
+        (None, None) => analyzer.run(ctx),
     };
 
     (result, diagnostics)

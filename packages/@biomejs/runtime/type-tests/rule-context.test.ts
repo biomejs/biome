@@ -37,6 +37,7 @@ defineRule({
 				embedding.embeddingKind satisfies
 					| "source"
 					| "expression"
+					| "textInterpolation"
 					| "snippetSignature"
 					| "legacyConst"
 					| "declaration";

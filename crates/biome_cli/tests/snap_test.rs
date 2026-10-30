@@ -75,10 +75,6 @@ impl CliRunResult {
         self.result.is_err()
     }
 
-    pub fn expect_err(self, message: &str) -> CliDiagnostic {
-        self.result.expect_err(message)
-    }
-
     pub fn followed_by(mut self, mut next: Self) -> Self {
         self.commands.append(&mut next.commands);
         next.commands = self.commands;
@@ -409,8 +405,32 @@ fn is_redaction_boundary(prev: Option<char>) -> bool {
 /// And normalizes the count of `-` at the end of the diagnostic
 fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
     let temp_dir = temp_dir().display().to_string();
-    let temp_dir = temp_dir.trim_end_matches(MAIN_SEPARATOR);
-    replace_temp_dir_impl(input, temp_dir)
+    replace_temp_dir_with_separator(input, &temp_dir, MAIN_SEPARATOR)
+}
+
+/// Replaces every occurrence of `temp_dir` with "<TEMP_DIR>", whether the output spells it with
+/// the platform `separator` or with `/`.
+///
+/// Some commands print paths with `/` on every platform, so on Windows the same directory can
+/// appear in both spellings.
+fn replace_temp_dir_with_separator<'a>(
+    input: Cow<'a, str>,
+    temp_dir: &str,
+    separator: char,
+) -> Cow<'a, str> {
+    // A root directory consists only of separators. It is kept whole, because an empty pattern
+    // matches at every position and the replacement would never advance.
+    let trimmed = temp_dir.trim_end_matches(separator);
+    let temp_dir = if trimmed.is_empty() {
+        temp_dir
+    } else {
+        trimmed
+    };
+    let output = replace_temp_dir_impl(input, temp_dir);
+    if separator == '/' {
+        return output;
+    }
+    replace_temp_dir_impl(output, &temp_dir.replace(separator, "/"))
 }
 
 fn replace_temp_dir_impl<'a>(input: Cow<'a, str>, temp_dir: &str) -> Cow<'a, str> {
@@ -731,6 +751,27 @@ mod tests {
         assert_eq!(
             replace_temp_dir_impl(input, "/build"),
             r#"{"path": "<TEMP_DIR>/file.js"}"#
+        );
+    }
+
+    #[test]
+    fn temp_dir_redaction_replaces_windows_path_with_either_separator() {
+        let temp_dir = r"C:\Users\ADMINI~1\AppData\Local\Temp\";
+        let input = Cow::Borrowed(
+            r"lint C:\Users\ADMINI~1\AppData\Local\Temp\project\file.js for C:/Users/ADMINI~1/AppData/Local/Temp/project/src/file.ts.",
+        );
+        assert_eq!(
+            replace_temp_dir_with_separator(input, temp_dir, '\\'),
+            r"lint <TEMP_DIR>\project\file.js for <TEMP_DIR>/project/src/file.ts."
+        );
+    }
+
+    #[test]
+    fn temp_dir_redaction_keeps_root_directory_pattern() {
+        let input = Cow::Borrowed(r#"{"path": "/build/file.js", "includes": ["**/build"]}"#);
+        assert_eq!(
+            replace_temp_dir_with_separator(input, "/", '/'),
+            r#"{"path": "<TEMP_DIR>build/file.js", "includes": ["**/build"]}"#
         );
     }
 

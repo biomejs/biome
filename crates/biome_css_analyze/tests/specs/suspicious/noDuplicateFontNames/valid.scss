@@ -1,0 +1,9 @@
+/* should not generate diagnostics */
+$family: Arial;
+.dynamic {
+  font-family: $family, sans-serif;
+}
+
+.static {
+  font-family: Arial, sans-serif;
+}

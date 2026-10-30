@@ -1,0 +1,130 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.nested.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.unknown-nested-property {
+  border: {
+    foo: 1px;
+  }
+}
+
+.unknown-combined-name {
+  font: {
+    color: red;
+  }
+}
+
+.unknown-in-nested-group {
+  border: {
+    top: {
+      bar: 1px;
+    }
+  }
+}
+
+$bold: true;
+.unknown-in-at-rule-in-group {
+  font: {
+    @if $bold {
+      color: red;
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.nested.scss:4:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    2 │ .unknown-nested-property {
+    3 │   border: {
+  > 4 │     foo: 1px;
+      │     ^^^
+    5 │   }
+    6 │ }
+  
+  i Sass emits this nested property as border-foo.
+  
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
+  
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+
+```
+
+```
+invalid.nested.scss:10:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+     8 │ .unknown-combined-name {
+     9 │   font: {
+  > 10 │     color: red;
+       │     ^^^^^
+    11 │   }
+    12 │ }
+  
+  i Sass emits this nested property as font-color.
+  
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
+  
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+
+```
+
+```
+invalid.nested.scss:17:7 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    15 │   border: {
+    16 │     top: {
+  > 17 │       bar: 1px;
+       │       ^^^
+    18 │     }
+    19 │   }
+  
+  i Sass emits this nested property as border-top-bar.
+  
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
+  
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+
+```
+
+```
+invalid.nested.scss:26:7 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    24 │   font: {
+    25 │     @if $bold {
+  > 26 │       color: red;
+       │       ^^^^^
+    27 │     }
+    28 │   }
+  
+  i Sass emits this nested property as font-color.
+  
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
+  
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+
+```

@@ -20,6 +20,10 @@ invalidTsInJs.js:1:1 lint/correctness/noUndeclaredVariables ━━━━━━�
     2 │ PromiseLike;
     3 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -35,6 +39,10 @@ invalidTsInJs.js:2:1 lint/correctness/noUndeclaredVariables ━━━━━━�
   > 2 │ PromiseLike;
       │ ^^^^^^^^^^^
     3 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

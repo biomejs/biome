@@ -1,0 +1,266 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-feature-values Example { ; @styleset { compact: 1 }; ; }
+.after { color: blue }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")],
+                names: CssFontFamilyNameList [
+                    CssFontFamilyName {
+                        names: CssCustomIdentifierSpaceSeparatedList [
+                            CssCustomIdentifier {
+                                value_token: IDENT@21..29 "Example" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssBogusBlock {
+                    items: [
+                        L_CURLY@29..31 "{" [] [Whitespace(" ")],
+                        CssFontFeatureValuesItemList [
+                            CssBogusFontFeatureValuesItem {
+                                items: [
+                                    SEMICOLON@31..33 ";" [] [Whitespace(" ")],
+                                    AT@33..34 "@" [] [],
+                                ],
+                            },
+                        ],
+                    ],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@34..43 "styleset" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@43..45 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..52 "compact" [] [],
+                                },
+                                colon_token: COLON@52..54 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@54..56 "1" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@56..57 "}" [] [],
+            },
+        },
+        CssBogusRule {
+            items: [
+                SEMICOLON@57..59 ";" [] [Whitespace(" ")],
+                SEMICOLON@59..61 ";" [] [Whitespace(" ")],
+                R_CURLY@61..62 "}" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@62..64 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@64..70 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@70..72 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@72..77 "color" [] [],
+                                },
+                                colon_token: COLON@77..79 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@79..84 "blue" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@84..85 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@85..86 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..86
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..85
+    0: CSS_AT_RULE@0..34
+      0: AT@0..1 "@" [] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@1..34
+        0: FONT_FEATURE_VALUES_KW@1..21 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_FONT_FAMILY_NAME_LIST@21..29
+          0: CSS_FONT_FAMILY_NAME@21..29
+            0: CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST@21..29
+              0: CSS_CUSTOM_IDENTIFIER@21..29
+                0: IDENT@21..29 "Example" [] [Whitespace(" ")]
+        2: CSS_BOGUS_BLOCK@29..34
+          0: L_CURLY@29..31 "{" [] [Whitespace(" ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@31..34
+            0: CSS_BOGUS_FONT_FEATURE_VALUES_ITEM@31..34
+              0: SEMICOLON@31..33 ";" [] [Whitespace(" ")]
+              1: AT@33..34 "@" [] []
+    1: CSS_QUALIFIED_RULE@34..57
+      0: CSS_SELECTOR_LIST@34..43
+        0: CSS_COMPOUND_SELECTOR@34..43
+          0: CSS_NESTED_SELECTOR_LIST@34..34
+          1: CSS_TYPE_SELECTOR@34..43
+            0: (empty)
+            1: CSS_IDENTIFIER@34..43
+              0: IDENT@34..43 "styleset" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@43..43
+      1: CSS_DECLARATION_OR_RULE_BLOCK@43..57
+        0: L_CURLY@43..45 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@45..56
+          0: CSS_DECLARATION_WITH_SEMICOLON@45..56
+            0: CSS_DECLARATION@45..56
+              0: CSS_GENERIC_PROPERTY@45..56
+                0: CSS_IDENTIFIER@45..52
+                  0: IDENT@45..52 "compact" [] []
+                1: COLON@52..54 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@54..56
+                  0: CSS_NUMBER@54..56
+                    0: CSS_NUMBER_LITERAL@54..56 "1" [] [Whitespace(" ")]
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@56..57 "}" [] []
+    2: CSS_BOGUS_RULE@57..62
+      0: SEMICOLON@57..59 ";" [] [Whitespace(" ")]
+      1: SEMICOLON@59..61 ";" [] [Whitespace(" ")]
+      2: R_CURLY@61..62 "}" [] []
+    3: CSS_QUALIFIED_RULE@62..85
+      0: CSS_SELECTOR_LIST@62..70
+        0: CSS_COMPOUND_SELECTOR@62..70
+          0: CSS_NESTED_SELECTOR_LIST@62..62
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@62..70
+            0: CSS_CLASS_SELECTOR@62..70
+              0: DOT@62..64 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@64..70
+                0: IDENT@64..70 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@70..85
+        0: L_CURLY@70..72 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@72..84
+          0: CSS_DECLARATION_WITH_SEMICOLON@72..84
+            0: CSS_DECLARATION@72..84
+              0: CSS_GENERIC_PROPERTY@72..84
+                0: CSS_IDENTIFIER@72..77
+                  0: IDENT@72..77 "color" [] []
+                1: COLON@77..79 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@79..84
+                  0: CSS_IDENTIFIER@79..84
+                    0: IDENT@79..84 "blue" [] [Whitespace(" ")]
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@84..85 "}" [] []
+  2: EOF@85..86 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-empty-statements-font-features.css:1:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a font-feature-values item but instead found '; @'.
+  
+  > 1 │ @font-feature-values Example { ; @styleset { compact: 1 }; ; }
+      │                                ^^^
+    2 │ .after { color: blue }
+    3 │ 
+  
+  i Expected a font-feature-values item here.
+  
+  > 1 │ @font-feature-values Example { ; @styleset { compact: 1 }; ; }
+      │                                ^^^
+    2 │ .after { color: blue }
+    3 │ 
+  
+parity-empty-statements-font-features.css:1:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a font-feature-values item but instead found 'styleset'.
+  
+  > 1 │ @font-feature-values Example { ; @styleset { compact: 1 }; ; }
+      │                                   ^^^^^^^^
+    2 │ .after { color: blue }
+    3 │ 
+  
+  i Expected a font-feature-values item here.
+  
+  > 1 │ @font-feature-values Example { ; @styleset { compact: 1 }; ; }
+      │                                   ^^^^^^^^
+    2 │ .after { color: blue }
+    3 │ 
+  
+parity-empty-statements-font-features.css:1:58 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '; ; }'.
+  
+  > 1 │ @font-feature-values Example { ; @styleset { compact: 1 }; ; }
+      │                                                          ^^^^^
+    2 │ .after { color: blue }
+    3 │ 
+  
+  i Expected a qualified rule, or an at rule here.
+  
+  > 1 │ @font-feature-values Example { ; @styleset { compact: 1 }; ; }
+      │                                                          ^^^^^
+    2 │ .after { color: blue }
+    3 │ 
+  
+```

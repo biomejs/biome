@@ -12,8 +12,9 @@ mod verbatim;
 
 pub(crate) use crate::context::GritFormatContext;
 pub(crate) use crate::trivia::*;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    CstFormatContext, Format, FormatLanguage, FormatResult, Formatted, Printed,
+    CstFormatContext, Format, FormatLanguage, FormatResult, Formatted,
     comments::Comments,
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
     write,

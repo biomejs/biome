@@ -1,0 +1,458 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@media(40rem<width),(40rem<width<80rem),(width>=40rem),(color),(aspect-ratio:16/9){.native{color:red}}
+@media(40rem<width<calc(80rem - 1rem)){.calculation{display:block}}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..6 "media" [] [],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@6..7 "(" [] [],
+                                feature: CssQueryFeatureReverseRange {
+                                    left: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@7..9 "40" [] [],
+                                        unit_token: IDENT@9..12 "rem" [] [],
+                                    },
+                                    comparison: CssQueryFeatureRangeComparison {
+                                        operator: L_ANGLE@12..13 "<" [] [],
+                                    },
+                                    right: CssIdentifier {
+                                        value_token: IDENT@13..18 "width" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@18..19 ")" [] [],
+                            },
+                        },
+                        COMMA@19..20 "," [] [],
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@20..21 "(" [] [],
+                                feature: CssQueryFeatureRangeInterval {
+                                    left: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@21..23 "40" [] [],
+                                        unit_token: IDENT@23..26 "rem" [] [],
+                                    },
+                                    left_comparison: CssQueryFeatureRangeComparison {
+                                        operator: L_ANGLE@26..27 "<" [] [],
+                                    },
+                                    name: CssIdentifier {
+                                        value_token: IDENT@27..32 "width" [] [],
+                                    },
+                                    right_comparison: CssQueryFeatureRangeComparison {
+                                        operator: L_ANGLE@32..33 "<" [] [],
+                                    },
+                                    right: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@33..35 "80" [] [],
+                                        unit_token: IDENT@35..38 "rem" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@38..39 ")" [] [],
+                            },
+                        },
+                        COMMA@39..40 "," [] [],
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@40..41 "(" [] [],
+                                feature: CssQueryFeatureRange {
+                                    left: CssIdentifier {
+                                        value_token: IDENT@41..46 "width" [] [],
+                                    },
+                                    comparison: CssQueryFeatureRangeComparison {
+                                        operator: GTEQ@46..48 ">=" [] [],
+                                    },
+                                    right: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@48..50 "40" [] [],
+                                        unit_token: IDENT@50..53 "rem" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@53..54 ")" [] [],
+                            },
+                        },
+                        COMMA@54..55 "," [] [],
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@55..56 "(" [] [],
+                                feature: CssQueryFeatureBoolean {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@56..61 "color" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@61..62 ")" [] [],
+                            },
+                        },
+                        COMMA@62..63 "," [] [],
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@63..64 "(" [] [],
+                                feature: CssQueryFeaturePlain {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@64..76 "aspect-ratio" [] [],
+                                    },
+                                    colon_token: COLON@76..77 ":" [] [],
+                                    value: CssRatio {
+                                        numerator: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@77..79 "16" [] [],
+                                        },
+                                        slash_token: SLASH@79..80 "/" [] [],
+                                        denominator: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@80..81 "9" [] [],
+                                        },
+                                    },
+                                },
+                                r_paren_token: R_PAREN@81..82 ")" [] [],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@82..83 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@83..84 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@84..90 "native" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@90..91 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@91..96 "color" [] [],
+                                                },
+                                                colon_token: COLON@96..97 ":" [] [],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@97..100 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: missing (optional),
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@100..101 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@101..102 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@102..104 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@104..109 "media" [] [],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@109..110 "(" [] [],
+                                feature: CssQueryFeatureRangeInterval {
+                                    left: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@110..112 "40" [] [],
+                                        unit_token: IDENT@112..115 "rem" [] [],
+                                    },
+                                    left_comparison: CssQueryFeatureRangeComparison {
+                                        operator: L_ANGLE@115..116 "<" [] [],
+                                    },
+                                    name: CssIdentifier {
+                                        value_token: IDENT@116..121 "width" [] [],
+                                    },
+                                    right_comparison: CssQueryFeatureRangeComparison {
+                                        operator: L_ANGLE@121..122 "<" [] [],
+                                    },
+                                    right: CssFunction {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@122..126 "calc" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@126..127 "(" [] [],
+                                        items: CssParameterList [
+                                            CssBinaryExpression {
+                                                left: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@127..129 "80" [] [],
+                                                            unit_token: IDENT@129..133 "rem" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
+                                                },
+                                                operator: MINUS@133..135 "-" [] [Whitespace(" ")],
+                                                right: CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@135..136 "1" [] [],
+                                                            unit_token: IDENT@136..139 "rem" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@139..140 ")" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@140..141 ")" [] [],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@141..142 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@142..143 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@143..154 "calculation" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@154..155 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@155..162 "display" [] [],
+                                                },
+                                                colon_token: COLON@162..163 ":" [] [],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@163..168 "block" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: missing (optional),
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@168..169 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@169..170 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@170..171 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..171
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..170
+    0: CSS_AT_RULE@0..102
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..102
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..82
+          0: MEDIA_KW@1..6 "media" [] []
+          1: CSS_MEDIA_QUERY_LIST@6..82
+            0: CSS_MEDIA_CONDITION_QUERY@6..19
+              0: CSS_MEDIA_FEATURE_IN_PARENS@6..19
+                0: L_PAREN@6..7 "(" [] []
+                1: CSS_QUERY_FEATURE_REVERSE_RANGE@7..18
+                  0: CSS_REGULAR_DIMENSION@7..12
+                    0: CSS_NUMBER_LITERAL@7..9 "40" [] []
+                    1: IDENT@9..12 "rem" [] []
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@12..13
+                    0: L_ANGLE@12..13 "<" [] []
+                  2: CSS_IDENTIFIER@13..18
+                    0: IDENT@13..18 "width" [] []
+                2: R_PAREN@18..19 ")" [] []
+            1: COMMA@19..20 "," [] []
+            2: CSS_MEDIA_CONDITION_QUERY@20..39
+              0: CSS_MEDIA_FEATURE_IN_PARENS@20..39
+                0: L_PAREN@20..21 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE_INTERVAL@21..38
+                  0: CSS_REGULAR_DIMENSION@21..26
+                    0: CSS_NUMBER_LITERAL@21..23 "40" [] []
+                    1: IDENT@23..26 "rem" [] []
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@26..27
+                    0: L_ANGLE@26..27 "<" [] []
+                  2: CSS_IDENTIFIER@27..32
+                    0: IDENT@27..32 "width" [] []
+                  3: CSS_QUERY_FEATURE_RANGE_COMPARISON@32..33
+                    0: L_ANGLE@32..33 "<" [] []
+                  4: CSS_REGULAR_DIMENSION@33..38
+                    0: CSS_NUMBER_LITERAL@33..35 "80" [] []
+                    1: IDENT@35..38 "rem" [] []
+                2: R_PAREN@38..39 ")" [] []
+            3: COMMA@39..40 "," [] []
+            4: CSS_MEDIA_CONDITION_QUERY@40..54
+              0: CSS_MEDIA_FEATURE_IN_PARENS@40..54
+                0: L_PAREN@40..41 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE@41..53
+                  0: CSS_IDENTIFIER@41..46
+                    0: IDENT@41..46 "width" [] []
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@46..48
+                    0: GTEQ@46..48 ">=" [] []
+                  2: CSS_REGULAR_DIMENSION@48..53
+                    0: CSS_NUMBER_LITERAL@48..50 "40" [] []
+                    1: IDENT@50..53 "rem" [] []
+                2: R_PAREN@53..54 ")" [] []
+            5: COMMA@54..55 "," [] []
+            6: CSS_MEDIA_CONDITION_QUERY@55..62
+              0: CSS_MEDIA_FEATURE_IN_PARENS@55..62
+                0: L_PAREN@55..56 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@56..61
+                  0: CSS_IDENTIFIER@56..61
+                    0: IDENT@56..61 "color" [] []
+                2: R_PAREN@61..62 ")" [] []
+            7: COMMA@62..63 "," [] []
+            8: CSS_MEDIA_CONDITION_QUERY@63..82
+              0: CSS_MEDIA_FEATURE_IN_PARENS@63..82
+                0: L_PAREN@63..64 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@64..81
+                  0: CSS_IDENTIFIER@64..76
+                    0: IDENT@64..76 "aspect-ratio" [] []
+                  1: COLON@76..77 ":" [] []
+                  2: CSS_RATIO@77..81
+                    0: CSS_NUMBER@77..79
+                      0: CSS_NUMBER_LITERAL@77..79 "16" [] []
+                    1: SLASH@79..80 "/" [] []
+                    2: CSS_NUMBER@80..81
+                      0: CSS_NUMBER_LITERAL@80..81 "9" [] []
+                2: R_PAREN@81..82 ")" [] []
+        1: CSS_RULE_BLOCK@82..102
+          0: L_CURLY@82..83 "{" [] []
+          1: CSS_RULE_LIST@83..101
+            0: CSS_QUALIFIED_RULE@83..101
+              0: CSS_SELECTOR_LIST@83..90
+                0: CSS_COMPOUND_SELECTOR@83..90
+                  0: CSS_NESTED_SELECTOR_LIST@83..83
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@83..90
+                    0: CSS_CLASS_SELECTOR@83..90
+                      0: DOT@83..84 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@84..90
+                        0: IDENT@84..90 "native" [] []
+              1: CSS_DECLARATION_OR_RULE_BLOCK@90..101
+                0: L_CURLY@90..91 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@91..100
+                  0: CSS_DECLARATION_WITH_SEMICOLON@91..100
+                    0: CSS_DECLARATION@91..100
+                      0: CSS_GENERIC_PROPERTY@91..100
+                        0: CSS_IDENTIFIER@91..96
+                          0: IDENT@91..96 "color" [] []
+                        1: COLON@96..97 ":" [] []
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@97..100
+                          0: CSS_IDENTIFIER@97..100
+                            0: IDENT@97..100 "red" [] []
+                      1: (empty)
+                    1: (empty)
+                2: R_CURLY@100..101 "}" [] []
+          2: R_CURLY@101..102 "}" [] []
+    1: CSS_AT_RULE@102..170
+      0: AT@102..104 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@104..170
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@104..141
+          0: MEDIA_KW@104..109 "media" [] []
+          1: CSS_MEDIA_QUERY_LIST@109..141
+            0: CSS_MEDIA_CONDITION_QUERY@109..141
+              0: CSS_MEDIA_FEATURE_IN_PARENS@109..141
+                0: L_PAREN@109..110 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE_INTERVAL@110..140
+                  0: CSS_REGULAR_DIMENSION@110..115
+                    0: CSS_NUMBER_LITERAL@110..112 "40" [] []
+                    1: IDENT@112..115 "rem" [] []
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@115..116
+                    0: L_ANGLE@115..116 "<" [] []
+                  2: CSS_IDENTIFIER@116..121
+                    0: IDENT@116..121 "width" [] []
+                  3: CSS_QUERY_FEATURE_RANGE_COMPARISON@121..122
+                    0: L_ANGLE@121..122 "<" [] []
+                  4: CSS_FUNCTION@122..140
+                    0: CSS_IDENTIFIER@122..126
+                      0: IDENT@122..126 "calc" [] []
+                    1: L_PAREN@126..127 "(" [] []
+                    2: CSS_PARAMETER_LIST@127..139
+                      0: CSS_BINARY_EXPRESSION@127..139
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@127..133
+                          0: CSS_COMPONENT_VALUE_LIST@127..133
+                            0: CSS_REGULAR_DIMENSION@127..133
+                              0: CSS_NUMBER_LITERAL@127..129 "80" [] []
+                              1: IDENT@129..133 "rem" [] [Whitespace(" ")]
+                        1: MINUS@133..135 "-" [] [Whitespace(" ")]
+                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@135..139
+                          0: CSS_COMPONENT_VALUE_LIST@135..139
+                            0: CSS_REGULAR_DIMENSION@135..139
+                              0: CSS_NUMBER_LITERAL@135..136 "1" [] []
+                              1: IDENT@136..139 "rem" [] []
+                    3: R_PAREN@139..140 ")" [] []
+                2: R_PAREN@140..141 ")" [] []
+        1: CSS_RULE_BLOCK@141..170
+          0: L_CURLY@141..142 "{" [] []
+          1: CSS_RULE_LIST@142..169
+            0: CSS_QUALIFIED_RULE@142..169
+              0: CSS_SELECTOR_LIST@142..154
+                0: CSS_COMPOUND_SELECTOR@142..154
+                  0: CSS_NESTED_SELECTOR_LIST@142..142
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@142..154
+                    0: CSS_CLASS_SELECTOR@142..154
+                      0: DOT@142..143 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@143..154
+                        0: IDENT@143..154 "calculation" [] []
+              1: CSS_DECLARATION_OR_RULE_BLOCK@154..169
+                0: L_CURLY@154..155 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@155..168
+                  0: CSS_DECLARATION_WITH_SEMICOLON@155..168
+                    0: CSS_DECLARATION@155..168
+                      0: CSS_GENERIC_PROPERTY@155..168
+                        0: CSS_IDENTIFIER@155..162
+                          0: IDENT@155..162 "display" [] []
+                        1: COLON@162..163 ":" [] []
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@163..168
+                          0: CSS_IDENTIFIER@163..168
+                            0: IDENT@163..168 "block" [] []
+                      1: (empty)
+                    1: (empty)
+                2: R_CURLY@168..169 "}" [] []
+          2: R_CURLY@169..170 "}" [] []
+  2: EOF@170..171 "" [Newline("\n")] []
+
+```

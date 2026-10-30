@@ -1,0 +1,197 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWrappers.ts
+---
+# Input
+```ts
+// should generate diagnostics
+obj[("__proto__" as string)];
+obj[("__proto__" as string)] = value;
+obj[("__proto__" satisfies string)];
+obj[("__proto__" satisfies string)] = value;
+obj[("__proto__")!];
+obj[("__proto__")!] = value;
+obj[<string>"__proto__"];
+obj[<string>"__proto__"] = value;
+obj[((`__proto__` as string)!)];
+
+```
+
+# Diagnostics
+```
+invalidWrappers.ts:2:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+    1 │ // should generate diagnostics
+  > 2 │ obj[("__proto__" as string)];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ obj[("__proto__" as string)] = value;
+    4 │ obj[("__proto__" satisfies string)];
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:3:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+    1 │ // should generate diagnostics
+    2 │ obj[("__proto__" as string)];
+  > 3 │ obj[("__proto__" as string)] = value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ obj[("__proto__" satisfies string)];
+    5 │ obj[("__proto__" satisfies string)] = value;
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:4:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+    2 │ obj[("__proto__" as string)];
+    3 │ obj[("__proto__" as string)] = value;
+  > 4 │ obj[("__proto__" satisfies string)];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ obj[("__proto__" satisfies string)] = value;
+    6 │ obj[("__proto__")!];
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:5:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+    3 │ obj[("__proto__" as string)] = value;
+    4 │ obj[("__proto__" satisfies string)];
+  > 5 │ obj[("__proto__" satisfies string)] = value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ obj[("__proto__")!];
+    7 │ obj[("__proto__")!] = value;
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:6:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+    4 │ obj[("__proto__" satisfies string)];
+    5 │ obj[("__proto__" satisfies string)] = value;
+  > 6 │ obj[("__proto__")!];
+      │ ^^^^^^^^^^^^^^^^^^^
+    7 │ obj[("__proto__")!] = value;
+    8 │ obj[<string>"__proto__"];
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:7:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+    5 │ obj[("__proto__" satisfies string)] = value;
+    6 │ obj[("__proto__")!];
+  > 7 │ obj[("__proto__")!] = value;
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ obj[<string>"__proto__"];
+    9 │ obj[<string>"__proto__"] = value;
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:8:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+     6 │ obj[("__proto__")!];
+     7 │ obj[("__proto__")!] = value;
+   > 8 │ obj[<string>"__proto__"];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ obj[<string>"__proto__"] = value;
+    10 │ obj[((`__proto__` as string)!)];
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:9:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+     7 │ obj[("__proto__")!] = value;
+     8 │ obj[<string>"__proto__"];
+   > 9 │ obj[<string>"__proto__"] = value;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ obj[((`__proto__` as string)!)];
+    11 │ 
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```
+
+```
+invalidWrappers.ts:10:1 lint/suspicious/noProto ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid use of the deprecated __proto__ accessor.
+  
+     8 │ obj[<string>"__proto__"];
+     9 │ obj[<string>"__proto__"] = value;
+  > 10 │ obj[((`__proto__` as string)!)];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Object.prototype.__proto__ is an outdated way to get or set an object's prototype,
+    having been deprecated in 2009 for being inefficient and unreliable.
+  
+  i Object.getPrototypeOf() and Object.setPrototypeOf() are modern alternatives that work on all objects and are more performant.
+  
+
+```

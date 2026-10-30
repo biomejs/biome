@@ -32,6 +32,10 @@ invalid.jsx:3:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
+  
   i Follow the links for more information,
       WCAG 1.3.5
       HTML Living Standard autofill
@@ -53,6 +57,10 @@ invalid.jsx:4:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
     6 │ 	<input type="text" autocomplete="home url" />
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
   
   i Follow the links for more information,
       WCAG 1.3.5
@@ -76,6 +84,10 @@ invalid.jsx:5:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
+  
   i Follow the links for more information,
       WCAG 1.3.5
       HTML Living Standard autofill
@@ -97,6 +109,10 @@ invalid.jsx:6:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
     8 │ 	<Input type="text" autocomplete="baz" />
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
   
   i Follow the links for more information,
       WCAG 1.3.5
@@ -120,6 +136,10 @@ invalid.jsx:7:7 lint/a11y/useValidAutocomplete ━━━━━━━━━━━
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
+  
   i Follow the links for more information,
       WCAG 1.3.5
       HTML Living Standard autofill
@@ -142,6 +162,10 @@ invalid.jsx:8:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
+  
   i Follow the links for more information,
       WCAG 1.3.5
       HTML Living Standard autofill
@@ -163,6 +187,10 @@ invalid.jsx:9:21 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
     11 │ 
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically.
+  
+  i Use a valid value, such as email or username.
   
   i Follow the links for more information,
       WCAG 1.3.5

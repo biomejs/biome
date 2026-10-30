@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/computed-supports-important-names.scss
+---
+
+# Input
+
+```scss
+@supports( !important:a ){.name{color:red}}
+@import "bare.css" supports( !important:a );
+@import "grouped.css" supports(( !important:a ));
+@supports(!important + "-name":a){.expression{color:red}}
+@supports(foo !important:a){.list{color:red}}
+@import "list.css" supports(foo !important:a);
+@supports(color:red !important){.value{color:red}}
+
+```
+
+
+# Formatted
+
+```scss
+@supports (!important: a) {
+	.name {
+		color: red;
+	}
+}
+@import "bare.css" supports(!important: a);
+@import "grouped.css" supports((!important: a));
+@supports (!important + "-name": a) {
+	.expression {
+		color: red;
+	}
+}
+@supports (foo !important: a) {
+	.list {
+		color: red;
+	}
+}
+@import "list.css" supports(foo !important: a);
+@supports (color: red !important) {
+	.value {
+		color: red;
+	}
+}
+
+```

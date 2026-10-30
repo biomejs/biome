@@ -1,0 +1,8 @@
+.whole { color: if(#{"style(--status: complete)"}: red; else: blue); next: retained; }
+.parenthesized { color: if((#{"style(--status: complete)"}): red; else: blue); next: retained; }
+.negated { color: if(not #{"style(--status: complete)"}: red; else: blue); next: retained; }
+.left { color: if(#{"style(--status: complete)"} and style(--enabled: true): red; else: blue); next: retained; }
+.right { color: if(style(--enabled: true) or #{"style(--status: complete)"}: red; else: blue); next: retained; }
+.legacy { color: if(#{true}, white, black); next: retained; }
+.native { color: if(style(--status: complete): red; else: blue); }
+.after { display: block; }

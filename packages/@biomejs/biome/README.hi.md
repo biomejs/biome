@@ -35,9 +35,9 @@
 
 **Biome** वेब[^1] परियोजना[^2]ओं के लिए एक प्रदर्शनकारी उपकरण-श्रृंखला[^3] है, इसका उद्देश्य उक्त परियोजना[^2]ओं के स्वास्थ्य को बनाए रखने के लिए डेवलपर[^4] उपकरण प्रदान करना है।
 
-**Biome** _JavaScript_, _TypeScript_, _JSX_ और _JSON_ के लिए **एक [तेज़ स्वरूपक](https://github.com/biomejs/benchmark#formatting)[^5]** है जो **[_Prettier_ के साथ ९७% अनुकूलता](https://algora.io/challenges/prettier)[^6]** स्कोर[^7] करता है।
+**Biome** _JavaScript_, _TypeScript_, _JSX_, _JSON_, _Markdown_, _YAML_ और _SCSS_ के लिए **एक [तेज़ स्वरूपक](https://github.com/biomejs/benchmark#formatting)[^5]** है जो **[_Prettier_ के साथ ९७% अनुकूलता](https://algora.io/challenges/prettier)[^6]** स्कोर[^7] करता है।
 
-**Biome _JavaScript_, _TypeScript_ और _JSX_ के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[३४० से अधिक नियम](https://biomejs.dev/linter/javascript/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
+**Biome _JavaScript_, _TypeScript_, _JSX_, _Markdown_, _YAML_ और _SCSS_ के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[३४० से अधिक नियम](https://biomejs.dev/linter/javascript/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
 
 **Biome** को शुरू से ही [संपादक](https://biomejs.dev/guides/integrate-in-editor/)[^15] [के भीतर अंतरक्रियात्मक](https://biomejs.dev/guides/integrate-in-editor/)[^16] [रूप से](https://biomejs.dev/editors/first-party-extensions/) उपयोग करने के लिए डिज़ाइन[^17] किया गया है। यह आपके द्वारा लिखे जा रहे विकृत[^18] कोड[^13] को स्वरूप[^5] और लिंट[^8] कर सकता है।
 
@@ -160,6 +160,9 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
       <td align="center" valign="middle">
         <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://github.com/syntaxfm" target="_blank"><img src="https://avatars.githubusercontent.com/u/130389858?s=200&v=4" height="100" alt="SyntaxFM logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -174,9 +177,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>

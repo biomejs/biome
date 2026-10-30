@@ -354,6 +354,7 @@ impl JsAstNode {
             "JS_VARIABLE_DECLARATION_CLAUSE" => JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE,
             "JS_VARIABLE_DECLARATOR" => JsSyntaxKind::JS_VARIABLE_DECLARATOR,
             "JS_VARIABLE_STATEMENT" => JsSyntaxKind::JS_VARIABLE_STATEMENT,
+            "JS_VUE_GENERIC_ROOT" => JsSyntaxKind::JS_VUE_GENERIC_ROOT,
             "JS_VUE_SLOT_PROPS_ROOT" => JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT,
             "JS_WHILE_STATEMENT" => JsSyntaxKind::JS_WHILE_STATEMENT,
             "JS_WITH_STATEMENT" => JsSyntaxKind::JS_WITH_STATEMENT,
@@ -772,6 +773,7 @@ impl JsAstNode {
             JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => &JS_VARIABLE_DECLARATION_CLAUSE_FIELDS,
             JsSyntaxKind::JS_VARIABLE_DECLARATOR => &JS_VARIABLE_DECLARATOR_FIELDS,
             JsSyntaxKind::JS_VARIABLE_STATEMENT => &JS_VARIABLE_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_VUE_GENERIC_ROOT => &JS_VUE_GENERIC_ROOT_FIELDS,
             JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => &JS_VUE_SLOT_PROPS_ROOT_FIELDS,
             JsSyntaxKind::JS_WHILE_STATEMENT => &JS_WHILE_STATEMENT_FIELDS,
             JsSyntaxKind::JS_WITH_STATEMENT => &JS_WITH_STATEMENT_FIELDS,
@@ -6508,6 +6510,30 @@ static JS_VARIABLE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
         },
     ],
 };
+static JS_VUE_GENERIC_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_VUE_GENERIC_ROOT,
+    name: "JsVueGenericRoot",
+    fields: &[
+        JsAstField {
+            property: "items",
+            updater: "withItems",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsVueGenericTypeParameters",
+                can_cast: AnyJsVueGenericTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
 static JS_VUE_SLOT_PROPS_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
     kind: JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT,
     name: "JsVueSlotPropsRoot",
@@ -7178,12 +7204,12 @@ static JSX_SHORTHAND_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
             },
         },
         JsAstField {
-            property: "name",
-            updater: "withName",
+            property: "expression",
+            updater: "withExpression",
             optional: false,
             value: JsAstFieldValue::Node {
-                ty: "JsReferenceIdentifier",
-                can_cast: JsReferenceIdentifier::can_cast,
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
             },
         },
         JsAstField {

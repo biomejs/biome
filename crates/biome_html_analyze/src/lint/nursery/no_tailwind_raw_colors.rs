@@ -4,10 +4,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_html_syntax::HtmlAttribute;
-use biome_rowan::TextRange;
 use biome_rule_options::no_tailwind_raw_colors::NoTailwindRawColorsOptions;
-use biome_tailwind_logic::no_tailwind_raw_colors::raw_color_ranges;
+use biome_tailwind_logic::no_tailwind_raw_colors::{RawColor, raw_colors};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
+use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
+use std::sync::Arc;
 
 declare_lint_rule! {
     /// Disallow Tailwind CSS utility classes that use raw palette colors.
@@ -18,8 +19,20 @@ declare_lint_rule! {
     /// This rule checks color utilities, including variants and opacity modifiers.
     /// It allows custom color names, `black`, `white`, `transparent`, `current`, and `inherit`.
     /// This rule does not check arbitrary values such as `bg-[#ff00aa]`.
-    /// It does not read your Tailwind CSS theme, so redefining a default palette name
+    /// Giving a default palette name another value in your Tailwind CSS theme
     /// does not exempt it.
+    ///
+    /// When the [`tailwind.stylesheet`](https://biomejs.dev/reference/configuration/#tailwindstylesheet)
+    /// option points at the CSS file that holds your Tailwind CSS configuration, the rule
+    /// also lists up to three classes to use instead, such as `bg-brand` for `bg-pink-500`.
+    /// Each one sets a color from your theme that looks similar to the reported one.
+    /// It can only compare theme colors whose value is written out, such as
+    /// `--color-brand: #00f`. It skips colors that refer to another value, such as
+    /// `--color-brand: var(--brand)`.
+    ///
+    /// Biome scans your project when this rule is enabled, so that it can read the
+    /// stylesheet and the files it imports. The scan happens even if `tailwind.stylesheet`
+    /// isn't set.
     ///
     /// ## Examples
     ///
@@ -76,7 +89,7 @@ declare_lint_rule! {
         version: "2.5.15",
         name: "noTailwindRawColors",
         language: "html",
-        domains: &[RuleDomain::Tailwind],
+        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
         recommended: false,
         sources: &[RuleSource::EslintShadcn("no-raw-colors").inspired()],
         issue_number: Some("11342"),
@@ -85,7 +98,7 @@ declare_lint_rule! {
 
 impl Rule for NoTailwindRawColors {
     type Query = TailwindSyntax<HtmlAttribute>;
-    type State = TextRange;
+    type State = RawColor;
     type Signals = Box<[Self::State]>;
     type Options = NoTailwindRawColorsOptions;
 
@@ -94,22 +107,32 @@ impl Rule for NoTailwindRawColors {
             return Box::default();
         }
         let root = ctx.query().tailwind_root();
-        raw_color_ranges(&root.candidates(), ctx.options()).into_boxed_slice()
+        raw_colors(&root.candidates(), ctx.options()).into_boxed_slice()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                host_range(ctx.query().node(), *range)?,
-                markup! { "This Tailwind CSS class uses a raw palette color." },
-            )
-            .note(markup! {
-                "Raw palette colors couple components to specific colors, making design-system changes harder."
-            })
-            .note(markup! {
-                "Use a color from your design system. Check your Tailwind config for the available colors."
-            }),
+    fn diagnostic(ctx: &RuleContext<Self>, raw_color: &Self::State) -> Option<RuleDiagnostic> {
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            host_range(ctx.query().node(), raw_color.range())?,
+            markup! { "This Tailwind CSS class uses a raw palette color." },
         )
+        .note(markup! {
+            "Raw palette colors couple components to specific colors, making design-system changes harder."
+        });
+        let design: &TailwindDesignSystem = match ctx.get_service::<Arc<TailwindDesignSystem>>() {
+            Some(design) => design,
+            None => TailwindDesignSystem::default_ref(),
+        };
+        let closest_classes = raw_color.closest_design_classes(design);
+        Some(if closest_classes.is_empty() {
+            diagnostic.note(markup! {
+                "Use a color from your design system. Check your Tailwind config for the available colors."
+            })
+        } else {
+            diagnostic.footer_list(
+                "Use a color from your design system. These classes are the closest matches:",
+                closest_classes,
+            )
+        })
     }
 }

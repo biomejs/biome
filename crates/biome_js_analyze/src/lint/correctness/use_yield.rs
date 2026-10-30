@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
-use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rowan::{AstNode, AstNodeList, Language, SyntaxKindSet, SyntaxNode, TextSize};
 use biome_rule_options::use_yield::UseYieldOptions;
 
 declare_lint_rule! {
@@ -57,6 +57,13 @@ struct MissingYieldVisitor {
 
 impl Visitor for MissingYieldVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyFunctionLike::KIND_SET.union(JsYieldExpression::KIND_SET))
+    }
 
     fn visit(
         &mut self,
@@ -138,10 +145,18 @@ impl Rule for UseYield {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {"This generator function doesn't contain "<Emphasis>"yield"</Emphasis>"."},
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {"This generator function doesn't contain "<Emphasis>"yield"</Emphasis>"."},
+            )
+            .note(markup! {
+                "A generator without "<Emphasis>"yield"</Emphasis>" never produces a value. This often means that a "<Emphasis>"yield"</Emphasis>" is missing."
+            })
+            .note(markup! {
+                "Add a "<Emphasis>"yield"</Emphasis>" expression, or remove the "<Emphasis>"*"</Emphasis>" to turn the function into a regular function."
+            }),
+        )
     }
 }

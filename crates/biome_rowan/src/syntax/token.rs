@@ -431,6 +431,30 @@ impl<L: Language> SyntaxToken<L> {
         ))
     }
 
+    /// Return a new version of this token with its leading trivia replaced with a single space.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_leading_space(&self) -> Self {
+        self.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+    }
+
+    /// Return a new version of this token with its trailing trivia replaced with a single space.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_trailing_space(&self) -> Self {
+        self.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+    }
+
+    /// Return a new version of this token with its leading and trailing trivia each replaced with a single space.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_surrounding_spaces(&self) -> Self {
+        self.with_leading_space().with_trailing_space()
+    }
+
+    /// Return a new version of this token with its leading trivia replaced with a single newline.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_leading_newline(&self) -> Self {
+        self.with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
+    }
+
     /// Return whitespace that juxtapose the token until the first non-whitespace item.
     pub fn indentation_trivia_pieces(
         &self,
@@ -443,6 +467,55 @@ impl<L: Language> SyntaxToken<L> {
                 .map(|pos| pos + 1)
                 .unwrap_or(0);
         self.leading_trivia().pieces().skip(skip_count)
+    }
+
+    /// Returns the column at which the token starts: the length, in bytes, of the text that
+    /// precedes it on its line, including trivia and preceding tokens.
+    ///
+    /// Lines end with `\n`, `\r\n`, or `\r`.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token(RawLanguageKind::LET_TOKEN, "let");
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::STRING_TOKEN,
+    ///         "\n  a ",
+    ///         &[TriviaPiece::newline(1), TriviaPiece::whitespace(2)],
+    ///         &[TriviaPiece::whitespace(1)],
+    ///     );
+    ///     builder.token(RawLanguageKind::EQUAL_TOKEN, "=");
+    /// });
+    /// let tokens: Vec<_> = node.descendants_tokens(Direction::Next).collect();
+    /// // `a` starts its line after two spaces
+    /// assert_eq!(tokens[1].column(), TextSize::from(2));
+    /// // `=` follows `a` and its trailing space on the same line
+    /// assert_eq!(tokens[2].column(), TextSize::from(4));
+    /// ```
+    pub fn column(&self) -> TextSize {
+        /// Returns the length of `text` after its last line break, or `Err` with the length of
+        /// `text` if it has none.
+        fn len_after_line_break(text: &str) -> Result<TextSize, TextSize> {
+            match text.rfind(['\n', '\r']) {
+                Some(index) => Ok(TextSize::of(&text[index + 1..])),
+                None => Err(TextSize::of(text)),
+            }
+        }
+
+        let mut column = match len_after_line_break(self.leading_trivia().text()) {
+            Ok(len) => return len,
+            Err(len) => len,
+        };
+        let mut previous = self.prev_token();
+        while let Some(token) = previous {
+            match len_after_line_break(token.text()) {
+                Ok(len) => return column + len,
+                Err(len) => column += len,
+            }
+            previous = token.prev_token();
+        }
+        column
     }
 
     /// Returns the token's leading trivia.

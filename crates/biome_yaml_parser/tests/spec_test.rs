@@ -4,7 +4,7 @@ use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_rowan::SyntaxKind;
-use biome_test_utils::validate_eof_token;
+use biome_test_utils::{validate_eof_token, validate_text_trimmed_ranges};
 use biome_yaml_parser::parse_yaml;
 use std::fmt::Write;
 use std::fs;
@@ -36,6 +36,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let parsed = parse_yaml(&content);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
     println!("Raw tree {:#?}", parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());

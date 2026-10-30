@@ -7,29 +7,30 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use biome_js_syntax::{
-    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember, AnyJsClassMemberName,
-    AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
+    AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsArrowFunctionParameters,
+    AnyJsAssignmentPattern, AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMember,
+    AnyJsClassMemberName, AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
-    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
-    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
-    JsClassExpression, JsClassMemberList, JsConstructorParameters, JsExtendsClause,
-    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
-    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
-    JsInitializerClause, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
-    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
-    JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsTemplateElement,
+    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern, JsArrayExpression,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList, JsConstructorParameters,
+    JsExtendsClause, JsForInStatement, JsForOfStatement, JsForVariableDeclaration,
+    JsFormalParameter, JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression,
+    JsGetterObjectMember, JsInitializerClause, JsLogicalExpression, JsLogicalOperator,
+    JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern, JsObjectExpression,
+    JsParameterList, JsParameters, JsParenthesizedExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
+    JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
+    JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
+    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInstantiationExpression,
+    TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration, TsPropertyParameterModifierList,
+    TsReferenceType, TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAliasDeclaration,
+    TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter, TsTypeParameters, TsTypeofType,
+    inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -467,7 +468,7 @@ impl TypeData {
                         }),
                     })
                     .collect(),
-                is_inferred_array: true,
+                is_inferred_array: !is_in_tuple_context(expr),
             })),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(collector, scope_id, expr)
@@ -616,6 +617,7 @@ impl TypeData {
             AnyJsExpression::JsSuperExpression(_) => Self::from(TypeofExpression::Super(
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
+            AnyJsExpression::JsTemplateExpression(expr) => Self::from_js_template_expression(expr),
             AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
@@ -1354,6 +1356,28 @@ impl TypeData {
             "undefined" => Self::Undefined,
             _ => Self::reference(TypeReference::from_name(scope_id, name)),
         })
+    }
+
+    pub fn from_js_template_expression(expr: &JsTemplateExpression) -> Self {
+        // A tag function may return any type.
+        if expr.tag().is_some() {
+            return Self::unknown();
+        }
+
+        // Only templates without substitutions have a literal value.
+        let mut elements = expr.elements().into_iter();
+        let text = match (elements.next(), elements.next()) {
+            (None, _) => Some(Text::default()),
+            (Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)), None) => {
+                text_from_token(chunk.template_chunk_token())
+            }
+            _ => None,
+        };
+
+        match text {
+            Some(text) => Self::Literal(Box::new(Literal::String(StringLiteral::from(text)))),
+            None => Self::string(),
+        }
     }
 
     pub fn from_js_unary_expression(
@@ -3524,6 +3548,54 @@ fn type_data_from_const_assertion_expression(
         .resolve_expression(scope_id, &expression)
         .into_owned();
     apply_deep_const(collector, inner_type)
+}
+
+/// Returns whether TypeScript infers the array expression as a tuple rather
+/// than an array because of where it appears:
+///
+/// ```ts
+/// const [first, second] = [1, "a"];
+/// [first, second] = [second, first];
+/// call(...[1, 2]);
+/// [1, "a"] satisfies [number, string];
+/// ```
+fn is_in_tuple_context(expr: &JsArrayExpression) -> bool {
+    let mut node = expr.syntax().clone();
+    let parent = loop {
+        let Some(parent) = node.parent() else {
+            return false;
+        };
+        if parent.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+            break parent;
+        }
+        node = parent;
+    };
+    if let Some(initializer) = JsInitializerClause::cast_ref(&parent) {
+        let Some(owner) = initializer.syntax().parent() else {
+            return false;
+        };
+        let pattern = JsVariableDeclarator::cast_ref(&owner)
+            .and_then(|declarator| declarator.id().ok())
+            .or_else(|| {
+                JsFormalParameter::cast_ref(&owner).and_then(|parameter| parameter.binding().ok())
+            });
+        return matches!(pattern, Some(AnyJsBindingPattern::JsArrayBindingPattern(_)));
+    }
+    if let Some(assignment) = JsAssignmentExpression::cast_ref(&parent) {
+        return matches!(
+            assignment.left(),
+            Ok(AnyJsAssignmentPattern::JsArrayAssignmentPattern(_))
+        );
+    }
+    if parent.kind() == JsSyntaxKind::JS_SPREAD {
+        return parent
+            .parent()
+            .is_some_and(|list| list.kind() == JsSyntaxKind::JS_CALL_ARGUMENT_LIST);
+    }
+    if let Some(satisfies) = TsSatisfiesExpression::cast_ref(&parent) {
+        return matches!(satisfies.ty(), Ok(AnyTsType::TsTupleType(_)));
+    }
+    false
 }
 
 /// Applies const assertion conversion to inferred tuple and object types.

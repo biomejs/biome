@@ -1,0 +1,11 @@
+# should generate diagnostics
+type User {
+  id: ID!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+directive @auth on FIELD_DEFINITION

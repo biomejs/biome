@@ -1,0 +1,177 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidDocuments.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+...
+---
+...
+%YAML 1.2
+---
+...
+---
+# Comment
+---
+--- # Comment
+---
+--- !!map
+
+```
+
+# Diagnostics
+```
+invalidDocuments.yaml:2:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    1 │ # should generate diagnostics
+  > 2 │ ...
+      │ ^^^
+    3 │ ---
+    4 │ ...
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:3:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    1 │ # should generate diagnostics
+    2 │ ...
+  > 3 │ ---
+      │ ^^^
+  > 4 │ ...
+      │ ^^^
+    5 │ %YAML 1.2
+    6 │ ---
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:5:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    3 │ ---
+    4 │ ...
+  > 5 │ %YAML 1.2
+      │ ^^^^^^^^^
+  > 6 │ ---
+  > 7 │ ...
+      │ ^^^
+    8 │ ---
+    9 │ # Comment
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:8:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+     6 │ ---
+     7 │ ...
+   > 8 │ ---
+       │ ^^^
+     9 │ # Comment
+    10 │ ---
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:10:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+     8 │ ---
+     9 │ # Comment
+  > 10 │ ---
+       │ ^^^
+    11 │ --- # Comment
+    12 │ ---
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:11:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+     9 │ # Comment
+    10 │ ---
+  > 11 │ --- # Comment
+       │ ^^^
+    12 │ ---
+    13 │ --- !!map
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:12:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    10 │ ---
+    11 │ --- # Comment
+  > 12 │ ---
+       │ ^^^
+    13 │ --- !!map
+    14 │ 
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidDocuments.yaml:13:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    11 │ --- # Comment
+    12 │ ---
+  > 13 │ --- !!map
+       │ ^^^^^^^^^
+    14 │ 
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```

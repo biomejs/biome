@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTailwind41.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className="bg-gradient-to-r bg-left-top break-words order-none" />;
+
+```
+
+# Diagnostics
+```
+invalidTailwind41.jsx:2:17 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-gradient-to-r is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-r bg-left-top break-words order-none" />;
+      │                 ^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-linear-to-r instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - <div·className="bg-gradient-to-r·bg-left-top·break-words·order-none"·/>;
+      2 │ + <div·className="bg-linear-to-r·bg-left-top·break-words·order-none"·/>;
+    3 3 │   
+  
+
+```
+
+```
+invalidTailwind41.jsx:2:34 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class bg-left-top is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-r bg-left-top break-words order-none" />;
+      │                                  ^^^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use bg-top-left instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - <div·className="bg-gradient-to-r·bg-left-top·break-words·order-none"·/>;
+      2 │ + <div·className="bg-gradient-to-r·bg-top-left·break-words·order-none"·/>;
+    3 3 │   
+  
+
+```
+
+```
+invalidTailwind41.jsx:2:46 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class break-words is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-r bg-left-top break-words order-none" />;
+      │                                              ^^^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use wrap-break-word instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - <div·className="bg-gradient-to-r·bg-left-top·break-words·order-none"·/>;
+      2 │ + <div·className="bg-gradient-to-r·bg-left-top·wrap-break-word·order-none"·/>;
+    3 3 │   
+  
+
+```
+
+```
+invalidTailwind41.jsx:2:58 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class order-none is a legacy name.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className="bg-gradient-to-r bg-left-top break-words order-none" />;
+      │                                                          ^^^^^^^^^^
+    3 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use order-0 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - <div·className="bg-gradient-to-r·bg-left-top·break-words·order-none"·/>;
+      2 │ + <div·className="bg-gradient-to-r·bg-left-top·break-words·order-0"·/>;
+    3 3 │   
+  
+
+```

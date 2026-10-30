@@ -1,0 +1,377 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function f1() {
+	return array.push(value);
+}
+function f2() {
+	return array.unshift(value);
+}
+function f3() {
+	return (array.push(value));
+}
+function f4() {
+	return array?.push(value);
+}
+function f5() {
+	return array.push?.(value);
+}
+function f6() {
+	return array.push(/* comment */ value);
+}
+function f7() {
+	// leading comment
+	return array.push(value); // trailing comment
+}
+function f8() {
+	return array.push(value) // trailing comment
+}
+function f9() {
+	return this.items.push(value);
+}
+function f10() {
+	switch (key) {
+		case 1:
+			return array.push(value);
+	}
+}
+function f11() {
+	return (array.push(value) /* comment */);
+}
+
+```
+
+# Diagnostics
+```
+invalidFix.js:3:15 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f1() {
+  > 3 │ 	return array.push(value);
+      │ 	             ^^^^
+    4 │ }
+    5 │ function f2() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   function f1() {
+     3    │ - → return·array.push(value);
+        3 │ + → array.push(value);·return;
+     4  4 │   }
+     5  5 │   function f2() {
+  
+
+```
+
+```
+invalidFix.js:6:15 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of unshift() is used here.
+  
+    4 │ }
+    5 │ function f2() {
+  > 6 │ 	return array.unshift(value);
+      │ 	             ^^^^^^^
+    7 │ }
+    8 │ function f3() {
+  
+  i unshift() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call unshift() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+     4  4 │   }
+     5  5 │   function f2() {
+     6    │ - → return·array.unshift(value);
+        6 │ + → array.unshift(value);·return;
+     7  7 │   }
+     8  8 │   function f3() {
+  
+
+```
+
+```
+invalidFix.js:9:16 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+     7 │ }
+     8 │ function f3() {
+   > 9 │ 	return (array.push(value));
+       │ 	              ^^^^
+    10 │ }
+    11 │ function f4() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+     7  7 │   }
+     8  8 │   function f3() {
+     9    │ - → return·(array.push(value));
+        9 │ + → array.push(value);·return;
+    10 10 │   }
+    11 11 │   function f4() {
+  
+
+```
+
+```
+invalidFix.js:12:16 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    10 │ }
+    11 │ function f4() {
+  > 12 │ 	return array?.push(value);
+       │ 	              ^^^^
+    13 │ }
+    14 │ function f5() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    10 10 │   }
+    11 11 │   function f4() {
+    12    │ - → return·array?.push(value);
+       12 │ + → array?.push(value);·return;
+    13 13 │   }
+    14 14 │   function f5() {
+  
+
+```
+
+```
+invalidFix.js:15:15 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    13 │ }
+    14 │ function f5() {
+  > 15 │ 	return array.push?.(value);
+       │ 	             ^^^^
+    16 │ }
+    17 │ function f6() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    13 13 │   }
+    14 14 │   function f5() {
+    15    │ - → return·array.push?.(value);
+       15 │ + → array.push?.(value);·return;
+    16 16 │   }
+    17 17 │   function f6() {
+  
+
+```
+
+```
+invalidFix.js:18:15 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    16 │ }
+    17 │ function f6() {
+  > 18 │ 	return array.push(/* comment */ value);
+       │ 	             ^^^^
+    19 │ }
+    20 │ function f7() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    16 16 │   }
+    17 17 │   function f6() {
+    18    │ - → return·array.push(/*·comment·*/·value);
+       18 │ + → array.push(/*·comment·*/·value);·return;
+    19 19 │   }
+    20 20 │   function f7() {
+  
+
+```
+
+```
+invalidFix.js:22:15 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    20 │ function f7() {
+    21 │ 	// leading comment
+  > 22 │ 	return array.push(value); // trailing comment
+       │ 	             ^^^^
+    23 │ }
+    24 │ function f8() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    20 20 │   function f7() {
+    21 21 │     // leading comment
+    22    │ - → return·array.push(value);·//·trailing·comment
+       22 │ + → array.push(value);·return;·//·trailing·comment
+    23 23 │   }
+    24 24 │   function f8() {
+  
+
+```
+
+```
+invalidFix.js:25:15 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    23 │ }
+    24 │ function f8() {
+  > 25 │ 	return array.push(value) // trailing comment
+       │ 	             ^^^^
+    26 │ }
+    27 │ function f9() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    23 23 │   }
+    24 24 │   function f8() {
+    25    │ - → return·array.push(value)·//·trailing·comment
+       25 │ + → array.push(value);·return·//·trailing·comment
+    26 26 │   }
+    27 27 │   function f9() {
+  
+
+```
+
+```
+invalidFix.js:28:20 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    26 │ }
+    27 │ function f9() {
+  > 28 │ 	return this.items.push(value);
+       │ 	                  ^^^^
+    29 │ }
+    30 │ function f10() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    26 26 │   }
+    27 27 │   function f9() {
+    28    │ - → return·this.items.push(value);
+       28 │ + → this.items.push(value);·return;
+    29 29 │   }
+    30 30 │   function f10() {
+  
+
+```
+
+```
+invalidFix.js:33:17 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    31 │ 	switch (key) {
+    32 │ 		case 1:
+  > 33 │ 			return array.push(value);
+       │ 			             ^^^^
+    34 │ 	}
+    35 │ }
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    31 31 │     switch (key) {
+    32 32 │       case 1:
+    33    │ - → → → return·array.push(value);
+       33 │ + → → → array.push(value);·return;
+    34 34 │     }
+    35 35 │   }
+  
+
+```
+
+```
+invalidFix.js:37:16 lint/nursery/noReturnArrayPush  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    35 │ }
+    36 │ function f11() {
+  > 37 │ 	return (array.push(value) /* comment */);
+       │ 	              ^^^^
+    38 │ }
+    39 │ 
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the call before the return statement.
+  
+    35 35 │   }
+    36 36 │   function f11() {
+    37    │ - → return·(array.push(value)·/*·comment·*/);
+       37 │ + → array.push(value)·/*·comment·*/;·return;
+    38 38 │   }
+    39 39 │   
+  
+
+```

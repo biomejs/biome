@@ -6,9 +6,9 @@ use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, AnyJsLiteralExpression,
-    JsExpressionStatement, JsExpressionStatementFields, JsSyntaxKind, JsUnaryOperator, T,
+    JsExpressionStatement, JsExpressionStatementFields, JsScript, JsSyntaxKind, JsUnaryOperator, T,
 };
-use biome_rowan::SyntaxNodeOptionExt;
+use biome_rowan::{AstNode, AstNodeList, SyntaxNodeOptionExt};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsExpressionStatement;
@@ -39,6 +39,7 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
         if f.options().semicolons().is_as_needed()
             // Don't perform semicolon insertion if the previous statement is an bogus statement.
             && !is_after_bogus
+            && !is_vue_event_handler_statement(node, f)
             && (needs_parentheses || needs_semicolon(node))
         {
             write!(f, [token(";")])?;
@@ -65,13 +66,21 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
 
         let has_dangling_comments = f.context().comments().has_dangling_comments(node.syntax());
 
-        write!(
-            f,
-            [
-                expression.format(),
-                FormatStatementSemicolon::new(semicolon_token.as_ref())
-            ]
-        )?;
+        write!(f, [expression.format()])?;
+        if is_vue_event_handler_statement(node, f) {
+            // Vue calls the function that `handler` refers to, but doesn't call
+            // it for `handler;`. Any other statement is written like an
+            // expression, without a semicolon.
+            match &semicolon_token {
+                Some(semicolon_token) if is_vue_function_reference(&expression?) => {
+                    write!(f, [semicolon_token.format()])?;
+                }
+                Some(semicolon_token) => write!(f, [format_removed(semicolon_token)])?,
+                None => {}
+            }
+        } else {
+            write!(f, [FormatStatementSemicolon::new(semicolon_token.as_ref())])?;
+        }
 
         if has_dangling_comments {
             write!(f, [space(), format_dangling_comments(node.syntax())])?;
@@ -87,6 +96,45 @@ impl FormatNodeRule<JsExpressionStatement> for FormatJsExpressionStatement {
     ) -> FormatResult<()> {
         // Formatted inside of `fmt_fields`
         Ok(())
+    }
+}
+
+/// Returns `true` if the statement is the only content of a Vue event handler,
+/// such as `@click="count++"`.
+fn is_vue_event_handler_statement(node: &JsExpressionStatement, f: &JsFormatter) -> bool {
+    if !f
+        .options()
+        .source_type()
+        .as_embedding_kind()
+        .is_vue_event_handler()
+    {
+        return false;
+    }
+
+    let Some(list) = node.syntax().parent() else {
+        return false;
+    };
+    list.kind() == JsSyntaxKind::JS_STATEMENT_LIST
+        && list.children().count() == 1
+        && list
+            .parent()
+            .and_then(JsScript::cast)
+            .is_some_and(|script| script.directives().is_empty())
+}
+
+/// Returns `true` if Vue uses `expression` as the handler itself when it's the
+/// whole value of an event handler, rather than running it as a statement.
+fn is_vue_function_reference(expression: &AnyJsExpression) -> bool {
+    match expression.clone().omit_parentheses() {
+        AnyJsExpression::JsIdentifierExpression(identifier) => !identifier
+            .name()
+            .and_then(|name| name.value_token())
+            .is_ok_and(|token| token.text_trimmed() == "undefined"),
+        AnyJsExpression::JsStaticMemberExpression(_)
+        | AnyJsExpression::JsComputedMemberExpression(_)
+        | AnyJsExpression::JsArrowFunctionExpression(_)
+        | AnyJsExpression::JsFunctionExpression(_) => true,
+        _ => false,
     }
 }
 

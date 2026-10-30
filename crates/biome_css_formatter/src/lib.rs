@@ -30,14 +30,15 @@ use biome_css_syntax::{
     AnyCssDeclarationBlock, AnyCssRule, AnyCssRuleBlock, AnyCssValue, CssLanguage, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxNodeWithOffset, CssSyntaxToken,
 };
+use biome_formatter::Formatted;
 use biome_formatter::comments::Comments;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::Printed;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
     FormatRuleWithTextCase, TransformSourceMap, write,
 };
-use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
 use biome_string_case::StrLikeExtension;
 
@@ -270,11 +271,21 @@ where
 #[derive(Debug, Default, Clone)]
 pub struct CssFormatLanguage {
     options: CssFormatOptions,
+    metavariable_ranges: Box<[TextRange]>,
 }
 
 impl CssFormatLanguage {
     pub fn new(options: CssFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            metavariable_ranges: Box::default(),
+        }
+    }
+
+    /// Writes the given ranges of metavariables as embedded elements.
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Box<[TextRange]>) -> Self {
+        self.metavariable_ranges = metavariable_ranges;
+        self
     }
 }
 
@@ -312,7 +323,9 @@ impl FormatLanguage for CssFormatLanguage {
         _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &CssCommentStyle, source_map.as_ref());
-        CssFormatContext::new(self.options, comments).with_source_map(source_map)
+        CssFormatContext::new(self.options, comments)
+            .with_source_map(source_map)
+            .with_metavariable_ranges(self.metavariable_ranges)
     }
 }
 
@@ -427,6 +440,23 @@ pub fn format_node_with_offset(
     biome_formatter::format_node_with_offset(root, CssFormatLanguage::new(options), false)
 }
 
+/// Formats a CSS syntax tree with an offset, writing the given ranges of
+/// metavariables as embedded elements.
+///
+/// The ranges are relative to the start of `root`, such as the interpolations
+/// of a styled-components template.
+pub fn format_node_with_offset_and_metavariables(
+    options: CssFormatOptions,
+    root: &CssSyntaxNodeWithOffset,
+    metavariable_ranges: Box<[TextRange]>,
+) -> FormatResult<Formatted<CssFormatContext>> {
+    biome_formatter::format_node_with_offset(
+        root,
+        CssFormatLanguage::new(options).with_metavariable_ranges(metavariable_ranges),
+        false,
+    )
+}
+
 /// Formats a single node within a file, supported by Biome.
 ///
 /// This runs a simple heuristic to determine the initial indentation
@@ -448,7 +478,7 @@ mod tests {
     use crate::format_node;
     use crate::utils::case::CssCase;
     use crate::{AsFormat, CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
-    use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_parser::{CssParserOptions, parse_css, parse_css_with_metavariables};
     use biome_css_syntax::{
         AnyCssFunctionName, AnyCssGenericComponentValue, CssCompoundSelector,
         CssGenericComponentValueList, CssIdentifier, CssIfSupportsIdentifierTest,
@@ -776,11 +806,13 @@ mod tests {
 
     #[test]
     fn grit_metavariables_preserve_casing() {
-        let src = "\u{00b5}Selector { \u{00b5}Declaration; COLOR: \u{00b5}Value; }\n@media \u{00b5}Query { A:HOVER { COLOR: RED; } }";
-        let parse = parse_css(
+        let src =
+            "$Selector { $Declaration; COLOR: $Value; }\n@media $Query { A:HOVER { COLOR: RED; } }";
+        let parse = parse_css_with_metavariables(
             src,
             CssFileSource::css(),
-            CssParserOptions::default().allow_metavariables(),
+            CssParserOptions::default(),
+            &biome_test_utils::grit_metavariable_ranges(src),
         );
         assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
 
@@ -788,7 +820,7 @@ mod tests {
 
         assert_eq!(
             formatted.print().unwrap().as_code(),
-            "\u{00b5}Selector {\n\t\u{00b5}Declaration\n\tcolor: \u{00b5}Value;\n}\n@media \u{00b5}Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
+            "$Selector {\n\t$Declaration;\n\tcolor: $Value;\n}\n@media $Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
         );
     }
 

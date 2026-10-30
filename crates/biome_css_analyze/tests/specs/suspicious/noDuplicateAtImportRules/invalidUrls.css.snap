@@ -20,6 +20,8 @@ invalidUrls.css:2:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━�
       │  ^^^^^^^^^^^^^^^^^^^^
     3 │ 
   
+  i Importing the same stylesheet more than once is redundant and can cause an extra request.
+  
   i Consider removing one of the duplicated imports.
   
 

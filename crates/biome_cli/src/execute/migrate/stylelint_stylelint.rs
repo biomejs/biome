@@ -74,9 +74,9 @@ pub(crate) enum Severity {
     Error,
 }
 impl Deserializable for Severity {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
@@ -118,19 +118,19 @@ impl Deref for Rules {
     }
 }
 impl Deserializable for Rules {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = Rules;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -162,47 +162,56 @@ pub(crate) struct RuleData {
     pub(crate) enabled: bool,
     /// The severity set in the secondary options, if any.
     pub(crate) severity: Option<Severity>,
+    /// The primary option, for rules whose Biome equivalent has a matching option.
+    pub(crate) primary_option: Option<PrimaryOption>,
 }
 impl Deserializable for RuleData {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        match value.visitable_type()? {
+        match value.visitable_type(ctx)? {
             DeserializableType::Null => Some(Self {
                 enabled: false,
                 severity: None,
+                primary_option: None,
             }),
             DeserializableType::Bool => {
                 let enabled = bool::deserialize(ctx, value, name)?;
                 Some(Self {
                     enabled,
                     severity: None,
+                    primary_option: None,
                 })
             }
             DeserializableType::Array => {
                 struct Visitor;
-                impl DeserializationVisitor for Visitor {
+                impl<S> DeserializationVisitor<S> for Visitor {
                     type Output = RuleData;
                     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
                     fn visit_array(
                         self,
-                        ctx: &mut dyn DeserializationContext,
+                        ctx: &mut dyn DeserializationContext<State = S>,
                         items: &mut dyn ExactSizeIterator<
-                            Item = Option<Box<dyn DeserializableValue>>,
+                            Item = Option<Box<dyn DeserializableValue<State = S>>>,
                         >,
                         _range: biome_rowan::TextRange,
                         name: &str,
                     ) -> Option<Self::Output> {
                         let mut items = items.flatten();
+                        let mut primary_option = None;
                         let enabled = match items.next() {
-                            Some(primary) => match primary.visitable_type() {
+                            Some(primary) => match primary.visitable_type(ctx) {
                                 Some(DeserializableType::Null) => false,
                                 Some(DeserializableType::Bool) => {
                                     bool::deserialize(ctx, &primary, name).unwrap_or(true)
                                 }
-                                _ => true,
+                                _ => {
+                                    primary_option =
+                                        PrimaryOption::from_rule_value(ctx, &primary, name);
+                                    true
+                                }
                             },
                             None => true,
                         };
@@ -212,7 +221,11 @@ impl Deserializable for RuleData {
                                 SecondaryOptions::deserialize(ctx, &secondary, name)
                             })
                             .and_then(|options| options.severity);
-                        Some(RuleData { enabled, severity })
+                        Some(RuleData {
+                            enabled,
+                            severity,
+                            primary_option,
+                        })
                     }
                 }
                 value.deserialize(ctx, Visitor, name)
@@ -221,7 +234,50 @@ impl Deserializable for RuleData {
             _ => Some(Self {
                 enabled: true,
                 severity: None,
+                primary_option: PrimaryOption::from_rule_value(ctx, value, name),
             }),
+        }
+    }
+}
+
+/// The primary option of a Stylelint rule whose Biome equivalent has a matching option.
+#[derive(Debug)]
+pub(crate) enum PrimaryOption {
+    LightnessNotation(LightnessNotation),
+}
+impl PrimaryOption {
+    /// Deserializes the primary option of the Stylelint rule named `rule_name`.
+    ///
+    /// Returns `None` for rules whose primary option isn't migrated.
+    fn from_rule_value<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        rule_name: &str,
+    ) -> Option<Self> {
+        match rule_name {
+            "lightness-notation" => {
+                LightnessNotation::deserialize(ctx, value, rule_name).map(Self::LightnessNotation)
+            }
+            _ => None,
+        }
+    }
+}
+
+/// The primary option of the `lightness-notation` rule.
+///
+/// See <https://stylelint.io/user-guide/rules/lightness-notation>
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum LightnessNotation {
+    Percentage,
+    Number,
+}
+impl From<LightnessNotation>
+    for biome_rule_options::use_consistent_lightness_notation::LightnessNotation
+{
+    fn from(value: LightnessNotation) -> Self {
+        match value {
+            LightnessNotation::Percentage => Self::Percentage,
+            LightnessNotation::Number => Self::Number,
         }
     }
 }
@@ -243,6 +299,7 @@ mod tests {
         RuleData {
             enabled,
             severity: None,
+            primary_option: None,
         }
     }
 

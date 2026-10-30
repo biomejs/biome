@@ -139,6 +139,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(Eslint("no-extra-parens"), FormatterCovers),
     UnsupportedRule(Eslint("no-extra-semi"), FormatterCovers),
     UnsupportedRule(Eslint("no-floating-decimal"), FormatterCovers),
+    UnsupportedRule(Eslint("no-iterator"), Legacy),
     UnsupportedRule(Eslint("no-mixed-operators"), Stylistic),
     UnsupportedRule(
         Eslint("no-mixed-spaces-and-tabs"),
@@ -198,6 +199,11 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(Eslint("wrap-iife"), Stylistic),
     UnsupportedRule(Eslint("wrap-regex"), Stylistic),
     UnsupportedRule(Eslint("yield-star-spacing"), FormatterCovers),
+    UnsupportedRule(
+        EslintBetterTailwindcss("no-unnecessary-whitespace"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintImport("imports-first"), Deprecated),
     UnsupportedRule(EslintJest("padding-around-after-all-blocks"), Stylistic),
     UnsupportedRule(EslintJest("padding-around-after-each-blocks"), Stylistic),
     UnsupportedRule(EslintJest("padding-around-all"), Stylistic),
@@ -209,6 +215,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintJsxA11y("no-onchange"), Deprecated),
     UnsupportedRule(EslintMysticatea("block-scoped-var"), CoveredByRule("noVar")),
     UnsupportedRule(EslintN("no-hide-core-modules"), Deprecated),
+    UnsupportedRule(EslintN("shebang"), Deprecated),
     UnsupportedRule(EslintQwik("no-async-prevent-default"), Deprecated),
     UnsupportedRule(
         EslintQwik("unused-server"),
@@ -246,8 +253,14 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         FormatterCovers,
     ),
     UnsupportedRule(EslintSvelte("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(
+        EslintSvelte("no-unused-svelte-ignore"),
+        RequiresExternalTool,
+    ),
+    // Svelte documentation recommends avoiding class directives.
+    UnsupportedRule(EslintSvelte("prefer-class-directive"), Legacy),
     UnsupportedRule(EslintSvelte("system"), NotApplicable),
-    UnsupportedRule(EslintSvelte("valid-compile"), NotApplicable),
+    UnsupportedRule(EslintSvelte("valid-compile"), RequiresExternalTool),
     UnsupportedRule(EslintSvelte("valid-style-parse"), FormatterCovers),
     UnsupportedRule(EslintStylistic("array-bracket-newline"), FormatterCovers),
     UnsupportedRule(
@@ -405,6 +418,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintStylistic("wrap-iife"), Stylistic),
     UnsupportedRule(EslintStylistic("wrap-regex"), Stylistic),
     UnsupportedRule(EslintStylistic("yield-star-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTailwindcss("important-modifier-suffix"), Deprecated),
     UnsupportedRule(EslintTypeScript("brace-style"), Stylistic),
     UnsupportedRule(EslintTypeScript("comma-dangle"), Stylistic),
     UnsupportedRule(EslintTypeScript("comma-spacing"), FormatterCovers),
@@ -419,6 +433,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintTypeScript("space-before-blocks"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("space-before-function-paren"), Stylistic),
     UnsupportedRule(EslintTypeScript("space-infix-ops"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("typedef"), Deprecated),
     UnsupportedRule(EslintUnicorn("comma-spacing"), FormatterCovers),
     UnsupportedRule(EslintUnicorn("empty-brace-spaces"), FormatterCovers),
     UnsupportedRule(
@@ -446,6 +461,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintVueJs("comma-dangle"), FormatterCovers),
     UnsupportedRule(EslintVueJs("comma-spacing"), FormatterCovers),
     UnsupportedRule(EslintVueJs("comma-style"), Stylistic),
+    UnsupportedRule(EslintVueJs("comment-directive"), NotApplicable),
     UnsupportedRule(EslintVueJs("dot-location"), Stylistic),
     UnsupportedRule(EslintVueJs("first-attribute-linebreak"), Stylistic),
     UnsupportedRule(EslintVueJs("func-call-spacing"), FormatterCovers),
@@ -477,8 +493,10 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         EslintVueJs("new-line-between-multi-line-property"),
         Stylistic,
     ),
+    UnsupportedRule(EslintVueJs("no-custom-modifiers-on-v-model"), Legacy),
     UnsupportedRule(EslintVueJs("no-extra-parens"), FormatterCovers),
     UnsupportedRule(EslintVueJs("no-multi-spaces"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("no-multiple-template-root"), Legacy),
     UnsupportedRule(EslintVueJs("no-parsing-error"), FormatterCovers),
     UnsupportedRule(
         EslintVueJs("no-spaces-around-equal-signs-in-attribute"),
@@ -517,6 +535,12 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         EslintVueJs("template-curly-spacing"),
         FormatterOption("delimiterSpacing"),
     ),
+    // Keys on v-if/else branches are not required in Vue 3.
+    UnsupportedRule(EslintVueJs("v-if-else-key"), Legacy),
+    UnsupportedRule(EslintVueJs("valid-model-definition"), Deprecated),
+    UnsupportedRule(EslintVueJs("valid-v-bind-sync"), Deprecated),
+    UnsupportedRule(Stylelint("color-no-invalid-hex"), ParserCovers),
+    UnsupportedRule(Stylelint("declaration-empty-line-before"), Stylistic),
     UnsupportedRule(HtmlEslint("attrs-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("element-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("indent"), FormatterOption("indentWidth")),
@@ -531,13 +555,14 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         Stylistic,
     ),
     UnsupportedRule(EslintMarkdown("no-space-in-emphasis"), FormatterCovers),
+    UnsupportedRule(EslintYml("flow-mapping-curly-newline"), FormatterCovers),
     UnsupportedRule(EslintYml("indent"), FormatterOption("indentWidth")),
     UnsupportedRule(EslintYml("no-tab-indent"), FormatterCovers),
     UnsupportedRule(EslintYml("no-trailing-spaces"), FormatterCovers),
     UnsupportedRule(EslintYml("quotes"), FormatterOption("quoteStyle")),
     UnsupportedRule(EslintAstro("no-omitted-end-tags"), Deprecated),
     UnsupportedRule(EslintAstro("semi"), FormatterOption("semicolons")),
-    UnsupportedRule(EslintAstro("valid-compile"), NotApplicable),
+    UnsupportedRule(EslintAstro("valid-compile"), RequiresExternalTool),
 ];
 
 #[cfg(test)]

@@ -1,0 +1,7 @@
+<!-- should not generate diagnostics -->
+<template>
+  <input ref="foo" />
+  <input ref="bar" />
+  <input ref="baz" />
+  <button @click="alert($refs.foo.value, $refs?.bar, $refs['baz'])">Click</button>
+</template>

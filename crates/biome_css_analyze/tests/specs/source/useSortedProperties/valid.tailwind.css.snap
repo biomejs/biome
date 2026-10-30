@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.tailwind.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@import "tailwindcss";
+
+@theme {
+  --font-*: initial;
+  --font-custom: Custom;
+}
+
+@theme {
+  --*: initial;
+  --color-custom: red;
+  --color-*: initial;
+  --color-custom: blue;
+}
+
+@theme inline {
+  --font-custom: Custom;
+  --font-*: initial;
+  --*: initial;
+}
+
+```

@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$theme-color: #000;
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:15 lint/style/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ $theme-color: #000;
+      │               ^^^^
+    3 │ 
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+
+```

@@ -1,6 +1,6 @@
 use crate::services::embedded::EmbeddedService;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, declare_lint_rule};
+use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_embeds::{VueDirectiveResolution, vue_directive_binding_name};
@@ -93,6 +93,7 @@ declare_lint_rule! {
         version: "2.5.14",
         name: "noVueUndeclaredDirectives",
         language: "html",
+        sources: &[RuleSource::EslintVueJs("no-undef-directives").same()],
         recommended: false,
         severity: Severity::Error,
         domains: &[RuleDomain::Vue],

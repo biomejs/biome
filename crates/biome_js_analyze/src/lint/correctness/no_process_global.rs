@@ -156,28 +156,25 @@ fn is_top_level_statement(node: &SyntaxNode<JsLanguage>) -> bool {
 }
 
 fn create_process_import(with_trailing_new_line: bool) -> JsImport {
-    let whitespace = [(TriviaPieceKind::Whitespace, " ")];
-    let new_line = [(TriviaPieceKind::Newline, "\n")];
     let mut semicolon = make::token(T![;]);
     if with_trailing_new_line {
-        semicolon = semicolon.with_trailing_trivia(new_line);
+        semicolon = semicolon.with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]);
     }
 
     let source = make::js_module_source(make::js_string_literal("node:process"));
-    let binding =
-        make::js_identifier_binding(make::ident("process").with_trailing_trivia(whitespace));
+    let binding = make::js_identifier_binding(make::ident("process").with_trailing_space());
     let specifier = make::js_default_import_specifier(binding.into());
     let clause = make::js_import_default_clause(
         specifier,
-        make::token(T![from]).with_trailing_trivia(whitespace),
+        make::token(T![from]).with_trailing_space(),
         source.into(),
     )
     .build();
 
     make::js_import(
         make::token(T![import])
-            .with_trailing_trivia(whitespace)
-            .with_leading_trivia(new_line),
+            .with_trailing_space()
+            .with_leading_newline(),
         clause.into(),
     )
     .with_semicolon_token(semicolon)

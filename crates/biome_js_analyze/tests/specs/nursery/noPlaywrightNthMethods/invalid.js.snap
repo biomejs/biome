@@ -1,0 +1,653 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+page.locator("button").first();
+frame.locator("button").first();
+foo.locator("button").first();
+foo.first();
+
+page.locator("button").last();
+frame.locator("button").last();
+foo.locator("button").last();
+foo.last();
+
+page.locator("button").nth(3);
+frame.locator("button").nth(3);
+foo.locator("button").nth(3);
+foo.nth(32);
+
+page.locator("button")["first"]();
+page.locator("button")['last']();
+page.locator("button")[`nth`](1);
+page.locator("button")[("first")]();
+
+page.locator("button").first().last();
+page.locator("button").nth(1).locator("span").first();
+
+page.locator("button")?.first();
+page.locator("button").last?.();
+page.locator("button")?.["nth"](2);
+
+(page.locator("button").first)();
+
+await page.locator("button").first().click();
+await expect(page.getByRole("listitem").last()).toBeVisible();
+
+buttons.nth(0);
+this.buttons.first();
+
+page
+	.locator("button")
+	// comment
+	.nth(
+		index,
+	);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:24 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ page.locator("button").first();
+      │                        ^^^^^^^
+    3 │ frame.locator("button").first();
+    4 │ foo.locator("button").first();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:25 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    1 │ /* should generate diagnostics */
+    2 │ page.locator("button").first();
+  > 3 │ frame.locator("button").first();
+      │                         ^^^^^^^
+    4 │ foo.locator("button").first();
+    5 │ foo.first();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    2 │ page.locator("button").first();
+    3 │ frame.locator("button").first();
+  > 4 │ foo.locator("button").first();
+      │                       ^^^^^^^
+    5 │ foo.first();
+    6 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    3 │ frame.locator("button").first();
+    4 │ foo.locator("button").first();
+  > 5 │ foo.first();
+      │     ^^^^^^^
+    6 │ 
+    7 │ page.locator("button").last();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:24 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+    5 │ foo.first();
+    6 │ 
+  > 7 │ page.locator("button").last();
+      │                        ^^^^^^
+    8 │ frame.locator("button").last();
+    9 │ foo.locator("button").last();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:25 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+     7 │ page.locator("button").last();
+   > 8 │ frame.locator("button").last();
+       │                         ^^^^^^
+     9 │ foo.locator("button").last();
+    10 │ foo.last();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+     7 │ page.locator("button").last();
+     8 │ frame.locator("button").last();
+   > 9 │ foo.locator("button").last();
+       │                       ^^^^^^
+    10 │ foo.last();
+    11 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+     8 │ frame.locator("button").last();
+     9 │ foo.locator("button").last();
+  > 10 │ foo.last();
+       │     ^^^^^^
+    11 │ 
+    12 │ page.locator("button").nth(3);
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:24 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    10 │ foo.last();
+    11 │ 
+  > 12 │ page.locator("button").nth(3);
+       │                        ^^^^^^
+    13 │ frame.locator("button").nth(3);
+    14 │ foo.locator("button").nth(3);
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:25 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    12 │ page.locator("button").nth(3);
+  > 13 │ frame.locator("button").nth(3);
+       │                         ^^^^^^
+    14 │ foo.locator("button").nth(3);
+    15 │ foo.nth(32);
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    12 │ page.locator("button").nth(3);
+    13 │ frame.locator("button").nth(3);
+  > 14 │ foo.locator("button").nth(3);
+       │                       ^^^^^^
+    15 │ foo.nth(32);
+    16 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:5 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    13 │ frame.locator("button").nth(3);
+    14 │ foo.locator("button").nth(3);
+  > 15 │ foo.nth(32);
+       │     ^^^^^^^
+    16 │ 
+    17 │ page.locator("button")["first"]();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    15 │ foo.nth(32);
+    16 │ 
+  > 17 │ page.locator("button")["first"]();
+       │                       ^^^^^^^^^^^
+    18 │ page.locator("button")['last']();
+    19 │ page.locator("button")[`nth`](1);
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+    17 │ page.locator("button")["first"]();
+  > 18 │ page.locator("button")['last']();
+       │                       ^^^^^^^^^^
+    19 │ page.locator("button")[`nth`](1);
+    20 │ page.locator("button")[("first")]();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    17 │ page.locator("button")["first"]();
+    18 │ page.locator("button")['last']();
+  > 19 │ page.locator("button")[`nth`](1);
+       │                       ^^^^^^^^^^
+    20 │ page.locator("button")[("first")]();
+    21 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:23 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    18 │ page.locator("button")['last']();
+    19 │ page.locator("button")[`nth`](1);
+  > 20 │ page.locator("button")[("first")]();
+       │                       ^^^^^^^^^^^^^
+    21 │ 
+    22 │ page.locator("button").first().last();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:24 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    20 │ page.locator("button")[("first")]();
+    21 │ 
+  > 22 │ page.locator("button").first().last();
+       │                        ^^^^^^^
+    23 │ page.locator("button").nth(1).locator("span").first();
+    24 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:32 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+    20 │ page.locator("button")[("first")]();
+    21 │ 
+  > 22 │ page.locator("button").first().last();
+       │                                ^^^^^^
+    23 │ page.locator("button").nth(1).locator("span").first();
+    24 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:24 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    22 │ page.locator("button").first().last();
+  > 23 │ page.locator("button").nth(1).locator("span").first();
+       │                        ^^^^^^
+    24 │ 
+    25 │ page.locator("button")?.first();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:47 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    22 │ page.locator("button").first().last();
+  > 23 │ page.locator("button").nth(1).locator("span").first();
+       │                                               ^^^^^^^
+    24 │ 
+    25 │ page.locator("button")?.first();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:25 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    23 │ page.locator("button").nth(1).locator("span").first();
+    24 │ 
+  > 25 │ page.locator("button")?.first();
+       │                         ^^^^^^^
+    26 │ page.locator("button").last?.();
+    27 │ page.locator("button")?.["nth"](2);
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:24 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+    25 │ page.locator("button")?.first();
+  > 26 │ page.locator("button").last?.();
+       │                        ^^^^^^^^
+    27 │ page.locator("button")?.["nth"](2);
+    28 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:25 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    25 │ page.locator("button")?.first();
+    26 │ page.locator("button").last?.();
+  > 27 │ page.locator("button")?.["nth"](2);
+       │                         ^^^^^^^^^^
+    28 │ 
+    29 │ (page.locator("button").first)();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:25 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    27 │ page.locator("button")?.["nth"](2);
+    28 │ 
+  > 29 │ (page.locator("button").first)();
+       │                         ^^^^^^^^
+    30 │ 
+    31 │ await page.locator("button").first().click();
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:30 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    29 │ (page.locator("button").first)();
+    30 │ 
+  > 31 │ await page.locator("button").first().click();
+       │                              ^^^^^^^
+    32 │ await expect(page.getByRole("listitem").last()).toBeVisible();
+    33 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:41 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i last() selects an element by its position.
+  
+    31 │ await page.locator("button").first().click();
+  > 32 │ await expect(page.getByRole("listitem").last()).toBeVisible();
+       │                                         ^^^^^^
+    33 │ 
+    34 │ buttons.nth(0);
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:9 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    32 │ await expect(page.getByRole("listitem").last()).toBeVisible();
+    33 │ 
+  > 34 │ buttons.nth(0);
+       │         ^^^^^^
+    35 │ this.buttons.first();
+    36 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:14 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i first() selects an element by its position.
+  
+    34 │ buttons.nth(0);
+  > 35 │ this.buttons.first();
+       │              ^^^^^^^
+    36 │ 
+    37 │ page
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:3 lint/nursery/noPlaywrightNthMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i nth() selects an element by its position.
+  
+    38 │ 	.locator("button")
+    39 │ 	// comment
+  > 40 │ 	.nth(
+       │ 	 ^^^^
+  > 41 │ 		index,
+  > 42 │ 	);
+       │ 	^
+    43 │ 
+  
+  i When elements are added, removed, or reordered on the page, the test can act on a different element.
+  
+  i Use a locator that matches only the element you want, such as getByRole() with a name or getByTestId(), or narrow the matches with filter().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

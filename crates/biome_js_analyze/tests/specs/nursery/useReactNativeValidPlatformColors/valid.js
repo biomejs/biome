@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+const single = PlatformColor('labelColor');
+const multiple = PlatformColor('controlAccentColor', 'controlColor');
+const withFallback = PlatformColor('labelColor', {fallback: '#FF0000'});
+const multipleWithFallback = PlatformColor('controlAccentColor', 'controlColor', {fallback: 'red'});
+const fallbackOnly = PlatformColor({fallback: 'red'});
+const parenthesized = PlatformColor(('labelColor'));
+const literals = DynamicColorIOS({light: 'black', dark: 'white'});
+const platformColors = DynamicColorIOS({light: PlatformColor('black'), dark: PlatformColor('white')});
+const highContrast = DynamicColorIOS({
+	light: PlatformColor('black'),
+	dark: PlatformColor('white'),
+	highContrastLight: PlatformColor('black'),
+	highContrastDark: PlatformColor('white'),
+});
+const computedKey = DynamicColorIOS({['light']: 'black', dark: 'white'});
+
+// Unrelated functions with other names
+const other = Color(labelColor);
+const member = theme.PlatformColor(labelColor);

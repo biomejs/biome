@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: suppressions/vue-v-for-global.vue
+---
+
+# Input
+
+```vue
+<!-- biome-ignore-all format: keep as written -->
+<template>
+	<li v-for='item   in   ["a","b"]' :key='item'>{{ item }}</li>
+</template>
+
+```
+
+
+# Formatted
+
+```vue
+<!-- biome-ignore-all format: keep as written -->
+<template>
+	<li v-for='item   in   ["a","b"]' :key='item'>{{ item }}</li>
+</template>
+
+```

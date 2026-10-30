@@ -88,6 +88,9 @@ impl Rule for NoSubstr {
         Some(
             RuleDiagnostic::new(rule_category!(), state.span(), diagnostic_message)
                 .note(note_message)
+                .note(markup! {
+                    "Replace the call with "<Emphasis>"slice()"</Emphasis>" and review its arguments. The arguments of the two methods have a different meaning, so Biome cannot always change them for you."
+                })
                 .note(mdn_link),
         )
     }

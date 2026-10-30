@@ -1,0 +1,181 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoreTopLevelFunctions.jsonc
+---
+# Input
+```cjs
+/* should generate diagnostics */ ;(function() { var bar = 1; return function () { var z; return 42; }; })()
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:70 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ ;(function() { var bar = 1; return function () { var z; return 42; }; })()
+      │                                                                      ^^^^^^^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */ ;(function() { var bar = 1; var baz = 2; })(); (function() { var bar = 1; var baz = 2; })()
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:37 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ ;(function() { var bar = 1; var baz = 2; })(); (function() { var bar = 1; var baz = 2; })()
+      │                                     ^^^^^^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:83 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ ;(function() { var bar = 1; var baz = 2; })(); (function() { var bar = 1; var baz = 2; })()
+      │                                                                                   ^^^^^^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */ define(['foo', 'qux'], function(foo, qux) { var bar = 1; var baz = 2; return function () { var z; return 42; }; })
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:112 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ define(['foo', 'qux'], function(foo, qux) { var bar = 1; var baz = 2; return function () { var z; return 42; }; })
+      │                                                                                                                ^^^^^^^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */ function foo() { 1; 2; } const bar = () => 1;
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:35 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ function foo() { 1; 2; } const bar = () => 1;
+      │                                   ^^^^^^^^^^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */ function foo(cb = () => { a; b; }) { 1; 2; }
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:53 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ function foo(cb = () => { a; b; }) { 1; 2; }
+      │                                                     ^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */ const foo = () => () => { a; b; };
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:53 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ const foo = () => () => { a; b; };
+      │                                                     ^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */ class C { static { one; two; function not_top_level() { 1; 2; } } }
+```
+
+# Diagnostics
+```
+invalidIgnoreTopLevelFunctions.jsonc:1:64 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━
+
+  ! This function has too many statements (2). Maximum allowed is 1.
+  
+  > 1 │ /* should generate diagnostics */ class C { static { one; two; function not_top_level() { 1; 2; } } }
+      │                                                                ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,313 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@custom-variant 2xl (@container page (width >= 96rem));
+
+@custom-variant 3xl {
+	@container page (width >= 112rem) {
+		@slot;
+	}
+}
+
+@custom-variant 2 (&:hover);
+
+@custom-variant @2xl (&:hover);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@16..20 "2xl" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@20..21 "(" [] [],
+                    selector: CssAtRuleDeclarator {
+                        at_token: AT@21..22 "@" [] [],
+                        declarator: CssContainerAtRuleDeclarator {
+                            container_token: CONTAINER_KW@22..32 "container" [] [Whitespace(" ")],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@32..37 "page" [] [Whitespace(" ")],
+                            },
+                            query: CssContainerSizeFeatureInParens {
+                                l_paren_token: L_PAREN@37..38 "(" [] [],
+                                feature: CssQueryFeatureRange {
+                                    left: CssIdentifier {
+                                        value_token: IDENT@38..44 "width" [] [Whitespace(" ")],
+                                    },
+                                    comparison: CssQueryFeatureRangeComparison {
+                                        operator: GTEQ@44..47 ">=" [] [Whitespace(" ")],
+                                    },
+                                    right: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@47..49 "96" [] [],
+                                        unit_token: IDENT@49..52 "rem" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@52..53 ")" [] [],
+                            },
+                        },
+                    },
+                    r_paren_token: R_PAREN@53..54 ")" [] [],
+                    semicolon_token: SEMICOLON@54..55 ";" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@55..58 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@58..73 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@73..77 "3xl" [] [Whitespace(" ")],
+                },
+                selector: CssRuleBlock {
+                    l_curly_token: L_CURLY@77..78 "{" [] [],
+                    rules: CssRuleList [
+                        CssAtRule {
+                            at_token: AT@78..81 "@" [Newline("\n"), Whitespace("\t")] [],
+                            rule: CssContainerAtRule {
+                                declarator: CssContainerAtRuleDeclarator {
+                                    container_token: CONTAINER_KW@81..91 "container" [] [Whitespace(" ")],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@91..96 "page" [] [Whitespace(" ")],
+                                    },
+                                    query: CssContainerSizeFeatureInParens {
+                                        l_paren_token: L_PAREN@96..97 "(" [] [],
+                                        feature: CssQueryFeatureRange {
+                                            left: CssIdentifier {
+                                                value_token: IDENT@97..103 "width" [] [Whitespace(" ")],
+                                            },
+                                            comparison: CssQueryFeatureRangeComparison {
+                                                operator: GTEQ@103..106 ">=" [] [Whitespace(" ")],
+                                            },
+                                            right: CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@106..109 "112" [] [],
+                                                unit_token: IDENT@109..112 "rem" [] [],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@112..114 ")" [] [Whitespace(" ")],
+                                    },
+                                },
+                                block: CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@114..115 "{" [] [],
+                                    items: CssDeclarationOrRuleList [
+                                        CssAtRule {
+                                            at_token: AT@115..119 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                            rule: TwSlotAtRule {
+                                                slot_token: SLOT_KW@119..123 "slot" [] [],
+                                                semicolon_token: SEMICOLON@123..124 ";" [] [],
+                                            },
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@124..127 "}" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@127..129 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@129..132 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@132..147 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@147..149 "2" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@149..150 "(" [] [],
+                    selector: CssSelectorList [
+                        CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [
+                                CssNestedSelector {
+                                    amp_token: AMP@150..151 "&" [] [],
+                                },
+                            ],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssPseudoClassSelector {
+                                    colon_token: COLON@151..152 ":" [] [],
+                                    class: CssPseudoClassIdentifier {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@152..157 "hover" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@157..158 ")" [] [],
+                    semicolon_token: SEMICOLON@158..159 ";" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@159..162 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwCustomVariantAtRule {
+                custom_variant_token: CUSTOM_VARIANT_KW@162..177 "custom-variant" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@177..182 "@2xl" [] [Whitespace(" ")],
+                },
+                selector: TwCustomVariantShorthand {
+                    l_paren_token: L_PAREN@182..183 "(" [] [],
+                    selector: CssSelectorList [
+                        CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [
+                                CssNestedSelector {
+                                    amp_token: AMP@183..184 "&" [] [],
+                                },
+                            ],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssPseudoClassSelector {
+                                    colon_token: COLON@184..185 ":" [] [],
+                                    class: CssPseudoClassIdentifier {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@185..190 "hover" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@190..191 ")" [] [],
+                    semicolon_token: SEMICOLON@191..192 ";" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@192..193 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..193
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..192
+    0: CSS_AT_RULE@0..55
+      0: AT@0..1 "@" [] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@1..55
+        0: CUSTOM_VARIANT_KW@1..16 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@16..20
+          0: IDENT@16..20 "2xl" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@20..55
+          0: L_PAREN@20..21 "(" [] []
+          1: CSS_AT_RULE_DECLARATOR@21..53
+            0: AT@21..22 "@" [] []
+            1: CSS_CONTAINER_AT_RULE_DECLARATOR@22..53
+              0: CONTAINER_KW@22..32 "container" [] [Whitespace(" ")]
+              1: CSS_CUSTOM_IDENTIFIER@32..37
+                0: IDENT@32..37 "page" [] [Whitespace(" ")]
+              2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@37..53
+                0: L_PAREN@37..38 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE@38..52
+                  0: CSS_IDENTIFIER@38..44
+                    0: IDENT@38..44 "width" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@44..47
+                    0: GTEQ@44..47 ">=" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@47..52
+                    0: CSS_NUMBER_LITERAL@47..49 "96" [] []
+                    1: IDENT@49..52 "rem" [] []
+                2: R_PAREN@52..53 ")" [] []
+          2: R_PAREN@53..54 ")" [] []
+          3: SEMICOLON@54..55 ";" [] []
+    1: CSS_AT_RULE@55..129
+      0: AT@55..58 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@58..129
+        0: CUSTOM_VARIANT_KW@58..73 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@73..77
+          0: IDENT@73..77 "3xl" [] [Whitespace(" ")]
+        2: CSS_RULE_BLOCK@77..129
+          0: L_CURLY@77..78 "{" [] []
+          1: CSS_RULE_LIST@78..127
+            0: CSS_AT_RULE@78..127
+              0: AT@78..81 "@" [Newline("\n"), Whitespace("\t")] []
+              1: CSS_CONTAINER_AT_RULE@81..127
+                0: CSS_CONTAINER_AT_RULE_DECLARATOR@81..114
+                  0: CONTAINER_KW@81..91 "container" [] [Whitespace(" ")]
+                  1: CSS_CUSTOM_IDENTIFIER@91..96
+                    0: IDENT@91..96 "page" [] [Whitespace(" ")]
+                  2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@96..114
+                    0: L_PAREN@96..97 "(" [] []
+                    1: CSS_QUERY_FEATURE_RANGE@97..112
+                      0: CSS_IDENTIFIER@97..103
+                        0: IDENT@97..103 "width" [] [Whitespace(" ")]
+                      1: CSS_QUERY_FEATURE_RANGE_COMPARISON@103..106
+                        0: GTEQ@103..106 ">=" [] [Whitespace(" ")]
+                      2: CSS_REGULAR_DIMENSION@106..112
+                        0: CSS_NUMBER_LITERAL@106..109 "112" [] []
+                        1: IDENT@109..112 "rem" [] []
+                    2: R_PAREN@112..114 ")" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_BLOCK@114..127
+                  0: L_CURLY@114..115 "{" [] []
+                  1: CSS_DECLARATION_OR_RULE_LIST@115..124
+                    0: CSS_AT_RULE@115..124
+                      0: AT@115..119 "@" [Newline("\n"), Whitespace("\t\t")] []
+                      1: TW_SLOT_AT_RULE@119..124
+                        0: SLOT_KW@119..123 "slot" [] []
+                        1: SEMICOLON@123..124 ";" [] []
+                  2: R_CURLY@124..127 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@127..129 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@129..159
+      0: AT@129..132 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@132..159
+        0: CUSTOM_VARIANT_KW@132..147 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@147..149
+          0: IDENT@147..149 "2" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@149..159
+          0: L_PAREN@149..150 "(" [] []
+          1: CSS_SELECTOR_LIST@150..157
+            0: CSS_COMPOUND_SELECTOR@150..157
+              0: CSS_NESTED_SELECTOR_LIST@150..151
+                0: CSS_NESTED_SELECTOR@150..151
+                  0: AMP@150..151 "&" [] []
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@151..157
+                0: CSS_PSEUDO_CLASS_SELECTOR@151..157
+                  0: COLON@151..152 ":" [] []
+                  1: CSS_PSEUDO_CLASS_IDENTIFIER@152..157
+                    0: CSS_IDENTIFIER@152..157
+                      0: IDENT@152..157 "hover" [] []
+          2: R_PAREN@157..158 ")" [] []
+          3: SEMICOLON@158..159 ";" [] []
+    3: CSS_AT_RULE@159..192
+      0: AT@159..162 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_CUSTOM_VARIANT_AT_RULE@162..192
+        0: CUSTOM_VARIANT_KW@162..177 "custom-variant" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@177..182
+          0: IDENT@177..182 "@2xl" [] [Whitespace(" ")]
+        2: TW_CUSTOM_VARIANT_SHORTHAND@182..192
+          0: L_PAREN@182..183 "(" [] []
+          1: CSS_SELECTOR_LIST@183..190
+            0: CSS_COMPOUND_SELECTOR@183..190
+              0: CSS_NESTED_SELECTOR_LIST@183..184
+                0: CSS_NESTED_SELECTOR@183..184
+                  0: AMP@183..184 "&" [] []
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@184..190
+                0: CSS_PSEUDO_CLASS_SELECTOR@184..190
+                  0: COLON@184..185 ":" [] []
+                  1: CSS_PSEUDO_CLASS_IDENTIFIER@185..190
+                    0: CSS_IDENTIFIER@185..190
+                      0: IDENT@185..190 "hover" [] []
+          2: R_PAREN@190..191 ")" [] []
+          3: SEMICOLON@191..192 ";" [] []
+  2: EOF@192..193 "" [Newline("\n")] []
+
+```

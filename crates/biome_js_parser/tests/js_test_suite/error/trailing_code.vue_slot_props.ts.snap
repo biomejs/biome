@@ -93,11 +93,11 @@ JsVueSlotPropsRoot {
 trailing_code.vue_slot_props.ts:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Template expressions can only contain a single expression
-
+  
   > 1 │ { item }: Props) => item
       │                ^
-    2 │
-
+    2 │ 
+  
   i Remove the extra code or split into multiple template expressions.
-
+  
 ```

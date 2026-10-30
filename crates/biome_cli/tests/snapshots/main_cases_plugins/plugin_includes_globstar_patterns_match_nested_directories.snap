@@ -1,0 +1,100 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/plugin_includes_globstar_patterns_match_nested_directories'
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    {
+      "path": "./no-assign.grit",
+      "includes": ["**/src/**", "!**/generated/**"]
+    }
+  ]
+}
+```
+
+## `lib/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `no-assign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Prefer object spread")
+}
+```
+
+## `packages/app/src/generated/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `packages/app/src/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `src/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+packages/app/src/index.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+src/index.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer object spread
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 6 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

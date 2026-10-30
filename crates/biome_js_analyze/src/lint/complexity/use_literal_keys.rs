@@ -54,6 +54,7 @@ declare_lint_rule! {
             RuleSource::Eslint("dot-notation").same(),
             RuleSource::Eslint("no-useless-computed-key").same(),
             RuleSource::EslintTypeScript("dot-notation").same(),
+            RuleSource::EslintVueJs("dot-notation").same(),
         ],
         recommended: true,
         severity: Severity::Information,
@@ -128,7 +129,10 @@ impl Rule for UseLiteralKeys {
                     "The computed expression can be simplified without the use of a string literal."
                 }
             },
-        ))
+        )
+        .note(markup! {
+            "A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, (_, token, _): &Self::State) -> Option<JsRuleAction> {

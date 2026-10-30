@@ -20,16 +20,18 @@ use biome_analyze::{
     RuleRegistry, SnippetAnalyzer,
 };
 use biome_aria::AriaRoles;
-use biome_db::AnyParsedSource;
+use biome_db::Source;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_embeds::EmbeddedData;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
+use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
+use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -63,7 +65,11 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct JsAnalyzerServices {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
-    parsed_source: Option<AnyParsedSource>,
+    parsed_source: Option<AnalyzedSource>,
+    /// The host document of the analyzed source, which the embedded queries
+    /// of `language_db` read. It stays set after fixes, when the analyzed tree
+    /// no longer matches `parsed_source`.
+    document: Option<Source>,
     embedded_data: Option<Arc<EmbeddedData>>,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: Option<TextSize>,
@@ -93,6 +99,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             module_db: Some(module_db),
             language_db: None,
             parsed_source: None,
+            document: None,
             embedded_data: None,
             snippet_offset: None,
             project_layout,
@@ -107,6 +114,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             module_db: None,
             language_db: None,
             parsed_source: None,
+            document: None,
             embedded_data: None,
             snippet_offset: None,
             project_layout: Arc::new(ProjectLayout::default()),
@@ -131,8 +139,15 @@ impl JsAnalyzerServices {
         self
     }
 
-    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+    /// Sets the parsed source of the analyzed tree, and its host document.
+    pub fn with_parsed_source(mut self, source: AnalyzedSource) -> Self {
+        self.document = Some(source.document());
         self.parsed_source = Some(source);
+        self
+    }
+
+    pub fn with_document(mut self, document: Source) -> Self {
+        self.document = Some(document);
         self
     }
 
@@ -213,6 +228,7 @@ where
         module_db,
         language_db: embedded_db,
         parsed_source,
+        document,
         embedded_data,
         snippet_offset,
         project_layout,
@@ -281,6 +297,10 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(TwSyntaxService::default());
+    services.insert_service(module_db.as_deref().map_or_else(
+        || Arc::new(TailwindDesignSystem::default()),
+        |module_db| TailwindDesignSystem::from_module_graph(module_db, options.tailwind()),
+    ));
     services.insert_service(source_type);
     if let Some(module_db) = module_db {
         services.insert_service(module_db);
@@ -297,11 +317,10 @@ where
     if let Some(embedded_data) = embedded_data {
         services.insert_service(EmbeddedService::from_data(embedded_data, snippet_offset));
     } else if let Some(embedded_db) = embedded_db {
-        services.insert_service(EmbeddedService::new(
-            embedded_db,
-            options.file_path.clone(),
-            snippet_offset,
-        ));
+        // A path can have a different document for each client of the
+        // workspace, so the embedded content comes from the analyzed document
+        // rather than from its path.
+        services.insert_service(EmbeddedService::new(embedded_db, document, snippet_offset));
     }
 
     let ctx = AnalyzerContext {

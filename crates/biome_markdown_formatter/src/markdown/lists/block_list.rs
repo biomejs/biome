@@ -4,13 +4,13 @@ use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
+use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode, format_removed_quote_boundary};
 use biome_formatter::FormatRuleWithOptions;
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet,
-    MdParagraph, MdQuote,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet, MdQuote,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -84,6 +84,30 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                         joiner.entry(&prefix.format().with_options(FormatMdQuotePrefixOptions {
                             should_remove: true,
                         }));
+
+                        // A newline printed as text skips the `align` markers, so
+                        // print this quote-only line's markers explicitly.
+                        if let Some((_, newline)) = iter.next_if(|(index, next)| {
+                            quote_trim_range.contains(index)
+                                && next.is_newline()
+                                && !newline_block_has_comments(next)
+                        }) {
+                            prev_content = PrevContentBlock::Other;
+                            let line_prefix = quote_line_prefix(newline.syntax())?;
+                            joiner.entry(&format_with(move |f| {
+                                format_removed_quote_boundary(&newline, f)?;
+                                write!(
+                                    f,
+                                    [
+                                        dedent_to_root(&format_args![
+                                            hard_line_break(),
+                                            line_prefix.format(false)
+                                        ]),
+                                        hard_line_break()
+                                    ]
+                                )
+                            }));
+                        }
                     }
 
                     AnyMdBlock::MdQuotePrefix(prefix)
@@ -118,7 +142,11 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
             return joiner.finish();
         }
 
-        DefaultBlockListFormatter { node: node.clone() }.fmt(f)
+        DefaultBlockListFormatter {
+            node: node.clone(),
+            text_context,
+        }
+        .fmt(f)
     }
 }
 
@@ -248,6 +276,7 @@ fn quote_boundary_trim_end(node: &MdBlockList, start: usize) -> usize {
 
 pub(crate) struct DefaultBlockListFormatter {
     node: MdBlockList,
+    text_context: TextContext,
 }
 
 #[derive(Default)]
@@ -264,6 +293,10 @@ impl PreviousBlock {
 
     fn is_list(&self) -> bool {
         self.0.as_ref().is_some_and(AnyMdBlock::is_list)
+    }
+
+    fn is_paragraph(&self) -> bool {
+        self.0.as_ref().is_some_and(AnyMdBlock::is_paragraph)
     }
 
     fn is_link_reference_definition(&self) -> bool {
@@ -305,9 +338,12 @@ impl PreviousBlock {
                 AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html)) if !html.is_html_comment()
             ) || matches!(
                 block,
-                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))
-                    if paragraph_has_inner_hard_line(paragraph)
-            )
+                AnyMdBlock::AnyMdLeafBlock(
+                    AnyMdLeafBlock::MdParagraph(_) | AnyMdLeafBlock::GfmTable(_)
+                )
+            ) || block
+                .as_any_md_container_block()
+                .is_some_and(|container| container.as_md_quote().is_some())
         })
     }
 }
@@ -549,6 +585,17 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     && !after_newline
                 {
                     joiner.entry(&hard_line_break());
+                } else if previous_block.is_paragraph()
+                    && !node.is_html_block()
+                    && !after_newline
+                    && !self.text_context.is_list()
+                {
+                    // A block that interrupts a paragraph (a header, a fenced
+                    // code block, a list, ...) gets a blank line before it.
+                    // Inside a list item the two stay tight, so a nested list
+                    // doesn't turn the item into a loose one. HTML blocks stay
+                    // attached to the paragraph, as Prettier does.
+                    joiner.entry(&empty_line());
                 }
 
                 still_leading = false;
@@ -638,17 +685,6 @@ fn next_content_block_is_link_reference_definition(
         .take_while(|(index, _)| *index < content_count)
         .find(|(_, block)| !block.is_newline())
         .is_some_and(|(_, block)| block.is_link_reference_definition())
-}
-
-fn paragraph_has_inner_hard_line(paragraph: &MdParagraph) -> bool {
-    let mut items = paragraph.list().iter().peekable();
-    while let Some(item) = items.next() {
-        if matches!(item, AnyMdInline::MdHardLine(_)) && items.peek().is_some() {
-            return true;
-        }
-    }
-
-    false
 }
 
 /// Whether the list terminates its own line.

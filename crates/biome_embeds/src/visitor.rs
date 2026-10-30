@@ -2,7 +2,7 @@ use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
@@ -15,15 +15,17 @@ use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType,
-    JsAssignmentExpression, JsCallExpression, JsExport, JsIdentifierAssignment, JsImport,
-    JsModuleItemList, JsParameterList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyJsVueGenericTypeParameters,
+    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
+    JsIdentifierAssignment, JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier,
+    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsSyntaxToken,
+    JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
 
@@ -113,7 +115,7 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
 #[salsa::tracked]
 pub fn embedded_bindings_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<Vec<EmbeddedBinding>> {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return Vec::new();
@@ -138,7 +140,7 @@ pub fn embedded_bindings_from_source(
 #[salsa::tracked]
 pub fn vue_directive_declarations_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> VueDirectiveDeclarations {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return VueDirectiveDeclarations::unknown();
@@ -232,7 +234,7 @@ struct CollectedEmbeddedBindings {
 #[salsa::tracked]
 pub fn embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<Vec<EmbeddedValueReference>> {
     let Some(builder) = collect_embedded_references_from_source(db, file) else {
         return Vec::new();
@@ -244,7 +246,7 @@ pub fn embedded_references_from_source(
 #[salsa::tracked]
 pub fn embedded_type_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<Vec<EmbeddedTypeReference>> {
     let Some(builder) = collect_embedded_references_from_source(db, file) else {
         return Vec::new();
@@ -255,7 +257,7 @@ pub fn embedded_type_references_from_source(
 
 fn collect_embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Option<EmbeddedReferencesBuilder> {
     let host_source = db.source_from_index(file.document_source_index(db))?;
     let snippets = file
@@ -284,6 +286,9 @@ fn collect_embedded_references(
         .is_some_and(|s| s.is_svelte());
 
     let mut builder = EmbeddedReferencesBuilder::new();
+    let generic_names: Vec<_> = vue_generic_parameter_names(snippets)
+        .map(|token| token.token_text_trimmed())
+        .collect();
 
     for snippet in snippets {
         let Some(js_file_source) = snippet.file_source.to_js_file_source() else {
@@ -295,6 +300,8 @@ fn collect_embedded_references(
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
+        } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
+            builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);
         }
     }
 
@@ -328,6 +335,32 @@ fn build_type_references(builder: &EmbeddedReferencesBuilder) -> Vec<EmbeddedTyp
             text: text.clone(),
         })
         .collect()
+}
+
+/// Returns the name tokens of the type parameters declared by the `generic` attribute of a
+/// Vue `<script setup>`.
+///
+/// A `generic` attribute that fails to parse declares no names.
+fn vue_generic_parameter_names<'a>(
+    snippets: &'a [EmbeddedSnippet],
+) -> impl Iterator<Item = JsSyntaxToken> + 'a {
+    snippets
+        .iter()
+        .filter(|snippet| {
+            snippet
+                .file_source
+                .to_js_file_source()
+                .is_some_and(|source| source.is_vue_generics_list())
+        })
+        .filter_map(|snippet| {
+            let root = snippet.parse.tree::<AnyJsRoot>();
+            match root.as_js_vue_generic_root()?.items().ok()? {
+                AnyJsVueGenericTypeParameters::TsTypeParameterList(items) => Some(items),
+                _ => None,
+            }
+        })
+        .flat_map(|items| items.iter())
+        .filter_map(|type_parameter| type_parameter.ok()?.name().ok()?.ident_token().ok())
 }
 
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {
@@ -495,6 +528,10 @@ impl EmbeddedBindingsBuilder {
                 self.visit_parameter_list_bindings(&root.parameters());
             }
         }
+
+        for token in vue_generic_parameter_names(snippets) {
+            self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
+        }
     }
 
     fn visit_svelte_html_root(&mut self, root: &HtmlRoot) {
@@ -559,6 +596,9 @@ impl EmbeddedBindingsBuilder {
             AnyVueVForBinding::AnyVueVForDestructuredBinding(binding) => {
                 self.visit_vue_v_for_destructured_binding(binding);
             }
+            AnyVueVForBinding::VueVForDefaultBinding(binding) => {
+                self.visit_vue_v_for_binding(&binding.binding().ok()?);
+            }
         }
 
         Some(())
@@ -596,6 +636,9 @@ impl EmbeddedBindingsBuilder {
             }
             AnyVueVForBindingListElement::AnyVueVForDestructuredBinding(binding) => {
                 self.visit_vue_v_for_destructured_binding(binding);
+            }
+            AnyVueVForBindingListElement::VueVForDefaultBinding(binding) => {
+                self.visit_vue_v_for_binding(&binding.binding().ok()?);
             }
         }
 
@@ -701,9 +744,13 @@ impl EmbeddedBindingsBuilder {
         self.is_vue_source = host_file_source.is_vue();
         self.is_vue_setup = self.is_vue_source && js_file_source.as_embedding_kind().is_vue_setup();
 
-        let preorder = root.syntax().preorder();
+        let kinds = JsModuleItemList::KIND_SET
+            .union(JsCallExpression::KIND_SET)
+            .union(JsAssignmentExpression::KIND_SET)
+            .union(JsSvelteSnippetRoot::KIND_SET)
+            .union(JsSvelteDeclarationRoot::KIND_SET);
 
-        for event in preorder {
+        for event in root.syntax().preorder_of_kinds(kinds) {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(module_item) = JsModuleItemList::cast_ref(&node) {
@@ -1663,9 +1710,12 @@ impl EmbeddedReferencesBuilder {
     }
 
     fn visit_non_source_snippet(&mut self, root: &AnyJsRoot, file_source: &JsFileSource) {
-        let preorder = root.syntax().preorder();
+        let kinds = JsxReferenceIdentifier::KIND_SET
+            .union(JsReferenceIdentifier::KIND_SET)
+            .union(JsIdentifierAssignment::KIND_SET)
+            .union(JsStaticMemberExpression::KIND_SET);
 
-        for event in preorder {
+        for event in root.syntax().preorder_of_kinds(kinds) {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(reference) = JsxReferenceIdentifier::cast_ref(&node) {
@@ -1681,6 +1731,29 @@ impl EmbeddedReferencesBuilder {
                     }
                 }
                 WalkEvent::Leave(_) => {}
+            }
+        }
+    }
+
+    /// Registers the type references of a Vue `<script setup>` that refer to one of the
+    /// `generic_names` declared by its `generic` attribute.
+    fn visit_vue_setup_generic_references(
+        &mut self,
+        root: &AnyJsRoot,
+        generic_names: &[TokenText],
+    ) {
+        for node in root.syntax().descendants() {
+            if let Some(reference) = JsReferenceIdentifier::cast_ref(&node)
+                && let Ok(name_token) = reference.value_token()
+                && AnyJsIdentifierReference::from(reference).is_only_type()
+                && generic_names
+                    .iter()
+                    .any(|name| name.text() == name_token.text_trimmed())
+            {
+                self.register_type_reference(
+                    name_token.text_trimmed_range(),
+                    name_token.token_text_trimmed(),
+                );
             }
         }
     }
@@ -1724,8 +1797,20 @@ impl EmbeddedReferencesBuilder {
                 }
                 value
             }
-            AnySvelteDirective::SvelteStyleDirective(_)
-            | AnySvelteDirective::SvelteClassDirective(_) => return None,
+            AnySvelteDirective::SvelteStyleDirective(directive) => {
+                let value = directive.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
+            AnySvelteDirective::SvelteClassDirective(directive) => {
+                let value = directive.value().ok()?;
+                if value.initializer().is_some() {
+                    return None;
+                }
+                value
+            }
         };
 
         self.register_svelte_binding_property(value.property().ok())
@@ -1737,8 +1822,8 @@ impl EmbeddedReferencesBuilder {
     ) -> Option<()> {
         let token = match property? {
             AnySvelteBindingProperty::SvelteName(name) => name.ident_token().ok()?,
-            AnySvelteBindingProperty::SvelteMemberProperty(_)
-            | AnySvelteBindingProperty::SvelteLiteral(_) => return None,
+            AnySvelteBindingProperty::SvelteLiteral(literal) => literal.value_token().ok()?,
+            AnySvelteBindingProperty::SvelteMemberProperty(_) => return None,
         };
 
         self.register_reference(token.text_trimmed_range(), token.token_text_trimmed());
@@ -1885,5 +1970,86 @@ impl EmbeddedReferencesBuilder {
             self.visit_reference_identifier(reference.clone())?;
         }
         Some(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::bindings::{InternedBindingTokenText, get_binding_by_name};
+    use crate::components::component_at;
+    use crate::references::{InternedReference, is_reference_used};
+    use crate::testing::{
+        TestDb, TestSnippet, document, parse_html_source_with_js_snippet, parse_js_source,
+        parse_vue_source, token_text,
+    };
+    use biome_languages::has_embedded_content;
+    use biome_rowan::TextSize;
+
+    #[test]
+    fn has_embedded_content_is_false_for_a_plain_script() {
+        let db = TestDb::new();
+        let source = "import Component from \"./Component.vue\"; Component;";
+        let path = parse_js_source(&db, source, Vec::new());
+
+        assert!(!has_embedded_content(&db, document(&db, &path)));
+
+        // The lookups that a `false` answer lets callers skip find nothing.
+        assert!(
+            get_binding_by_name(
+                &db,
+                InternedBindingTokenText::new(&db, document(&db, &path), token_text("Component"))
+            )
+            .is_none()
+        );
+        assert!(!is_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("Component"))
+        ));
+        let whole_file = TextRange::up_to(TextSize::of(source));
+        assert!(component_at(&db, document(&db, &path), whole_file).is_none());
+    }
+
+    #[test]
+    fn has_embedded_content_is_true_for_an_html_like_host() {
+        let db = TestDb::new();
+        let path = parse_vue_source(&db, "<template><Component /></template>");
+
+        assert!(has_embedded_content(&db, document(&db, &path)));
+    }
+
+    #[test]
+    fn has_embedded_content_is_true_for_an_html_host_with_a_snippet() {
+        let db = TestDb::new();
+        let js = "const schema = {};";
+        let path = parse_html_source_with_js_snippet(
+            &db,
+            &format!(r#"<script type="module">{js}</script>"#),
+            js,
+        );
+
+        assert!(has_embedded_content(&db, document(&db, &path)));
+    }
+
+    #[test]
+    fn has_embedded_content_is_true_for_a_script_with_a_snippet() {
+        let db = TestDb::new();
+        let source = "const used = 1; html`${used}`;";
+        let content_start = TextSize::from(source.find("${used}").unwrap() as u32 + 2);
+        let content_range = TextRange::at(content_start, TextSize::of("used"));
+        let snippet = TestSnippet {
+            text: "used".to_string(),
+            element_range: content_range,
+            content_range,
+            content_offset: content_start,
+            source_index: 3,
+        };
+        let path = parse_js_source(&db, source, vec![snippet]);
+
+        assert!(has_embedded_content(&db, document(&db, &path)));
+        assert!(is_reference_used(
+            &db,
+            InternedReference::new(&db, document(&db, &path), token_text("used"))
+        ));
     }
 }

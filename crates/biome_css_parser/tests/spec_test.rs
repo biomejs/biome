@@ -1,7 +1,7 @@
 use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css_with_metavariables};
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
@@ -9,9 +9,12 @@ use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_languages::CssFileSource;
 use biome_languages::css::CssEmbeddingKind;
-use biome_rowan::SyntaxKind;
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_service::settings::Settings;
-use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
+use biome_test_utils::{
+    grit_metavariable_ranges, has_bogus_nodes_or_empty_slots, validate_eof_token,
+    validate_text_trimmed_ranges,
+};
 use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
@@ -47,11 +50,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let mut options = CssParserOptions::default()
-        // it is an internal option that cannot be configured via options.json
-        // TODO: find a way to make it configurable
-        .allow_metavariables()
-        .report_scss_exclusive_syntax();
+    let mut options = CssParserOptions::default();
 
     let mut css_modules_enabled = false;
     let mut css_modules_kind = CssModulesKind::Classic;
@@ -115,8 +114,16 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let parsed = parse_css(&content, source_type, options);
+    let metavariables = if test_case.contains("grit_metavariable") {
+        grit_metavariable_ranges(&content)
+    } else if file_name.ends_with(".styled.css") {
+        template_interpolation_ranges(&content)
+    } else {
+        Vec::new()
+    };
+    let parsed = parse_css_with_metavariables(&content, source_type, options, &metavariables);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 
@@ -207,4 +214,39 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
+}
+
+/// Returns the ranges of the template interpolations in a styled fixture, such
+/// as `${props.color}`.
+fn template_interpolation_ranges(source: &str) -> Vec<TextRange> {
+    let mut ranges = Vec::new();
+    let mut position = 0;
+    while let Some(offset) = source[position..].find("${") {
+        let start = position + offset;
+        let mut depth = 0usize;
+        let end = source[start..]
+            .char_indices()
+            .find_map(|(index, chr)| {
+                match chr {
+                    '{' => depth += 1,
+                    '}' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            return Some(start + index + 1);
+                        }
+                    }
+                    _ => {}
+                }
+                None
+            })
+            .unwrap_or(source.len());
+
+        ranges.push(TextRange::new(
+            TextSize::from(start as u32),
+            TextSize::from(end as u32),
+        ));
+        position = end;
+    }
+
+    ranges
 }

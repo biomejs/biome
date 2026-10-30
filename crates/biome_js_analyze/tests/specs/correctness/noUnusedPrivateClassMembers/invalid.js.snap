@@ -73,6 +73,8 @@ invalid.js:2:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
     3 │ 
     4 │ 	#unusedMethod() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
      1  1 │   class Bioo {
@@ -94,6 +96,8 @@ invalid.js:4:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━�
       │ 	^^^^^^^^^^^^^
     5 │ 
     6 │ 	};
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   
@@ -121,6 +125,8 @@ invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     11 │ 
     12 │ 	method() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
      8  8 │   
@@ -143,6 +149,8 @@ invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     19 │ 
     20 │ 	method() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     16 16 │   
@@ -164,6 +172,8 @@ invalid.js:26:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
        │ 	    ^^^^^^^^^^^^^^^
     27 │ 	set #unusedAccessor(value) {}
     28 │ }
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   
@@ -188,6 +198,8 @@ invalid.js:27:6 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     28 │ }
     29 │ 
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     25 25 │   class Accessor {
@@ -209,6 +221,8 @@ invalid.js:31:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │ }
     33 │ 
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   
@@ -232,6 +246,8 @@ invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     36 │ 	method() {
     37 │ 			this.#usedOnlyInWrite = 42;
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     33 33 │   
@@ -254,6 +270,8 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     43 │ 	method() {
     44 │ 			this.#usedOnlyInWriteStatement = 42;
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     40 40 │   
@@ -275,6 +293,8 @@ invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
        │ 	^^^^^^^^^^^^^^^^^^^^
     50 │ 
     51 │ 	foo() {
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   

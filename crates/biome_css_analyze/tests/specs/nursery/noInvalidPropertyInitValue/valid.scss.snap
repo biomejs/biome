@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 10deg;
+}
+
+$angle: 20deg;
+@property --dynamic-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: $angle;
+}
+
+@function angle-value() {
+  @return 30deg;
+}
+
+@property --function-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: angle-value();
+}
+
+```

@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-props-array.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: ["value", "list"],
+  methods: {
+    update() {
+      this.value = "test";
+      this.list.splice(0, 1);
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-props-array.vue:7:12 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop value.
+  
+    5 │   methods: {
+    6 │     update() {
+  > 7 │       this.value = "test";
+      │            ^^^^^
+    8 │       this.list.splice(0, 1);
+    9 │     },
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-props-array.vue:8:12 lint/nursery/noVueMutatingProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This changes the prop list.
+  
+     6 │     update() {
+     7 │       this.value = "test";
+   > 8 │       this.list.splice(0, 1);
+       │            ^^^^
+     9 │     },
+    10 │   },
+  
+  i A prop belongs to the parent component. Changing it from the child either fails, or changes the parent's data without the parent knowing.
+  
+  i Emit an event so the parent can change the value, or copy the prop into a local ref() or computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

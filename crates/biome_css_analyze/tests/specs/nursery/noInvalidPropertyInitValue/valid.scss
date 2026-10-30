@@ -1,0 +1,23 @@
+/* should not generate diagnostics */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 10deg;
+}
+
+$angle: 20deg;
+@property --dynamic-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: $angle;
+}
+
+@function angle-value() {
+  @return 30deg;
+}
+
+@property --function-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: angle-value();
+}

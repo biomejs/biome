@@ -1,0 +1,132 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin size {
+  width: 100%;
+}
+
+.card {
+  margin: 1px 2px 3px 4px;
+  inset-block-start: 1px;
+  inset-block-end: 2px;
+  padding: #{$space} 2px;
+  margin: $space 2px;
+  padding-block-start: #{$space};
+  padding-block-end: 2px;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin size {
+  > 3 │   width: 100%;
+      │   ^^^^^
+    4 │ }
+    5 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace width with inline-size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the logical CSS replacement.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   @mixin size {
+     3    │ - ··width:·100%;
+        3 │ + ··inline-size:·100%;
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.scss:7:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    6 │ .card {
+  > 7 │   margin: 1px 2px 3px 4px;
+      │   ^^^^^^
+    8 │   inset-block-start: 1px;
+    9 │   inset-block-end: 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+     5  5 │   
+     6  6 │   .card {
+     7    │ - ··margin:·1px·2px·3px·4px;
+        7 │ + ··margin-block:·1px·3px;·margin-inline:·4px·2px;
+     8  8 │     inset-block-start: 1px;
+     9  9 │     inset-block-end: 2px;
+  
+
+```
+
+```
+invalid.scss:8:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+     6 │ .card {
+     7 │   margin: 1px 2px 3px 4px;
+   > 8 │   inset-block-start: 1px;
+       │   ^^^^^^^^^^^^^^^^^
+     9 │   inset-block-end: 2px;
+    10 │   padding: #{$space} 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as inset-block.
+  
+     6  6 │   .card {
+     7  7 │     margin: 1px 2px 3px 4px;
+     8    │ - ··inset-block-start:·1px;
+     9    │ - ··inset-block-end:·2px;
+        8 │ + ··inset-block:·1px·2px;
+    10  9 │     padding: #{$space} 2px;
+    11 10 │     margin: $space 2px;
+  
+
+```
+
+```
+invalid.scss:11:3 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+     9 │   inset-block-end: 2px;
+    10 │   padding: #{$space} 2px;
+  > 11 │   margin: $space 2px;
+       │   ^^^^^^
+    12 │   padding-block-start: #{$space};
+    13 │   padding-block-end: 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The variable or function may supply multiple values, so check its substitution and split the shorthand manually.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

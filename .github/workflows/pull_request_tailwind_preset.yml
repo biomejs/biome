@@ -7,7 +7,7 @@ on:
       - main
     paths: # Only run when the generator, its dependencies or its output change
       - 'packages/tailwindcss-config-analyzer/**'
-      - 'crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs'
+      - 'crates/biome_tailwind_logic/src/use_tailwind_sorted_classes/tailwind_preset_v4.rs'
       - 'pnpm-lock.yaml'
       - 'rust-toolchain.toml'
       - '.github/workflows/pull_request_tailwind_preset.yml'
@@ -38,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24.21.0
       - name: Cache pnpm modules
@@ -54,4 +54,4 @@ jobs:
           pnpm --filter tailwindcss-config-analyzer i --frozen-lockfile
           pnpm --filter tailwindcss-config-analyzer run execute:v4
       - name: Check that the preset is up to date
-        run: git diff --exit-code -- crates/biome_js_analyze/src/lint/nursery/use_sorted_classes/tailwind_preset_v4.rs
+        run: git diff --exit-code -- crates/biome_tailwind_logic/src/use_tailwind_sorted_classes/tailwind_preset_v4.rs

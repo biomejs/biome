@@ -70,7 +70,15 @@ if (binPath) {
 		throw result.error;
 	}
 
-	process.exitCode = result.status;
+	// We check `signal` instead of `status` because a child killed by a signal
+	// has a null `status`, which Node turns into exit code 0. The shell
+	// convention for that case is 128 + signal number.
+	if (result.signal) {
+		const signalNumber = require("os").constants.signals[result.signal];
+		process.exitCode = signalNumber ? 128 + signalNumber : 1;
+	} else {
+		process.exitCode = result.status;
+	}
 } else {
 	console.error(
 		"The Biome CLI package doesn't ship with prebuilt binaries for your platform yet. " +

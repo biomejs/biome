@@ -35,9 +35,9 @@
 
 **Biome** 是一个用于 Web 项目的高性能工具链，旨在为开发者提供维护项目的工具。
 
-**Biome 是一个[快速的格式化工具](https://github.com/biomejs/benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_、_JSON_ 等，与 _Prettier_ 的兼容性达到了 **[97%](https://algora.io/challenges/prettier)**。
+**Biome 是一个[快速的格式化工具](https://github.com/biomejs/benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_Markdown_、_YAML_ 和 _SCSS_ 等，与 _Prettier_ 的兼容性达到了 **[97%](https://algora.io/challenges/prettier)**。
 
-**Biome 是一个[高性能的 Linter](https://github.com/biomejs/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 等，包含了来自 ESLint、typescript-eslint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[500 余项规则](https://biomejs.dev/zh-cn/linter/javascript/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
+**Biome 是一个[高性能的 Linter](https://github.com/biomejs/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_、_Markdown_、_YAML_ 和 _SCSS_ 等，包含了来自 ESLint、typescript-eslint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[500 余项规则](https://biomejs.dev/zh-cn/linter/javascript/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
 
 **Biome** 从一开始就设计为[在编辑器中交互式使用](https://biomejs.dev/zh-cn/editors/first-party-extensions/)。它可以在你编写代码时格式化并检查出不规范的代码。
 
@@ -134,6 +134,9 @@ npx @biomejs/biome ci ./src
       <td align="center" valign="middle">
         <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://github.com/syntaxfm" target="_blank"><img src="https://avatars.githubusercontent.com/u/130389858?s=200&v=4" height="100" alt="SyntaxFM logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -148,9 +151,6 @@ npx @biomejs/biome ci ./src
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>

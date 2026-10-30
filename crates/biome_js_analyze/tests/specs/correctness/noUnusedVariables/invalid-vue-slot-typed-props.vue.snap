@@ -27,15 +27,15 @@ interface UnusedType {
 invalid-vue-slot-typed-props.vue:8:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This interface UnusedType is unused.
-
+  
      6 │   innerValue: string;
      7 │ }
    > 8 │ interface UnusedType {
        │           ^^^^^^^^^^
      9 │   innerValue: string;
     10 │ }
-
+  
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
-
+  
 
 ```

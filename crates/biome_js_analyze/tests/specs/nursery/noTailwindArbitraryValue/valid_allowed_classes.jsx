@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+<div className="p-[13px]" />;
+<div className="md:p-[13px] hover:md:p-[13px]" />;
+<div className="p-[13px]! !p-[13px]" />;
+<div className="-m-[2px] md:-m-[2px]!" />;
+<div className="[color:red] hover:[color:red]!" />;

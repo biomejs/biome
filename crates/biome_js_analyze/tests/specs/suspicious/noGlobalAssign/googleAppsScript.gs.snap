@@ -27,6 +27,8 @@ googleAppsScript.gs:2:1 lint/suspicious/noGlobalAssign ━━━━━━━━�
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```
 
@@ -43,6 +45,8 @@ googleAppsScript.gs:3:1 lint/suspicious/noGlobalAssign ━━━━━━━━�
     5 │ // Assigning to a non-global identifier is fine.
   
   i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
   
 
 ```

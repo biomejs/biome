@@ -16,8 +16,9 @@ use crate::syntax::scss::{
 };
 use crate::syntax::{
     CssSyntaxFeatures, ValueParsingContext, ValueParsingMode, is_at_any_value_with_context,
-    is_at_dashed_identifier, is_at_identifier, is_at_string, is_nth_at_identifier,
-    parse_any_value_with_context, parse_custom_identifier_with_keywords, parse_dashed_identifier,
+    is_at_dashed_identifier, is_at_identifier, is_at_metavariable, is_at_string,
+    is_nth_at_identifier, is_nth_at_metavariable, parse_any_value_with_context,
+    parse_custom_identifier_with_keywords, parse_dashed_identifier, parse_metavariable,
     parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
@@ -306,8 +307,9 @@ fn is_at_tailwind_theme_reference_property(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_direct_generic_property(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n)
-        && (p.nth_at(n + 1, T![:]) || is_nth_at_tailwind_theme_reference_property(p, n))
+    (is_nth_at_identifier(p, n)
+        && (p.nth_at(n + 1, T![:]) || is_nth_at_tailwind_theme_reference_property(p, n)))
+        || (is_nth_at_metavariable(p, n) && p.nth_at(n + 1, T![:]))
 }
 
 #[inline]
@@ -360,6 +362,8 @@ pub(crate) fn parse_generic_property_name(p: &mut CssParser) -> ParsedSyntax {
 fn parse_plain_property_name(p: &mut CssParser) -> ParsedSyntax {
     if is_at_dashed_identifier(p) {
         parse_dashed_identifier(p)
+    } else if is_at_metavariable(p) {
+        parse_metavariable(p)
     } else {
         parse_regular_identifier(p)
     }
@@ -461,6 +465,7 @@ pub(crate) struct GenericComponentValueList {
     end_set: TokenSet<CssSyntaxKind>,
     recovery_set: TokenSet<CssSyntaxKind>,
     boundary: Option<fn(&mut CssParser) -> bool>,
+    context: Option<ValueParsingContext>,
 }
 
 impl GenericComponentValueList {
@@ -472,11 +477,18 @@ impl GenericComponentValueList {
             end_set,
             recovery_set,
             boundary: None,
+            context: None,
         }
     }
 
     pub(crate) fn with_boundary(mut self, boundary: fn(&mut CssParser) -> bool) -> Self {
         self.boundary = Some(boundary);
+        self
+    }
+
+    /// Preserves the caller's value policy for every component in the list.
+    pub(crate) fn with_context(mut self, context: ValueParsingContext) -> Self {
+        self.context = Some(context);
         self
     }
 
@@ -501,7 +513,10 @@ impl ParseNodeList for GenericComponentValueList {
     const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_generic_component_value(p)
+        let context = self
+            .context
+            .unwrap_or_else(|| ValueParsingContext::new(p, ValueParsingMode::ScssAware));
+        parse_generic_component_value_with_context(p, context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

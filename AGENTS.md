@@ -73,6 +73,12 @@ Load [doc-comments](./.agents/skills/doc-comments/SKILL.md) whenever editing `//
 - Delete comments that only restate names, types, or control flow.
 - Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user documentation; also load the lint-rule guide for its content requirements.
 
+## Rust Style
+
+- Annotate types only where the compiler can't infer them, such as the target of `collect()`, and keep the annotation minimal with `_` placeholders: `let ranges: FxHashSet<_> = iter.collect();`.
+- Pass closures directly to the call that consumes them, so their parameter types are inferred, instead of binding them to a variable with annotated parameters.
+- Name associated functions that return `Self` or `Option<Self>` as constructors: `new`, `new_*`, or `from_*`, as in `fn from_range(root: &SyntaxNode, range: TextRange) -> Option<Self>`. Don't use names such as `find` or `get`, even when the function searches for the value it builds.
+
 ## Cargo Dependencies
 
 Internal `biome_*` crates under `[dev-dependencies]` use `path = "../biome_*"`, not `workspace = true`. Regular `[dependencies]` continue to use `workspace = true`.

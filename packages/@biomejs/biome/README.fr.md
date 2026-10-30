@@ -37,9 +37,9 @@
 
 **Biome** fournit un ensemble d’outils performants conçus pour maintenir des projets web.
 
-**Biome est un [outil de formatage rapide](https://github.com/biomejs/benchmark#formatting)** pour _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ et _GraphQL_ qui atteint **[97 % de compatibilité avec _Prettier_](https://algora.io/challenges/prettier)**.
+**Biome est un [outil de formatage rapide](https://github.com/biomejs/benchmark#formatting)** pour _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ et _SCSS_ qui atteint **[97 % de compatibilité avec _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome est un [outil de linting performant](https://github.com/biomejs/benchmark#linting)** pour _JavaScript_, _TypeScript_, _JSX_, _CSS_ et _GraphQL_ qui comprend **[plus de 500 règles](https://biomejs.dev/fr/linter/javascript/rules/)** d’ESLint, de typescript-eslint, et [d’autres sources](https://github.com/biomejs/biome/discussions/3).
+**Biome est un [outil de linting performant](https://github.com/biomejs/benchmark#linting)** pour _JavaScript_, _TypeScript_, _JSX_, _CSS_, _GraphQL_, _Markdown_, _YAML_ et _SCSS_ qui comprend **[plus de 500 règles](https://biomejs.dev/fr/linter/javascript/rules/)** d’ESLint, de typescript-eslint, et [d’autres sources](https://github.com/biomejs/biome/discussions/3).
 Il **fournit des diagnostics détaillés et contextualisés** qui vous aident à améliorer votre code et à devenir un meilleur programmeur !
 
 **Biome** est conçu dès le départ pour être utilisé [dans un éditeur de manière interactive](https://biomejs.dev/fr/editors/first-party-extensions/).
@@ -154,6 +154,9 @@ Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonction
       <td align="center" valign="middle">
         <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://github.com/syntaxfm" target="_blank"><img src="https://avatars.githubusercontent.com/u/130389858?s=200&v=4" height="100" alt="SyntaxFM logo"></a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -168,9 +171,6 @@ Nous utilisons [Polar.sh](https://polar.sh/biomejs) pour voter pour des fonction
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://pennylane.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/57875210?s=200&v=4" width="80" alt="Pennylane logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="https://jetbrains.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png" width="100" alt="JetBrains logo"></a>

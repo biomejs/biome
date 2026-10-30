@@ -50,3 +50,9 @@ describe('template dynamic', () => {
   it(`test ${title} one`, () => {});
   it(`test ${title} two`, () => {});
 });
+
+// A describe and a test may share a title
+describe('shared title', () => {
+  describe('same', () => {});
+  it('same', () => {});
+});

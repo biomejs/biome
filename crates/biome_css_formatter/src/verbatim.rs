@@ -2,13 +2,14 @@ use crate::context::CssFormatContext;
 use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, located_token_text, text};
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::prelude::{Tag, located_token_text, text};
 use biome_formatter::trivia::{
     format_leading_comments_from_slice, format_trailing_comments_from_slice,
 };
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatError, FormatResult, FormatWithRule,
+    LINE_TERMINATORS, normalize_newlines,
 };
 #[cfg(debug_assertions)]
 use biome_rowan::SyntaxElement;
@@ -105,6 +106,10 @@ where
             f.state_mut().track_token(&token);
 
             match (self.format_token)(&token, range, f)? {
+                CssVerbatimTokenFormat::Source if token.text_trimmed().contains('\r') => {
+                    let source = token.token_text().slice(range - token.text_range().start());
+                    text(&normalize_newlines(&source, ['\r']), Some(range.start())).fmt(f)?;
+                }
                 CssVerbatimTokenFormat::Source => located_token_text(&token, range).fmt(f)?,
                 CssVerbatimTokenFormat::Replacement => {}
             }
@@ -294,7 +299,7 @@ fn write_verbatim_range_source(
     let mut source = range.start();
 
     raw.slice(relative_range).try_for_each_chunk(|chunk| {
-        text(chunk, Some(source)).fmt(f)?;
+        text(&normalize_newlines(chunk, ['\r']), Some(source)).fmt(f)?;
         source += TextSize::from(chunk.len() as u32);
         Ok(())
     })

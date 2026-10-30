@@ -1,0 +1,27 @@
+@mixin frames {from {opacity:0;}to {opacity:1;}}
+
+@keyframes generated{
+// Before an outer statement.
+@include   frames; // After an outer statement.
+$index:0;
+@for $i from 0 through 2{
+// Before a generated step.
+#{$i * 50%}{opacity:$i * .5;} // After a generated step.
+}
+@each $step,$scale in (25%:1.05,75%:.95){#{$step}{transform:scale($scale);}}
+@while $index < 2{#{$index * 100%}{left:$index * 10px;}$index:$index + 1;}
+@if true{40%{visibility:visible;}}
+@if false{from{visibility:hidden;}}@else if true{50%{visibility:visible;}}@else{to{visibility:hidden;}}
+25%,75%{animation-timing-function:ease-in;}
+to{opacity:1;}
+// Before the keyframes closing brace.
+}
+
+@keyframes fallback{@if false{from{opacity:0;}}@else if false{50%{opacity:.5;}}@else{to{opacity:1;}}}
+
+@keyframes else-comment{@if true{from{}}
+// note
+@else{to{}}}
+
+.after{color:red;}
+@mixin after-keyframes{color:blue;}

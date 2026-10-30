@@ -1,0 +1,53 @@
+/* should not generate diagnostics */
+a { top: 0; }
+a { top: 0.0; }
+a { top: 10px; }
+a { top: 100.00px; }
+a { top: 0.10em; }
+a { top: .1em; }
+a { top: 0.01em; }
+a { padding: 1px 0 2px 3px; }
+a { padding: 0 /* 0px */; }
+a { color: #0ac0ac; }
+a::before { content: "0px 0em 0cm"; }
+a { margin: 0%; }
+a { transition: top 0s; }
+a { transition-duration: 0ms; }
+a { transform: rotate(0deg); }
+a { background: linear-gradient(0turn, red 0%, blue 80%); }
+a { grid-template-columns: repeat(10, 0fr); }
+a { grid-template-rows: 0fr 1fr; }
+a { width: 0unknown; }
+@media print and (min-resolution: 0dpi) {}
+@media (min-width: 0) {}
+
+/* Math functions need the unit. */
+a { padding: calc(0px + 0px); }
+a { padding: cAlc(0px + 0px); }
+a { padding: calc(1in + 0in * 2) 0 calc(0px) 0; }
+a { padding: calc(var(--foo, 0px) + 10px) 0; }
+a { padding: max(10px, var(--foo, 0px)) 0; }
+a { right: calc(max(100vw, 0rem)); }
+a { right: min(100vw, 0rem); }
+a { right: clamp(50rem, 50vw, 0rem); }
+a { width: calc-size(auto, size + 0px); }
+a { width: round(0px, 1px); }
+a { width: random(0px, 10px); }
+a { --x: calc(0px + 1px); }
+a { width: -webkit-calc(100% - 0px); }
+a { width: c\61lc(0px + 1px); }
+
+/* A zero without a unit is a number in these properties. */
+a { line-height: 0px; }
+a { lIne-hEight: 0px; }
+a { flex: 0px; }
+a { Flex: 1 1 0px; }
+a { -webkit-flex: 1 0px; }
+a { fl\65x: 0px; }
+a { font: normal normal 400 16px/0px cursive; }
+a { font: normal normal 400 0 / 0px cursive; }
+a { font: normal normal 400 16px / 0px cursive; }
+a { font: normal normal 400 16px/ 0px cursive; }
+a { font: normal normal 400 16px /0px cursive; }
+a { FONT: 16px/0px cursive; }
+a { font: var(--foo, normal normal 400 16px/0px cursive); }

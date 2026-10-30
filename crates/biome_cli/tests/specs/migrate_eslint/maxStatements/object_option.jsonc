@@ -1,0 +1,8 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "max-statements": ["warn", { "max": 15 }]
+    }
+  }
+}

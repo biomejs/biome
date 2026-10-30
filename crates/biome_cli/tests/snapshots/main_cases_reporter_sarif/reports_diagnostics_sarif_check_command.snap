@@ -63,7 +63,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
             {
               "id": "assist/source/organizeImports",
               "shortDescription": {
-                "text": "Sorts imports and exports in your JavaScript and TypeScript files."
+                "text": "Organize imports and exports in JavaScript and TypeScript files."
               },
               "helpUri": "https://biomejs.dev/assist/actions/organize-imports"
             },

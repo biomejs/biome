@@ -1,0 +1,22 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalidEmptyFile.md
+---
+# Input
+```md
+
+```
+
+# Diagnostics
+```
+invalidEmptyFile.md:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty source is not allowed.
+  
+  > 1 │ 
+      │ 
+  
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
+  
+
+```

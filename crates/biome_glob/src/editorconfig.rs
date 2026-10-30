@@ -127,9 +127,9 @@ impl TryFrom<String> for EditorconfigGlob {
 // We use a custom impl to precisely report the location of the error.
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for EditorconfigGlob {
-    fn deserialize(
-        ctx: &mut dyn biome_deserialize::DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let glob = String::deserialize(ctx, value, name)?;

@@ -31,6 +31,10 @@ pub struct MarkdownParserOptions {
 
     /// Enables GitHub Flavored Markdown extensions.
     pub(crate) gfm: bool,
+
+    /// Applies the CommonMark CJK-friendly amendments to the emphasis and
+    /// strikethrough flanking rules.
+    pub(crate) cjk_friendly_emphasis: bool,
 }
 
 impl MarkdownParserOptions {
@@ -45,6 +49,15 @@ impl MarkdownParserOptions {
         self.gfm = gfm;
         self
     }
+
+    /// Controls whether `*`, `_`, and `~~` delimiter runs follow the
+    /// [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md).
+    ///
+    /// When disabled, flanking follows CommonMark exactly.
+    pub fn with_cjk_friendly_emphasis(mut self, cjk_friendly_emphasis: bool) -> Self {
+        self.cjk_friendly_emphasis = cjk_friendly_emphasis;
+        self
+    }
 }
 
 impl Default for MarkdownParserOptions {
@@ -53,6 +66,7 @@ impl Default for MarkdownParserOptions {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
             frontmatter: false,
             gfm: false,
+            cjk_friendly_emphasis: false,
         }
     }
 }
@@ -105,6 +119,10 @@ pub(crate) struct MarkdownParserState {
     /// The ordered list delimiter of the parent list (`.` or `)`).
     /// Used to detect delimiter changes at blank-line boundaries.
     pub(crate) list_item_ordered_delim: Option<char>,
+    /// Innermost open block quote inside a list, linked to the quotes enclosing it.
+    pub(crate) open_quote: Option<Rc<OpenQuote>>,
+    /// Innermost open list item, linked to the items enclosing it.
+    pub(crate) open_list_item: Option<Rc<OpenListItem>>,
     /// Emphasis parsing context for the current inline item list.
     pub(crate) emphasis_context: Option<Rc<EmphasisContext>>,
     /// Link reference definitions accepted while parsing block structure.
@@ -138,6 +156,8 @@ struct MarkdownParserStateCheckpoint {
     list_item_marker_indent: usize,
     list_item_marker_kind: Option<MarkdownSyntaxKind>,
     list_item_ordered_delim: Option<char>,
+    open_quote: Option<Rc<OpenQuote>>,
+    open_list_item: Option<Rc<OpenListItem>>,
     emphasis_context: Option<Rc<EmphasisContext>>,
     link_reference_definitions_len: usize,
     deferred_inlines_len: usize,
@@ -161,6 +181,8 @@ impl MarkdownParserState {
             list_item_marker_indent: self.list_item_marker_indent,
             list_item_marker_kind: self.list_item_marker_kind,
             list_item_ordered_delim: self.list_item_ordered_delim,
+            open_quote: self.open_quote.clone(),
+            open_list_item: self.open_list_item.clone(),
             emphasis_context: self.emphasis_context.clone(),
             link_reference_definitions_len: self.link_reference_definitions.len(),
             deferred_inlines_len: self.deferred_inlines.len(),
@@ -183,6 +205,8 @@ impl MarkdownParserState {
         self.list_item_marker_indent = checkpoint.list_item_marker_indent;
         self.list_item_marker_kind = checkpoint.list_item_marker_kind;
         self.list_item_ordered_delim = checkpoint.list_item_ordered_delim;
+        self.open_quote = checkpoint.open_quote;
+        self.open_list_item = checkpoint.open_list_item;
         self.emphasis_context = checkpoint.emphasis_context;
         self.link_reference_definitions
             .truncate(checkpoint.link_reference_definitions_len);
@@ -199,6 +223,42 @@ impl MarkdownParserState {
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
         self.task_list_item_allowed = checkpoint.task_list_item_allowed;
     }
+}
+
+/// An open block quote and the indentation its `>` markers follow.
+///
+/// A block quote inside a list item repeats its `>` marker on continuation
+/// lines after the item's content indent (CommonMark §5.1, §5.2), so matching
+/// the marker needs that indent for every enclosing quote.
+#[derive(Debug)]
+pub(crate) struct OpenQuote {
+    /// Nesting depth of this quote, starting at 1.
+    pub(crate) depth: usize,
+    /// Columns of list item indentation that precede this quote's `>` marker,
+    /// measured from the content of the enclosing quote or the line start.
+    pub(crate) container_indent: usize,
+    /// List nesting depth when the quote opened. A quote nested directly in
+    /// this one, with no list item opened in between, has no container indent.
+    pub(crate) list_nesting_depth: usize,
+    /// The quote enclosing this one.
+    pub(crate) parent: Option<Rc<Self>>,
+}
+
+/// An open list item's content column.
+///
+/// Deciding whether a list marker on an under-indented line starts an item or
+/// continues a paragraph lazily (CommonMark §5.2) needs the content columns of
+/// every enclosing item, not only the innermost one.
+#[derive(Debug)]
+pub(crate) struct OpenListItem {
+    /// Columns required for a line to continue this item.
+    pub(crate) required_indent: usize,
+    /// Block quote depth at which the item opened. Indentation inside a block
+    /// quote is measured from the quote content, so only items opened at the
+    /// current depth share a column origin with the current line.
+    pub(crate) block_quote_depth: usize,
+    /// The item enclosing this one.
+    pub(crate) parent: Option<Rc<Self>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -302,7 +362,7 @@ impl DeferredInline {
     }
 
     pub(crate) fn context(&self) -> InlineContainerContext {
-        self.context
+        self.context.clone()
     }
 
     pub(crate) fn definitions_len(&self) -> usize {
@@ -339,7 +399,7 @@ impl DeferredInline {
 /// the recursive block parser. This snapshot restores the quote, list, and
 /// virtual-line context needed to classify continuation prefixes and indentation
 /// exactly as they appear in the final CST.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub(crate) struct InlineContainerContext {
     /// Active block quote nesting at the start of the inline range.
     block_quote_depth: usize,
@@ -353,6 +413,10 @@ pub(crate) struct InlineContainerContext {
     list_item_marker_kind: Option<MarkdownSyntaxKind>,
     /// Delimiter of the containing ordered list, when present.
     list_item_ordered_delim: Option<char>,
+    /// Innermost open block quote inside a list, linked to the quotes enclosing it.
+    open_quote: Option<Rc<OpenQuote>>,
+    /// Innermost open list item, linked to the items enclosing it.
+    open_list_item: Option<Rc<OpenListItem>>,
     /// Logical line start after a container prefix has been consumed.
     virtual_line_start: Option<TextSize>,
 }
@@ -544,7 +608,7 @@ impl<'source> MarkdownParser<'source> {
     pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
-            source: MarkdownTokenSource::from_str(source),
+            source: MarkdownTokenSource::from_str(source, &options),
             options,
             table_cell_inline: false,
             known_link_reference_definitions: None,
@@ -569,13 +633,15 @@ impl<'source> MarkdownParser<'source> {
             list_item_marker_indent: context.list_item_marker_indent,
             list_item_marker_kind: context.list_item_marker_kind,
             list_item_ordered_delim: context.list_item_ordered_delim,
+            open_quote: context.open_quote,
+            open_list_item: context.open_list_item,
             virtual_line_start: context.virtual_line_start,
             ..MarkdownParserState::default()
         };
 
         Some(Self {
             context: ParserContext::default(),
-            source: MarkdownTokenSource::from_range(source, range)?,
+            source: MarkdownTokenSource::from_range(source, range, &options)?,
             options,
             table_cell_inline,
             known_link_reference_definitions: Some(definitions),
@@ -602,7 +668,6 @@ impl<'source> MarkdownParser<'source> {
         col
     }
 
-    /// Returns parser options. Reserved for GFM extensions.
     pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
     }
@@ -682,6 +747,8 @@ impl<'source> MarkdownParser<'source> {
             list_item_marker_indent: self.state.list_item_marker_indent,
             list_item_marker_kind: self.state.list_item_marker_kind,
             list_item_ordered_delim: self.state.list_item_ordered_delim,
+            open_quote: self.state.open_quote.clone(),
+            open_list_item: self.state.open_list_item.clone(),
             virtual_line_start: self.state.virtual_line_start,
         }
     }

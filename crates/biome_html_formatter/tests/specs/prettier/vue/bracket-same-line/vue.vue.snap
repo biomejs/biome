@@ -38,7 +38,26 @@ text
 ```diff
 --- Prettier
 +++ Biome
-@@ -28,10 +28,12 @@
+@@ -1,12 +1,16 @@
+ <template>
+   <div>
+     <div
+-      :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
++      :long_long_attribute="
++        long_long_long_long_long_long_long_long_long_long_long_value
++      "
+     >
+       text
+     </div>
+     <div
+-      v-on:long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
++      v-on:long_long_attribute="
++        long_long_long_long_long_long_long_long_long_long_long_value
++      "
+     ></div>
+     <span
+       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+@@ -28,10 +32,12 @@
  <script
    long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
  >
@@ -61,12 +80,16 @@ text
 <template>
   <div>
     <div
-      :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+      :long_long_attribute="
+        long_long_long_long_long_long_long_long_long_long_long_value
+      "
     >
       text
     </div>
     <div
-      v-on:long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+      v-on:long_long_attribute="
+        long_long_long_long_long_long_long_long_long_long_long_value
+      "
     ></div>
     <span
       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
@@ -101,11 +124,9 @@ export default {};
 
 # Lines exceeding max width of 80 characters
 ```
-    4:       :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-    9:       v-on:long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-   12:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-   17:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-   20:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-   29:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-   34:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   16:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   21:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   24:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   33:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   38:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 ```

@@ -5,7 +5,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsLanguage, JsStaticMemberExpression};
-use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeOptionExt, TextRange, WalkEvent};
+use biome_rowan::{
+    AstNode, Language, SyntaxKindSet, SyntaxNode, SyntaxNodeOptionExt, TextRange, WalkEvent,
+};
 use biome_rule_options::no_excessive_nested_test_suites::NoExcessiveNestedTestSuitesOptions;
 
 declare_lint_rule! {
@@ -110,6 +112,13 @@ impl Default for NestedTestVisitor {
 
 impl Visitor for NestedTestVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(JsCallExpression::KIND_SET)
+    }
 
     fn visit(
         &mut self,
