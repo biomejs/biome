@@ -446,6 +446,7 @@ define_categories! {
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
     "lint/nursery/useVueValidDefineEmits": "https://biomejs.dev/linter/rules/use-vue-valid-define-emits",
     "lint/nursery/useVueValidDefineProps": "https://biomejs.dev/linter/rules/use-vue-valid-define-props",
+    "lint/nursery/useVueValidNextTick": "https://biomejs.dev/linter/rules/use-vue-valid-next-tick",
     "lint/nursery/useVueVOnExact": "https://biomejs.dev/linter/rules/use-vue-v-on-exact",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
     "lint/nursery/useVueValidVIs": "https://biomejs.dev/linter/rules/use-vue-valid-v-is",

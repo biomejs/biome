@@ -3843,6 +3843,11 @@ export interface Nursery {
 	 */
 	useVueValidDefineProps?: UseVueValidDefinePropsConfiguration;
 	/**
+	 * Enforce valid calls to Vue's nextTick function.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-next-tick
+	 */
+	useVueValidNextTick?: UseVueValidNextTickConfiguration;
+	/**
 	 * Enforce valid v-is Vue directives.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-is
 	 */
@@ -6555,6 +6560,9 @@ export type UseVueValidDefineEmitsConfiguration =
 export type UseVueValidDefinePropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidDefinePropsOptions;
+export type UseVueValidNextTickConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidNextTickOptions;
 export type UseVueValidVIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVIsOptions;
@@ -9593,6 +9601,14 @@ export interface RuleWithUseVueValidDefinePropsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidDefinePropsOptions;
 }
+export interface RuleWithUseVueValidNextTickOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueValidNextTickOptions;
+}
 export interface RuleWithUseVueValidVIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVIsOptions;
@@ -12033,6 +12049,7 @@ export type UseVueVModelOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidDefineEmitsOptions = {};
 export type UseVueValidDefinePropsOptions = {};
+export type UseVueValidNextTickOptions = {};
 export type UseVueValidVIsOptions = {};
 export type UseVueValidVMemoOptions = {};
 export type UseVueValidVModelOptions = {};
@@ -13665,6 +13682,7 @@ export type Category =
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineProps"
+	| "lint/nursery/useVueValidNextTick"
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
