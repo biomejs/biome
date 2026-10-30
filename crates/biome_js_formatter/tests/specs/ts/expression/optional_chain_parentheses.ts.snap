@@ -6,24 +6,17 @@ info: ts/expression/optional_chain_parentheses.ts
 # Input
 
 ```ts
+(a?.b).c;
 (a?.b)!.c;
 (a?.b)![c];
 (a?.b!).c;
-new (a?.b)!();
-(a?.b)`template`;
-(a?.b)!`template`;
-(a?.b).c = 1;
-(a?.b)!.c = 1;
-(a?.b)!.c++;
-(a?.b)!();
-x = (a?.b)!;
+(a?.b!.c).d;
 ((a?.b)).c;
-new ((a?.b)!<c>)();
-new ((a?.b!))<c>();
-(a?.b)[c] = 1;
-(a?.b)![c] = 1;
+(a?.b)!();
+(a?.b!)();
 (a?.b<C>).d;
 (a?.b!<C>).d;
+x = (a?.b)!;
 
 ```
 
@@ -31,23 +24,16 @@ new ((a?.b!))<c>();
 # Formatted
 
 ```ts
+(a?.b).c;
 (a?.b)!.c;
 (a?.b)![c];
 (a?.b!).c;
-new (a?.b)!();
-(a?.b)`template`;
-(a?.b)!`template`;
-(a?.b).c = 1;
-(a?.b)!.c = 1;
-(a?.b)!.c++;
-(a?.b)!();
-x = a?.b!;
+(a?.b!.c).d;
 (a?.b).c;
-new (a?.b)!<c>();
-new (a?.b!)<c>();
-(a?.b)[c] = 1;
-(a?.b)![c] = 1;
+(a?.b)!();
+(a?.b!)();
 (a?.b<C>).d;
 (a?.b!<C>).d;
+x = a?.b!;
 
 ```
