@@ -1,0 +1,340 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function getSize(set: Set<string>) {
+	return Array.from(set).length;
+}
+
+function getReadonlySize(set: ReadonlySet<string>) {
+	return [...set].length;
+}
+
+function getAssertedSize(set: unknown) {
+	return [...(set as Set<string>)].length;
+}
+
+function getAssertedFromSize(set: unknown) {
+	return Array.from(set as Set<string>).length;
+}
+
+function getSatisfiedSize(set: Set<string>) {
+	return Array.from(set satisfies ReadonlySet<string>).length;
+}
+
+function getNonNullSize(set?: Set<string>) {
+	return [...set!].length;
+}
+
+let annotated: Set<number> = new Set();
+[...annotated].length;
+
+const constant = new Set<number>() as Set<number>;
+[...constant].length;
+
+declare function getSet(): Set<number>;
+new [...getSet() as Set<number>].length.constructor("42");
+
+const set = new Set();
+use()
+Array.from(set as Set<number>).length;
+
+function getTypeAssertionSize(set: unknown) {
+	return [...<Set<string>>set].length;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function getSize(set: Set<string>) {
+  > 3 │ 	return Array.from(set).length;
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   function getSize(set: Set<string>) {
+     3    │ - → return·Array.from(set).length;
+        3 │ + → return·set.size;
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.ts:7:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    6 │ function getReadonlySize(set: ReadonlySet<string>) {
+  > 7 │ 	return [...set].length;
+      │ 	       ^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     5  5 │   
+     6  6 │   function getReadonlySize(set: ReadonlySet<string>) {
+     7    │ - → return·[...set].length;
+        7 │ + → return·set.size;
+     8  8 │   }
+     9  9 │   
+  
+
+```
+
+```
+invalid.ts:11:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    10 │ function getAssertedSize(set: unknown) {
+  > 11 │ 	return [...(set as Set<string>)].length;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     9  9 │   
+    10 10 │   function getAssertedSize(set: unknown) {
+    11    │ - → return·[...(set·as·Set<string>)].length;
+       11 │ + → return·(set·as·Set<string>).size;
+    12 12 │   }
+    13 13 │   
+  
+
+```
+
+```
+invalid.ts:15:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    14 │ function getAssertedFromSize(set: unknown) {
+  > 15 │ 	return Array.from(set as Set<string>).length;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    13 13 │   
+    14 14 │   function getAssertedFromSize(set: unknown) {
+    15    │ - → return·Array.from(set·as·Set<string>).length;
+       15 │ + → return·(set·as·Set<string>).size;
+    16 16 │   }
+    17 17 │   
+  
+
+```
+
+```
+invalid.ts:19:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    18 │ function getSatisfiedSize(set: Set<string>) {
+  > 19 │ 	return Array.from(set satisfies ReadonlySet<string>).length;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    17 17 │   
+    18 18 │   function getSatisfiedSize(set: Set<string>) {
+    19    │ - → return·Array.from(set·satisfies·ReadonlySet<string>).length;
+       19 │ + → return·(set·satisfies·ReadonlySet<string>).size;
+    20 20 │   }
+    21 21 │   
+  
+
+```
+
+```
+invalid.ts:23:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    22 │ function getNonNullSize(set?: Set<string>) {
+  > 23 │ 	return [...set!].length;
+       │ 	       ^^^^^^^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    21 21 │   
+    22 22 │   function getNonNullSize(set?: Set<string>) {
+    23    │ - → return·[...set!].length;
+       23 │ + → return·(set!).size;
+    24 24 │   }
+    25 25 │   
+  
+
+```
+
+```
+invalid.ts:27:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    26 │ let annotated: Set<number> = new Set();
+  > 27 │ [...annotated].length;
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ const constant = new Set<number>() as Set<number>;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    25 25 │   
+    26 26 │   let annotated: Set<number> = new Set();
+    27    │ - [...annotated].length;
+       27 │ + annotated.size;
+    28 28 │   
+    29 29 │   const constant = new Set<number>() as Set<number>;
+  
+
+```
+
+```
+invalid.ts:30:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    29 │ const constant = new Set<number>() as Set<number>;
+  > 30 │ [...constant].length;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ declare function getSet(): Set<number>;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    28 28 │   
+    29 29 │   const constant = new Set<number>() as Set<number>;
+    30    │ - [...constant].length;
+       30 │ + constant.size;
+    31 31 │   
+    32 32 │   declare function getSet(): Set<number>;
+  
+
+```
+
+```
+invalid.ts:33:5 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    32 │ declare function getSet(): Set<number>;
+  > 33 │ new [...getSet() as Set<number>].length.constructor("42");
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ const set = new Set();
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    31 31 │   
+    32 32 │   declare function getSet(): Set<number>;
+    33    │ - new·[...getSet()·as·Set<number>].length.constructor("42");
+       33 │ + new·(getSet()·as·Set<number>).size.constructor("42");
+    34 34 │   
+    35 35 │   const set = new Set();
+  
+
+```
+
+```
+invalid.ts:37:1 lint/nursery/useSetSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    35 │ const set = new Set();
+    36 │ use()
+  > 37 │ Array.from(set as Set<number>).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ function getTypeAssertionSize(set: unknown) {
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    39 │ function getTypeAssertionSize(set: unknown) {
+  > 40 │ 	return [...<Set<string>>set].length;
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    38 38 │   
+    39 39 │   function getTypeAssertionSize(set: unknown) {
+    40    │ - → return·[...<Set<string>>set].length;
+       40 │ + → return·(<Set<string>>set).size;
+    41 41 │   }
+    42 42 │   
+  
+
+```
