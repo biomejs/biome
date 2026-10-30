@@ -17,7 +17,8 @@ declare_lint_rule! {
     /// colors instead of the role those colors play. Design system color names such as `primary`
     /// or `muted` let a design system change its palette without editing each component.
     /// This rule checks color utilities, including variants and opacity modifiers.
-    /// It allows custom color names, `black`, `white`, `transparent`, `current`, and `inherit`.
+    /// It allows custom color names, `transparent`, `current`, and `inherit`.
+    /// It also allows `black` and `white`, unless the `allowBlackAndWhite` option is turned off.
     /// This rule does not check arbitrary values such as `bg-[#ff00aa]`.
     /// Giving a default palette name another value in your Tailwind CSS theme
     /// does not exempt it.
@@ -81,6 +82,31 @@ declare_lint_rule! {
     /// <div class="bg-pink-500 hover:text-pink-500/80 border-black"></div>
     /// ```
     ///
+    /// ### allowBlackAndWhite
+    ///
+    /// Default: `true`
+    ///
+    /// Whether to allow `black` and `white`.
+    /// Set it to `false` to report them like other palette colors, so that black and
+    /// white also come from your design system, such as `bg-surface` instead of `bg-white`.
+    /// You can still allow one of them with `allowedColors`, such as `["white"]`.
+    ///
+    /// ```json,options
+    /// { "options": { "allowBlackAndWhite": false } }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// ```html,expect_diagnostic,use_options
+    /// <div class="hover:bg-white/80"></div>
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```html,use_options
+    /// <div class="bg-surface text-foreground border-transparent fill-current"></div>
+    /// ```
+    ///
     /// ## See Also
     ///
     /// - [noTailwindArbitraryValue](https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value/)
@@ -123,7 +149,7 @@ impl Rule for NoTailwindRawColors {
             Some(design) => design,
             None => TailwindDesignSystem::default_ref(),
         };
-        let closest_classes = raw_color.closest_design_classes(design);
+        let closest_classes = raw_color.closest_design_classes(design, ctx.options());
         Some(if closest_classes.is_empty() {
             diagnostic.note(markup! {
                 "Use a color from your design system. Check your Tailwind config for the available colors."

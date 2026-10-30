@@ -12,11 +12,12 @@ use smallvec::SmallVec;
 
 use crate::use_tailwind_sorted_classes::{THEME_COLOR_VALUES, TailwindDesignSystem};
 
-/// A class that sets a default palette color, such as `bg-pink-500`.
+/// A class that sets a default palette color, such as `bg-pink-500`, or
+/// `black` or `white` when the options forbid them.
 pub struct RawColor {
     /// The class without its variants and `!`.
     candidate: TwFunctionalCandidate,
-    /// The palette color, such as `pink-500`.
+    /// The palette color, such as `pink-500` or `white`.
     color: TailwindSyntaxToken,
 }
 
@@ -34,13 +35,16 @@ impl RawColor {
     /// Only colors whose value is written out, such as `#00f` or
     /// `oklch(0.5 0.2 240)`, can be compared. Colors that refer to another
     /// value, as in `var(--primary)`, are left out, and so are the stylesheet's
-    /// own palette colors, such as `--color-pink-400`. The result is empty when
-    /// the stylesheet has no similar color.
+    /// own palette colors, such as `--color-pink-400`, even when
+    /// `allowedColors` lists them. `--color-black` and `--color-white` are left
+    /// out too when the options forbid `black` and `white`. The result is empty
+    /// when the stylesheet has no similar color.
     pub fn closest_design_classes<'a>(
         &'a self,
         design: &'a TailwindDesignSystem,
+        options: &NoTailwindRawColorsOptions,
     ) -> SmallVec<[SuggestedClass<'a>; MAX_SUGGESTIONS]> {
-        self.closest_design_colors(design)
+        self.closest_design_colors(design, options)
             .into_iter()
             .map(|color| SuggestedClass {
                 raw_color: self,
@@ -52,6 +56,7 @@ impl RawColor {
     fn closest_design_colors<'a>(
         &self,
         design: &'a TailwindDesignSystem,
+        options: &NoTailwindRawColorsOptions,
     ) -> SmallVec<[&'a str; MAX_SUGGESTIONS]> {
         let color = self.color.text_trimmed();
         // The stylesheet can give a palette color another value.
@@ -64,7 +69,7 @@ impl RawColor {
         };
         let mut closest: SmallVec<[(f32, &str); MAX_SUGGESTIONS]> = SmallVec::new();
         for (name, value) in design.stylesheet_colors() {
-            if is_palette_color(name) {
+            if is_raw_color(name, options) {
                 continue;
             }
             let Ok(candidate) = parse_color(value) else {
@@ -119,7 +124,8 @@ impl Display for SuggestedClass<'_> {
     }
 }
 
-/// Returns the default palette utilities that aren't explicitly allowed.
+/// Returns the color utilities that set a default palette color, or `black` or
+/// `white` when the options forbid them, and that aren't explicitly allowed.
 pub fn raw_colors(
     candidates: &TwCandidateList,
     options: &NoTailwindRawColorsOptions,
@@ -148,7 +154,7 @@ pub fn raw_colors(
             };
             let color = value.value_token().ok()?;
             let name = color.text_trimmed();
-            if !is_palette_color(name) || options.is_allowed_color(name) {
+            if !is_raw_color(name, options) || options.is_allowed_color(name) {
                 return None;
             }
             Some(RawColor { candidate, color })
@@ -241,6 +247,11 @@ fn is_color_utility(base: &str) -> bool {
     COLOR_UTILITIES.binary_search(&base).is_ok()
 }
 
+fn is_raw_color(value: &str, options: &NoTailwindRawColorsOptions) -> bool {
+    is_palette_color(value)
+        || (!options.allow_black_and_white() && matches!(value, "black" | "white"))
+}
+
 fn is_palette_color(value: &str) -> bool {
     let Some((color, shade)) = value.rsplit_once('-') else {
         return false;
@@ -259,18 +270,23 @@ mod tests {
     /// Returns the classes suggested for the single raw color in `class`,
     /// given the variables of `theme`.
     fn closest_design_classes(class: &str, theme: &[(&str, &str)]) -> Vec<String> {
+        closest_design_classes_with_options(class, theme, &NoTailwindRawColorsOptions::default())
+    }
+
+    fn closest_design_classes_with_options(
+        class: &str,
+        theme: &[(&str, &str)],
+        options: &NoTailwindRawColorsOptions,
+    ) -> Vec<String> {
         let mut design = TailwindDesignSystem::default();
         for (name, value) in theme {
             design.add_theme_variable(name, value);
         }
         let parse = parse_tailwind(class);
-        let raw_colors = raw_colors(
-            &parse.tree().candidates(),
-            &NoTailwindRawColorsOptions::default(),
-        );
+        let raw_colors = raw_colors(&parse.tree().candidates(), options);
         assert_eq!(raw_colors.len(), 1, "{class}");
         raw_colors[0]
-            .closest_design_classes(&design)
+            .closest_design_classes(&design, options)
             .into_iter()
             .map(|class| {
                 let markup = markup! { {class} }.to_owned();
@@ -387,6 +403,88 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn detects_black_and_white_when_not_allowed() {
+        let options = NoTailwindRawColorsOptions {
+            allow_black_and_white: Some(false),
+            ..Default::default()
+        };
+        for color in ["black", "white"] {
+            for utility in COLOR_UTILITIES {
+                for class in [
+                    format!("{utility}-{color}"),
+                    format!("hover:{utility}-{color}/50!"),
+                ] {
+                    let parse = parse_tailwind(&class);
+                    assert!(!parse.has_errors(), "{class}");
+                    assert_eq!(
+                        raw_colors(&parse.tree().candidates(), &options).len(),
+                        1,
+                        "{class}"
+                    );
+                }
+            }
+        }
+        for class in [
+            "bg-transparent",
+            "text-current",
+            "border-inherit",
+            "font-black",
+            "bg-white-500",
+        ] {
+            let parse = parse_tailwind(class);
+            assert!(!parse.has_errors(), "{class}");
+            assert!(
+                raw_colors(&parse.tree().candidates(), &options).is_empty(),
+                "{class}"
+            );
+        }
+    }
+
+    #[test]
+    fn allowed_colors_take_precedence_over_black_and_white() {
+        let options = NoTailwindRawColorsOptions {
+            allow_black_and_white: Some(false),
+            allowed_colors: Some(["white".into()].into_iter().collect()),
+        };
+        let parse = parse_tailwind("bg-white text-black");
+        let raw_colors = raw_colors(&parse.tree().candidates(), &options);
+        let classes: Vec<_> = raw_colors
+            .iter()
+            .map(|raw_color| &"bg-white text-black"[raw_color.range()])
+            .collect();
+        assert_eq!(classes, ["text-black"]);
+    }
+
+    #[test]
+    fn suggests_theme_colors_for_black_and_white() {
+        let options = NoTailwindRawColorsOptions {
+            allow_black_and_white: Some(false),
+            ..Default::default()
+        };
+        let theme = [
+            ("--color-white", "#fff"),
+            ("--color-surface", "#fff"),
+            ("--color-ink", "oklch(0.1 0 0)"),
+        ];
+        assert_eq!(
+            closest_design_classes_with_options("bg-white/50", &theme, &options),
+            ["bg-surface/50"]
+        );
+        assert_eq!(
+            closest_design_classes_with_options("text-black", &theme, &options),
+            ["text-ink"]
+        );
+        assert_eq!(
+            closest_design_classes_with_options("text-slate-50", &theme, &options),
+            ["text-surface"]
+        );
+        assert_eq!(
+            closest_design_classes("text-slate-50", &theme),
+            ["text-surface", "text-white"]
+        );
     }
 
     #[test]
