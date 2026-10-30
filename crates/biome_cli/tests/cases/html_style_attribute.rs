@@ -144,7 +144,7 @@ fn parses_html_quote_entities_in_style_attributes() {
     let html_file = Utf8Path::new("index.html");
     fs.insert(
         html_file.into(),
-        r#"<p style="font-family: RotisSansCyrillic, &quot;Rotis Sans Cyrillic&quot;, &#39;Open Sans&#39;, sans-serif; font-size: 10px">test</p>
+        r#"<p style="font-family: RotisSansCyrillic, &quot;Rotis Sans Cyrillic&quot;, &#39;Open Sans&#39;, &quot;Mixed&#34;, &quot;&#34;, sans-serif; font-size: 10px">test</p>
 "#
         .as_bytes(),
     );

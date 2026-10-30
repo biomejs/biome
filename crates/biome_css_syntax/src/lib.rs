@@ -229,12 +229,32 @@ impl TryFrom<CssSyntaxKind> for TriviaPieceKind {
 pub fn inner_string_text(token: &CssSyntaxToken) -> TokenText {
     let mut text = token.token_text_trimmed();
     if token.kind() == CssSyntaxKind::CSS_STRING_LITERAL {
-        let (delimiter_len, _) = html_quote_entity_at(&text).unwrap_or((1, 0));
-        let delimiter_len = TextSize::from(delimiter_len as u32);
-        let range = TextRange::new(delimiter_len, text.len() - delimiter_len);
+        let (opening_len, closing_len) = string_delimiter_lens(&text);
+        let range = TextRange::new(
+            TextSize::from(opening_len as u32),
+            text.len() - TextSize::from(closing_len as u32),
+        );
         text = text.slice(range);
     }
     text
+}
+
+/// The lengths of a string literal's opening and closing delimiters. A string quoted with HTML
+/// entities can open and close with different spellings of the same quote, like `&quot;A&#34;`.
+fn string_delimiter_lens(text: &str) -> (usize, usize) {
+    let Some((opening_len, _)) = html_quote_entity_at(text) else {
+        return (1, 1);
+    };
+    let closing_len = (0..text.len())
+        .rev()
+        .filter(|&start| start >= opening_len && text.is_char_boundary(start))
+        .find_map(|start| {
+            html_quote_entity_at(&text[start..])
+                .filter(|(len, _)| start + len == text.len())
+                .map(|(len, _)| len)
+        })
+        .unwrap_or(opening_len);
+    (opening_len, closing_len)
 }
 
 pub fn html_quote_entity_at(text: &str) -> Option<(usize, u8)> {
@@ -251,4 +271,18 @@ pub fn html_quote_entity_at(text: &str) -> Option<(usize, u8)> {
         .iter()
         .find(|(entity, _)| text.starts_with(entity))
         .map(|(entity, quote)| (entity.len(), *quote))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::string_delimiter_lens;
+
+    #[test]
+    fn string_delimiter_lens_match_each_end() {
+        assert_eq!(string_delimiter_lens("\"A\""), (1, 1));
+        assert_eq!(string_delimiter_lens("&quot;A&quot;"), (6, 6));
+        assert_eq!(string_delimiter_lens("&quot;ABC&#34;"), (6, 5));
+        assert_eq!(string_delimiter_lens("&#x27;A&apos;"), (6, 6));
+        assert_eq!(string_delimiter_lens("&quot;&#34;"), (6, 5));
+    }
 }

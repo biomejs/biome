@@ -22,7 +22,7 @@ biome lint index.html
 ## `index.html`
 
 ```html
-<p style="font-family: RotisSansCyrillic, &quot;Rotis Sans Cyrillic&quot;, &#39;Open Sans&#39;, sans-serif; font-size: 10px">test</p>
+<p style="font-family: RotisSansCyrillic, &quot;Rotis Sans Cyrillic&quot;, &#39;Open Sans&#39;, &quot;Mixed&#34;, &quot;&#34;, sans-serif; font-size: 10px">test</p>
 
 ```
 
