@@ -6520,6 +6520,28 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSyncMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSyncMethodsOptions" }
+			]
+		},
+		"NoSyncMethodsOptions": {
+			"description": "Options for the `noSyncMethods` rule.",
+			"type": "object",
+			"properties": {
+				"allowAtRootLevel": {
+					"description": "Allows synchronous calls at the top level of a file, outside of any function.\n\nDefaults to `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignore": {
+					"description": "Names of synchronous functions that the rule doesn't report, such as `readFileSync`.\n\nDefaults to `[]`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoSyncScriptsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8432,6 +8454,13 @@
 					"description": "Disallow $derived.by() when $derived() is sufficient.\nSee https://biomejs.dev/linter/rules/no-svelte-useless-derived-by",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteUselessDerivedByConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSyncMethods": {
+					"description": "Disallow calling synchronous methods, such as fs.readFileSync().\nSee https://biomejs.dev/linter/rules/no-sync-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSyncMethodsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13066,6 +13095,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSwitchDeclarationsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSyncMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSyncMethodsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
