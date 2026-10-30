@@ -1,4 +1,4 @@
-use crate::bullet_list::FmtAnyList;
+use crate::bullet_list::{FmtAnyList, list_ends_with_quote_prefix};
 use crate::context::ProseWrap;
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
@@ -42,12 +42,27 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
         if should_not_trim {
             let quote_trim_range = quote_boundary_trim_range(node, self.quote_boundary_trim);
             let mut prev_content = PrevContentBlock::None;
+            let mut prev_list_removed_quote_prefix = false;
             let mut iter = node.iter().enumerate().peekable();
 
             while let Some((index, node)) = iter.next() {
                 if !quote_trim_range.contains(&index) {
                     joiner.entry(&format_with(|f| format_removed_quote_boundary(&node, f)));
                     continue;
+                }
+
+                if prev_list_removed_quote_prefix {
+                    prev_list_removed_quote_prefix = false;
+                    let line_prefix = quote_line_prefix(node.syntax())?;
+                    joiner.entry(&format_with(|f| {
+                        write!(
+                            f,
+                            [dedent_to_root(&format_args![
+                                hard_line_break(),
+                                line_prefix.format(true)
+                            ])]
+                        )
+                    }));
                 }
 
                 match &node {
@@ -131,6 +146,8 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                     _ => {
                         prev_content = PrevContentBlock::Other;
                         if let Some(list_item) = node.as_any_list_item() {
+                            prev_list_removed_quote_prefix =
+                                list_ends_with_quote_prefix(&list_item);
                             joiner
                                 .entry(&format_with(|f| FmtAnyList::new(list_item.clone()).fmt(f)));
                         } else {

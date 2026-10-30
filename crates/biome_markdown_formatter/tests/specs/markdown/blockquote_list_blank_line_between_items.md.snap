@@ -1,0 +1,90 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_list_blank_line_between_items.md
+---
+
+# Input
+
+```md
+> - one
+> - two
+>
+> - three
+
+> 1. one
+>
+> 2. two
+
+> - one
+>
+>
+> - two
+
+> - one
+>   - nested
+>
+> - two
+
+> - one
+>   - a
+>
+>   - b
+
+> > - one
+> >
+> > - two
+
+> - one
+>
+>   paragraph
+>
+> - two
+
+- > - one
+  >
+  > - two
+
+```
+
+
+# Formatted
+
+```md
+> - one
+> - two
+>
+> - three
+
+> 1. one
+>
+> 2. two
+
+> - one
+>
+> - two
+
+> - one
+>   - nested
+>
+> - two
+
+> - one
+>   - a
+>
+>   - b
+
+> > - one
+> >
+> > - two
+
+> - one
+>
+>   paragraph
+>
+> - two
+
+- > - one
+  >
+  > - two
+
+```

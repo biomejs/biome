@@ -53,8 +53,8 @@ use crate::syntax::link_block::{at_link_block, at_link_block_start, parse_link_b
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
-    emit_optional_marker_space, has_quote_prefix, open_quote, parse_quote_block_list,
-    parse_quote_in_container,
+    emit_optional_marker_space, has_quote_prefix, line_has_quote_prefix_at_current, open_quote,
+    parse_quote_block_list, parse_quote_in_container,
 };
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
@@ -1736,9 +1736,13 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         return outcome;
     }
 
-    // Phases 4-5 share a quote-prefix check.
+    // Phases 4-5 share a quote-prefix check. A nested list item can consume
+    // the prefixes of a line that it then leaves to this item. Probing again
+    // would take a `>` in the line's content for a continuation prefix, as in
+    // the second `>` of `> - one\n>   - nested\n> > quoted`.
     let line_has_quote_prefix = quote_depth > 0
         && (p.is_at_line_start() || p.has_preceding_line_break())
+        && !line_has_quote_prefix_at_current(p, quote_depth)
         && (has_quote_prefix(p, quote_depth)
             || quote_only_line_indent_at_current(p, quote_depth).is_some());
 
@@ -2360,7 +2364,7 @@ fn parse_first_line_blocks(
         }
         state.first_line = false;
 
-        p.state_mut().virtual_line_start = prev_virtual;
+        restore_virtual_line_start_after_nested_list(p, prev_virtual);
         p.state_mut().list_item_required_indent = prev_required;
         return LoopAction::Continue;
     }
@@ -2373,6 +2377,23 @@ fn parse_first_line_blocks(
     }
 
     LoopAction::FallThrough
+}
+
+/// Restore `virtual_line_start` to `prev_virtual` after parsing a nested list,
+/// unless the list stopped at a virtual line start.
+///
+/// A list item consumes the block quote prefix of the next line before it
+/// checks whether the line continues the item. When the line belongs to an
+/// enclosing list instead, as `- two` does in `> - one\n>   - nested\n> - two`,
+/// the virtual line start set after that prefix is the only record that the
+/// cursor sits at the start of the line's content.
+fn restore_virtual_line_start_after_nested_list(
+    p: &mut MarkdownParser,
+    prev_virtual: Option<TextSize>,
+) {
+    if p.state().virtual_line_start != Some(p.cur_range().start()) {
+        p.state_mut().virtual_line_start = prev_virtual;
+    }
 }
 
 fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
@@ -2807,7 +2828,7 @@ fn check_continuation_indent(
                 if state.last_was_blank {
                     state.has_blank_line = true;
                 }
-                p.state_mut().virtual_line_start = prev_virtual;
+                restore_virtual_line_start_after_nested_list(p, prev_virtual);
                 return ContinuationResult {
                     action: LoopAction::Continue,
                     restore: VirtualLineRestore::None,
