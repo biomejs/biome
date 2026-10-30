@@ -67,3 +67,17 @@ Paragraph after a list.
 
 
     top level indented code block
+
+Hard break with trailing spaces.  
+
+
+
+Hard break with a backslash.\
+
+
+
+> Quote ending in a hard break.  
+
+
+
+End.
