@@ -5,18 +5,21 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_semantic::BindingExtensions;
+use biome_js_semantic::{BindingExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsModule,
-    JsNewTargetExpression, JsReferenceIdentifier, JsScript, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, JsThisExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsStatement,
+    JsAssignmentExpression, JsComputedMemberAssignment, JsConditionalExpression,
+    JsConstructorClassMember, JsFunctionBody, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsGetterClassMember,
+    JsGetterObjectMember, JsInitializerClause, JsInstanceofExpression, JsMethodClassMember,
+    JsMethodObjectMember, JsModule, JsNewExpression, JsNewTargetExpression, JsReferenceIdentifier,
+    JsScript, JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsVariableDeclarator,
     T,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxResult, TextRange, WalkEvent,
     declare_node_union,
 };
 use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
@@ -73,6 +76,14 @@ declare_lint_rule! {
     /// const q = function () {
     ///     return arguments[0];
     /// }
+    /// ```
+    ///
+    /// Function expressions whose `prototype` is used are ignored,
+    /// because arrow functions don't have a `prototype`:
+    ///
+    /// ```js
+    /// const f = function () {};
+    /// console.log(f.prototype.toString());
     /// ```
     ///
     /// Function expressions that declare the type of `this` are  also ignored:
@@ -134,16 +145,13 @@ impl Rule for UseArrowFunction {
             // Ignore functions that explicitly declare a `this` type.
             return None;
         }
-        let requires_prototype = function_expression
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|ancestor| ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION)
-            .is_some_and(|ancestor| {
+        let requires_prototype =
+            value_parent(function_expression.syntax()).is_some_and(|ancestor| {
                 matches!(
                     ancestor.kind(),
                     JsSyntaxKind::JS_NEW_EXPRESSION | JsSyntaxKind::JS_EXTENDS_CLAUSE
-                )
+                ) || (function_expression.async_token().is_none()
+                    && is_prototype_of_binding_used(&ancestor, model))
             });
         if requires_prototype {
             // Ignore cases where a prototype is required
@@ -262,6 +270,137 @@ impl Rule for UseArrowFunction {
             markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }.to_owned(),
             mutation,
         ))
+    }
+}
+
+/// Returns the first ancestor of `node` that uses its value, skipping the nodes that pass it on
+/// unchanged: parentheses, TypeScript type-only wrappers, the branches of a conditional
+/// expression, and the operands of a logical expression.
+///
+/// e.g. the initializer clause in `const f = cond ? function() {} : g;`
+fn value_parent(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    let mut node = node.clone();
+    loop {
+        let parent = node.parent()?;
+        let passes_value = match parent.kind() {
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+            | JsSyntaxKind::TS_AS_EXPRESSION
+            | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+            | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+            | JsSyntaxKind::JS_LOGICAL_EXPRESSION => true,
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => JsConditionalExpression::cast_ref(&parent)
+                .is_some_and(|conditional| {
+                    conditional.test().is_ok_and(|test| test.syntax() != &node)
+                }),
+            _ => false,
+        };
+        if !passes_value {
+            return Some(parent);
+        }
+        node = parent;
+    }
+}
+
+/// Returns `true` if `parent` binds a function expression to a variable that is used
+/// in a way that requires a `prototype`.
+///
+/// e.g. `const f = function() {}; f.prototype.x = 0;`
+fn is_prototype_of_binding_used(parent: &JsSyntaxNode, model: &SemanticModel) -> bool {
+    let binding = if let Some(initializer) = JsInitializerClause::cast_ref(parent) {
+        let Some(declarator) = initializer.parent::<JsVariableDeclarator>() else {
+            return false;
+        };
+        let Some(id) = declarator
+            .id()
+            .ok()
+            .and_then(|id| id.as_any_js_binding()?.as_js_identifier_binding().cloned())
+        else {
+            return false;
+        };
+        model.as_binding(&id)
+    } else if let Some(assignment) = JsAssignmentExpression::cast_ref(parent) {
+        let Some(binding) = assignment.left().ok().and_then(|left| {
+            left.as_any_js_assignment()?
+                .as_js_identifier_assignment()?
+                .binding(model)
+        }) else {
+            return false;
+        };
+        binding
+    } else {
+        return false;
+    };
+    binding
+        .all_reads()
+        .any(|reference| is_prototype_required_by(&reference.syntax()))
+}
+
+/// Returns `true` if the reference `reference` is used in a way that requires a `prototype`:
+/// `f.prototype`, `f["prototype"]`, `new f()`, `class extends f {}`, or `x instanceof f`.
+///
+/// Parentheses and TypeScript type-only wrappers around the reference are ignored,
+/// e.g. `new (f as any)()`.
+fn is_prototype_required_by(reference: &JsSyntaxNode) -> bool {
+    let Some(expression) = reference.parent() else {
+        return false;
+    };
+    let expression = expression
+        .ancestors()
+        .take_while(|node| {
+            node == &expression
+                || matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+                        | JsSyntaxKind::TS_AS_EXPRESSION
+                        | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+                        | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+                        | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+                        | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
+                )
+        })
+        .last()
+        .unwrap_or(expression);
+    let Some(parent) = expression.parent() else {
+        return false;
+    };
+    let is_expression =
+        |node: SyntaxResult<AnyJsExpression>| node.is_ok_and(|node| node.syntax() == &expression);
+    match parent.kind() {
+        JsSyntaxKind::JS_EXTENDS_CLAUSE => true,
+        JsSyntaxKind::JS_NEW_EXPRESSION => {
+            JsNewExpression::cast(parent).is_some_and(|new| is_expression(new.callee()))
+        }
+        JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => JsInstanceofExpression::cast(parent)
+            .is_some_and(|instanceof| is_expression(instanceof.right())),
+        JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+            AnyJsMemberExpression::cast(parent).is_some_and(|member| {
+                is_expression(member.object())
+                    && member
+                        .member_name()
+                        .is_some_and(|name| name.text() == "prototype")
+            })
+        }
+        JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => JsStaticMemberAssignment::cast(parent)
+            .is_some_and(|member| {
+                is_expression(member.object())
+                    && member.member().is_ok_and(|name| {
+                        name.as_js_name()
+                            .and_then(|name| name.value_token().ok())
+                            .is_some_and(|token| token.text_trimmed() == "prototype")
+                    })
+            }),
+        JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => JsComputedMemberAssignment::cast(parent)
+            .is_some_and(|member| {
+                is_expression(member.object())
+                    && member.member().is_ok_and(|name| {
+                        name.omit_parentheses()
+                            .as_static_value()
+                            .is_some_and(|name| name.text() == "prototype")
+                    })
+            }),
+        _ => false,
     }
 }
 
