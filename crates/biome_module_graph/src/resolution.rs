@@ -1,7 +1,7 @@
 use crate::{ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS};
 use biome_resolver::{
-    ResolveOptions, ResolvedSpecifier, ResolverDb, ResolverDbAdapter, ResolverPathData,
-    resolve_with_metadata,
+    ResolveError, ResolveOptions, ResolvedPath, ResolvedSpecifier, ResolverDb, ResolverDbAdapter,
+    ResolverPathData, resolve_with_metadata,
 };
 use camino::Utf8Path;
 
@@ -63,20 +63,35 @@ pub struct ResolutionRequest<'db> {
 }
 
 /// Resolves one interned module request using the path info in the database.
+///
+/// A script specifier that doesn't resolve to a file, except a runtime
+/// built-in, resolves to the module that a framework declares for it. See
+/// [ResolverDb::framework_module_path].
 #[salsa::tracked]
 pub fn resolve_module_request<'db>(
     db: &'db dyn ResolverDb,
     request: ResolutionRequest<'db>,
 ) -> ResolvedSpecifier {
-    let options = resolve_options(request.mode(db));
+    let mode = request.mode(db);
+    let options = resolve_options(mode);
     let proxy = ResolverDbAdapter::new(db);
-    resolve_with_metadata(
-        request.specifier(db),
-        request.base_directory(db).path(db),
-        &proxy,
-        &options,
-    )
-    .into()
+    let specifier = request.specifier(db);
+    let directory = request.base_directory(db).path(db);
+    match resolve_with_metadata(specifier, directory, &proxy, &options) {
+        Err(error)
+            if mode != ResolutionMode::Css
+                && !matches!(error, ResolveError::NodeBuiltIn | ResolveError::BunBuiltIn) =>
+        {
+            match db.framework_module_path(directory, specifier) {
+                Some(path) => ResolvedSpecifier::new(
+                    ResolvedPath::from_path(path),
+                    biome_resolver::ResolutionKind::FrameworkModule,
+                ),
+                None => error.into(),
+            }
+        }
+        result => result.into(),
+    }
 }
 
 /// Resolves `specifier` relative to `base_directory`.

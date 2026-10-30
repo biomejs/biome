@@ -41,6 +41,7 @@ biome_diagnostics_macros     = { path = "./crates/biome_diagnostics_macros", ver
 biome_flags                  = { path = "./crates/biome_flags" }
 biome_formatter              = { path = "./crates/biome_formatter", version = "0.7.0" }
 biome_formatter_test         = { path = "./crates/biome_formatter_test" }
+biome_frameworks             = { path = "./crates/biome_frameworks", version = "0.7.0" }
 biome_fs                     = { path = "./crates/biome_fs", version = "0.7.0" }
 biome_glob                   = { path = "./crates/biome_glob", version = "0.7.0" }
 biome_graphql_analyze        = { path = "./crates/biome_graphql_analyze", version = "0.7.0" }

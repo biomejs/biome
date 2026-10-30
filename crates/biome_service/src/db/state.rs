@@ -1243,6 +1243,38 @@ impl DbState {
         }
     }
 
+    /// Replaces the modules that the frameworks of the package in
+    /// `package_path` declare. See [WorkspaceDb::set_framework_modules].
+    ///
+    /// Nothing happens when they don't change, so that queries keep their
+    /// results.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn set_framework_modules(
+        &self,
+        package_path: camino::Utf8PathBuf,
+        modules: std::sync::Arc<crate::frameworks::FrameworkModules>,
+    ) {
+        if self
+            .fork()
+            .framework_modules(&package_path)
+            .is_some_and(|current| current == modules)
+        {
+            return;
+        }
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db
+                    .fork()
+                    .data()
+                    .set_framework_modules(package_path, modules);
+                self.mark_module_graph_dirty();
+            }
+            DbStorage::Owned(db) => {
+                db.with_setter(|db| db.set_framework_modules(package_path, modules));
+            }
+        }
+    }
+
     /// Records that a project was replaced.
     ///
     /// In the view of a scan, the scan advances the projects generation when

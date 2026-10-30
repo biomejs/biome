@@ -15,6 +15,7 @@ use biome_js_type_info::{
 };
 use biome_resolver::ResolvedSpecifier;
 use biome_rowan::{Text, TextRange};
+use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
@@ -283,7 +284,7 @@ pub struct JsModuleInfoInner {
 ///
 /// A name can be declared by more than one declaration. Each declaration is a
 /// separate [JsAmbientModule], and TypeScript merges their exports.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct JsAmbientModule {
     /// The module name, as written. It may contain a `*` wildcard, as in
     /// `declare module "*.svg"`.
@@ -299,6 +300,23 @@ pub struct JsAmbientModule {
     /// `declare module "name";`, which gives every import from the module
     /// the type `any`.
     pub info: Option<JsModuleInfo>,
+}
+
+/// Returns the path of the module graph entry of the ambient module at
+/// `index` in the [JsModuleInfoInner::ambient_modules] of the file at `file`.
+///
+/// No file exists at this path. The path starts with the path of the file,
+/// so that removing the directory of the file removes the entry too.
+pub fn ambient_module_path(file: &Utf8Path, index: usize) -> Utf8PathBuf {
+    Utf8PathBuf::from(format!("{file}#{index}"))
+}
+
+/// Returns the path of the file that declares the ambient module at `path`,
+/// a path that [ambient_module_path] returned. The ranges of the module are
+/// ranges of this file.
+pub fn ambient_module_declaring_file(path: &Utf8Path) -> Option<&Utf8Path> {
+    let (file, index) = path.as_str().rsplit_once('#')?;
+    index.parse::<usize>().is_ok().then(|| Utf8Path::new(file))
 }
 
 /// A binding declared directly inside a `namespace` or `module` declaration.

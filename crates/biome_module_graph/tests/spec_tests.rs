@@ -96,6 +96,9 @@ struct TestModuleDb {
     files: BTreeMap<Utf8PathBuf, Source>,
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     resolver_paths: ResolverPaths,
+    /// The modules that frameworks declare, by specifier. See
+    /// [ResolverDb::framework_module_path].
+    framework_modules: BTreeMap<String, Utf8PathBuf>,
     events: Events,
     storage: Storage<Self>,
 }
@@ -113,6 +116,7 @@ impl TestModuleDb {
             files: BTreeMap::new(),
             modules: BTreeMap::new(),
             resolver_paths: ResolverPaths::default(),
+            framework_modules: BTreeMap::new(),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -168,6 +172,10 @@ impl ResolverDb for TestModuleDb {
 
     fn resolver_paths(&self) -> &ResolverPaths {
         &self.resolver_paths
+    }
+
+    fn framework_module_path(&self, _directory: &Utf8Path, specifier: &str) -> Option<Utf8PathBuf> {
+        self.framework_modules.get(specifier).cloned()
     }
 }
 

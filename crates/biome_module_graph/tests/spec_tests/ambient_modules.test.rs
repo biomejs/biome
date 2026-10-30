@@ -1,5 +1,8 @@
 use super::*;
-use biome_module_graph::{JsAmbientModule, JsModuleInfo};
+use biome_module_graph::{
+    JsAmbientModule, JsModuleInfo, ResolutionMode, ResolveError, ambient_module_path,
+    module_dependencies, resolve_specifier,
+};
 use std::collections::BTreeSet;
 
 fn js_module_info(fs: &MemoryFileSystem, path: &str) -> JsModuleInfo {
@@ -267,4 +270,86 @@ fn namespace_import_alias_keeps_the_file_a_script() {
         .map(|module| module.name.text())
         .collect();
     assert_eq!(names, ["virtual:alias"]);
+}
+
+#[test]
+fn script_exports_the_exports_of_its_ambient_modules() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/legacy/index.d.ts".into(),
+        r#"declare const shared: number;
+        declare module "legacy" {
+            export const named: number;
+            function implicit(): void;
+        }
+        declare module "legacy/extra" {
+            export { named as renamed } from "legacy";
+            export default shared;
+        }"#,
+    );
+
+    let info = js_module_info(&fs, "/node_modules/legacy/index.d.ts");
+
+    let exports: BTreeSet<_> = export_names(&info).into_iter().collect();
+    assert_eq!(
+        exports,
+        BTreeSet::from(["default", "implicit", "named", "renamed"])
+    );
+}
+
+#[test]
+fn script_specifier_without_file_resolves_to_a_framework_module() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/astro/client.d.ts".into(),
+        r#"declare module "astro:content" {
+            export const getCollection: () => void;
+        }"#,
+    );
+    let mut db = build_js_test_module_db(&fs, &["/node_modules/astro/client.d.ts"], false);
+    let module_path = ambient_module_path(Utf8Path::new("/node_modules/astro/client.d.ts"), 0);
+    db.framework_modules
+        .insert("astro:content".to_string(), module_path.clone());
+    let directory = Utf8Path::new("/src");
+
+    let resolved = resolve_specifier(&db, directory, "astro:content", ResolutionMode::JavaScript);
+    assert_eq!(resolved.path().as_path(), Some(module_path.as_path()));
+
+    // Runtime built-ins and stylesheet imports keep their resolution.
+    let built_in = resolve_specifier(&db, directory, "node:fs", ResolutionMode::JavaScript);
+    assert!(matches!(
+        built_in.path().as_deref(),
+        Err(ResolveError::NodeBuiltIn)
+    ));
+    let stylesheet = resolve_specifier(&db, directory, "astro:content", ResolutionMode::Css);
+    assert!(stylesheet.path().as_path().is_none());
+}
+
+#[test]
+fn modules_that_frameworks_declare_are_not_dependencies() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/astro/client.d.ts".into(),
+        r#"declare module "astro:content" {
+            export const getCollection: () => void;
+        }"#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"import { getCollection } from "astro:content";"#,
+    );
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/node_modules/astro/client.d.ts", "/src/index.ts"],
+        false,
+    );
+    db.framework_modules.insert(
+        "astro:content".to_string(),
+        ambient_module_path(Utf8Path::new("/node_modules/astro/client.d.ts"), 0),
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("the module must exist");
+
+    assert!(module_dependencies(&db, module).is_empty());
 }

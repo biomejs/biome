@@ -6,7 +6,7 @@ use crate::{
     JsModuleInfo, ModuleDb, ModuleDependencies, ModuleInfo, ModuleInfoKind, ResolutionMode,
     resolve_specifier,
 };
-use biome_resolver::ResolverDb;
+use biome_resolver::{ResolutionKind, ResolverDb};
 use camino::Utf8Path;
 
 /// Returns the resolved dependencies of `module`.
@@ -84,6 +84,11 @@ impl<'a> DependencyCollector<'a> {
 
     fn resolve(&mut self, specifier: &str, mode: ResolutionMode) {
         let resolved = resolve_specifier(self.db, self.directory, specifier, mode);
+        // No file exists at the path of a module that a framework declares.
+        // The workspace indexes the files that declare these modules.
+        if resolved.kind() == ResolutionKind::FrameworkModule {
+            return;
+        }
         if let Some(path) = resolved.path().as_path() {
             self.dependencies.insert(path.to_path_buf());
         }

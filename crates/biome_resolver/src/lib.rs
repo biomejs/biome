@@ -524,19 +524,26 @@ fn matching_target_mapping<'a>(
     // Step 3: Try pattern matches in sorted order.
     for (key, target) in pattern_keys {
         let key = normalize_subpath(key.as_str());
-        if let Some((pattern_base, pattern_trailer)) = key.split_once('*')
-            && subpath.starts_with(pattern_base)
-            && subpath != pattern_base
-            && (pattern_trailer.is_empty()
-                || (subpath.ends_with(pattern_trailer) && subpath.len() >= key.len()))
-        {
-            let glob_replacement =
-                &subpath[pattern_base.len()..subpath.len() - pattern_trailer.len()];
+        if let Some(glob_replacement) = match_pattern_key(key, subpath) {
             return Some((target, Some(glob_replacement)));
         }
     }
 
     None
+}
+
+/// Returns the characters that the `*` of the pattern key `key` matches in
+/// `subpath`, or `None` when `key` has no `*` or doesn't match `subpath`.
+///
+/// Like in Node.js, the `*` matches at least one character, except when the
+/// key ends with it, as in `./features/*`.
+pub fn match_pattern_key<'a>(key: &str, subpath: &'a str) -> Option<&'a str> {
+    let (pattern_base, pattern_trailer) = key.split_once('*')?;
+    let matches = subpath.starts_with(pattern_base)
+        && subpath != pattern_base
+        && (pattern_trailer.is_empty()
+            || (subpath.ends_with(pattern_trailer) && subpath.len() >= key.len()));
+    matches.then(|| &subpath[pattern_base.len()..subpath.len() - pattern_trailer.len()])
 }
 
 /// Compares two pattern keys for sorting in descending order of specificity.
@@ -545,7 +552,7 @@ fn matching_target_mapping<'a>(
 /// resolver specification. Keys with longer prefixes (before `*`) are
 /// considered more specific. If prefixes have equal length, keys with longer
 /// suffixes (after `*`) take priority.
-fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
+pub fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
     let base_length_a = key_a.find('*').unwrap_or(key_a.len());
     let base_length_b = key_b.find('*').unwrap_or(key_b.len());
 
@@ -1071,6 +1078,9 @@ pub enum ResolutionKind {
         /// Whether appending to the wildcard preserves the resolved target.
         can_add_extension: bool,
     },
+    /// The path is the module that a framework declares for the specifier.
+    /// No file exists at the path. See [`ResolverDb::framework_module_path`].
+    FrameworkModule,
 }
 
 /// A resolved path and the mechanism that produced it.

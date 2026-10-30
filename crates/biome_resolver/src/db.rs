@@ -44,6 +44,20 @@ pub trait ResolverDb: ParseDb {
 
     /// Returns the lookup table of the known resolver paths.
     fn resolver_paths(&self) -> &ResolverPaths;
+
+    /// Returns the path of the module that a framework declares for
+    /// `specifier`, as imported by a file in `directory`, such as the module
+    /// that Astro declares for `astro:content`.
+    ///
+    /// Module resolution calls it only when `specifier` doesn't resolve
+    /// otherwise. The default implementation doesn't know any such module.
+    fn framework_module_path(
+        &self,
+        _directory: &Utf8Path,
+        _specifier: &str,
+    ) -> Option<Utf8PathBuf> {
+        None
+    }
 }
 
 /// The path info of a path used by the resolver.

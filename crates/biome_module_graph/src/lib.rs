@@ -51,7 +51,7 @@ pub use import_path_map::{ImportPathMap, ImportPathMapIterator};
 pub use js_module_info::{
     JsAmbientModule, JsExport, JsExportedSymbolLookup, JsImport, JsImportKind, JsImportPath,
     JsImportPhase, JsModuleInfo, JsModuleInfoDiagnostic, JsOwnExport, JsReexport,
-    SerializedJsModuleInfo, TypeInferenceMode,
+    SerializedJsModuleInfo, TypeInferenceMode, ambient_module_declaring_file, ambient_module_path,
 };
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,

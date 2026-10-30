@@ -126,6 +126,24 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         &self,
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
+
+    /// Runs the framework loaders of each package of the project, and returns
+    /// the files that they visit, by the path of the package.
+    fn framework_visits(&self, _project_key: ProjectKey) -> Vec<(Utf8PathBuf, Vec<Utf8PathBuf>)> {
+        Vec::new()
+    }
+
+    /// Returns the files that the `/// <reference path="..." />` directives of
+    /// the declaration file at `path` name.
+    fn declaration_references(&self, _path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        Vec::new()
+    }
+
+    /// Records the modules that `files` declare as the modules of the
+    /// frameworks of the package in `package_path`. `files` are the indexed
+    /// files that the framework loaders of the package visit, and the files
+    /// that they reference.
+    fn register_framework_modules(&self, _package_path: &Utf8Path, _files: &[Utf8PathBuf]) {}
 }
 
 /// Trait used to give access to workspace functionality required by the

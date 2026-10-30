@@ -8,6 +8,8 @@ pub(crate) use state::DbReadGuard;
 pub use state::DbState;
 
 use crate::WorkspaceError;
+#[cfg(feature = "module_graph")]
+use crate::frameworks::FrameworkModules;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
 pub(crate) use crate::workspace::views::ViewId;
@@ -20,7 +22,7 @@ use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
     InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
-    ModuleInfoKind, TypeDb, module_for_key,
+    ModuleInfoKind, TypeDb, ambient_module_declaring_file, module_for_key,
 };
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -46,6 +48,17 @@ use tracing::{debug, instrument};
 const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
 
 type NodeCaches = Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>;
+#[cfg(feature = "module_graph")]
+type FrameworkModulesByPackage = Arc<HashMap<Utf8PathBuf, Arc<FrameworkModules>>>;
+
+/// Returns whether the module at `module_path` belongs to `path`: the file or
+/// directory at `path` contains the module, or declares it with
+/// `declare module "name"`.
+#[cfg(feature = "module_graph")]
+fn is_module_within(module_path: &Utf8Path, path: &Utf8Path) -> bool {
+    module_path.starts_with(path)
+        || ambient_module_declaring_file(module_path).is_some_and(|file| file.starts_with(path))
+}
 type SettingsQueryEventHandler =
     std::panic::AssertUnwindSafe<Arc<dyn Fn(salsa::Event) + Send + Sync>>;
 
@@ -232,6 +245,10 @@ pub struct WorkspaceDb {
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    /// The modules that the frameworks of each package declare, by the path
+    /// of the package.
+    #[cfg(feature = "module_graph")]
+    framework_modules: FrameworkModulesByPackage,
     /// The path info observed by the resolver.
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
@@ -271,6 +288,8 @@ pub struct WorkspaceDbData {
     node_caches: NodeCaches,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    #[cfg(feature = "module_graph")]
+    framework_modules: FrameworkModulesByPackage,
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -436,6 +455,20 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
+    /// Replaces the modules that the frameworks of the package in
+    /// `package_path` declare.
+    ///
+    /// A package without such modules keeps an empty entry, so that its
+    /// files don't resolve the modules of an enclosing package.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn set_framework_modules(
+        &self,
+        package_path: Utf8PathBuf,
+        modules: Arc<FrameworkModules>,
+    ) {
+        self.framework_modules.pin().insert(package_path, modules);
+    }
+
     /// Removes all files and modules that start with the given path. That's
     /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
@@ -459,7 +492,7 @@ impl WorkspaceDbData {
             let modules = self.modules.pin();
             let to_remove: Vec<Utf8PathBuf> = modules
                 .keys()
-                .filter(|p| p.starts_with(path))
+                .filter(|p| is_module_within(p, path))
                 .cloned()
                 .collect();
             for p in to_remove {
@@ -490,6 +523,8 @@ impl WorkspaceDb {
             node_caches: Arc::default(),
             #[cfg(feature = "module_graph")]
             modules: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            framework_modules: Arc::default(),
             #[cfg(feature = "module_graph")]
             resolver_paths: ResolverPaths::default(),
             #[cfg(feature = "module_graph")]
@@ -588,6 +623,8 @@ impl WorkspaceDb {
             node_caches: self.node_caches.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            framework_modules: self.framework_modules.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
@@ -1098,6 +1135,28 @@ impl WorkspaceDb {
         }
     }
 
+    /// Returns the modules that the frameworks of the package in
+    /// `package_path` declare, if they were recorded.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn framework_modules(
+        &self,
+        package_path: &Utf8Path,
+    ) -> Option<Arc<FrameworkModules>> {
+        self.framework_modules.pin().get(package_path).cloned()
+    }
+
+    /// Replaces the modules that the frameworks of the package in
+    /// `package_path` declare, and advances the module graph generation.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn set_framework_modules(
+        &mut self,
+        package_path: Utf8PathBuf,
+        modules: Arc<FrameworkModules>,
+    ) {
+        let data = self.data();
+        self.write_module_data(|_| data.set_framework_modules(package_path, modules));
+    }
+
     #[cfg(feature = "module_graph")]
     pub fn remove_module(&mut self, path: &Utf8Path) {
         if self.modules.pin().contains_key(path) {
@@ -1133,7 +1192,7 @@ impl WorkspaceDb {
                 .modules
                 .pin()
                 .keys()
-                .filter(|module_path| module_path.starts_with(path))
+                .filter(|module_path| is_module_within(module_path, path))
                 .cloned()
                 .collect::<Vec<_>>();
             if !to_remove.is_empty() {
@@ -1384,6 +1443,8 @@ pub struct SharedWorkspaceDb {
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     #[cfg(feature = "module_graph")]
+    framework_modules: FrameworkModulesByPackage,
+    #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
     #[cfg(feature = "module_graph")]
     resolver_fs: Arc<dyn FsWithResolverProxy>,
@@ -1413,6 +1474,8 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules,
             #[cfg(feature = "module_graph")]
+            framework_modules,
+            #[cfg(feature = "module_graph")]
             resolver_paths,
             #[cfg(feature = "module_graph")]
             resolver_fs,
@@ -1428,6 +1491,8 @@ impl SharedWorkspaceDb {
             node_caches,
             #[cfg(feature = "module_graph")]
             modules,
+            #[cfg(feature = "module_graph")]
+            framework_modules,
             #[cfg(feature = "module_graph")]
             resolver_paths,
             #[cfg(feature = "module_graph")]
@@ -1448,6 +1513,8 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
+            framework_modules: self.framework_modules.clone(),
+            #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
             inline_configurations: self.inline_configurations.clone(),
@@ -1464,6 +1531,8 @@ impl SharedWorkspaceDb {
             inline_configurations: self.inline_configurations.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            framework_modules: self.framework_modules.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             #[cfg(feature = "module_graph")]
@@ -1496,6 +1565,17 @@ impl ResolverDb for WorkspaceDb {
 
     fn resolver_paths(&self) -> &ResolverPaths {
         &self.resolver_paths
+    }
+
+    fn framework_module_path(&self, directory: &Utf8Path, specifier: &str) -> Option<Utf8PathBuf> {
+        // The tables change with the module graph generation, so reading it
+        // makes the resolutions that read the tables run again.
+        let _ = self.module_graph_generation();
+        let framework_modules = self.framework_modules.pin();
+        let modules = directory
+            .ancestors()
+            .find_map(|directory| framework_modules.get(directory))?;
+        modules.module_path(specifier).cloned()
     }
 }
 

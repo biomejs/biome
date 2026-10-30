@@ -1,0 +1,55 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint src/index.ts
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": { "correctness": { "noUnresolvedImports": "error" } }
+  }
+}
+```
+
+## `node_modules/legacy/index.d.ts`
+
+```ts
+declare module "legacy" {
+	export const named: number;
+}
+
+```
+
+## `node_modules/legacy/package.json`
+
+```json
+{ "name": "legacy", "version": "1.0.0", "types": "./index.d.ts" }
+```
+
+## `package.json`
+
+```json
+{ "dependencies": { "legacy": "^1.0.0" } }
+```
+
+## `src/index.ts`
+
+```ts
+import { named } from "legacy";
+
+export { named };
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
