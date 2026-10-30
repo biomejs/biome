@@ -318,7 +318,8 @@ TwRoot {
                                                                 CssBogusPropertyValue {
                                                                     items: [
                                                                         L_PAREN@113..114 "(" [] [],
-                                                                        TW_VALUE@114..117 "2px" [] [],
+                                                                        CSS_NUMBER_LITERAL@114..115 "2" [] [],
+                                                                        PX_KW@115..117 "px" [] [],
                                                                     ],
                                                                 },
                                                             ],
@@ -570,7 +571,8 @@ TwRoot {
                       1: IDENT@110..113 "px" [] [Whitespace("_")]
                     1: CSS_BOGUS_PROPERTY_VALUE@113..117
                       0: L_PAREN@113..114 "(" [] []
-                      1: TW_VALUE@114..117 "2px" [] []
+                      1: CSS_NUMBER_LITERAL@114..115 "2" [] []
+                      2: PX_KW@115..117 "px" [] []
               3: R_PAREN@117..118 ")" [] []
             1: CSS_BOGUS_PROPERTY_VALUE@118..119
               0: R_PAREN@118..119 ")" [] []
