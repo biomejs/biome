@@ -3208,6 +3208,11 @@ export interface Nursery {
 	 */
 	noShortTimeValues?: NoShortTimeValuesConfiguration;
 	/**
+	 * Disallow passing an array with a single element to Promise.all(), Promise.any(), or Promise.race().
+	 * See https://biomejs.dev/linter/rules/no-single-promise-in-promise-methods
+	 */
+	noSinglePromiseInPromiseMethods?: NoSinglePromiseInPromiseMethodsConfiguration;
+	/**
 	 * Disallow addEventListener in Svelte files.
 	 * See https://biomejs.dev/linter/rules/no-svelte-add-event-listener
 	 */
@@ -6514,6 +6519,9 @@ export type NoSelfNestedLayerConfiguration =
 export type NoShortTimeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShortTimeValuesOptions;
+export type NoSinglePromiseInPromiseMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSinglePromiseInPromiseMethodsOptions;
 export type NoSvelteAddEventListenerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAddEventListenerOptions;
@@ -9456,6 +9464,14 @@ export interface RuleWithNoSelfNestedLayerOptions {
 export interface RuleWithNoShortTimeValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoShortTimeValuesOptions;
+}
+export interface RuleWithNoSinglePromiseInPromiseMethodsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSinglePromiseInPromiseMethodsOptions;
 }
 export interface RuleWithNoSvelteAddEventListenerOptions {
 	/**
@@ -12586,6 +12602,7 @@ export interface NoShortTimeValuesOptions {
 	 */
 	minimum?: number;
 }
+export type NoSinglePromiseInPromiseMethodsOptions = {};
 export type NoSvelteAddEventListenerOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
@@ -14731,6 +14748,7 @@ export type Category =
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSelfNestedLayer"
 	| "lint/nursery/noShortTimeValues"
+	| "lint/nursery/noSinglePromiseInPromiseMethods"
 	| "lint/nursery/noSvelteAddEventListener"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
