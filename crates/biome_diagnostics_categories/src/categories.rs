@@ -258,6 +258,7 @@ define_categories! {
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noImpliedEval": "https://biomejs.dev/linter/rules/no-implied-eval",
+    "lint/nursery/noInvalidFetchOptions": "https://biomejs.dev/linter/rules/no-invalid-fetch-options",
     "lint/nursery/noInvalidFileInputAccept": "https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
     "lint/nursery/noInvalidPropertyInitValue": "https://biomejs.dev/linter/rules/no-invalid-property-init-value",
     "lint/nursery/noInvalidRemoveEventListener": "https://biomejs.dev/linter/rules/no-invalid-remove-event-listener",
