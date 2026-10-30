@@ -10,7 +10,7 @@ pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
 use crate::services::semantic::SemanticModelBuilderVisitor;
-use crate::services::typed::TypedModule;
+use crate::services::typed::{TsrsFile, TypedModule};
 pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
@@ -307,6 +307,7 @@ where
     }
     services.insert_service(node_manifest);
     services.insert_service(turborepo_configs);
+    services.insert_service(TsrsFile::new(&file_path).map(Arc::new));
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
