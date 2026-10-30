@@ -717,6 +717,10 @@ fn parse_emphasis_from_context(p: &mut MarkdownParser, expect_strong: bool) -> P
             break;
         }
 
+        if super::consume_inline_quote_prefix(p) {
+            continue;
+        }
+
         // Parse nested inline content
         let result = super::parse_any_inline(p);
         if result.is_absent() {
@@ -796,7 +800,13 @@ pub(crate) fn parse_inline_strikethrough(p: &mut MarkdownParser) -> ParsedSyntax
         if closer_offset >= current_offset && closer_offset < current_offset + current_len {
             break;
         }
-        if current_offset > closer_offset || super::parse_any_inline(p).is_absent() {
+        if current_offset > closer_offset {
+            break;
+        }
+        if super::consume_inline_quote_prefix(p) {
+            continue;
+        }
+        if super::parse_any_inline(p).is_absent() {
             break;
         }
     }

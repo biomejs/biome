@@ -1,9 +1,14 @@
+use crate::context::ProseWrap;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
+use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use biome_formatter::write;
+use crate::shared::{TextContext, TextPrintMode};
+use biome_formatter::{Format, write};
 use biome_markdown_syntax::{
-    AnyMdInline, MdInlineEmphasis, MdInlineEmphasisFields, emphasis_ext::MdEmphasisFence,
+    AnyMdInline, MdBlockList, MdInlineEmphasis, MdInlineEmphasisFields, MdInlineItemList,
+    MdParagraph, MdReferenceImage, MdReferenceLink, emphasis_ext::MdEmphasisFence,
 };
+use biome_rowan::AstNode;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineEmphasis;
@@ -41,7 +46,7 @@ impl FormatNodeRule<MdInlineEmphasis> for FormatMdInlineEmphasis {
                     })
                     .fmt(f)
             } else {
-                content.format().fmt(f)
+                FormatEmphasisContent::new(&content).fmt(f)
             }
         });
 
@@ -68,6 +73,55 @@ impl FormatNodeRule<MdInlineEmphasis> for FormatMdInlineEmphasis {
                     ),
                 ]
             )
+        }
+    }
+}
+
+/// Reflows strong-emphasis content in wrapping paragraphs without adding a block-ending break.
+pub(crate) struct FormatEmphasisContent<'a> {
+    content: &'a MdInlineItemList,
+    options: FormatMdFormatInlineItemListOptions,
+}
+
+impl<'a> FormatEmphasisContent<'a> {
+    pub(crate) fn new(content: &'a MdInlineItemList) -> Self {
+        Self::new_with_options(content, FormatMdFormatInlineItemListOptions::default())
+    }
+
+    pub(crate) fn new_with_options(
+        content: &'a MdInlineItemList,
+        options: FormatMdFormatInlineItemListOptions,
+    ) -> Self {
+        Self { content, options }
+    }
+}
+
+impl Format<MarkdownFormatContext> for FormatEmphasisContent<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let mut ancestors = self.content.syntax().ancestors().take_while(|ancestor| {
+            !MdReferenceImage::can_cast(ancestor.kind())
+                && !MdReferenceLink::can_cast(ancestor.kind())
+        });
+        let reflow_prose = f.options().prose_wrap() == ProseWrap::Always
+            && ancestors
+                .by_ref()
+                .any(|ancestor| MdInlineEmphasis::can_cast(ancestor.kind()))
+            && ancestors
+                .find_map(MdParagraph::cast)
+                .and_then(|paragraph| paragraph.syntax().parent())
+                .is_some_and(|parent| MdBlockList::can_cast(parent.kind()));
+
+        if reflow_prose {
+            self.content
+                .format()
+                .with_options(FormatMdFormatInlineItemListOptions {
+                    print_mode: TextPrintMode::fill(),
+                    text_context: TextContext::Inline,
+                    ..self.options
+                })
+                .fmt(f)
+        } else {
+            self.content.format().with_options(self.options).fmt(f)
         }
     }
 }
