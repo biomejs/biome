@@ -1,0 +1,22 @@
+/* should not generate diagnostics */
+$fn: is;
+
+.b:#{$fn}(::before) {
+	color: red;
+}
+
+.a:is(.b:#{$fn}(::before)) {
+	color: red;
+}
+
+.a {
+	&:is(.b, .c)::before {
+		content: "";
+	}
+
+	&::before {
+		&:is(:hover) {
+			color: red;
+		}
+	}
+}
