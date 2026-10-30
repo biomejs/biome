@@ -166,3 +166,10 @@ describe("foo", () => {
 		someFn();
 	});
 });
+
+import { afterEach } from "vitest";
+
+describe("imported hooks are still checked", () => {
+	afterEach(() => {});
+	afterEach(() => {});
+});
