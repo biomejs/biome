@@ -326,6 +326,18 @@ impl PreviousBlock {
             .is_some_and(|item| list_ends_with_line_break(&item))
     }
 
+    /// Whether the source text of the block ends with its own line
+    /// terminator, as a paragraph does. Otherwise the first newline that
+    /// follows the block terminates its last line.
+    fn ends_with_line_terminator(&self) -> bool {
+        self.0.as_ref().is_some_and(|block| {
+            block
+                .syntax()
+                .last_token()
+                .is_some_and(|token| token.text().ends_with('\n'))
+        })
+    }
+
     fn needs_empty_line_before_list(&self) -> bool {
         self.0.as_ref().is_some_and(|block| {
             matches!(
@@ -513,10 +525,25 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                                 ));
                             }
                         }
-                        // The remaining newlines are real blank lines, kept as
-                        // they are.
-                        for blank_line in blank_lines {
-                            joiner.entry(&blank_line.format());
+                        // The remaining newlines are real blank lines. They
+                        // collapse into one, or into two before an indented
+                        // code block so that it can't be read as part of the
+                        // list.
+                        let kept = if iter.peek().is_some_and(|(_, next)| next.is_indent_block()) {
+                            2
+                        } else {
+                            1
+                        };
+                        for (position, blank_line) in blank_lines.enumerate() {
+                            joiner.entry(&blank_line.format().with_options(
+                                FormatMdNewlineOptions {
+                                    print_mode: if position < kept {
+                                        TextPrintMode::Pristine
+                                    } else {
+                                        TextPrintMode::Remove
+                                    },
+                                },
+                            ));
                         }
                     }
                 } else if previous_block.is_fenced_code_block()
@@ -559,14 +586,54 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                             joiner.entry(&hard_line_break());
                         }
                     }
-                } else {
+                } else if is_leading || is_trailing {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
-                        print_mode: if is_leading || is_trailing {
-                            TextPrintMode::Remove
-                        } else {
-                            TextPrintMode::Pristine
-                        },
+                        print_mode: TextPrintMode::Remove,
                     }));
+                } else {
+                    let mut run = vec![newline.clone()];
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
+                        if let Some((
+                            _,
+                            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(nl)),
+                        )) = iter.next()
+                        {
+                            run.push(nl);
+                        }
+                    }
+                    if iter.peek().is_some_and(|(_, next)| next.is_list()) {
+                        // Same separator as a single newline before a list.
+                        for nl in &run {
+                            joiner.entry(&nl.format().with_options(FormatMdNewlineOptions {
+                                print_mode: TextPrintMode::Remove,
+                            }));
+                        }
+                        if previous_block.needs_empty_line_before_list() {
+                            joiner.entry(&empty_line());
+                        } else {
+                            joiner.entry(&hard_line_break());
+                        }
+                    } else {
+                        // Consecutive blank lines collapse into one. When the
+                        // previous block doesn't print its own line terminator,
+                        // the first newline of the run is that terminator.
+                        let kept = if previous_block.ends_with_line_terminator() {
+                            1
+                        } else {
+                            2
+                        };
+                        for (position, nl) in run.iter().enumerate() {
+                            joiner.entry(&nl.format().with_options(FormatMdNewlineOptions {
+                                print_mode: if position < kept {
+                                    TextPrintMode::Pristine
+                                } else {
+                                    TextPrintMode::Remove
+                                },
+                            }));
+                        }
+                    }
                 }
                 after_newline = true;
             } else {

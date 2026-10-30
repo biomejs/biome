@@ -220,110 +220,14 @@ This paragraph has some `code` in it.
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,6 +4,8 @@
- 
-     This is a paragraph.
- 
-+
-+
- # Header 1
- 
- ## Header 2
-@@ -14,6 +16,8 @@
-     Header 2
-     --------
- 
-+
-+
- # Header 1
- 
- ## Header 2
-@@ -33,6 +37,8 @@
-     ##### Header 5
-     ###### Header 6
- 
-+
-+
- # Header 1
- 
- ## Header 2
-@@ -52,12 +58,15 @@
-     ##### Header 5 #####
-     ###### Header 6 ######
- 
-+
-+
- > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
- 
+@@ -57,7 +57,6 @@
      > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
  
-+
-+
  > ## This is a header.
 ->
  > 1. This is the first list item.
  > 2. This is the second list item.
  >
-@@ -73,6 +82,9 @@
-     >
-     >     Markdown.generate();
- 
-+
-+
-+
- - Red
- - Green
- - Blue
-@@ -85,6 +97,7 @@
- - Green
- - Blue
- 
-+
- ```markdown
- - Red
- - Green
-@@ -109,6 +122,8 @@
- 1. Bake
- ```
- 
-+
-+
- Paragraph:
- 
-     Code
-@@ -139,6 +154,8 @@
- 
-     ---------------------------------------
- 
-+
-+
- This is [an example](http://example.com "Example") link.
- 
- [This link](http://example.com) has no title attr.
-@@ -159,6 +176,8 @@
- 
-     [id]: http://example.com "Optional Title"
- 
-+
-+
- _single asterisks_
- 
- _single underscores_
-@@ -175,10 +194,14 @@
- 
-     __double underscores__
- 
-+
-+
- This paragraph has some `code` in it.
- 
-     This paragraph has some `code` in it.
- 
-+
-+
- ![Alt Text](http://placehold.it/200x50 "Image Title")
- 
-     ![Alt Text](http://placehold.it/200x50 "Image Title")
 ```
 
 # Output
@@ -335,8 +239,6 @@ This is a paragraph.
 
     This is a paragraph.
 
-
-
 # Header 1
 
 ## Header 2
@@ -346,8 +248,6 @@ This is a paragraph.
 
     Header 2
     --------
-
-
 
 # Header 1
 
@@ -368,8 +268,6 @@ This is a paragraph.
     ##### Header 5
     ###### Header 6
 
-
-
 # Header 1
 
 ## Header 2
@@ -389,13 +287,9 @@ This is a paragraph.
     ##### Header 5 #####
     ###### Header 6 ######
 
-
-
 > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
 
     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-
-
 
 > ## This is a header.
 > 1. This is the first list item.
@@ -413,9 +307,6 @@ This is a paragraph.
     >
     >     Markdown.generate();
 
-
-
-
 - Red
 - Green
 - Blue
@@ -427,7 +318,6 @@ This is a paragraph.
 - Red
 - Green
 - Blue
-
 
 ```markdown
 - Red
@@ -452,8 +342,6 @@ This is a paragraph.
 1. Mix together with water
 1. Bake
 ```
-
-
 
 Paragraph:
 
@@ -485,8 +373,6 @@ Paragraph:
 
     ---------------------------------------
 
-
-
 This is [an example](http://example.com "Example") link.
 
 [This link](http://example.com) has no title attr.
@@ -507,8 +393,6 @@ This is [an example][id] reference-style link.
 
     [id]: http://example.com "Optional Title"
 
-
-
 _single asterisks_
 
 _single underscores_
@@ -525,13 +409,9 @@ _single underscores_
 
     __double underscores__
 
-
-
 This paragraph has some `code` in it.
 
     This paragraph has some `code` in it.
-
-
 
 ![Alt Text](http://placehold.it/200x50 "Image Title")
 
@@ -541,6 +421,6 @@ This paragraph has some `code` in it.
 # Lines exceeding max width of 80 characters
 ```
     1: [View raw (TEST.md)](https://raw.github.com/adamschwartz/github-markdown-kitchen-sink/master/README.md)
-   63: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
-   65:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   55: > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+   57:     > Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
 ```
