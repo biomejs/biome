@@ -760,6 +760,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_invalid_property_init_value::NoInvalidPropertyInitValueOptions,
         >(),
     ));
+    result.push(("nursery", "noInvalidRemoveEventListener", TypeId::of::<biome_rule_options::no_invalid_remove_event_listener::NoInvalidRemoveEventListenerOptions>()));
     result.push((
         "nursery",
         "noInvalidThis",
