@@ -19,7 +19,7 @@ use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdBlockList,
     MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
-    MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
+    MdIndentTokenList, MdOrderedListItem, MdQuote, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction, SyntaxError};
 use std::collections::VecDeque;
@@ -1060,7 +1060,25 @@ impl Format<MarkdownFormatContext> for ListBlockList {
             ) {
                 (_, true) => write!(f, [hard_line_break()])?,
                 (1, false) => write!(f, [hard_line_break()])?,
-                (_, false) => write!(f, [empty_line()])?,
+                (_, false) => match self.content.syntax().ancestors().find_map(MdQuote::cast) {
+                    // A blank line without `>` ends a blockquote, so trailing
+                    // blank lines of an item inside a blockquote keep the
+                    // quote's markers.
+                    Some(quote) => {
+                        let line_prefix = quote_line_prefix(quote.content().syntax())?;
+                        write!(
+                            f,
+                            [
+                                dedent_to_root(&format_args![
+                                    hard_line_break(),
+                                    line_prefix.format(false)
+                                ]),
+                                hard_line_break()
+                            ]
+                        )?;
+                    }
+                    None => write!(f, [empty_line()])?,
+                },
             }
         }
         Ok(())
