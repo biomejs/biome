@@ -511,6 +511,7 @@ define_categories! {
     "lint/nursery/useVueMacroVariableName": "https://biomejs.dev/linter/rules/use-vue-macro-variable-name",
     "lint/nursery/useVueMatchingComponentFileName": "https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
+    "lint/nursery/useVueOneComponentPerFile": "https://biomejs.dev/linter/rules/use-vue-one-component-per-file",
     "lint/nursery/useVuePropTypeConstructor": "https://biomejs.dev/linter/rules/use-vue-prop-type-constructor",
     "lint/nursery/useVueRenderReturn": "https://biomejs.dev/linter/rules/use-vue-render-return",
     "lint/nursery/useVueSeparateStaticClass": "https://biomejs.dev/linter/rules/use-vue-separate-static-class",

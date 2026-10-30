@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { defineComponent as define } from "vue";
+
+export const A = define({ name: "A" } as const);
+export const B = define({ name: "B" } satisfies object);
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:18 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    2 │ import { defineComponent as define } from "vue";
+    3 │ 
+  > 4 │ export const A = define({ name: "A" } as const);
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ export const B = define({ name: "B" } satisfies object);
+    6 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:18 lint/nursery/useVueOneComponentPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file defines more than one component.
+  
+    4 │ export const A = define({ name: "A" } as const);
+  > 5 │ export const B = define({ name: "B" } satisfies object);
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Components that share a file are harder to find, and the file grows harder to read and change.
+  
+  i Move this component to its own file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

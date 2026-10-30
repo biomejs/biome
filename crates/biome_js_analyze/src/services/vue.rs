@@ -107,7 +107,8 @@ impl VueSemanticService {
         })
     }
 
-    /// The model of the whole file the analyzed tree belongs to.
+    /// The model of the whole file, including the script blocks of a
+    /// single-file component other than the analyzed one.
     pub(crate) fn model(&self) -> &VueSemanticModel {
         &self.model
     }

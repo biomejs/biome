@@ -10391,6 +10391,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueOneComponentPerFile": {
+					"description": "Enforce that each file defines at most one Vue component.\nSee https://biomejs.dev/linter/rules/use-vue-one-component-per-file",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueOneComponentPerFileConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVuePropTypeConstructor": {
 					"description": "Require the type of a Vue prop to be a constructor.\nSee https://biomejs.dev/linter/rules/use-vue-prop-type-constructor",
 					"anyOf": [
@@ -18903,6 +18910,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueOneComponentPerFileOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueOneComponentPerFileOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVuePropTypeConstructorOptions": {
 			"type": "object",
 			"properties": {
@@ -24812,6 +24828,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueOneComponentPerFileConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueOneComponentPerFileOptions" }
+			]
+		},
+		"UseVueOneComponentPerFileOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
