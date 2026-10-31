@@ -15,7 +15,8 @@ use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlRoot};
 #[cfg(feature = "html_embeds")]
 use biome_html_syntax::{HtmlComponentName, HtmlTextExpression};
 #[cfg(feature = "module_graph")]
-use biome_module_graph::{ModuleDb, ModuleInfoKind};
+use biome_module_graph::{ModuleDb, ModuleInfoKind, ambient_module_declaring_file};
+use biome_resolver::ResolutionKind;
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, TokenAtOffset};
@@ -171,6 +172,12 @@ fn resolve_import_definition(
     if !module_db.contains(target_path) {
         return None;
     }
+    // A module that a framework declares is a part of its declaring file.
+    let target_path = if resolved.kind() == ResolutionKind::FrameworkModule {
+        ambient_module_declaring_file(target_path)?
+    } else {
+        target_path
+    };
 
     result.store(
         BiomePath::new(target_path),

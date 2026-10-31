@@ -1575,7 +1575,12 @@ impl ResolverDb for WorkspaceDb {
         let modules = directory
             .ancestors()
             .find_map(|directory| framework_modules.get(directory))?;
-        modules.module_path(specifier).cloned()
+        // The declaring file can be removed before the frameworks are
+        // registered again.
+        modules
+            .module_path(specifier)
+            .filter(|path| self.modules.pin().contains_key(path.as_path()))
+            .cloned()
     }
 }
 
