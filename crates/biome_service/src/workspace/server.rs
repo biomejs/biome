@@ -5066,20 +5066,20 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
 
         // The package of a removed manifest no longer has frameworks, and its
         // files use the frameworks of an enclosing package.
-        let Some(project_path) = self.project_get_path(project_key) else {
+        let Some(project_path) = retry_on_pending_write(|| self.project_get_path(project_key))
+        else {
             return;
         };
-        let removed_packages: Vec<_> = self
-            .db_state
-            .fork()
-            .framework_package_paths()
-            .into_iter()
-            .filter(|package_path| {
-                package_path.starts_with(&project_path) && !loaded_packages.contains(package_path)
-            })
-            .collect();
+        let removed_packages: Vec<_> =
+            retry_on_pending_write(|| self.db_state.fork().framework_package_paths())
+                .into_iter()
+                .filter(|package_path| {
+                    package_path.starts_with(&project_path)
+                        && !loaded_packages.contains(package_path)
+                })
+                .collect();
         for package_path in removed_packages {
-            self.db_state.remove_frameworks(&package_path);
+            retry_on_pending_write(|| self.db_state.remove_frameworks(&package_path));
         }
     }
 
@@ -5093,21 +5093,21 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
     fn is_framework_config(&self, path: &Utf8Path) -> bool {
+        let is_config_file = path.file_name().is_some_and(|file_name| {
+            LOADERS.iter().any(|loader| {
+                matches!(
+                    loader.activation(),
+                    Activation::Dependency { config_files } if config_files.contains(&file_name)
+                )
+            })
+        });
         // Loaders read only the configuration files in the folder of a
         // package.
-        let is_in_package = path.parent().is_some_and(|directory| {
-            self.project_layout
-                .get_node_manifest_for_package(directory)
-                .is_some()
-        });
-        is_in_package
-            && path.file_name().is_some_and(|file_name| {
-                LOADERS.iter().any(|loader| {
-                    matches!(
-                        loader.activation(),
-                        Activation::Dependency { config_files } if config_files.contains(&file_name)
-                    )
-                })
+        is_config_file
+            && path.parent().is_some_and(|directory| {
+                self.project_layout
+                    .get_node_manifest_for_package(directory)
+                    .is_some()
             })
     }
 }
