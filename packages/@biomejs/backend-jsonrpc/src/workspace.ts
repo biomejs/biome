@@ -3308,6 +3308,11 @@ export interface Nursery {
 	 */
 	noSvelteAddEventListener?: NoSvelteAddEventListenerConfiguration;
 	/**
+	 * Disallow passing async functions to Svelte stores.
+	 * See https://biomejs.dev/linter/rules/no-svelte-async-store
+	 */
+	noSvelteAsyncStore?: NoSvelteAsyncStoreConfiguration;
+	/**
 	 * Disallow the use of Svelte's {@debug} tag.
 	 * See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags
 	 */
@@ -6719,6 +6724,9 @@ export type NoSubtractionComparisonConfiguration =
 export type NoSvelteAddEventListenerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAddEventListenerOptions;
+export type NoSvelteAsyncStoreConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAsyncStoreOptions;
 export type NoSvelteAtDebugTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtDebugTagsOptions;
@@ -9800,6 +9808,10 @@ export interface RuleWithNoSvelteAddEventListenerOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoSvelteAddEventListenerOptions;
+}
+export interface RuleWithNoSvelteAsyncStoreOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteAsyncStoreOptions;
 }
 export interface RuleWithNoSvelteAtDebugTagsOptions {
 	/**
@@ -13013,6 +13025,7 @@ export interface NoShortTimeValuesOptions {
 export type NoSinglePromiseInPromiseMethodsOptions = {};
 export type NoSubtractionComparisonOptions = {};
 export type NoSvelteAddEventListenerOptions = {};
+export type NoSvelteAsyncStoreOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteBindValueOnCheckableInputsOptions = {};
@@ -15187,6 +15200,7 @@ export type Category =
 	| "lint/nursery/noSubtractionComparison"
 	| "lint/nursery/noSinglePromiseInPromiseMethods"
 	| "lint/nursery/noSvelteAddEventListener"
+	| "lint/nursery/noSvelteAsyncStore"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteBindValueOnCheckableInputs"

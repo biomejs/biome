@@ -306,6 +306,7 @@ pub mod no_substr;
 pub mod no_subtraction_comparison;
 pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_svelte_add_event_listener;
+pub mod no_svelte_async_store;
 pub mod no_svelte_at_debug_tags;
 pub mod no_svelte_at_html_tags;
 pub mod no_svelte_bind_value_on_checkable_inputs;
