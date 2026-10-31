@@ -7670,6 +7670,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedModelDefinitionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedModelDefinitionOptions" }
+			]
+		},
+		"NoVueDeprecatedModelDefinitionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedPropsDefaultThisConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8739,6 +8749,13 @@
 					"description": "Disallow the deprecated Vue $listeners API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-listeners",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedListenersConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedModelDefinition": {
+					"description": "Disallow the deprecated model option in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-model-definition",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedModelDefinitionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14333,6 +14350,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedListenersOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedModelDefinitionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedModelDefinitionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

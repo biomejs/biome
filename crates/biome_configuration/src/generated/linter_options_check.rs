@@ -1862,6 +1862,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_vue_deprecated_listeners::NoVueDeprecatedListenersOptions,
         >(),
     ));
+    result.push(("nursery", "noVueDeprecatedModelDefinition", TypeId::of::<biome_rule_options::no_vue_deprecated_model_definition::NoVueDeprecatedModelDefinitionOptions>()));
     result.push(("nursery", "noVueDeprecatedPropsDefaultThis", TypeId::of::<biome_rule_options::no_vue_deprecated_props_default_this::NoVueDeprecatedPropsDefaultThisOptions>()));
     result.push(("nursery", "noVueDeprecatedRouterLinkTagProp", TypeId::of::<biome_rule_options::no_vue_deprecated_router_link_tag_prop::NoVueDeprecatedRouterLinkTagPropOptions>()));
     result.push(("nursery", "noVueDeprecatedScopeAttribute", TypeId::of::<biome_rule_options::no_vue_deprecated_scope_attribute::NoVueDeprecatedScopeAttributeOptions>()));

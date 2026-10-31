@@ -100,6 +100,7 @@ impl ModelBuilder {
             name: None,
             inherit_attrs: Tri::Unknown,
             render: None,
+            model_option: None,
             decl_open: [OpenReasons::default(); Namespace::COUNT],
             uses_open: [false; Namespace::COUNT],
             macro_options: MacroOptions::empty(),
