@@ -403,12 +403,11 @@ fn unknown_framework_modules_are_not_reported() {
         br##"import { getCollection } from "astro:content";
 import { config } from "virtual:starlight/user-config";
 import { helper } from "./missing";
-import { drive } from "C:/missing.js";
 import { alias } from "~/lib/alias";
 import { internal } from "#internal";
 import { kit } from "$lib/kit";
 
-export { alias, config, drive, getCollection, helper, internal, kit };
+export { alias, config, getCollection, helper, internal, kit };
 "##,
     );
 

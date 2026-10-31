@@ -497,11 +497,24 @@ pub fn find_css_class_definition<'db>(
         result.extend(this_result);
     }
 
-    // 4. Check the CSS files that frameworks apply to every page
+    // 4. Check the CSS files that frameworks apply to every page, and the
+    //    global styles of their components (carry content_offset)
     for step in framework_class_steps(db, *module) {
         let Some(module) = db.module_for_path(&step.css_path) else {
             continue;
         };
+        if let ModuleInfoKind::Html(html_info) = module.kind(db) {
+            for class_def in &html_info.style_classes {
+                if class_def.applicability.is_global() && class_def.name.text() == symbol.name(db) {
+                    result.push((
+                        step.css_path.clone(),
+                        class_def.range,
+                        class_def.content_offset,
+                    ));
+                }
+            }
+            continue;
+        }
         let this_result = search_css_class_transitive(
             db,
             SymbolFromModuleInfo::new(db, symbol.name(db), module),
