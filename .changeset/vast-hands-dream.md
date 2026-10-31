@@ -2,6 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-The rule [`noUnresolvedImports`](https://biomejs.dev/linter/rules/no-unresolved-imports/) now resolves the modules that Astro provides, such as `astro:content` and `astro:assets`, and checks the names imported from them. Biome reads these modules from the type declarations of the installed `astro` package.
-
-The rule also finds the exports of a package whose type declarations describe the package with `declare module "package-name" { ... }`. Previously, importing such an export was reported as an error.
+Added support for the modules that Astro provides to [`noUnresolvedImports`](https://biomejs.dev/linter/rules/no-unresolved-imports/): imports from `astro:content` and `astro:assets` now resolve, and the rule checks the names imported from them. The rule also finds the exports of packages whose type declarations use `declare module "package-name" { ... }`, which it previously reported as missing.
