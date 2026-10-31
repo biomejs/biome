@@ -3458,6 +3458,11 @@ export interface Nursery {
 	 */
 	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
 	/**
+	 * Require Vue components to declare the events they emit.
+	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-emits
+	 */
+	noVueUndeclaredEmits?: NoVueUndeclaredEmitsConfiguration;
+	/**
 	 * Disallow declaring events that a Vue component never emits.
 	 * See https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations
 	 */
@@ -6379,6 +6384,9 @@ export type NoVueSideEffectsInComputedConfiguration =
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
+export type NoVueUndeclaredEmitsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUndeclaredEmitsOptions;
 export type NoVueUnusedEmitDeclarationsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedEmitDeclarationsOptions;
@@ -9245,6 +9253,10 @@ export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
 }
+export interface RuleWithNoVueUndeclaredEmitsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUndeclaredEmitsOptions;
+}
 export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedEmitDeclarationsOptions;
@@ -11921,6 +11933,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	 */
 	globals?: string[];
 }
+export type NoVueUndeclaredEmitsOptions = {};
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueUnusedRefsOptions = {};
 export type NoVueVForTemplateKeyOnChildOptions = {};
@@ -13742,6 +13755,7 @@ export type Category =
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
+	| "lint/nursery/noVueUndeclaredEmits"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"
 	| "lint/nursery/noVueVForTemplateKeyOnChild"

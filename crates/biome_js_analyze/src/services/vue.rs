@@ -97,6 +97,11 @@ impl VueSemanticService {
         })
     }
 
+    /// The model of the whole file the analyzed tree belongs to.
+    pub(crate) fn model(&self) -> &VueSemanticModel {
+        &self.model
+    }
+
     /// Returns `true` when `symbol` is declared in the analyzed tree.
     fn declares(&self, symbol: &Symbol) -> bool {
         symbol.snippet().map(|snippet| snippet.id()) == self.snippet
