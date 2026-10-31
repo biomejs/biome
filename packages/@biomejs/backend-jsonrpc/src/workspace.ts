@@ -3113,6 +3113,11 @@ export interface Nursery {
 	 */
 	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
 	/**
+	 * Disallow checking a map for one key and then using a different key.
+	 * See https://biomejs.dev/linter/rules/no-mismatched-map-key
+	 */
+	noMismatchedMapKey?: NoMismatchedMapKeyConfiguration;
+	/**
 	 * Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
 	 * See https://biomejs.dev/linter/rules/no-misplaced-list-elements
 	 */
@@ -6517,6 +6522,9 @@ export type NoMeaninglessVoidOperatorConfiguration =
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
+export type NoMismatchedMapKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMismatchedMapKeyOptions;
 export type NoMisplacedListElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisplacedListElementsOptions;
@@ -9456,6 +9464,10 @@ export interface RuleWithNoMeaninglessVoidOperatorOptions {
 export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
+}
+export interface RuleWithNoMismatchedMapKeyOptions {
+	level: RulePlainConfiguration;
+	options?: NoMismatchedMapKeyOptions;
 }
 export interface RuleWithNoMisplacedListElementsOptions {
 	level: RulePlainConfiguration;
@@ -12751,6 +12763,7 @@ export interface NoMapSpreadOptions {
 }
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
+export type NoMismatchedMapKeyOptions = {};
 export type NoMisplacedListElementsOptions = {};
 export type NoMissingScssInterpolationOptions = {};
 export type NoMissingThrowOptions = {};
@@ -14901,6 +14914,7 @@ export type Category =
 	| "lint/nursery/noMapSpread"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noMismatchedMapKey"
 	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingScssInterpolation"
