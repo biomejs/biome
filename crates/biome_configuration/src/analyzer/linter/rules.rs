@@ -719,6 +719,7 @@ pub enum RuleName {
     UseTailwindSortedClasses,
     UseTailwindStaticClassStrings,
     UseTailwindVariablesShorthand,
+    UseTanstackQueryInfiniteQueryPropertyOrder,
     UseTanstackQueryStableQueryClient,
     UseTemplate,
     UseTestHooksInOrder,
@@ -1434,6 +1435,9 @@ impl RuleName {
             Self::UseTailwindSortedClasses => "useTailwindSortedClasses",
             Self::UseTailwindStaticClassStrings => "useTailwindStaticClassStrings",
             Self::UseTailwindVariablesShorthand => "useTailwindVariablesShorthand",
+            Self::UseTanstackQueryInfiniteQueryPropertyOrder => {
+                "useTanstackQueryInfiniteQueryPropertyOrder"
+            }
             Self::UseTanstackQueryStableQueryClient => "useTanstackQueryStableQueryClient",
             Self::UseTemplate => "useTemplate",
             Self::UseTestHooksInOrder => "useTestHooksInOrder",
@@ -2145,6 +2149,7 @@ impl RuleName {
             Self::UseTailwindSortedClasses => RuleGroup::Nursery,
             Self::UseTailwindStaticClassStrings => RuleGroup::Nursery,
             Self::UseTailwindVariablesShorthand => RuleGroup::Nursery,
+            Self::UseTanstackQueryInfiniteQueryPropertyOrder => RuleGroup::Nursery,
             Self::UseTanstackQueryStableQueryClient => RuleGroup::Nursery,
             Self::UseTemplate => RuleGroup::Style,
             Self::UseTestHooksInOrder => RuleGroup::Style,
@@ -2865,6 +2870,9 @@ impl std::str::FromStr for RuleName {
             "useTailwindSortedClasses" => Ok(Self::UseTailwindSortedClasses),
             "useTailwindStaticClassStrings" => Ok(Self::UseTailwindStaticClassStrings),
             "useTailwindVariablesShorthand" => Ok(Self::UseTailwindVariablesShorthand),
+            "useTanstackQueryInfiniteQueryPropertyOrder" => {
+                Ok(Self::UseTanstackQueryInfiniteQueryPropertyOrder)
+            }
             "useTanstackQueryStableQueryClient" => Ok(Self::UseTanstackQueryStableQueryClient),
             "useTemplate" => Ok(Self::UseTemplate),
             "useTestHooksInOrder" => Ok(Self::UseTestHooksInOrder),
