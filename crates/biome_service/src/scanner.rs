@@ -344,6 +344,35 @@ impl Scanner {
         })
     }
 
+    /// Runs the framework loaders of the project `project_key` again, and
+    /// indexes the files that they visit and the dependencies of these files.
+    ///
+    /// Use this when a file that the loaders read changes, such as the
+    /// configuration of a framework or a manifest.
+    pub(crate) fn reindex_framework_files<W: WorkspaceScannerBridge>(
+        &self,
+        workspace: &W,
+        project_key: ProjectKey,
+        project_path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        self.index_with_context(workspace, project_key, IndexTrigger::Update, true, |ctx| {
+            ctx.workspace.index_framework_files(project_key, &|paths| {
+                ctx.index_files_in_parallel(paths);
+            });
+            let dependencies = mem::take(&mut ctx.dependencies)
+                .into_inner()
+                .unwrap()
+                .into_iter()
+                .collect();
+            scan_dependencies(project_path, dependencies, ctx).1
+        })
+        .inspect(|_| {
+            // Files were indexed before the frameworks were recorded, so the
+            // clients refresh their diagnostics again.
+            workspace.notify(ServiceNotification::IndexUpdated);
+        })
+    }
+
     /// Runs `index` with the context of a scan of the project, and returns the
     /// diagnostics it reported. The folders that `index` returns are watched
     /// when `watch` is set.

@@ -185,6 +185,17 @@ fn scanned_lsp_workspace(
     fs: &Arc<MemoryFileSystem>,
     project_path: &str,
 ) -> (LocalWorkspace, ProjectKey) {
+    scanned_lsp_workspace_with_configuration(fs, project_path, Configuration::default())
+}
+
+/// Like [scanned_lsp_workspace], with `configuration` as the root
+/// configuration.
+#[cfg(feature = "module_graph")]
+fn scanned_lsp_workspace_with_configuration(
+    fs: &Arc<MemoryFileSystem>,
+    project_path: &str,
+    configuration: Configuration,
+) -> (LocalWorkspace, ProjectKey) {
     let (watcher_tx, _) = crossbeam::channel::unbounded();
     let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
     let mut workspace = LocalWorkspace::new(
@@ -205,7 +216,7 @@ fn scanned_lsp_workspace(
         .update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: Some(BiomePath::new(project_path)),
-            configuration: Configuration::default(),
+            configuration,
             extended_configurations: vec![],
             module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
         })
@@ -7599,6 +7610,220 @@ declare module "second" { export const second: number; }"#,
 
 #[cfg(feature = "module_graph")]
 #[test]
+fn framework_modules_follow_manifest_changes() {
+    const MANIFEST: &str = "/project/package.json";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        (MANIFEST, "{}"),
+        (
+            "/project/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "5.0.0" }"#,
+        ),
+        (
+            "/project/node_modules/astro/client.d.ts",
+            r#"declare module "astro:content" { export const getCollection: () => void; }"#,
+        ),
+        (
+            "/project/src/index.ts",
+            r#"import { getCollection } from "astro:content";"#,
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "astro:content"),
+        None
+    );
+
+    fs.insert(
+        MANIFEST.into(),
+        r#"{ "dependencies": { "astro": "^5.0.0" } }"#,
+    );
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(MANIFEST))
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "astro:content"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/astro/client.d.ts#0"
+        ))
+    );
+
+    fs.insert(MANIFEST.into(), "{}");
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(MANIFEST))
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "astro:content"),
+        None
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn removed_packages_lose_their_framework_modules() {
+    const MANIFEST: &str = "/project/docs/package.json";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        (MANIFEST, r#"{ "dependencies": { "astro": "^5.0.0" } }"#),
+        (
+            "/project/docs/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "5.0.0" }"#,
+        ),
+        (
+            "/project/docs/node_modules/astro/client.d.ts",
+            r#"declare module "astro:content" { export const getCollection: () => void; }"#,
+        ),
+        (
+            "/project/docs/src/index.ts",
+            r#"import { getCollection } from "astro:content";"#,
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert!(resolved_import(&workspace, "/project/docs/src/index.ts", "astro:content").is_some());
+
+    fs.remove(Utf8Path::new(MANIFEST));
+    watcher(&workspace)
+        .unload_file(Utf8Path::new(MANIFEST), project_key)
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, "/project/docs/src/index.ts", "astro:content"),
+        None
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn framework_stylesheets_follow_configuration_changes() {
+    const CONFIG: &str = "/project/astro.config.mjs";
+    const STYLESHEET: &str = "/project/src/custom.css";
+    let config = |custom_css: &str| {
+        format!(
+            "import starlight from \"@astrojs/starlight\";\nexport default {{ integrations: [starlight({{ customCss: [{custom_css}] }})] }};\n"
+        )
+    };
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        (
+            "/project/package.json",
+            r#"{ "dependencies": { "astro": "^5.0.0", "@astrojs/starlight": "^0.30.0" } }"#,
+        ),
+        (
+            "/project/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "5.0.0" }"#,
+        ),
+        (
+            "/project/node_modules/@astrojs/starlight/package.json",
+            r#"{ "name": "@astrojs/starlight", "version": "0.30.0" }"#,
+        ),
+        (STYLESHEET, ".custom {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    fs.insert(CONFIG.into(), config(""));
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    let has_stylesheet = || {
+        workspace
+            .get_db()
+            .framework_scope(Utf8Path::new(STYLESHEET))
+            .is_some_and(|scope| scope.stylesheets.iter().any(|path| path == STYLESHEET))
+    };
+    assert!(!has_stylesheet());
+
+    fs.insert(CONFIG.into(), config("\"./src/custom.css\""));
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(CONFIG))
+        .unwrap();
+    assert!(has_stylesheet());
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn framework_stylesheets_follow_removed_configurations() {
+    const CONFIG: &str = "/project/astro.config.mjs";
+    const STYLESHEET: &str = "/project/src/custom.css";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        (
+            "/project/package.json",
+            r#"{ "dependencies": { "astro": "^5.0.0", "@astrojs/starlight": "^0.30.0" } }"#,
+        ),
+        (
+            "/project/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "5.0.0" }"#,
+        ),
+        (
+            "/project/node_modules/@astrojs/starlight/package.json",
+            r#"{ "name": "@astrojs/starlight", "version": "0.30.0" }"#,
+        ),
+        (
+            CONFIG,
+            "import starlight from \"@astrojs/starlight\";\nexport default { integrations: [starlight({ customCss: [\"./src/custom.css\"] })] };\n",
+        ),
+        (STYLESHEET, ".custom {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    let has_stylesheet = || {
+        workspace
+            .get_db()
+            .framework_scope(Utf8Path::new(STYLESHEET))
+            .is_some_and(|scope| scope.stylesheets.iter().any(|path| path == STYLESHEET))
+    };
+    assert!(has_stylesheet());
+
+    fs.remove(Utf8Path::new(CONFIG));
+    watcher(&workspace)
+        .unload_file(Utf8Path::new(CONFIG), project_key)
+        .unwrap();
+    assert!(!has_stylesheet());
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn new_package_folders_get_their_framework_modules() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), "{}");
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+
+    for (path, content) in [
+        (
+            "/project/docs/package.json",
+            r#"{ "dependencies": { "astro": "^5.0.0" } }"#,
+        ),
+        (
+            "/project/docs/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "5.0.0" }"#,
+        ),
+        (
+            "/project/docs/node_modules/astro/client.d.ts",
+            r#"declare module "astro:content" { export const getCollection: () => void; }"#,
+        ),
+        (
+            "/project/docs/src/index.ts",
+            r#"import { getCollection } from "astro:content";"#,
+        ),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    watcher(&workspace)
+        .index_folder(Utf8Path::new("/project/docs"))
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, "/project/docs/src/index.ts", "astro:content"),
+        Some(Utf8PathBuf::from(
+            "/project/docs/node_modules/astro/client.d.ts#0"
+        ))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
 fn modules_that_frameworks_declare_disappear_with_their_declaring_file() {
     const DECLARATIONS: &str = "/project/node_modules/astro/client.d.ts";
     let fs = Arc::new(MemoryFileSystem::default());
@@ -7633,4 +7858,54 @@ fn modules_that_frameworks_declare_disappear_with_their_declaring_file() {
         resolved_import(&workspace, "/project/src/index.ts", "astro:content"),
         None
     );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn framework_stylesheets_follow_removed_ignored_configurations() {
+    const CONFIG: &str = "/project/astro.config.mjs";
+    const STYLESHEET: &str = "/project/src/custom.css";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        (
+            "/project/package.json",
+            r#"{ "dependencies": { "astro": "^5.0.0", "@astrojs/starlight": "^0.30.0" } }"#,
+        ),
+        (
+            "/project/node_modules/astro/package.json",
+            r#"{ "name": "astro", "version": "5.0.0" }"#,
+        ),
+        (
+            "/project/node_modules/@astrojs/starlight/package.json",
+            r#"{ "name": "@astrojs/starlight", "version": "0.30.0" }"#,
+        ),
+        (
+            CONFIG,
+            "import starlight from \"@astrojs/starlight\";\nexport default { integrations: [starlight({ customCss: [\"./src/custom.css\"] })] };\n",
+        ),
+        (STYLESHEET, ".custom {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let configuration = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        r#"{ "files": { "includes": ["src/**"] } }"#,
+        biome_json_parser::JsonParserOptions::default(),
+        "",
+    )
+    .into_deserialized()
+    .unwrap();
+    let (workspace, _) = scanned_lsp_workspace_with_configuration(&fs, "/project", configuration);
+    let has_stylesheet = || {
+        workspace
+            .get_db()
+            .framework_scope(Utf8Path::new(STYLESHEET))
+            .is_some_and(|scope| scope.stylesheets.iter().any(|path| path == STYLESHEET))
+    };
+    assert!(has_stylesheet());
+
+    fs.remove(Utf8Path::new(CONFIG));
+    watcher(&workspace)
+        .reload_frameworks_for_ignored_config(Utf8Path::new(CONFIG))
+        .unwrap();
+    assert!(!has_stylesheet());
 }
