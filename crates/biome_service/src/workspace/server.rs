@@ -8,6 +8,11 @@ use crate::db::{DbReadGuard, DbState, ViewId, WorkspaceDb};
 use crate::diagnostics::{
     FileTooLarge, NoIgnoreFileFound, TailwindStylesheetNotFound, VcsDiagnostic,
 };
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use crate::diagnostics::{
+    UnknownFrameworkModules, UnknownFrameworkModulesAdvice, UnknownFrameworkStylesheets,
+    UnknownFrameworkStylesheetsAdvice,
+};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
@@ -2470,11 +2475,70 @@ impl WorkspaceServerWithDb<'_> {
                 let manifest = self
                     .project_layout
                     .get_node_manifest_for_package(&package_path)?;
-                let contributions =
+                #[cfg_attr(not(feature = "lang_css"), expect(unused_mut))]
+                let mut contributions =
                     biome_frameworks::load_frameworks(&host, LOADERS, &package_path, &manifest);
+                #[cfg(feature = "lang_css")]
+                self.add_css_globals(&db, &host, project_key, &package_path, &mut contributions);
                 Some((package_path, contributions))
             })
             .collect()
+    }
+
+    /// Adds the stylesheets that the `css.globals` option of the configuration
+    /// of the package in `package_path` names to `contributions`.
+    ///
+    /// Each entry is a path or a glob pattern relative to the folder of the
+    /// configuration. Any entry makes the user authoritative for the
+    /// stylesheets that apply to every page, so the styles of the package are
+    /// no longer incomplete.
+    #[cfg(all(feature = "module_graph", feature = "lang_js", feature = "lang_css"))]
+    fn add_css_globals(
+        &self,
+        db: &WorkspaceDb,
+        host: &WorkspaceLoaderHost,
+        project_key: ProjectKey,
+        package_path: &Utf8Path,
+        contributions: &mut FrameworkContributions,
+    ) {
+        let Some((configuration_path, settings, _)) = self.project_get_settings_query(
+            db,
+            project_key,
+            &package_path.join("package.json"),
+            None,
+        ) else {
+            return;
+        };
+        let Some(globals) = settings
+            .languages
+            .css
+            .globals
+            .as_ref()
+            .filter(|globals| !globals.is_empty())
+        else {
+            return;
+        };
+        let mut entries: Vec<_> = globals.iter().collect();
+        entries.sort_unstable();
+        for entry in entries {
+            if entry.contains(['*', '?', '[', '{']) {
+                if let Ok(glob) = entry.parse::<biome_glob::Glob>() {
+                    contributions
+                        .visits
+                        .extend(biome_frameworks::LoaderHost::glob(
+                            host,
+                            &configuration_path,
+                            &glob,
+                        ));
+                }
+            } else {
+                let path = normalize_path(&configuration_path.join(entry.as_ref()));
+                if self.fs.path_is_file(&path) {
+                    contributions.visits.insert(path);
+                }
+            }
+        }
+        contributions.incomplete.remove(&Facet::Styles);
     }
 
     /// Records what the frameworks of the package in `package_path` inject.
@@ -2493,7 +2557,7 @@ impl WorkspaceServerWithDb<'_> {
         package_path: Utf8PathBuf,
         files: &[Utf8PathBuf],
         contributions: &FrameworkContributions,
-    ) {
+    ) -> Vec<Error> {
         let mut modules = FrameworkModules::default();
         let mut scope = FrameworkScope {
             package_path: package_path.clone(),
@@ -2538,12 +2602,27 @@ impl WorkspaceServerWithDb<'_> {
                 (declaration.name.clone(), definition)
             })
             .collect();
+        let manifest_path = package_path.join("package.json").to_string();
+        let mut diagnostics = Vec::new();
+        if scope.has_unknown_styles {
+            diagnostics.push(Error::from(UnknownFrameworkStylesheets {
+                manifest_path: manifest_path.clone(),
+                advice: UnknownFrameworkStylesheetsAdvice,
+            }));
+        }
+        if scope.has_unknown_modules {
+            diagnostics.push(Error::from(UnknownFrameworkModules {
+                manifest_path,
+                advice: UnknownFrameworkModulesAdvice,
+            }));
+        }
         let frameworks = PackageFrameworks {
             modules,
             scope: Arc::new(scope),
         };
         self.db_state
             .set_frameworks(package_path, Arc::new(frameworks));
+        diagnostics
     }
 
     // #region DATABASE OPERATIONS
@@ -5020,7 +5099,12 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-    fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
+    fn index_framework_files(
+        &self,
+        project_key: ProjectKey,
+        index: &dyn Fn(Vec<Utf8PathBuf>),
+    ) -> Vec<Error> {
+        let mut diagnostics = Vec::new();
         // Outside the epoch of a scan, such as when the watcher reports a
         // change, a concurrent client update can cancel the database reads.
         let loaded = retry_on_pending_write(|| self.load_package_frameworks(project_key));
@@ -5059,16 +5143,16 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                 files.append(&mut pending);
                 pending = references;
             }
-            retry_on_pending_write(|| {
-                self.register_frameworks(package_path.clone(), &files, &contributions);
-            });
+            diagnostics.extend(retry_on_pending_write(|| {
+                self.register_frameworks(package_path.clone(), &files, &contributions)
+            }));
         }
 
         // The package of a removed manifest no longer has frameworks, and its
         // files use the frameworks of an enclosing package.
         let Some(project_path) = retry_on_pending_write(|| self.project_get_path(project_key))
         else {
-            return;
+            return diagnostics;
         };
         let removed_packages: Vec<_> =
             retry_on_pending_write(|| self.db_state.fork().framework_package_paths())
@@ -5081,6 +5165,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         for package_path in removed_packages {
             retry_on_pending_write(|| self.db_state.remove_frameworks(&package_path));
         }
+        diagnostics
     }
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
@@ -5206,9 +5291,13 @@ impl WorkspaceScannerBridge for LocalWorkspace {
             .index_new_module_dependencies(project_key)
     }
 
-    fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
+    fn index_framework_files(
+        &self,
+        project_key: ProjectKey,
+        index: &dyn Fn(Vec<Utf8PathBuf>),
+    ) -> Vec<Error> {
         self.as_workspace()
-            .index_framework_files(project_key, index);
+            .index_framework_files(project_key, index)
     }
 
     fn is_framework_config(&self, path: &Utf8Path) -> bool {

@@ -491,3 +491,88 @@ export { getCollection, helper, Image };
         result,
     ));
 }
+
+#[test]
+fn css_globals_enable_css_rules_when_framework_stylesheets_are_unknown() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    insert_starlight_site(
+        &fs,
+        br#"{
+    "html": { "experimentalFullSupportEnabled": true },
+    "css": { "globals": ["site/src/styles/custom.css"] },
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noUndeclaredClasses": "error",
+                "noUndeclaredCustomProperties": "error",
+                "noUnusedClasses": "error"
+            }
+        }
+    }
+}
+"#,
+        br#"import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+
+function stylesheets() {
+	return ["./src/styles/custom.css"];
+}
+
+export default defineConfig({
+	integrations: [starlight({ customCss: stylesheets() })],
+});
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            ["lint"]
+                .into_iter()
+                .chain(STARLIGHT_SITE_FILES)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_enable_css_rules_when_framework_stylesheets_are_unknown",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn css_globals_are_not_supported_in_overrides() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        br#"{
+    "overrides": [{ "includes": ["**/*.css"], "css": { "globals": ["theme.css"] } }]
+}
+"#,
+    );
+    let file = Utf8Path::new("theme.css");
+    fs.insert(file.into(), b".theme { color: red; }\n");
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_are_not_supported_in_overrides",
+        fs,
+        console,
+        result,
+    ));
+}

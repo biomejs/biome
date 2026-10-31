@@ -163,5 +163,17 @@ import "../styles/page.css";
 # Emitted Messages
 
 ```block
+site/package.json project/frameworks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Biome can't find all the stylesheets that the frameworks of this package add to every page.
+  
+  i The rules noUndeclaredClasses, noUndeclaredCustomProperties and noUnusedClasses don't report anything in this package. This happens when a framework isn't installed, or when its configuration computes the stylesheets, for example with a function.
+  
+  i List these stylesheets in the css.globals option of the Biome configuration to enable the rules.
+  
+
+```
+
+```block
 Checked 4 files in <TIME>. No fixes applied.
 ```
