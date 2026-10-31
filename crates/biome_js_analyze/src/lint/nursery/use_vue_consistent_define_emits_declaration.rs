@@ -148,7 +148,7 @@ declare_lint_rule! {
     /// - To enforce a declaration style for `defineProps`, see [`useVueConsistentDefinePropsDeclaration`](https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration/).
     ///
     pub UseVueConsistentDefineEmitsDeclaration {
-        version: "next",
+        version: "2.6.5",
         name: "useVueConsistentDefineEmitsDeclaration",
         language: "ts",
         recommended: false,
