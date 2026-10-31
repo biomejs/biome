@@ -1123,3 +1123,34 @@ pub struct UnmatchedCssGlobal {
 pub struct NegatedCssGlobal {
     pub entry: String,
 }
+
+/// An entry of `css.globals` is a glob pattern that isn't valid.
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project/frameworks",
+    severity = Warning,
+    message(
+        message("The entry "<Emphasis>{self.entry}</Emphasis>" of "<Emphasis>"css.globals"</Emphasis>" isn't a valid glob pattern: "{self.error}),
+        description = "The entry {entry} of css.globals isn't a valid glob pattern: {error}",
+    ),
+)]
+pub struct InvalidCssGlobal {
+    pub entry: String,
+    pub error: String,
+}
+
+/// A stylesheet that `css.globals` names can't be read, for example because
+/// it's larger than `files.maxSize`.
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project/frameworks",
+    severity = Warning,
+    message(
+        message("Biome can't read the stylesheet "<Emphasis>{self.path}</Emphasis>" that "<Emphasis>"css.globals"</Emphasis>" names, so the rules that check classes and custom properties don't report anything in this package."),
+        description = "Biome can't read the stylesheet {path} that css.globals names, so the rules that check classes and custom properties don't report anything in this package.",
+    ),
+)]
+pub struct UnreadableCssGlobal {
+    #[location(resource)]
+    pub path: String,
+}
