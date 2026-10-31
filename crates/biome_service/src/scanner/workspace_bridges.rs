@@ -140,6 +140,11 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     fn is_framework_config(&self, _path: &Utf8Path) -> bool {
         false
     }
+
+    /// Returns whether the folder at `path` contains a package, or is one.
+    fn contains_package(&self, _path: &Utf8Path) -> bool {
+        false
+    }
 }
 
 /// Trait used to give access to workspace functionality required by the
@@ -221,6 +226,16 @@ pub trait WorkspaceWatcherBridge {
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
+    /// Runs the framework loaders again when `path` is the configuration file
+    /// of a framework that the settings ignore. The loaders read such a file
+    /// like a scan does, although the watcher doesn't index it.
+    fn reload_frameworks_for_ignored_config(
+        &self,
+        _path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        Ok(Vec::new())
+    }
+
     /// Notifies service notification listeners that the watcher has stopped.
     fn notify_stopped(&self);
 }
@@ -243,10 +258,15 @@ impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
     }
 
     /// Returns whether the change at `path` affects what the framework
-    /// loaders read: a manifest, when `manifest_changed` is set, or the
-    /// configuration file of a framework.
+    /// loaders read: the configuration file of a framework, or a manifest,
+    /// when `manifest_changed` is set.
+    ///
+    /// The loaders read `package.json` manifests, but not the other manifests
+    /// of the resolver, such as `tsconfig.json`.
     fn affects_frameworks(&self, path: &Utf8Path, manifest_changed: bool) -> bool {
-        manifest_changed || self.workspace.is_framework_config(path)
+        let is_package_or_folder =
+            path.file_name() == Some("package.json") || path.extension().is_none();
+        (manifest_changed && is_package_or_folder) || self.workspace.is_framework_config(path)
     }
 
     /// Runs the framework loaders of the project again when `affected` is
@@ -369,9 +389,11 @@ where
         if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
-        diagnostics.extend(
-            self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
-        );
+        // A new package, such as a renamed package folder, has no manifest
+        // that the resolver knew before the folder was indexed.
+        let affects_frameworks = self.affects_frameworks(path, manifest_changed)
+            || self.workspace.contains_package(path);
+        diagnostics.extend(self.reload_frameworks(project_key, affects_frameworks)?);
         Ok(diagnostics)
     }
 
@@ -417,6 +439,22 @@ where
             self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
         );
         Ok(diagnostics)
+    }
+
+    fn reload_frameworks_for_ignored_config(
+        &self,
+        path: &Utf8Path,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if !self.workspace.is_framework_config(path) {
+            return Ok(Vec::new());
+        }
+        let Some((project_key, scan_kind)) = self.find_project_with_scan_kind_for_path(path) else {
+            return Ok(Vec::new());
+        };
+        if !WorkspaceWatcherBridge::is_ignored(self, project_key, &scan_kind, path, None)? {
+            return Ok(Vec::new());
+        }
+        self.reload_frameworks(project_key, true)
     }
 
     #[inline]
