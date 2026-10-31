@@ -292,6 +292,10 @@ fn unignored_else_range(
 }
 
 fn is_ignored(at_rule: &CssAtRule, options: &NoExcessiveNestingDepthOptions) -> bool {
+    // Reading the name walks down the tree, which allocates; skip it when nothing is ignored.
+    if options.ignore_at_rules.is_empty() {
+        return false;
+    }
     at_rule
         .rule()
         .ok()
