@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOverloadScopes.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function before(value: string): string;
+const separator = 1;
+function before(value: string) { return value; }
+
+function after(value: string) { return value; }
+function after(value: string): string;
+
+function first(value: string): string;
+function second(value: string): string;
+function first(value: string) { return value; }
+function second(value: string) { return value; }
+
+export function exportedAfter(value: string) { return value; }
+export const exportSeparator = 1;
+export function exportedAfter(value: string): string;
+
+namespace Outer {
+    function inner(value: string) { return value; }
+    function inner(value: string): string;
+    function innerOther(value: string): string;
+    function innerOther(value: string) { return value; }
+}
+
+switch (value) {
+    case 0:
+        function switchAfter(value: string) { return value; }
+        function switchOther(value: string) { return value; }
+    case 1:
+        separator;
+    default:
+        function switchAfter(value: string): string;
+        function switchOther(value: string): string;
+}
+
+```

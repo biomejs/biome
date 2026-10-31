@@ -1,20 +1,25 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, ServiceBag,
+    Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsSwitchClause, JsArrowFunctionExpression,
     JsComputedMemberName, JsConstructorClassMember, JsExport, JsFunctionDeclaration,
-    JsGetterClassMember, JsGetterObjectMember, JsInitializerClause, JsMethodClassMember,
-    JsMethodModifierList, JsMethodObjectMember, JsPropertyClassMember, JsSetterClassMember,
-    JsSetterObjectMember, JsStatementList, JsStaticInitializationBlockClassMember,
-    JsSuperExpression, JsThisExpression, JsVariableDeclarator, TsDeclareFunctionDeclaration,
-    unescape_js_string,
+    JsGetterClassMember, JsGetterObjectMember, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodModifierList, JsMethodObjectMember, JsPropertyClassMember,
+    JsSetterClassMember, JsSetterObjectMember, JsStatementList,
+    JsStaticInitializationBlockClassMember, JsSuperExpression, JsThisExpression,
+    JsVariableDeclarator, TsDeclareFunctionDeclaration, unescape_js_string,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent, declare_node_union};
+use biome_rowan::{
+    AstNode, Language, SyntaxKindSet, SyntaxNode, Text, TextRange, WalkEvent,
+    declare_node_union,
+};
 use biome_rule_options::use_consistent_function_style::{
     FunctionStyle, UseConsistentFunctionStyleOptions,
 };
+use rustc_hash::{FxHashMap, FxHashSet};
 
 declare_lint_rule! {
     /// Enforce consistent use of function declarations or expressions assigned to variables.
@@ -157,12 +162,8 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    pub AnyFunctionStyle = JsFunctionDeclaration | JsVariableDeclarator
-}
-
 impl Rule for UseConsistentFunctionStyle {
-    type Query = Ast<AnyFunctionStyle>;
+    type Query = FunctionStyleQuery;
     type State = (FunctionStyle, TextRange);
     type Signals = Option<Self::State>;
     type Options = UseConsistentFunctionStyleOptions;
@@ -171,16 +172,16 @@ impl Rule for UseConsistentFunctionStyle {
         let options = ctx.options();
         let style = options.style();
         match ctx.query() {
-            AnyFunctionStyle::JsFunctionDeclaration(function) => {
-                if style == FunctionStyle::Declaration
-                    || (ctx.source_type::<JsFileSource>().is_typescript()
-                        && is_overloaded(function).unwrap_or(false))
-                {
+            FunctionStyleQuery::Function {
+                function,
+                is_overloaded,
+            } => {
+                if style == FunctionStyle::Declaration || *is_overloaded {
                     return None;
                 }
                 Some((FunctionStyle::Expression, function.id().ok()?.range()))
             }
-            AnyFunctionStyle::JsVariableDeclarator(variable) => {
+            FunctionStyleQuery::Variable(variable) => {
                 if style == FunctionStyle::Expression || variable.variable_annotation().is_some() {
                     return None;
                 }
@@ -242,56 +243,159 @@ impl Rule for UseConsistentFunctionStyle {
     }
 }
 
-/// Checks for a TypeScript overload signature with the same name in the surrounding scope.
-/// Returns `None` if the function's name or surrounding syntax is unavailable.
-fn is_overloaded(function: &JsFunctionDeclaration) -> Option<bool> {
-    let name = function
-        .id()
-        .ok()?
-        .as_js_identifier_binding()?
-        .name_token()
-        .ok()?;
-    let name = unescape_js_string(name.token_text_trimmed());
-    let parent = function.syntax().parent()?;
-    // Exported signatures and implementations each have a JsExport wrapper.
-    // Search the enclosing module item list and unwrap exports before comparing signatures.
-    let is_export = JsExport::can_cast(parent.kind());
-    let list = if is_export { parent.parent()? } else { parent };
-    let matches_signature = |sibling| {
-        let declaration = TsDeclareFunctionDeclaration::cast(sibling)?;
-        let id = declaration.id().ok()?;
-        let token = id.as_js_identifier_binding()?.name_token().ok()?;
-        Some(unescape_js_string(token.token_text_trimmed()) == name)
-    };
-    // All switch clauses share a scope, so a signature can occur in another clause.
-    if let Some(clause) = list.parent().and_then(AnyJsSwitchClause::cast) {
-        return Some(
-            clause
-                .syntax()
-                .parent()?
-                .children()
-                .filter_map(AnyJsSwitchClause::cast)
-                .any(|clause| {
-                    clause.consequent().iter().any(|statement| {
-                        matches_signature(statement.into_syntax()).unwrap_or(false)
-                    })
-                }),
-        );
+/// A function declaration or variable declarator checked by the rule.
+#[derive(Clone)]
+pub enum FunctionStyleQuery {
+    Function {
+        function: JsFunctionDeclaration,
+        /// Whether a TypeScript overload signature with the same name exists in
+        /// the surrounding scope. Always `false` outside TypeScript files and with the
+        /// declaration style.
+        is_overloaded: bool,
+    },
+    Variable(JsVariableDeclarator),
+}
+
+impl QueryMatch for FunctionStyleQuery {
+    fn text_range(&self) -> TextRange {
+        match self {
+            Self::Function { function, .. } => function.syntax().text_trimmed_range(),
+            Self::Variable(variable) => variable.syntax().text_trimmed_range(),
+        }
     }
-    Some(list.children().any(|sibling| {
-        let sibling = if is_export {
-            let Some(export) = JsExport::cast(sibling) else {
-                return false;
-            };
-            let Ok(clause) = export.export_clause() else {
-                return false;
-            };
-            clause.into_syntax()
-        } else {
-            sibling
+}
+
+impl Queryable for FunctionStyleQuery {
+    type Input = Self;
+    type Output = Self;
+    type Language = JsLanguage;
+    type Services = ();
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        _: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(Phases::Syntax, FunctionStyleVisitor::default);
+    }
+
+    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
+        query.clone()
+    }
+}
+
+/// Emits a [FunctionStyleQuery] on entering each function declaration and variable declarator.
+///
+/// Overload signatures may occur anywhere in the scope of a function declaration, including
+/// after it, so each scope's signature names are collected once, on its first function
+/// declaration, instead of rescanning the scope for every declaration it contains.
+#[derive(Default)]
+struct FunctionStyleVisitor {
+    /// Unescaped names of the overload signatures in a scope, keyed by the scope node and
+    /// whether the signatures are exported.
+    signatures: FxHashMap<(SyntaxNode<JsLanguage>, bool), FxHashSet<Text>>,
+}
+
+impl Visitor for FunctionStyleVisitor {
+    type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(JsFunctionDeclaration::KIND_SET.union(JsVariableDeclarator::KIND_SET))
+    }
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        mut ctx: VisitorContext<Self::Language>,
+    ) {
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
-        matches_signature(sibling).unwrap_or(false)
-    }))
+        if let Some(function) = JsFunctionDeclaration::cast_ref(node) {
+            let is_typescript = ctx
+                .services
+                .get_service::<JsFileSource>()
+                .is_some_and(JsFileSource::is_typescript);
+            // The declaration style never reports function declarations, so it doesn't need
+            // the overload signatures.
+            let requires_expressions = ctx
+                .options
+                .rule_options::<UseConsistentFunctionStyle>()
+                .unwrap_or_default()
+                .style()
+                == FunctionStyle::Expression;
+            let is_overloaded = is_typescript
+                && requires_expressions
+                && self.is_overloaded(&function).unwrap_or(false);
+            ctx.match_query(FunctionStyleQuery::Function {
+                function,
+                is_overloaded,
+            });
+        } else if let Some(variable) = JsVariableDeclarator::cast_ref(node) {
+            ctx.match_query(FunctionStyleQuery::Variable(variable));
+        }
+    }
+}
+
+impl FunctionStyleVisitor {
+    /// Checks for a TypeScript overload signature with the same name in the surrounding scope.
+    /// Returns `None` if the function's name or surrounding syntax is unavailable.
+    fn is_overloaded(&mut self, function: &JsFunctionDeclaration) -> Option<bool> {
+        let name = function
+            .id()
+            .ok()?
+            .as_js_identifier_binding()?
+            .name_token()
+            .ok()?;
+        let name = unescape_js_string(name.token_text_trimmed());
+        let parent = function.syntax().parent()?;
+        // Exported signatures and implementations each have a JsExport wrapper.
+        // Search the enclosing module item list and unwrap exports before comparing signatures.
+        let is_export = JsExport::can_cast(parent.kind());
+        let list = if is_export { parent.parent()? } else { parent };
+        // All switch clauses share a scope, so a signature can occur in another clause.
+        let switch_clause = list.parent().and_then(AnyJsSwitchClause::cast);
+        let scope = match &switch_clause {
+            Some(clause) => clause.syntax().parent()?,
+            None => list,
+        };
+        let signatures = self
+            .signatures
+            .entry((scope, is_export))
+            .or_insert_with_key(|(scope, is_export)| {
+                if switch_clause.is_some() {
+                    scope
+                        .children()
+                        .filter_map(AnyJsSwitchClause::cast)
+                        .flat_map(|clause| clause.consequent())
+                        .filter_map(|statement| signature_name(statement.into_syntax()))
+                        .collect()
+                } else {
+                    scope
+                        .children()
+                        .filter_map(|sibling| {
+                            if *is_export {
+                                Some(JsExport::cast(sibling)?.export_clause().ok()?.into_syntax())
+                            } else {
+                                Some(sibling)
+                            }
+                        })
+                        .filter_map(signature_name)
+                        .collect()
+                }
+            });
+        Some(signatures.contains(&name))
+    }
+}
+
+/// Returns the unescaped name of `node` if it is an overload signature.
+fn signature_name(node: SyntaxNode<JsLanguage>) -> Option<Text> {
+    let declaration = TsDeclareFunctionDeclaration::cast(node)?;
+    let id = declaration.id().ok()?;
+    let token = id.as_js_identifier_binding()?.name_token().ok()?;
+    Some(unescape_js_string(token.token_text_trimmed()))
 }
 
 declare_node_union! {
