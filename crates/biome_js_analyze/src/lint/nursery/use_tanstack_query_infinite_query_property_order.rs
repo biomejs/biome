@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsNamedImportSpecifier, AnyJsObjectMember,
-    JsCallExpression, JsIdentifierBinding, JsImport,
+    AnyJsCallArgument, AnyJsNamedImportSpecifier, AnyJsObjectMember, JsCallExpression,
+    JsIdentifierBinding, JsImport, JsObjectExpression,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_tanstack_query_infinite_query_property_order::UseTanstackQueryInfiniteQueryPropertyOrderOptions;
@@ -89,28 +89,46 @@ declare_lint_rule! {
     }
 }
 
-/// A property that is moved to the position of another property.
-type Replacement = (AnyJsObjectMember, AnyJsObjectMember);
+/// The properties whose relative order matters, in the order they must be written.
+///
+/// The derived ordering follows the declaration order of the variants.
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+enum OrderedProperty {
+    QueryFn,
+    GetPreviousPageParam,
+    GetNextPageParam,
+}
+
+impl OrderedProperty {
+    fn from_name(name: &str) -> Option<Self> {
+        match name {
+            "queryFn" => Some(Self::QueryFn),
+            "getPreviousPageParam" => Some(Self::GetPreviousPageParam),
+            "getNextPageParam" => Some(Self::GetNextPageParam),
+            _ => None,
+        }
+    }
+}
+
+/// Two ordered properties that are written in the wrong order.
+///
+/// `first` is written before `second` but must come after it.
+type Inversion = (AnyJsObjectMember, AnyJsObjectMember);
 
 impl Rule for UseTanstackQueryInfiniteQueryPropertyOrder {
     type Query = Semantic<JsCallExpression>;
-    type State = Box<[Replacement]>;
-    type Signals = Option<Self::State>;
+    type State = Inversion;
+    type Signals = Box<[Self::State]>;
     type Options = UseTanstackQueryInfiniteQueryPropertyOrderOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
         if !is_infinite_query_function(call, ctx.model()) {
-            return None;
+            return Box::default();
         }
 
-        let arguments = call.arguments().ok()?;
-        let first = arguments.args().first()?.ok()?;
-        let AnyJsCallArgument::AnyJsExpression(first) = first else {
-            return None;
-        };
-        let AnyJsExpression::JsObjectExpression(object) = first.omit_parentheses() else {
-            return None;
+        let Some(object) = options_object(call) else {
+            return Box::default();
         };
 
         let ordered: Vec<_> = object
@@ -118,29 +136,19 @@ impl Rule for UseTanstackQueryInfiniteQueryPropertyOrder {
             .iter()
             .flatten()
             .filter_map(|member| {
-                let rank = property_rank(member.name()?.text())?;
-                Some((member, rank))
+                let property = OrderedProperty::from_name(member.name()?.text())?;
+                Some((member, property))
             })
             .collect();
-        if ordered.is_sorted_by_key(|(_, rank)| *rank) {
-            return None;
-        }
 
-        let mut sorted = ordered.clone();
-        sorted.sort_by_key(|(_, rank)| *rank);
-
-        let replacements = ordered
-            .into_iter()
-            .zip(sorted)
-            .filter(|((current, _), (expected, _))| current != expected)
-            .map(|((current, _), (expected, _))| (current, expected))
-            .collect();
-
-        Some(replacements)
+        ordered
+            .windows(2)
+            .filter(|pair| pair[0].1 > pair[1].1)
+            .map(|pair| (pair[0].0.clone(), pair[1].0.clone()))
+            .collect()
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let (first, _) = state.first()?;
+    fn diagnostic(_: &RuleContext<Self>, (first, _): &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -155,11 +163,16 @@ impl Rule for UseTanstackQueryInfiniteQueryPropertyOrder {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, (first, second): &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        for (current, expected) in state.iter() {
-            mutation.replace_node_discard_trivia(current.clone(), expected.clone());
-        }
+        mutation.replace_node_transfer_trivia(
+            first.clone(),
+            second.clone().trim_comments_and_trivia()?,
+        );
+        mutation.replace_node_transfer_trivia(
+            second.clone(),
+            first.clone().trim_comments_and_trivia()?,
+        );
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -170,15 +183,13 @@ impl Rule for UseTanstackQueryInfiniteQueryPropertyOrder {
     }
 }
 
-/// Returns the position that the property `name` must have relative to the other ordered
-/// properties, or `None` if the position of the property is free.
-fn property_rank(name: &str) -> Option<u8> {
-    match name {
-        "queryFn" => Some(0),
-        "getPreviousPageParam" => Some(1),
-        "getNextPageParam" => Some(2),
-        _ => None,
-    }
+/// Returns the options object passed as the first argument of `call`.
+fn options_object(call: &JsCallExpression) -> Option<JsObjectExpression> {
+    let first = call.arguments().ok()?.args().first()?.ok()?;
+    let AnyJsCallArgument::AnyJsExpression(first) = first else {
+        return None;
+    };
+    first.omit_parentheses().as_js_object_expression().cloned()
 }
 
 /// Returns whether `call` calls an infinite query function imported by name from a TanStack

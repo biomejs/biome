@@ -102,10 +102,39 @@ invalid.js:12:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE
     10 10 │   
     11 11 │   useData({
     12    │ - → getNextPageParam:·(p)·=>·p.next,
-       12 │ + → queryFn()·{},
-    13 13 │     getPreviousPageParam: (p) => p.prev,
+    13    │ - → getPreviousPageParam:·(p)·=>·p.prev,
+       12 │ + → getPreviousPageParam:·(p)·=>·p.prev,
+       13 │ + → getNextPageParam:·(p)·=>·p.next,
+    14 14 │     queryFn() {},
+    15 15 │   });
+  
+
+```
+
+```
+invalid.js:13:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! The properties of this infinite query are in the wrong order.
+  
+    11 │ useData({
+    12 │ 	getNextPageParam: (p) => p.next,
+  > 13 │ 	getPreviousPageParam: (p) => p.prev,
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	queryFn() {},
+    15 │ });
+  
+  i TanStack Query infers types from the order of the properties. Write queryFn, then getPreviousPageParam, then getNextPageParam.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Reorder the properties.
+  
+    11 11 │   useData({
+    12 12 │     getNextPageParam: (p) => p.next,
+    13    │ - → getPreviousPageParam:·(p)·=>·p.prev,
     14    │ - → queryFn()·{},
-       14 │ + → getNextPageParam:·(p)·=>·p.next,
+       13 │ + → queryFn()·{},
+       14 │ + → getPreviousPageParam:·(p)·=>·p.prev,
     15 15 │   });
     16 16 │   
   
@@ -188,15 +217,12 @@ invalid.js:30:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE
   
   i Unsafe fix: Reorder the properties.
   
-    27 27 │   
     28 28 │   useInfiniteQuery(({
-    29    │ - → //·next·page
+    29 29 │     // next page
     30    │ - → getNextPageParam,
-    31    │ - → //·fetcher
-    32    │ - → queryFn,
-       29 │ + → //·fetcher
        30 │ + → queryFn,
-       31 │ + → //·next·page
+    31 31 │     // fetcher
+    32    │ - → queryFn,
        32 │ + → getNextPageParam,
     33 33 │   }));
     34 34 │   
@@ -254,12 +280,10 @@ invalid.js:41:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE
     40 40 │   useInfiniteQuery({
     41    │ - → getNextPageParam,
     42    │ - → queryFn:·a,
-    43    │ - → queryFn:·b,
        41 │ + → queryFn:·a,
-       42 │ + → queryFn:·b,
-       43 │ + → getNextPageParam,
+       42 │ + → getNextPageParam,
+    43 43 │     queryFn: b,
     44 44 │   });
-    45 45 │   
   
 
 ```
