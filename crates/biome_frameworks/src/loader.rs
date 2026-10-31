@@ -213,6 +213,11 @@ impl LoaderContext<'_> {
         })
     }
 
+    /// Returns whether `path` is a file.
+    pub fn is_file(&self, path: &Utf8Path) -> bool {
+        self.host.is_file(path)
+    }
+
     /// Resolves `specifier` relative to the package directory, like the
     /// paths of a configuration file.
     pub fn resolve(&self, specifier: &str, kind: ResolutionKind) -> Option<Utf8PathBuf> {
