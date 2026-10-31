@@ -835,6 +835,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noMapSpread",
+        TypeId::of::<biome_rule_options::no_map_spread::NoMapSpreadOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noMeaninglessVoidOperator",
         TypeId::of::<
             biome_rule_options::no_meaningless_void_operator::NoMeaninglessVoidOperatorOptions,
