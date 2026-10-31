@@ -451,7 +451,12 @@ where
         let Some((project_key, scan_kind)) = self.find_project_with_scan_kind_for_path(path) else {
             return Ok(Vec::new());
         };
-        if !WorkspaceWatcherBridge::is_ignored(self, project_key, &scan_kind, path, None)? {
+        // A removed path can't be checked, so its configuration is reloaded
+        // in case it was ignored.
+        if matches!(
+            WorkspaceWatcherBridge::is_ignored(self, project_key, &scan_kind, path, None),
+            Ok(false)
+        ) {
             return Ok(Vec::new());
         }
         self.reload_frameworks(project_key, true)
