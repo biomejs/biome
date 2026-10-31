@@ -1,0 +1,324 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div>
+    <template v-for="x in list"><Foo :key="x" /></template>
+    <template v-for="x in list"><Foo :key="x.id" /></template>
+    <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+    <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+    <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+    <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+    <template v-for="(x, i) in list"><Foo :key="i" /></template>
+    <template v-for="({ id }, i) in list"><Foo :key="id" /></template>
+    <template v-for="{ id: itemId } in list"><Foo :key="itemId" /></template>
+    <template v-for="x in list" :key="ids.find((x) => x.ok)"><Foo :key="x.id" /></template>
+    <template v-for="x in list">
+      <Foo :key="x.error1" />
+      <div :key="x.error2" />
+      <slot :key="x.error3"></slot>
+    </template>
+  </div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:38 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    2 │ <template>
+    3 │   <div>
+  > 4 │     <template v-for="x in list"><Foo :key="x" /></template>
+      │                                      ^^^^^^^^
+    5 │     <template v-for="x in list"><Foo :key="x.id" /></template>
+    6 │     <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:38 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    3 │   <div>
+    4 │     <template v-for="x in list"><Foo :key="x" /></template>
+  > 5 │     <template v-for="x in list"><Foo :key="x.id" /></template>
+      │                                      ^^^^^^^^^^^
+    6 │     <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+    7 │     <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:49 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    4 │     <template v-for="x in list"><Foo :key="x" /></template>
+    5 │     <template v-for="x in list"><Foo :key="x.id" /></template>
+  > 6 │     <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+      │                                                 ^^^^^^^^^^^
+    7 │     <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+    8 │     <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:50 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    5 │     <template v-for="x in list"><Foo :key="x.id" /></template>
+    6 │     <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+  > 7 │     <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+      │                                                  ^^^^^^^^^^^
+    8 │     <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+    9 │     <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:43 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+     6 │     <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+     7 │     <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+   > 8 │     <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+       │                                           ^^^^^^^^^^^^^^^^^^^
+     9 │     <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+    10 │     <template v-for="(x, i) in list"><Foo :key="i" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:70 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+     6 │     <template v-for="x in list" :key="foo"><Foo :key="x.id" /></template>
+     7 │     <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+   > 8 │     <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+       │                                                                      ^^^^^^^^^^^^^^^^^^^
+     9 │     <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+    10 │     <template v-for="(x, i) in list"><Foo :key="i" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:38 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+     7 │     <template v-for="x in list" :key><div /><Foo :key="x.id" /></template>
+     8 │     <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+   > 9 │     <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+       │                                      ^^^^^^^^^^^^^^^^^
+    10 │     <template v-for="(x, i) in list"><Foo :key="i" /></template>
+    11 │     <template v-for="({ id }, i) in list"><Foo :key="id" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:43 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+     8 │     <template v-for="x in list" :key><Foo :key="'foo' + x.id" /><Bar :key="'bar' + x.id" /></template>
+     9 │     <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+  > 10 │     <template v-for="(x, i) in list"><Foo :key="i" /></template>
+       │                                           ^^^^^^^^
+    11 │     <template v-for="({ id }, i) in list"><Foo :key="id" /></template>
+    12 │     <template v-for="{ id: itemId } in list"><Foo :key="itemId" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:48 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+     9 │     <template v-for="x in list"><div v-bind:key="x.id"></div></template>
+    10 │     <template v-for="(x, i) in list"><Foo :key="i" /></template>
+  > 11 │     <template v-for="({ id }, i) in list"><Foo :key="id" /></template>
+       │                                                ^^^^^^^^^
+    12 │     <template v-for="{ id: itemId } in list"><Foo :key="itemId" /></template>
+    13 │     <template v-for="x in list" :key="ids.find((x) => x.ok)"><Foo :key="x.id" /></template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:51 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    10 │     <template v-for="(x, i) in list"><Foo :key="i" /></template>
+    11 │     <template v-for="({ id }, i) in list"><Foo :key="id" /></template>
+  > 12 │     <template v-for="{ id: itemId } in list"><Foo :key="itemId" /></template>
+       │                                                   ^^^^^^^^^^^^^
+    13 │     <template v-for="x in list" :key="ids.find((x) => x.ok)"><Foo :key="x.id" /></template>
+    14 │     <template v-for="x in list">
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:67 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    11 │     <template v-for="({ id }, i) in list"><Foo :key="id" /></template>
+    12 │     <template v-for="{ id: itemId } in list"><Foo :key="itemId" /></template>
+  > 13 │     <template v-for="x in list" :key="ids.find((x) => x.ok)"><Foo :key="x.id" /></template>
+       │                                                                   ^^^^^^^^^^^
+    14 │     <template v-for="x in list">
+    15 │       <Foo :key="x.error1" />
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:12 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    13 │     <template v-for="x in list" :key="ids.find((x) => x.ok)"><Foo :key="x.id" /></template>
+    14 │     <template v-for="x in list">
+  > 15 │       <Foo :key="x.error1" />
+       │            ^^^^^^^^^^^^^^^
+    16 │       <div :key="x.error2" />
+    17 │       <slot :key="x.error3"></slot>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:12 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    14 │     <template v-for="x in list">
+    15 │       <Foo :key="x.error1" />
+  > 16 │       <div :key="x.error2" />
+       │            ^^^^^^^^^^^^^^^
+    17 │       <slot :key="x.error3"></slot>
+    18 │     </template>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:13 lint/nursery/noVueVForTemplateKeyOnChild ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key of this <template v-for> is placed on a child element.
+  
+    15 │       <Foo :key="x.error1" />
+    16 │       <div :key="x.error2" />
+  > 17 │       <slot :key="x.error3"></slot>
+       │             ^^^^^^^^^^^^^^^
+    18 │     </template>
+    19 │   </div>
+  
+  i Vue tracks each repeated block by the key of the <template> tag, not by the keys of its children.
+  
+  i Move this key to the <template v-for> tag.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
