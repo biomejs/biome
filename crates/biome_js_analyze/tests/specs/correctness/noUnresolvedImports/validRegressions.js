@@ -10,4 +10,10 @@ import { renamedSymbol } from "./aliased-reexport-barrel.js";
 // `export * as MyNs from "./namespace-reexport-source.js"`.
 import { MyNs } from "./namespace-reexport-barrel.js";
 
-console.log(renamedSymbol, MyNs);
+// Regression: a default import from a package whose types are a script that
+// declares the package as an ambient module must not be flagged.
+// node_modules/ambient-module-package/index.d.ts declares
+// `declare module "ambient-module-package" { ...; export = render; }`.
+import render from "ambient-module-package";
+
+console.log(renamedSymbol, MyNs, render);
