@@ -8,7 +8,7 @@ use crate::{
     Configuration, FilesConfiguration, FormatterConfiguration, GritConfiguration,
     LinterConfiguration, Rules, analyzer::assist::AssistConfiguration,
 };
-use biome_deserialize::Merge;
+use biome_deserialize::{DeserializableValidator, DeserializationContext, Merge, TextRange};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, IndentStyle,
@@ -32,6 +32,7 @@ pub struct Overrides(pub Vec<OverridePattern>);
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+#[deserializable(with_validator)]
 pub struct OverridePattern {
     /// A list of glob patterns selecting the files to which this override applies. If omitted, the
     /// override applies to every file. An empty list applies to no files.
@@ -100,6 +101,35 @@ pub struct OverridePattern {
     #[cfg(feature = "plugins")]
     #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<Plugins>,
+}
+
+impl DeserializableValidator for OverridePattern {
+    fn validate<S>(
+        &mut self,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        _name: &str,
+        range: TextRange,
+    ) -> bool {
+        #[cfg(feature = "lang_css")]
+        if self
+            .css
+            .as_mut()
+            .is_some_and(|css| css.globals.take().is_some())
+        {
+            ctx.report(
+                biome_deserialize::DeserializationDiagnostic::new(biome_console::markup! {
+                    "The option "<Emphasis>"css.globals"</Emphasis>" isn't supported in "<Emphasis>"overrides"</Emphasis>"."
+                })
+                .with_range(range)
+                .with_note("Biome ignores it. Set the option at the top level of the configuration instead.")
+                .with_custom_severity(biome_diagnostics::Severity::Warning),
+            );
+        }
+        #[cfg(not(feature = "lang_css"))]
+        let _ = (ctx, range);
+
+        true
+    }
 }
 
 impl OverridePattern {

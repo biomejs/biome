@@ -128,12 +128,19 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 
     /// Runs the framework loaders of each package of the project, and records
-    /// what the frameworks inject.
+    /// what the frameworks inject. Returns the diagnostics that tell when what
+    /// they inject can't all be known.
     ///
     /// The files that the loaders visit, and the declaration files that their
     /// `/// <reference path="..." />` directives name, are indexed with `index`
     /// first.
-    fn index_framework_files(&self, _project_key: ProjectKey, _index: &dyn Fn(Vec<Utf8PathBuf>)) {}
+    fn index_framework_files(
+        &self,
+        _project_key: ProjectKey,
+        _index: &dyn Fn(Vec<Utf8PathBuf>),
+    ) -> Vec<Error> {
+        Vec::new()
+    }
 
     /// Returns whether `path` is the configuration file of a framework that a
     /// framework loader reads, such as `astro.config.mjs`.

@@ -1016,3 +1016,82 @@ mod test {
         snap_diagnostic("module_diagnostic", diagnostics);
     }
 }
+
+/// Biome can't find all the stylesheets that the frameworks of a package add
+/// to every page, so the rules that check classes and custom properties don't
+/// report anything in the package.
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project/frameworks",
+    severity = Information,
+    message(
+        message("Biome can't find all the stylesheets that the frameworks of this package add to every page."),
+        description = "Biome can't find all the stylesheets that the frameworks of this package add to every page.",
+    ),
+)]
+pub struct UnknownFrameworkStylesheets {
+    #[location(resource)]
+    pub manifest_path: String,
+
+    #[advice]
+    pub advice: UnknownFrameworkStylesheetsAdvice,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct UnknownFrameworkStylesheetsAdvice;
+
+impl Advices for UnknownFrameworkStylesheetsAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "The rules "<Emphasis>"noUndeclaredClasses"</Emphasis>", "<Emphasis>"noUndeclaredCustomProperties"</Emphasis>" and "<Emphasis>"noUnusedClasses"</Emphasis>" don't report anything in this package. This happens when a framework isn't installed, or when its configuration computes the stylesheets, for example with a function."
+            },
+        )?;
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "List these stylesheets in the "<Emphasis>"css.globals"</Emphasis>" option of the Biome configuration to enable the rules."
+            },
+        )
+    }
+}
+
+/// Biome can't find all the modules that the frameworks of a package provide,
+/// so `noUnresolvedImports` doesn't report some imports in the package.
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project/frameworks",
+    severity = Information,
+    message(
+        message("Biome can't find all the modules that the frameworks of this package provide."),
+        description = "Biome can't find all the modules that the frameworks of this package provide.",
+    ),
+)]
+pub struct UnknownFrameworkModules {
+    #[location(resource)]
+    pub manifest_path: String,
+
+    #[advice]
+    pub advice: UnknownFrameworkModulesAdvice,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct UnknownFrameworkModulesAdvice;
+
+impl Advices for UnknownFrameworkModulesAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "The rule "<Emphasis>"noUnresolvedImports"</Emphasis>" doesn't report the imports in this package whose specifier is neither a path nor a package name, such as "<Emphasis>"astro:content"</Emphasis>"."
+            },
+        )?;
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "Install the dependencies of the package, and check that Biome supports the installed version of the framework."
+            },
+        )
+    }
+}
