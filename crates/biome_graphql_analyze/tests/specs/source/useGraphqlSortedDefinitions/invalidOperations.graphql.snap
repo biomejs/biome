@@ -1,0 +1,93 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidOperations.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+subscription OnChange {
+  changed
+}
+
+fragment Fields on User {
+  id
+}
+
+query {
+  anonymous
+}
+
+mutation Create {
+  create
+}
+
+extend type Account {
+  id: ID!
+}
+
+query Get {
+  field
+}
+
+```
+
+# Diagnostics
+```
+invalidOperations.graphql:2:1 assist/source/useGraphqlSortedDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i The definitions of this document are not sorted.
+  
+     1 │ # should generate diagnostics
+   > 2 │ subscription OnChange {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+   > 3 │   changed
+   > 4 │ }
+        ...
+  > 22 │ query Get {
+  > 23 │   field
+  > 24 │ }
+       │ ^
+    25 │ 
+  
+  i Safe fix: Sort the definitions.
+  
+     1    │ - #·should·generate·diagnostics
+     2    │ - subscription·OnChange·{
+     3    │ - ··changed
+        1 │ + extend·type·Account·{
+        2 │ + ··id:·ID!
+        3 │ + }
+        4 │ + 
+        5 │ + mutation·Create·{
+        6 │ + ··create
+     4  7 │   }
+     5  8 │   
+    ····· │ 
+     8 11 │   }
+     9 12 │   
+    10    │ - query·{
+    11    │ - ··anonymous
+       13 │ + query·Get·{
+       14 │ + ··field
+    12 15 │   }
+    13 16 │   
+    14    │ - mutation·Create·{
+    15    │ - ··create
+    16    │ - }
+    17    │ - 
+    18    │ - extend·type·Account·{
+    19    │ - ··id:·ID!
+       17 │ + #·should·generate·diagnostics
+       18 │ + subscription·OnChange·{
+       19 │ + ··changed
+    20 20 │   }
+    21 21 │   
+    22    │ - query·Get·{
+    23    │ - ··field
+       22 │ + query·{
+       23 │ + ··anonymous
+    24 24 │   }
+    25 25 │   
+  
+
+```

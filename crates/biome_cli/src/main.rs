@@ -12,6 +12,7 @@ use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, set_bottom_frame};
 use biome_fs::OsFileSystem;
 use biome_service::workspace;
+use std::mem::ManuallyDrop;
 use std::process::{ExitCode, Termination};
 use std::sync::Arc;
 use tokio::runtime::Runtime;
@@ -22,7 +23,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl")
+    not(all(target_env = "musl", target_arch = "aarch64"))
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
@@ -71,6 +72,18 @@ fn run_workspace(console: &mut EnvConsole, command: BiomeCommand) -> Result<(), 
         workspace::server(Arc::new(fs), threads)
     };
 
-    let session = CliSession::new(&*workspace, console)?;
+    // Without `--use-server`, the workspace lives in this process and keeps the
+    // syntax tree of every file it has parsed until it is dropped. Dropping it
+    // takes a noticeable part of a run over a large project, although the
+    // process exits right after the command finishes and the operating system
+    // then reclaims all of its memory at once. The workspace is therefore
+    // never dropped, whichever way the command ends.
+    //
+    // With `--use-server`, the workspace is only a client of the server that
+    // owns the files. It has nothing expensive to drop, and leaving it alone
+    // means the operating system closes its connection when the process exits.
+    let workspace = ManuallyDrop::new(workspace);
+
+    let session = CliSession::new(&**workspace, console)?;
     session.run(command)
 }

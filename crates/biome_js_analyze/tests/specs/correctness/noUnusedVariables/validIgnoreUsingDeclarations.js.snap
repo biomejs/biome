@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: validIgnoreUsingDeclarations.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+{
+	using resource = createResource();
+}
+
+async function main() {
+	await using connection = await openConnection();
+}
+main();
+
+for (using item of items) {}
+
+for (await using item of items) {}
+
+{
+	using used = createResource();
+	console.log(used);
+}
+
+```

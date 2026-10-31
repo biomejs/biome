@@ -87,6 +87,7 @@ use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
+use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock};
@@ -138,6 +139,57 @@ pub struct Settings {
 }
 
 impl Settings {
+    /// Returns `file_source` with the variants that the parser settings
+    /// select: JSX in JavaScript files, CSS modules or Tailwind CSS directives
+    /// in CSS files, and CJK-friendly emphasis in Markdown files.
+    #[cfg_attr(
+        not(any(feature = "lang_js", feature = "lang_css", feature = "lang_md")),
+        expect(unused_mut)
+    )]
+    pub(crate) fn file_source_with_parser_variants(
+        &self,
+        mut file_source: DocumentFileSource,
+    ) -> DocumentFileSource {
+        #[cfg(feature = "lang_js")]
+        if let DocumentFileSource::Js(js) = &mut file_source
+            && !js.is_typescript()
+            && !js.is_jsx()
+            && self
+                .languages
+                .javascript
+                .parser
+                .jsx_everywhere
+                .unwrap_or_default()
+                .into()
+        {
+            js.set_variant(biome_languages::javascript::LanguageVariant::Jsx);
+        }
+
+        #[cfg(feature = "lang_css")]
+        if let DocumentFileSource::Css(css) = &mut file_source {
+            let parser = &self.languages.css.parser;
+            if parser.css_modules_enabled.unwrap_or_default().into() {
+                css.set_variant(biome_languages::css::CssVariant::CssModules)
+            } else if parser.tailwind_directives.unwrap_or_default().into() {
+                css.set_variant(biome_languages::css::CssVariant::TailwindCss)
+            }
+        }
+
+        #[cfg(feature = "lang_md")]
+        if let DocumentFileSource::Markdown(markdown) = &mut file_source {
+            markdown.set_cjk_friendly_emphasis(
+                self.languages
+                    .markdown
+                    .parser
+                    .cjk_friendly_emphasis
+                    .unwrap_or_default()
+                    .into(),
+            );
+        }
+
+        file_source
+    }
+
     pub fn format_options<L>(
         &self,
         override_indices: &[usize],
@@ -454,6 +506,34 @@ impl Settings {
                     Some(Cow::Borrowed(pattern_rules))
                 };
             }
+        }
+        result
+    }
+
+    /// Returns the rules explicitly enabled by the base configuration and selected overrides.
+    ///
+    /// Each configuration layer is inspected separately because merging a group-wide severity with
+    /// per-rule overrides expands the severity into individual rule settings.
+    pub(crate) fn as_linter_explicitly_enabled_rules_by_indices(
+        &self,
+        indices: &[usize],
+    ) -> FxHashSet<biome_analyze::RuleFilter<'static>> {
+        let mut result = self
+            .linter
+            .rules
+            .as_ref()
+            .map(Rules::as_explicitly_enabled_rules)
+            .unwrap_or_default();
+        for &index in indices {
+            let Some(pattern_rules) = self
+                .override_settings
+                .patterns
+                .get(index)
+                .and_then(|pattern| pattern.linter.rules.as_ref())
+            else {
+                continue;
+            };
+            result.extend(pattern_rules.as_explicitly_enabled_rules());
         }
         result
     }
@@ -1183,6 +1263,7 @@ impl From<biome_configuration::MarkdownConfiguration>
         if let Some(linter) = markdown.linter {
             language_setting.linter.enabled = linter.enabled;
         }
+        language_setting.linter.analyze_embeds = markdown.analyze_embeds;
 
         language_setting
     }
@@ -2652,6 +2733,7 @@ fn to_markdown_language_settings(
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;
+    language_setting.linter.analyze_embeds = conf.analyze_embeds;
 
     language_setting
 }

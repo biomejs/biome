@@ -381,7 +381,10 @@ impl Rule for UseNullishCoalescing {
                     markup! {
                         "Prefer "<Emphasis>"??"</Emphasis>" over a ternary expression checking for nullish."
                     },
-                ),
+                )
+                .note(markup! {
+                    "A ternary expression that checks for "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>" does what "<Emphasis>"??"</Emphasis>" does, but "<Emphasis>"??"</Emphasis>" is shorter and easier to read."
+                }),
             ),
             UseNullishCoalescingState::IfStatement { if_range, .. } => Some(
                 RuleDiagnostic::new(

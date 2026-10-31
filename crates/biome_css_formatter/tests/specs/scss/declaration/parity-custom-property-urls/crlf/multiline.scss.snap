@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/declaration/parity-custom-property-urls/crlf/multiline.scss
+---
+
+# Input
+
+```scss
+.icon{
+--icon:url(
+data:image/svg+xml,%3Csvg/%3E
+);
+--commented:url(
+/*v1*/asset.svg
+);
+--interpolated:url(#{"asset\
+-name.svg"});
+--multiline:url(/icons/#{
+"mark"
+}.svg);
+color:red;
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineEnding": "crlf"
+  }
+}
+```
+
+# Formatted
+
+```scss
+.icon {<CRLF>
+	--icon: url(data:image/svg+xml,%3Csvg/%3E);<CRLF>
+	--commented: url(/*v1*/asset.svg);<CRLF>
+	--interpolated: url(#{"asset\<CRLF>
+-name.svg"});<CRLF>
+	--multiline: url(/icons/#{<CRLF>
+"mark"<CRLF>
+}.svg);<CRLF>
+	color: red;<CRLF>
+}<CRLF>
+
+```

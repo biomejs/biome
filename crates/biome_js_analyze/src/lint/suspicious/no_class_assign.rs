@@ -112,12 +112,18 @@ impl Rule for NoClassAssign {
             RuleDiagnostic::new(
                 rule_category!(),
                 reference.syntax().text_trimmed_range(),
-                markup! {"'"{class_name}"' is a class."},
+                markup! {"The class '"{class_name}"' is reassigned."},
             )
             .detail(
                 binding.text_trimmed_range(),
                 markup! {"'"{class_name}"' is defined here."},
-            ),
+            )
+            .note(markup! {
+                "Reassigning a class replaces it. Code that expects the original class, such as "<Emphasis>"new"</Emphasis>" calls and "<Emphasis>"instanceof"</Emphasis>" checks, can then break."
+            })
+            .note(markup! {
+                "Store the new value in a separate variable, or give the new class a different name."
+            }),
         )
     }
 }

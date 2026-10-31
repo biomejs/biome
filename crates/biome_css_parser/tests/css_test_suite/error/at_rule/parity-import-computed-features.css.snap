@@ -1,0 +1,762 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@media ($bound + "-width": 30rem) {}
+@container ($bound + "-width": 30rem) {}
+.control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+.following { color: green; }
+@import "wide-layout.css" screen and ($bound + "-width": 30rem);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@7..8 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssBinaryExpression {
+                                                            left: ScssVariable {
+                                                                dollar_token: DOLLAR@8..9 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@9..15 "bound" [] [Whitespace(" ")],
+                                                                },
+                                                            },
+                                                            operator: PLUS@15..17 "+" [] [Whitespace(" ")],
+                                                            right: CssString {
+                                                                value_token: CSS_STRING_LITERAL@17..25 "\"-width\"" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                COLON@25..27 ":" [] [Whitespace(" ")],
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@27..29 "30" [] [],
+                                                    unit_token: IDENT@29..32 "rem" [] [],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@32..34 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@34..35 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@35..36 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@36..38 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CssBogus {
+                        items: [
+                            CONTAINER_KW@38..48 "container" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    L_PAREN@48..49 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            CssBogusSupportsCondition {
+                                                items: [
+                                                    DOLLAR@49..50 "$" [] [],
+                                                    CssIdentifier {
+                                                        value_token: IDENT@50..56 "bound" [] [Whitespace(" ")],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    CssBogusBlock {
+                        items: [],
+                    },
+                ],
+            },
+        },
+        CssBogusRule {
+            items: [
+                PLUS@56..58 "+" [] [Whitespace(" ")],
+                CSS_STRING_LITERAL@58..66 "\"-width\"" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                COLON@66..68 ":" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        CSS_DIMENSION_VALUE@68..70 "30" [] [],
+                    ],
+                },
+                missing separator,
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@70..73 "rem" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+                missing separator,
+                CssBogusSelector {
+                    items: [
+                        R_PAREN@73..75 ")" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@75..76 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@76..77 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@77..79 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@79..87 "control" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@87..89 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@89..94 "width" [] [],
+                                    },
+                                    COLON@94..96 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssIfFunction {
+                                                if_token: IF_KW@96..98 "if" [] [],
+                                                l_paren_token: L_PAREN@98..99 "(" [] [],
+                                                css_if_branch_list: CssIfBranchList [
+                                                    CssBogusIfBranch {
+                                                        items: [
+                                                            CssBogusIfTest {
+                                                                items: [
+                                                                    MEDIA_KW@99..104 "media" [] [],
+                                                                    L_PAREN@104..105 "(" [] [],
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            CssBogusSupportsCondition {
+                                                                                items: [
+                                                                                    DOLLAR@105..106 "$" [] [],
+                                                                                    CssIdentifier {
+                                                                                        value_token: IDENT@106..112 "bound" [] [Whitespace(" ")],
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogusPropertyValue {
+                                                                        items: [
+                                                                            PLUS@112..114 "+" [] [Whitespace(" ")],
+                                                                            CSS_STRING_LITERAL@114..122 "\"-width\"" [] [],
+                                                                            COLON@122..124 ":" [] [Whitespace(" ")],
+                                                                            CSS_DIMENSION_VALUE@124..126 "30" [] [],
+                                                                            REM_KW@126..129 "rem" [] [],
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@129..130 ")" [] [],
+                                            },
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    COLON@130..132 ":" [] [Whitespace(" ")],
+                                                    CSS_DIMENSION_VALUE@132..133 "1" [] [],
+                                                    PX_KW@133..135 "px" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@135..137 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@137..141 "else" [] [],
+                                },
+                                colon_token: COLON@141..143 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@143..144 "2" [] [],
+                                        unit_token: IDENT@144..146 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@146..147 ")" [] [],
+                        ],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@147..149 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@149..150 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@150..152 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@152..162 "following" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@162..164 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@164..169 "color" [] [],
+                                },
+                                colon_token: COLON@169..171 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@171..176 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@176..178 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@178..179 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@179..181 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@181..188 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@188..206 "\"wide-layout.css\"" [] [Whitespace(" ")],
+                },
+                layer: missing (optional),
+                supports: missing (optional),
+                media: CssMediaQueryList [
+                    CssBogusMediaQuery {
+                        items: [
+                            CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@206..213 "screen" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            AND_KW@213..217 "and" [] [Whitespace(" ")],
+                            CssBogus {
+                                items: [
+                                    L_PAREN@217..218 "(" [] [],
+                                    CssBogus {
+                                        items: [
+                                            ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssBinaryExpression {
+                                                        left: ScssVariable {
+                                                            dollar_token: DOLLAR@218..219 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@219..225 "bound" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                        operator: PLUS@225..227 "+" [] [Whitespace(" ")],
+                                                        right: CssString {
+                                                            value_token: CSS_STRING_LITERAL@227..235 "\"-width\"" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            COLON@235..237 ":" [] [Whitespace(" ")],
+                                            CssRegularDimension {
+                                                value_token: CSS_NUMBER_LITERAL@237..239 "30" [] [],
+                                                unit_token: IDENT@239..242 "rem" [] [],
+                                            },
+                                        ],
+                                    },
+                                    R_PAREN@242..243 ")" [] [],
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                semicolon_token: SEMICOLON@243..244 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@244..245 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..245
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..244
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..36
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..34
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..34
+            0: CSS_BOGUS_MEDIA_QUERY@7..34
+              0: CSS_BOGUS@7..34
+                0: L_PAREN@7..8 "(" [] []
+                1: CSS_BOGUS@8..32
+                  0: SCSS_EXPRESSION@8..25
+                    0: SCSS_EXPRESSION_ITEM_LIST@8..25
+                      0: SCSS_BINARY_EXPRESSION@8..25
+                        0: SCSS_VARIABLE@8..15
+                          0: DOLLAR@8..9 "$" [] []
+                          1: CSS_IDENTIFIER@9..15
+                            0: IDENT@9..15 "bound" [] [Whitespace(" ")]
+                        1: PLUS@15..17 "+" [] [Whitespace(" ")]
+                        2: CSS_STRING@17..25
+                          0: CSS_STRING_LITERAL@17..25 "\"-width\"" [] []
+                  1: COLON@25..27 ":" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@27..32
+                    0: CSS_NUMBER_LITERAL@27..29 "30" [] []
+                    1: IDENT@29..32 "rem" [] []
+                2: R_PAREN@32..34 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@34..36
+          0: L_CURLY@34..35 "{" [] []
+          1: CSS_RULE_LIST@35..35
+          2: R_CURLY@35..36 "}" [] []
+    1: CSS_AT_RULE@36..56
+      0: AT@36..38 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@38..56
+        0: CSS_BOGUS@38..56
+          0: CONTAINER_KW@38..48 "container" [] [Whitespace(" ")]
+          1: CSS_BOGUS@48..56
+            0: L_PAREN@48..49 "(" [] []
+            1: CSS_BOGUS@49..56
+              0: CSS_BOGUS_SUPPORTS_CONDITION@49..56
+                0: DOLLAR@49..50 "$" [] []
+                1: CSS_IDENTIFIER@50..56
+                  0: IDENT@50..56 "bound" [] [Whitespace(" ")]
+        1: CSS_BOGUS_BLOCK@56..56
+    2: CSS_BOGUS_RULE@56..66
+      0: PLUS@56..58 "+" [] [Whitespace(" ")]
+      1: CSS_STRING_LITERAL@58..66 "\"-width\"" [] []
+    3: CSS_QUALIFIED_RULE@66..77
+      0: CSS_SELECTOR_LIST@66..75
+        0: CSS_COMPOUND_SELECTOR@66..68
+          0: CSS_NESTED_SELECTOR_LIST@66..66
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@66..68
+            0: CSS_BOGUS_SUB_SELECTOR@66..68
+              0: COLON@66..68 ":" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_BOGUS_SELECTOR@68..70
+          0: CSS_DIMENSION_VALUE@68..70 "30" [] []
+        3: (empty)
+        4: CSS_COMPOUND_SELECTOR@70..73
+          0: CSS_NESTED_SELECTOR_LIST@70..70
+          1: CSS_TYPE_SELECTOR@70..73
+            0: (empty)
+            1: CSS_IDENTIFIER@70..73
+              0: IDENT@70..73 "rem" [] []
+          2: CSS_SUB_SELECTOR_LIST@73..73
+        5: (empty)
+        6: CSS_BOGUS_SELECTOR@73..75
+          0: R_PAREN@73..75 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@75..77
+        0: L_CURLY@75..76 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@76..76
+        2: R_CURLY@76..77 "}" [] []
+    4: CSS_QUALIFIED_RULE@77..150
+      0: CSS_SELECTOR_LIST@77..87
+        0: CSS_COMPOUND_SELECTOR@77..87
+          0: CSS_NESTED_SELECTOR_LIST@77..77
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@77..87
+            0: CSS_CLASS_SELECTOR@77..87
+              0: DOT@77..79 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@79..87
+                0: IDENT@79..87 "control" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@87..150
+        0: L_CURLY@87..89 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@89..149
+          0: CSS_DECLARATION_WITH_SEMICOLON@89..137
+            0: CSS_DECLARATION@89..135
+              0: CSS_BOGUS_PROPERTY@89..135
+                0: CSS_IDENTIFIER@89..94
+                  0: IDENT@89..94 "width" [] []
+                1: COLON@94..96 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@96..135
+                  0: CSS_IF_FUNCTION@96..130
+                    0: IF_KW@96..98 "if" [] []
+                    1: L_PAREN@98..99 "(" [] []
+                    2: CSS_IF_BRANCH_LIST@99..129
+                      0: CSS_BOGUS_IF_BRANCH@99..129
+                        0: CSS_BOGUS_IF_TEST@99..112
+                          0: MEDIA_KW@99..104 "media" [] []
+                          1: L_PAREN@104..105 "(" [] []
+                          2: CSS_BOGUS@105..112
+                            0: CSS_BOGUS_SUPPORTS_CONDITION@105..112
+                              0: DOLLAR@105..106 "$" [] []
+                              1: CSS_IDENTIFIER@106..112
+                                0: IDENT@106..112 "bound" [] [Whitespace(" ")]
+                        1: CSS_BOGUS@112..129
+                          0: CSS_BOGUS_PROPERTY_VALUE@112..129
+                            0: PLUS@112..114 "+" [] [Whitespace(" ")]
+                            1: CSS_STRING_LITERAL@114..122 "\"-width\"" [] []
+                            2: COLON@122..124 ":" [] [Whitespace(" ")]
+                            3: CSS_DIMENSION_VALUE@124..126 "30" [] []
+                            4: REM_KW@126..129 "rem" [] []
+                    3: R_PAREN@129..130 ")" [] []
+                  1: CSS_BOGUS_PROPERTY_VALUE@130..135
+                    0: COLON@130..132 ":" [] [Whitespace(" ")]
+                    1: CSS_DIMENSION_VALUE@132..133 "1" [] []
+                    2: PX_KW@133..135 "px" [] []
+              1: (empty)
+            1: SEMICOLON@135..137 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@137..146
+            0: CSS_DECLARATION@137..146
+              0: CSS_GENERIC_PROPERTY@137..146
+                0: CSS_IDENTIFIER@137..141
+                  0: IDENT@137..141 "else" [] []
+                1: COLON@141..143 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@143..146
+                  0: CSS_REGULAR_DIMENSION@143..146
+                    0: CSS_NUMBER_LITERAL@143..144 "2" [] []
+                    1: IDENT@144..146 "px" [] []
+              1: (empty)
+            1: (empty)
+          2: CSS_BOGUS@146..147
+            0: R_PAREN@146..147 ")" [] []
+          3: CSS_EMPTY_DECLARATION@147..149
+            0: SEMICOLON@147..149 ";" [] [Whitespace(" ")]
+        2: R_CURLY@149..150 "}" [] []
+    5: CSS_QUALIFIED_RULE@150..179
+      0: CSS_SELECTOR_LIST@150..162
+        0: CSS_COMPOUND_SELECTOR@150..162
+          0: CSS_NESTED_SELECTOR_LIST@150..150
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@150..162
+            0: CSS_CLASS_SELECTOR@150..162
+              0: DOT@150..152 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@152..162
+                0: IDENT@152..162 "following" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@162..179
+        0: L_CURLY@162..164 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@164..178
+          0: CSS_DECLARATION_WITH_SEMICOLON@164..178
+            0: CSS_DECLARATION@164..176
+              0: CSS_GENERIC_PROPERTY@164..176
+                0: CSS_IDENTIFIER@164..169
+                  0: IDENT@164..169 "color" [] []
+                1: COLON@169..171 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@171..176
+                  0: CSS_IDENTIFIER@171..176
+                    0: IDENT@171..176 "green" [] []
+              1: (empty)
+            1: SEMICOLON@176..178 ";" [] [Whitespace(" ")]
+        2: R_CURLY@178..179 "}" [] []
+    6: CSS_AT_RULE@179..244
+      0: AT@179..181 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@181..244
+        0: IMPORT_KW@181..188 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@188..206
+          0: CSS_STRING_LITERAL@188..206 "\"wide-layout.css\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@206..243
+          0: CSS_BOGUS_MEDIA_QUERY@206..243
+            0: CSS_MEDIA_TYPE_QUERY@206..213
+              0: (empty)
+              1: CSS_MEDIA_TYPE@206..213
+                0: CSS_IDENTIFIER@206..213
+                  0: IDENT@206..213 "screen" [] [Whitespace(" ")]
+            1: AND_KW@213..217 "and" [] [Whitespace(" ")]
+            2: CSS_BOGUS@217..243
+              0: L_PAREN@217..218 "(" [] []
+              1: CSS_BOGUS@218..242
+                0: SCSS_EXPRESSION@218..235
+                  0: SCSS_EXPRESSION_ITEM_LIST@218..235
+                    0: SCSS_BINARY_EXPRESSION@218..235
+                      0: SCSS_VARIABLE@218..225
+                        0: DOLLAR@218..219 "$" [] []
+                        1: CSS_IDENTIFIER@219..225
+                          0: IDENT@219..225 "bound" [] [Whitespace(" ")]
+                      1: PLUS@225..227 "+" [] [Whitespace(" ")]
+                      2: CSS_STRING@227..235
+                        0: CSS_STRING_LITERAL@227..235 "\"-width\"" [] []
+                1: COLON@235..237 ":" [] [Whitespace(" ")]
+                2: CSS_REGULAR_DIMENSION@237..242
+                  0: CSS_NUMBER_LITERAL@237..239 "30" [] []
+                  1: IDENT@239..242 "rem" [] []
+              2: R_PAREN@242..243 ")" [] []
+        5: SEMICOLON@243..244 ";" [] []
+  2: EOF@244..245 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-import-computed-features.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ @media ($bound + "-width": 30rem) {}
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ @container ($bound + "-width": 30rem) {}
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+  
+parity-import-computed-features.css:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+  > 2 │ @container ($bound + "-width": 30rem) {}
+      │             ^^^^^^
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+    4 │ .following { color: green; }
+  
+parity-import-computed-features.css:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `+`
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+  > 2 │ @container ($bound + "-width": 30rem) {}
+      │                    ^
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+    4 │ .following { color: green; }
+  
+  i Remove +
+  
+parity-import-computed-features.css:2:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+  > 2 │ @container ($bound + "-width": 30rem) {}
+      │                                ^^
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+    4 │ .following { color: green; }
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - state
+  - current
+  - past
+  - future
+  
+parity-import-computed-features.css:2:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `rem`
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+  > 2 │ @container ($bound + "-width": 30rem) {}
+      │                                  ^^^
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+    4 │ .following { color: green; }
+  
+  i Remove rem
+  
+parity-import-computed-features.css:2:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+  > 2 │ @container ($bound + "-width": 30rem) {}
+      │                                     ^
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+    4 │ .following { color: green; }
+  
+  i Remove )
+  
+parity-import-computed-features.css:3:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+    2 │ @container ($bound + "-width": 30rem) {}
+  > 3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+      │                            ^^^^^^
+    4 │ .following { color: green; }
+    5 │ @import "wide-layout.css" screen and ($bound + "-width": 30rem);
+  
+parity-import-computed-features.css:3:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `+`
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+    2 │ @container ($bound + "-width": 30rem) {}
+  > 3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+      │                                   ^
+    4 │ .following { color: green; }
+    5 │ @import "wide-layout.css" screen and ($bound + "-width": 30rem);
+  
+  i Remove +
+  
+parity-import-computed-features.css:3:53 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+    2 │ @container ($bound + "-width": 30rem) {}
+  > 3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+      │                                                     ^^^^^
+    4 │ .following { color: green; }
+    5 │ @import "wide-layout.css" screen and ($bound + "-width": 30rem);
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parity-import-computed-features.css:3:69 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `)`
+  
+    1 │ @media ($bound + "-width": 30rem) {}
+    2 │ @container ($bound + "-width": 30rem) {}
+  > 3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+      │                                                                     ^
+    4 │ .following { color: green; }
+    5 │ @import "wide-layout.css" screen and ($bound + "-width": 30rem);
+  
+  i Remove )
+  
+parity-import-computed-features.css:5:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    3 │ .control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+    4 │ .following { color: green; }
+  > 5 │ @import "wide-layout.css" screen and ($bound + "-width": 30rem);
+      │                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+```

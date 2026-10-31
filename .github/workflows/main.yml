@@ -55,7 +55,7 @@ jobs:
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
-      - uses: tombi-toml/setup-tombi@b4c080f8f2b95efb36f254032cb607eed7c70a33 # v1.7.1
+      - uses: tombi-toml/setup-tombi@d8f3250344c4e9107b91c02bc11efcf72baf5793 # v1.7.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Format TOML files
@@ -103,7 +103,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install cargo-deny
-        uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0 # v2.87.22
+        uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
         with:
           tool: cargo-deny
       - name: Audit crates.io dependencies

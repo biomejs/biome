@@ -126,7 +126,10 @@ impl Rule for NoDuplicateAtImportRules {
                 },
             )
             .note(markup! {
-                    "Consider removing one of the duplicated imports."
+                "Importing the same stylesheet more than once is redundant and can cause an extra request."
+            })
+            .note(markup! {
+                "Consider removing one of the duplicated imports."
             }),
         )
     }

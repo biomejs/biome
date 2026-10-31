@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsExport, JsLanguage,
     assign_ext::AnyJsMemberAssignment,
 };
-use biome_rowan::{AstNode, Language, TextRange, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, Language, SyntaxKindSet, TextRange, WalkEvent, declare_node_union};
 use biome_rule_options::no_exports_in_test::NoExportsInTestOptions;
 
 declare_lint_rule! {
@@ -66,13 +66,21 @@ impl Rule for NoExportsInTest {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {
-                "Do not export from a test file."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Do not export from a test file."
+                },
+            )
+            .note(markup! {
+                "Importing a test file runs all of its tests again in the importing file. This causes duplicate test runs."
+            })
+            .note(markup! {
+                "Move the exported code into a separate file and import it from the tests that need it."
+            }),
+        )
     }
 }
 
@@ -126,6 +134,17 @@ struct AnyExportInTestVisitor {
 
 impl Visitor for AnyExportInTestVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            MaybeExport::KIND_SET
+                .union(JsCallExpression::KIND_SET)
+                .union(AnyJsRoot::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,

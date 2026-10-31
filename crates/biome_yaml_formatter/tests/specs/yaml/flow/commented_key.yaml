@@ -1,0 +1,37 @@
+{"key": # comment after the colon
+  value}
+---
+{? key # explicit
+ : value}
+---
+{ ? key # on the key line
+ # on its own line
+ : v }
+---
+{ ? [a, b] # collection
+ : v }
+---
+{"one" # 1
+:value, "two" # 2
+: v2}
+---
+a:
+  b: {"key" # nested
+    :value}
+---
+- {"key" # in a sequence
+  :value}
+---
+[key: # single pair
+ v]
+---
+[? key # explicit single pair
+ : v]
+---
+{ ? key # on the key line
+  : # on the colon line
+    value }
+---
+{ key: # after the colon
+ # on its own line
+ value }

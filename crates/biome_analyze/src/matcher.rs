@@ -2,7 +2,7 @@ use crate::{
     AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleCategory, RuleFilter, RuleGroup,
     ServiceBag, SuppressionAction,
 };
-use biome_rowan::{Language, TextRange};
+use biome_rowan::{Language, SyntaxKindSet, TextRange};
 use std::fmt::Display;
 use std::{
     any::{Any, TypeId},
@@ -17,6 +17,19 @@ use std::{
 pub trait QueryMatcher<L: Language> {
     /// Execute a single query match
     fn match_query(&mut self, params: MatchQueryParams<L>);
+
+    /// Returns the kinds of [SyntaxNode](biome_rowan::SyntaxNode) queries that
+    /// can run a rule in `phase`, or `None` if the matcher can't tell. Queries
+    /// for nodes of other kinds must have no effect.
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        let _ = phase;
+        None
+    }
+
+    /// Returns whether rule matching stopped after a panic.
+    fn has_panicked(&self) -> bool {
+        false
+    }
 }
 
 /// Parameters provided to [QueryMatcher::match_query] and require to run lint rules
@@ -105,6 +118,12 @@ impl Display for RuleKey {
     }
 }
 
+impl biome_console::fmt::Display for RuleKey {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        write!(fmt, "{}/{}", self.group, self.rule)
+    }
+}
+
 impl RuleKey {
     pub fn new(group: &'static str, rule: &'static str) -> Self {
         Self { group, rule }
@@ -142,6 +161,7 @@ impl PartialEq<RuleKey> for RuleFilter<'static> {
 pub enum SignalRuleKey {
     Rule(RuleKey),
     Plugin(Box<str>),
+    Internal,
 }
 
 impl From<RuleKey> for SignalRuleKey {
@@ -154,7 +174,7 @@ impl From<RuleKey> for SignalRuleKey {
 pub struct SignalEntry<'phase, L: Language> {
     /// Boxed analyzer signal to be emitted
     pub signal: Box<dyn AnalyzerSignal<L> + 'phase>,
-    /// Unique identifier for the rule that emitted this signal
+    /// Origin of this signal, used when matching suppression comments
     pub rule: SignalRuleKey,
     /// Optional rule instances being suppressed
     pub instances: Box<[Box<str>]>,
@@ -187,6 +207,10 @@ impl<L: Language> PartialEq for SignalEntry<'_, L> {
 
 /// Adapter type wrapping a [QueryMatcher] type with a function that can be
 /// used to inspect the query matches emitted by the analyzer
+///
+/// It reports [QueryMatcher::syntax_query_kinds] of the wrapped matcher, so
+/// the function doesn't see syntax node queries the wrapped matcher would
+/// ignore when the analyzer skips those nodes.
 pub struct InspectMatcher<F, I> {
     func: F,
     inner: I,
@@ -214,6 +238,14 @@ where
     fn match_query(&mut self, params: MatchQueryParams<L>) {
         (self.func)(&params);
         self.inner.match_query(params);
+    }
+
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        self.inner.syntax_query_kinds(phase)
+    }
+
+    fn has_panicked(&self) -> bool {
+        self.inner.has_panicked()
     }
 }
 

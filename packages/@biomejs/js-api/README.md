@@ -13,6 +13,7 @@ npm i @biomejs/wasm-<dist>
 ```
 
 You need to install one of the `@biomejs/wasm-*` package as a **peer dependency** for this package to work correctly, out of the following distributions:
+
 - `@biomejs/wasm-bundler`: Install this package if you're using a bundler that supports importing `*.wasm` files directly
 - `@biomejs/wasm-nodejs`: Install this package if you're using Node.js to load the WebAssembly bundle use the `fs` API
 - `@biomejs/wasm-web`: Install this package if you're targeting the web platform to load the WASM bundle using the `fetch` API
@@ -31,26 +32,26 @@ const { projectKey } = biome.openProject("path/to/project/dir");
 
 // Optionally apply a Biome configuration (instead of biome.json)
 biome.applyConfiguration(projectKey, {
-  // options
+	// options
 });
 
 const formatted = biome.formatContent(
-  projectKey,
-  "function f   (a, b) { return a == b; }",
-  {
-    filePath: "example.js",
-  },
+	projectKey,
+	"function f   (a, b) { return a == b; }",
+	{
+		filePath: "example.js",
+	},
 );
 
 console.log("Formatted content: ", formatted.content);
 
 const result = biome.lintContent(projectKey, formatted.content, {
-  filePath: "example.js",
+	filePath: "example.js",
 });
 
 const html = biome.printDiagnostics(result.diagnostics, {
-  filePath: "example.js",
-  fileSource: formatted.content,
+	filePath: "example.js",
+	fileSource: formatted.content,
 });
 
 console.log("Lint diagnostics: ", html);
@@ -62,12 +63,12 @@ If you want to work with diagnostics in your program, you can use the `spanInByt
 import { Biome, spanInBytesToSpanInCodeUnits } from "@biomejs/js-api/nodejs";
 
 for (const diagnostic of result.diagnostics) {
-  const [start, end] = spanInBytesToSpanInCodeUnits(
-    diagnostic.location.span,
-    formatted.content,
-  );
-  // Correctly extracts the text
-  const _text = formatted.content.slice(start, end);
+	const [start, end] = spanInBytesToSpanInCodeUnits(
+		diagnostic.location.span,
+		formatted.content,
+	);
+	// Correctly extracts the text
+	const _text = formatted.content.slice(start, end);
 }
 ```
 

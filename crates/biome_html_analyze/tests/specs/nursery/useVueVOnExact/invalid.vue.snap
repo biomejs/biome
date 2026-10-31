@@ -1,0 +1,604 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <button
+    @click="foo"
+    @click.ctrl="bar"
+  ></button>
+  <button
+    v-on:click="foo"
+    v-on:click.ctrl="bar"
+  ></button>
+  <button
+    @click="foo"
+    @click.ctrl.stop="bar"
+  ></button>
+  <button
+    @click.prevent="foo"
+    @click.ctrl="bar"
+  ></button>
+  <input
+    @keydown.prevent="foo"
+    @keydown.ctrl="bar"
+  />
+  <input
+    @keydown.ctrl.enter.exact="save"
+    @keydown.stop="foo"
+  />
+  <button
+    @click.exact="foo"
+    @click.ctrl="bar"
+    @click.ctrl.shift="baz"
+  ></button>
+  <button
+    @click="foo"
+    @click.ctrl="bar"
+    @click.ctrl.shift="baz"
+  ></button>
+  <button
+    @click.alt.shift="foo"
+    @click.alt.ctrl.shift="bar"
+  ></button>
+  <input
+    @keypress.27="foo"
+    @keypress.27.shift="bar"
+  >
+  <input
+    @keypress.exact="foo"
+    @keypress.esc="bar"
+    @keypress.ctrl="baz"
+  >
+  <button
+    @[foo]="foo"
+    @[foo].ctrl="bar"
+  ></button>
+  <svg @click="foo" @click.meta="bar"></svg>
+  <input
+    @keydown.enter="foo"
+    @keydown.enter.shift.exact="bar"
+  />
+  <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+  <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+  <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+  <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    2 │ <template>
+    3 │   <button
+  > 4 │     @click="foo"
+      │     ^^^^^^
+    5 │     @click.ctrl="bar"
+    6 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    3 │   <button
+    4 │     @click="foo"
+  > 5 │     @click.ctrl="bar"
+      │     ^^^^^^^^^^^
+    6 │   ></button>
+    7 │   <button
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+     6 │   ></button>
+     7 │   <button
+   > 8 │     v-on:click="foo"
+       │     ^^^^^^^^^^
+     9 │     v-on:click.ctrl="bar"
+    10 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+     7 │   <button
+     8 │     v-on:click="foo"
+   > 9 │     v-on:click.ctrl="bar"
+       │     ^^^^^^^^^^^^^^^
+    10 │   ></button>
+    11 │   <button
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    10 │   ></button>
+    11 │   <button
+  > 12 │     @click="foo"
+       │     ^^^^^^
+    13 │     @click.ctrl.stop="bar"
+    14 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    11 │   <button
+    12 │     @click="foo"
+  > 13 │     @click.ctrl.stop="bar"
+       │     ^^^^^^^^^^^^^^^^
+    14 │   ></button>
+    15 │   <button
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    14 │   ></button>
+    15 │   <button
+  > 16 │     @click.prevent="foo"
+       │     ^^^^^^^^^^^^^^
+    17 │     @click.ctrl="bar"
+    18 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    15 │   <button
+    16 │     @click.prevent="foo"
+  > 17 │     @click.ctrl="bar"
+       │     ^^^^^^^^^^^
+    18 │   ></button>
+    19 │   <input
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    18 │   ></button>
+    19 │   <input
+  > 20 │     @keydown.prevent="foo"
+       │     ^^^^^^^^^^^^^^^^
+    21 │     @keydown.ctrl="bar"
+    22 │   />
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    19 │   <input
+    20 │     @keydown.prevent="foo"
+  > 21 │     @keydown.ctrl="bar"
+       │     ^^^^^^^^^^^^^
+    22 │   />
+    23 │   <input
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    23 │   <input
+    24 │     @keydown.ctrl.enter.exact="save"
+  > 25 │     @keydown.stop="foo"
+       │     ^^^^^^^^^^^^^
+    26 │   />
+    27 │   <button
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    22 │   />
+    23 │   <input
+  > 24 │     @keydown.ctrl.enter.exact="save"
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │     @keydown.stop="foo"
+    26 │   />
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    27 │   <button
+    28 │     @click.exact="foo"
+  > 29 │     @click.ctrl="bar"
+       │     ^^^^^^^^^^^
+    30 │     @click.ctrl.shift="baz"
+    31 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    28 │     @click.exact="foo"
+    29 │     @click.ctrl="bar"
+  > 30 │     @click.ctrl.shift="baz"
+       │     ^^^^^^^^^^^^^^^^^
+    31 │   ></button>
+    32 │   <button
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:33:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    31 │   ></button>
+    32 │   <button
+  > 33 │     @click="foo"
+       │     ^^^^^^
+    34 │     @click.ctrl="bar"
+    35 │     @click.ctrl.shift="baz"
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    32 │   <button
+    33 │     @click="foo"
+  > 34 │     @click.ctrl="bar"
+       │     ^^^^^^^^^^^
+    35 │     @click.ctrl.shift="baz"
+    36 │   ></button>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:34:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    32 │   <button
+    33 │     @click="foo"
+  > 34 │     @click.ctrl="bar"
+       │     ^^^^^^^^^^^
+    35 │     @click.ctrl.shift="baz"
+    36 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    33 │     @click="foo"
+    34 │     @click.ctrl="bar"
+  > 35 │     @click.ctrl.shift="baz"
+       │     ^^^^^^^^^^^^^^^^^
+    36 │   ></button>
+    37 │   <button
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:38:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    36 │   ></button>
+    37 │   <button
+  > 38 │     @click.alt.shift="foo"
+       │     ^^^^^^^^^^^^^^^^
+    39 │     @click.alt.ctrl.shift="bar"
+    40 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    37 │   <button
+    38 │     @click.alt.shift="foo"
+  > 39 │     @click.alt.ctrl.shift="bar"
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    40 │   ></button>
+    41 │   <input
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:42:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    40 │   ></button>
+    41 │   <input
+  > 42 │     @keypress.27="foo"
+       │     ^^^^^^^^^^^^
+    43 │     @keypress.27.shift="bar"
+    44 │   >
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    41 │   <input
+    42 │     @keypress.27="foo"
+  > 43 │     @keypress.27.shift="bar"
+       │     ^^^^^^^^^^^^^^^^^^
+    44 │   >
+    45 │   <input
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:47:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    45 │   <input
+    46 │     @keypress.exact="foo"
+  > 47 │     @keypress.esc="bar"
+       │     ^^^^^^^^^^^^^
+    48 │     @keypress.ctrl="baz"
+    49 │   >
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    46 │     @keypress.exact="foo"
+    47 │     @keypress.esc="bar"
+  > 48 │     @keypress.ctrl="baz"
+       │     ^^^^^^^^^^^^^^
+    49 │   >
+    50 │   <button
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:51:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    49 │   >
+    50 │   <button
+  > 51 │     @[foo]="foo"
+       │     ^^^^^^
+    52 │     @[foo].ctrl="bar"
+    53 │   ></button>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    50 │   <button
+    51 │     @[foo]="foo"
+  > 52 │     @[foo].ctrl="bar"
+       │     ^^^^^^^^^^^
+    53 │   ></button>
+    54 │   <svg @click="foo" @click.meta="bar"></svg>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:54:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    52 │     @[foo].ctrl="bar"
+    53 │   ></button>
+  > 54 │   <svg @click="foo" @click.meta="bar"></svg>
+       │        ^^^^^^
+    55 │   <input
+    56 │     @keydown.enter="foo"
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    52 │     @[foo].ctrl="bar"
+    53 │   ></button>
+  > 54 │   <svg @click="foo" @click.meta="bar"></svg>
+       │                     ^^^^^^^^^^^
+    55 │   <input
+    56 │     @keydown.enter="foo"
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:56:5 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    54 │   <svg @click="foo" @click.meta="bar"></svg>
+    55 │   <input
+  > 56 │     @keydown.enter="foo"
+       │     ^^^^^^^^^^^^^^
+    57 │     @keydown.enter.shift.exact="bar"
+    58 │   />
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    55 │   <input
+    56 │     @keydown.enter="foo"
+  > 57 │     @keydown.enter.shift.exact="bar"
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │   />
+    59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:59:29 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    57 │     @keydown.enter.shift.exact="bar"
+    58 │   />
+  > 59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+       │                             ^^^^^^
+    60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    57 │     @keydown.enter.shift.exact="bar"
+    58 │   />
+  > 59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+       │                                          ^^^^^^^^^^^
+    60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:60:22 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    58 │   />
+    59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+  > 60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+       │                      ^^^^^^
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    58 │   />
+    59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+  > 60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+       │                                   ^^^^^^^^^^^
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:61:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+    60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+  > 61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+       │        ^^^^^^^^^^^^
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+    63 │ </template>
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    59 │   <button is="fancy-button" @click="foo" @click.ctrl="bar"></button>
+    60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+  > 61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+       │                           ^^^^^^^^^^^^^^^^^
+    62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+    63 │ </template>
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:62:8 lint/nursery/useVueVOnExact ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This event listener also runs when the modifier keys of another listener are held down.
+  
+    60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+  > 62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+       │        ^^^^^^^^^^
+    63 │ </template>
+    64 │ 
+  
+  i When these modifier keys are held down, both listeners run.
+  
+    60 │   <button :is="kind" @click="foo" @click.ctrl="bar"></button>
+    61 │   <div @click.right="foo" @contextmenu.ctrl="bar"></div>
+  > 62 │   <div @mousedown="foo" @mousedown.ctrl.right="bar"></div>
+       │                         ^^^^^^^^^^^^^^^^^^^^^
+    63 │ </template>
+    64 │ 
+  
+  i Add the .exact modifier so this listener only runs when no other modifier keys are held down.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

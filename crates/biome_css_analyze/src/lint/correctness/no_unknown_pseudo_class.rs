@@ -200,9 +200,15 @@ impl Rule for NoUnknownPseudoClass {
             rule_category!(),
             span,
             markup! {
-                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>" "
+                "Unexpected unknown pseudo-class "<Emphasis>{ class_name }</Emphasis>"."
             },
-        );
+        )
+        .note(markup! {
+            "Browsers ignore a rule when its selector contains an unknown pseudo-class, so the styles are never applied."
+        })
+        .note(markup! {
+            "Check the spelling of the pseudo-class, or replace it with one that exists."
+        });
         match class_type {
             PseudoClassType::PagePseudoClass => {
                 diag = diag.note(markup! {
@@ -240,7 +246,9 @@ impl AnyPseudoLike {
                 return css_selector_identifier_token(ident.name().ok()?);
             }
             Self::ScssInterpolatedPseudoClassFunction(_) => return None,
-            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
+            Self::CssPageSelectorPseudo(page_pseudo) => {
+                return css_selector_identifier_token(page_pseudo.selector().ok()?);
+            }
         };
 
         ident.ok()?.value_token().ok()

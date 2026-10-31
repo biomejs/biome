@@ -43,8 +43,9 @@ pub use crate::{
     file_source::FileSourceError,
     green::{NodeCache, RawSyntaxKind},
     syntax::{
-        AnySyntaxNode, ChainTriviaPiecesIterator, EmbeddedSendNode, Language, SendNode,
-        SyntaxElement, SyntaxElementChildren, SyntaxKind, SyntaxList, SyntaxNode,
+        AnySyntaxNode, BorrowedToken, BorrowedTokensIterator, BorrowedTriviaPiece,
+        BorrowedTriviaPiecesIterator, ChainTriviaPiecesIterator, EmbeddedSendNode, Language,
+        SendNode, SyntaxElement, SyntaxElementChildren, SyntaxKind, SyntaxList, SyntaxNode,
         SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxRewriter, SyntaxSlot,
         SyntaxSlots, SyntaxToken, SyntaxTokenWithOffset, SyntaxTriviaPiece,
         SyntaxTriviaPieceComments, TriviaPiece, TriviaPieceKind, VisitNodeSignal,

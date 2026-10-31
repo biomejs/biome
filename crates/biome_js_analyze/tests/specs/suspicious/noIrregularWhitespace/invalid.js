@@ -18,3 +18,8 @@
 /* \u{202f} */ const foo = 'thing';
 /* \u{205f} */ const foo = 'thing';
 /* \u{3000} */ const　foo　=　'thing';
+　const leading = 1;
+function indented() {
+  return 1; // \u{2003} before a comment
+}
+ 

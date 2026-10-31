@@ -1,0 +1,33 @@
+/* should not generate diagnostics */
+
+/* Nesting selectors with the same authored tail can resolve to different target compounds. */
+.card {
+  .column {
+    :root[data-theme="dark"] & {}
+  }
+
+  code {
+    :root[data-theme="dark"] & {}
+  }
+}
+
+/* Parent selector lists expand one nested selector into several resolved selectors. */
+.settings button {
+  #theme &:hover {}
+}
+
+.settings select,
+.settings .trigger,
+.editor select {
+  &:hover {}
+}
+
+.files li.active {
+  #theme & {}
+}
+
+.settings select,
+.settings .trigger,
+.editor select {
+  #theme & {}
+}

@@ -3,8 +3,8 @@ use biome_formatter::comments::CommentKind;
 use biome_formatter::{
     FormatResult, FormatRule,
     comments::{CommentStyle, Comments, SourceComment, is_doc_comment},
-    prelude::*,
     prelude::{Formatter, align, format_once, hard_line_break, text},
+    rowan::prelude::*,
     write,
 };
 use biome_grit_syntax::GritLanguage;

@@ -10,7 +10,7 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression,
     JsBinaryOperator, JsLanguage, JsUnaryExpression, JsUnaryOperator, T,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_implicit_coercions::NoImplicitCoercionsOptions;
 
 // NB: please don't remove the NBSP in the markdown table, it is there to prevent merging backticks together
@@ -174,6 +174,7 @@ declare_lint_rule! {
         recommended: false,
         sources: &[
             RuleSource::Eslint("no-implicit-coercion").same(),
+            RuleSource::EslintVueJs("no-implicit-coercion").same(),
         ],
         fix_kind: FixKind::Unsafe,
     }
@@ -363,20 +364,21 @@ impl Rule for NoImplicitCoercions {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                {
-                    // TODO: probably should update this eventually to be more illustrative/precise
-                    if matches!(state, RuleState::ExpressionToMinusOneComparison(_)) {
-                        "Using binary operations instead of comparisons is harder to read and understand."
-                    } else {
-                        "Implicit type conversions are hard to read and understand."
-                    }
-                }
-            },
-        ))
+        let (message, reason) = if matches!(state, RuleState::ExpressionToMinusOneComparison(_)) {
+            (
+                "Use a comparison instead of a binary operation.",
+                "Using binary operations instead of comparisons is harder to read and understand.",
+            )
+        } else {
+            (
+                "Use an explicit type conversion.",
+                "Implicit type conversions are hard to read and understand.",
+            )
+        };
+        Some(
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! { {message} })
+                .note(markup! { {reason} }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {
@@ -391,7 +393,7 @@ impl Rule for NoImplicitCoercions {
                 {
                     mutation.replace_token_discard_trivia(
                         operator_token.clone(),
-                        operator_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        operator_token.with_trailing_space(),
                     )
                 }
 
@@ -415,8 +417,7 @@ impl Rule for NoImplicitCoercions {
                     assignment_info.assignment_expression.clone(),
                     make::js_assignment_expression(
                         AnyJsAssignmentPattern::AnyJsAssignment(assignment_info.assignment.clone()),
-                        make::token(T![=])
-                            .with_trailing_trivia(Some((TriviaPieceKind::Whitespace, " "))),
+                        make::token(T![=]).with_trailing_space(),
                         assignment_info
                             .assignment
                             .as_expression()?
@@ -441,9 +442,7 @@ impl Rule for NoImplicitCoercions {
                         make::token(T!['(']),
                         make::js_binary_expression(
                             expression_info.argument.clone(),
-                            make::token(T![!==])
-                                .with_leading_trivia(Some((TriviaPieceKind::Whitespace, " ")))
-                                .with_trailing_trivia(Some((TriviaPieceKind::Whitespace, " "))),
+                            make::token(T![!==]).with_surrounding_spaces(),
                             AnyJsExpression::AnyJsLiteralExpression(
                                 AnyJsLiteralExpression::JsNumberLiteralExpression(
                                     make::js_number_literal_expression(make::js_number_literal(-1)),
@@ -523,7 +522,9 @@ trait ExpressionExt {
                 AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
             ) => string_literal
                 .inner_string_text()
-                .ok().as_ref().is_some_and(|text| text.is_empty()),
+                .ok()
+                .as_ref()
+                .is_some_and(|text| text.is_empty()),
             AnyJsExpression::JsTemplateExpression(template_expression) => {
                 template_expression.elements().len() == 0
             }
@@ -542,7 +543,9 @@ trait ExpressionExt {
                 return false;
             };
             return callee
-                .get_callee_member_name().as_ref().is_some_and(|name| name.text_trimmed() == "indexOf");
+                .get_callee_member_name()
+                .as_ref()
+                .is_some_and(|name| name.text_trimmed() == "indexOf");
         }
         false
     }

@@ -6,7 +6,7 @@ use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonArrayValue, JsonLanguage, JsonMember, JsonMemberList, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 use crate::declare_migration;
 
@@ -74,7 +74,7 @@ impl Rule for NoRestrictedGlobals {
 
                 Some(make::json_member(
                     make::json_member_name(value.value_token().ok()?).into(),
-                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![:]).with_trailing_space(),
                     make::json_string_value(make::json_string_literal(
                         "TODO: Add a custom message here.",
                     ))

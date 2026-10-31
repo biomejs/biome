@@ -2,6 +2,7 @@
 
 #[macro_use]
 mod generated;
+mod anchor_ext;
 mod block_ext;
 mod flow_ext;
 mod map_ext;
@@ -11,7 +12,20 @@ pub use self::generated::*;
 use biome_rowan::{AstNode, RawSyntaxKind, TokenText};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use block_ext::{AnyYamlBlockScalar, AnyYamlEntryValue};
+pub use flow_ext::AnyYamlFlowScalar;
 pub use syntax_node::*;
+
+/// Returns the range of `text` without its opening quote, and without its closing `quote` when
+/// it has one.
+fn range_without_quotes(text: &str, quote: char) -> TextRange {
+    let len = text.text_len();
+    let end = if len > TextSize::from(1) && text.ends_with(quote) {
+        len - TextSize::from(1)
+    } else {
+        len
+    };
+    TextRange::new(TextSize::from(1), end)
+}
 
 impl From<u16> for YamlSyntaxKind {
     fn from(d: u16) -> Self {
@@ -103,15 +117,14 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
 /// assert_eq!(inner_string_text(&a), inner_string_text(&b));
 /// ```
 pub fn inner_string_text(token: &YamlSyntaxToken) -> TokenText {
-    let mut text = token.token_text_trimmed();
-    if matches!(
-        token.kind(),
-        YamlSyntaxKind::SINGLE_QUOTED_LITERAL | YamlSyntaxKind::DOUBLE_QUOTED_LITERAL
-    ) && text.starts_with(['"', '\''])
-    {
-        // SAFETY: a string literal that starts with a quote is terminated by its matching quote
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
-        text = text.slice(range);
-    }
-    text
+    let text = token.token_text_trimmed();
+    let range = match token.kind() {
+        YamlSyntaxKind::SINGLE_QUOTED_LITERAL => range_without_quotes(&text, '\''),
+        YamlSyntaxKind::DOUBLE_QUOTED_LITERAL => range_without_quotes(&text, '"'),
+        YamlSyntaxKind::PLAIN_LITERAL => {
+            TextRange::up_to(text.trim_end_matches([' ', '\t']).text_len())
+        }
+        _ => return text,
+    };
+    text.slice(range)
 }

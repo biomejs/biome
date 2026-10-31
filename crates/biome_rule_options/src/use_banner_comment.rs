@@ -56,12 +56,12 @@ impl schemars::JsonSchema for BannerContent {
 }
 
 impl Deserializable for BannerContent {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Single)
         } else {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Multiple)

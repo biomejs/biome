@@ -276,7 +276,7 @@ pub fn css_color_profile_at_rule(
 }
 pub fn css_color_profile_at_rule_declarator(
     color_profile_token: SyntaxToken,
-    name: CssCustomIdentifier,
+    name: AnyCssAtRuleCustomName,
 ) -> CssColorProfileAtRuleDeclarator {
     CssColorProfileAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE_DECLARATOR,
@@ -666,7 +666,7 @@ pub fn css_counter_style_at_rule(
 }
 pub fn css_counter_style_at_rule_declarator(
     counter_style_token: SyntaxToken,
-    name: CssCustomIdentifier,
+    name: AnyCssAtRuleCustomName,
 ) -> CssCounterStyleAtRuleDeclarator {
     CssCounterStyleAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COUNTER_STYLE_AT_RULE_DECLARATOR,
@@ -696,7 +696,7 @@ pub fn css_custom_media_at_rule(
 }
 pub fn css_custom_media_at_rule_declarator(
     custom_media_token: SyntaxToken,
-    name: AnyCssDashedIdentifier,
+    name: AnyCssAtRuleDashedName,
     queries: AnyCssCustomMediaQuery,
 ) -> CssCustomMediaAtRuleDeclarator {
     CssCustomMediaAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
@@ -1050,7 +1050,7 @@ pub fn css_font_palette_values_at_rule(
 }
 pub fn css_font_palette_values_at_rule_declarator(
     font_palette_values_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssAtRuleDashedName,
 ) -> CssFontPaletteValuesAtRuleDeclarator {
     CssFontPaletteValuesAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE_DECLARATOR,
@@ -1830,10 +1830,10 @@ pub struct CssNamespaceAtRuleBuilder {
     namespace_token: SyntaxToken,
     url: AnyCssNamespaceUrl,
     semicolon_token: SyntaxToken,
-    prefix: Option<CssIdentifier>,
+    prefix: Option<AnyCssNamespacePrefixName>,
 }
 impl CssNamespaceAtRuleBuilder {
-    pub fn with_prefix(mut self, prefix: CssIdentifier) -> Self {
+    pub fn with_prefix(mut self, prefix: AnyCssNamespacePrefixName) -> Self {
         self.prefix = Some(prefix);
         self
     }
@@ -1922,10 +1922,10 @@ pub fn css_page_selector(pseudos: CssPageSelectorPseudoList) -> CssPageSelectorB
 }
 pub struct CssPageSelectorBuilder {
     pseudos: CssPageSelectorPseudoList,
-    ty: Option<CssCustomIdentifier>,
+    ty: Option<AnyCssAtRuleCustomName>,
 }
 impl CssPageSelectorBuilder {
-    pub fn with_ty(mut self, ty: CssCustomIdentifier) -> Self {
+    pub fn with_ty(mut self, ty: AnyCssAtRuleCustomName) -> Self {
         self.ty = Some(ty);
         self
     }
@@ -1942,7 +1942,7 @@ impl CssPageSelectorBuilder {
 }
 pub fn css_page_selector_pseudo(
     colon_token: SyntaxToken,
-    selector: CssIdentifier,
+    selector: AnyCssSelectorIdentifier,
 ) -> CssPageSelectorPseudo {
     CssPageSelectorPseudo::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PAGE_SELECTOR_PSEUDO,
@@ -2007,7 +2007,7 @@ pub fn css_position_try_at_rule(
 }
 pub fn css_position_try_at_rule_declarator(
     position_try_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssAtRuleDashedName,
 ) -> CssPositionTryAtRuleDeclarator {
     CssPositionTryAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_POSITION_TRY_AT_RULE_DECLARATOR,
@@ -2031,7 +2031,7 @@ pub fn css_property_at_rule(
 }
 pub fn css_property_at_rule_declarator(
     property_token: SyntaxToken,
-    name: AnyCssDashedIdentifier,
+    name: AnyCssAtRuleDashedName,
 ) -> CssPropertyAtRuleDeclarator {
     CssPropertyAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PROPERTY_AT_RULE_DECLARATOR,
@@ -3303,7 +3303,7 @@ pub fn scss_at_root_query_clause(
         ],
     ))
 }
-pub fn scss_at_root_selector(selector: CssSelectorList) -> ScssAtRootSelector {
+pub fn scss_at_root_selector(selector: AnyScssAtRootSelectorList) -> ScssAtRootSelector {
     ScssAtRootSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_AT_ROOT_SELECTOR,
         [Some(SyntaxElement::Node(selector.into_syntax()))],
@@ -3659,6 +3659,15 @@ impl ScssFunctionAtRuleBuilder {
             ],
         ))
     }
+}
+pub fn scss_hash_value(hash_token: SyntaxToken, value_token: SyntaxToken) -> ScssHashValue {
+    ScssHashValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_HASH_VALUE,
+        [
+            Some(SyntaxElement::Token(hash_token)),
+            Some(SyntaxElement::Token(value_token)),
+        ],
+    ))
 }
 pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) -> ScssHideClause {
     ScssHideClause::unwrap_cast(SyntaxNode::new_detached(
@@ -4426,6 +4435,12 @@ impl ScssPartialCombinatorSelectorBuilder {
         ))
     }
 }
+pub fn scss_percent_value(percent_token: SyntaxToken) -> ScssPercentValue {
+    ScssPercentValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PERCENT_VALUE,
+        [Some(SyntaxElement::Token(percent_token))],
+    ))
+}
 pub fn scss_placeholder_selector(
     percent_token: SyntaxToken,
     name: AnyCssSelectorCustomIdentifier,
@@ -4522,49 +4537,55 @@ pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn scss_supports_feature_declaration(
-    l_paren_token: SyntaxToken,
-    name: ScssVariable,
+pub fn scss_supports_declaration(
+    name: AnyScssSupportsDeclarationName,
     colon_token: SyntaxToken,
     value: AnyCssGenericPropertyValueOrExpression,
-    r_paren_token: SyntaxToken,
-) -> ScssSupportsFeatureDeclarationBuilder {
-    ScssSupportsFeatureDeclarationBuilder {
-        l_paren_token,
+) -> ScssSupportsDeclarationBuilder {
+    ScssSupportsDeclarationBuilder {
         name,
         colon_token,
         value,
-        r_paren_token,
         important: None,
     }
 }
-pub struct ScssSupportsFeatureDeclarationBuilder {
-    l_paren_token: SyntaxToken,
-    name: ScssVariable,
+pub struct ScssSupportsDeclarationBuilder {
+    name: AnyScssSupportsDeclarationName,
     colon_token: SyntaxToken,
     value: AnyCssGenericPropertyValueOrExpression,
-    r_paren_token: SyntaxToken,
     important: Option<CssDeclarationImportant>,
 }
-impl ScssSupportsFeatureDeclarationBuilder {
+impl ScssSupportsDeclarationBuilder {
     pub fn with_important(mut self, important: CssDeclarationImportant) -> Self {
         self.important = Some(important);
         self
     }
-    pub fn build(self) -> ScssSupportsFeatureDeclaration {
-        ScssSupportsFeatureDeclaration::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::SCSS_SUPPORTS_FEATURE_DECLARATION,
+    pub fn build(self) -> ScssSupportsDeclaration {
+        ScssSupportsDeclaration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_SUPPORTS_DECLARATION,
             [
-                Some(SyntaxElement::Token(self.l_paren_token)),
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 Some(SyntaxElement::Token(self.colon_token)),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
                 self.important
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
             ],
         ))
     }
+}
+pub fn scss_supports_feature_declaration(
+    l_paren_token: SyntaxToken,
+    declaration: ScssSupportsDeclaration,
+    r_paren_token: SyntaxToken,
+) -> ScssSupportsFeatureDeclaration {
+    ScssSupportsFeatureDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_SUPPORTS_FEATURE_DECLARATION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(declaration.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn scss_supports_interpolated_condition(
     condition: ScssInterpolation,
@@ -5191,7 +5212,7 @@ pub fn css_custom_identifier_space_separated_list<I>(
     items: I,
 ) -> CssCustomIdentifierSpaceSeparatedList
 where
-    I: IntoIterator<Item = AnyCssCustomIdentifier>,
+    I: IntoIterator<Item = AnyCssAtRuleCustomName>,
     I::IntoIter: ExactSizeIterator,
 {
     CssCustomIdentifierSpaceSeparatedList::unwrap_cast(SyntaxNode::new_detached(

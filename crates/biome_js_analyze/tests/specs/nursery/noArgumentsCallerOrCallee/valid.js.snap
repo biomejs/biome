@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+// should not generate diagnostics
+
+function example() {
+    const length = arguments.length;
+    const args = arguments;
+    const first = arguments[0];
+    const dynamic = arguments[caller];
+    const computed = arguments["callee"];
+    const optionalComputed = arguments?.["caller"];
+}
+
+function factorial(n) {
+    return n <= 1 ? 1 : n * factorial(n - 1);
+}
+
+other.caller;
+other.callee;
+fn.caller;
+fn.callee;
+obj.arguments.caller;
+obj.arguments.callee;
+arguments.callees;
+arguments.callers;
+arguments.calleeName;
+arguments["caller"] = value;
+arguments["callee"]++;
+
+```

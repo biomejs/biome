@@ -26,7 +26,7 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     3 │ 	<div class={`px-2 foo p-4 bar ${variable}`}/>
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -53,7 +53,7 @@ templateLiteralSpace.jsx:3:15 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     4 │ 	<div class={`${variable}px-2 foo p-4 bar`}/>
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -81,7 +81,7 @@ templateLiteralSpace.jsx:4:30 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     5 │ 	<div class={`px-2 foo p-4 bar${variable}`}/>
     6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -109,7 +109,7 @@ templateLiteralSpace.jsx:5:15 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     6 │ 	<div class={`bar-${variable} mx-2 m-5 bar-${variable} mx-1 m-5`}/>
     7 │ </>
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -137,7 +137,7 @@ templateLiteralSpace.jsx:6:30 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     7 │ </>
     8 │ 
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -165,7 +165,7 @@ templateLiteralSpace.jsx:6:55 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     7 │ </>
     8 │ 
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

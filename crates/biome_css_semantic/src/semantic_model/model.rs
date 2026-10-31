@@ -13,6 +13,7 @@ use biome_rowan::{
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -108,6 +109,17 @@ impl SemanticModel {
             .map(|selector| selector.specificity())
     }
 
+    /// Returns whether the document declares an SCSS `@function` named `name`.
+    ///
+    /// Sass treats `-` and `_` as the same character in function names, so
+    /// `my_function` matches `@function my-function`.
+    pub fn has_scss_function(&self, name: &str) -> bool {
+        self.data
+            .scss_function_names
+            .binary_search_by(|declared| compare_scss_function_names(declared.text(), name))
+            .is_ok()
+    }
+
     pub fn is_media_rule(&self, rule: &Rule) -> bool {
         matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
     }
@@ -154,6 +166,9 @@ pub(crate) struct SemanticModelData {
     /// Each value indexes the last matching declaration in
     /// [`Self::at_property_rules`].
     pub(crate) last_at_property_by_name: FxHashMap<TokenText, usize>,
+    /// The names of the SCSS `@function` rules declared anywhere in the
+    /// document, sorted by [compare_scss_function_names].
+    pub(crate) scss_function_names: Vec<TokenText>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
 }
@@ -192,6 +207,7 @@ impl PartialEq for SemanticModel {
                 .iter()
                 .zip(&other.data.at_property_rules)
                 .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
+            && self.data.scss_function_names == other.data.scss_function_names
             && self.data.global_custom_variables.len() == other.data.global_custom_variables.len()
             && self.data.global_custom_variables.iter().all(|(key, val)| {
                 other
@@ -634,6 +650,15 @@ impl Selector {
     pub fn specificity(&self) -> Specificity {
         self.specificity
     }
+}
+
+/// Compares SCSS function names the way Sass does, treating `_` and `-` as
+/// the same character.
+pub(crate) fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
+    let normalize = |byte| if byte == b'_' { b'-' } else { byte };
+    left.bytes()
+        .map(normalize)
+        .cmp(right.bytes().map(normalize))
 }
 
 /// Collects the non-trivia tokens of a selector node as [`CssSyntaxToken`]s.

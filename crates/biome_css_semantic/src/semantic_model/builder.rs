@@ -9,7 +9,8 @@ use std::{collections::BTreeMap, sync::LazyLock};
 
 use super::model::{
     CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
-    RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
+    RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity,
+    compare_scss_function_names, selector_tokens,
 };
 use crate::events::SemanticEvent;
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -37,6 +38,7 @@ pub struct SemanticModelBuilder {
     at_property_rules: Vec<CssPropertyAtRuleData>,
     at_property_by_range: FxHashMap<TextRange, usize>,
     last_at_property_by_name: FxHashMap<TokenText, usize>,
+    scss_function_names: Vec<TokenText>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     /// Map from text range to RuleId
@@ -57,6 +59,7 @@ impl SemanticModelBuilder {
             at_property_rules: Vec::new(),
             at_property_by_range: FxHashMap::default(),
             last_at_property_by_name: FxHashMap::default(),
+            scss_function_names: Vec::new(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
         }
@@ -117,7 +120,9 @@ impl SemanticModelBuilder {
             .any(|at_root| at_root_excludes_style_rules(&at_root))
     }
 
-    pub fn build(self) -> SemanticModel {
+    pub fn build(mut self) -> SemanticModel {
+        self.scss_function_names
+            .sort_by(|left, right| compare_scss_function_names(left.text(), right.text()));
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
             all_rules: self.all_rules,
@@ -127,6 +132,7 @@ impl SemanticModelBuilder {
             at_property_rules: self.at_property_rules,
             at_property_by_range: self.at_property_by_range,
             last_at_property_by_name: self.last_at_property_by_name,
+            scss_function_names: self.scss_function_names,
             range_to_rule_id: self.range_to_rule_id,
         };
         SemanticModel::new(data)
@@ -290,6 +296,9 @@ impl SemanticModelBuilder {
                         self.last_at_property_by_name.insert(property_name, index);
                     }
                 }
+            }
+            SemanticEvent::ScssFunctionDeclaration { name } => {
+                self.scss_function_names.push(name.token_text_trimmed());
             }
         }
     }

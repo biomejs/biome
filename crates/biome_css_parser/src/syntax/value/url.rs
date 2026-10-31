@@ -90,27 +90,61 @@ pub(crate) fn parse_url_function_with_context(
 
     p.bump_ts(URL_SET);
 
-    let scss_url_lex_context = if is_at_nth_url_modifier_function(p, 1, context) {
+    let lex_context = if is_at_nth_url_modifier_function(p, 1, context) {
         // Keep plain function heads on regular tokenization so `src(var(--foo))`
         // and similar cases do not get folded into a raw URL literal.
-        p.bump(T!['(']);
-        None
+        CssLexContext::Regular
     } else {
-        let lex_context = p
-            .source()
-            .url_body_lex_context(context.is_full_scss_parsing_allowed());
-        let scss_url_lex_context =
-            matches!(lex_context, CssLexContext::ScssUrlValue { .. }).then_some(lex_context);
-        p.bump_with_context(T!['('], lex_context);
-        scss_url_lex_context
+        p.source()
+            .url_body_lex_context(context.is_full_scss_parsing_allowed())
     };
 
-    parse_url_value_with_context(p, context, scss_url_lex_context).ok();
-
-    UrlModifierList::new(context).parse_list(p);
-    p.expect(T![')']);
+    parse_url_function_body(p, context, lex_context, CssLexContext::Regular);
 
     Present(m.complete(p, CSS_URL_FUNCTION))
+}
+
+/// Parses a raw URL without promoting `$name` to a Sass expression.
+/// Returns `Absent` for bodies that need generic custom-property parsing.
+///
+/// ```scss
+/// .icon { --image: url($directory/#{$name}.svg); }
+/// ```
+pub(crate) fn parse_custom_property_url_function(
+    p: &mut CssParser,
+    following_context: CssLexContext,
+) -> ParsedSyntax {
+    if !is_at_url_function(p) || !p.at(T![url]) {
+        return Absent;
+    }
+    let Some(lex_context) = p.source_mut().custom_property_url_lex_context() else {
+        return Absent;
+    };
+
+    let function = p.start();
+    p.bump(T![url]);
+    parse_url_function_body(
+        p,
+        ValueParsingContext::new(p, ValueParsingMode::CssOnly),
+        lex_context,
+        following_context,
+    );
+    Present(function.complete(p, CSS_URL_FUNCTION))
+}
+
+/// Parses the body of `url(icon.svg)` and restores the caller's lexer context.
+fn parse_url_function_body(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+    lex_context: CssLexContext,
+    following_context: CssLexContext,
+) {
+    let scss_url_lex_context =
+        matches!(lex_context, CssLexContext::ScssUrlValue { .. }).then_some(lex_context);
+    p.bump_with_context(T!['('], lex_context);
+    parse_url_value_with_context(p, context, scss_url_lex_context).ok();
+    UrlModifierList::new(context).parse_list(p);
+    p.expect_with_context(T![')'], following_context);
 }
 
 /// Detects a function-shaped URL modifier at lookahead `n`.

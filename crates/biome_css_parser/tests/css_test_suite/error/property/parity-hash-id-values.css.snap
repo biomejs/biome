@@ -1,0 +1,622 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.values {
+  --raw: #app #ABCG #12px;
+  after-raw: red;
+  identifier: #app;
+  after-identifier: red;
+  hex-prefix: #ABCG;
+  after-prefix: #ABC;
+  hex-five: #abcde;
+  after-five: #ABCDEF;
+  numeric: #12345;
+  after-numeric: #ABCD;
+  bare: #;
+  after-bare: red;
+}
+#app { color: #ABCDEF12; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..8 "values" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@8..9 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@9..17 "--raw" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@19..20 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@20..21 "a" [] [],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@21..24 "pp" [] [Whitespace(" ")],
+                                    },
+                                    CssColor {
+                                        hash_token: HASH@24..25 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@25..28 "ABC" [] [],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@28..30 "G" [] [Whitespace(" ")],
+                                    },
+                                    CssColor {
+                                        hash_token: HASH@30..31 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@31..33 "12" [] [],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@33..35 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@35..36 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@36..48 "after-raw" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@50..53 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@53..54 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@54..67 "identifier" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@67..69 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@69..70 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@70..71 "a" [] [],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@71..73 "pp" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@73..74 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@74..93 "after-identifier" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@93..95 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@95..98 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@98..99 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@99..112 "hex-prefix" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@112..114 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@114..115 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@115..118 "ABC" [] [],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@118..119 "G" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@119..120 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@120..135 "after-prefix" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@135..137 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@137..138 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@138..141 "ABC" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@141..142 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@142..153 "hex-five" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@153..155 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@155..156 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@156..161 "abcde" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@161..162 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@162..175 "after-five" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@175..177 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@177..178 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@178..184 "ABCDEF" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@184..185 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@185..195 "numeric" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@195..197 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@197..198 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@198..203 "12345" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@203..204 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@204..220 "after-numeric" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@220..222 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@222..223 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@223..227 "ABCD" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@227..228 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@228..235 "bare" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@235..237 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@237..238 "#" [] [],
+                                        value_token: missing (required),
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@238..239 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@239..252 "after-bare" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@252..254 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@254..257 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@257..258 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@258..260 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssIdSelector {
+                            hash_token: HASH@260..262 "#" [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@262..266 "app" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@266..268 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@268..273 "color" [] [],
+                                },
+                                colon_token: COLON@273..275 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@275..276 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@276..284 "ABCDEF12" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@284..286 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@286..287 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@287..288 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..288
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..287
+    0: CSS_QUALIFIED_RULE@0..260
+      0: CSS_SELECTOR_LIST@0..8
+        0: CSS_COMPOUND_SELECTOR@0..8
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..8
+            0: CSS_CLASS_SELECTOR@0..8
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..8
+                0: IDENT@1..8 "values" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@8..260
+        0: L_CURLY@8..9 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@9..258
+          0: CSS_DECLARATION_WITH_SEMICOLON@9..36
+            0: CSS_DECLARATION@9..35
+              0: CSS_GENERIC_PROPERTY@9..35
+                0: CSS_DASHED_IDENTIFIER@9..17
+                  0: IDENT@9..17 "--raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@17..19 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@19..35
+                  0: CSS_COLOR@19..21
+                    0: HASH@19..20 "#" [] []
+                    1: CSS_COLOR_LITERAL@20..21 "a" [] []
+                  1: CSS_IDENTIFIER@21..24
+                    0: IDENT@21..24 "pp" [] [Whitespace(" ")]
+                  2: CSS_COLOR@24..28
+                    0: HASH@24..25 "#" [] []
+                    1: CSS_COLOR_LITERAL@25..28 "ABC" [] []
+                  3: CSS_IDENTIFIER@28..30
+                    0: IDENT@28..30 "G" [] [Whitespace(" ")]
+                  4: CSS_COLOR@30..33
+                    0: HASH@30..31 "#" [] []
+                    1: CSS_COLOR_LITERAL@31..33 "12" [] []
+                  5: CSS_IDENTIFIER@33..35
+                    0: IDENT@33..35 "px" [] []
+              1: (empty)
+            1: SEMICOLON@35..36 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@36..54
+            0: CSS_DECLARATION@36..53
+              0: CSS_GENERIC_PROPERTY@36..53
+                0: CSS_IDENTIFIER@36..48
+                  0: IDENT@36..48 "after-raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@48..50 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@50..53
+                  0: CSS_IDENTIFIER@50..53
+                    0: IDENT@50..53 "red" [] []
+              1: (empty)
+            1: SEMICOLON@53..54 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@54..74
+            0: CSS_DECLARATION@54..73
+              0: CSS_GENERIC_PROPERTY@54..73
+                0: CSS_IDENTIFIER@54..67
+                  0: IDENT@54..67 "identifier" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@67..69 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@69..73
+                  0: CSS_COLOR@69..71
+                    0: HASH@69..70 "#" [] []
+                    1: CSS_COLOR_LITERAL@70..71 "a" [] []
+                  1: CSS_IDENTIFIER@71..73
+                    0: IDENT@71..73 "pp" [] []
+              1: (empty)
+            1: SEMICOLON@73..74 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@74..99
+            0: CSS_DECLARATION@74..98
+              0: CSS_GENERIC_PROPERTY@74..98
+                0: CSS_IDENTIFIER@74..93
+                  0: IDENT@74..93 "after-identifier" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@93..95 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@95..98
+                  0: CSS_IDENTIFIER@95..98
+                    0: IDENT@95..98 "red" [] []
+              1: (empty)
+            1: SEMICOLON@98..99 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@99..120
+            0: CSS_DECLARATION@99..119
+              0: CSS_GENERIC_PROPERTY@99..119
+                0: CSS_IDENTIFIER@99..112
+                  0: IDENT@99..112 "hex-prefix" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@112..114 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@114..119
+                  0: CSS_COLOR@114..118
+                    0: HASH@114..115 "#" [] []
+                    1: CSS_COLOR_LITERAL@115..118 "ABC" [] []
+                  1: CSS_IDENTIFIER@118..119
+                    0: IDENT@118..119 "G" [] []
+              1: (empty)
+            1: SEMICOLON@119..120 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@120..142
+            0: CSS_DECLARATION@120..141
+              0: CSS_GENERIC_PROPERTY@120..141
+                0: CSS_IDENTIFIER@120..135
+                  0: IDENT@120..135 "after-prefix" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@135..137 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@137..141
+                  0: CSS_COLOR@137..141
+                    0: HASH@137..138 "#" [] []
+                    1: CSS_COLOR_LITERAL@138..141 "ABC" [] []
+              1: (empty)
+            1: SEMICOLON@141..142 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@142..162
+            0: CSS_DECLARATION@142..161
+              0: CSS_GENERIC_PROPERTY@142..161
+                0: CSS_IDENTIFIER@142..153
+                  0: IDENT@142..153 "hex-five" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@153..155 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@155..161
+                  0: CSS_COLOR@155..161
+                    0: HASH@155..156 "#" [] []
+                    1: CSS_COLOR_LITERAL@156..161 "abcde" [] []
+              1: (empty)
+            1: SEMICOLON@161..162 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@162..185
+            0: CSS_DECLARATION@162..184
+              0: CSS_GENERIC_PROPERTY@162..184
+                0: CSS_IDENTIFIER@162..175
+                  0: IDENT@162..175 "after-five" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@175..177 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@177..184
+                  0: CSS_COLOR@177..184
+                    0: HASH@177..178 "#" [] []
+                    1: CSS_COLOR_LITERAL@178..184 "ABCDEF" [] []
+              1: (empty)
+            1: SEMICOLON@184..185 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@185..204
+            0: CSS_DECLARATION@185..203
+              0: CSS_GENERIC_PROPERTY@185..203
+                0: CSS_IDENTIFIER@185..195
+                  0: IDENT@185..195 "numeric" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@195..197 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@197..203
+                  0: CSS_COLOR@197..203
+                    0: HASH@197..198 "#" [] []
+                    1: CSS_COLOR_LITERAL@198..203 "12345" [] []
+              1: (empty)
+            1: SEMICOLON@203..204 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@204..228
+            0: CSS_DECLARATION@204..227
+              0: CSS_GENERIC_PROPERTY@204..227
+                0: CSS_IDENTIFIER@204..220
+                  0: IDENT@204..220 "after-numeric" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@220..222 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@222..227
+                  0: CSS_COLOR@222..227
+                    0: HASH@222..223 "#" [] []
+                    1: CSS_COLOR_LITERAL@223..227 "ABCD" [] []
+              1: (empty)
+            1: SEMICOLON@227..228 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@228..239
+            0: CSS_DECLARATION@228..238
+              0: CSS_GENERIC_PROPERTY@228..238
+                0: CSS_IDENTIFIER@228..235
+                  0: IDENT@228..235 "bare" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@235..237 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@237..238
+                  0: CSS_COLOR@237..238
+                    0: HASH@237..238 "#" [] []
+                    1: (empty)
+              1: (empty)
+            1: SEMICOLON@238..239 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@239..258
+            0: CSS_DECLARATION@239..257
+              0: CSS_GENERIC_PROPERTY@239..257
+                0: CSS_IDENTIFIER@239..252
+                  0: IDENT@239..252 "after-bare" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@252..254 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@254..257
+                  0: CSS_IDENTIFIER@254..257
+                    0: IDENT@254..257 "red" [] []
+              1: (empty)
+            1: SEMICOLON@257..258 ";" [] []
+        2: R_CURLY@258..260 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@260..287
+      0: CSS_SELECTOR_LIST@260..266
+        0: CSS_COMPOUND_SELECTOR@260..266
+          0: CSS_NESTED_SELECTOR_LIST@260..260
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@260..266
+            0: CSS_ID_SELECTOR@260..266
+              0: HASH@260..262 "#" [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@262..266
+                0: IDENT@262..266 "app" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@266..287
+        0: L_CURLY@266..268 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@268..286
+          0: CSS_DECLARATION_WITH_SEMICOLON@268..286
+            0: CSS_DECLARATION@268..284
+              0: CSS_GENERIC_PROPERTY@268..284
+                0: CSS_IDENTIFIER@268..273
+                  0: IDENT@268..273 "color" [] []
+                1: COLON@273..275 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@275..284
+                  0: CSS_COLOR@275..284
+                    0: HASH@275..276 "#" [] []
+                    1: CSS_COLOR_LITERAL@276..284 "ABCDEF12" [] []
+              1: (empty)
+            1: SEMICOLON@284..286 ";" [] [Whitespace(" ")]
+        2: R_CURLY@286..287 "}" [] []
+  2: EOF@287..288 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-hash-id-values.css:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid color
+  
+    1 │ .values {
+  > 2 │   --raw: #app #ABCG #12px;
+      │           ^
+    3 │   after-raw: red;
+    4 │   identifier: #app;
+  
+parity-hash-id-values.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid color
+  
+    1 │ .values {
+  > 2 │   --raw: #app #ABCG #12px;
+      │                      ^^
+    3 │   after-raw: red;
+    4 │   identifier: #app;
+  
+parity-hash-id-values.css:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid color
+  
+    2 │   --raw: #app #ABCG #12px;
+    3 │   after-raw: red;
+  > 4 │   identifier: #app;
+      │                ^
+    5 │   after-identifier: red;
+    6 │   hex-prefix: #ABCG;
+  
+parity-hash-id-values.css:8:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid color
+  
+     6 │   hex-prefix: #ABCG;
+     7 │   after-prefix: #ABC;
+   > 8 │   hex-five: #abcde;
+       │              ^^^^^
+     9 │   after-five: #ABCDEF;
+    10 │   numeric: #12345;
+  
+parity-hash-id-values.css:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid color
+  
+     8 │   hex-five: #abcde;
+     9 │   after-five: #ABCDEF;
+  > 10 │   numeric: #12345;
+       │             ^^^^^
+    11 │   after-numeric: #ABCD;
+    12 │   bare: #;
+  
+parity-hash-id-values.css:12:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a color but instead found '#'.
+  
+    10 │   numeric: #12345;
+    11 │   after-numeric: #ABCD;
+  > 12 │   bare: #;
+       │         ^
+    13 │   after-bare: red;
+    14 │ }
+  
+  i Expected a color here.
+  
+    10 │   numeric: #12345;
+    11 │   after-numeric: #ABCD;
+  > 12 │   bare: #;
+       │         ^
+    13 │   after-bare: red;
+    14 │ }
+  
+  i Ensure the color is specified in a valid hexadecimal format. Examples: #000, #000f, #ffffff, #ffffffff
+  
+```

@@ -1,0 +1,9 @@
+@position-try --try-#{$name} { top: 0; }
+@color-profile --profile-#{$name} { src: url("a.icc"); }
+@custom-media --media-#{$name} (min-width: 1px);
+@counter-style counter-#{$name} { system: cyclic; symbols: "*"; }
+@counter-style counter-#{$name}2 { system: cyclic; symbols: "*"; }
+@font-feature-values Font #{$name} { @swash { fancy: 1; } }
+@page page-#{$name}:#{$pseudo} { margin: 1in; }
+@namespace ns-#{$name} url("http://example.com");
+.after { color: red; }

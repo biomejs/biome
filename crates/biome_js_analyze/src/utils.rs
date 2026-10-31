@@ -1,9 +1,12 @@
 use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
 use biome_rowan::{AstNode, Direction, WalkEvent};
+use rustc_hash::FxHasher;
+use std::hash::{Hash, Hasher};
 use std::iter;
 
 pub mod batch;
 pub mod rename;
+pub mod same_reference;
 #[cfg(test)]
 pub mod tests;
 
@@ -37,6 +40,21 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
         }
     }
     true
+}
+
+/// Hashes the kinds and inner token texts that [is_node_equal] compares, so nodes that
+/// [is_node_equal] considers equal have the same hash.
+pub(crate) fn node_hash(node: &JsSyntaxNode) -> u64 {
+    let mut hasher = FxHasher::default();
+    for event in node.preorder_with_tokens(Direction::Next) {
+        if let WalkEvent::Enter(element) = event {
+            element.kind().hash(&mut hasher);
+            if let Some(token) = element.as_token() {
+                inner_string_text(token).text().hash(&mut hasher);
+            }
+        }
+    }
+    hasher.finish()
 }
 
 #[derive(Debug, PartialEq)]

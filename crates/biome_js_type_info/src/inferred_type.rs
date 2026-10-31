@@ -1,4 +1,6 @@
+mod any_type_kind;
 mod boolean_coercion;
+pub use any_type_kind::AnyTypeKind;
 pub use boolean_coercion::BooleanCoercion;
 
 use crate::TypeDb;
@@ -1892,10 +1894,7 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(
-            &self,
-            _path: &camino::Utf8Path,
-        ) -> Option<biome_db::ParsedSource> {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<biome_db::Source> {
             None
         }
     }

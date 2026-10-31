@@ -7,18 +7,22 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
+use biome_css_factory::make::{
+    css_declaration_list, css_declaration_or_at_rule_list, css_declaration_or_rule_list,
+};
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
-    CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
-    CssSyntaxKind, TextRange, keywords::VENDOR_PREFIXES,
+    CssDeclarationBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
+    CssDeclarationWithSemicolon, CssKeyframesItem, CssLanguage, CssSyntaxKind, CssSyntaxToken,
+    TextRange, keywords::VENDOR_PREFIXES,
 };
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
 use std::{
     borrow::Cow,
     cmp::Ordering,
-    collections::{BTreeSet, HashSet},
+    collections::{BTreeSet, HashMap},
 };
 
 declare_source_rule! {
@@ -27,6 +31,8 @@ declare_source_rule! {
     /// The action uses a predefined order that groups related properties by purpose.
     /// Custom properties come first, and nested rules or at-rules such as `@media` come after
     /// declarations.
+    ///
+    /// Properties inside CSS and SCSS keyframe steps use the same order.
     ///
     /// The main groups are:
     ///
@@ -66,6 +72,15 @@ declare_source_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diff
+    /// @keyframes fade {
+    ///   from {
+    ///     opacity: 0;
+    ///     display: block;
+    ///   }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
@@ -96,9 +111,13 @@ declare_source_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnySortableBlockLike = CssDeclarationOrRuleBlock | CssDeclarationBlock | CssDeclarationOrAtRuleBlock
+}
+
 pub struct UseSortedPropertiesState {
     /// The containing node
-    block: CssDeclarationOrRuleBlock,
+    block: AnySortableBlockLike,
     /// The items to be sorted in their original order
     original_properties: Vec<AnyCssDeclarationOrRule>,
     /// The items in their sorted order, or [None] if sorting would be unsafe or if the rule contains unknown items.
@@ -106,7 +125,7 @@ pub struct UseSortedPropertiesState {
 }
 
 impl Rule for UseSortedProperties {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
+    type Query = Ast<AnySortableBlockLike>;
     type State = UseSortedPropertiesState;
     type Signals = Option<Self::State>;
     type Options = UseSortedPropertiesOptions;
@@ -114,10 +133,27 @@ impl Rule for UseSortedProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        let original_properties = node
-            .items()
-            .into_iter()
-            .collect::<Vec<AnyCssDeclarationOrRule>>();
+        // Declaration and declaration-or-at-rule blocks also occur in descriptor at-rules
+        // such as @font-face; only sort them when they belong to a keyframe step.
+        if !matches!(node, AnySortableBlockLike::CssDeclarationOrRuleBlock(_)) {
+            CssKeyframesItem::cast(node.syntax().parent()?)?;
+        }
+
+        let original_properties = match node {
+            AnySortableBlockLike::CssDeclarationOrRuleBlock(block) => {
+                block.items().into_iter().collect::<Vec<_>>()
+            }
+            AnySortableBlockLike::CssDeclarationBlock(block) => block
+                .declarations()
+                .into_iter()
+                .map(|declaration| AnyCssDeclarationOrRule::cast(declaration.into_syntax()))
+                .collect::<Option<Vec<_>>>()?,
+            AnySortableBlockLike::CssDeclarationOrAtRuleBlock(block) => block
+                .items()
+                .into_iter()
+                .map(|declaration| AnyCssDeclarationOrRule::cast(declaration.into_syntax()))
+                .collect::<Option<Vec<_>>>()?,
+        };
 
         // Template steps can depend on declarations before enclosing controls or content blocks.
         // Native keyframe lists do not use the declaration-or-rule list alternative.
@@ -130,7 +166,7 @@ impl Rule for UseSortedProperties {
             return None;
         }
 
-        if contains_shorthand_after_longhand(&original_properties) {
+        if contains_property_conflicts(&original_properties) {
             // This would be unsafe to sort
             return Some(UseSortedPropertiesState {
                 block: node.clone(),
@@ -183,7 +219,26 @@ impl Rule for UseSortedProperties {
         }
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(state.block.items(), sorted_properties.as_sorted()?);
+        match &state.block {
+            AnySortableBlockLike::CssDeclarationOrRuleBlock(block) => {
+                mutation.replace_node_discard_trivia(
+                    block.items(),
+                    css_declaration_or_rule_list(sorted_properties.sorted_items()?),
+                );
+            }
+            AnySortableBlockLike::CssDeclarationBlock(block) => {
+                mutation.replace_node_discard_trivia(
+                    block.declarations(),
+                    css_declaration_list(sorted_properties.sorted_items()?),
+                );
+            }
+            AnySortableBlockLike::CssDeclarationOrAtRuleBlock(block) => {
+                mutation.replace_node_discard_trivia(
+                    block.items(),
+                    css_declaration_or_at_rule_list(sorted_properties.sorted_items()?),
+                );
+            }
+        }
 
         Some(CssRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -191,6 +246,61 @@ impl Rule for UseSortedProperties {
             markup! { "Sort these properties" }.to_owned(),
             mutation,
         ))
+    }
+}
+
+fn with_terminated_line_comment(
+    item: AnyCssDeclarationOrRule,
+    next_item: Option<&AnyCssDeclarationOrRule>,
+) -> Option<AnyCssDeclarationOrRule> {
+    let last_token = item.syntax().last_token()?;
+    if !last_token
+        .trailing_trivia()
+        .pieces()
+        .any(|piece| piece.text().starts_with("//"))
+    {
+        return Some(item);
+    }
+
+    let next_token = match next_item {
+        Some(next) => next.syntax().first_token()?,
+        None => item.syntax().parent()?.last_token()?.next_token()?,
+    };
+    if next_token
+        .leading_trivia()
+        .pieces()
+        .find(|piece| !piece.kind().is_whitespace())
+        .is_some_and(|piece| piece.kind().is_newline())
+    {
+        return Some(item);
+    }
+
+    // The parser attaches the terminating newline to the following token.
+    // Preserve it when sorting would otherwise extend the comment over code.
+    let newline = last_token
+        .next_token()?
+        .leading_trivia()
+        .pieces()
+        .find(|piece| piece.kind().is_newline())?;
+    item.append_trivia_pieces([newline])
+}
+
+fn with_semicolon(item: AnyCssDeclarationOrRule) -> Option<AnyCssDeclarationOrRule> {
+    match item {
+        AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration)
+            if declaration.semicolon_token().is_none() =>
+        {
+            let trailing_trivia = declaration.syntax().last_token()?.trailing_trivia();
+            let semicolon = CssSyntaxToken::new_detached(CssSyntaxKind::SEMICOLON, ";", [], [])
+                .with_trailing_trivia_pieces(trailing_trivia.pieces());
+            Some(
+                declaration
+                    .with_trailing_trivia_pieces([])?
+                    .with_semicolon_token(Some(semicolon))
+                    .into(),
+            )
+        }
+        item => Some(item),
     }
 }
 
@@ -217,16 +327,18 @@ impl RecessOrderProperties {
             .all(|(a, b)| a.0 == *b)
     }
 
-    /// Wrap the sorted list in a CssDeclarationOrRuleList.
-    pub fn as_sorted(&self) -> Option<CssDeclarationOrRuleList> {
-        let slots = self
-            .0
-            .iter()
-            .map(|item| Some(NodeOrToken::Node(item.0.clone().into_syntax())));
-        CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
-            slots,
-        ))
+    fn sorted_items<N>(&self) -> Option<Vec<N>>
+    where
+        N: AstNode<Language = CssLanguage>,
+    {
+        let mut members = self.0.iter().peekable();
+        let mut items = Vec::with_capacity(self.0.len());
+        while let Some(member) = members.next() {
+            let item =
+                with_terminated_line_comment(member.0.clone(), members.peek().map(|next| &next.0))?;
+            items.push(N::cast(with_semicolon(item)?.into_syntax())?);
+        }
+        Some(items)
     }
 }
 
@@ -280,7 +392,8 @@ impl RecessOrderMember {
                             return NodeKindOrder::UnknownKind;
                         };
                         match prop {
-                            AnyCssDeclarationName::AnyCssDashedIdentifier(_) => {
+                            AnyCssDeclarationName::AnyCssDashedIdentifier(_)
+                            | AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
@@ -291,12 +404,7 @@ impl RecessOrderMember {
                                     NodeKindOrder::Declaration
                                 }
                             }
-                            AnyCssDeclarationName::TwValueThemeReference(_) => {
-                                NodeKindOrder::Declaration
-                            }
-                            AnyCssDeclarationName::CssMetavariable(_) => {
-                                NodeKindOrder::UnknownKind
-                            }
+                            AnyCssDeclarationName::CssMetavariable(_) => NodeKindOrder::UnknownKind,
                         }
                     }
                 }
@@ -422,13 +530,17 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
     unprefixed.unwrap_or(prop_lowercase)
 }
 
-/// Check if any shortand property (e.g. margin) appears after any of its longhand sub properties (e.g. margin-top).
-/// Sorting such properties would be unsafe, so we need to bail out. The noShorthandPropertyOverrides rule will catch that case instead.
-fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool {
-    let mut disallowed_longhand_properties = HashSet::<(Option<&str>, &str)>::new();
+/// Returns whether sorting would reverse declarations that can affect the same property.
+/// For example, moving `margin` before an earlier `margin-top` would change which value wins.
+/// Such conflicts must prevent the sorting action; `noShorthandPropertyOverrides` reports
+/// shorthands that override earlier longhands, but does not cover every conflict checked here.
+fn contains_property_conflicts(nodes: &[AnyCssDeclarationOrRule]) -> bool {
+    let mut later_properties = HashMap::new();
 
-    // We have a mapping of shorthand to longhand sub properties, and to make use of that we need to iterate backwards.
-    // Starting from the bottom, when we see a shorthand property, record the set of longhand properties that are no longer allowed to appear above it.
+    // Scan backwards so later declarations contribute their affected longhands and alias groups
+    // before earlier declarations are checked. Keep the lowest sort index for each affected
+    // property and vendor prefix: a larger index on an earlier declaration would reverse their
+    // relative order when sorted, potentially changing the cascade.
     for node in nodes.iter().rev() {
         let Some(prop_text) = &node
             .as_css_declaration_with_semicolon()
@@ -439,24 +551,83 @@ fn contains_shorthand_after_longhand(nodes: &[AnyCssDeclarationOrRule]) -> bool 
 
         let prefix = prop_text_to_prefix(prop_text);
         let unprefixed = prop_text_to_unprefixed(prop_text);
+        let Some((&property, &index)) = PROPERTY_ORDER_MAP.get_key_value(unprefixed.as_ref()) else {
+            continue;
+        };
 
-        // Check for disallowed properties
-        for disallowed_property in disallowed_longhand_properties.iter() {
-            if (prefix, unprefixed.as_ref()) == *disallowed_property {
+        if !matches!(property, "all" | "direction" | "unicode-bidi")
+            && later_properties.contains_key(&(None, "all"))
+        {
+            return true;
+        }
+
+        for affected in std::iter::once(property)
+            .chain(get_longhand_sub_properties(property).iter().copied())
+            .chain(get_reset_to_initial_properties(property).iter().copied())
+        {
+            if later_properties
+                .get(&(prefix, affected))
+                .is_some_and(|later_index| index > *later_index)
+            {
                 return true;
             }
-        }
 
-        // Disallow sub properties to appear above this property
-        for longhand_child_property in get_longhand_sub_properties(&unprefixed) {
-            disallowed_longhand_properties.insert((prefix, longhand_child_property));
-        }
-        for longhand_child_property in get_reset_to_initial_properties(&unprefixed) {
-            disallowed_longhand_properties.insert((prefix, longhand_child_property));
+            if let Some((own_group, opposite_group)) = property_alias_groups(affected) {
+                if later_properties
+                    .get(&(prefix, opposite_group))
+                    .is_some_and(|later_index| index > *later_index)
+                {
+                    return true;
+                }
+                later_properties
+                    .entry((prefix, own_group))
+                    .and_modify(|later_index| *later_index = index.min(*later_index))
+                    .or_insert(index);
+            }
+
+            later_properties
+                .entry((prefix, affected))
+                .and_modify(|later_index| *later_index = index.min(*later_index))
+                .or_insert(index);
         }
     }
 
     false
+}
+
+// Physical and logical declarations can overlap under a writing mode inherited from another rule.
+fn property_alias_groups(property: &str) -> Option<(&'static str, &'static str)> {
+    let (logical_group, physical_group) = if property.starts_with("corner-") {
+        (":logical-corner-shape", ":physical-corner-shape")
+    } else if property.starts_with("border-") {
+        if property.ends_with("-color") {
+            (":logical-border-color", ":physical-border-color")
+        } else if property.ends_with("-style") {
+            (":logical-border-style", ":physical-border-style")
+        } else if property.ends_with("-width") {
+            (":logical-border-width", ":physical-border-width")
+        } else {
+            return None;
+        }
+    } else {
+        return None;
+    };
+
+    if property.contains("-block-")
+        || property.contains("-inline-")
+        || property.starts_with("corner-start-")
+        || property.starts_with("corner-end-")
+    {
+        Some((logical_group, physical_group))
+    } else if property.contains("-top-")
+        || property.contains("-right-")
+        || property.contains("-bottom-")
+        || property.contains("-left-")
+    {
+        Some((physical_group, logical_group))
+    } else {
+        None
+    }
 }
 
 /// Check for properties that don't appear in [PROPERTY_ORDER_MAP]. They are likely a mistake.

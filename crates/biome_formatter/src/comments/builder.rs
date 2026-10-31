@@ -83,10 +83,22 @@ where
             self.parents.push(root.clone());
         }
 
-        for event in root.preorder_with_tokens(Direction::Next) {
+        let mut preorder = root.preorder_with_tokens(Direction::Next);
+        while let Some(event) = preorder.next() {
             match event {
                 WalkEvent::Enter(SyntaxElement::Node(node)) => {
-                    self.visit_node(WalkEvent::Enter(node))
+                    let skipped_last_token = self.last_token_of_skippable_subtree(&node);
+                    self.visit_node(WalkEvent::Enter(node));
+
+                    if let Some(last_token) = skipped_last_token {
+                        // Comments are only queued while visiting a token,
+                        // and the first node other than a list that is entered
+                        // or left after that token flushes them. None of them
+                        // waits for a token of the skipped subtree.
+                        debug_assert!(self.pending_comments.is_empty());
+                        self.last_token = Some(last_token);
+                        preorder.skip_subtree();
+                    }
                 }
 
                 WalkEvent::Leave(SyntaxElement::Node(node)) => {
@@ -167,6 +179,41 @@ where
                 self.preceding_node = Some(node);
             }
         }
+    }
+
+    /// Returns the last token of `node` when the visitor can jump from entering
+    /// `node` straight to leaving it, and `None` when it has to visit the
+    /// node's descendants.
+    ///
+    /// Visiting the descendants only matters when it queues a comment or
+    /// records a skipped token. Neither happens when no token inside of `node`
+    /// has comments or skipped trivia, and the trailing trivia of the token in
+    /// front of `node` has no comments either. That trivia is processed
+    /// together with the first token of `node`, so its comments need the
+    /// nodes that start at that token.
+    ///
+    /// Lists are never skipped, because leaving a list doesn't reset the
+    /// visitor's state the way leaving any other node does.
+    fn last_token_of_skippable_subtree(
+        &self,
+        node: &SyntaxNode<Style::Language>,
+    ) -> Option<SyntaxToken<Style::Language>> {
+        if node.kind().is_list()
+            || node.has_comments_descendants()
+            || node.has_skipped_descendants()
+        {
+            return None;
+        }
+
+        if self
+            .last_token
+            .as_ref()
+            .is_some_and(SyntaxToken::has_trailing_comments)
+        {
+            return None;
+        }
+
+        node.last_token()
     }
 
     fn visit_token(&mut self, token: SyntaxToken<Style::Language>) {
@@ -812,9 +859,10 @@ mod tests {
     use crate::{TextSize, TransformSourceMap, TransformSourceMapBuilder};
     use biome_js_parser::{JsParserOptions, parse_module};
     use biome_js_syntax::{
-        JsIdentifierExpression, JsLanguage, JsParameters, JsParenthesizedExpression,
-        JsPropertyObjectMember, JsReferenceIdentifier, JsSequenceExpression,
-        JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression,
+        JsCallExpression, JsIdentifierExpression, JsLanguage, JsParameters,
+        JsParenthesizedExpression, JsPropertyObjectMember, JsReferenceIdentifier,
+        JsSequenceExpression, JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxNode,
+        JsUnaryExpression,
     };
     use biome_rowan::syntax::SyntaxElementKey;
     use biome_rowan::{
@@ -1124,6 +1172,149 @@ mod tests {
             .unwrap();
 
         assert!(!comments.trailing(&a.syntax().key()).is_empty());
+    }
+
+    #[test]
+    fn comment_in_front_of_comment_free_node() {
+        let (root, decorated, comments) = extract_comments("call(/* comment */ argument);");
+
+        assert_eq!(decorated.len(), 1);
+
+        let comment = decorated.last().unwrap();
+
+        assert_eq!(comment.text_position(), CommentTextPosition::SameLine);
+        assert_eq!(comment.lines_before(), 0);
+        assert_eq!(comment.lines_after(), 0);
+        assert_eq!(comment.preceding_node(), None);
+        assert_eq!(
+            comment
+                .following_node()
+                .map(|node| node.text_trimmed().to_string())
+                .as_deref(),
+            Some("argument")
+        );
+        assert_eq!(
+            comment
+                .following_token()
+                .map(|token| token.text_trimmed().to_string())
+                .as_deref(),
+            Some("argument")
+        );
+        assert_eq!(
+            comment.enclosing_node().kind(),
+            JsSyntaxKind::JS_CALL_ARGUMENTS
+        );
+
+        let argument = root
+            .descendants()
+            .filter_map(JsIdentifierExpression::cast)
+            .last()
+            .unwrap();
+
+        assert!(!comments.leading(&argument.syntax().key()).is_empty());
+    }
+
+    #[test]
+    fn comment_behind_comment_free_node() {
+        let (root, decorated, comments) = extract_comments(
+            r#"call(first(1, 2)
+  /* comment */
+);"#,
+        );
+
+        assert_eq!(decorated.len(), 1);
+
+        let comment = decorated.last().unwrap();
+
+        assert_eq!(comment.text_position(), CommentTextPosition::OwnLine);
+        assert_eq!(comment.lines_before(), 1);
+        assert_eq!(comment.lines_after(), 1);
+        assert_eq!(
+            comment
+                .preceding_node()
+                .map(|node| node.text_trimmed().to_string())
+                .as_deref(),
+            Some("first(1, 2)")
+        );
+        assert_eq!(comment.following_node(), None);
+        assert_eq!(
+            comment
+                .following_token()
+                .map(|token| token.text_trimmed().to_string())
+                .as_deref(),
+            Some(")")
+        );
+        assert_eq!(
+            comment.enclosing_node().kind(),
+            JsSyntaxKind::JS_CALL_ARGUMENTS
+        );
+
+        let first = root
+            .descendants()
+            .filter_map(JsCallExpression::cast)
+            .last()
+            .unwrap();
+
+        assert!(!comments.trailing(&first.syntax().key()).is_empty());
+    }
+
+    #[test]
+    fn comment_behind_line_break_of_comment_free_node() {
+        let comment = "/* comment */";
+        let root = JsSyntaxNode::new_detached(
+            JsSyntaxKind::JS_MODULE,
+            [
+                Some(
+                    JsSyntaxNode::new_detached(
+                        JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                        [Some(
+                            SyntaxToken::new_detached(
+                                JsSyntaxKind::IDENT,
+                                "first\n",
+                                [],
+                                [TriviaPiece::newline(1)],
+                            )
+                            .into(),
+                        )],
+                    )
+                    .into(),
+                ),
+                Some(
+                    JsSyntaxNode::new_detached(
+                        JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                        [Some(
+                            SyntaxToken::new_detached(
+                                JsSyntaxKind::IDENT,
+                                &std::format!("{comment} second"),
+                                [
+                                    TriviaPiece::multi_line_comment(TextSize::of(comment)),
+                                    TriviaPiece::whitespace(1),
+                                ],
+                                [],
+                            )
+                            .into(),
+                        )],
+                    )
+                    .into(),
+                ),
+            ],
+        );
+
+        let (decorated, comments) = extract_comments_from_node(&root);
+
+        assert_eq!(decorated.len(), 1);
+
+        let comment = decorated.last().unwrap();
+
+        assert_eq!(comment.text_position(), CommentTextPosition::OwnLine);
+        assert_eq!(comment.lines_before(), 1);
+        assert_eq!(comment.lines_after(), 0);
+        assert_eq!(comment.preceding_node(), root.first_child().as_ref());
+        assert_eq!(comment.following_node(), root.last_child().as_ref());
+
+        let second = root.last_child().unwrap();
+
+        assert!(!comments.leading(&second.key()).is_empty());
     }
 
     #[test]

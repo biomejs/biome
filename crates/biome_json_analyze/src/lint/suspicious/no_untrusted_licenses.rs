@@ -279,6 +279,9 @@ impl Rule for NoUntrustedLicenses {
             )
             .note(markup! {
                 "Dependencies without a license field may have unknown legal restrictions."
+            })
+            .note(markup! {
+                "Choose a dependency that specifies a license, or ask its authors to add one."
             }),
             Reason::Rejected(reject_reason, license) => match reject_reason {
                 RejectReason::Denied => RuleDiagnostic::new(
@@ -290,6 +293,9 @@ impl Rule for NoUntrustedLicenses {
                 )
                 .note(markup! {
                     "This license is explicitly listed in the deny option."
+                })
+                .note(markup! {
+                    "Remove or replace the dependency, or remove the license from the deny option if it is acceptable."
                 }),
                 RejectReason::Untrusted => RuleDiagnostic::new(
                     rule_category!(),

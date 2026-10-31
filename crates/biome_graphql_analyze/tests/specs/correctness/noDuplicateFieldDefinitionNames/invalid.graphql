@@ -34,3 +34,10 @@ extend input SomeInputObject {
 	bar: String
 	foo: String
 }
+
+type TwoDuplicates {
+	foo: String
+	bar: String
+	foo: String
+	bar: String
+}

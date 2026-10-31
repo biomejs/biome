@@ -1,20 +1,28 @@
 use biome_diagnostics::Severity;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
     options::PreferredQuote,
 };
 use biome_console::markup;
 use biome_js_factory::make;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsBindingPattern, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsMemberExpression, AnyJsObjectBindingPatternMember, JsAssignmentExpression,
-    JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty, JsSyntaxKind, T,
-    inner_string_text,
+    AnyJsMemberExpression, AnyJsObjectBindingPatternMember, AnyTsType, JsAssignmentExpression,
+    JsFormalParameter, JsLanguage, JsObjectBindingPattern, JsObjectBindingPatternProperty,
+    JsObjectBindingPatternShorthandProperty, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, T,
+    TsArrayType, TsBigintLiteralType, TsBigintType, TsBooleanLiteralType, TsBooleanType,
+    TsConstructorType, TsFunctionType, TsNullLiteralType, TsNumberLiteralType, TsNumberType,
+    TsObjectType, TsStringLiteralType, TsStringType, TsSymbolType, TsTemplateLiteralType,
+    TsTupleType, TsTypeAnnotation, TsUndefinedType, inner_string_text,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, declare_node_union};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, TextRange, declare_node_union,
+};
 use biome_rule_options::use_dom_node_text_content::UseDomNodeTextContentOptions;
 
 use crate::JsRuleAction;
+use crate::services::semantic::Semantic;
 
 const INNER_TEXT: &str = "innerText";
 const TEXT_CONTENT: &str = "textContent";
@@ -76,13 +84,22 @@ declare_node_union! {
 }
 
 impl Rule for UseDomNodeTextContent {
-    type Query = Ast<AnyUseDomNodeTextContentQuery>;
+    type Query = Semantic<AnyUseDomNodeTextContentQuery>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = UseDomNodeTextContentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        ctx.query().run()
+        let query = ctx.query();
+        let range = query.run()?;
+        let annotation = query.receiver_annotation(ctx.model());
+        if annotation
+            .and_then(|annotation| annotation.ty().ok())
+            .is_some_and(is_non_dom_type)
+        {
+            return None;
+        }
+        Some(range)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -189,7 +206,90 @@ impl AnyUseDomNodeTextContentQuery {
             }
         }
     }
+
+    /// Returns the type annotation written on the declaration of the value that `innerText` is
+    /// read from, written to, or destructured from.
+    ///
+    /// ## Examples
+    ///
+    /// ```ts
+    /// function f(node: { innerText: string }) { node.innerText; }
+    /// //               ^^^^^^^^^^^^^^^^^^^^^
+    /// function g({ innerText }: { innerText: string }) {}
+    /// //                        ^^^^^^^^^^^^^^^^^^^^^
+    /// ```
+    fn receiver_annotation(&self, model: &SemanticModel) -> Option<TsTypeAnnotation> {
+        let receiver = match self {
+            Self::AnyJsMemberExpression(node) => node.object().ok()?,
+            Self::JsAssignmentExpression(node) => match node.left().ok()?.as_any_js_assignment()? {
+                AnyJsAssignment::JsStaticMemberAssignment(node) => node.object().ok()?,
+                AnyJsAssignment::JsComputedMemberAssignment(node) => node.object().ok()?,
+                _ => return None,
+            },
+            Self::JsObjectBindingPatternProperty(node) => {
+                return object_pattern_annotation(node.syntax());
+            }
+            Self::JsObjectBindingPatternShorthandProperty(node) => {
+                return object_pattern_annotation(node.syntax());
+            }
+        };
+        let reference = receiver
+            .omit_parentheses()
+            .as_js_identifier_expression()?
+            .name()
+            .ok()?;
+        let declaration = model.binding(&reference)?.tree().declaration()?;
+        declaration_annotation(declaration.syntax())
+    }
 }
+
+/// Returns the type annotation of the parameter or variable declaration that contains the object
+/// pattern of `member`.
+fn object_pattern_annotation(member: &JsSyntaxNode) -> Option<TsTypeAnnotation> {
+    let pattern = JsObjectBindingPattern::cast(member.grand_parent()?)?;
+    declaration_annotation(&pattern.syntax().parent()?)
+}
+
+fn declaration_annotation(declaration: &JsSyntaxNode) -> Option<TsTypeAnnotation> {
+    if let Some(parameter) = JsFormalParameter::cast_ref(declaration) {
+        return parameter.type_annotation();
+    }
+    JsVariableDeclarator::cast_ref(declaration)?
+        .variable_annotation()?
+        .type_annotation()
+        .ok()
+        .flatten()
+}
+
+/// Returns `true` if `ty` is written as a type that can't hold a DOM node, such as
+/// `{ innerText: string }`, `string`, or a union of such types.
+///
+/// Named types aren't resolved, so they return `false` even when they don't refer to a DOM node.
+fn is_non_dom_type(ty: AnyTsType) -> bool {
+    let ty = ty.omit_parentheses();
+    if let AnyTsType::TsUnionType(union) = &ty {
+        return union.types().iter().all(|ty| ty.is_ok_and(is_non_dom_type));
+    }
+    NON_DOM_TYPE_KINDS.matches(ty.syntax().kind())
+}
+
+const NON_DOM_TYPE_KINDS: SyntaxKindSet<JsLanguage> = TsArrayType::KIND_SET
+    .union(TsBigintLiteralType::KIND_SET)
+    .union(TsBigintType::KIND_SET)
+    .union(TsBooleanLiteralType::KIND_SET)
+    .union(TsBooleanType::KIND_SET)
+    .union(TsConstructorType::KIND_SET)
+    .union(TsFunctionType::KIND_SET)
+    .union(TsNullLiteralType::KIND_SET)
+    .union(TsNumberLiteralType::KIND_SET)
+    .union(TsNumberType::KIND_SET)
+    .union(TsObjectType::KIND_SET)
+    .union(TsStringLiteralType::KIND_SET)
+    .union(TsStringType::KIND_SET)
+    .union(TsSymbolType::KIND_SET)
+    .union(TsTemplateLiteralType::KIND_SET)
+    .union(TsTupleType::KIND_SET)
+    .union(TsUndefinedType::KIND_SET);
 
 /// Returns the range of `innerText` when used in a member expression.
 ///

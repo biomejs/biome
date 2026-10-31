@@ -45,6 +45,7 @@ use biome_unicode_table::{
 
 use crate::MarkdownParser;
 use crate::lexer::MarkdownReLexContext;
+use crate::parser::OpenListItem;
 use crate::syntax::fenced_code_block::parse_fenced_code_block;
 use crate::syntax::header::parse_header;
 use crate::syntax::html_block::{at_html_block, parse_html_block};
@@ -52,18 +53,20 @@ use crate::syntax::link_block::{at_link_block, at_link_block_start, parse_link_b
 use crate::syntax::parse_error::list_nesting_too_deep;
 use crate::syntax::quote::{
     at_quote_indented_code_start, consume_quote_prefix, consume_quote_prefix_without_virtual,
-    emit_optional_marker_space, has_quote_prefix, parse_quote, parse_quote_block_list,
+    emit_optional_marker_space, has_quote_prefix, line_has_quote_prefix_at_current, open_quote,
+    parse_quote_block_list, parse_quote_in_container,
 };
 use crate::syntax::thematic_break_block::parse_thematic_break_block;
 use crate::syntax::with_virtual_line_start;
 use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS,
     MIN_FENCE_RUN_LENGTH, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES, at_block_interrupt,
-    at_indent_code_block, first_non_indent_byte, is_ordered_list_starts_with_one,
-    is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
+    at_indent_code_block, first_non_indent_byte, is_paragraph_like, is_whitespace_only,
+    parse_empty_paragraph,
 };
 use crate::syntax::{parse_any_block_with_indent_code_policy, parse_paragraph};
 use biome_rowan::{TextRange, TextSize};
+use std::rc::Rc;
 
 /// Tokens that start a new block (used for recovery)
 const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![
@@ -88,9 +91,15 @@ const BLOCK_RECOVERY_SET: TokenSet<MarkdownSyntaxKind> = token_set![
 /// column needed for CommonMark's indent rules.
 fn compute_marker_indent(p: &MarkdownParser) -> usize {
     if p.state().virtual_line_start == Some(p.cur_range().start()) {
-        // Inside block quotes, treat the virtual line start as column 0.
+        // Quote prefixes set the column origin; continuation indentation may
+        // already have been consumed before the marker.
         if p.state().block_quote_depth > 0 {
-            return p.line_start_leading_indent();
+            return if super::quote::line_has_quote_prefix_at_current(p, p.state().block_quote_depth)
+            {
+                super::real_line_indent_from_source(p).max(p.line_start_leading_indent())
+            } else {
+                p.line_start_leading_indent()
+            };
         }
 
         let source = p.source().source_text();
@@ -147,7 +156,68 @@ pub(crate) fn at_bullet_list_item(p: &mut MarkdownParser) -> bool {
 }
 
 fn list_marker_base_indent(p: &MarkdownParser) -> usize {
-    p.state().list_item_required_indent
+    match p.state().open_list_item.as_deref() {
+        Some(item) if item.block_quote_depth < p.state().block_quote_depth => 0,
+        _ => p.state().list_item_required_indent,
+    }
+}
+
+/// Record the list item whose content is about to be parsed as the innermost
+/// open item, using the already-updated `list_item_required_indent`.
+///
+/// Returns the previous innermost item, which the caller restores once the
+/// item's content is parsed.
+fn open_list_item(p: &mut MarkdownParser) -> Option<Rc<OpenListItem>> {
+    let parent = p.state().open_list_item.clone();
+    let item = OpenListItem {
+        required_indent: p.state().list_item_required_indent,
+        block_quote_depth: p.state().block_quote_depth,
+        parent: parent.clone(),
+    };
+    p.state_mut().open_list_item = Some(Rc::new(item));
+    parent
+}
+
+/// Content column of the deepest open list item that a line indented by
+/// `indent` columns still continues, or 0 when it continues none.
+///
+/// A list marker on such a line starts a new list item only when it sits at
+/// most three columns past this column. Further right, the line is lazy
+/// paragraph continuation text (CommonMark §5.2).
+pub(crate) fn enclosing_list_content_indent(p: &MarkdownParser, indent: usize) -> usize {
+    let quote_depth = p.state().block_quote_depth;
+    let mut line_bounds = None;
+    let mut item = p.state().open_list_item.as_deref();
+    while let Some(current) = item {
+        if current.required_indent > indent {
+            item = current.parent.as_deref();
+            continue;
+        }
+        let in_line_container = current.block_quote_depth == quote_depth
+            || (current.block_quote_depth < quote_depth && {
+                let (line_start, line_end) = *line_bounds.get_or_insert_with(|| {
+                    let source = p.source().source_text();
+                    let current: usize = p.cur_range().start().into();
+                    let line_start = source[..current].rfind(['\n', '\r']).map_or(0, |i| i + 1);
+                    let line_end = source[current..]
+                        .find(['\n', '\r'])
+                        .map_or(source.len(), |i| current + i);
+                    (line_start, line_end)
+                });
+                super::quote::skip_quote_prefixes_in_line(
+                    p,
+                    line_start,
+                    line_end,
+                    current.block_quote_depth + 1,
+                )
+                .is_none()
+            });
+        if in_line_container {
+            return current.required_indent;
+        }
+        item = current.parent.as_deref();
+    }
+    0
 }
 
 fn list_item_within_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
@@ -156,18 +226,41 @@ fn list_item_within_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
     }
 
     let indent = p.line_start_leading_indent();
-    let base_indent =
-        if p.state().virtual_line_start == Some(p.cur_range().start()) && base_indent > 0 {
-            0
-        } else {
-            base_indent
-        };
+    // A virtual line start past the line's content start means the base
+    // indent was already consumed, so `indent` is relative to it.
+    let base_indent = if p.state().virtual_line_start == Some(p.cur_range().start())
+        && base_indent > 0
+        && !at_line_content_start(p)
+    {
+        0
+    } else {
+        base_indent
+    };
 
     if base_indent == 0 {
         indent <= MAX_BLOCK_PREFIX_INDENT
     } else {
         indent >= base_indent && indent <= base_indent + MAX_BLOCK_PREFIX_INDENT
     }
+}
+
+/// Byte offset of the current line's content start: the line start, moved
+/// past the block quote prefixes before the cursor.
+///
+/// Scans the source because the prefixes are already consumed as tokens and
+/// lookahead cannot walk back to them.
+fn line_content_start_before_cursor(p: &MarkdownParser) -> usize {
+    let source = p.source().source_text();
+    let current: usize = p.cur_range().start().into();
+    let line_start = source[..current].rfind(['\n', '\r']).map_or(0, |i| i + 1);
+    super::quote::skip_quote_prefixes_in_line(p, line_start, current, p.state().block_quote_depth)
+        .unwrap_or(line_start)
+}
+
+/// Whether the cursor sits at the start of the current line, or directly
+/// after its block quote prefixes, with no indentation consumed yet.
+fn at_line_content_start(p: &MarkdownParser) -> bool {
+    line_content_start_before_cursor(p) == usize::from(p.cur_range().start())
 }
 
 fn skip_leading_whitespace_tokens(p: &mut MarkdownParser) {
@@ -311,47 +404,34 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
 }
 
 fn at_bullet_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
-    p.lookahead(|p| {
-        if !list_item_within_indent(p, base_indent) {
-            return false;
+    let is_candidate = match p.cur() {
+        MD_SETEXT_UNDERLINE_LITERAL => is_single_dash_setext_marker(p.cur_text()),
+        MD_TEXTUAL_LITERAL => {
+            is_whitespace_only(p.cur_text()) || is_textual_bullet_marker(p.cur_text())
         }
+        T![-] | T![*] | T![+] => true,
+        _ => false,
+    };
+    if !is_candidate || !list_item_within_indent(p, base_indent) {
+        return false;
+    }
+    let marker = first_non_whitespace_token(p);
+    let is_bullet = match p.nth(marker) {
+        MD_SETEXT_UNDERLINE_LITERAL => p.nth_text(marker).is_some_and(is_single_dash_setext_marker),
+        MD_TEXTUAL_LITERAL => p.nth_text(marker).is_some_and(is_textual_bullet_marker),
+        T![-] | T![*] | T![+] => true,
+        _ => false,
+    };
+    is_bullet && marker_followed_by_whitespace_or_eol_at(p, marker + 1)
+}
 
-        skip_leading_whitespace_tokens(p);
-
-        // Check for -, *, or + at the start of a line
-        // Thematic breaks (--- or ***) are lexed as MD_THEMATIC_BREAK_LITERAL,
-        // so if we see MINUS, STAR, or PLUS, it's a single character marker.
-        // A single-dash setext underline token can also represent an empty list item.
-        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
-            if !is_single_dash_setext_marker(p.cur_text()) {
-                return false;
-            }
-        } else if p.at(MD_TEXTUAL_LITERAL) {
-            if !is_textual_bullet_marker(p.cur_text()) {
-                return false;
-            }
-        } else if !p.at(T![-]) && !p.at(T![*]) && !p.at(T![+]) {
-            return false;
-        }
-
-        if p.at(MD_SETEXT_UNDERLINE_LITERAL) {
-            p.bump_remap(T![-]);
-        } else if p.at(MD_TEXTUAL_LITERAL) {
-            let text = p.cur_text();
-            if text == "-" {
-                p.bump_remap(T![-]);
-            } else if text == "*" {
-                p.bump_remap(T![*]);
-            } else if text == "+" {
-                p.bump_remap(T![+]);
-            } else {
-                return false;
-            }
-        } else {
-            p.bump(p.cur());
-        }
-        marker_followed_by_whitespace_or_eol(p)
-    })
+fn first_non_whitespace_token(p: &mut MarkdownParser) -> usize {
+    let mut offset = 0;
+    while p.nth_at(offset, MD_TEXTUAL_LITERAL) && p.nth_text(offset).is_some_and(is_whitespace_only)
+    {
+        offset += 1;
+    }
+    offset
 }
 
 pub(crate) fn marker_followed_by_whitespace_or_eol(p: &mut MarkdownParser) -> bool {
@@ -855,7 +935,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
 
     // Count spaces BEFORE consuming (peek from source text)
     let spaces_after_marker =
-        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width);
+        count_spaces_after_marker(p.source_after_current(), current_absolute_column(p));
 
     let first_line_empty = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
@@ -899,11 +979,13 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
         };
     p.state_mut().list_item_marker_indent = marker_indent;
     p.state_mut().task_list_item_allowed = true;
+    let prev_open_list_item = open_list_item(p);
 
     // Parse block content (MD_BLOCK_LIST)
     let blank_info = parse_list_item_block_content(p, effective_spaces);
 
     // Restore previous required indent
+    p.state_mut().open_list_item = prev_open_list_item;
     p.state_mut().list_item_required_indent = prev_required_indent;
     p.state_mut().list_item_marker_indent = prev_marker_indent;
     p.state_mut().task_list_item_allowed = prev_task_list_item_allowed;
@@ -924,32 +1006,97 @@ pub(crate) fn at_order_list_item(p: &mut MarkdownParser) -> bool {
 }
 
 fn at_order_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
-    p.lookahead(|p| {
-        if !list_item_within_indent(p, base_indent) {
-            return false;
-        }
-
-        skip_leading_whitespace_tokens(p);
-
-        // Check for ordered list marker token at line start
-        if !p.at(MD_ORDERED_LIST_MARKER) {
-            return false;
-        }
-
-        p.bump(MD_ORDERED_LIST_MARKER);
-        marker_followed_by_whitespace_or_eol(p)
-    })
+    let is_candidate = p.at(MD_ORDERED_LIST_MARKER)
+        || (p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()));
+    if !is_candidate || !list_item_within_indent(p, base_indent) {
+        return false;
+    }
+    let marker = first_non_whitespace_token(p);
+    p.nth_at(marker, MD_ORDERED_LIST_MARKER)
+        && marker_followed_by_whitespace_or_eol_at(p, marker + 1)
 }
 
-fn at_order_list_item_textual_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
-    p.lookahead(|p| {
-        if !list_item_within_indent(p, base_indent) {
-            return false;
+fn at_list_item_with_base_indent(p: &mut MarkdownParser, base_indent: usize) -> bool {
+    let is_candidate = match p.cur() {
+        MD_SETEXT_UNDERLINE_LITERAL => is_single_dash_setext_marker(p.cur_text()),
+        MD_ORDERED_LIST_MARKER | T![-] | T![*] | T![+] => true,
+        MD_TEXTUAL_LITERAL => {
+            let text = p.cur_text();
+            is_whitespace_only(text)
+                || is_textual_bullet_marker(text)
+                || textual_starts_with_ordered_marker(text)
         }
+        _ => false,
+    };
+    if !is_candidate || !list_item_within_indent(p, base_indent) {
+        return false;
+    }
 
-        skip_leading_whitespace_tokens(p);
-        p.at(MD_TEXTUAL_LITERAL) && textual_starts_with_ordered_marker(p.cur_text())
-    })
+    let source = p.source_after_current().trim_start_matches([' ', '\t']);
+    let bytes = source.as_bytes();
+    let is_bullet = matches!(bytes.first(), Some(b'-' | b'*' | b'+'))
+        && bytes
+            .get(1)
+            .is_none_or(|byte| matches!(byte, b' ' | b'\t' | b'\r' | b'\n'));
+    is_bullet || textual_starts_with_ordered_marker(source)
+}
+
+enum ContinuationListMarker {
+    Bullet,
+    Ordered,
+    TextualOrdered,
+}
+
+fn continuation_list_marker_with_base_indent(
+    p: &mut MarkdownParser,
+    base_indent: usize,
+) -> Option<ContinuationListMarker> {
+    let is_candidate = match p.cur() {
+        MD_SETEXT_UNDERLINE_LITERAL => is_single_dash_setext_marker(p.cur_text()),
+        MD_ORDERED_LIST_MARKER | T![-] | T![*] | T![+] => true,
+        MD_TEXTUAL_LITERAL => {
+            let text = p.cur_text();
+            is_whitespace_only(text)
+                || is_textual_bullet_marker(text)
+                || textual_starts_with_ordered_marker(text)
+        }
+        _ => false,
+    };
+    if !is_candidate || !list_item_within_indent(p, base_indent) {
+        return None;
+    }
+
+    let marker = first_non_whitespace_token(p);
+    match p.nth(marker) {
+        MD_SETEXT_UNDERLINE_LITERAL
+            if p.nth_text(marker).is_some_and(is_single_dash_setext_marker)
+                && marker_followed_by_whitespace_or_eol_at(p, marker + 1) =>
+        {
+            Some(ContinuationListMarker::Bullet)
+        }
+        MD_TEXTUAL_LITERAL => {
+            let (is_bullet, is_ordered) = p.nth_text(marker).map(|text| {
+                (
+                    is_textual_bullet_marker(text),
+                    textual_starts_with_ordered_marker(text),
+                )
+            })?;
+            if is_bullet && marker_followed_by_whitespace_or_eol_at(p, marker + 1) {
+                Some(ContinuationListMarker::Bullet)
+            } else if is_ordered {
+                Some(ContinuationListMarker::TextualOrdered)
+            } else {
+                None
+            }
+        }
+        T![-] | T![*] | T![+] if marker_followed_by_whitespace_or_eol_at(p, marker + 1) => {
+            Some(ContinuationListMarker::Bullet)
+        }
+        MD_ORDERED_LIST_MARKER if marker_followed_by_whitespace_or_eol_at(p, marker + 1) => {
+            Some(ContinuationListMarker::Ordered)
+        }
+        _ => None,
+    }
 }
 
 /// Struct implementing `ParseNodeList` for ordered lists.
@@ -1181,7 +1328,7 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
 
     // Count spaces (peek from source text BEFORE consuming)
     let spaces_after_marker =
-        count_spaces_after_marker(p.source_after_current(), marker_indent + marker_width);
+        count_spaces_after_marker(p.source_after_current(), current_absolute_column(p));
 
     let first_line_empty = p.lookahead(|p| {
         while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
@@ -1225,9 +1372,11 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
         };
     p.state_mut().list_item_marker_indent = marker_indent;
     p.state_mut().task_list_item_allowed = true;
+    let prev_open_list_item = open_list_item(p);
 
     let blank_info = parse_list_item_block_content(p, spaces_after_marker);
 
+    p.state_mut().open_list_item = prev_open_list_item;
     p.state_mut().list_item_required_indent = prev_required_indent;
     p.state_mut().list_item_marker_indent = prev_marker_indent;
     p.state_mut().task_list_item_allowed = prev_task_list_item_allowed;
@@ -1245,8 +1394,14 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     (Present(completed), blank_info)
 }
 
-/// Count the number of space/tab characters at the start of a string.
-/// Used to determine actual spaces after list marker.
+/// Absolute column of the current token, with tabs expanded from the line
+/// start. Tab stops are absolute, so measuring a tab after a list marker
+/// needs this column even when the marker follows a block quote prefix.
+fn current_absolute_column(p: &MarkdownParser) -> usize {
+    p.cached_absolute_column_at(p.cur_range().start().into())
+}
+
+/// Count the leading whitespace columns from an absolute column.
 fn count_spaces_after_marker(s: &str, start_column: usize) -> usize {
     let mut column = start_column;
 
@@ -1371,50 +1526,25 @@ fn quote_only_line_indent_at_current(p: &MarkdownParser, depth: usize) -> Option
         .find('\n')
         .map_or(source.len(), |offset| start + offset);
 
-    let mut i = start;
-    for _ in 0..depth {
-        let mut column = 0usize;
-        while i < line_end && column < MAX_BLOCK_PREFIX_INDENT {
-            match bytes[i] {
-                b' ' => {
-                    column += 1;
-                    i += 1;
-                }
-                b'\t' => {
-                    let advance = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
-                    column += advance;
-                    i += 1;
-                }
-                _ => break,
-            }
-        }
+    let mut i = super::quote::skip_quote_prefixes_in_line(p, start, line_end, depth)?;
 
-        if i >= line_end || bytes[i] != b'>' {
-            return None;
-        }
-        i += 1;
-
-        if i < line_end && (bytes[i] == b' ' || bytes[i] == b'\t') {
-            i += 1;
-        }
-    }
-
-    let mut indent = 0usize;
+    let start_column = p.cached_absolute_column_at(i);
+    let mut column = start_column;
     while i < line_end {
         match bytes[i] {
             b' ' => {
-                indent += 1;
+                column += 1;
                 i += 1;
             }
             b'\t' => {
-                indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
+                column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                 i += 1;
             }
             _ => return None,
         }
     }
 
-    Some(indent)
+    Some(column - start_column)
 }
 
 fn next_quote_content_indent(p: &MarkdownParser, depth: usize) -> Option<usize> {
@@ -1438,46 +1568,21 @@ fn next_quote_content_indent(p: &MarkdownParser, depth: usize) -> Option<usize> 
             line_end -= 1;
         }
 
-        let mut i = line_start;
-        for _ in 0..depth {
-            let mut column = 0usize;
-            while i < line_end && column < MAX_BLOCK_PREFIX_INDENT {
-                match bytes[i] {
-                    b' ' => {
-                        column += 1;
-                        i += 1;
-                    }
-                    b'\t' => {
-                        let advance = TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
-                        column += advance;
-                        i += 1;
-                    }
-                    _ => break,
-                }
-            }
+        let mut i = super::quote::skip_quote_prefixes_in_line(p, line_start, line_end, depth)?;
 
-            if i >= line_end || bytes[i] != b'>' {
-                return None;
-            }
-            i += 1;
-
-            if i < line_end && (bytes[i] == b' ' || bytes[i] == b'\t') {
-                i += 1;
-            }
-        }
-
-        let mut indent = 0usize;
+        let start_column = p.cached_absolute_column_at(i);
+        let mut column = start_column;
         while i < line_end {
             match bytes[i] {
                 b' ' => {
-                    indent += 1;
+                    column += 1;
                     i += 1;
                 }
                 b'\t' => {
-                    indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES);
+                    column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES);
                     i += 1;
                 }
-                _ => return Some(indent),
+                _ => return Some(column - start_column),
             }
         }
 
@@ -1631,9 +1736,13 @@ fn handle_blank_lines(p: &mut MarkdownParser, state: &mut ListItemLoopState) -> 
         return outcome;
     }
 
-    // Phases 4-5 share a quote-prefix check.
+    // Phases 4-5 share a quote-prefix check. A nested list item can consume
+    // the prefixes of a line that it then leaves to this item. Probing again
+    // would take a `>` in the line's content for a continuation prefix, as in
+    // the second `>` of `> - one\n>   - nested\n> > quoted`.
     let line_has_quote_prefix = quote_depth > 0
         && (p.is_at_line_start() || p.has_preceding_line_break())
+        && !line_has_quote_prefix_at_current(p, quote_depth)
         && (has_quote_prefix(p, quote_depth)
             || quote_only_line_indent_at_current(p, quote_depth).is_some());
 
@@ -1756,6 +1865,10 @@ fn blank_line_phase_quote_only_blank(
         p.at(NEWLINE) || p.at(T![EOF])
     });
 
+    if is_quote_blank_line && next_quote_content_indent(p, quote_depth).is_none() {
+        return Some(BlankLineOutcome::resolved(LoopAction::Break));
+    }
+
     if is_quote_blank_line {
         let m = p.start();
         p.bump(NEWLINE);
@@ -1823,6 +1936,10 @@ fn blank_line_phase_quote_only_after_prefix(
         }
         p.at(NEWLINE) || p.at(T![EOF])
     });
+
+    if is_quote_only_line && next_quote_content_indent(p, quote_depth).is_none() {
+        return Some(BlankLineOutcome::resolved(LoopAction::Break));
+    }
 
     if is_quote_only_line {
         consume_quote_prefix(p, quote_depth);
@@ -2247,7 +2364,7 @@ fn parse_first_line_blocks(
         }
         state.first_line = false;
 
-        p.state_mut().virtual_line_start = prev_virtual;
+        restore_virtual_line_start_after_nested_list(p, prev_virtual);
         p.state_mut().list_item_required_indent = prev_required;
         return LoopAction::Continue;
     }
@@ -2260,6 +2377,23 @@ fn parse_first_line_blocks(
     }
 
     LoopAction::FallThrough
+}
+
+/// Restore `virtual_line_start` to `prev_virtual` after parsing a nested list,
+/// unless the list stopped at a virtual line start.
+///
+/// A list item consumes the block quote prefix of the next line before it
+/// checks whether the line continues the item. When the line belongs to an
+/// enclosing list instead, as `- two` does in `> - one\n>   - nested\n> - two`,
+/// the virtual line start set after that prefix is the only record that the
+/// cursor sits at the start of the line's content.
+fn restore_virtual_line_start_after_nested_list(
+    p: &mut MarkdownParser,
+    prev_virtual: Option<TextSize>,
+) {
+    if p.state().virtual_line_start != Some(p.cur_range().start()) {
+        p.state_mut().virtual_line_start = prev_virtual;
+    }
 }
 
 fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> bool {
@@ -2278,7 +2412,12 @@ fn list_link_reference_before_dash_thematic_break(p: &mut MarkdownParser) -> boo
     let line = &line[..line_end];
     let required_indent = p.state().list_item_required_indent;
 
-    dash_thematic_break_after_required_indent(line, required_indent).is_some()
+    dash_thematic_break_after_required_indent(
+        line,
+        p.cached_absolute_column_at(line_start),
+        required_indent,
+    )
+    .is_some()
 }
 
 fn next_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option<usize> {
@@ -2298,7 +2437,7 @@ fn next_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option<us
     strip_quote_prefixes(next_line, quote_prefix_count).map(|offset| next_line_start + offset)
 }
 
-fn count_quote_prefixes(mut line: &str) -> usize {
+pub(crate) fn count_quote_prefixes(mut line: &str) -> usize {
     let mut count = 0usize;
     while let Some(offset) = strip_one_quote_prefix(line) {
         count += 1;
@@ -2307,7 +2446,7 @@ fn count_quote_prefixes(mut line: &str) -> usize {
     count
 }
 
-fn strip_quote_prefixes(line: &str, count: usize) -> Option<usize> {
+pub(crate) fn strip_quote_prefixes(line: &str, count: usize) -> Option<usize> {
     let mut byte_offset = 0usize;
     for _ in 0..count {
         let offset = strip_one_quote_prefix(&line[byte_offset..])?;
@@ -2355,7 +2494,11 @@ fn current_line_dash_thematic_break_after_required_indent(
     let source = p.source().source_text();
     let line = source.get(line_start..)?;
     let line_end = line.find(['\n', '\r']).unwrap_or(line.len());
-    dash_thematic_break_after_required_indent(&line[..line_end], required_indent)
+    dash_thematic_break_after_required_indent(
+        &line[..line_end],
+        p.cached_absolute_column_at(line_start),
+        required_indent,
+    )
 }
 
 fn current_line_required_indent_byte_count(
@@ -2365,7 +2508,9 @@ fn current_line_required_indent_byte_count(
     let line_start = current_line_start_after_current_quote_prefixes(p)?;
     let source = p.source().source_text();
     let line = source.get(line_start..)?;
-    required_indent_byte_count(line, required_indent).map(|(byte_offset, _)| byte_offset)
+    let start_column = p.cached_absolute_column_at(line_start);
+    required_indent_byte_count(line, start_column, required_indent)
+        .map(|(byte_offset, _)| byte_offset)
 }
 
 fn current_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option<usize> {
@@ -2386,12 +2531,22 @@ fn current_line_start_after_current_quote_prefixes(p: &MarkdownParser) -> Option
         .or(Some(physical_line_start))
 }
 
-fn required_indent_byte_count(line: &str, required_indent: usize) -> Option<(usize, usize)> {
+/// Measure the leading whitespace of `line` that covers `required_indent`
+/// columns, returning its byte length and the columns it covers.
+///
+/// `start_column` is the absolute column where `line` begins. Tabs expand to
+/// absolute tab stops, so a line that starts after a block quote prefix needs
+/// it to measure tab widths correctly.
+fn required_indent_byte_count(
+    line: &str,
+    start_column: usize,
+    required_indent: usize,
+) -> Option<(usize, usize)> {
     let mut byte_offset = 0usize;
-    let mut column = 0usize;
+    let mut column = start_column;
     let bytes = line.as_bytes();
 
-    while column < required_indent {
+    while column - start_column < required_indent {
         let byte = bytes.get(byte_offset)?;
         match byte {
             b' ' => column += 1,
@@ -2401,11 +2556,18 @@ fn required_indent_byte_count(line: &str, required_indent: usize) -> Option<(usi
         byte_offset += 1;
     }
 
-    Some((byte_offset, column))
+    Some((byte_offset, column - start_column))
 }
 
-fn dash_thematic_break_after_required_indent(line: &str, required_indent: usize) -> Option<usize> {
-    let (mut byte_offset, mut column) = required_indent_byte_count(line, required_indent)?;
+fn dash_thematic_break_after_required_indent(
+    line: &str,
+    start_column: usize,
+    required_indent: usize,
+) -> Option<usize> {
+    let (mut byte_offset, indent_columns) =
+        required_indent_byte_count(line, start_column, required_indent)?;
+    let mut column = start_column + indent_columns;
+    let item_content_column = start_column + required_indent;
     let bytes = line.as_bytes();
 
     let required_byte_offset = byte_offset;
@@ -2415,7 +2577,7 @@ fn dash_thematic_break_after_required_indent(line: &str, required_indent: usize)
             b'\t' => column + (TAB_STOP_SPACES - (column % TAB_STOP_SPACES)),
             _ => break,
         };
-        if next_column.saturating_sub(required_indent) > MAX_BLOCK_PREFIX_INDENT {
+        if next_column.saturating_sub(item_content_column) > MAX_BLOCK_PREFIX_INDENT {
             return None;
         }
         column = next_column;
@@ -2438,50 +2600,19 @@ fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
     dash_count >= MIN_THEMATIC_BREAK_RUN
 }
 
-/// Return true when the current line's ordered marker starts with `1`.
-///
-/// The cursor may still be on separate indentation tokens, or the lexer may
-/// have bundled indentation and marker text into one `MD_TEXTUAL_LITERAL`
-/// (for example, `"  1. child"`).
-fn nested_ordered_marker_starts_with_one(p: &mut MarkdownParser) -> bool {
-    if p.at(MD_TEXTUAL_LITERAL) {
-        let trimmed = p.cur_text().trim_start_matches([' ', '\t']);
-        if let Some(rest) = trimmed
-            .strip_prefix("1.")
-            .or_else(|| trimmed.strip_prefix("1)"))
-        {
-            return rest.is_empty() || rest.starts_with([' ', '\t']);
-        }
+/// Return whether the current line has an ordered marker, and whether it
+/// starts with `1`, without asking the lexer to tokenize beyond the cursor.
+fn ordered_marker_starting_with_one(p: &MarkdownParser) -> Option<bool> {
+    let source = p.source_after_current().trim_start_matches([' ', '\t']);
+    if !textual_starts_with_ordered_marker(source) {
+        return None;
     }
-    p.lookahead(|p| {
-        skip_leading_whitespace_tokens(p);
-        is_ordered_list_starts_with_one(p)
-    })
-}
 
-/// Return true when the current line starts with an ordered marker.
-///
-/// This detects markers that are too deeply indented for `at_order_list_item`,
-/// so CommonMark §5.2 paragraph-interrupt rules still apply.
-fn line_starts_with_ordered_marker_after_whitespace(p: &mut MarkdownParser) -> bool {
-    if p.at(MD_TEXTUAL_LITERAL) {
-        let trimmed = p.cur_text().trim_start_matches([' ', '\t']);
-        if textual_starts_with_ordered_marker(trimmed) {
-            return true;
-        }
-    }
-    p.lookahead(|p| {
-        while p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-            p.bump(MD_TEXTUAL_LITERAL);
-        }
-        if p.at(MD_ORDERED_LIST_MARKER) {
-            return true;
-        }
-        if p.at(MD_TEXTUAL_LITERAL) {
-            return textual_starts_with_ordered_marker(p.cur_text());
-        }
-        false
-    })
+    let starts_with_one = source
+        .strip_prefix("1.")
+        .or_else(|| source.strip_prefix("1)"))
+        .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t', '\r', '\n']));
+    Some(starts_with_one)
 }
 
 /// Emit an explicit `MdContinuationIndent` covering exactly `indent` columns
@@ -2550,6 +2681,7 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
         indent_m.complete(p, MD_QUOTE_INDENT_LIST);
         p.bump_remap(T![>]);
         p.state_mut().block_quote_depth += 1;
+        let prev_open_quote = open_quote(p, prev_required);
 
         let has_indented_code = at_quote_indented_code_start(p);
         let marker_space = emit_optional_marker_space(p, has_indented_code);
@@ -2558,6 +2690,7 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
 
         parse_quote_block_list(p);
 
+        p.state_mut().open_quote = prev_open_quote;
         p.state_mut().block_quote_depth -= 1;
         let completed = quote_m.complete(p, MD_QUOTE);
         let range = completed.range(p);
@@ -2568,7 +2701,7 @@ fn parse_first_line_blockquote(p: &mut MarkdownParser, state: &mut ListItemLoopS
         true
     } else {
         // T![>] case: parse_quote can handle it directly
-        let parsed = parse_quote(p);
+        let parsed = parse_quote_in_container(p, prev_required);
         if parsed.is_present() {
             state.record_first_line_block();
             true
@@ -2620,10 +2753,9 @@ fn check_continuation_indent(
         // Below the marker indent. Lazy continuation is still allowed for
         // plain-text lines per CommonMark §5.2; list item starts and block
         // interrupts must break.
+        let base_indent = enclosing_list_content_indent(p, indent);
         let can_lazy = state.last_block_was_paragraph
-            && !at_bullet_list_item_with_base_indent(p, 0)
-            && !at_order_list_item_with_base_indent(p, 0)
-            && !at_order_list_item_textual_with_base_indent(p, 0)
+            && !at_list_item_with_base_indent(p, base_indent)
             && !at_current_line_block_interrupt(p);
         if !can_lazy {
             return ContinuationResult {
@@ -2646,14 +2778,14 @@ fn check_continuation_indent(
 
             // Detect nested list markers before emitting indentation because
             // at_*_list_item uses the original leading whitespace.
-            let starts_nested_bullet = at_bullet_list_item(p);
-            let mut starts_nested_ordered = !starts_nested_bullet && at_order_list_item(p);
-            let mut starts_nested_ordered_textual = !starts_nested_bullet
-                && !starts_nested_ordered
-                && at_order_list_item_textual_with_base_indent(
-                    p,
-                    p.state().list_item_required_indent,
-                );
+            let nested_marker =
+                continuation_list_marker_with_base_indent(p, list_marker_base_indent(p));
+            let starts_nested_bullet =
+                matches!(nested_marker, Some(ContinuationListMarker::Bullet));
+            let mut starts_nested_ordered =
+                matches!(nested_marker, Some(ContinuationListMarker::Ordered));
+            let mut starts_nested_ordered_textual =
+                matches!(nested_marker, Some(ContinuationListMarker::TextualOrdered));
 
             // CommonMark §5.2: ordered markers that do not start with `1`
             // cannot interrupt an ongoing paragraph. Detect any ordered
@@ -2661,8 +2793,8 @@ fn check_continuation_indent(
             // this base indent, then verify whether it starts with `1`.
             let force_paragraph_continuation = state.last_block_was_paragraph
                 && !prev_was_blank
-                && line_starts_with_ordered_marker_after_whitespace(p)
-                && !nested_ordered_marker_starts_with_one(p);
+                && !starts_nested_bullet
+                && ordered_marker_starting_with_one(p) == Some(false);
             if force_paragraph_continuation {
                 // Clear nested ordered matches so the line is parsed as
                 // paragraph continuation below instead of as a child list.
@@ -2690,7 +2822,13 @@ fn check_continuation_indent(
                 }
                 state.last_block_was_paragraph = false;
                 state.first_line = false;
-                p.state_mut().virtual_line_start = prev_virtual;
+                // The nested list is this item's latest content, so the item
+                // ends with a blank line only if that list does.
+                state.last_was_blank = p.take_last_list_ends_with_blank();
+                if state.last_was_blank {
+                    state.has_blank_line = true;
+                }
+                restore_virtual_line_start_after_nested_list(p, prev_virtual);
                 return ContinuationResult {
                     action: LoopAction::Continue,
                     restore: VirtualLineRestore::None,
@@ -2735,10 +2873,8 @@ fn check_continuation_indent(
         }
     } else {
         // Insufficient indentation - check for block interrupts
-        if at_bullet_list_item_with_base_indent(p, state.marker_indent)
-            || at_order_list_item_with_base_indent(p, state.marker_indent)
-            || at_order_list_item_textual_with_base_indent(p, state.marker_indent)
-        {
+        let base_indent = enclosing_list_content_indent(p, indent);
+        if at_list_item_with_base_indent(p, base_indent) {
             return ContinuationResult {
                 action: LoopAction::Break,
                 restore: VirtualLineRestore::None,

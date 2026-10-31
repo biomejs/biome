@@ -1,0 +1,56 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-duplicate.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-if="ok" ref="box" />
+  <div v-else ref="box" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-duplicate.vue:3:23 lint/nursery/noVueUnusedRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template ref box is never used.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-if="ok" ref="box" />
+      │                       ^^^
+    4 │   <div v-else ref="box" />
+    5 │ </template>
+  
+  i Nothing reads this element through $refs or useTemplateRef(), so the ref attribute has no effect.
+  
+  i Remove the ref attribute, or use the ref.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-duplicate.vue:4:20 lint/nursery/noVueUnusedRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template ref box is never used.
+  
+    2 │ <template>
+    3 │   <div v-if="ok" ref="box" />
+  > 4 │   <div v-else ref="box" />
+      │                    ^^^
+    5 │ </template>
+    6 │ 
+  
+  i Nothing reads this element through $refs or useTemplateRef(), so the ref attribute has no effect.
+  
+  i Remove the ref attribute, or use the ref.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

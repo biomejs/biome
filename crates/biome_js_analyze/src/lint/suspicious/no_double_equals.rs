@@ -78,6 +78,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::Eslint("eqeqeq").same(),
             RuleSource::EslintVueJs("eqeqeq").same(),
+            RuleSource::DenoLint("eqeqeq").same(),
         ],
         recommended: true,
         severity: Severity::Error,

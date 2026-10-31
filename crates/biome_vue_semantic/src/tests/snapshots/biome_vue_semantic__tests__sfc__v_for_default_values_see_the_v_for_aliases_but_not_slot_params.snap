@@ -1,0 +1,13 @@
+---
+source: crates/biome_vue_semantic/src/tests/sfc.rs
+assertion_line: 52
+expression: "references(r#\"<script setup>\nimport List from './List.vue'\ndefineProps(['rows', 'fallback', 'id'])\n</script>\n<template>\n  <li v-for=\"({ id = fallback }, index = id) in rows\">{{ index }}</li>\n  <List v-for=\"{ row = fallback } in rows\" v-slot=\"{ fallback }\">{{ fallback }}</List>\n</template>\n\"#)"
+---
+ref rows 154..158 Binding Identifier Read -> Prop rows
+ref fallback 127..135 Binding Identifier Read -> Prop fallback
+ref id 147..149 Binding Identifier Read -> VForAlias id
+ref index 163..168 Binding Identifier Read -> VForAlias index
+ref rows 214..218 Binding Identifier Read -> Prop rows
+ref fallback 200..208 Binding Identifier Read -> Prop fallback
+ref fallback 245..253 Binding Identifier Read -> SlotParam fallback
+ref List 180..184 Component TagName(ElementId(3)) Read -> Import List

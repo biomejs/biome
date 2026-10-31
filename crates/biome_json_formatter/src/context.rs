@@ -1,8 +1,9 @@
 use crate::JsonCommentStyle;
 use crate::comments::{FormatJsonLeadingComment, JsonComments};
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::separated::TrailingSeparator;
-use biome_formatter::{BracketSpacing, DelimiterSpacing, Expand, IndentWidth, prelude::*};
+use biome_formatter::{BracketSpacing, DelimiterSpacing, Expand, IndentWidth, rowan::prelude::*};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
@@ -39,6 +40,7 @@ impl JsonFormatContext {
 
 impl FormatContext for JsonFormatContext {
     type Options = JsonFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

@@ -69,7 +69,7 @@ try {
 ```
 invalid.js:6:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  i The original error is not passed to the new `Error` object.
   
     4 │   throw new Error("Original error");
     5 │ } catch (err) {
@@ -78,13 +78,17 @@ invalid.js:6:3 lint/style/useErrorCause ━━━━━━━━━━━━━�
     7 │ }
     8 │ 
   
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
 
 ```
 
 ```
 invalid.js:13:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  i The original error is not passed to the new `Error` object.
   
     11 │   throw new Error("Original error");
     12 │ } catch (err) {
@@ -93,13 +97,17 @@ invalid.js:13:3 lint/style/useErrorCause ━━━━━━━━━━━━━
     14 │ }
     15 │ 
   
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
 
 ```
 
 ```
 invalid.js:27:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is being discarded because the `catch` clause doesn't have a parameter.Specify an error object in the `catch` clause to access the original error.
+  i The original error is discarded because the `catch` clause has no parameter.
   
     25 │ 	doSomething();
     26 │ } catch {
@@ -108,13 +116,17 @@ invalid.js:27:2 lint/style/useErrorCause ━━━━━━━━━━━━━
     28 │ }
     29 │ 
   
+  i Without a parameter, the code cannot access the original error, so its details are lost.
+  
+  i Add a parameter to the `catch` clause and pass it as the `cause` of the new error.
+  
 
 ```
 
 ```
 invalid.js:33:10 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
+  i The error is destructured in the `catch` clause.
   
     31 │ try {
     32 │   throw new Error("Original error");
@@ -123,13 +135,17 @@ invalid.js:33:10 lint/style/useErrorCause ━━━━━━━━━━━━�
     34 │   throw new Error(message);
     35 │ }
   
+  i Destructuring can lose information from the error object, such as the stack trace. The original error also cannot be passed as the `cause`.
+  
+  i Catch the error in a single variable, read its properties from that variable, and pass the variable as the `cause`.
+  
 
 ```
 
 ```
 invalid.js:41:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  i The original error is not passed to the new `Error` object.
   
     39 │   throw new Error("Original error");
     40 │ } catch (err) {
@@ -137,6 +153,10 @@ invalid.js:41:3 lint/style/useErrorCause ━━━━━━━━━━━━━
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ }
     43 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
   
 
 ```
@@ -162,13 +182,17 @@ invalid.js:49:58 lint/style/useErrorCause ━━━━━━━━━━━━�
     47 │     if (whatever) {
     48 │         const error = anotherError; // This declaration is the problem.
   
+  i The `cause` refers to a different value than the caught error, so the original error is still lost.
+  
+  i Rename the variable that shadows the caught error, or pass the caught error as the `cause`.
+  
 
 ```
 
 ```
 invalid.js:56:2 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  i The original error is not passed to the new `Error` object.
   
     54 │     doSomething();
     55 │ } catch (err) {
@@ -176,6 +200,10 @@ invalid.js:56:2 lint/style/useErrorCause ━━━━━━━━━━━━━
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     57 │ }
     58 │ 
+  
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
   
 
 ```

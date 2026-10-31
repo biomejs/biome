@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidUsingDeclarationsOptionDisabled.js
+---
+# Input
+```js
+/* should generate diagnostics */
+{
+	using resource = createResource();
+}
+
+async function main() {
+	await using connection = await openConnection();
+}
+main();
+
+```
+
+# Diagnostics
+```
+invalidUsingDeclarationsOptionDisabled.js:3:8 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable resource is unused.
+  
+    1 │ /* should generate diagnostics */
+    2 │ {
+  > 3 │ 	using resource = createResource();
+      │ 	      ^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend resource with an underscore.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   {
+     3    │ - → using·resource·=·createResource();
+        3 │ + → using·_resource·=·createResource();
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalidUsingDeclarationsOptionDisabled.js:7:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable connection is unused.
+  
+    6 │ async function main() {
+  > 7 │ 	await using connection = await openConnection();
+      │ 	            ^^^^^^^^^^
+    8 │ }
+    9 │ main();
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend connection with an underscore.
+  
+     5  5 │   
+     6  6 │   async function main() {
+     7    │ - → await·using·connection·=·await·openConnection();
+        7 │ + → await·using·_connection·=·await·openConnection();
+     8  8 │   }
+     9  9 │   main();
+  
+
+```

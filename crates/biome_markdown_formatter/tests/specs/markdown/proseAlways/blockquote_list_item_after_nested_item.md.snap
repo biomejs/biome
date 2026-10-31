@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseAlways/blockquote_list_item_after_nested_item.md
+---
+
+# Input
+
+```md
+> - one
+>   - nested
+> - two
+
+> - one
+>   - nested
+> > quoted
+
+> - one
+>   - nested
+>   > quoted
+
+> 1. one
+> - other list
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "always",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+> - one
+>   - nested
+> - two
+
+> - one
+>   - nested
+> > quoted
+
+> - one
+>   - nested
+>   > quoted
+
+> 1. one
+> - other list
+
+```

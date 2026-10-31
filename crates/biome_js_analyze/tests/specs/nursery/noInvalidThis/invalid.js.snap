@@ -1,0 +1,1083 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Top level of a module.
+this.a = 0;
+console.log(this);
+z((x) => console.log(x, this));
+() => {
+	this.a = 0;
+};
+
+// Functions.
+function foo() {
+	this.a = 0;
+}
+export function exported() {
+	this.a = 0;
+}
+export default function () {
+	this.a = 0;
+}
+(function () {
+	this.a = 0;
+})();
+const func = function () {
+	this.a = 0;
+};
+func2 = function () {
+	this.a = 0;
+};
+const Named = function named() {
+	this.a = 0;
+};
+function bar() {
+	z((x) => console.log(x, this));
+}
+function nested() {
+	function inner() {
+		this.a = 0;
+	}
+}
+function params(a = this.a) {}
+
+// Functions returned from methods.
+const obj1 = {
+	foo() {
+		function inner() {
+			this.a = 0;
+		}
+	},
+	bar: function () {
+		return function () {
+			this.a = 0;
+		};
+	},
+};
+obj.foo = function () {
+	return function () {
+		this.a = 0;
+	};
+};
+class A {
+	foo() {
+		return function () {
+			this.a = 0;
+		};
+	}
+	static {
+		function foo() {
+			this.a = 0;
+		}
+		(function () {
+			this.a = 0;
+		})();
+	}
+}
+
+// Computed keys and heritage use the surrounding `this`.
+class B {
+	[this.a] = 0;
+	[this.b]() {}
+	static {}
+	[this.c];
+}
+const obj2 = {
+	[this.a]: 0,
+	[this.b]() {},
+};
+class C extends this.Base {}
+
+// Functions passed somewhere without a `this` value.
+foo(function () {
+	this.a = 0;
+});
+new Foo(function () {
+	this.a = 0;
+});
+const callee = (function () {
+	this.a = 0;
+}).bar(obj);
+const boundNull = function () {
+	this.a = 0;
+}.bind(null);
+(function () {
+	this.a = 0;
+}).call(undefined);
+(function () {
+	this.a = 0;
+}).apply(void 0);
+(function () {
+	this.a = 0;
+}).call();
+list.forEach(function () {
+	this.a = 0;
+});
+list.forEach(function () {
+	this.a = 0;
+}, null);
+Array.from(list, function () {
+	this.a = 0;
+});
+Reflect.apply(function () {
+	this.a = 0;
+}, null, []);
+// Arrow functions returned from a function inherit its `this`.
+obj.foo = (function () {
+	return () => {
+		this.a = 0;
+	};
+})();
+// The top level of a module.
+obj.foo = (() => () => {
+	this.a = 0;
+})();
+const notIife = (function () {
+	return function () {
+		this.a = 0;
+	};
+});
+const notArrowIife = () => function () {
+	this.a = 0;
+};
+const wrapped = foo(() => function () {
+	this.a = 0;
+})();
+[func3 = function () {
+	this.a = 0;
+}] = list;
+function defaultParameter(func = function () {
+	this.a = 0;
+}) {}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    3 │ // Top level of a module.
+  > 4 │ this.a = 0;
+      │ ^^^^
+    5 │ console.log(this);
+    6 │ z((x) => console.log(x, this));
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:13 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    3 │ // Top level of a module.
+    4 │ this.a = 0;
+  > 5 │ console.log(this);
+      │             ^^^^
+    6 │ z((x) => console.log(x, this));
+    7 │ () => {
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:25 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    4 │ this.a = 0;
+    5 │ console.log(this);
+  > 6 │ z((x) => console.log(x, this));
+      │                         ^^^^
+    7 │ () => {
+    8 │ 	this.a = 0;
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+     6 │ z((x) => console.log(x, this));
+     7 │ () => {
+   > 8 │ 	this.a = 0;
+       │ 	^^^^
+     9 │ };
+    10 │ 
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    11 │ // Functions.
+    12 │ function foo() {
+  > 13 │ 	this.a = 0;
+       │ 	^^^^
+    14 │ }
+    15 │ export function exported() {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    14 │ }
+    15 │ export function exported() {
+  > 16 │ 	this.a = 0;
+       │ 	^^^^
+    17 │ }
+    18 │ export default function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    17 │ }
+    18 │ export default function () {
+  > 19 │ 	this.a = 0;
+       │ 	^^^^
+    20 │ }
+    21 │ (function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    20 │ }
+    21 │ (function () {
+  > 22 │ 	this.a = 0;
+       │ 	^^^^
+    23 │ })();
+    24 │ const func = function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    23 │ })();
+    24 │ const func = function () {
+  > 25 │ 	this.a = 0;
+       │ 	^^^^
+    26 │ };
+    27 │ func2 = function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    26 │ };
+    27 │ func2 = function () {
+  > 28 │ 	this.a = 0;
+       │ 	^^^^
+    29 │ };
+    30 │ const Named = function named() {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    29 │ };
+    30 │ const Named = function named() {
+  > 31 │ 	this.a = 0;
+       │ 	^^^^
+    32 │ };
+    33 │ function bar() {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:26 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    32 │ };
+    33 │ function bar() {
+  > 34 │ 	z((x) => console.log(x, this));
+       │ 	                        ^^^^
+    35 │ }
+    36 │ function nested() {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    36 │ function nested() {
+    37 │ 	function inner() {
+  > 38 │ 		this.a = 0;
+       │ 		^^^^
+    39 │ 	}
+    40 │ }
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:21 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    39 │ 	}
+    40 │ }
+  > 41 │ function params(a = this.a) {}
+       │                     ^^^^
+    42 │ 
+    43 │ // Functions returned from methods.
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:4 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    45 │ 	foo() {
+    46 │ 		function inner() {
+  > 47 │ 			this.a = 0;
+       │ 			^^^^
+    48 │ 		}
+    49 │ 	},
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:4 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    50 │ 	bar: function () {
+    51 │ 		return function () {
+  > 52 │ 			this.a = 0;
+       │ 			^^^^
+    53 │ 		};
+    54 │ 	},
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    56 │ obj.foo = function () {
+    57 │ 	return function () {
+  > 58 │ 		this.a = 0;
+       │ 		^^^^
+    59 │ 	};
+    60 │ };
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:4 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    62 │ 	foo() {
+    63 │ 		return function () {
+  > 64 │ 			this.a = 0;
+       │ 			^^^^
+    65 │ 		};
+    66 │ 	}
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:4 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    67 │ 	static {
+    68 │ 		function foo() {
+  > 69 │ 			this.a = 0;
+       │ 			^^^^
+    70 │ 		}
+    71 │ 		(function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:4 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    70 │ 		}
+    71 │ 		(function () {
+  > 72 │ 			this.a = 0;
+       │ 			^^^^
+    73 │ 		})();
+    74 │ 	}
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    77 │ // Computed keys and heritage use the surrounding `this`.
+    78 │ class B {
+  > 79 │ 	[this.a] = 0;
+       │ 	 ^^^^
+    80 │ 	[this.b]() {}
+    81 │ 	static {}
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:80:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    78 │ class B {
+    79 │ 	[this.a] = 0;
+  > 80 │ 	[this.b]() {}
+       │ 	 ^^^^
+    81 │ 	static {}
+    82 │ 	[this.c];
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:82:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    80 │ 	[this.b]() {}
+    81 │ 	static {}
+  > 82 │ 	[this.c];
+       │ 	 ^^^^
+    83 │ }
+    84 │ const obj2 = {
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    83 │ }
+    84 │ const obj2 = {
+  > 85 │ 	[this.a]: 0,
+       │ 	 ^^^^
+    86 │ 	[this.b]() {},
+    87 │ };
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:86:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    84 │ const obj2 = {
+    85 │ 	[this.a]: 0,
+  > 86 │ 	[this.b]() {},
+       │ 	 ^^^^
+    87 │ };
+    88 │ class C extends this.Base {}
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:17 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    86 │ 	[this.b]() {},
+    87 │ };
+  > 88 │ class C extends this.Base {}
+       │                 ^^^^
+    89 │ 
+    90 │ // Functions passed somewhere without a `this` value.
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:92:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    90 │ // Functions passed somewhere without a `this` value.
+    91 │ foo(function () {
+  > 92 │ 	this.a = 0;
+       │ 	^^^^
+    93 │ });
+    94 │ new Foo(function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:95:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    93 │ });
+    94 │ new Foo(function () {
+  > 95 │ 	this.a = 0;
+       │ 	^^^^
+    96 │ });
+    97 │ const callee = (function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:98:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+     96 │ });
+     97 │ const callee = (function () {
+   > 98 │ 	this.a = 0;
+        │ 	^^^^
+     99 │ }).bar(obj);
+    100 │ const boundNull = function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:101:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+     99 │ }).bar(obj);
+    100 │ const boundNull = function () {
+  > 101 │ 	this.a = 0;
+        │ 	^^^^
+    102 │ }.bind(null);
+    103 │ (function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:104:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    102 │ }.bind(null);
+    103 │ (function () {
+  > 104 │ 	this.a = 0;
+        │ 	^^^^
+    105 │ }).call(undefined);
+    106 │ (function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:107:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    105 │ }).call(undefined);
+    106 │ (function () {
+  > 107 │ 	this.a = 0;
+        │ 	^^^^
+    108 │ }).apply(void 0);
+    109 │ (function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:110:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    108 │ }).apply(void 0);
+    109 │ (function () {
+  > 110 │ 	this.a = 0;
+        │ 	^^^^
+    111 │ }).call();
+    112 │ list.forEach(function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:113:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    111 │ }).call();
+    112 │ list.forEach(function () {
+  > 113 │ 	this.a = 0;
+        │ 	^^^^
+    114 │ });
+    115 │ list.forEach(function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:116:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    114 │ });
+    115 │ list.forEach(function () {
+  > 116 │ 	this.a = 0;
+        │ 	^^^^
+    117 │ }, null);
+    118 │ Array.from(list, function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:119:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    117 │ }, null);
+    118 │ Array.from(list, function () {
+  > 119 │ 	this.a = 0;
+        │ 	^^^^
+    120 │ });
+    121 │ Reflect.apply(function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:122:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    120 │ });
+    121 │ Reflect.apply(function () {
+  > 122 │ 	this.a = 0;
+        │ 	^^^^
+    123 │ }, null, []);
+    124 │ // Arrow functions returned from a function inherit its `this`.
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:127:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    125 │ obj.foo = (function () {
+    126 │ 	return () => {
+  > 127 │ 		this.a = 0;
+        │ 		^^^^
+    128 │ 	};
+    129 │ })();
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:132:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this at the top level of a module.
+  
+    130 │ // The top level of a module.
+    131 │ obj.foo = (() => () => {
+  > 132 │ 	this.a = 0;
+        │ 	^^^^
+    133 │ })();
+    134 │ const notIife = (function () {
+  
+  i this is always undefined at the top level of a module.
+  
+  i Use globalThis to refer to the global object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:136:3 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    134 │ const notIife = (function () {
+    135 │ 	return function () {
+  > 136 │ 		this.a = 0;
+        │ 		^^^^
+    137 │ 	};
+    138 │ });
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:140:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    138 │ });
+    139 │ const notArrowIife = () => function () {
+  > 140 │ 	this.a = 0;
+        │ 	^^^^
+    141 │ };
+    142 │ const wrapped = foo(() => function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:143:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    141 │ };
+    142 │ const wrapped = foo(() => function () {
+  > 143 │ 	this.a = 0;
+        │ 	^^^^
+    144 │ })();
+    145 │ [func3 = function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:146:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    144 │ })();
+    145 │ [func3 = function () {
+  > 146 │ 	this.a = 0;
+        │ 	^^^^
+    147 │ }] = list;
+    148 │ function defaultParameter(func = function () {
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:149:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    147 │ }] = list;
+    148 │ function defaultParameter(func = function () {
+  > 149 │ 	this.a = 0;
+        │ 	^^^^
+    150 │ }) {}
+    151 │ 
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

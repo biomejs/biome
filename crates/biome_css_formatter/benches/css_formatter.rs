@@ -2,7 +2,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::AnyCssRoot;
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
@@ -15,7 +15,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;

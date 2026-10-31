@@ -77,9 +77,11 @@ invalid.scss:3:3 lint/correctness/noUnknownProperty ━━━━━━━━━�
     4 │ }
     5 │ 
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -96,9 +98,11 @@ invalid.scss:8:5 lint/correctness/noUnknownProperty ━━━━━━━━━�
      9 │   }
     10 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -115,9 +119,11 @@ invalid.scss:18:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     19 │   }
     20 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -134,9 +140,11 @@ invalid.scss:24:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     25 │   }
     26 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -153,9 +161,11 @@ invalid.scss:31:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     32 │   }
     33 │ } @else {
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -172,9 +182,11 @@ invalid.scss:35:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     36 │   }
     37 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -191,9 +203,11 @@ invalid.scss:41:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     42 │   }
     43 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -210,9 +224,11 @@ invalid.scss:47:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     48 │   }
     49 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -229,9 +245,11 @@ invalid.scss:54:5 lint/correctness/noUnknownProperty ━━━━━━━━━
     55 │   }
     56 │   $count: $count + 1;
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```

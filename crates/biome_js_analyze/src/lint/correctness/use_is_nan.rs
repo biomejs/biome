@@ -149,7 +149,10 @@ impl Rule for UseIsNan {
             rule_category!(),
             state.range,
             state.message_id.as_str(),
-        ))
+        )
+        .note(markup! {
+            <Emphasis>"NaN"</Emphasis>" is not equal to anything, not even to itself, so comparing with it directly never works as intended."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

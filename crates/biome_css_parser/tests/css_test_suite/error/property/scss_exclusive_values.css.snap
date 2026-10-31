@@ -282,7 +282,7 @@ CssRoot {
                                     COLON@221..223 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
-                                            CssBogus {
+                                            CssBogusIfTestBooleanExpr {
                                                 items: [
                                                     HASH@223..224 "#" [] [],
                                                     L_CURLY@224..225 "{" [] [],
@@ -925,7 +925,7 @@ CssRoot {
                                                                 items: [
                                                                     CssBogus {
                                                                         items: [
-                                                                            CssBogus {
+                                                                            CssBogusIfTestBooleanExpr {
                                                                                 items: [
                                                                                     HASH@771..772 "#" [] [],
                                                                                     L_CURLY@772..773 "{" [] [],
@@ -1276,7 +1276,7 @@ CssRoot {
                                                                                 items: [
                                                                                     CssBogus {
                                                                                         items: [
-                                                                                            CssBogus {
+                                                                                            CssBogusIfTestBooleanExpr {
                                                                                                 items: [
                                                                                                     HASH@1025..1026 "#" [] [],
                                                                                                     L_CURLY@1026..1027 "{" [] [],
@@ -1819,7 +1819,7 @@ CssRoot {
                   0: IDENT@205..221 "interpolation" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@221..223 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@223..232
-                  0: CSS_BOGUS@223..232
+                  0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@223..232
                     0: HASH@223..224 "#" [] []
                     1: L_CURLY@224..225 "{" [] []
                     2: SCSS_EXPRESSION@225..231
@@ -2158,7 +2158,7 @@ CssRoot {
                     2: CSS_BOGUS@771..780
                       0: CSS_BOGUS@771..780
                         0: CSS_BOGUS@771..780
-                          0: CSS_BOGUS@771..780
+                          0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@771..780
                             0: HASH@771..772 "#" [] []
                             1: L_CURLY@772..773 "{" [] []
                             2: SCSS_EXPRESSION@773..779
@@ -2337,7 +2337,7 @@ CssRoot {
                           0: MINUS@1024..1025 "-" [] []
                           1: CSS_BOGUS@1025..1033
                             0: CSS_BOGUS@1025..1033
-                              0: CSS_BOGUS@1025..1033
+                              0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@1025..1033
                                 0: HASH@1025..1026 "#" [] []
                                 1: L_CURLY@1026..1027 "{" [] []
                                 2: SCSS_EXPRESSION@1027..1032

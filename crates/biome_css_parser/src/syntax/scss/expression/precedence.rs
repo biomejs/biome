@@ -1,10 +1,12 @@
 use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
+use crate::syntax::is_nth_at_identifier;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::is_at_scss_interpolated_dashed_identifier;
 use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_NUMBER_LITERAL, SCSS_BINARY_EXPRESSION, SCSS_UNARY_EXPRESSION,
+    CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL, CSS_PERCENTAGE_VALUE, CSS_STRING_LITERAL,
+    GRIT_METAVARIABLE, SCSS_BINARY_EXPRESSION, SCSS_STRING_QUOTE, SCSS_UNARY_EXPRESSION,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
@@ -73,7 +75,7 @@ pub(super) fn parse_scss_binary_tail(
             break;
         };
 
-        if prec < min_prec {
+        if prec < min_prec || (p.at(T![%]) && !is_at_scss_modulo_operator(p, options)) {
             break;
         }
 
@@ -85,6 +87,43 @@ pub(super) fn parse_scss_binary_tail(
     }
 
     left
+}
+
+/// Distinguishes infix modulo from a trailing percent string using the next
+/// operand's start and the caller's boundaries.
+///
+/// `10 %` is a space-separated list, but `10 % 3` is modulo. A unary prefix
+/// still starts the right operand, so `10 % +` reports its missing value.
+///
+/// Docs: https://sass-lang.com/documentation/values/strings/#other-unquoted-strings
+#[inline]
+fn is_at_scss_modulo_operator(p: &mut CssParser, options: ScssExpressionOptions) -> bool {
+    if p.nth_at_ts(1, options.end_ts) || options.boundary.is_some_and(|boundary| boundary(p, 1)) {
+        return false;
+    }
+
+    is_nth_at_identifier(p, 1)
+        || p.nth_at_ts(
+            1,
+            token_set![
+                CSS_NUMBER_LITERAL,
+                CSS_DIMENSION_VALUE,
+                CSS_PERCENTAGE_VALUE,
+                CSS_STRING_LITERAL,
+                SCSS_STRING_QUOTE,
+                GRIT_METAVARIABLE,
+                T!['('],
+                T!['['],
+                T![$],
+                T![#],
+                T![&],
+                T![%],
+                T![+],
+                T![-],
+                T![/],
+            ],
+        )
+        || (p.nth_at(1, T![!]) && p.nth_at(2, T![important]))
 }
 
 /// Parses chained unary operators (`-`, `+`, `not`) before an operand.

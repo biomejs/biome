@@ -1,0 +1,872 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+new Promise(function (resolve, reject) { return 1; });
+new Promise(function foo(resolve, reject) { return 1; });
+new Promise((resolve, reject) => { return 1; });
+new Promise(function (resolve, reject) { return undefined; });
+new Promise((resolve, reject) => { return null; });
+new Promise((resolve, reject) => { return reject(foo); });
+new Promise((resolve, reject) => { return Promise.resolve(42); });
+new Promise(function (resolve, reject) { if (foo) { return 1; } });
+new Promise((resolve, reject) => { try { return 1; } catch (e) {} });
+new Promise(function (resolve, reject) { while (foo) { if (bar) break; else return 1; } });
+new Promise(() => { return void 1; });
+new Promise((Promise) => { return 1; });
+new Promise(function Promise(resolve, reject) { return 1; });
+new (Promise)((resolve) => { return 1; });
+new Promise(((resolve) => { return 1; }));
+new Promise(async (resolve) => { return 1; });
+
+// Multiple returns, and returns next to nested functions
+new Promise(() => {
+	if (foo) {
+		return 0;
+	} else bar(() => { return 1; });
+	return 2;
+});
+
+// Arrow function expression bodies
+new Promise(r => r(1));
+new Promise((resolve, reject) => resolve);
+new Promise((resolve, reject) => null);
+new Promise((resolve, reject) => x + y);
+new Promise(() => (1));
+new Promise(() => ({}));
+new Promise(r => /*hi*/ ~0);
+new Promise(() => () => 1);
+new Promise(() => async () => 1);
+new Promise(() => function foo() {});
+new Promise(() => class Foo {});
+new Promise(() => []);
+new Promise((resolve, reject) => getSomething((err, data) => {
+	if (err) {
+		reject(err);
+	} else {
+		resolve(data);
+	}
+}));
+new Promise(r => r(1) // comment
+);
+
+// No fix: wrapping in braces would turn these into invalid declarations
+new Promise(() => function () {});
+new Promise(() => class {});
+
+// Nested inside another function
+function outer() {
+	return new Promise(function () { return 1; });
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:42 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ new Promise(function (resolve, reject) { return 1; });
+      │                                          ^^^^^^^^^
+    4 │ new Promise(function foo(resolve, reject) { return 1; });
+    5 │ new Promise((resolve, reject) => { return 1; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:45 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    3 │ new Promise(function (resolve, reject) { return 1; });
+  > 4 │ new Promise(function foo(resolve, reject) { return 1; });
+      │                                             ^^^^^^^^^
+    5 │ new Promise((resolve, reject) => { return 1; });
+    6 │ new Promise(function (resolve, reject) { return undefined; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:36 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    3 │ new Promise(function (resolve, reject) { return 1; });
+    4 │ new Promise(function foo(resolve, reject) { return 1; });
+  > 5 │ new Promise((resolve, reject) => { return 1; });
+      │                                    ^^^^^^^^^
+    6 │ new Promise(function (resolve, reject) { return undefined; });
+    7 │ new Promise((resolve, reject) => { return null; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:42 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    4 │ new Promise(function foo(resolve, reject) { return 1; });
+    5 │ new Promise((resolve, reject) => { return 1; });
+  > 6 │ new Promise(function (resolve, reject) { return undefined; });
+      │                                          ^^^^^^^^^^^^^^^^^
+    7 │ new Promise((resolve, reject) => { return null; });
+    8 │ new Promise((resolve, reject) => { return reject(foo); });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:36 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    5 │ new Promise((resolve, reject) => { return 1; });
+    6 │ new Promise(function (resolve, reject) { return undefined; });
+  > 7 │ new Promise((resolve, reject) => { return null; });
+      │                                    ^^^^^^^^^^^^
+    8 │ new Promise((resolve, reject) => { return reject(foo); });
+    9 │ new Promise((resolve, reject) => { return Promise.resolve(42); });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:36 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+     6 │ new Promise(function (resolve, reject) { return undefined; });
+     7 │ new Promise((resolve, reject) => { return null; });
+   > 8 │ new Promise((resolve, reject) => { return reject(foo); });
+       │                                    ^^^^^^^^^^^^^^^^^^^
+     9 │ new Promise((resolve, reject) => { return Promise.resolve(42); });
+    10 │ new Promise(function (resolve, reject) { if (foo) { return 1; } });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:36 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+     7 │ new Promise((resolve, reject) => { return null; });
+     8 │ new Promise((resolve, reject) => { return reject(foo); });
+   > 9 │ new Promise((resolve, reject) => { return Promise.resolve(42); });
+       │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ new Promise(function (resolve, reject) { if (foo) { return 1; } });
+    11 │ new Promise((resolve, reject) => { try { return 1; } catch (e) {} });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:53 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+     8 │ new Promise((resolve, reject) => { return reject(foo); });
+     9 │ new Promise((resolve, reject) => { return Promise.resolve(42); });
+  > 10 │ new Promise(function (resolve, reject) { if (foo) { return 1; } });
+       │                                                     ^^^^^^^^^
+    11 │ new Promise((resolve, reject) => { try { return 1; } catch (e) {} });
+    12 │ new Promise(function (resolve, reject) { while (foo) { if (bar) break; else return 1; } });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:42 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+     9 │ new Promise((resolve, reject) => { return Promise.resolve(42); });
+    10 │ new Promise(function (resolve, reject) { if (foo) { return 1; } });
+  > 11 │ new Promise((resolve, reject) => { try { return 1; } catch (e) {} });
+       │                                          ^^^^^^^^^
+    12 │ new Promise(function (resolve, reject) { while (foo) { if (bar) break; else return 1; } });
+    13 │ new Promise(() => { return void 1; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:77 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    10 │ new Promise(function (resolve, reject) { if (foo) { return 1; } });
+    11 │ new Promise((resolve, reject) => { try { return 1; } catch (e) {} });
+  > 12 │ new Promise(function (resolve, reject) { while (foo) { if (bar) break; else return 1; } });
+       │                                                                             ^^^^^^^^^
+    13 │ new Promise(() => { return void 1; });
+    14 │ new Promise((Promise) => { return 1; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:21 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    11 │ new Promise((resolve, reject) => { try { return 1; } catch (e) {} });
+    12 │ new Promise(function (resolve, reject) { while (foo) { if (bar) break; else return 1; } });
+  > 13 │ new Promise(() => { return void 1; });
+       │                     ^^^^^^^^^^^^^^
+    14 │ new Promise((Promise) => { return 1; });
+    15 │ new Promise(function Promise(resolve, reject) { return 1; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:28 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    12 │ new Promise(function (resolve, reject) { while (foo) { if (bar) break; else return 1; } });
+    13 │ new Promise(() => { return void 1; });
+  > 14 │ new Promise((Promise) => { return 1; });
+       │                            ^^^^^^^^^
+    15 │ new Promise(function Promise(resolve, reject) { return 1; });
+    16 │ new (Promise)((resolve) => { return 1; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:49 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    13 │ new Promise(() => { return void 1; });
+    14 │ new Promise((Promise) => { return 1; });
+  > 15 │ new Promise(function Promise(resolve, reject) { return 1; });
+       │                                                 ^^^^^^^^^
+    16 │ new (Promise)((resolve) => { return 1; });
+    17 │ new Promise(((resolve) => { return 1; }));
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:30 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    14 │ new Promise((Promise) => { return 1; });
+    15 │ new Promise(function Promise(resolve, reject) { return 1; });
+  > 16 │ new (Promise)((resolve) => { return 1; });
+       │                              ^^^^^^^^^
+    17 │ new Promise(((resolve) => { return 1; }));
+    18 │ new Promise(async (resolve) => { return 1; });
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:29 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    15 │ new Promise(function Promise(resolve, reject) { return 1; });
+    16 │ new (Promise)((resolve) => { return 1; });
+  > 17 │ new Promise(((resolve) => { return 1; }));
+       │                             ^^^^^^^^^
+    18 │ new Promise(async (resolve) => { return 1; });
+    19 │ 
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:34 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    16 │ new (Promise)((resolve) => { return 1; });
+    17 │ new Promise(((resolve) => { return 1; }));
+  > 18 │ new Promise(async (resolve) => { return 1; });
+       │                                  ^^^^^^^^^
+    19 │ 
+    20 │ // Multiple returns, and returns next to nested functions
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:3 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    21 │ new Promise(() => {
+    22 │ 	if (foo) {
+  > 23 │ 		return 0;
+       │ 		^^^^^^^^^
+    24 │ 	} else bar(() => { return 1; });
+    25 │ 	return 2;
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:2 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    23 │ 		return 0;
+    24 │ 	} else bar(() => { return 1; });
+  > 25 │ 	return 2;
+       │ 	^^^^^^^^^
+    26 │ });
+    27 │ 
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:18 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    28 │ // Arrow function expression bodies
+  > 29 │ new Promise(r => r(1));
+       │                  ^^^^
+    30 │ new Promise((resolve, reject) => resolve);
+    31 │ new Promise((resolve, reject) => null);
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    29 │ new·Promise(r·=>·{r(1)});
+       │                  +    +  
+
+```
+
+```
+invalid.js:30:34 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    28 │ // Arrow function expression bodies
+    29 │ new Promise(r => r(1));
+  > 30 │ new Promise((resolve, reject) => resolve);
+       │                                  ^^^^^^^
+    31 │ new Promise((resolve, reject) => null);
+    32 │ new Promise((resolve, reject) => x + y);
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    30 │ new·Promise((resolve,·reject)·=>·{resolve});
+       │                                  +       +  
+
+```
+
+```
+invalid.js:31:34 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    29 │ new Promise(r => r(1));
+    30 │ new Promise((resolve, reject) => resolve);
+  > 31 │ new Promise((resolve, reject) => null);
+       │                                  ^^^^
+    32 │ new Promise((resolve, reject) => x + y);
+    33 │ new Promise(() => (1));
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    31 │ new·Promise((resolve,·reject)·=>·{null});
+       │                                  +    +  
+
+```
+
+```
+invalid.js:32:34 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    30 │ new Promise((resolve, reject) => resolve);
+    31 │ new Promise((resolve, reject) => null);
+  > 32 │ new Promise((resolve, reject) => x + y);
+       │                                  ^^^^^
+    33 │ new Promise(() => (1));
+    34 │ new Promise(() => ({}));
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    32 │ new·Promise((resolve,·reject)·=>·{x·+·y});
+       │                                  +     +  
+
+```
+
+```
+invalid.js:33:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    31 │ new Promise((resolve, reject) => null);
+    32 │ new Promise((resolve, reject) => x + y);
+  > 33 │ new Promise(() => (1));
+       │                   ^^^
+    34 │ new Promise(() => ({}));
+    35 │ new Promise(r => /*hi*/ ~0);
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    33 │ new·Promise(()·=>·{(1)});
+       │                   +   +  
+
+```
+
+```
+invalid.js:34:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    32 │ new Promise((resolve, reject) => x + y);
+    33 │ new Promise(() => (1));
+  > 34 │ new Promise(() => ({}));
+       │                   ^^^^
+    35 │ new Promise(r => /*hi*/ ~0);
+    36 │ new Promise(() => () => 1);
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    34 │ new·Promise(()·=>·{({})});
+       │                   +    +  
+
+```
+
+```
+invalid.js:35:25 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    33 │ new Promise(() => (1));
+    34 │ new Promise(() => ({}));
+  > 35 │ new Promise(r => /*hi*/ ~0);
+       │                         ^^
+    36 │ new Promise(() => () => 1);
+    37 │ new Promise(() => async () => 1);
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    35 │ new·Promise(r·=>·/*hi*/·{~0});
+       │                         +  +  
+
+```
+
+```
+invalid.js:36:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    34 │ new Promise(() => ({}));
+    35 │ new Promise(r => /*hi*/ ~0);
+  > 36 │ new Promise(() => () => 1);
+       │                   ^^^^^^^
+    37 │ new Promise(() => async () => 1);
+    38 │ new Promise(() => function foo() {});
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    36 │ new·Promise(()·=>·{()·=>·1});
+       │                   +       +  
+
+```
+
+```
+invalid.js:37:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    35 │ new Promise(r => /*hi*/ ~0);
+    36 │ new Promise(() => () => 1);
+  > 37 │ new Promise(() => async () => 1);
+       │                   ^^^^^^^^^^^^^
+    38 │ new Promise(() => function foo() {});
+    39 │ new Promise(() => class Foo {});
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    37 │ new·Promise(()·=>·{async·()·=>·1});
+       │                   +             +  
+
+```
+
+```
+invalid.js:38:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    36 │ new Promise(() => () => 1);
+    37 │ new Promise(() => async () => 1);
+  > 38 │ new Promise(() => function foo() {});
+       │                   ^^^^^^^^^^^^^^^^^
+    39 │ new Promise(() => class Foo {});
+    40 │ new Promise(() => []);
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    38 │ new·Promise(()·=>·{function·foo()·{}});
+       │                   +                 +  
+
+```
+
+```
+invalid.js:39:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    37 │ new Promise(() => async () => 1);
+    38 │ new Promise(() => function foo() {});
+  > 39 │ new Promise(() => class Foo {});
+       │                   ^^^^^^^^^^^^
+    40 │ new Promise(() => []);
+    41 │ new Promise((resolve, reject) => getSomething((err, data) => {
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    39 │ new·Promise(()·=>·{class·Foo·{}});
+       │                   +            +  
+
+```
+
+```
+invalid.js:40:19 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    38 │ new Promise(() => function foo() {});
+    39 │ new Promise(() => class Foo {});
+  > 40 │ new Promise(() => []);
+       │                   ^^
+    41 │ new Promise((resolve, reject) => getSomething((err, data) => {
+    42 │ 	if (err) {
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    40 │ new·Promise(()·=>·{[]});
+       │                   +  +  
+
+```
+
+```
+invalid.js:41:34 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    39 │ new Promise(() => class Foo {});
+    40 │ new Promise(() => []);
+  > 41 │ new Promise((resolve, reject) => getSomething((err, data) => {
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 42 │ 	if (err) {
+        ...
+  > 46 │ 	}
+  > 47 │ }));
+       │ ^^
+    48 │ new Promise(r => r(1) // comment
+    49 │ );
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    39 39 │   new Promise(() => class Foo {});
+    40 40 │   new Promise(() => []);
+    41    │ - new·Promise((resolve,·reject)·=>·getSomething((err,·data)·=>·{
+       41 │ + new·Promise((resolve,·reject)·=>·{getSomething((err,·data)·=>·{
+    42 42 │   	if (err) {
+    43 43 │   		reject(err);
+    ····· │ 
+    45 45 │   		resolve(data);
+    46 46 │   	}
+    47    │ - }));
+       47 │ + })});
+    48 48 │   new Promise(r => r(1) // comment
+    49 49 │   );
+  
+
+```
+
+```
+invalid.js:48:18 lint/nursery/noPromiseExecutorReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    46 │ 	}
+    47 │ }));
+  > 48 │ new Promise(r => r(1) // comment
+       │                  ^^^^
+    49 │ );
+    50 │ 
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the expression in braces.
+  
+    48 │ new·Promise(r·=>·{r(1)}·//·comment
+       │                  +    +           
+
+```
+
+```
+invalid.js:52:19 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    51 │ // No fix: wrapping in braces would turn these into invalid declarations
+  > 52 │ new Promise(() => function () {});
+       │                   ^^^^^^^^^^^^^^
+    53 │ new Promise(() => class {});
+    54 │ 
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:19 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns this value.
+  
+    51 │ // No fix: wrapping in braces would turn these into invalid declarations
+    52 │ new Promise(() => function () {});
+  > 53 │ new Promise(() => class {});
+       │                   ^^^^^^^^
+    54 │ 
+    55 │ // Nested inside another function
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:35 lint/nursery/noPromiseExecutorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function passed to new Promise() returns a value here.
+  
+    55 │ // Nested inside another function
+    56 │ function outer() {
+  > 57 │ 	return new Promise(function () { return 1; });
+       │ 	                                 ^^^^^^^^^
+    58 │ }
+    59 │ 
+  
+  i new Promise() ignores this returned value, so it has no effect on the Promise.
+  
+  i Call resolve() or reject() to complete the Promise. To stop the function early, use return without a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

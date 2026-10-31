@@ -15,7 +15,7 @@ pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
     let mut builder = SemanticModelBuilder::new(root.clone());
 
     let root = root.syntax();
-    for node in root.preorder() {
+    for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {
         match node {
             biome_css_syntax::WalkEvent::Enter(node) => {
                 extractor.enter(&node);
@@ -226,6 +226,27 @@ mod tests {
         assert_eq!(global_custom_variables.len(), 2);
         assert!(global_custom_variables.contains_key("--literal"));
         assert!(global_custom_variables.contains_key("--computed"));
+    }
+
+    #[test]
+    fn test_scss_functions() {
+        let parse = parse_css(
+            r#"@function rem_from_px($px) { @return $px; }
+.card {
+  @function nested-spacing($n) { @return $n; }
+  padding: rem-from-px(16px);
+}"#,
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        assert!(model.has_scss_function("rem_from_px"));
+        assert!(model.has_scss_function("rem-from-px"));
+        assert!(model.has_scss_function("nested_spacing"));
+        assert!(!model.has_scss_function("rem"));
     }
 
     #[test]

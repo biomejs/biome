@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-store-subscription.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+  import { toasts } from "./stores.js";
+  import { theme } from "./stores.js";
+  import { unused } from "./stores.js";
+</script>
+
+{#each $toasts as toast (toast.id)}
+  <p>{toast.title}</p>
+{/each}
+
+<select bind:value={$theme}>
+  <option value="white">White</option>
+</select>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-store-subscription.svelte:5:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    3 │   import { toasts } from "./stores.js";
+    4 │   import { theme } from "./stores.js";
+  > 5 │   import { unused } from "./stores.js";
+      │          ^^^^^^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    2 2 │     import { toasts } from "./stores.js";
+    3 3 │     import { theme } from "./stores.js";
+    4   │ - ··import·{·unused·}·from·"./stores.js";
+    5 4 │   
+  
+
+```

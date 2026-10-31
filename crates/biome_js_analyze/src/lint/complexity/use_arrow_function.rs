@@ -10,13 +10,14 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
     JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
     JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsModule,
-    JsReferenceIdentifier, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
+    JsNewTargetExpression, JsReferenceIdentifier, JsScript, JsSetterClassMember,
+    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, JsThisExpression,
+    T,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind,
-    WalkEvent, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, WalkEvent,
+    declare_node_union,
 };
 use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 
@@ -107,7 +108,12 @@ impl Rule for UseArrowFunction {
         let scope = ctx.query();
         let model = ctx.model();
         let root = scope.syntax();
-        let mut preorder = root.preorder();
+        let mut preorder = root.preorder_of_kinds(
+            AnyThisScope::KIND_SET
+                .union(JsThisExpression::KIND_SET)
+                .union(JsNewTargetExpression::KIND_SET)
+                .union(JsReferenceIdentifier::KIND_SET),
+        );
 
         let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
             return None;
@@ -209,7 +215,7 @@ impl Rule for UseArrowFunction {
         };
         let mut arrow_function_builder = make::js_arrow_function_expression(
             function_expression.parameters().ok()?.into(),
-            make::token(T![=>]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![=>]).with_trailing_space(),
             to_arrow_body(function_expression.body().ok()?),
         );
         if let Some(async_token) = function_expression.async_token() {

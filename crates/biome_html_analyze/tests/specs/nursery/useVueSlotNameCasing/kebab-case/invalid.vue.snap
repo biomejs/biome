@@ -1,0 +1,145 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <slot name="fooBar" />
+  <slot name="foo_bar" />
+  <slot name="foo:bar" />
+  <slot name="foo-Bar_baz" />
+  <slot name="foo--bar" />
+  <slot name="-foo" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name fooBar isn't in kebab-case.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <slot name="fooBar" />
+      │              ^^^^^^^^
+    4 │   <slot name="foo_bar" />
+    5 │   <slot name="foo:bar" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is in kebab-case, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo_bar isn't in kebab-case.
+  
+    2 │ <template>
+    3 │   <slot name="fooBar" />
+  > 4 │   <slot name="foo_bar" />
+      │              ^^^^^^^^^
+    5 │   <slot name="foo:bar" />
+    6 │   <slot name="foo-Bar_baz" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is in kebab-case, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo:bar isn't in kebab-case.
+  
+    3 │   <slot name="fooBar" />
+    4 │   <slot name="foo_bar" />
+  > 5 │   <slot name="foo:bar" />
+      │              ^^^^^^^^^
+    6 │   <slot name="foo-Bar_baz" />
+    7 │   <slot name="foo--bar" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is in kebab-case, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo-Bar_baz isn't in kebab-case.
+  
+    4 │   <slot name="foo_bar" />
+    5 │   <slot name="foo:bar" />
+  > 6 │   <slot name="foo-Bar_baz" />
+      │              ^^^^^^^^^^^^^
+    7 │   <slot name="foo--bar" />
+    8 │   <slot name="-foo" />
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is in kebab-case, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name foo--bar isn't in kebab-case.
+  
+    5 │   <slot name="foo:bar" />
+    6 │   <slot name="foo-Bar_baz" />
+  > 7 │   <slot name="foo--bar" />
+      │              ^^^^^^^^^^
+    8 │   <slot name="-foo" />
+    9 │ </template>
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is in kebab-case, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:14 lint/nursery/useVueSlotNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The slot name -foo isn't in kebab-case.
+  
+     6 │   <slot name="foo-Bar_baz" />
+     7 │   <slot name="foo--bar" />
+   > 8 │   <slot name="-foo" />
+       │              ^^^^^^
+     9 │ </template>
+    10 │ 
+  
+  i Vue doesn't convert slot names between casings, so components that fill this slot must use the exact same name. Using one casing for every slot name keeps them consistent.
+  
+  i Rename the slot so that it is in kebab-case, and update the components that fill it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

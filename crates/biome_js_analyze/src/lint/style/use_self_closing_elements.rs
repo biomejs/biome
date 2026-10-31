@@ -84,7 +84,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useSelfClosingElements",
         language: "js",
-        sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp").same()],
+        sources: &[
+            RuleSource::EslintReact("self-closing-comp").same(),
+            RuleSource::EslintStylistic("jsx-self-closing-comp").same(),
+        ],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
@@ -116,9 +119,12 @@ impl Rule for UseSelfClosingElements {
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing."
+                "JSX elements without children should be marked as self-closing."
             },
-        ))
+        )
+        .note(markup! {
+            "In JSX, it is valid for any element to be self-closing, and the shorter form is easier to read."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

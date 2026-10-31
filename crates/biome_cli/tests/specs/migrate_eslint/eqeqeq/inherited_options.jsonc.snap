@@ -1,0 +1,81 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: inherited_options.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"overrides": [
+		{ "files": ["severity.js"], "rules": { "eqeqeq": "error" } },
+		{ "files": ["array-severity.js"], "rules": { "eqeqeq": ["warn"] } },
+		{ "files": ["replace.js"], "rules": { "eqeqeq": ["error", "always", {}] } }
+	],
+	"rules": { "eqeqeq": ["off", "always", { "null": "ignore" }] }
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"suspicious": {
+				"noDoubleEquals": { "level": "off", "options": { "ignoreNull": true } }
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["severity.js"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noDoubleEquals": {
+							"level": "error",
+							"options": { "ignoreNull": true }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["array-severity.js"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noDoubleEquals": {
+							"level": "warn",
+							"options": { "ignoreNull": true }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["replace.js"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noDoubleEquals": {
+							"level": "error",
+							"options": { "ignoreNull": false }
+						}
+					}
+				}
+			}
+		}
+	]
+}
+
+```

@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-multiple-with-defaults.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const props = withDefaults(defineProps<{ msg?: string }>(), { msg: "hello" });
+defineProps();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-multiple-with-defaults.vue:4:1 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineProps() is called more than once.
+  
+    2 │ <script setup lang="ts">
+    3 │ const props = withDefaults(defineProps<{ msg?: string }>(), { msg: "hello" });
+  > 4 │ defineProps();
+      │ ^^^^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i It's first called here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const props = withDefaults(defineProps<{ msg?: string }>(), { msg: "hello" });
+      │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ defineProps();
+    5 │ </script>
+  
+  i A component declares its props once, and Vue fails to compile a component that calls defineProps() several times.
+  
+  i Declare all the props in a single defineProps() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

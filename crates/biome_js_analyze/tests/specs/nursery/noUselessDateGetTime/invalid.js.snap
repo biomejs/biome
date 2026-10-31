@@ -1,0 +1,549 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+new Date(date.getTime());
+new Date(date.getTime(),);
+new Date(new Date(date.getTime()).getTime());
+new Date((0, date).getTime());
+new Date((date.getTime()));
+new Date((date.getTime)());
+new Date(foo.bar.getTime());
+new Date(getDate().getTime());
+new globalThis.Date(date.getTime());
+new window.Date(date.getTime());
+const cloned = new Date(originalDate.getTime());
+new Date(date.getTime(/* comment */));
+new Date(date./* comment */getTime());
+new Date(date /* comment */.getTime());
+new Date(date.getTime /* comment */());
+new Date(date.getTime() /* comment */);
+new Date(date // comment
+	.getTime());
+new Date(getDate(/* comment */).getTime());
+new Date((date /* comment */).getTime());
+new Date(
+	date.getTime()
+);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:15 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new Date(date.getTime());
+      │               ^^^^^^^^^
+    3 │ new Date(date.getTime(),);
+    4 │ new Date(new Date(date.getTime()).getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - new·Date(date.getTime());
+        2 │ + new·Date(date);
+     3  3 │   new Date(date.getTime(),);
+     4  4 │   new Date(new Date(date.getTime()).getTime());
+  
+
+```
+
+```
+invalid.js:3:15 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ new Date(date.getTime());
+  > 3 │ new Date(date.getTime(),);
+      │               ^^^^^^^^^
+    4 │ new Date(new Date(date.getTime()).getTime());
+    5 │ new Date((0, date).getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   new Date(date.getTime());
+     3    │ - new·Date(date.getTime(),);
+        3 │ + new·Date(date,);
+     4  4 │   new Date(new Date(date.getTime()).getTime());
+     5  5 │   new Date((0, date).getTime());
+  
+
+```
+
+```
+invalid.js:4:35 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    2 │ new Date(date.getTime());
+    3 │ new Date(date.getTime(),);
+  > 4 │ new Date(new Date(date.getTime()).getTime());
+      │                                   ^^^^^^^^^
+    5 │ new Date((0, date).getTime());
+    6 │ new Date((date.getTime()));
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    4 │ new·Date(new·Date(date.getTime()).getTime());
+      │                                  ----------  
+
+```
+
+```
+invalid.js:4:24 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    2 │ new Date(date.getTime());
+    3 │ new Date(date.getTime(),);
+  > 4 │ new Date(new Date(date.getTime()).getTime());
+      │                        ^^^^^^^^^
+    5 │ new Date((0, date).getTime());
+    6 │ new Date((date.getTime()));
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     2  2 │   new Date(date.getTime());
+     3  3 │   new Date(date.getTime(),);
+     4    │ - new·Date(new·Date(date.getTime()).getTime());
+        4 │ + new·Date(new·Date(date).getTime());
+     5  5 │   new Date((0, date).getTime());
+     6  6 │   new Date((date.getTime()));
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    3 │ new Date(date.getTime(),);
+    4 │ new Date(new Date(date.getTime()).getTime());
+  > 5 │ new Date((0, date).getTime());
+      │                    ^^^^^^^^^
+    6 │ new Date((date.getTime()));
+    7 │ new Date((date.getTime)());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    5 │ new·Date((0,·date).getTime());
+      │                   ----------  
+
+```
+
+```
+invalid.js:6:16 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    4 │ new Date(new Date(date.getTime()).getTime());
+    5 │ new Date((0, date).getTime());
+  > 6 │ new Date((date.getTime()));
+      │                ^^^^^^^^^
+    7 │ new Date((date.getTime)());
+    8 │ new Date(foo.bar.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     4  4 │   new Date(new Date(date.getTime()).getTime());
+     5  5 │   new Date((0, date).getTime());
+     6    │ - new·Date((date.getTime()));
+        6 │ + new·Date((date));
+     7  7 │   new Date((date.getTime)());
+     8  8 │   new Date(foo.bar.getTime());
+  
+
+```
+
+```
+invalid.js:7:16 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    5 │ new Date((0, date).getTime());
+    6 │ new Date((date.getTime()));
+  > 7 │ new Date((date.getTime)());
+      │                ^^^^^^^^^^
+    8 │ new Date(foo.bar.getTime());
+    9 │ new Date(getDate().getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     5  5 │   new Date((0, date).getTime());
+     6  6 │   new Date((date.getTime()));
+     7    │ - new·Date((date.getTime)());
+        7 │ + new·Date(date);
+     8  8 │   new Date(foo.bar.getTime());
+     9  9 │   new Date(getDate().getTime());
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+     6 │ new Date((date.getTime()));
+     7 │ new Date((date.getTime)());
+   > 8 │ new Date(foo.bar.getTime());
+       │                  ^^^^^^^^^
+     9 │ new Date(getDate().getTime());
+    10 │ new globalThis.Date(date.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     6  6 │   new Date((date.getTime()));
+     7  7 │   new Date((date.getTime)());
+     8    │ - new·Date(foo.bar.getTime());
+        8 │ + new·Date(foo.bar);
+     9  9 │   new Date(getDate().getTime());
+    10 10 │   new globalThis.Date(date.getTime());
+  
+
+```
+
+```
+invalid.js:9:20 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+     7 │ new Date((date.getTime)());
+     8 │ new Date(foo.bar.getTime());
+   > 9 │ new Date(getDate().getTime());
+       │                    ^^^^^^^^^
+    10 │ new globalThis.Date(date.getTime());
+    11 │ new window.Date(date.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    9 │ new·Date(getDate().getTime());
+      │                   ----------  
+
+```
+
+```
+invalid.js:10:26 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+     8 │ new Date(foo.bar.getTime());
+     9 │ new Date(getDate().getTime());
+  > 10 │ new globalThis.Date(date.getTime());
+       │                          ^^^^^^^^^
+    11 │ new window.Date(date.getTime());
+    12 │ const cloned = new Date(originalDate.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     8  8 │   new Date(foo.bar.getTime());
+     9  9 │   new Date(getDate().getTime());
+    10    │ - new·globalThis.Date(date.getTime());
+       10 │ + new·globalThis.Date(date);
+    11 11 │   new window.Date(date.getTime());
+    12 12 │   const cloned = new Date(originalDate.getTime());
+  
+
+```
+
+```
+invalid.js:11:22 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+     9 │ new Date(getDate().getTime());
+    10 │ new globalThis.Date(date.getTime());
+  > 11 │ new window.Date(date.getTime());
+       │                      ^^^^^^^^^
+    12 │ const cloned = new Date(originalDate.getTime());
+    13 │ new Date(date.getTime(/* comment */));
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+     9  9 │   new Date(getDate().getTime());
+    10 10 │   new globalThis.Date(date.getTime());
+    11    │ - new·window.Date(date.getTime());
+       11 │ + new·window.Date(date);
+    12 12 │   const cloned = new Date(originalDate.getTime());
+    13 13 │   new Date(date.getTime(/* comment */));
+  
+
+```
+
+```
+invalid.js:12:38 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    10 │ new globalThis.Date(date.getTime());
+    11 │ new window.Date(date.getTime());
+  > 12 │ const cloned = new Date(originalDate.getTime());
+       │                                      ^^^^^^^^^
+    13 │ new Date(date.getTime(/* comment */));
+    14 │ new Date(date./* comment */getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    10 10 │   new globalThis.Date(date.getTime());
+    11 11 │   new window.Date(date.getTime());
+    12    │ - const·cloned·=·new·Date(originalDate.getTime());
+       12 │ + const·cloned·=·new·Date(originalDate);
+    13 13 │   new Date(date.getTime(/* comment */));
+    14 14 │   new Date(date./* comment */getTime());
+  
+
+```
+
+```
+invalid.js:13:15 lint/nursery/noUselessDateGetTime ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    11 │ new window.Date(date.getTime());
+    12 │ const cloned = new Date(originalDate.getTime());
+  > 13 │ new Date(date.getTime(/* comment */));
+       │               ^^^^^^^^^^^^^^^^^^^^^^
+    14 │ new Date(date./* comment */getTime());
+    15 │ new Date(date /* comment */.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:28 lint/nursery/noUselessDateGetTime ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    12 │ const cloned = new Date(originalDate.getTime());
+    13 │ new Date(date.getTime(/* comment */));
+  > 14 │ new Date(date./* comment */getTime());
+       │                            ^^^^^^^^^
+    15 │ new Date(date /* comment */.getTime());
+    16 │ new Date(date.getTime /* comment */());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:29 lint/nursery/noUselessDateGetTime ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    13 │ new Date(date.getTime(/* comment */));
+    14 │ new Date(date./* comment */getTime());
+  > 15 │ new Date(date /* comment */.getTime());
+       │                             ^^^^^^^^^
+    16 │ new Date(date.getTime /* comment */());
+    17 │ new Date(date.getTime() /* comment */);
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:15 lint/nursery/noUselessDateGetTime ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    14 │ new Date(date./* comment */getTime());
+    15 │ new Date(date /* comment */.getTime());
+  > 16 │ new Date(date.getTime /* comment */());
+       │               ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ new Date(date.getTime() /* comment */);
+    18 │ new Date(date // comment
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:15 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    15 │ new Date(date /* comment */.getTime());
+    16 │ new Date(date.getTime /* comment */());
+  > 17 │ new Date(date.getTime() /* comment */);
+       │               ^^^^^^^^^
+    18 │ new Date(date // comment
+    19 │ 	.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    15 15 │   new Date(date /* comment */.getTime());
+    16 16 │   new Date(date.getTime /* comment */());
+    17    │ - new·Date(date.getTime()·/*·comment·*/);
+       17 │ + new·Date(date·/*·comment·*/);
+    18 18 │   new Date(date // comment
+    19 19 │   	.getTime());
+  
+
+```
+
+```
+invalid.js:19:3 lint/nursery/noUselessDateGetTime ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    17 │ new Date(date.getTime() /* comment */);
+    18 │ new Date(date // comment
+  > 19 │ 	.getTime());
+       │ 	 ^^^^^^^^^
+    20 │ new Date(getDate(/* comment */).getTime());
+    21 │ new Date((date /* comment */).getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:33 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    18 │ new Date(date // comment
+    19 │ 	.getTime());
+  > 20 │ new Date(getDate(/* comment */).getTime());
+       │                                 ^^^^^^^^^
+    21 │ new Date((date /* comment */).getTime());
+    22 │ new Date(
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    20 │ new·Date(getDate(/*·comment·*/).getTime());
+       │                                ----------  
+
+```
+
+```
+invalid.js:21:31 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    19 │ 	.getTime());
+    20 │ new Date(getDate(/* comment */).getTime());
+  > 21 │ new Date((date /* comment */).getTime());
+       │                               ^^^^^^^^^
+    22 │ new Date(
+    23 │ 	date.getTime()
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    21 │ new·Date((date·/*·comment·*/).getTime());
+       │                              ----------  
+
+```
+
+```
+invalid.js:23:7 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    21 │ new Date((date /* comment */).getTime());
+    22 │ new Date(
+  > 23 │ 	date.getTime()
+       │ 	     ^^^^^^^^^
+    24 │ );
+    25 │ 
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    21 21 │   new Date((date /* comment */).getTime());
+    22 22 │   new Date(
+    23    │ - → date.getTime()
+       23 │ + → date
+    24 24 │   );
+    25 25 │   
+  
+
+```

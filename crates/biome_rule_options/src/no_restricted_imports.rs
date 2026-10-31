@@ -69,12 +69,12 @@ impl From<Paths> for PathOptions {
 }
 
 impl Deserializable for Paths {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
@@ -179,9 +179,9 @@ impl From<Patterns> for PatternOptions {
 }
 
 impl Deserializable for Patterns {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)

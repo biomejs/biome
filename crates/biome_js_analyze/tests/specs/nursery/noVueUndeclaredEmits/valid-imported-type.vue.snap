@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-imported-type.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="emit('submit')">Submit</button>
+</template>
+
+<script setup lang="ts">
+import type { Emits } from "./types";
+
+const emit = defineEmits<Emits>();
+
+emit("change");
+</script>
+
+```

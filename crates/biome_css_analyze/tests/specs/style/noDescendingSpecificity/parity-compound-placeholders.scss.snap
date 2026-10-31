@@ -1,0 +1,47 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-compound-placeholders.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+%a%b .placeholder-target {}
+.placeholder-target {}
+
+.card%a%b .mixed-target {}
+.mixed-target {}
+
+%a%b {
+  .nested-target {}
+}
+.nested-target {}
+
+.parent .normal-target {}
+.normal-target {}
+
+```
+
+# Diagnostics
+```
+parity-compound-placeholders.scss:14:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    13 │ .parent .normal-target {}
+  > 14 │ .normal-target {}
+       │ ^^^^^^^^^^^^^^
+    15 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    11 │ .nested-target {}
+    12 │ 
+  > 13 │ .parent .normal-target {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    14 │ .normal-target {}
+    15 │ 
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

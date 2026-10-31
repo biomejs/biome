@@ -214,6 +214,7 @@ AnyCssSubSelector =
 	| CssPseudoElementSelector
 	| CssNestedSelector
 	| ScssInterpolatedSubSelector
+	| ScssPlaceholderSelector
 	| CssBogusSubSelector
 
 // [hidden]#{$suffix} {}
@@ -273,6 +274,7 @@ AnyCssSelectorIdentifier =
 
 AnyCssSelectorCustomIdentifier =
 	CssCustomIdentifier
+	| CssMetavariable
 	| ScssInterpolatedIdentifier
 
 // [title = "title" i] {}
@@ -781,6 +783,8 @@ AnyCssCustomPropertyComponent =
 	| ScssInterpolatedString
 	| ScssInterpolation
 	| CssCustomPropertyFunction
+	| CssUrlFunction
+	| CssIfFunction
 	| CssCustomPropertyParenthesizedBlock
 	| CssCustomPropertyBracketedBlock
 	| CssCustomPropertyBracedBlock
@@ -883,7 +887,7 @@ AnyCssGenericComponentValue =
 //                                ^
 // }
 CssGenericDelimiter =
-	value: (',' | '/')
+	value: (',' | '/' | '%')
 
 CssComponentValueList = AnyCssValue*
 
@@ -1015,32 +1019,63 @@ CssStartingStyleAtRuleDeclarator =
 	'starting-style'
 
 // Declaration block declarator nodes
+// @color-profile --profile-#{$name} { src: url("a.icc"); }
+//                ^^^^^^^^^^^^^^^^^^
 CssColorProfileAtRuleDeclarator =
 	'color-profile'
-	name: CssCustomIdentifier
+	name: AnyCssAtRuleCustomName
 
+// @counter-style counter-#{$name} { symbols: "*"; }
+//                ^^^^^^^^^^^^^^^^
 CssCounterStyleAtRuleDeclarator =
 	'counter-style'
-	name: CssCustomIdentifier
+	name: AnyCssAtRuleCustomName
+
+// @counter-style counter-#{$name} { symbols: "*"; }
+//                ^^^^^^^^^^^^^^^^
+AnyCssAtRuleCustomName =
+	CssCustomIdentifier
+	| ScssInterpolatedIdentifier
+	| CssBogusCustomIdentifier
+
+// @font-palette-values --palette-#{$name} { font-family: "Bixa"; }
+//                      ^^^^^^^^^^^^^^^^^^
+// @property #{$name} { syntax: "*"; inherits: false; }
+//           ^^^^^^^^
+AnyCssAtRuleDashedName =
+	CssDashedIdentifier
+	| ScssInterpolatedDashedIdentifier
+	| ScssInterpolatedIdentifier
+	| CssBogusCustomIdentifier
 
 // @property --accent {}
 //           ^^^^^^^^
 // @property --#{$name} {}
 //           ^^^^^^^^^^
+// @property #{$name} {}
+//           ^^^^^^^^
 CssPropertyAtRuleDeclarator =
 	'property'
-	name: AnyCssDashedIdentifier
+	name: AnyCssAtRuleDashedName
 
 CssFontFaceAtRuleDeclarator =
 	'font-face'
 
+// @font-palette-values --palette-#{$name} { font-family: "Bixa"; }
+//                      ^^^^^^^^^^^^^^^^^^
+// @font-palette-values #{$name} { font-family: "Bixa"; }
+//                      ^^^^^^^^
 CssFontPaletteValuesAtRuleDeclarator =
 	'font-palette-values'
-	name: CssDashedIdentifier
+	name: AnyCssAtRuleDashedName
 
+// @position-try --try-#{$name} { top: 0; }
+//               ^^^^^^^^^^^^^^
+// @position-try #{$name} { top: 0; }
+//               ^^^^^^^^
 CssPositionTryAtRuleDeclarator =
 	'position-try'
-	name: CssDashedIdentifier
+	name: AnyCssAtRuleDashedName
 
 CssViewTransitionAtRuleDeclarator =
 	'view-transition'
@@ -1110,6 +1145,7 @@ CssFontFamilyNameList = (AnyCssFontFamilyName (',' AnyCssFontFamilyName)*)
 AnyCssFontFamilyName =
     CssFontFamilyName
     | CssString
+    | ScssInterpolatedString
     | CssBogusFontFamilyName
 
 CssFontFamilyName =
@@ -1117,7 +1153,9 @@ CssFontFamilyName =
 
 // @font-feature-values Font Second Gothic { }
 //                      ^^^^^^^^^^^^^^^^^^
-CssCustomIdentifierSpaceSeparatedList = AnyCssCustomIdentifier*
+// @font-feature-values Font #{$name} { }
+//                      ^^^^^^^^^^^^^
+CssCustomIdentifierSpaceSeparatedList = AnyCssAtRuleCustomName*
 
 // :active-view-transition-type(forwards, backwards) { }
 //                              ^^^^^^^^^^^^^^^^^^^^
@@ -1661,11 +1699,18 @@ AnyCssQueryFeature =
 	| CssQueryFeatureReverseRange
 	| CssQueryFeatureRangeInterval
 
+// @media ($bound + "-width": 40rem) {}
+//         ^^^^^^^^^^^^^^^^^
+// @media (range-name() >= 40rem) {}
+//         ^^^^^^^^^^^^
 AnyCssQueryFeatureName =
 	CssIdentifier
 	| CssDashedIdentifier
+	| AnyCssFunction
 	| ScssInterpolatedIdentifier
 	| ScssVariable
+	| ScssExpression
+	| ScssInterpolation
 
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^
@@ -1715,6 +1760,7 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| CssMetavariable
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolation
@@ -1747,7 +1793,7 @@ AnyCssPageSelector =
 // that the name is case sensitive. For simplicity, `<custom-ident>` gets the
 // exact same behavior.
 CssPageSelector =
-	type: CssCustomIdentifier?
+	type: AnyCssAtRuleCustomName?
 	pseudos: CssPageSelectorPseudoList
 
 CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
@@ -1758,9 +1804,11 @@ AnyCssPageSelectorPseudo =
 
 // @page name:first,:blank:first {  }
 // 			     ^^^^^^ ^^^^^^^^^^^^
+// @page :#{$pseudo} { }
+//       ^^^^^^^^^^^
 CssPageSelectorPseudo =
 	':'
-	selector: CssIdentifier
+	selector: AnyCssSelectorIdentifier
 
 AnyCssPageAtRuleBlock =
 	CssPageAtRuleBlock
@@ -1948,11 +1996,22 @@ CssSupportsFeatureDeclaration =
 //           ^^^^^^^^^^^^^^^
 ScssSupportsFeatureDeclaration =
 	'('
-	name: ScssVariable
+	declaration: ScssSupportsDeclaration
+	')'
+
+// @supports ($prefix + $axis: clip) {}
+//            ^^^^^^^^^^^^^^^^^^^^^
+// @import "theme.css" supports($prefix + $axis: clip);
+//                              ^^^^^^^^^^^^^^^^^^^^
+ScssSupportsDeclaration =
+	name: AnyScssSupportsDeclarationName
 	':'
 	value: AnyCssGenericPropertyValueOrExpression
 	important: CssDeclarationImportant?
-	')'
+
+AnyScssSupportsDeclarationName =
+	ScssVariable
+	| ScssExpression
 
 // @supports selector(:focus-visible) { }
 // 				   ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2047,6 +2106,7 @@ CssImportSupports =
 AnyCssImportSupportsCondition =
 	AnyCssSupportsCondition
 	| CssDeclaration
+	| ScssSupportsDeclaration
 
 // https://drafts.csswg.org/css-namespaces/#declaration
 // @namespace = @namespace <namespace-prefix>? [ <string> | <url> ] ;
@@ -2054,11 +2114,18 @@ AnyCssImportSupportsCondition =
 
 CssNamespaceAtRule =
 	'namespace'
-	prefix: CssIdentifier?
+	prefix: AnyCssNamespacePrefixName?
 	url: AnyCssNamespaceUrl
 	';'
 
 AnyCssNamespaceUrl = CssUrlFunction | CssString
+
+// @namespace ns-#{$name} url("http://example.com");
+//            ^^^^^^^^^^^
+AnyCssNamespacePrefixName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
+	| CssBogusCustomIdentifier
 
 // https://drafts.csswg.org/css-transitions-2/#at-ruledef-starting-style
 // @starting-style {
@@ -2274,9 +2341,11 @@ CssCustomMediaAtRule =
 	declarator: CssCustomMediaAtRuleDeclarator
 	';'
 
+// @custom-media --media-#{$name} (min-width: 1px);
+//               ^^^^^^^^^^^^^^^^
 CssCustomMediaAtRuleDeclarator =
 	'custom-media'
-	name: AnyCssDashedIdentifier
+	name: AnyCssAtRuleDashedName
 	queries: AnyCssCustomMediaQuery
 
 AnyCssCustomMediaQuery =
@@ -2299,8 +2368,10 @@ AnyCssValue =
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolatedValue
+	| ScssHashValue
 	| ScssModuleMemberAccess
 	| ScssParentSelectorValue
+	| ScssPercentValue
 	| CssString
 	| ScssInterpolatedString
 	| CssNumber
@@ -2500,10 +2571,11 @@ CssIfTestBooleanOrExpr =
 	'or'
 	right: AnyCssIfTestBooleanOrCombinableExpr
 
-// <boolean-expr-group> = <if-test> | ( <boolean-expr> )
+// <boolean-expr-group> = <if-test> | ( <boolean-expr> ) | <sass-interpolation>
 AnyCssIfTestBooleanExprGroup =
 	AnyCssIfTest
 	| CssIfTestBooleanExprInParens
+	| ScssInterpolation
 
 // ( <boolean-expr> )
 //
@@ -2529,9 +2601,13 @@ CssIfBranch =
 
 // if(sass(true): 1px + 2px; else: 0)
 //                ^^^^^^^^^
+// Inside an SCSS custom property, Sass doesn't evaluate branch values:
+// --gap: if(media(print): $gap; else: 0)
+//                         ^^^^
 AnyCssIfBranchValue =
 	CssGenericComponentValueList
 	| ScssExpression
+	| CssCustomPropertyValue
 
 AnyCssIfBranch =
 	CssIfBranch
@@ -2746,11 +2822,19 @@ CssRegularAttrUnit =
 CssUnknownAttrUnit =
 	unit: 'ident'
 
+// .card { width: attr(data-width $unit, 10px); }
+//                                ^^^^^
+// .card { width: attr(data-width #{$unit}, 10px); }
+//                                ^^^^^^^^
 AnyCssAttrType =
 	CssRawStringDeclarator
 	| CssTypeFunction
 	| CssNumberDeclarator
 	| AnyCssAttrUnit
+	| ScssVariable
+	| ScssNamespacedVariable
+	| ScssInterpolatedIdentifier
+	| CssBogusPropertyValue
 
 // attr(data-test type(*), rem);
 //                       ^^^^^
@@ -3204,10 +3288,20 @@ ScssAtRootQueryClause =
 	':'
 	rules: ScssExpression
 
-// .root-only, .another-root
-// ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root .root-only, .another-root { color: red; }
+//          ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @keyframes fade { @at-root 50%, to { opacity: 1; } }
+//                            ^^^^^^^
 ScssAtRootSelector =
-	selector: CssSelectorList
+	selector: AnyScssAtRootSelectorList
+
+// @at-root .root-only { color: red; }
+//          ^^^^^^^^^^
+// @keyframes fade { @at-root 50%, to { opacity: 1; } }
+//                            ^^^^^^^
+AnyScssAtRootSelectorList =
+	CssSelectorList
+	| CssKeyframesSelectorList
 
 // !optional
 // ^^^^^^^^^
@@ -3335,6 +3429,10 @@ AnyScssInterpolatedIdentifierPart =
 	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
 
+ScssHashValue =
+	'#'
+	value: 'ident'
+
 ScssInterpolatedValue =
 	items: ScssInterpolatedValuePartList
 
@@ -3342,6 +3440,8 @@ ScssInterpolatedValuePartList = AnyScssInterpolatedValuePart*
 
 AnyScssInterpolatedValuePart =
 	ScssVariable
+	| ScssHashValue
+	| CssGenericDelimiter
 	| ScssNamespacedVariable
 	| ScssInterpolation
 	| CssNumber
@@ -3583,6 +3683,7 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
+	| CssDeclarationImportant
 	| ScssBinaryExpression
 	| ScssInterpolation
 	| ScssUnaryExpression
@@ -3595,6 +3696,11 @@ AnyScssExpression =
 //     ^
 ScssParentSelectorValue =
 	'&'
+
+// $unit: %;
+//        ^
+ScssPercentValue =
+	'%'
 
 // color: module.$var;
 //        ^^^^^^^^^^^

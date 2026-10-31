@@ -129,7 +129,12 @@
       "playwright/no-identical-title": "error",
       "react-prefer-function-component/prefer-function-component": "error",
       "svelte/no-target-blank": "error",
-      "svelte/prefer-const": "error"
+      "svelte/prefer-const": "error",
+      "n/shebang": "error",
+      "svelte/prefer-class-directive": "error",
+      "vue/v-if-else-key": "error",
+      "vue/valid-model-definition": "error",
+      "vue/valid-v-bind-sync": "error"
     }
   }
 }

@@ -69,6 +69,9 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     NoDuplicateClasses,
     OrganizeImports,
+    UseGraphqlSortedArguments,
+    UseGraphqlSortedDefinitions,
+    UseGraphqlSortedVariables,
     UseSortedAttributes,
     UseSortedEnumMembers,
     UseSortedInterfaceMembers,
@@ -83,6 +86,9 @@ impl ActionName {
         match self {
             Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
+            Self::UseGraphqlSortedArguments => "useGraphqlSortedArguments",
+            Self::UseGraphqlSortedDefinitions => "useGraphqlSortedDefinitions",
+            Self::UseGraphqlSortedVariables => "useGraphqlSortedVariables",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedEnumMembers => "useSortedEnumMembers",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
@@ -97,6 +103,9 @@ impl ActionName {
         match self {
             Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
+            Self::UseGraphqlSortedArguments => RuleGroup::Source,
+            Self::UseGraphqlSortedDefinitions => RuleGroup::Source,
+            Self::UseGraphqlSortedVariables => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedEnumMembers => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
@@ -114,6 +123,9 @@ impl std::str::FromStr for ActionName {
         match s {
             "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
+            "useGraphqlSortedArguments" => Ok(Self::UseGraphqlSortedArguments),
+            "useGraphqlSortedDefinitions" => Ok(Self::UseGraphqlSortedDefinitions),
+            "useGraphqlSortedVariables" => Ok(Self::UseGraphqlSortedVariables),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedEnumMembers" => Ok(Self::UseSortedEnumMembers),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),

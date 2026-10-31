@@ -1,0 +1,85 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate prettier --write
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto",
+    "bracketSameLine": false,
+    "bracketSpacing": true,
+    "expand": "auto",
+    "useEditorconfig": true
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteStyle": "double",
+      "attributePosition": "auto",
+      "bracketSpacing": true
+    }
+  },
+  "markdown": { "formatter": { "formatEmbeds": false } },
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": false,
+      "selfCloseVoidElements": "always"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["docs/**/*.md"],
+      "markdown": { "formatter": { "formatEmbeds": true } }
+    }
+  ]
+}
+```
+
+## `.prettierrc`
+
+```prettierrc
+{
+        "semi": true,
+        "singleQuote": false,
+        "embeddedLanguageFormatting": "off",
+        "overrides": [{
+            "files": ["docs/**/*.md"],
+            "options": { "embeddedLanguageFormatting": "auto" }
+        }]
+    }
+```
+
+# Emitted Messages
+
+```block
+.prettierrc has been successfully migrated.
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```

@@ -1,0 +1,56 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+## `file.md`
+
+```md
+---
+title: Biome
+items: [a, b]
+---
+
+# Embeds
+
+```js
+const value = { a: 1, b: 2 };
+```
+
+```css
+a {
+	color: red;
+}
+```
+
+```rust
+fn   main() {}
+```
+
+<div><span>content</span>
+</div>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

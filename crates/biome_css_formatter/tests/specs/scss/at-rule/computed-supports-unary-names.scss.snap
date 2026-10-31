@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/computed-supports-unary-names.scss
+---
+
+# Input
+
+```scss
+$gap:2px;$suffix:space;
+@supports( -  -space:$gap ){a{color:red}}
+@supports( -  -#{$suffix}:$gap ){a{color:red}}
+@supports( -  -1:$gap ){a{color:red}}
+@import "bare.css" supports( -  -space:$gap );
+@import "grouped.css" supports(( -  -space:$gap ));
+@supports(- /* name */ -space:$gap){a{color:red}}
+@supports(--space: $gap){a{color:red}}
+@supports(-10:$gap){a{color:red}}
+@supports($suffix: - -space){a{color:red}}
+
+```
+
+
+# Formatted
+
+```scss
+$gap: 2px;
+$suffix: space;
+@supports (- -space: $gap) {
+	a {
+		color: red;
+	}
+}
+@supports (- -#{$suffix}: $gap) {
+	a {
+		color: red;
+	}
+}
+@supports (- -1: $gap) {
+	a {
+		color: red;
+	}
+}
+@import "bare.css" supports(- -space: $gap);
+@import "grouped.css" supports((- -space: $gap));
+@supports (- /* name */ -space: $gap) {
+	a {
+		color: red;
+	}
+}
+@supports (--space: $gap) {
+	a {
+		color: red;
+	}
+}
+@supports (-10: $gap) {
+	a {
+		color: red;
+	}
+}
+@supports ($suffix: --space) {
+	a {
+		color: red;
+	}
+}
+
+```

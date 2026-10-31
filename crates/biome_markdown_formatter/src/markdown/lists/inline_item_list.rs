@@ -860,14 +860,23 @@ impl FormatMdInlineItemList {
     ) -> FormatResult<()> {
         let mut items = ProseItemList::from_inline_item_list(node, f)?;
         let inside_list = text_context.is_list();
+        let prose_wrap = f.options().prose_wrap();
+        // Must run before the indentation is removed below.
+        let indented_block_marker_lines = if prose_wrap == ProseWrap::Preserve {
+            items.indented_block_marker_lines(inside_list)
+        } else {
+            Vec::new()
+        };
 
         if inside_list {
             items.remove_spaces_after_soft_breaks();
         }
         let items = items.as_slice();
 
-        match f.options().prose_wrap() {
-            ProseWrap::Preserve => self.fmt_prose_preserve(node, items, f, inside_list)?,
+        match prose_wrap {
+            ProseWrap::Preserve => {
+                self.fmt_prose_preserve(node, items, &indented_block_marker_lines, f, inside_list)?
+            }
             ProseWrap::Always => self.fmt_prose_always(items, f)?,
             ProseWrap::Never => self.fmt_prose_never(items, f)?,
         }
@@ -879,10 +888,19 @@ impl FormatMdInlineItemList {
         Ok(())
     }
 
+    /// Prints each source line of `items` on its own line, with two exceptions.
+    ///
+    /// A line that would start a list item, heading, or blockquote at its
+    /// printed indentation joins the previous line with a space. These are the
+    /// lines in `indented_block_marker_lines` and, inside a list item, the
+    /// indented lazy continuation lines that start with a list marker.
+    /// An unindented lazy continuation line that starts with a list marker
+    /// stays at the start of the line, outside the list item's indentation.
     fn fmt_prose_preserve(
         &self,
         node: &MdInlineItemList,
         items: &[ProseItem],
+        indented_block_marker_lines: &[usize],
         f: &mut MarkdownFormatter,
         inside_list: bool,
     ) -> FormatResult<()> {
@@ -928,17 +946,17 @@ impl FormatMdInlineItemList {
                 ProseItem::SoftBreak => {
                     let line_items = &items[line_start..i];
                     if !line_items.is_empty() {
-                        let next_line_is_outdented_list_marker =
-                            indented_outdented_lines.contains(&(line_index + 1));
+                        let join_next_line = indented_outdented_lines.contains(&(line_index + 1))
+                            || indented_block_marker_lines.contains(&(line_index + 1));
                         format_source_line(
                             line_items,
                             line_index,
                             !is_first_line,
-                            !inside_list,
+                            !inside_list && !join_next_line,
                             &outdented_lines,
                             f,
                         )?;
-                        if next_line_is_outdented_list_marker {
+                        if join_next_line {
                             write!(f, [space()])?;
                             is_first_line = true;
                         } else {

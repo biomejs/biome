@@ -61,6 +61,8 @@ invalid.js:1:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━�
     2 │ if (x) {
     3 │   x;
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     1 │ if·(x)·{·x;·}
@@ -79,6 +81,8 @@ invalid.js:4:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━�
       │   ^^^^^^^
     5 │ if (x) {
     6 │   x;
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -99,6 +103,8 @@ invalid.js:7:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━�
     8 │ for (;;);
     9 │ for (p in obj);
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     7 │ }·else·if·(y)·{·y;·}
@@ -117,6 +123,8 @@ invalid.js:8:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━�
        │ ^^^^^^^^^
      9 │ for (p in obj);
     10 │ for (x of xs);
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -142,6 +150,8 @@ invalid.js:9:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━�
     10 │ for (x of xs);
     11 │ do;
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
      7  7 │   } else if (y) y;
@@ -165,6 +175,8 @@ invalid.js:10:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
        │ ^^^^^^^^^^^^^^
     11 │ do;
     12 │ while (x);
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -192,6 +204,8 @@ invalid.js:11:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     13 │ while (x);
     14 │ 
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
      9  9 │   for (p in obj);
@@ -216,6 +230,8 @@ invalid.js:13:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     14 │ 
     15 │ if (x);
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     11 11 │   do;
@@ -239,6 +255,8 @@ invalid.js:15:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
        │ ^^^^^^^
     16 │ 
     17 │ if (test);
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -267,6 +285,8 @@ invalid.js:17:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     20 │ 
     21 │ while (test)
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     15 15 │   if (x);
@@ -292,6 +312,8 @@ invalid.js:18:6 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     20 │ 
     21 │ while (test)
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     16 16 │   
@@ -315,6 +337,8 @@ invalid.js:19:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
        │ ^^^^^
     20 │ 
     21 │ while (test)
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -341,6 +365,8 @@ invalid.js:21:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
        │   ^^^
     23 │ 
     24 │   while (test)
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -370,6 +396,8 @@ invalid.js:24:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
        │     ^^^
     26 │ 
     27 │ if (test)
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -404,6 +432,8 @@ invalid.js:27:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     33 │ 
     34 │   if (test)
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     25 25 │       bar
@@ -435,6 +465,8 @@ invalid.js:29:6 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     33 │ 
     34 │   if (test)
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     27 27 │   if (test)
@@ -463,6 +495,8 @@ invalid.js:31:1 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
        │   ^^^
     33 │ 
     34 │   if (test)
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
@@ -497,6 +531,8 @@ invalid.js:34:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     40 │ 
     41 │ if (test) {
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     32 32 │     bar
@@ -528,6 +564,8 @@ invalid.js:36:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     40 │ 
     41 │ if (test) {
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     34 34 │     if (test)
@@ -557,6 +595,8 @@ invalid.js:38:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
     40 │ 
     41 │ if (test) {
   
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
+  
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
     36 36 │     else if(test)
@@ -582,6 +622,8 @@ invalid.js:43:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━
   > 43 │ } else console.log("false") // comment
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 
+  
+  i Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs.
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   

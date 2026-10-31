@@ -6,7 +6,11 @@ use crate::syntax::scss::{
     parse_scss_interpolation_with_context,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
+use crate::syntax::value::function::{
+    is_nth_at_adjacent_l_paren, try_parse_custom_property_if_function,
+};
+use crate::syntax::value::r#if::is_at_if_function;
+use crate::syntax::value::url::parse_custom_property_url_function;
 use crate::syntax::{is_at_identifier, parse_custom_identifier_with_keywords, parse_number};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -96,6 +100,17 @@ pub(crate) fn parse_supports_custom_property_value(
         CssCustomPropertyCommentMode::ScssLineComments,
         CSS_CUSTOM_PROPERTY_VALUE,
     )
+}
+
+/// Parses a raw custom-property value with the caller's `//` policy.
+///
+/// Example: `$gap` in `--space: if(media(print): $gap; else: 0);`.
+pub(crate) fn parse_custom_property_value_with_mode(
+    p: &mut CssParser,
+    end_set: TokenSet<CssSyntaxKind>,
+    comment_mode: CssCustomPropertyCommentMode,
+) -> CompletedMarker {
+    parse_raw_property_value_with_mode(p, end_set, comment_mode, CSS_CUSTOM_PROPERTY_VALUE)
 }
 
 /// Parses a raw custom-property value with the caller's `//` policy.
@@ -274,28 +289,24 @@ fn parse_custom_property_function(
         return Absent;
     }
 
-    let function = p.start();
-    let is_url_function = p.at(T![url]);
     let context = CssLexContext::CustomPropertyValue(comment_mode);
-
-    parse_custom_identifier_with_keywords(p, context, true).ok();
-
-    // Raw `url(...)` contents keep `//` as URL text; fallback function bodies
-    // parse it as a Sass comment.
-    let body_comment_mode = if comment_mode == CssCustomPropertyCommentMode::ScssLineComments
-        && is_url_function
-        && p.source().is_scss_raw_url_body()
+    if !legacy_filter_recovery && let Present(url) = parse_custom_property_url_function(p, context)
     {
-        CssCustomPropertyCommentMode::PreserveDoubleSlash
-    } else {
-        comment_mode
-    };
+        return Present(url);
+    }
+    // A modern `if()` gets its own node. Anything else, such as Sass's legacy
+    // `if($condition, $a, $b)`, stays a raw function.
+    if !legacy_filter_recovery
+        && is_at_if_function(p)
+        && let Present(function) = try_parse_custom_property_if_function(p, comment_mode)
+    {
+        return Present(function);
+    }
 
-    p.bump_with_context(
-        T!['('],
-        CssLexContext::CustomPropertyValue(body_comment_mode),
-    );
-    CustomPropertyComponentList::block(body_comment_mode, nested_end_set, legacy_filter_recovery)
+    let function = p.start();
+    parse_custom_identifier_with_keywords(p, context, true).ok();
+    p.bump_with_context(T!['('], context);
+    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery)
         .parse_list(p);
     p.expect_with_context(T![')'], context);
     Present(function.complete(p, CSS_CUSTOM_PROPERTY_FUNCTION))

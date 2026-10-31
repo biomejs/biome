@@ -116,14 +116,18 @@ impl Rule for UseObjectSpread {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.member_expr_range,
-            markup! {
-                "Object spread syntax is more concise, readable, and performs better"
-                " than "<Emphasis>"Object.assign"</Emphasis>"."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.member_expr_range,
+                markup! {
+                    "Use object spread instead of "<Emphasis>"Object.assign"</Emphasis>"."
+                },
+            )
+            .note(markup! {
+                "Object spread syntax is more concise, readable, and performs better than "<Emphasis>"Object.assign"</Emphasis>"."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {

@@ -1,0 +1,2 @@
+# should generate diagnostics
+type b { id: ID! } type a { id: ID! } # a

@@ -130,7 +130,10 @@ impl Rule for UseShorthandAssign {
             markup! {
                 "Assignment "<Emphasis>"(=)"</Emphasis>" can be replaced with operator assignment "<Emphasis>""{shorthand_operator}""</Emphasis>"."
             },
-        ))
+        )
+        .note(markup! {
+            "The shorthand operator is shorter and does not repeat the name of the variable."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

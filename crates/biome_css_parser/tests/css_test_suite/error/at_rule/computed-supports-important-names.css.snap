@@ -1,0 +1,297 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@supports (!important: a) {}
+@import "bare.css" supports(!important: a);
+@import "grouped.css" supports((!important: a));
+.after { color: green; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                    condition: CssBogusSupportsCondition {
+                        items: [
+                            L_PAREN@10..11 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    BANG@11..12 "!" [] [],
+                                    IMPORTANT_KW@12..21 "important" [] [],
+                                    COLON@21..23 ":" [] [Whitespace(" ")],
+                                    IDENT@23..24 "a" [] [],
+                                ],
+                            },
+                            R_PAREN@24..26 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@27..28 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@28..30 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    IMPORT_KW@30..37 "import" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@37..48 "\"bare.css\"" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            SUPPORTS_KW@48..56 "supports" [] [],
+                            L_PAREN@56..57 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    BANG@57..58 "!" [] [],
+                                    IMPORTANT_KW@58..67 "important" [] [],
+                                    COLON@67..69 ":" [] [Whitespace(" ")],
+                                    IDENT@69..70 "a" [] [],
+                                ],
+                            },
+                            R_PAREN@70..71 ")" [] [],
+                        ],
+                    },
+                    CssMediaQueryList [],
+                    SEMICOLON@71..72 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@72..74 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@74..81 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@81..95 "\"grouped.css\"" [] [Whitespace(" ")],
+                },
+                layer: missing (optional),
+                supports: CssImportSupports {
+                    supports_token: SUPPORTS_KW@95..103 "supports" [] [],
+                    l_paren_token: L_PAREN@103..104 "(" [] [],
+                    condition: CssBogusSupportsCondition {
+                        items: [
+                            L_PAREN@104..105 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    BANG@105..106 "!" [] [],
+                                    IMPORTANT_KW@106..115 "important" [] [],
+                                    COLON@115..117 ":" [] [Whitespace(" ")],
+                                    IDENT@117..118 "a" [] [],
+                                ],
+                            },
+                            R_PAREN@118..119 ")" [] [],
+                        ],
+                    },
+                    r_paren_token: R_PAREN@119..120 ")" [] [],
+                },
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@120..121 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@121..123 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@123..129 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@129..131 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@131..136 "color" [] [],
+                                },
+                                colon_token: COLON@136..138 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@138..143 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@143..145 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@145..146 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@146..147 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..147
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..146
+    0: CSS_AT_RULE@0..28
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..28
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..26
+          0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+          1: CSS_BOGUS_SUPPORTS_CONDITION@10..26
+            0: L_PAREN@10..11 "(" [] []
+            1: CSS_BOGUS@11..24
+              0: BANG@11..12 "!" [] []
+              1: IMPORTANT_KW@12..21 "important" [] []
+              2: COLON@21..23 ":" [] [Whitespace(" ")]
+              3: IDENT@23..24 "a" [] []
+            2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@26..28
+          0: L_CURLY@26..27 "{" [] []
+          1: CSS_RULE_LIST@27..27
+          2: R_CURLY@27..28 "}" [] []
+    1: CSS_AT_RULE@28..72
+      0: AT@28..30 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@30..72
+        0: IMPORT_KW@30..37 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@37..48
+          0: CSS_STRING_LITERAL@37..48 "\"bare.css\"" [] [Whitespace(" ")]
+        2: CSS_BOGUS@48..71
+          0: SUPPORTS_KW@48..56 "supports" [] []
+          1: L_PAREN@56..57 "(" [] []
+          2: CSS_BOGUS@57..70
+            0: BANG@57..58 "!" [] []
+            1: IMPORTANT_KW@58..67 "important" [] []
+            2: COLON@67..69 ":" [] [Whitespace(" ")]
+            3: IDENT@69..70 "a" [] []
+          3: R_PAREN@70..71 ")" [] []
+        3: CSS_MEDIA_QUERY_LIST@71..71
+        4: SEMICOLON@71..72 ";" [] []
+    2: CSS_AT_RULE@72..121
+      0: AT@72..74 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@74..121
+        0: IMPORT_KW@74..81 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@81..95
+          0: CSS_STRING_LITERAL@81..95 "\"grouped.css\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_IMPORT_SUPPORTS@95..120
+          0: SUPPORTS_KW@95..103 "supports" [] []
+          1: L_PAREN@103..104 "(" [] []
+          2: CSS_BOGUS_SUPPORTS_CONDITION@104..119
+            0: L_PAREN@104..105 "(" [] []
+            1: CSS_BOGUS@105..118
+              0: BANG@105..106 "!" [] []
+              1: IMPORTANT_KW@106..115 "important" [] []
+              2: COLON@115..117 ":" [] [Whitespace(" ")]
+              3: IDENT@117..118 "a" [] []
+            2: R_PAREN@118..119 ")" [] []
+          3: R_PAREN@119..120 ")" [] []
+        4: CSS_MEDIA_QUERY_LIST@120..120
+        5: SEMICOLON@120..121 ";" [] []
+    3: CSS_QUALIFIED_RULE@121..146
+      0: CSS_SELECTOR_LIST@121..129
+        0: CSS_COMPOUND_SELECTOR@121..129
+          0: CSS_NESTED_SELECTOR_LIST@121..121
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@121..129
+            0: CSS_CLASS_SELECTOR@121..129
+              0: DOT@121..123 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@123..129
+                0: IDENT@123..129 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@129..146
+        0: L_CURLY@129..131 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@131..145
+          0: CSS_DECLARATION_WITH_SEMICOLON@131..145
+            0: CSS_DECLARATION@131..143
+              0: CSS_GENERIC_PROPERTY@131..143
+                0: CSS_IDENTIFIER@131..136
+                  0: IDENT@131..136 "color" [] []
+                1: COLON@136..138 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@138..143
+                  0: CSS_IDENTIFIER@138..143
+                    0: IDENT@138..143 "green" [] []
+              1: (empty)
+            1: SEMICOLON@143..145 ";" [] [Whitespace(" ")]
+        2: R_CURLY@145..146 "}" [] []
+  2: EOF@146..147 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+computed-supports-important-names.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @supports (!important: a) {}
+      │            ^^^^^^^^^^^^^
+    2 │ @import "bare.css" supports(!important: a);
+    3 │ @import "grouped.css" supports((!important: a));
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+computed-supports-important-names.css:2:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @supports (!important: a) {}
+  > 2 │ @import "bare.css" supports(!important: a);
+      │                             ^^^^^^^^^^^^^
+    3 │ @import "grouped.css" supports((!important: a));
+    4 │ .after { color: green; }
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+computed-supports-important-names.css:3:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @supports (!important: a) {}
+    2 │ @import "bare.css" supports(!important: a);
+  > 3 │ @import "grouped.css" supports((!important: a));
+      │                                 ^^^^^^^^^^^^^
+    4 │ .after { color: green; }
+    5 │ 
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+```

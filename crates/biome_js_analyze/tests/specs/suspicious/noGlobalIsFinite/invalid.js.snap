@@ -30,12 +30,14 @@ localIsNaN(isFinite);
 ```
 invalid.js:1:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
   > 1 │ isFinite({});
       │ ^^^^^^^^
     2 │ 
     3 │ (isFinite)({});
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -52,7 +54,7 @@ invalid.js:1:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:3:2 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
     1 │ isFinite({});
     2 │ 
@@ -60,6 +62,8 @@ invalid.js:3:2 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
       │  ^^^^^^^^
     4 │ 
     5 │ globalThis.isFinite({});
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -78,7 +82,7 @@ invalid.js:3:2 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:5:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
     3 │ (isFinite)({});
     4 │ 
@@ -86,6 +90,8 @@ invalid.js:5:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^
     6 │ 
     7 │ (globalThis).isFinite({});
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -104,7 +110,7 @@ invalid.js:5:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:7:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
     5 │ globalThis.isFinite({});
     6 │ 
@@ -112,6 +118,8 @@ invalid.js:7:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ globalThis.globalThis.window.isFinite({});
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -130,7 +138,7 @@ invalid.js:7:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:9:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
      7 │ (globalThis).isFinite({});
      8 │ 
@@ -138,6 +146,8 @@ invalid.js:9:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
     11 │ globalThis["isFinite"]({});
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -156,7 +166,7 @@ invalid.js:9:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━�
 ```
 invalid.js:11:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
      9 │ globalThis.globalThis.window.isFinite({});
     10 │ 
@@ -164,6 +174,8 @@ invalid.js:11:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
     13 │ (globalThis)[("isFinite")]({});
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -182,7 +194,7 @@ invalid.js:11:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
 ```
 invalid.js:13:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
     11 │ globalThis["isFinite"]({});
     12 │ 
@@ -190,6 +202,8 @@ invalid.js:13:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ function localIsNaN(isFinite) {
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -203,13 +217,15 @@ invalid.js:13:1 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
 ```
 invalid.js:16:5 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
     15 │ function localIsNaN(isFinite) {
   > 16 │     globalThis.isFinite({});
        │     ^^^^^^^^^^^^^^^^^^^
     17 │ }
     18 │ 
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   
@@ -228,13 +244,15 @@ invalid.js:16:5 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━
 ```
 invalid.js:19:12 lint/suspicious/noGlobalIsFinite  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! isFinite is unsafe. It attempts a type coercion. Use Number.isFinite instead.
+  ! Use Number.isFinite instead of the global isFinite.
   
     17 │ }
     18 │ 
   > 19 │ localIsNaN(isFinite);
        │            ^^^^^^^^
     20 │ 
+  
+  i The global isFinite converts its argument to a number first, so a string such as "12" is treated as a finite number.
   
   i See the MDN documentation for more details.
   

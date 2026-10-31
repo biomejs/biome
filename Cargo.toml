@@ -69,7 +69,6 @@ biome_js_runtime             = { path = "./crates/biome_js_runtime", version = "
 biome_js_semantic            = { path = "./crates/biome_js_semantic", version = "0.7.0" }
 biome_js_syntax              = { path = "./crates/biome_js_syntax", version = "0.7.0" }
 biome_js_type_info           = { path = "./crates/biome_js_type_info", version = "0.7.0" }
-biome_js_type_info_macros    = { path = "./crates/biome_js_type_info_macros", version = "0.7.0" }
 biome_jsdoc_comment          = { path = "./crates/biome_jsdoc_comment", version = "0.7.0" }
 biome_json_analyze           = { path = "./crates/biome_json_analyze", version = "0.7.0" }
 biome_json_factory           = { path = "./crates/biome_json_factory", version = "0.7.0" }
@@ -98,9 +97,10 @@ biome_react_compiler         = { path = "./crates/biome_react_compiler", version
 biome_resolver               = { path = "./crates/biome_resolver", version = "0.7.0" }
 biome_rowan                  = { path = "./crates/biome_rowan", version = "0.7.0" }
 biome_rule_options           = { path = "./crates/biome_rule_options", version = "0.7.0" }
+biome_ruledoc                = { path = "./crates/biome_ruledoc" }
 biome_ruledoc_utils          = { path = "./crates/biome_ruledoc_utils" }
 biome_service                = { path = "./crates/biome_service" }
-biome_string_case            = { path = "./crates/biome_string_case", version = "0.7.0", features = ["biome_rowan"] }
+biome_string_case            = { path = "./crates/biome_string_case", version = "0.7.0" }
 biome_suppression            = { path = "./crates/biome_suppression", version = "0.7.0" }
 biome_tailwind_factory       = { path = "./crates/biome_tailwind_factory", version = "0.7.0" }
 biome_tailwind_logic         = { path = "./crates/biome_tailwind_logic", version = "0.1.0" }
@@ -111,6 +111,7 @@ biome_text_edit              = { path = "./crates/biome_text_edit", version = "0
 biome_text_size              = { path = "./crates/biome_text_size", version = "0.7.0" }
 biome_ungrammar              = { path = "./crates/biome_ungrammar", version = "0.3.1" }
 biome_unicode_table          = { path = "./crates/biome_unicode_table", version = "0.7.0" }
+biome_vue_semantic           = { path = "./crates/biome_vue_semantic" }
 biome_yaml_analyze           = { path = "./crates/biome_yaml_analyze", version = "0.1.0" }
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.7.0" }
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.7.0" }
@@ -143,7 +144,7 @@ libc                         = "0.2.190"
 # See: https://github.com/biomejs/biome/issues/10270
 # See: https://github.com/biomejs/biome/issues/11242
 mimalloc                     = "=0.1.48"
-notify                       = "8.2.0"
+notify                       = "8.2.1"
 papaya                       = "0.2.5"
 path-absolutize              = { version = "3.1.1", features = ["use_unix_paths_on_wasm"], optional = false }
 phf                          = { version = "0.13.1", features = ["macros"] }
@@ -155,23 +156,22 @@ quickcheck_macros            = "1.2.0"
 quote                        = "1.0.47"
 rayon                        = "1.12.0"
 regex                        = "1.13.1"
-reqwest                      = { version = "0.12.19", default-features = false }
 rustc-hash                   = "2.1.3"
 ryu-js                       = "1.0.3"
 salsa                        = "0.28.5"
 schemars                     = { version = "1.2.2", features = ["indexmap2", "smallvec1"] }
 serde                        = { version = "1.0.229", features = ["derive"] }
-serde_json                   = "1.0.151"
+serde_json                   = "1.0.154"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
-smallvec                     = { version = "1.16.2", features = ["const_new", "serde", "union"] }
+smallvec                     = { version = "1.16.4", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"
 terminal_size                = "0.4.4"
 tests_macros                 = { path = "./crates/tests_macros" }
 tikv-jemallocator            = "0.6.1"
-tokio                        = "1.53.1"
+tokio                        = "1.53.3"
 tower                        = "0.5.3"
 tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }

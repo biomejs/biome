@@ -315,15 +315,6 @@ a {
  a {
    prop1: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
    prop2: func(1px, 1px, 1px, func(1px, 1px, 1px, func(1px, 1px, 1px)));
-@@ -67,7 +68,7 @@
-   content: attr(data-title);
-   color: var(--main-bg-color);
-   background-color: rgb(255, 0, 0);
--  background: element(#css-source);
-+  background: element(#c ss-source);
-   width: calc(100% - (#{var(--g-spacing)} - #{$iframe-x-padding}) * 2);
-   padding-bottom: (
-     100% * $image-height /
 @@ -75,7 +76,7 @@
    );
    padding-top: var(--paddingC);
@@ -503,7 +494,7 @@ a {
   content: attr(data-title);
   color: var(--main-bg-color);
   background-color: rgb(255, 0, 0);
-  background: element(#c ss-source);
+  background: element(#css-source);
   width: calc(100% - (#{var(--g-spacing)} - #{$iframe-x-padding}) * 2);
   padding-bottom: (
     100% * $image-height /
@@ -642,17 +633,6 @@ a {
 
 # Errors
 ```
-parens.scss:120:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Invalid color
-  
-    118 │   color: var(  --main-bg-color  );
-    119 │   background-color: rgb(  255,  0,  0  );
-  > 120 │   background: element(  #css-source  );
-        │                          ^
-    121 │   width: calc(  100%  -  (  #{var(--g-spacing)}  -  #{$iframe-x-padding}  )  *  2  );
-    122 │   padding-bottom:
-  
 parens.scss:150:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a SCSS expression but instead found '@width/2 @width /2 @width/ 2 @width / 2'.

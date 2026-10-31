@@ -1,0 +1,34 @@
+# should generate diagnostics
+query InlineCommas($c: Int, $b: Int, $a: Int) { x }
+
+query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+
+query InlinePadded( $c: Int, $a: Int ) { x }
+
+query MultilineCommas(
+  $c: Int,
+  $b: Int,
+  $a: Int
+) { x }
+
+query MultilineTrailingComma(
+  $b: Int,
+  $a: Int,
+) { x }
+
+query MixedLayout($c: Int,
+  $a: Int) { x }
+
+query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+
+query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+
+query Duplicates($b: Int, $a: Int, $b: String) { x }
+
+query ($b: Int, $a: Int) { x }
+
+mutation Mutation($b: Int, $a: Int) { x }
+
+subscription Subscription($b: Int, $a: Int) { x }
+
+query DirectiveArguments($c: Int @dir(x: 1), $a: Int @dir(y: [1, 2]), $b: Int) { x }

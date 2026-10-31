@@ -68,10 +68,14 @@ impl Rule for NoEmptyTypeParameters {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {"Using an "<Emphasis>"empty type parameter list"</Emphasis>" is confusing."},
-        ).note("Remove the empty type parameter list or add a type parameter."))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {"Unexpected "<Emphasis>"empty type parameter list"</Emphasis>"."},
+            )
+            .note("An empty type parameter list declares nothing, so it has no effect and can hide a missing type parameter.")
+            .note("Remove the empty type parameter list or add a type parameter."),
+        )
     }
 }

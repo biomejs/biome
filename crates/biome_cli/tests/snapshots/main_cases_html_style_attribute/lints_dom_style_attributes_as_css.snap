@@ -56,9 +56,11 @@ component.vue:1:26 lint/correctness/noUnknownProperty ━━━━━━━━�
       │                          ^^^^
     2 │ 
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -73,9 +75,11 @@ index.html:1:13 lint/correctness/noUnknownProperty ━━━━━━━━━�
     2 │ <my-element style="colr: blue"></my-element>
     3 │ 
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -90,9 +94,11 @@ index.html:2:20 lint/correctness/noUnknownProperty ━━━━━━━━━�
       │                    ^^^^
     3 │ 
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```

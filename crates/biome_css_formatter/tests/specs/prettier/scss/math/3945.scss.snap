@@ -2373,17 +2373,23 @@ light: #eaf0c6
   
   i Remove last
   
-3945.scss:38:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3945.scss:38:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `%`
+  × Expected an identifier but instead found '2'.
   
     37 │ $last:nth($juggler,length($juggler));
   > 38 │ $x:if($last%2==0,1/2,3/2);
-       │            ^
+       │             ^
     39 │ $new:pow($last,$x);
     40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
   
-  i Remove %
+  i Expected an identifier here.
+  
+    37 │ $last:nth($juggler,length($juggler));
+  > 38 │ $x:if($last%2==0,1/2,3/2);
+       │             ^
+    39 │ $new:pow($last,$x);
+    40 │ $sequence:1,1 1,2 1,1 2 1 1, 1 1 1 2 2 1;
   
 3945.scss:38:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

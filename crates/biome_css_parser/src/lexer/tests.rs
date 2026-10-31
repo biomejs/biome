@@ -173,6 +173,169 @@ fn custom_property_context_preserves_unknown_delimiters() {
 }
 
 #[test]
+fn scss_hash_values_preserve_complete_identifier_ranges() {
+    for (source, body) in [
+        ("#app;", "app"),
+        ("#Brand;", "Brand"),
+        ("#BAR;", "BAR"),
+        ("#ABCG;", "ABCG"),
+        ("#a;", "a"),
+        ("#ab;", "ab"),
+        ("#abcde;", "abcde"),
+        ("#abcdefg;", "abcdefg"),
+        ("#abcdefabc;", "abcdefabc"),
+        ("#-app;", "-app"),
+        ("#_app;", "_app"),
+        ("#and;", "and"),
+        ("#éclair;", "éclair"),
+        ("#--;", "--"),
+        ("#-#{app};", "-"),
+        ("#--#{app};", "--"),
+        ("#ABC#{G};", "ABC"),
+        ("#app#{foo};", "app"),
+        (r"#\61 pp;", r"\61 pp"),
+        (r"#\31 23;", r"\31 23"),
+        (r"#ABC\47;", r"ABC\47"),
+        (r"#\41 BCG;", r"\41 BCG"),
+        ("#app rest;", "app"),
+        ("#app/**/#{foo};", "app"),
+        ("#app,rest;", "app"),
+        (r"#\61 pp rest;", r"\61 pp"),
+        (r"#app\ ;", r"app\ "),
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        let scan = lexer.scss_hash_value_scan(lexer.position()).unwrap();
+        assert_eq!(lexer.position(), 1, "{source}");
+        assert_eq!(scan.start, 1, "{source}");
+        assert_eq!(scan.end, 1 + body.len(), "{source}");
+        assert_eq!(
+            lexer.next_token(CssLexContext::ScssHashValue(scan)),
+            CssSyntaxKind::IDENT,
+            "{source}",
+        );
+        assert_eq!(&source[lexer.current_range()], body, "{source}");
+        assert_eq!(
+            lexer.current_range(),
+            TextRange::new(TextSize::from(1), TextSize::from(scan.end as u32)),
+            "{source}",
+        );
+
+        let mut reconstructed = format!("#{body}");
+        while lexer.next_token(CssLexContext::Regular) != EOF {
+            reconstructed.push_str(&source[lexer.current_range()]);
+        }
+        assert_eq!(reconstructed, source);
+        assert_eq!(lexer.position(), source.len());
+        assert!(lexer.finish().is_empty(), "{source}");
+    }
+}
+
+#[test]
+fn scss_hash_values_leave_color_and_invalid_starts_to_color_lexing() {
+    for source in [
+        "#ABC;",
+        "#ABCD;",
+        "#ABCDEF;",
+        "#ABCDEF12;",
+        r"#\61 bc;",
+        r"#a\62 c;",
+        r"#ABC\31;",
+        r"#ABC\44;",
+        r"#abc\64 ef;",
+        "#ABC/**/#{G};",
+        "#ABC #{G};",
+        "#12345;",
+        "#1234567;",
+        "#12px;",
+        "#;",
+        "# app;",
+        "#/**/app;",
+        "#{foo};",
+        "#-;",
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        assert_eq!(lexer.scss_hash_value_scan(lexer.position()), None, "{source}");
+        assert_eq!(lexer.position(), 1);
+        assert!(lexer.finish().is_empty(), "{source}");
+    }
+
+    for (source, color, diagnostic_count) in [
+        ("#ABC;", "ABC", 0),
+        ("#ABCD;", "ABCD", 0),
+        ("#ABCDEF;", "ABCDEF", 0),
+        ("#ABCDEF12;", "ABCDEF12", 0),
+        ("#12345;", "12345", 1),
+        ("#1234567;", "1234567", 1),
+        ("#12px;", "12", 1),
+        (r"#ABC\44;", "ABC", 0),
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        assert_eq!(lexer.next_token(CssLexContext::Color), CssSyntaxKind::CSS_COLOR_LITERAL);
+        assert_eq!(&source[lexer.current_range()], color, "{source}");
+        let mut reconstructed = format!("#{color}");
+        while lexer.next_token(CssLexContext::Regular) != EOF {
+            reconstructed.push_str(&source[lexer.current_range()]);
+        }
+        assert_eq!(reconstructed, source);
+        assert_eq!(lexer.position(), source.len());
+        assert_eq!(lexer.finish().len(), diagnostic_count, "{source}");
+    }
+}
+
+#[test]
+fn scss_hash_value_context_replaces_buffered_regular_tokens() {
+    let mut source = CssTokenSource::from_str(
+        "#--#{app};",
+        CssParserOptions::default(),
+        CssFileSource::scss(),
+        &[],
+    );
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.nth(1), T![-]);
+    assert_eq!(source.nth(2), T![-]);
+    assert_eq!(source.nth(3), T![#]);
+
+    let checkpoint = source.checkpoint();
+    let scan = source.scss_hash_value_scan().unwrap();
+    assert_eq!(scan.start, 1);
+    assert_eq!(scan.end, 3);
+    source.bump_with_context(CssLexContext::ScssHashValue(scan));
+    assert_eq!(source.current(), CssSyntaxKind::IDENT);
+    assert_eq!(source.current_range(), TextRange::new(TextSize::from(1), TextSize::from(3)));
+    assert_eq!(&source.text()[source.current_range()], "--");
+    source.bump();
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.nth(1), T!['{']);
+
+    source.rewind(checkpoint);
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.scss_hash_value_scan(), Some(scan));
+    source.bump_with_context(CssLexContext::ScssHashValue(scan));
+    assert_eq!(source.current(), CssSyntaxKind::IDENT);
+    while source.current() != EOF {
+        source.bump();
+    }
+    assert_eq!(source.current_range().end(), TextSize::from(10));
+    assert!(source.finish().1.is_empty());
+}
+
+#[test]
+fn regular_css_hash_tokenization_remains_contextual() {
+    let mut lexer = CssLexer::from_str("#ABCG;");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+    assert_eq!(lexer.next_token(CssLexContext::Color), CssSyntaxKind::CSS_COLOR_LITERAL);
+    assert_eq!(&lexer.source()[lexer.current_range()], "ABC");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), CssSyntaxKind::IDENT);
+    assert_eq!(&lexer.source()[lexer.current_range()], "G");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![;]);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), EOF);
+    assert!(lexer.finish().is_empty());
+}
+
+#[test]
 fn url_body_classification_emits_raw_url_value() {
     let mut lexer = CssLexer::from_str("url(foo.css)");
 
@@ -733,7 +896,7 @@ fn raw_url_classification_keeps_leading_comments_in_the_value() {
 }
 
 #[test]
-fn css_scan_cursor_classifies_scss_raw_url_bodies() {
+fn css_scan_cursor_classifies_custom_property_url_bodies() {
     let protocol_relative = CssScanCursor::new(
         SourceCursor::new("//cdn.example.com/app.css)", 0),
         true,
@@ -743,9 +906,33 @@ fn css_scan_cursor_classifies_scss_raw_url_bodies() {
         CssScanCursor::new(SourceCursor::new("image\\20 fallback.svg)", 0), true, true);
     let line_comment = CssScanCursor::new(SourceCursor::new("// silent\napp.css)", 0), true, true);
 
-    assert!(protocol_relative.is_scss_raw_url_body());
-    assert!(escaped_whitespace.is_scss_raw_url_body());
-    assert!(!line_comment.is_scss_raw_url_body());
+    assert!(protocol_relative.custom_property_url_lex_context().is_some());
+    assert!(escaped_whitespace.custom_property_url_lex_context().is_some());
+    assert!(line_comment.custom_property_url_lex_context().is_none());
+}
+
+#[test]
+fn custom_property_url_context_reuses_raw_scan_after_lookahead() {
+    let text = "url( $asset.svg)";
+    let mut source = CssTokenSource::from_str(
+        text,
+        CssParserOptions::default(),
+        CssFileSource::scss(),
+        &[],
+    );
+    assert_eq!(source.nth(2), T![$]);
+    let context = source.custom_property_url_lex_context().unwrap();
+    assert!(matches!(
+        context,
+        CssLexContext::UrlRawValue(scan)
+            if scan.start == 5 && scan.end == text.len() - 1 && scan.terminated
+    ));
+    source.bump();
+    source.bump_with_context(context);
+    assert_eq!(source.current(), CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL);
+    assert_eq!(&text[source.current_range()], "$asset.svg");
+    source.bump();
+    assert_eq!(source.current(), T![')']);
 }
 
 #[test]
@@ -855,6 +1042,281 @@ fn css_scan_cursor_consumes_identifier_sequence_tracks_non_ascii_transition() {
     assert_eq!(scan.position, 6);
     assert_eq!(scan.stop_byte, Some(b' '));
     assert_eq!(cursor.position(), 6);
+}
+
+const PARITY_UNICODE_IDENTIFIER_CHARACTERS: &[(char, bool, bool)] = &[
+    ('\u{007F}', false, false),
+    ('\u{0080}', true, false),
+    ('\u{00A0}', true, false),
+    ('£', true, false),
+    ('«', true, false),
+    ('»', true, false),
+    ('é', true, true),
+    ('\u{10437}', true, true),
+];
+
+#[test]
+fn parity_unicode_identifiers_scanner_start_and_continuation() {
+    for &(character, scss_allowed, css_allowed) in PARITY_UNICODE_IDENTIFIER_CHARACTERS {
+        for is_scss in [false, true] {
+            let allowed = if is_scss { scss_allowed } else { css_allowed };
+            for prefix in ["", "-", "--", "ab"] {
+                let source = format!("{prefix}{character}tail;");
+                let mut cursor =
+                    CssScanCursor::new(SourceCursor::new(&source, 0), is_scss, is_scss);
+                let expected_start = allowed || prefix == "ab";
+                assert_eq!(
+                    cursor.is_ident_start(),
+                    expected_start,
+                    "{source:?}, SCSS={is_scss}"
+                );
+
+                let lookahead_source = format!("::{source}");
+                let lookahead =
+                    CssScanCursor::new(SourceCursor::new(&lookahead_source, 0), is_scss, is_scss);
+                assert_eq!(
+                    lookahead.is_ident_start_at(2),
+                    expected_start,
+                    "{source:?}, SCSS={is_scss}"
+                );
+                assert_eq!(lookahead.position(), 0);
+
+                let mut buffer = [0; 16];
+                let scan = cursor.consume_ident_sequence(&mut buffer);
+                let expected_end = if allowed {
+                    source.len() - 1
+                } else {
+                    prefix.len()
+                };
+                assert_eq!(scan.position, expected_end, "{source:?}, SCSS={is_scss}");
+                assert_eq!(cursor.position(), expected_end);
+                assert_eq!(scan.only_ascii_used, !allowed);
+                assert_eq!(scan.stop_byte, Some(source.as_bytes()[expected_end]));
+                assert!(source.is_char_boundary(expected_end));
+            }
+        }
+    }
+}
+
+fn assert_parity_unicode_identifier_tokens(
+    source: &str,
+    is_scss: bool,
+    context: CssLexContext,
+    expected: &[(CssSyntaxKind, &str)],
+) {
+    let source_type = if is_scss {
+        CssFileSource::scss()
+    } else {
+        CssFileSource::css()
+    };
+    let mut lexer = CssLexer::from_str(source).with_source_type(source_type);
+    let mut position = 0;
+    let mut error_ranges = Vec::new();
+    let mut reconstructed = String::new();
+    for &(kind, text) in expected {
+        assert_eq!(
+            lexer.next_token(context),
+            kind,
+            "{source:?}, SCSS={is_scss}"
+        );
+        let range = TextRange::new(
+            TextSize::from(position as u32),
+            TextSize::from((position + text.len()) as u32),
+        );
+        assert_eq!(lexer.current_range(), range, "{source:?}, SCSS={is_scss}");
+        assert_eq!(&source[range], text);
+        reconstructed.push_str(&source[range]);
+        position += text.len();
+        if kind == CssSyntaxKind::ERROR_TOKEN {
+            error_ranges.push(Some(range));
+        }
+    }
+    assert_eq!(lexer.next_token(context), EOF, "{source:?}, SCSS={is_scss}");
+    assert_eq!(lexer.position(), source.len());
+    assert_eq!(
+        lexer.current_range(),
+        TextRange::empty(TextSize::from(source.len() as u32))
+    );
+    assert_eq!(reconstructed, source);
+    assert_eq!(
+        lexer
+            .finish()
+            .iter()
+            .map(|diagnostic| diagnostic.span())
+            .collect::<Vec<_>>(),
+        error_ranges
+    );
+}
+
+#[test]
+fn parity_unicode_identifiers_lexer_modes_and_byte_ranges() {
+    for &(character, scss_allowed, css_allowed) in PARITY_UNICODE_IDENTIFIER_CHARACTERS {
+        for is_scss in [false, true] {
+            let allowed = if is_scss { scss_allowed } else { css_allowed };
+            for prefix in ["", "-", "--", "ab"] {
+                let spelling = format!("{prefix}{character}tail");
+                let character_text = character.to_string();
+                let source = format!("{spelling};café");
+                let mut expected = Vec::new();
+                if allowed {
+                    expected.push((CssSyntaxKind::IDENT, spelling.as_str()));
+                } else {
+                    if prefix == "ab" {
+                        expected.push((CssSyntaxKind::IDENT, prefix));
+                    } else {
+                        for _ in prefix.bytes() {
+                            expected.push((T![-], "-"));
+                        }
+                    }
+                    expected.push((CssSyntaxKind::ERROR_TOKEN, character_text.as_str()));
+                    expected.push((CssSyntaxKind::IDENT, "tail"));
+                }
+                expected.extend([(T![;], ";"), (CssSyntaxKind::IDENT, "café")]);
+                assert_parity_unicode_identifier_tokens(
+                    &source,
+                    is_scss,
+                    CssLexContext::Regular,
+                    &expected,
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn parity_unicode_identifiers_preserve_token_boundaries() {
+    use CssSyntaxKind::{
+        CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL, CSS_STRING_LITERAL, IDENT, UNICODE_BOM, WHITESPACE,
+    };
+
+    for (source, expected) in [
+        ("« »", vec![(IDENT, "«"), (WHITESPACE, " "), (IDENT, "»")]),
+        ("«\u{00A0}»", vec![(IDENT, "«\u{00A0}»")]),
+        (
+            "«»,a«b;",
+            vec![(IDENT, "«»"), (T![,], ","), (IDENT, "a«b"), (T![;], ";")],
+        ),
+        (
+            "1«;",
+            vec![(CSS_DIMENSION_VALUE, "1"), (IDENT, "«"), (T![;], ";")],
+        ),
+        (
+            "1 «;",
+            vec![
+                (CSS_NUMBER_LITERAL, "1"),
+                (WHITESPACE, " "),
+                (IDENT, "«"),
+                (T![;], ";"),
+            ],
+        ),
+        (
+            "«#{name}»",
+            vec![
+                (IDENT, "«"),
+                (T![#], "#"),
+                (T!['{'], "{"),
+                (IDENT, "name"),
+                (T!['}'], "}"),
+                (IDENT, "»"),
+            ],
+        ),
+        (
+            "«/**/»",
+            vec![(IDENT, "«"), (CssSyntaxKind::COMMENT, "/**/"), (IDENT, "»")],
+        ),
+        ("\u{FEFF}«", vec![(UNICODE_BOM, "\u{FEFF}"), (IDENT, "«")]),
+    ] {
+        assert_parity_unicode_identifier_tokens(source, true, CssLexContext::Regular, &expected);
+    }
+
+    for is_scss in [false, true] {
+        for (source, expected) in [
+            (r"\ab \bb", vec![(IDENT, r"\ab \bb")]),
+            (
+                "\"«\" '»'",
+                vec![
+                    (CSS_STRING_LITERAL, "\"«\""),
+                    (WHITESPACE, " "),
+                    (CSS_STRING_LITERAL, "'»'"),
+                ],
+            ),
+            (
+                "\u{FEFF}café",
+                vec![(UNICODE_BOM, "\u{FEFF}"), (IDENT, "café")],
+            ),
+        ] {
+            assert_parity_unicode_identifier_tokens(
+                source,
+                is_scss,
+                CssLexContext::Regular,
+                &expected,
+            );
+        }
+    }
+    assert_parity_unicode_identifier_tokens(
+        "1«;",
+        false,
+        CssLexContext::Regular,
+        &[
+            (CSS_NUMBER_LITERAL, "1"),
+            (CssSyntaxKind::ERROR_TOKEN, "«"),
+            (T![;], ";"),
+        ],
+    );
+    assert_parity_unicode_identifier_tokens(
+        "«»",
+        false,
+        CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::PreserveDoubleSlash),
+        &[
+            (CssSyntaxKind::CSS_DELIM_LITERAL, "«"),
+            (CssSyntaxKind::CSS_DELIM_LITERAL, "»"),
+        ],
+    );
+}
+
+#[test]
+fn parity_unicode_identifiers_interpolated_function_lookahead() {
+    for source in [
+        "«#{name}(arg)",
+        "-«#{name}(arg)",
+        "--«#{name}(arg)",
+        "ab«#{name}(arg)",
+        "#{name}«(arg)",
+    ] {
+        let scss = CssScanCursor::new(SourceCursor::new(source, 0), true, true);
+        let css = CssScanCursor::new(SourceCursor::new(source, 0), false, false);
+        assert!(scss.is_at_scss_interpolated_function(), "{source}");
+        assert!(!css.is_at_scss_interpolated_function(), "{source}");
+        assert_eq!(scss.position(), 0);
+        assert_eq!(css.position(), 0);
+    }
+}
+
+#[test]
+fn parity_unicode_identifiers_hash_value_scan() {
+    for source in [
+        "#«;",
+        "#-«;",
+        "#--«;",
+        "#ABC«;",
+        "#a\u{0080};",
+        "#a\u{00A0};",
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        let scan = lexer.scss_hash_value_scan(lexer.position()).unwrap();
+        assert_eq!(scan.start, 1);
+        assert_eq!(scan.end, source.len() - 1, "{source:?}");
+        assert_eq!(lexer.position(), 1);
+        assert_eq!(
+            lexer.next_token(CssLexContext::ScssHashValue(scan)),
+            CssSyntaxKind::IDENT
+        );
+        assert_eq!(&source[lexer.current_range()], &source[1..source.len() - 1]);
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![;]);
+        assert_eq!(lexer.next_token(CssLexContext::Regular), EOF);
+        assert!(lexer.finish().is_empty());
+    }
 }
 
 #[test]

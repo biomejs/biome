@@ -216,6 +216,115 @@ expression: invalid.css
   offset-anchor: 50% 50%;
 }
 
+.scroll-behavior {
+  color: red;
+  scroll-behavior: smooth;
+  overflow: auto;
+  display: block;
+}
+
+.multi-column {
+  columns: auto;
+  display: block;
+  column-fill: balance;
+  column-span: all;
+  column-count: 2;
+  column-width: 10em;
+}
+
+.column-rule {
+  column-rule: 1px solid red;
+  align-items: center;
+  column-rule-color: red;
+  column-rule-style: solid;
+  column-rule-width: 1px;
+  column-gap: 1em;
+}
+
+.anchor-positioning {
+  position-try: normal;
+  color: red;
+  position-visibility: always;
+  position-try-fallbacks: flip-block;
+  position-try-order: normal;
+  position-anchor: --anchor;
+  position-area: top;
+  anchor-scope: all;
+  anchor-name: --anchor;
+  display: block;
+}
+
+.text-box {
+  text-box: normal;
+  text-autospace: normal;
+  color: red;
+  text-box-edge: auto;
+  text-box-trim: none;
+  line-height: 1;
+}
+
+.field-sizing {
+  resize: both;
+  field-sizing: content;
+  display: block;
+}
+
+.logical-borders {
+  border-block: 1px solid red;
+  border-inline: 1px solid red;
+  border-inline-width: 1px;
+  border-inline-style: solid;
+  border-inline-color: red;
+  border-block-width: 1px;
+  border-block-style: solid;
+  border-block-color: red;
+}
+
+.corner-shape {
+  corner-shape: round;
+  corner-bottom-left-shape: bevel;
+  corner-top-left-shape: bevel;
+  border-radius: 1em;
+}
+
+.svg-geometry {
+  vector-effect: non-scaling-stroke;
+  fill: red;
+  d: none;
+  r: 1px;
+  cy: 1px;
+  cx: 1px;
+  ry: 1px;
+  rx: 1px;
+  y: 1px;
+  x: 1px;
+}
+
+.math {
+  transform: none;
+  math-depth: 0;
+  math-shift: normal;
+  math-style: normal;
+}
+
+.transition-behavior {
+  transition: opacity 1s;
+  transition-behavior: allow-discrete;
+  color: red;
+}
+
+.paged-media {
+  break-before: page;
+  page: wide;
+  will-change: auto;
+}
+
+.all-exempt-properties {
+  direction: rtl;
+  unicode-bidi: isolate;
+  all: initial;
+}
+
 ```
 
 # Diagnostics
@@ -1030,11 +1139,11 @@ invalid.css:204:14 assist/source/useSortedProperties  FIXABLE  ━━━━━�
         │              ^
   > 205 │   offset-position: 0px 0px;
          ...
-  > 209 │   offset-rotate: 0deg;
   > 210 │   offset-anchor: 50% 50%;
   > 211 │ }
         │ ^
     212 │ 
+    213 │ .scroll-behavior {
   
   i Safe fix: Sort these properties
   
@@ -1046,6 +1155,493 @@ invalid.css:204:14 assist/source/useSortedProperties  FIXABLE  ━━━━━�
         206 │ + ··offset-position:·0px·0px;
     207 207 │     offset-path: none;
     208 208 │     offset-distance: 0%;
+  
+
+```
+
+```
+invalid.css:213:18 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    211 │ }
+    212 │ 
+  > 213 │ .scroll-behavior {
+        │                  ^
+  > 214 │   color: red;
+  > 215 │   scroll-behavior: smooth;
+  > 216 │   overflow: auto;
+  > 217 │   display: block;
+  > 218 │ }
+        │ ^
+    219 │ 
+    220 │ .multi-column {
+  
+  i Safe fix: Sort these properties
+  
+    212 212 │   
+    213 213 │   .scroll-behavior {
+    214     │ - ··color:·red;
+    215     │ - ··scroll-behavior:·smooth;
+    216     │ - ··overflow:·auto;
+    217     │ - ··display:·block;
+        214 │ + ··display:·block;
+        215 │ + ··overflow:·auto;
+        216 │ + ··scroll-behavior:·smooth;
+        217 │ + ··color:·red;
+    218 218 │   }
+    219 219 │   
+  
+
+```
+
+```
+invalid.css:220:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    218 │ }
+    219 │ 
+  > 220 │ .multi-column {
+        │               ^
+  > 221 │   columns: auto;
+         ...
+  > 226 │   column-width: 10em;
+  > 227 │ }
+        │ ^
+    228 │ 
+    229 │ .column-rule {
+  
+  i Safe fix: Sort these properties
+  
+    219 219 │   
+    220 220 │   .multi-column {
+    221     │ - ··columns:·auto;
+    222     │ - ··display:·block;
+    223     │ - ··column-fill:·balance;
+    224     │ - ··column-span:·all;
+    225     │ - ··column-count:·2;
+    226     │ - ··column-width:·10em;
+        221 │ + ··display:·block;
+        222 │ + ··columns:·auto;
+        223 │ + ··column-width:·10em;
+        224 │ + ··column-count:·2;
+        225 │ + ··column-span:·all;
+        226 │ + ··column-fill:·balance;
+    227 227 │   }
+    228 228 │   
+  
+
+```
+
+```
+invalid.css:229:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    227 │ }
+    228 │ 
+  > 229 │ .column-rule {
+        │              ^
+  > 230 │   column-rule: 1px solid red;
+         ...
+  > 235 │   column-gap: 1em;
+  > 236 │ }
+        │ ^
+    237 │ 
+    238 │ .anchor-positioning {
+  
+  i Safe fix: Sort these properties
+  
+    228 228 │   
+    229 229 │   .column-rule {
+    230     │ - ··column-rule:·1px·solid·red;
+    231     │ - ··align-items:·center;
+    232     │ - ··column-rule-color:·red;
+        230 │ + ··column-gap:·1em;
+        231 │ + ··column-rule:·1px·solid·red;
+        232 │ + ··column-rule-width:·1px;
+    233 233 │     column-rule-style: solid;
+    234     │ - ··column-rule-width:·1px;
+    235     │ - ··column-gap:·1em;
+        234 │ + ··column-rule-color:·red;
+        235 │ + ··align-items:·center;
+    236 236 │   }
+    237 237 │   
+  
+
+```
+
+```
+invalid.css:238:21 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    236 │ }
+    237 │ 
+  > 238 │ .anchor-positioning {
+        │                     ^
+  > 239 │   position-try: normal;
+         ...
+  > 248 │   display: block;
+  > 249 │ }
+        │ ^
+    250 │ 
+    251 │ .text-box {
+  
+  i Safe fix: Sort these properties
+  
+    237 237 │   
+    238 238 │   .anchor-positioning {
+    239     │ - ··position-try:·normal;
+    240     │ - ··color:·red;
+    241     │ - ··position-visibility:·always;
+    242     │ - ··position-try-fallbacks:·flip-block;
+    243     │ - ··position-try-order:·normal;
+    244     │ - ··position-anchor:·--anchor;
+    245     │ - ··position-area:·top;
+    246     │ - ··anchor-scope:·all;
+    247     │ - ··anchor-name:·--anchor;
+    248     │ - ··display:·block;
+        239 │ + ··display:·block;
+        240 │ + ··anchor-name:·--anchor;
+        241 │ + ··anchor-scope:·all;
+        242 │ + ··position-area:·top;
+        243 │ + ··position-anchor:·--anchor;
+        244 │ + ··position-try:·normal;
+        245 │ + ··position-try-order:·normal;
+        246 │ + ··position-try-fallbacks:·flip-block;
+        247 │ + ··position-visibility:·always;
+        248 │ + ··color:·red;
+    249 249 │   }
+    250 250 │   
+  
+
+```
+
+```
+invalid.css:251:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    249 │ }
+    250 │ 
+  > 251 │ .text-box {
+        │           ^
+  > 252 │   text-box: normal;
+         ...
+  > 257 │   line-height: 1;
+  > 258 │ }
+        │ ^
+    259 │ 
+    260 │ .field-sizing {
+  
+  i Safe fix: Sort these properties
+  
+    250 250 │   
+    251 251 │   .text-box {
+    252     │ - ··text-box:·normal;
+    253     │ - ··text-autospace:·normal;
+    254     │ - ··color:·red;
+        252 │ + ··line-height:·1;
+        253 │ + ··text-box:·normal;
+        254 │ + ··text-box-trim:·none;
+    255 255 │     text-box-edge: auto;
+    256     │ - ··text-box-trim:·none;
+    257     │ - ··line-height:·1;
+        256 │ + ··color:·red;
+        257 │ + ··text-autospace:·normal;
+    258 258 │   }
+    259 259 │   
+  
+
+```
+
+```
+invalid.css:260:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    258 │ }
+    259 │ 
+  > 260 │ .field-sizing {
+        │               ^
+  > 261 │   resize: both;
+  > 262 │   field-sizing: content;
+  > 263 │   display: block;
+  > 264 │ }
+        │ ^
+    265 │ 
+    266 │ .logical-borders {
+  
+  i Safe fix: Sort these properties
+  
+    259 259 │   
+    260 260 │   .field-sizing {
+    261     │ - ··resize:·both;
+        261 │ + ··display:·block;
+    262 262 │     field-sizing: content;
+    263     │ - ··display:·block;
+        263 │ + ··resize:·both;
+    264 264 │   }
+    265 265 │   
+  
+
+```
+
+```
+invalid.css:266:18 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    264 │ }
+    265 │ 
+  > 266 │ .logical-borders {
+        │                  ^
+  > 267 │   border-block: 1px solid red;
+         ...
+  > 274 │   border-block-color: red;
+  > 275 │ }
+        │ ^
+    276 │ 
+    277 │ .corner-shape {
+  
+  i Safe fix: Sort these properties
+  
+    266 266 │   .logical-borders {
+    267 267 │     border-block: 1px solid red;
+    268     │ - ··border-inline:·1px·solid·red;
+    269     │ - ··border-inline-width:·1px;
+    270     │ - ··border-inline-style:·solid;
+    271     │ - ··border-inline-color:·red;
+    272     │ - ··border-block-width:·1px;
+    273     │ - ··border-block-style:·solid;
+    274     │ - ··border-block-color:·red;
+        268 │ + ··border-block-color:·red;
+        269 │ + ··border-block-style:·solid;
+        270 │ + ··border-block-width:·1px;
+        271 │ + ··border-inline:·1px·solid·red;
+        272 │ + ··border-inline-color:·red;
+        273 │ + ··border-inline-style:·solid;
+        274 │ + ··border-inline-width:·1px;
+    275 275 │   }
+    276 276 │   
+  
+
+```
+
+```
+invalid.css:277:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    275 │ }
+    276 │ 
+  > 277 │ .corner-shape {
+        │               ^
+  > 278 │   corner-shape: round;
+  > 279 │   corner-bottom-left-shape: bevel;
+  > 280 │   corner-top-left-shape: bevel;
+  > 281 │   border-radius: 1em;
+  > 282 │ }
+        │ ^
+    283 │ 
+    284 │ .svg-geometry {
+  
+  i Safe fix: Sort these properties
+  
+    276 276 │   
+    277 277 │   .corner-shape {
+    278     │ - ··corner-shape:·round;
+    279     │ - ··corner-bottom-left-shape:·bevel;
+    280     │ - ··corner-top-left-shape:·bevel;
+    281     │ - ··border-radius:·1em;
+        278 │ + ··border-radius:·1em;
+        279 │ + ··corner-shape:·round;
+        280 │ + ··corner-top-left-shape:·bevel;
+        281 │ + ··corner-bottom-left-shape:·bevel;
+    282 282 │   }
+    283 283 │   
+  
+
+```
+
+```
+invalid.css:284:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    282 │ }
+    283 │ 
+  > 284 │ .svg-geometry {
+        │               ^
+  > 285 │   vector-effect: non-scaling-stroke;
+         ...
+  > 294 │   x: 1px;
+  > 295 │ }
+        │ ^
+    296 │ 
+    297 │ .math {
+  
+  i Safe fix: Sort these properties
+  
+    283 283 │   
+    284 284 │   .svg-geometry {
+    285     │ - ··vector-effect:·non-scaling-stroke;
+    286     │ - ··fill:·red;
+    287     │ - ··d:·none;
+    288     │ - ··r:·1px;
+    289     │ - ··cy:·1px;
+    290     │ - ··cx:·1px;
+    291     │ - ··ry:·1px;
+    292     │ - ··rx:·1px;
+    293     │ - ··y:·1px;
+    294     │ - ··x:·1px;
+        285 │ + ··x:·1px;
+        286 │ + ··y:·1px;
+        287 │ + ··rx:·1px;
+        288 │ + ··ry:·1px;
+        289 │ + ··cx:·1px;
+        290 │ + ··cy:·1px;
+        291 │ + ··r:·1px;
+        292 │ + ··d:·none;
+        293 │ + ··fill:·red;
+        294 │ + ··vector-effect:·non-scaling-stroke;
+    295 295 │   }
+    296 296 │   
+  
+
+```
+
+```
+invalid.css:297:7 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    295 │ }
+    296 │ 
+  > 297 │ .math {
+        │       ^
+  > 298 │   transform: none;
+  > 299 │   math-depth: 0;
+  > 300 │   math-shift: normal;
+  > 301 │   math-style: normal;
+  > 302 │ }
+        │ ^
+    303 │ 
+    304 │ .transition-behavior {
+  
+  i Safe fix: Sort these properties
+  
+    296 296 │   
+    297 297 │   .math {
+    298     │ - ··transform:·none;
+    299     │ - ··math-depth:·0;
+    300     │ - ··math-shift:·normal;
+    301     │ - ··math-style:·normal;
+        298 │ + ··math-style:·normal;
+        299 │ + ··math-shift:·normal;
+        300 │ + ··math-depth:·0;
+        301 │ + ··transform:·none;
+    302 302 │   }
+    303 303 │   
+  
+
+```
+
+```
+invalid.css:304:22 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    302 │ }
+    303 │ 
+  > 304 │ .transition-behavior {
+        │                      ^
+  > 305 │   transition: opacity 1s;
+  > 306 │   transition-behavior: allow-discrete;
+  > 307 │   color: red;
+  > 308 │ }
+        │ ^
+    309 │ 
+    310 │ .paged-media {
+  
+  i Safe fix: Sort these properties
+  
+    303 303 │   
+    304 304 │   .transition-behavior {
+    305     │ - ··transition:·opacity·1s;
+    306     │ - ··transition-behavior:·allow-discrete;
+    307     │ - ··color:·red;
+        305 │ + ··color:·red;
+        306 │ + ··transition:·opacity·1s;
+        307 │ + ··transition-behavior:·allow-discrete;
+    308 308 │   }
+    309 309 │   
+  
+
+```
+
+```
+invalid.css:310:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    308 │ }
+    309 │ 
+  > 310 │ .paged-media {
+        │              ^
+  > 311 │   break-before: page;
+  > 312 │   page: wide;
+  > 313 │   will-change: auto;
+  > 314 │ }
+        │ ^
+    315 │ 
+    316 │ .all-exempt-properties {
+  
+  i Safe fix: Sort these properties
+  
+    309 309 │   
+    310 310 │   .paged-media {
+    311     │ - ··break-before:·page;
+        311 │ + ··will-change:·auto;
+    312 312 │     page: wide;
+    313     │ - ··will-change:·auto;
+        313 │ + ··break-before:·page;
+    314 314 │   }
+    315 315 │   
+  
+
+```
+
+```
+invalid.css:316:24 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    314 │ }
+    315 │ 
+  > 316 │ .all-exempt-properties {
+        │                        ^
+  > 317 │   direction: rtl;
+  > 318 │   unicode-bidi: isolate;
+  > 319 │   all: initial;
+  > 320 │ }
+        │ ^
+    321 │ 
+  
+  i Safe fix: Sort these properties
+  
+    315 315 │   
+    316 316 │   .all-exempt-properties {
+    317     │ - ··direction:·rtl;
+    318     │ - ··unicode-bidi:·isolate;
+    319     │ - ··all:·initial;
+        317 │ + ··all:·initial;
+        318 │ + ··direction:·rtl;
+        319 │ + ··unicode-bidi:·isolate;
+    320 320 │   }
+    321 321 │   
   
 
 ```

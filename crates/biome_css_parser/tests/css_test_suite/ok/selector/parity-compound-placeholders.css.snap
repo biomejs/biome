@@ -1,0 +1,319 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+a.card[data-ready]:hover, .x > .y + .z { color: red; width: 50%; }
+@keyframes pulse { 50% { opacity: 0.5; } }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..1 "a" [] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@1..2 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@2..6 "card" [] [],
+                            },
+                        },
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@6..7 "[" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@7..17 "data-ready" [] [],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@17..18 "]" [] [],
+                        },
+                        CssPseudoClassSelector {
+                            colon_token: COLON@18..19 ":" [] [],
+                            class: CssPseudoClassIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@19..24 "hover" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                COMMA@24..26 "," [] [Whitespace(" ")],
+                CssComplexSelector {
+                    left: CssComplexSelector {
+                        left: CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssClassSelector {
+                                    dot_token: DOT@26..27 "." [] [],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@27..29 "x" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                        },
+                        combinator: R_ANGLE@29..31 ">" [] [Whitespace(" ")],
+                        right: CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssClassSelector {
+                                    dot_token: DOT@31..32 "." [] [],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@32..34 "y" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    combinator: PLUS@34..36 "+" [] [Whitespace(" ")],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@36..37 "." [] [],
+                                name: CssCustomIdentifier {
+                                    value_token: IDENT@37..39 "z" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@39..41 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@41..46 "color" [] [],
+                                },
+                                colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@48..51 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@51..53 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@53..58 "width" [] [],
+                                },
+                                colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssPercentage {
+                                        value_token: CSS_NUMBER_LITERAL@60..62 "50" [] [],
+                                        percent_token: PERCENT@62..63 "%" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@63..65 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@65..66 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@66..68 "@" [Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@68..78 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@78..84 "pulse" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@84..86 "{" [] [Whitespace(" ")],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesPercentageSelector {
+                                    selector: CssPercentage {
+                                        value_token: CSS_NUMBER_LITERAL@86..88 "50" [] [],
+                                        percent_token: PERCENT@88..90 "%" [] [Whitespace(" ")],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@90..92 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@92..99 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@99..101 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@101..104 "0.5" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@104..106 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@106..108 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@108..109 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@109..110 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..110
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..109
+    0: CSS_QUALIFIED_RULE@0..66
+      0: CSS_SELECTOR_LIST@0..39
+        0: CSS_COMPOUND_SELECTOR@0..24
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..1
+            0: (empty)
+            1: CSS_IDENTIFIER@0..1
+              0: IDENT@0..1 "a" [] []
+          2: CSS_SUB_SELECTOR_LIST@1..24
+            0: CSS_CLASS_SELECTOR@1..6
+              0: DOT@1..2 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@2..6
+                0: IDENT@2..6 "card" [] []
+            1: CSS_ATTRIBUTE_SELECTOR@6..18
+              0: L_BRACK@6..7 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@7..17
+                0: (empty)
+                1: CSS_IDENTIFIER@7..17
+                  0: IDENT@7..17 "data-ready" [] []
+              2: (empty)
+              3: R_BRACK@17..18 "]" [] []
+            2: CSS_PSEUDO_CLASS_SELECTOR@18..24
+              0: COLON@18..19 ":" [] []
+              1: CSS_PSEUDO_CLASS_IDENTIFIER@19..24
+                0: CSS_IDENTIFIER@19..24
+                  0: IDENT@19..24 "hover" [] []
+        1: COMMA@24..26 "," [] [Whitespace(" ")]
+        2: CSS_COMPLEX_SELECTOR@26..39
+          0: CSS_COMPLEX_SELECTOR@26..34
+            0: CSS_COMPOUND_SELECTOR@26..29
+              0: CSS_NESTED_SELECTOR_LIST@26..26
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@26..29
+                0: CSS_CLASS_SELECTOR@26..29
+                  0: DOT@26..27 "." [] []
+                  1: CSS_CUSTOM_IDENTIFIER@27..29
+                    0: IDENT@27..29 "x" [] [Whitespace(" ")]
+            1: R_ANGLE@29..31 ">" [] [Whitespace(" ")]
+            2: CSS_COMPOUND_SELECTOR@31..34
+              0: CSS_NESTED_SELECTOR_LIST@31..31
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@31..34
+                0: CSS_CLASS_SELECTOR@31..34
+                  0: DOT@31..32 "." [] []
+                  1: CSS_CUSTOM_IDENTIFIER@32..34
+                    0: IDENT@32..34 "y" [] [Whitespace(" ")]
+          1: PLUS@34..36 "+" [] [Whitespace(" ")]
+          2: CSS_COMPOUND_SELECTOR@36..39
+            0: CSS_NESTED_SELECTOR_LIST@36..36
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@36..39
+              0: CSS_CLASS_SELECTOR@36..39
+                0: DOT@36..37 "." [] []
+                1: CSS_CUSTOM_IDENTIFIER@37..39
+                  0: IDENT@37..39 "z" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@39..66
+        0: L_CURLY@39..41 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@41..65
+          0: CSS_DECLARATION_WITH_SEMICOLON@41..53
+            0: CSS_DECLARATION@41..51
+              0: CSS_GENERIC_PROPERTY@41..51
+                0: CSS_IDENTIFIER@41..46
+                  0: IDENT@41..46 "color" [] []
+                1: COLON@46..48 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@48..51
+                  0: CSS_IDENTIFIER@48..51
+                    0: IDENT@48..51 "red" [] []
+              1: (empty)
+            1: SEMICOLON@51..53 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@53..65
+            0: CSS_DECLARATION@53..63
+              0: CSS_GENERIC_PROPERTY@53..63
+                0: CSS_IDENTIFIER@53..58
+                  0: IDENT@53..58 "width" [] []
+                1: COLON@58..60 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@60..63
+                  0: CSS_PERCENTAGE@60..63
+                    0: CSS_NUMBER_LITERAL@60..62 "50" [] []
+                    1: PERCENT@62..63 "%" [] []
+              1: (empty)
+            1: SEMICOLON@63..65 ";" [] [Whitespace(" ")]
+        2: R_CURLY@65..66 "}" [] []
+    1: CSS_AT_RULE@66..109
+      0: AT@66..68 "@" [Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@68..109
+        0: KEYFRAMES_KW@68..78 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@78..84
+          0: IDENT@78..84 "pulse" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@84..109
+          0: L_CURLY@84..86 "{" [] [Whitespace(" ")]
+          1: CSS_KEYFRAMES_ITEM_LIST@86..108
+            0: CSS_KEYFRAMES_ITEM@86..108
+              0: CSS_KEYFRAMES_SELECTOR_LIST@86..90
+                0: CSS_KEYFRAMES_PERCENTAGE_SELECTOR@86..90
+                  0: CSS_PERCENTAGE@86..90
+                    0: CSS_NUMBER_LITERAL@86..88 "50" [] []
+                    1: PERCENT@88..90 "%" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_BLOCK@90..108
+                0: L_CURLY@90..92 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@92..106
+                  0: CSS_DECLARATION_WITH_SEMICOLON@92..106
+                    0: CSS_DECLARATION@92..104
+                      0: CSS_GENERIC_PROPERTY@92..104
+                        0: CSS_IDENTIFIER@92..99
+                          0: IDENT@92..99 "opacity" [] []
+                        1: COLON@99..101 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@101..104
+                          0: CSS_NUMBER@101..104
+                            0: CSS_NUMBER_LITERAL@101..104 "0.5" [] []
+                      1: (empty)
+                    1: SEMICOLON@104..106 ";" [] [Whitespace(" ")]
+                2: R_CURLY@106..108 "}" [] [Whitespace(" ")]
+          2: R_CURLY@108..109 "}" [] []
+  2: EOF@109..110 "" [Newline("\n")] []
+
+```

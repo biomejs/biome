@@ -1,0 +1,141 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/parity-unicode-identifiers.scss
+---
+
+# Input
+
+```scss
+@use "sass:map";
+@use "sass:string";
+
+$marks: (
+  open: «,
+  close: »,
+);
+
+q:lang(fr) {
+  quotes:
+    string.quote(map.get($marks, open))
+    string.quote(map.get($marks, close));
+}
+
+$«: »;
+$spellings: (start: «name, end: name», middle: a«b, pair: «», single-hyphen: -«, double-hyphen: --«);
+
+@function echo($value) { @return $value; }
+@function «($value: ») { @return $value; }
+
+.«name,
+.name»,
+.a«b,
+.«»,
+.-«,
+.--«,
+.café,
+.𐐀 {
+  «property: $«;
+  standalone: « »;
+  spellings: «name name» a«b «» -« --«;
+  other: £ £name a£b;
+  existing: café 𐐀;
+  quoted: "«" '»';
+  escaped: \ab \bb \ab name name\bb;
+  map-value: map.get($spellings, pair);
+  argument: echo(«);
+  arguments: map.get(echo((«: », café: 𐐀)), «);
+  keyword: echo($value: a«b);
+  function-name: «();
+  unknown-function: «name(», a«b);
+  hyphen-function: -«(») --«(«);
+  space-list: « »;
+  comma-list: «, »;
+  unit: 1«;
+  units: 1«name 2a«b;
+  block-comment: «/* boundary */ »;
+  line-comment: « // boundary
+    »;
+  interpolation: «#{"name"} #{"name"}» a#{"«"}b;
+  adjacent-interpolation: «#{"»"}«;
+  after: red;
+}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:map";
+@use "sass:string";
+
+$marks: (
+	open: «,
+	close: »,
+);
+
+q:lang(fr) {
+	quotes: string.quote(map.get($marks, open))
+		string.quote(map.get($marks, close));
+}
+
+$«: »;
+$spellings: (
+	start: «name,
+	end: name»,
+	middle: a«b,
+	pair: «»,
+	single-hyphen: -«,
+	double-hyphen: --«,
+);
+
+@function echo($value) {
+	@return $value;
+}
+@function «($value: ») {
+	@return $value;
+}
+
+.«name,
+.name»,
+.a«b,
+.«»,
+.-«,
+.--«,
+.café,
+.𐐀 {
+	«property: $«;
+	standalone: « »;
+	spellings: «name name» a«b «» -« --«;
+	other: £ £name a£b;
+	existing: café 𐐀;
+	quoted: "«" "»";
+	escaped: \ab \bb \ab name name\bb;
+	map-value: map.get($spellings, pair);
+	argument: echo(«);
+	arguments: map.get(
+		echo(
+			(
+				«: »,
+				café: 𐐀,
+			)
+		),
+		«
+	);
+	keyword: echo($value: a«b);
+	function-name: «();
+	unknown-function: «name(», a«b);
+	hyphen-function: -«(») --«(«);
+	space-list: « »;
+	comma-list: «, »;
+	unit: 1«;
+	units: 1«name 2a«b;
+	block-comment: « /* boundary */ »;
+	line-comment: « // boundary
+		»;
+	interpolation: «#{"name"} #{"name"}» a#{"«"}b;
+	adjacent-interpolation: «#{"»"}«;
+	after: red;
+}
+
+```

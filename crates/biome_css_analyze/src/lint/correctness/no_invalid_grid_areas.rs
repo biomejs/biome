@@ -4,13 +4,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssGenericPropertyValueOrExpression, AnyCssValue, AnyScssExpressionItem,
-    CssDeclarationOrRuleList, CssSyntaxToken, css_grid_template_property,
+    CssDeclarationOrRuleList, CssSyntaxToken, css_grid_template_property, inner_string_text,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{TextRange, TokenText};
+use biome_rowan::{TextRange, TextSize, TokenText};
 use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
 
-use rustc_hash::FxHashSet;
+use rustc_hash::FxHashMap;
+use std::collections::hash_map::Entry;
 
 declare_lint_rule! {
     /// Disallow invalid named areas in CSS grid templates.
@@ -65,18 +66,15 @@ declare_lint_rule! {
     }
 }
 
-type GridAreasProp = (String, TextRange);
-type GridAreasProps = Vec<(TokenText, TextRange)>;
-
 #[derive(Debug)]
 enum GridAreaValidationError {
     EmptyGridArea,
     InconsistentCellCount,
-    DuplicateGridToken,
+    /// The name of an area whose cells do not form one filled rectangle.
+    DuplicateGridToken(TokenText),
 }
 
 pub struct UseConsistentGridAreasState {
-    text: Option<String>,
     span: TextRange,
     reason: GridAreaValidationError,
 }
@@ -91,7 +89,7 @@ impl Rule for NoInvalidGridAreas {
         let node = ctx.query();
         // Extract named grid-area strings from `grid`, `grid-template`, and
         // `grid-template-areas` declarations.
-        let plain_grid_areas_props = node
+        let rows = node
             .into_iter()
             .filter_map(|item| {
                 let binding = item
@@ -117,24 +115,17 @@ impl Rule for NoInvalidGridAreas {
                     .ok()
                     .map_or_else(Vec::new, grid_area_string_tokens)
             })
-            // Need to remove `"` with escaping slash from the grid area
-            // Ex: "\"a a a\""
-            .map(|x| {
-                let trimmed_text = x.token_text_trimmed();
-                let text_range = x.text_range();
-                (trimmed_text, text_range)
+            .map(|token| GridRow {
+                content: inner_string_text(&token),
+                range: token.text_trimmed_range(),
             })
-            .collect::<GridAreasProps>();
+            .collect::<Vec<_>>();
 
-        if !plain_grid_areas_props.is_empty() {
-            is_consistent_grids(plain_grid_areas_props)
-        } else {
-            None
-        }
+        check_grid_rows(&rows)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match state.reason {
+        match &state.reason {
             GridAreaValidationError::EmptyGridArea => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -159,7 +150,7 @@ impl Rule for NoInvalidGridAreas {
                     "Consider adding the same number of cell tokens in each string."
                 }),
             ),
-            GridAreaValidationError::DuplicateGridToken => Some(
+            GridAreaValidationError::DuplicateGridToken(name) => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     state.span,
@@ -168,7 +159,7 @@ impl Rule for NoInvalidGridAreas {
                     },
                 )
                 .note(markup! {
-                    "Consider removing the duplicated filled-in rectangle: " <Emphasis>{state.text.as_ref().unwrap()}</Emphasis>
+                    "Consider removing the duplicated filled-in rectangle: " <Emphasis>{name.text()}</Emphasis>
                 }),
             ),
         }
@@ -216,83 +207,85 @@ fn grid_area_string_tokens(value: AnyCssGenericPropertyValueOrExpression) -> Vec
     }
 }
 
-// Check if the grid areas are consistent
-fn is_consistent_grids(grid_areas_props: GridAreasProps) -> Option<UseConsistentGridAreasState> {
-    let first_prop = inner_string_text(&grid_areas_props[0].0);
-    let first_len = first_prop.len();
-    let mut shortest = &grid_areas_props[0];
+/// A quoted row of a grid template.
+struct GridRow {
+    /// The text between the quotes.
+    content: TokenText,
+    range: TextRange,
+}
 
-    for grid_areas_prop in &grid_areas_props {
-        let cleaned_text = inner_string_text(&grid_areas_prop.0);
-        // Check if the grid areas are empty
-        if cleaned_text.is_empty() {
+/// The cells covered so far by a named area: columns `start..end` of every row up to `last_row`.
+struct AreaBounds {
+    last_row: usize,
+    start: usize,
+    end: usize,
+}
+
+/// Checks that every row contains at least one cell, that all rows contain the same number of
+/// cells, and that the cells of each named area form one filled rectangle.
+fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
+    let first_row = rows.first()?;
+    let first_count = GridCellsIterator::new(first_row.content.text()).count();
+
+    for row in rows {
+        let count = GridCellsIterator::new(row.content.text()).count();
+        if count == 0 {
             return Some(UseConsistentGridAreasState {
-                text: None,
-                span: grid_areas_prop.1,
+                span: row.range,
                 reason: GridAreaValidationError::EmptyGridArea,
             });
         }
-        // Check if all elements have the same length
-        if cleaned_text.len() != first_len {
-            if cleaned_text.len() < inner_string_text(&shortest.0).len() {
-                shortest = grid_areas_prop;
-            }
+        if count != first_count {
+            // Point at the row with fewer cells, because that is the row missing cells.
+            let span = if count < first_count {
+                row.range
+            } else {
+                first_row.range
+            };
             return Some(UseConsistentGridAreasState {
-                text: None,
-                span: shortest.1,
+                span,
                 reason: GridAreaValidationError::InconsistentCellCount,
             });
         }
     }
 
-    // Check if there are no duplicate grid tokens
-    // It should be partial match because for example, in the following grid areas:
-    // {"a a a"
-    //  "b b b"; }
-    //  are the consistent grid properties because it forms a single filled-in rectangle.
-    if grid_areas_props
-        .iter()
-        .all(|prop| is_all_same(prop.0.clone()))
-    {
-        return None;
-    }
-    //  But in the following grid areas:
-    //  {"a a a"
-    //   "b b a"; }
-    //   are not consistent because `a` breaks a single filled-in rectangle.
-    if let Some(result) = has_partial_match(&grid_areas_props) {
-        return Some(UseConsistentGridAreasState {
-            text: Some(result.0),
-            span: result.1,
-            reason: GridAreaValidationError::DuplicateGridToken,
-        });
-    }
-
-    None
-}
-
-// Check if all characters in a string are the same
-fn is_all_same(token_text: TokenText) -> bool {
-    let prop = inner_string_text(&token_text);
-    let mut iter = prop.chars().filter(|c| !c.is_whitespace());
-    let Some(head) = iter.next() else {
-        return true;
-    };
-    iter.all(|c| c == head)
-}
-
-fn has_partial_match(grid_areas_props: &GridAreasProps) -> Option<GridAreasProp> {
-    let mut seen_parts = FxHashSet::default();
-
-    for (text, range) in grid_areas_props {
-        let prop = inner_string_text(text);
-        let parts: FxHashSet<String> = prop
-            .split_whitespace()
-            .map(|part| part.to_string())
-            .collect();
-        for part in parts {
-            if !seen_parts.insert(part.clone()) {
-                return Some((part, *range));
+    // An area forms a rectangle when it covers the same consecutive columns in consecutive rows.
+    let mut areas = FxHashMap::<&str, AreaBounds>::default();
+    for (row_index, row) in rows.iter().enumerate() {
+        let text = row.content.text();
+        let mut cells = GridCellsIterator::new(text).enumerate().peekable();
+        while let Some((start, range)) = cells.next() {
+            let name = &text[range];
+            let mut end = start + 1;
+            while cells.next_if(|(_, next)| &text[*next] == name).is_some() {
+                end += 1;
+            }
+            if is_null_cell(name) {
+                continue;
+            }
+            match areas.entry(name) {
+                Entry::Vacant(entry) => {
+                    entry.insert(AreaBounds {
+                        last_row: row_index,
+                        start,
+                        end,
+                    });
+                }
+                Entry::Occupied(mut entry) => {
+                    let bounds = entry.get_mut();
+                    if bounds.last_row + 1 != row_index
+                        || bounds.start != start
+                        || bounds.end != end
+                    {
+                        return Some(UseConsistentGridAreasState {
+                            span: row.range,
+                            reason: GridAreaValidationError::DuplicateGridToken(
+                                row.content.clone().slice(range),
+                            ),
+                        });
+                    }
+                    bounds.last_row = row_index;
+                }
             }
         }
     }
@@ -300,15 +293,47 @@ fn has_partial_match(grid_areas_props: &GridAreasProps) -> Option<GridAreasProp>
     None
 }
 
-fn inner_string_text(text: &TokenText) -> &str {
-    let result = text.text();
-    if result.len() >= 2 {
-        debug_assert!(
-            (result.starts_with('"') && result.len() >= 2 && result.ends_with('"'))
-                || (result.starts_with('\'') && result.len() >= 2 && result.ends_with('\''))
-        );
-        result[1..result.len() - 1].trim()
-    } else {
-        result
+/// Iterator over the ranges of the cells in a grid row, relative to the row. Cells are separated
+/// by whitespace, and a sequence of `.` is a cell of its own even when it touches a name: `a.b`
+/// contains three cells.
+struct GridCellsIterator<'a> {
+    bytes: &'a [u8],
+    index: usize,
+}
+
+impl<'a> GridCellsIterator<'a> {
+    fn new(row: &'a str) -> Self {
+        Self {
+            bytes: row.as_bytes(),
+            index: 0,
+        }
     }
+}
+
+impl Iterator for GridCellsIterator<'_> {
+    type Item = TextRange;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.bytes.get(self.index)?.is_ascii_whitespace() {
+            self.index += 1;
+        }
+        let start = self.index;
+        let is_dot = self.bytes[start] == b'.';
+        while self
+            .bytes
+            .get(self.index)
+            .is_some_and(|byte| !byte.is_ascii_whitespace() && (*byte == b'.') == is_dot)
+        {
+            self.index += 1;
+        }
+        Some(TextRange::new(
+            TextSize::from(start as u32),
+            TextSize::from(self.index as u32),
+        ))
+    }
+}
+
+/// A cell made only of `.` characters leaves its grid cell unnamed.
+fn is_null_cell(cell: &str) -> bool {
+    cell.bytes().all(|byte| byte == b'.')
 }

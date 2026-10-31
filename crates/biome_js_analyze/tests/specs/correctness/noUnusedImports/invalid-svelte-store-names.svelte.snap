@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-store-names.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+import { props } from "./stores.js";
+import { state } from "./stores.js";
+import { restProps } from "./stores.js";
+import { slots } from "./stores.js";
+</script>
+
+<p>{$props()} {$state(0)} {$$restProps} {$$slots}</p>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-store-names.svelte:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ import { props } from "./stores.js";
+      │        ^^^^^^^^^
+    4 │ import { state } from "./stores.js";
+    5 │ import { restProps } from "./stores.js";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1   │ - 
+    2   │ - import·{·props·}·from·"./stores.js";
+      1 │ + 
+    3 2 │   import { state } from "./stores.js";
+    4 3 │   import { restProps } from "./stores.js";
+  
+
+```
+
+```
+invalid-svelte-store-names.svelte:4:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    2 │ <script>
+    3 │ import { props } from "./stores.js";
+  > 4 │ import { state } from "./stores.js";
+      │        ^^^^^^^^^
+    5 │ import { restProps } from "./stores.js";
+    6 │ import { slots } from "./stores.js";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   
+    2 2 │   import { props } from "./stores.js";
+    3   │ - import·{·state·}·from·"./stores.js";
+    4 3 │   import { restProps } from "./stores.js";
+    5 4 │   import { slots } from "./stores.js";
+  
+
+```
+
+```
+invalid-svelte-store-names.svelte:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    3 │ import { props } from "./stores.js";
+    4 │ import { state } from "./stores.js";
+  > 5 │ import { restProps } from "./stores.js";
+      │        ^^^^^^^^^^^^^
+    6 │ import { slots } from "./stores.js";
+    7 │ </script>
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    2 2 │   import { props } from "./stores.js";
+    3 3 │   import { state } from "./stores.js";
+    4   │ - import·{·restProps·}·from·"./stores.js";
+    5 4 │   import { slots } from "./stores.js";
+    6 5 │   
+  
+
+```
+
+```
+invalid-svelte-store-names.svelte:6:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    4 │ import { state } from "./stores.js";
+    5 │ import { restProps } from "./stores.js";
+  > 6 │ import { slots } from "./stores.js";
+      │        ^^^^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    3 3 │   import { state } from "./stores.js";
+    4 4 │   import { restProps } from "./stores.js";
+    5   │ - import·{·slots·}·from·"./stores.js";
+    6 5 │   
+  
+
+```

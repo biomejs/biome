@@ -8,7 +8,7 @@ use biome_js_syntax::{
     JsConditionalExpression, JsNewExpression, JsSyntaxKind,
 };
 use biome_module_graph::type_inference::TypeInferenceClassification;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_misused_promises::NoMisusedPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
@@ -112,11 +112,10 @@ impl Rule for NoMisusedPromises {
             return match ctx.classify_expression_as_promise(expression) {
                 TypeInferenceClassification::Match => Some(state),
                 TypeInferenceClassification::NoMatch => None,
-                TypeInferenceClassification::Indeterminate => (ctx
-                    .type_of_expression(expression)?
-                    .is_promise_instance()
-                    == Some(true))
-                .then_some(state),
+                TypeInferenceClassification::Indeterminate => {
+                    (ctx.type_of_expression(expression)?.is_promise_instance() == Some(true))
+                        .then_some(state)
+                }
             };
         }
         if expression.as_any_js_literal_expression().is_some()
@@ -215,8 +214,7 @@ impl Rule for NoMisusedPromises {
 
         let mut mutation = ctx.root().begin();
         let await_expression = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-            make::token(JsSyntaxKind::AWAIT_KW)
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
             expression.clone().trim_leading_trivia()?,
         ));
 
@@ -236,11 +234,12 @@ fn misused_promise_expression_state(
     let parent = expression.syntax().parent()?;
     let state = match parent.kind() {
         JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
-            if JsConditionalExpression::cast(parent)
-                .is_some_and(|conditional| conditional.test().is_ok_and(|test| test == *expression))
-            => {
-                NoMisusedPromisesState::Conditional
-            }
+            if JsConditionalExpression::cast(parent).is_some_and(|conditional| {
+                conditional.test().is_ok_and(|test| test == *expression)
+            }) =>
+        {
+            NoMisusedPromisesState::Conditional
+        }
         JsSyntaxKind::JS_DO_WHILE_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_IF_STATEMENT => NoMisusedPromisesState::Conditional,
         JsSyntaxKind::JS_SPREAD => NoMisusedPromisesState::Spread,
@@ -278,10 +277,10 @@ fn find_misused_promise_returning_callback(
         )?
     } else {
         let new_expression = argument_list
-        .syntax()
-        .ancestors()
-        .skip(1)
-        .find_map(JsNewExpression::cast)?;
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(JsNewExpression::cast)?;
         ctx.expected_argument_type(
             &new_expression.callee().ok()?,
             &argument_list,

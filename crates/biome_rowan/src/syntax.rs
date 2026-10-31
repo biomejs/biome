@@ -1,3 +1,4 @@
+mod borrowed_token;
 mod element;
 mod node;
 mod rewriter;
@@ -5,11 +6,14 @@ mod token;
 mod trivia;
 
 use crate::{AstNode, RawSyntaxKind};
+pub use borrowed_token::{
+    BorrowedToken, BorrowedTokensIterator, BorrowedTriviaPiece, BorrowedTriviaPiecesIterator,
+};
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
-    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren,
-    SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt, SyntaxNodeWithOffset, SyntaxSlot,
-    SyntaxSlots,
+    AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderOfKinds, PreorderWithTokens, SendNode,
+    SyntaxElementChildren, SyntaxNode, SyntaxNodeChildren, SyntaxNodeOptionExt,
+    SyntaxNodeWithOffset, SyntaxSlot, SyntaxSlots,
 };
 pub use rewriter::{SyntaxRewriter, VisitNodeSignal};
 use std::fmt;
@@ -497,6 +501,11 @@ mod tests {
 
         let mut root = builder.finish();
 
+        assert_eq!(
+            root.text_trimmed_range(),
+            TextRange::new(0.into(), 4.into())
+        );
+
         // Keep cleanup iterative so this test isolates lookup stack usage.
         let texts = [root.first_token(), root.last_token()].map(|token| {
             let token = token?;
@@ -517,6 +526,112 @@ mod tests {
 
         assert_eq!(texts[0].as_deref(), Some("edge"));
         assert_eq!(texts[1].as_deref(), Some("edge"));
+    }
+
+    #[test]
+    fn text_trimmed_range_skips_empty_tokens_and_tokenless_nodes() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.finish_node();
+        builder.token(RawLanguageKind::EOF, "");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            " a",
+            &[TriviaPiece::whitespace(1)],
+            &[],
+        );
+        builder.finish_node();
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            "b ",
+            &[],
+            &[TriviaPiece::whitespace(1)],
+        );
+        builder.finish_node();
+        builder.token_with_trivia(
+            RawLanguageKind::EOF,
+            "\n",
+            &[TriviaPiece::new(TriviaPieceKind::Newline, 1)],
+            &[],
+        );
+        builder.finish_node();
+
+        let root = builder.finish();
+        let tokenless = root.children().next().unwrap();
+
+        assert_eq!(
+            root.text_trimmed_range(),
+            TextRange::new(1.into(), 3.into())
+        );
+        assert_eq!(tokenless.text_trimmed_range(), TextRange::empty(0.into()));
+    }
+
+    #[test]
+    fn text_trimmed_range_of_node_with_only_empty_tokens_leaves_the_node() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            "before ",
+            &[],
+            &[TriviaPiece::whitespace(1)],
+        );
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.token(RawLanguageKind::EOF, "");
+        builder.token_with_trivia(
+            RawLanguageKind::EOF,
+            "  ",
+            &[TriviaPiece::whitespace(2)],
+            &[],
+        );
+        builder.finish_node();
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            " after",
+            &[TriviaPiece::whitespace(1)],
+            &[],
+        );
+        builder.finish_node();
+
+        let root = builder.finish();
+        let empty = root.children().next().unwrap();
+
+        assert_eq!(
+            empty.text_range_with_trivia(),
+            TextRange::new(7.into(), 9.into())
+        );
+        assert_eq!(empty.text_trimmed_range(), TextRange::empty(10.into()));
+    }
+
+    #[test]
+    fn text_trimmed_range_looks_past_child_with_only_trivia() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            "a ",
+            &[],
+            &[TriviaPiece::whitespace(1)],
+        );
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.token_with_trivia(
+            RawLanguageKind::EOF,
+            "  ",
+            &[TriviaPiece::whitespace(2)],
+            &[],
+        );
+        builder.finish_node();
+        builder.finish_node();
+
+        let root = builder.finish();
+
+        assert_eq!(
+            root.text_trimmed_range(),
+            TextRange::new(0.into(), 1.into())
+        );
     }
 
     #[test]
@@ -708,5 +823,36 @@ mod tests {
             .unwrap();
         assert!(!root.has_comments_descendants());
         assert!(!root.has_skipped_descendants());
+    }
+
+    #[test]
+    fn single_space_and_newline_trivia_helpers_replace_trivia() {
+        let token = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::LET_TOKEN,
+            "/*a*/let//b",
+            [TriviaPiece::multi_line_comment(5)],
+            [TriviaPiece::single_line_comment(3)],
+        );
+
+        assert_eq!(token.with_leading_space().text(), " let//b");
+        assert_eq!(token.with_trailing_space().text(), "/*a*/let ");
+        assert_eq!(token.with_surrounding_spaces().text(), " let ");
+        assert_eq!(token.with_leading_newline().text(), "\nlet//b");
+
+        let leading: Vec<_> = token
+            .with_leading_newline()
+            .leading_trivia()
+            .pieces()
+            .collect();
+        assert_eq!(leading.len(), 1);
+        assert!(leading[0].is_newline());
+
+        let trailing: Vec<_> = token
+            .with_trailing_space()
+            .trailing_trivia()
+            .pieces()
+            .collect();
+        assert_eq!(trailing.len(), 1);
+        assert!(trailing[0].is_whitespace());
     }
 }

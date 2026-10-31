@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-type-and-argument.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineProps<{ msg?: string }>({ msg: String });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-type-and-argument.vue:3:1 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineProps() declares the props both with a type and with an argument.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ defineProps<{ msg?: string }>({ msg: String });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Vue can't use both at the same time, and fails to compile the component.
+  
+  i Declare the props either with a type between <> or with an argument between ().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

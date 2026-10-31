@@ -1,15 +1,13 @@
 use crate::fonts::is_function_keyword;
-use crate::utils::is_custom_function;
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::services::semantic::Semantic;
+use crate::utils::{is_custom_function, is_scss_built_in_function};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{CssFunction, ScssFunctionAtRule};
+use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
-use std::cmp::Ordering;
 
 declare_lint_rule! {
     /// Disallow unrecognized CSS value functions.
@@ -74,106 +72,13 @@ declare_lint_rule! {
     }
 }
 
-const SCSS_BUILT_IN_FUNCTIONS: &[&str] = &[
-    "abs",
-    "adjust-color",
-    "adjust-hue",
-    "alpha",
-    "append",
-    "blue",
-    "call",
-    "ceil",
-    "change-color",
-    "color",
-    "comparable",
-    "complement",
-    "content-exists",
-    "darken",
-    "desaturate",
-    "fade-in",
-    "fade-out",
-    "feature-exists",
-    "floor",
-    "function-exists",
-    "get-function",
-    "global-variable-exists",
-    "grayscale",
-    "green",
-    "hsl",
-    "hsla",
-    "hue",
-    "hwb",
-    "ie-hex-str",
-    "if",
-    "index",
-    "inspect",
-    "invert",
-    "is-bracketed",
-    "is-superselector",
-    "join",
-    "keywords",
-    "lab",
-    "lch",
-    "length",
-    "lighten",
-    "lightness",
-    "list-separator",
-    "map-get",
-    "map-has-key",
-    "map-keys",
-    "map-merge",
-    "map-remove",
-    "map-values",
-    "max",
-    "min",
-    "mix",
-    "mixin-exists",
-    "nth",
-    "oklab",
-    "oklch",
-    "opacify",
-    "opacity",
-    "percentage",
-    "quote",
-    "random",
-    "red",
-    "rgb",
-    "rgba",
-    "round",
-    "saturate",
-    "saturation",
-    "scale-color",
-    "selector-append",
-    "selector-extend",
-    "selector-nest",
-    "selector-parse",
-    "selector-replace",
-    "selector-unify",
-    "set-nth",
-    "simple-selectors",
-    "str-index",
-    "str-insert",
-    "str-length",
-    "str-slice",
-    "to-lower-case",
-    "to-upper-case",
-    "transparentize",
-    "type-of",
-    "unique-id",
-    "unit",
-    "unitless",
-    "unquote",
-    "variable-exists",
-    "zip",
-];
-
 pub struct NoUnknownFunctionState {
     function_name: Box<str>,
     span: TextRange,
 }
 
 impl Rule for NoUnknownFunction {
-    type Query = Ast<CssFunction>;
+    type Query = Semantic<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownFunctionOptions;
@@ -186,8 +91,8 @@ impl Rule for NoUnknownFunction {
         })?;
         let function_name = binding.text_trimmed();
 
-        // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
-        // Therefore, we ignore these custom functions to prevent false detections.
+        // The semantic model doesn't track custom function definitions, which may also come
+        // from other files, so we ignore custom functions to prevent false detections.
         if is_custom_function(function_name) {
             return None;
         }
@@ -198,20 +103,7 @@ impl Rule for NoUnknownFunction {
 
         if ctx.source_type::<CssFileSource>().is_scss()
             && (is_scss_built_in_function(function_name)
-                || ctx
-                    .root()
-                    .syntax()
-                    .descendants()
-                    .filter_map(ScssFunctionAtRule::cast)
-                    .any(|function| {
-                        function
-                            .name()
-                            .ok()
-                            .and_then(|name| name.value_token().ok())
-                            .is_some_and(|name| {
-                                scss_function_names_equal(name.text_trimmed(), function_name)
-                            })
-                    }))
+                || ctx.model().has_scss_function(function_name))
         {
             return None;
         }
@@ -236,6 +128,9 @@ impl Rule for NoUnknownFunction {
                 },
             )
             .note(markup! {
+                "Browsers ignore a declaration that contains an unknown function, so the style is not applied."
+            })
+            .note(markup! {
                 "Use a known function instead."
             })
             .note(markup! {
@@ -245,26 +140,6 @@ impl Rule for NoUnknownFunction {
     }
 }
 
-fn is_scss_built_in_function(name: &str) -> bool {
-    SCSS_BUILT_IN_FUNCTIONS
-        .binary_search_by(|built_in| compare_scss_function_names(built_in, name))
-        .is_ok()
-}
-
-fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
-    left.bytes()
-        .map(normalize_scss_function_name_byte)
-        .cmp(right.bytes().map(normalize_scss_function_name_byte))
-}
-
-fn normalize_scss_function_name_byte(byte: u8) -> u8 {
-    if byte == b'_' { b'-' } else { byte }
-}
-
-fn scss_function_names_equal(left: &str, right: &str) -> bool {
-    compare_scss_function_names(left, right) == Ordering::Equal
-}
-
 fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
     for ignore_pattern in &options.ignore {
         if name.eq_ignore_ascii_case(ignore_pattern) {
@@ -272,22 +147,4 @@ fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
         }
     }
     false
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn scss_built_in_functions_are_sorted() {
-        for pair in SCSS_BUILT_IN_FUNCTIONS.windows(2) {
-            assert_eq!(
-                compare_scss_function_names(pair[0], pair[1]),
-                Ordering::Less,
-                "{} should sort before {}",
-                pair[0],
-                pair[1]
-            );
-        }
-    }
 }

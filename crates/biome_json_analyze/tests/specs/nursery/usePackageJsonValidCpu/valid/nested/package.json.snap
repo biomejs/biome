@@ -1,0 +1,17 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "my-package",
+	"config": {
+		"cpu": "x86"
+	},
+	"publishConfig": {
+		"cpu": ["x86", 64]
+	}
+}
+
+```

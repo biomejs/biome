@@ -1,0 +1,37 @@
+@mixin responsive($bound, $width) {
+  @media ($bound + "-width": $width) { @content; }
+}
+.panel {
+  @include responsive(min, 40rem) { display: grid; }
+  @include responsive(max, 80rem) { display: block; }
+}
+
+$bound: min;
+$breakpoint: 48rem;
+@import "wide-layout.css" screen and ($bound + "-width": $breakpoint);
+@import "wide-layout.css" screen and (#{$bound}-width: $breakpoint);
+
+$feature: min-width;
+@media ($feature: $breakpoint) { .control { display: grid; } }
+@media ($bound + "-width": 40rem), ($bound + "-height": 20rem) { .queries { color: red; } }
+@media ($bound + "-width": 40rem) and (color) { .logical { color: red; } }
+@media ($bound /* name */ +
+  "-width" /* colon */: $breakpoint) { .comments { color: red; } }
+@media (min + "-width": $breakpoint) { .identifier { color: red; } }
+@media ("min" + "-width": $breakpoint) { .string { color: red; } }
+@media ($bound + #{"-width"}: $breakpoint) { .interpolation { color: red; } }
+
+@function feature-name() { @return min-width; }
+@media (feature-name(): 40rem) { .function { color: red; } }
+@import "wide-layout.css" screen and (feature-name(): 40rem);
+$boolean-feature: color;
+@media ($boolean-feature + "") { .boolean { color: red; } }
+@import "wide-layout.css" screen and ($boolean-feature + "");
+
+$min: 20rem;
+$max: 80rem;
+@media ($min + 1rem < width) { .reverse { color: red; } }
+@media ($min + 1rem < width <= $max - 1rem) { .interval { color: red; } }
+@media (width >= $min + 1rem) { .range { color: red; } }
+@media (aspect-ratio: 16 / 9) { .ratio { color: red; } }
+@media (width: calc(100px + 1rem)) { .calc { color: red; } }

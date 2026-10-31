@@ -1,0 +1,383 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@use "breakpoints";
+@media (breakpoints.$feature: 40rem) {}
+@media (breakpoints.$feature >= 40rem) {}
+@media (20rem < breakpoints.$feature <= 80rem) {}
+@import "layout.css" (breakpoints.$feature + "": 40rem);
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssUseAtRule {
+                use_token: USE_KW@1..5 "use" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@5..18 "\"breakpoints\"" [] [],
+                },
+                as_clause: missing (optional),
+                with_clause: missing (optional),
+                semicolon_token: SEMICOLON@18..19 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@19..21 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@21..27 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@27..28 "(" [] [],
+                                feature: CssQueryFeaturePlain {
+                                    name: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssModuleMemberAccess {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@28..39 "breakpoints" [] [],
+                                                },
+                                                dot_token: DOT@39..40 "." [] [],
+                                                member: ScssVariable {
+                                                    dollar_token: DOLLAR@40..41 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@41..48 "feature" [] [],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    colon_token: COLON@48..50 ":" [] [Whitespace(" ")],
+                                    value: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@50..52 "40" [] [],
+                                        unit_token: IDENT@52..55 "rem" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@55..57 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@57..58 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@58..59 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@59..61 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@61..67 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@67..68 "(" [] [],
+                                feature: CssQueryFeatureRange {
+                                    left: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssModuleMemberAccess {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@68..79 "breakpoints" [] [],
+                                                },
+                                                dot_token: DOT@79..80 "." [] [],
+                                                member: ScssVariable {
+                                                    dollar_token: DOLLAR@80..81 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@81..89 "feature" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    comparison: CssQueryFeatureRangeComparison {
+                                        operator: GTEQ@89..92 ">=" [] [Whitespace(" ")],
+                                    },
+                                    right: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@92..94 "40" [] [],
+                                        unit_token: IDENT@94..97 "rem" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@97..99 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@99..100 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@100..101 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@101..103 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@103..109 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@109..110 "(" [] [],
+                                feature: CssQueryFeatureRangeInterval {
+                                    left: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@110..112 "20" [] [],
+                                        unit_token: IDENT@112..116 "rem" [] [Whitespace(" ")],
+                                    },
+                                    left_comparison: CssQueryFeatureRangeComparison {
+                                        operator: L_ANGLE@116..118 "<" [] [Whitespace(" ")],
+                                    },
+                                    name: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssModuleMemberAccess {
+                                                module: CssIdentifier {
+                                                    value_token: IDENT@118..129 "breakpoints" [] [],
+                                                },
+                                                dot_token: DOT@129..130 "." [] [],
+                                                member: ScssVariable {
+                                                    dollar_token: DOLLAR@130..131 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@131..139 "feature" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    right_comparison: CssQueryFeatureRangeComparison {
+                                        operator: LTEQ@139..142 "<=" [] [Whitespace(" ")],
+                                    },
+                                    right: CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@142..144 "80" [] [],
+                                        unit_token: IDENT@144..147 "rem" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@147..149 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@149..150 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@150..151 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@151..153 "@" [Newline("\n")] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@153..160 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@160..173 "\"layout.css\"" [] [Whitespace(" ")],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [
+                            CssMediaConditionQuery {
+                                condition: CssMediaFeatureInParens {
+                                    l_paren_token: L_PAREN@173..174 "(" [] [],
+                                    feature: CssQueryFeaturePlain {
+                                        name: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssBinaryExpression {
+                                                    left: ScssModuleMemberAccess {
+                                                        module: CssIdentifier {
+                                                            value_token: IDENT@174..185 "breakpoints" [] [],
+                                                        },
+                                                        dot_token: DOT@185..186 "." [] [],
+                                                        member: ScssVariable {
+                                                            dollar_token: DOLLAR@186..187 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@187..195 "feature" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                    },
+                                                    operator: PLUS@195..197 "+" [] [Whitespace(" ")],
+                                                    right: CssString {
+                                                        value_token: CSS_STRING_LITERAL@197..199 "\"\"" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        colon_token: COLON@199..201 ":" [] [Whitespace(" ")],
+                                        value: CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@201..203 "40" [] [],
+                                            unit_token: IDENT@203..206 "rem" [] [],
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@206..207 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                ],
+                semicolon_token: SEMICOLON@207..208 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@208..209 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..209
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..208
+    0: CSS_AT_RULE@0..19
+      0: AT@0..1 "@" [] []
+      1: SCSS_USE_AT_RULE@1..19
+        0: USE_KW@1..5 "use" [] [Whitespace(" ")]
+        1: CSS_STRING@5..18
+          0: CSS_STRING_LITERAL@5..18 "\"breakpoints\"" [] []
+        2: (empty)
+        3: (empty)
+        4: SEMICOLON@18..19 ";" [] []
+    1: CSS_AT_RULE@19..59
+      0: AT@19..21 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@21..59
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@21..57
+          0: MEDIA_KW@21..27 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@27..57
+            0: CSS_MEDIA_CONDITION_QUERY@27..57
+              0: CSS_MEDIA_FEATURE_IN_PARENS@27..57
+                0: L_PAREN@27..28 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@28..55
+                  0: SCSS_EXPRESSION@28..48
+                    0: SCSS_EXPRESSION_ITEM_LIST@28..48
+                      0: SCSS_MODULE_MEMBER_ACCESS@28..48
+                        0: CSS_IDENTIFIER@28..39
+                          0: IDENT@28..39 "breakpoints" [] []
+                        1: DOT@39..40 "." [] []
+                        2: SCSS_VARIABLE@40..48
+                          0: DOLLAR@40..41 "$" [] []
+                          1: CSS_IDENTIFIER@41..48
+                            0: IDENT@41..48 "feature" [] []
+                  1: COLON@48..50 ":" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@50..55
+                    0: CSS_NUMBER_LITERAL@50..52 "40" [] []
+                    1: IDENT@52..55 "rem" [] []
+                2: R_PAREN@55..57 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@57..59
+          0: L_CURLY@57..58 "{" [] []
+          1: CSS_RULE_LIST@58..58
+          2: R_CURLY@58..59 "}" [] []
+    2: CSS_AT_RULE@59..101
+      0: AT@59..61 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@61..101
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@61..99
+          0: MEDIA_KW@61..67 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@67..99
+            0: CSS_MEDIA_CONDITION_QUERY@67..99
+              0: CSS_MEDIA_FEATURE_IN_PARENS@67..99
+                0: L_PAREN@67..68 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE@68..97
+                  0: SCSS_EXPRESSION@68..89
+                    0: SCSS_EXPRESSION_ITEM_LIST@68..89
+                      0: SCSS_MODULE_MEMBER_ACCESS@68..89
+                        0: CSS_IDENTIFIER@68..79
+                          0: IDENT@68..79 "breakpoints" [] []
+                        1: DOT@79..80 "." [] []
+                        2: SCSS_VARIABLE@80..89
+                          0: DOLLAR@80..81 "$" [] []
+                          1: CSS_IDENTIFIER@81..89
+                            0: IDENT@81..89 "feature" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@89..92
+                    0: GTEQ@89..92 ">=" [] [Whitespace(" ")]
+                  2: CSS_REGULAR_DIMENSION@92..97
+                    0: CSS_NUMBER_LITERAL@92..94 "40" [] []
+                    1: IDENT@94..97 "rem" [] []
+                2: R_PAREN@97..99 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@99..101
+          0: L_CURLY@99..100 "{" [] []
+          1: CSS_RULE_LIST@100..100
+          2: R_CURLY@100..101 "}" [] []
+    3: CSS_AT_RULE@101..151
+      0: AT@101..103 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@103..151
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@103..149
+          0: MEDIA_KW@103..109 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@109..149
+            0: CSS_MEDIA_CONDITION_QUERY@109..149
+              0: CSS_MEDIA_FEATURE_IN_PARENS@109..149
+                0: L_PAREN@109..110 "(" [] []
+                1: CSS_QUERY_FEATURE_RANGE_INTERVAL@110..147
+                  0: CSS_REGULAR_DIMENSION@110..116
+                    0: CSS_NUMBER_LITERAL@110..112 "20" [] []
+                    1: IDENT@112..116 "rem" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@116..118
+                    0: L_ANGLE@116..118 "<" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@118..139
+                    0: SCSS_EXPRESSION_ITEM_LIST@118..139
+                      0: SCSS_MODULE_MEMBER_ACCESS@118..139
+                        0: CSS_IDENTIFIER@118..129
+                          0: IDENT@118..129 "breakpoints" [] []
+                        1: DOT@129..130 "." [] []
+                        2: SCSS_VARIABLE@130..139
+                          0: DOLLAR@130..131 "$" [] []
+                          1: CSS_IDENTIFIER@131..139
+                            0: IDENT@131..139 "feature" [] [Whitespace(" ")]
+                  3: CSS_QUERY_FEATURE_RANGE_COMPARISON@139..142
+                    0: LTEQ@139..142 "<=" [] [Whitespace(" ")]
+                  4: CSS_REGULAR_DIMENSION@142..147
+                    0: CSS_NUMBER_LITERAL@142..144 "80" [] []
+                    1: IDENT@144..147 "rem" [] []
+                2: R_PAREN@147..149 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@149..151
+          0: L_CURLY@149..150 "{" [] []
+          1: CSS_RULE_LIST@150..150
+          2: R_CURLY@150..151 "}" [] []
+    4: CSS_AT_RULE@151..208
+      0: AT@151..153 "@" [Newline("\n")] []
+      1: SCSS_IMPORT_AT_RULE@153..208
+        0: IMPORT_KW@153..160 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@160..207
+          0: SCSS_PLAIN_IMPORT@160..207
+            0: CSS_STRING@160..173
+              0: CSS_STRING_LITERAL@160..173 "\"layout.css\"" [] [Whitespace(" ")]
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@173..207
+              0: CSS_MEDIA_CONDITION_QUERY@173..207
+                0: CSS_MEDIA_FEATURE_IN_PARENS@173..207
+                  0: L_PAREN@173..174 "(" [] []
+                  1: CSS_QUERY_FEATURE_PLAIN@174..206
+                    0: SCSS_EXPRESSION@174..199
+                      0: SCSS_EXPRESSION_ITEM_LIST@174..199
+                        0: SCSS_BINARY_EXPRESSION@174..199
+                          0: SCSS_MODULE_MEMBER_ACCESS@174..195
+                            0: CSS_IDENTIFIER@174..185
+                              0: IDENT@174..185 "breakpoints" [] []
+                            1: DOT@185..186 "." [] []
+                            2: SCSS_VARIABLE@186..195
+                              0: DOLLAR@186..187 "$" [] []
+                              1: CSS_IDENTIFIER@187..195
+                                0: IDENT@187..195 "feature" [] [Whitespace(" ")]
+                          1: PLUS@195..197 "+" [] [Whitespace(" ")]
+                          2: CSS_STRING@197..199
+                            0: CSS_STRING_LITERAL@197..199 "\"\"" [] []
+                    1: COLON@199..201 ":" [] [Whitespace(" ")]
+                    2: CSS_REGULAR_DIMENSION@201..206
+                      0: CSS_NUMBER_LITERAL@201..203 "40" [] []
+                      1: IDENT@203..206 "rem" [] []
+                  2: R_PAREN@206..207 ")" [] []
+        2: SEMICOLON@207..208 ";" [] []
+  2: EOF@208..209 "" [Newline("\n")] []
+
+```

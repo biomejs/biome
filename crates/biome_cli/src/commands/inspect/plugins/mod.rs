@@ -6,7 +6,7 @@ use crate::{
 use biome_configuration::OverrideGlobs;
 use biome_console::fmt::{self, Formatter};
 use biome_console::{ConsoleExt, markup};
-use biome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::{MessageAndDescription, PrintDiagnostic};
 use biome_fs::normalize_path;
 use biome_glob::NormalizedGlob;
 use biome_plugin_loader::{PluginDiagnostic, ResolvedPluginKind, resolve_plugin};
@@ -378,7 +378,7 @@ pub(crate) fn inspect_plugins(
     for (override_index, override_includes, declarations) in declarations {
         for configuration in declarations.into_iter().flat_map(|plugins| plugins.iter()) {
             let applies_to_target = matched_path.as_deref().map(|path| {
-                configuration.matches_includes(path)
+                configuration.matches_includes(base_path, path)
                     && override_index.is_none_or(|index| {
                         matching_overrides
                             .as_ref()
@@ -598,7 +598,7 @@ pub(crate) fn inspect_plugins(
 
     if errors.is_empty() {
         let diagnostic = InspectionDiagnostic {
-            message: markup! { {summary} }.to_owned(),
+            message: MessageAndDescription::from(markup! { {summary} }.to_owned()),
             path: None,
             span: None,
             source_code: None,

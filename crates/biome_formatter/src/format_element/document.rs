@@ -6,22 +6,21 @@ use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, SourceMapGeneration, TextSize,
-    TrailingNewline, TransformSourceMap,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, Source, SourceMapGeneration,
+    TrailingNewline,
 };
 use crate::{format, write};
-use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
 
 /// A formatted document.
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
-pub struct Document {
-    elements: Vec<FormatElement>,
+pub struct Document<S: Source> {
+    elements: Vec<FormatElement<S>>,
 }
 
-impl Document {
-    pub fn new(elements: Vec<FormatElement>) -> Self {
+impl<S: Source> Document<S> {
+    pub fn new(elements: Vec<FormatElement<S>>) -> Self {
         Self { elements }
     }
 
@@ -34,6 +33,8 @@ impl Document {
     ///
     /// [`BestFitting`] elements act as expand boundaries, meaning that the fact that a
     /// [`BestFitting`]'s content expands is not propagated past the [`BestFitting`] element.
+    /// Boundary groups, see [crate::builders::boundary_group], stop the expansion the same way:
+    /// their content never expands them or the groups around them.
     ///
     /// [`BestFitting`]: FormatElement::BestFitting
     pub(crate) fn propagate_expand(&mut self) {
@@ -41,6 +42,7 @@ impl Document {
         enum Enclosing<'a> {
             Group(&'a tag::Group),
             BestFitting,
+            BoundaryGroup,
         }
 
         fn expand_parent(enclosing: &[Enclosing]) {
@@ -49,14 +51,21 @@ impl Document {
             }
         }
 
-        fn propagate_expands<'a>(
-            elements: &'a [FormatElement],
+        fn propagate_expands<'a, S: Source>(
+            elements: &'a [FormatElement<S>],
             enclosing: &mut Vec<Enclosing<'a>>,
-            checked_interned: &mut FxHashMap<&'a Interned, bool>,
+            checked_interned: &mut FxHashMap<&'a Interned<S>, bool>,
         ) -> bool {
             let mut expands = false;
+            // The enclosing elements opened by `elements` itself, rather than
+            // by the content around it
+            let outer_len = enclosing.len();
             for element in elements {
                 let element_expands = match element {
+                    FormatElement::Tag(Tag::StartGroup(group)) if group.is_boundary() => {
+                        enclosing.push(Enclosing::BoundaryGroup);
+                        false
+                    }
                     FormatElement::Tag(Tag::StartGroup(group)) => {
                         enclosing.push(Enclosing::Group(group));
                         false
@@ -129,7 +138,14 @@ impl Document {
                 };
 
                 if element_expands {
-                    expands = true;
+                    // An expansion inside a boundary group doesn't reach
+                    // the content around `elements`
+                    let in_boundary_group = enclosing[outer_len..]
+                        .iter()
+                        .any(|enclosing| matches!(enclosing, Enclosing::BoundaryGroup));
+                    if !in_boundary_group {
+                        expands = true;
+                    }
                     expand_parent(enclosing)
                 }
             }
@@ -142,25 +158,58 @@ impl Document {
         propagate_expands(self, &mut enclosing, &mut interned);
     }
 
-    pub fn into_elements(self) -> Vec<FormatElement> {
+    pub fn into_elements(self) -> Vec<FormatElement<S>> {
         self.elements
     }
 
-    pub fn as_elements(&self) -> &[FormatElement] {
+    pub fn as_elements(&self) -> &[FormatElement<S>] {
         &self.elements
+    }
+
+    /// Returns the content the host formatter wrote for each embedded element,
+    /// by the key of the element.
+    pub fn embedded_contents(&self) -> FxHashMap<S::EmbeddedKey, Interned<S>> {
+        let mut contents = FxHashMap::default();
+        collect_embedded_contents(&self.elements, &mut contents);
+        contents
     }
 
     /// Transforms the document by visiting every embedded element, optionally
     /// replacing its content.
     ///
-    /// Accepts a `format_embedded` function that will be called with the range of
+    /// Accepts a `format_embedded` function that will be called with the key of
     /// each embedded element, and which may optionally return the [Document] that
     /// replaces the element's content.
-    pub(crate) fn replace_embedded(
+    pub fn replace_embedded(
         &mut self,
-        format_embedded: &mut impl FnMut(TextRange) -> Option<Self>,
+        format_embedded: &mut impl FnMut(S::EmbeddedKey) -> Option<Self>,
     ) {
         replace_embedded_elements(&mut self.elements, format_embedded);
+    }
+}
+
+/// Collects the host content of each embedded element in `elements`,
+/// including the ones nested in the content of other elements.
+fn collect_embedded_contents<S: Source>(
+    elements: &[FormatElement<S>],
+    contents: &mut FxHashMap<S::EmbeddedKey, Interned<S>>,
+) {
+    let mut embedded_key = None;
+    for element in elements {
+        let host_content_key = embedded_key.take();
+        match element {
+            FormatElement::Tag(Tag::StartEmbedded(key)) => embedded_key = Some(key.clone()),
+            FormatElement::Interned(interned) => {
+                if let Some(key) = host_content_key {
+                    contents.insert(key, interned.clone());
+                }
+                collect_embedded_contents(interned, contents);
+            }
+            FormatElement::BestFitting(best_fitting) => {
+                collect_embedded_contents(best_fitting.as_slice(), contents);
+            }
+            _ => {}
+        }
     }
 }
 
@@ -173,19 +222,19 @@ impl Document {
 /// Nested data structures such as [FormatElement::Interned] and
 /// [FormatElement::BestFitting] use recursion and call [replace_embedded_elements()]
 /// again.
-fn replace_embedded_elements(
-    elements: &mut [FormatElement],
-    format_embedded: &mut impl FnMut(TextRange) -> Option<Document>,
+fn replace_embedded_elements<S: Source>(
+    elements: &mut [FormatElement<S>],
+    format_embedded: &mut impl FnMut(S::EmbeddedKey) -> Option<Document<S>>,
 ) {
-    // The range of the embedded element whose host content is the next element.
-    let mut embedded_range = None;
+    // The key of the embedded element whose host content is the next element.
+    let mut embedded_key = None;
     for element in elements {
-        let host_content_range = embedded_range.take();
+        let host_content_key = embedded_key.take();
         match element {
-            FormatElement::Tag(Tag::StartEmbedded(range)) => embedded_range = Some(*range),
-            FormatElement::Interned(interned) => match host_content_range {
-                Some(range) => {
-                    if let Some(document) = format_embedded(range) {
+            FormatElement::Tag(Tag::StartEmbedded(key)) => embedded_key = Some(key.clone()),
+            FormatElement::Interned(interned) => match host_content_key {
+                Some(key) => {
+                    if let Some(document) = format_embedded(key) {
                         *interned = Interned::new(document.into_elements());
                     }
                 }
@@ -203,23 +252,23 @@ fn replace_embedded_elements(
     }
 }
 
-impl From<Vec<FormatElement>> for Document {
-    fn from(elements: Vec<FormatElement>) -> Self {
+impl<S: Source> From<Vec<FormatElement<S>>> for Document<S> {
+    fn from(elements: Vec<FormatElement<S>>) -> Self {
         Self { elements }
     }
 }
 
-impl Deref for Document {
-    type Target = [FormatElement];
+impl<S: Source> Deref for Document<S> {
+    type Target = [FormatElement<S>];
 
     fn deref(&self) -> &Self::Target {
         self.elements.as_slice()
     }
 }
 
-impl std::fmt::Display for Document {
+impl<S: Source> std::fmt::Display for Document<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let formatted = format!(IrFormatContext::default(), [self.elements.as_slice()])
+        let formatted = format!(IrFormatContext::<S>::default(), [self.elements.as_slice()])
             .expect("Formatting not to throw any FormatErrors");
 
         f.write_str(
@@ -231,20 +280,25 @@ impl std::fmt::Display for Document {
     }
 }
 
+/// Writes the elements of a document as readable text, for the [Display]
+/// output of [Document].
+///
+/// [Display]: std::fmt::Display
 #[derive(Clone, Default, Debug)]
-struct IrFormatContext {
+struct IrFormatContext<S: Source> {
     /// The interned elements that have been printed to this point
-    printed_interned_elements: FxHashMap<Interned, usize>,
+    printed_interned_elements: FxHashMap<Interned<S>, usize>,
 }
 
-impl FormatContext for IrFormatContext {
+impl<S: Source> FormatContext for IrFormatContext<S> {
     type Options = IrFormatOptions;
+    type Source = S;
 
     fn options(&self) -> &Self::Options {
         &IrFormatOptions
     }
 
-    fn source_map(&self) -> Option<&TransformSourceMap> {
+    fn source_map(&self) -> Option<&S::SourceMap> {
         None
     }
 }
@@ -284,11 +338,11 @@ impl FormatOptions for IrFormatOptions {
     }
 }
 
-impl Format<IrFormatContext> for &[FormatElement] {
-    fn fmt(&self, f: &mut Formatter<IrFormatContext>) -> FormatResult<()> {
+impl<S: Source> Format<IrFormatContext<S>> for &[FormatElement<S>] {
+    fn fmt(&self, f: &mut Formatter<IrFormatContext<S>>) -> FormatResult<()> {
         use Tag::*;
 
-        fn is_contiguous_display_text(element: &FormatElement) -> bool {
+        fn is_contiguous_display_text<S: Source>(element: &FormatElement<S>) -> bool {
             matches!(
                 element,
                 FormatElement::Space
@@ -299,9 +353,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
             )
         }
 
-        fn write_source_position(
-            f: &mut Formatter<IrFormatContext>,
-            source_position: TextSize,
+        fn write_source_position<S: Source>(
+            f: &mut Formatter<IrFormatContext<S>>,
+            source_position: S::Position,
         ) -> FormatResult<()> {
             write!(
                 f,
@@ -316,7 +370,10 @@ impl Format<IrFormatContext> for &[FormatElement] {
             )
         }
 
-        fn write_display_text(f: &mut Formatter<IrFormatContext>, text: &str) -> FormatResult<()> {
+        fn write_display_text<S: Source>(
+            f: &mut Formatter<IrFormatContext<S>>,
+            text: &str,
+        ) -> FormatResult<()> {
             let text = text.replace('"', "\\\"");
             f.write_element(FormatElement::Text {
                 text_width: TextWidth::from_text(&text, f.options().indent_width()),
@@ -598,7 +655,11 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         }
 
                         StartGroup(group) => {
-                            write!(f, [token("group(")])?;
+                            if group.is_boundary() {
+                                write!(f, [token("boundary_group(")])?;
+                            } else {
+                                write!(f, [token("group(")])?;
+                            }
 
                             if let Some(group_id) = group.id() {
                                 write!(
@@ -720,8 +781,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
 
 struct ContentArrayStart;
 
-impl Format<IrFormatContext> for ContentArrayStart {
-    fn fmt(&self, f: &mut Formatter<IrFormatContext>) -> FormatResult<()> {
+impl<S: Source> Format<IrFormatContext<S>> for ContentArrayStart {
+    fn fmt(&self, f: &mut Formatter<IrFormatContext<S>>) -> FormatResult<()> {
         use Tag::*;
 
         write!(f, [token("[")])?;
@@ -736,8 +797,8 @@ impl Format<IrFormatContext> for ContentArrayStart {
 
 struct ContentArrayEnd;
 
-impl Format<IrFormatContext> for ContentArrayEnd {
-    fn fmt(&self, f: &mut Formatter<IrFormatContext>) -> FormatResult<()> {
+impl<S: Source> Format<IrFormatContext<S>> for ContentArrayEnd {
+    fn fmt(&self, f: &mut Formatter<IrFormatContext<S>>) -> FormatResult<()> {
         use Tag::*;
         f.write_elements([
             FormatElement::Tag(EndIndent),
@@ -749,7 +810,7 @@ impl Format<IrFormatContext> for ContentArrayEnd {
     }
 }
 
-impl FormatElements for [FormatElement] {
+impl<S: Source> FormatElements<S> for [FormatElement<S>] {
     fn will_break(&self) -> bool {
         use Tag::*;
         let mut ignore_depth = 0usize;
@@ -817,15 +878,15 @@ impl FormatElements for [FormatElement] {
             .is_some_and(|element| element.has_label(expected))
     }
 
-    fn start_tag(&self, kind: TagKind) -> Option<&Tag> {
+    fn start_tag(&self, kind: TagKind) -> Option<&Tag<S>> {
         // Assert that the document ends at a tag with the specified kind;
         let _ = self.end_tag(kind)?;
 
-        fn traverse_slice<'a>(
-            slice: &'a [FormatElement],
+        fn traverse_slice<'a, S: Source>(
+            slice: &'a [FormatElement<S>],
             kind: TagKind,
             depth: &mut usize,
-        ) -> Option<&'a Tag> {
+        ) -> Option<&'a Tag<S>> {
             for element in slice.iter().rev() {
                 match element {
                     FormatElement::Tag(tag) if tag.kind() == kind => {
@@ -868,25 +929,25 @@ impl FormatElements for [FormatElement] {
         traverse_slice(self, kind, &mut depth)
     }
 
-    fn end_tag(&self, kind: TagKind) -> Option<&Tag> {
+    fn end_tag(&self, kind: TagKind) -> Option<&Tag<S>> {
         self.last().and_then(|element| element.end_tag(kind))
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rowan"))]
 mod tests {
     use biome_js_syntax::JsSyntaxKind;
     use biome_js_syntax::JsSyntaxToken;
 
     use crate::prelude::document::IrFormatOptions;
     use crate::prelude::tag::GroupMode;
-    use crate::prelude::*;
+    use crate::rowan::prelude::*;
     use crate::{FormatOptions, SimpleFormatContext};
     use crate::{format, format_args, write};
 
     #[test]
     fn literal_line_break_is_forced_without_propagating_expand() {
-        use Tag::*;
+        use crate::format_element::tag::Tag::*;
 
         let group = tag::Group::new();
         let mut document = Document::from(vec![
@@ -908,6 +969,52 @@ mod tests {
         document.propagate_expand();
 
         assert_eq!(group.mode(), GroupMode::Flat);
+    }
+
+    #[test]
+    fn boundary_group_stops_expand_propagation() {
+        use crate::format_element::tag::Tag::*;
+
+        let mut document = Document::from(vec![
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Tag(StartGroup(tag::Group::new().with_boundary(true))),
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Line(LineMode::Hard),
+            FormatElement::Tag(EndGroup),
+            FormatElement::Tag(EndGroup),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        document.propagate_expand();
+
+        assert_eq!(
+            &std::format!("{document}"),
+            "[group([boundary_group([group(expand: propagated, [hard_line_break])])])]"
+        );
+    }
+
+    #[test]
+    fn interned_boundary_group_does_not_expand_reference() {
+        use crate::format_element::tag::Tag::*;
+
+        let interned = Interned::new(vec![
+            FormatElement::Tag(StartGroup(tag::Group::new().with_boundary(true))),
+            FormatElement::Line(LineMode::Hard),
+            FormatElement::Tag(EndGroup),
+        ]);
+        let mut document = Document::from(vec![
+            FormatElement::Interned(interned.clone()),
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Interned(interned),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        document.propagate_expand();
+
+        assert_eq!(
+            &std::format!("{document}"),
+            "[<interned 0> [boundary_group([hard_line_break])], group([<ref interned *0>])]"
+        );
     }
 
     #[test]
@@ -961,7 +1068,7 @@ mod tests {
 
     #[test]
     fn display_invalid_document() {
-        use Tag::*;
+        use crate::format_element::tag::Tag::*;
 
         let document = Document::from(vec![
             FormatElement::Token { text: "[" },
@@ -999,7 +1106,7 @@ mod tests {
 
     #[test]
     fn interned_best_fitting_allows_sibling_expand_propagation() {
-        use Tag::*;
+        use crate::format_element::tag::Tag::*;
 
         // An interned element containing something that expands the parent,
         // and a best_fitting element after it.

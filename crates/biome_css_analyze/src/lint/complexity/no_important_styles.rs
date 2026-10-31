@@ -3,7 +3,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_css_factory::make::css_declaration;
-use biome_css_syntax::{CssDeclaration, CssDeclarationImportant};
+use biome_css_syntax::{CssDeclaration, CssDeclarationImportant, ScssSupportsDeclaration};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_important_styles::NoImportantStylesOptions;
@@ -54,8 +54,11 @@ impl Rule for NoImportantStyles {
     type Signals = Option<Self::State>;
     type Options = NoImportantStylesOptions;
 
-    fn run(_: &RuleContext<Self>) -> Self::Signals {
-        Some(())
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let parent = ctx.query().syntax().parent()?;
+        // `!important` in `@supports (!important: a) {}` is a name, not a modifier.
+        (CssDeclaration::can_cast(parent.kind()) || ScssSupportsDeclaration::can_cast(parent.kind()))
+            .then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

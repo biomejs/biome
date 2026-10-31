@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+$name: base;
+$other: theme;
+
+@layer #{$name} {
+	@layer #{$other} {
+	}
+
+	@layer base {
+	}
+}
+
+@layer base {
+	@layer #{$name} {
+	}
+}

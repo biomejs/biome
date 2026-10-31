@@ -1,0 +1,2317 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<a charset="UTF-8" href="/page">Link</a>;
+<link charSet="UTF-8" rel="stylesheet" href="/style.css" />;
+<script charSet="UTF-8" src="/script.js"></script>;
+<a name="anchor">Link</a>;
+<img name="photo" src="/photo.jpg" alt="" />;
+<option name="first">First</option>;
+<table align="center"></table>;
+<div align="left">Content</div>;
+<h1 align="center">Title</h1>;
+<body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+<table bgcolor={color} border="1"></table>;
+<img src="/photo.jpg" alt="" border={0} />;
+<table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+<table cellpadding="5" cellspacing="0"></table>;
+<iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+<iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+<html manifest="app.appcache"></html>;
+<form accept="image/*"></form>;
+<div contextMenu="menu">Content</div>;
+<div contextmenu="menu">Content</div>;
+<span dropzone="copy">Drop here</span>;
+<custom-element onshow="show()"></custom-element>;
+<area href="/page" hrefLang="en" alt="Page" />;
+<area href="/page" hreflang="en" alt="Page" />;
+<area nohref alt="Nothing" />;
+<li type="square">Item</li>;
+<ul type="disc"></ul>;
+<menu type="context" label="Actions"></menu>;
+<style type="text/css">{css}</style>;
+<script language="javascript"></script>;
+<script htmlFor="window" event="onload"></script>;
+<script for="window"></script>;
+<td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+<br clear="all" />;
+<hr noshade size="2" color="red" width="50%" />;
+<object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+<object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+<meta name="keywords" scheme="ISBN" content="0000" />;
+<img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+<input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+<object usemap="#map"></object>;
+<a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+<table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+<div datasrc="#data" datafld="name" dataformatas="text"></div>;
+<pre width="80">Text</pre>;
+<head profile="https://example.com/profile"></head>;
+<html version="-//W3C//DTD HTML 4.01//EN"></html>;
+<link target="_blank" href="/page" />;
+<input type="text" hspace="10" vspace="10" />;
+<tr char="." charoff="2"></tr>;
+<dl compact></dl>;
+<body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+<iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+<svg>
+	<foreignObject>
+		<table bgcolor="#ffffff"></table>
+	</foreignObject>
+</svg>;
+<svg contextMenu="menu"></svg>;
+<svg contextMenu="menu" />;
+<iframe src="/page" allowTransparency="true"></iframe>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:4 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The charset attribute on <a> is obsolete.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <a charset="UTF-8" href="/page">Link</a>;
+      │    ^^^^^^^^^^^^^^^
+    3 │ <link charSet="UTF-8" rel="stylesheet" href="/style.css" />;
+    4 │ <script charSet="UTF-8" src="/script.js"></script>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. The server that hosts the linked file should send its character encoding in the Content-Type header instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The charSet attribute on <link> is obsolete.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <a charset="UTF-8" href="/page">Link</a>;
+  > 3 │ <link charSet="UTF-8" rel="stylesheet" href="/style.css" />;
+      │       ^^^^^^^^^^^^^^^
+    4 │ <script charSet="UTF-8" src="/script.js"></script>;
+    5 │ <a name="anchor">Link</a>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. The server that hosts the linked file should send its character encoding in the Content-Type header instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The charSet attribute on <script> is obsolete.
+  
+    2 │ <a charset="UTF-8" href="/page">Link</a>;
+    3 │ <link charSet="UTF-8" rel="stylesheet" href="/style.css" />;
+  > 4 │ <script charSet="UTF-8" src="/script.js"></script>;
+      │         ^^^^^^^^^^^^^^^
+    5 │ <a name="anchor">Link</a>;
+    6 │ <img name="photo" src="/photo.jpg" alt="" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. Scripts use the same character encoding as the page.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:4 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The name attribute on <a> is obsolete.
+  
+    3 │ <link charSet="UTF-8" rel="stylesheet" href="/style.css" />;
+    4 │ <script charSet="UTF-8" src="/script.js"></script>;
+  > 5 │ <a name="anchor">Link</a>;
+      │    ^^^^^^^^^^^^^
+    6 │ <img name="photo" src="/photo.jpg" alt="" />;
+    7 │ <option name="first">First</option>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the id attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The name attribute on <img> is obsolete.
+  
+    4 │ <script charSet="UTF-8" src="/script.js"></script>;
+    5 │ <a name="anchor">Link</a>;
+  > 6 │ <img name="photo" src="/photo.jpg" alt="" />;
+      │      ^^^^^^^^^^^^
+    7 │ <option name="first">First</option>;
+    8 │ <table align="center"></table>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the id attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The name attribute on <option> is obsolete.
+  
+    5 │ <a name="anchor">Link</a>;
+    6 │ <img name="photo" src="/photo.jpg" alt="" />;
+  > 7 │ <option name="first">First</option>;
+      │         ^^^^^^^^^^^^
+    8 │ <table align="center"></table>;
+    9 │ <div align="left">Content</div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the id attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The align attribute on <table> is obsolete.
+  
+     6 │ <img name="photo" src="/photo.jpg" alt="" />;
+     7 │ <option name="first">First</option>;
+   > 8 │ <table align="center"></table>;
+       │        ^^^^^^^^^^^^^^
+     9 │ <div align="left">Content</div>;
+    10 │ <h1 align="center">Title</h1>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The align attribute on <div> is obsolete.
+  
+     7 │ <option name="first">First</option>;
+     8 │ <table align="center"></table>;
+   > 9 │ <div align="left">Content</div>;
+       │      ^^^^^^^^^^^^
+    10 │ <h1 align="center">Title</h1>;
+    11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The align attribute on <h1> is obsolete.
+  
+     8 │ <table align="center"></table>;
+     9 │ <div align="left">Content</div>;
+  > 10 │ <h1 align="center">Title</h1>;
+       │     ^^^^^^^^^^^^^^
+    11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+    12 │ <table bgcolor={color} border="1"></table>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgcolor attribute on <body> is obsolete.
+  
+     9 │ <div align="left">Content</div>;
+    10 │ <h1 align="center">Title</h1>;
+  > 11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+       │       ^^^^^^^^^^^^^^^^^
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:25 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The text attribute on <body> is obsolete.
+  
+     9 │ <div align="left">Content</div>;
+    10 │ <h1 align="center">Title</h1>;
+  > 11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+       │                         ^^^^^^^^^^^^^^
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:40 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The link attribute on <body> is obsolete.
+  
+     9 │ <div align="left">Content</div>;
+    10 │ <h1 align="center">Title</h1>;
+  > 11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+       │                                        ^^^^^^^^^^^
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgcolor attribute on <table> is obsolete.
+  
+    10 │ <h1 align="center">Title</h1>;
+    11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+  > 12 │ <table bgcolor={color} border="1"></table>;
+       │        ^^^^^^^^^^^^^^^
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:24 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The border attribute on <table> is obsolete.
+  
+    10 │ <h1 align="center">Title</h1>;
+    11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+  > 12 │ <table bgcolor={color} border="1"></table>;
+       │                        ^^^^^^^^^^
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:30 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The border attribute on <img> is obsolete.
+  
+    11 │ <body bgcolor="#ffffff" text="#000000" link="blue"></body>;
+    12 │ <table bgcolor={color} border="1"></table>;
+  > 13 │ <img src="/photo.jpg" alt="" border={0} />;
+       │                              ^^^^^^^^^^
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The width attribute on <table> is obsolete.
+  
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  > 14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+       │        ^^^^^^^^^^^^
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:21 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The height attribute on <table> is obsolete.
+  
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  > 14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+       │                     ^^^^^^^^^^^^
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:34 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The cellPadding attribute on <table> is obsolete.
+  
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  > 14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+       │                                  ^^^^^^^^^^^^^^^
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:50 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The cellSpacing attribute on <table> is obsolete.
+  
+    12 │ <table bgcolor={color} border="1"></table>;
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+  > 14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+       │                                                  ^^^^^^^^^^^^^^^
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The cellpadding attribute on <table> is obsolete.
+  
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+  > 15 │ <table cellpadding="5" cellspacing="0"></table>;
+       │        ^^^^^^^^^^^^^^^
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+    17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:24 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The cellspacing attribute on <table> is obsolete.
+  
+    13 │ <img src="/photo.jpg" alt="" border={0} />;
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+  > 15 │ <table cellpadding="5" cellspacing="0"></table>;
+       │                        ^^^^^^^^^^^^^^^
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+    17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:21 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The frameBorder attribute on <iframe> is obsolete.
+  
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+  > 16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+       │                     ^^^^^^^^^^^^^^^
+    17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+    18 │ <html manifest="app.appcache"></html>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:37 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The scrolling attribute on <iframe> is obsolete.
+  
+    14 │ <table width="100%" height="200" cellPadding="5" cellSpacing="0"></table>;
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+  > 16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+       │                                     ^^^^^^^^^^^^^^
+    17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+    18 │ <html manifest="app.appcache"></html>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:17:21 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The frameborder attribute on <iframe> is obsolete.
+  
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  > 17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+       │                     ^^^^^^^^^^^^^^^
+    18 │ <html manifest="app.appcache"></html>;
+    19 │ <form accept="image/*"></form>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:17:37 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The allowtransparency attribute on <iframe> is obsolete.
+  
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  > 17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+       │                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <html manifest="app.appcache"></html>;
+    19 │ <form accept="image/*"></form>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:17:62 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The framespacing attribute on <iframe> is obsolete.
+  
+    15 │ <table cellpadding="5" cellspacing="0"></table>;
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+  > 17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+       │                                                              ^^^^^^^^^^^^^^^^
+    18 │ <html manifest="app.appcache"></html>;
+    19 │ <form accept="image/*"></form>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:18:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The manifest attribute on <html> is obsolete.
+  
+    16 │ <iframe src="/page" frameBorder="0" scrolling="no"></iframe>;
+    17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+  > 18 │ <html manifest="app.appcache"></html>;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <form accept="image/*"></form>;
+    20 │ <div contextMenu="menu">Content</div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use a service worker to make the page work offline instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The accept attribute on <form> is obsolete.
+  
+    17 │ <iframe src="/page" frameborder="0" allowtransparency="true" framespacing="0"></iframe>;
+    18 │ <html manifest="app.appcache"></html>;
+  > 19 │ <form accept="image/*"></form>;
+       │       ^^^^^^^^^^^^^^^^
+    20 │ <div contextMenu="menu">Content</div>;
+    21 │ <div contextmenu="menu">Content</div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Add the accept attribute to each file <input> element in the form instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The contextMenu attribute on <div> is obsolete.
+  
+    18 │ <html manifest="app.appcache"></html>;
+    19 │ <form accept="image/*"></form>;
+  > 20 │ <div contextMenu="menu">Content</div>;
+       │      ^^^^^^^^^^^^^^^^^^
+    21 │ <div contextmenu="menu">Content</div>;
+    22 │ <span dropzone="copy">Drop here</span>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Custom context menus are no longer supported. Handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:21:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The contextmenu attribute on <div> is obsolete.
+  
+    19 │ <form accept="image/*"></form>;
+    20 │ <div contextMenu="menu">Content</div>;
+  > 21 │ <div contextmenu="menu">Content</div>;
+       │      ^^^^^^^^^^^^^^^^^^
+    22 │ <span dropzone="copy">Drop here</span>;
+    23 │ <custom-element onshow="show()"></custom-element>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Custom context menus are no longer supported. Handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:22:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dropzone attribute on <span> is obsolete.
+  
+    20 │ <div contextMenu="menu">Content</div>;
+    21 │ <div contextmenu="menu">Content</div>;
+  > 22 │ <span dropzone="copy">Drop here</span>;
+       │       ^^^^^^^^^^^^^^^
+    23 │ <custom-element onshow="show()"></custom-element>;
+    24 │ <area href="/page" hrefLang="en" alt="Page" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Handle the dragenter and dragover events in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:23:17 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The onshow attribute on <custom-element> is obsolete.
+  
+    21 │ <div contextmenu="menu">Content</div>;
+    22 │ <span dropzone="copy">Drop here</span>;
+  > 23 │ <custom-element onshow="show()"></custom-element>;
+       │                 ^^^^^^^^^^^^^^^
+    24 │ <area href="/page" hrefLang="en" alt="Page" />;
+    25 │ <area href="/page" hreflang="en" alt="Page" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Custom context menus are no longer supported. Handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:24:20 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The hrefLang attribute on <area> is obsolete.
+  
+    22 │ <span dropzone="copy">Drop here</span>;
+    23 │ <custom-element onshow="show()"></custom-element>;
+  > 24 │ <area href="/page" hrefLang="en" alt="Page" />;
+       │                    ^^^^^^^^^^^^^
+    25 │ <area href="/page" hreflang="en" alt="Page" />;
+    26 │ <area nohref alt="Nothing" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:25:20 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The hreflang attribute on <area> is obsolete.
+  
+    23 │ <custom-element onshow="show()"></custom-element>;
+    24 │ <area href="/page" hrefLang="en" alt="Page" />;
+  > 25 │ <area href="/page" hreflang="en" alt="Page" />;
+       │                    ^^^^^^^^^^^^^
+    26 │ <area nohref alt="Nothing" />;
+    27 │ <li type="square">Item</li>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:26:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The nohref attribute on <area> is obsolete.
+  
+    24 │ <area href="/page" hrefLang="en" alt="Page" />;
+    25 │ <area href="/page" hreflang="en" alt="Page" />;
+  > 26 │ <area nohref alt="Nothing" />;
+       │       ^^^^^^
+    27 │ <li type="square">Item</li>;
+    28 │ <ul type="disc"></ul>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:27:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type attribute on <li> is obsolete.
+  
+    25 │ <area href="/page" hreflang="en" alt="Page" />;
+    26 │ <area nohref alt="Nothing" />;
+  > 27 │ <li type="square">Item</li>;
+       │     ^^^^^^^^^^^^^
+    28 │ <ul type="disc"></ul>;
+    29 │ <menu type="context" label="Actions"></menu>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:28:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type attribute on <ul> is obsolete.
+  
+    26 │ <area nohref alt="Nothing" />;
+    27 │ <li type="square">Item</li>;
+  > 28 │ <ul type="disc"></ul>;
+       │     ^^^^^^^^^^^
+    29 │ <menu type="context" label="Actions"></menu>;
+    30 │ <style type="text/css">{css}</style>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:29:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type attribute on <menu> is obsolete.
+  
+    27 │ <li type="square">Item</li>;
+    28 │ <ul type="disc"></ul>;
+  > 29 │ <menu type="context" label="Actions"></menu>;
+       │       ^^^^^^^^^^^^^^
+    30 │ <style type="text/css">{css}</style>;
+    31 │ <script language="javascript"></script>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. For context menus, handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:29:22 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The label attribute on <menu> is obsolete.
+  
+    27 │ <li type="square">Item</li>;
+    28 │ <ul type="disc"></ul>;
+  > 29 │ <menu type="context" label="Actions"></menu>;
+       │                      ^^^^^^^^^^^^^^^
+    30 │ <style type="text/css">{css}</style>;
+    31 │ <script language="javascript"></script>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Custom context menus are no longer supported. Handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:30:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type attribute on <style> is obsolete.
+  
+    28 │ <ul type="disc"></ul>;
+    29 │ <menu type="context" label="Actions"></menu>;
+  > 30 │ <style type="text/css">{css}</style>;
+       │        ^^^^^^^^^^^^^^^
+    31 │ <script language="javascript"></script>;
+    32 │ <script htmlFor="window" event="onload"></script>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. Styles are always CSS. To embed other data, use a <script> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:31:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The language attribute on <script> is obsolete.
+  
+    29 │ <menu type="context" label="Actions"></menu>;
+    30 │ <style type="text/css">{css}</style>;
+  > 31 │ <script language="javascript"></script>;
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it for JavaScript. To embed other data, use the type attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:32:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The htmlFor attribute on <script> is obsolete.
+  
+    30 │ <style type="text/css">{css}</style>;
+    31 │ <script language="javascript"></script>;
+  > 32 │ <script htmlFor="window" event="onload"></script>;
+       │         ^^^^^^^^^^^^^^^^
+    33 │ <script for="window"></script>;
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Register event listeners with addEventListener() in the script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:32:26 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event attribute on <script> is obsolete.
+  
+    30 │ <style type="text/css">{css}</style>;
+    31 │ <script language="javascript"></script>;
+  > 32 │ <script htmlFor="window" event="onload"></script>;
+       │                          ^^^^^^^^^^^^^^
+    33 │ <script for="window"></script>;
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Register event listeners with addEventListener() in the script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:33:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The for attribute on <script> is obsolete.
+  
+    31 │ <script language="javascript"></script>;
+    32 │ <script htmlFor="window" event="onload"></script>;
+  > 33 │ <script for="window"></script>;
+       │         ^^^^^^^^^^^^
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+    35 │ <br clear="all" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Register event listeners with addEventListener() in the script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The nowrap attribute on <td> is obsolete.
+  
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  > 34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+       │     ^^^^^^
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:12 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The abbr attribute on <td> is obsolete.
+  
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  > 34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+       │            ^^^^^^^^^^^^
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Start the cell text with a short description and put the details after it. For header cells, use a <th> element, which supports the abbr attribute.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:25 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The valign attribute on <td> is obsolete.
+  
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  > 34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+       │                         ^^^^^^^^^^^^
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:38 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The axis attribute on <td> is obsolete.
+  
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  > 34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+       │                                      ^^^^^^^^^^^^
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the scope attribute on the related <th> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:51 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The scope attribute on <td> is obsolete.
+  
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  > 34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+       │                                                   ^^^^^^^^^^^
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use a <th> element for header cells instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:34:63 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The height attribute on <td> is obsolete.
+  
+    32 │ <script htmlFor="window" event="onload"></script>;
+    33 │ <script for="window"></script>;
+  > 34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+       │                                                               ^^^^^^^^^^^
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:35:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The clear attribute on <br> is obsolete.
+  
+    33 │ <script for="window"></script>;
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+  > 35 │ <br clear="all" />;
+       │     ^^^^^^^^^^^
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:36:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The noshade attribute on <hr> is obsolete.
+  
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+    35 │ <br clear="all" />;
+  > 36 │ <hr noshade size="2" color="red" width="50%" />;
+       │     ^^^^^^^
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:36:13 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The size attribute on <hr> is obsolete.
+  
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+    35 │ <br clear="all" />;
+  > 36 │ <hr noshade size="2" color="red" width="50%" />;
+       │             ^^^^^^^^
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:36:22 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The color attribute on <hr> is obsolete.
+  
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+    35 │ <br clear="all" />;
+  > 36 │ <hr noshade size="2" color="red" width="50%" />;
+       │                      ^^^^^^^^^^^
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:36:34 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The width attribute on <hr> is obsolete.
+  
+    34 │ <td nowrap abbr="Short" valign="top" axis="group" scope="row" height="20">Cell</td>;
+    35 │ <br clear="all" />;
+  > 36 │ <hr noshade size="2" color="red" width="50%" />;
+       │                                  ^^^^^^^^^^^
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:37:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The classID attribute on <object> is obsolete.
+  
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  > 37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+       │         ^^^^^^^^^^^^^^^^^^^^
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the data and type attributes instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:37:30 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The codebase attribute on <object> is obsolete.
+  
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  > 37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+       │                              ^^^^^^^^^^^^^^^^^^
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the data and type attributes instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:37:49 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The standby attribute on <object> is obsolete.
+  
+    35 │ <br clear="all" />;
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+  > 37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+       │                                                 ^^^^^^^^^^^^^^^^^
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it, and make the resource load quickly or in smaller parts instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The classid attribute on <object> is obsolete.
+  
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  > 38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+       │         ^^^^^^^^^^^^^^^^^^^^
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the data and type attributes instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:30 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The archive attribute on <object> is obsolete.
+  
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  > 38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+       │                              ^^^^^^^^^^^^^^^^
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the data and type attributes instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:47 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The code attribute on <object> is obsolete.
+  
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  > 38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+       │                                               ^^^^^^^^^^^^^^^^^^^
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the data and type attributes instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:67 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The codetype attribute on <object> is obsolete.
+  
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  > 38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+       │                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the data and type attributes instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:95 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The declare attribute on <object> is obsolete.
+  
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  > 38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+       │                                                                                               ^^^^^^^
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Repeat the whole <object> element each time you want to reuse the resource.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:38:103 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The typemustmatch attribute on <object> is obsolete.
+  
+    36 │ <hr noshade size="2" color="red" width="50%" />;
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+  > 38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+       │                                                                                                       ^^^^^^^^^^^^^
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it, and avoid using <object> elements to embed resources you don't trust.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:39:23 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The scheme attribute on <meta> is obsolete.
+  
+    37 │ <object classID="clsid:1234" codebase="/plugin" standby="Loading"></object>;
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+  > 39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+       │                       ^^^^^^^^^^^^^
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Include the scheme in the value of the content attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:40:30 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The longdesc attribute on <img> is obsolete.
+  
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+  > 40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Link to the description with a regular <a> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:40:59 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The lowsrc attribute on <img> is obsolete.
+  
+    38 │ <object classid="clsid:1234" archive="/a.jar" code="Applet.class" codetype="application/java" declare typemustmatch></object>;
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+  > 40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+       │                                                           ^^^^^^^^^^^^^^^^^^^
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use a single image that loads progressively, such as a progressive JPEG, in the src attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:41:46 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The ismap attribute on <input> is obsolete.
+  
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  > 41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+       │                                              ^^^^^
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:41:52 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The useMap attribute on <input> is obsolete.
+  
+    39 │ <meta name="keywords" scheme="ISBN" content="0000" />;
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+  > 41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+       │                                                    ^^^^^^^^^^^^^
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use an <img> element to make clickable regions in an image instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:42:9 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The usemap attribute on <object> is obsolete.
+  
+    40 │ <img src="/photo.jpg" alt="" longdesc="/description.html" lowsrc="/small.jpg" />;
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+  > 42 │ <object usemap="#map"></object>;
+       │         ^^^^^^^^^^^^^
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use an <img> element to make clickable regions in an image instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:17 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rev attribute on <a> is obsolete.
+  
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  > 43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+       │                 ^^^^^^^^^^
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use the rel attribute with the opposite meaning instead. For example, replace rev="made" with rel="author".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:28 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The urn attribute on <a> is obsolete.
+  
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  > 43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+       │                            ^^^^^^^^^^^^^^^^^
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Put the permanent address of the resource in the href attribute instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:46 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The methods attribute on <a> is obsolete.
+  
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  > 43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+       │                                              ^^^^^^^^^^^^^
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. Send an HTTP OPTIONS request to find out which methods a URL supports.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:60 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The shape attribute on <a> is obsolete.
+  
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  > 43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+       │                                                            ^^^^^^^^^^^^
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use an <area> element inside a <map> element to make clickable regions in an image.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:43:73 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The coords attribute on <a> is obsolete.
+  
+    41 │ <input type="image" src="/map.png" alt="Map" ismap useMap="#map" />;
+    42 │ <object usemap="#map"></object>;
+  > 43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+       │                                                                         ^^^^^^^^^^^^^^^^^^
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use an <area> element inside a <map> element to make clickable regions in an image.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The summary attribute on <table> is obsolete.
+  
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  > 44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+       │        ^^^^^^^^^^^^^^^^^
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Describe the table with a <caption> element or with text next to the table instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:26 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The frame attribute on <table> is obsolete.
+  
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  > 44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+       │                          ^^^^^^^^^^^
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:38 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rules attribute on <table> is obsolete.
+  
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  > 44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+       │                                      ^^^^^^^^^^^
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:50 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The datapagesize attribute on <table> is obsolete.
+  
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  > 44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+       │                                                  ^^^^^^^^^^^^^^^^^
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:68 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The background attribute on <table> is obsolete.
+  
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  > 44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+       │                                                                    ^^^^^^^^^^^^^^^^^^^^
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:44:89 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bordercolor attribute on <table> is obsolete.
+  
+    42 │ <object usemap="#map"></object>;
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+  > 44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+       │                                                                                         ^^^^^^^^^^^^^^^^^
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:45:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The datasrc attribute on <div> is obsolete.
+  
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+  > 45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+       │      ^^^^^^^^^^^^^^^
+    46 │ <pre width="80">Text</pre>;
+    47 │ <head profile="https://example.com/profile"></head>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Load the data with a script instead, for example with fetch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:45:22 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The datafld attribute on <div> is obsolete.
+  
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+  > 45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+       │                      ^^^^^^^^^^^^^^
+    46 │ <pre width="80">Text</pre>;
+    47 │ <head profile="https://example.com/profile"></head>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Load the data with a script instead, for example with fetch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:45:37 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dataformatas attribute on <div> is obsolete.
+  
+    43 │ <a href="/page" rev="made" urn="urn:example" methods="get" shape="rect" coords="0,0,10,10">Link</a>;
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+  > 45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+       │                                     ^^^^^^^^^^^^^^^^^^^
+    46 │ <pre width="80">Text</pre>;
+    47 │ <head profile="https://example.com/profile"></head>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Load the data with a script instead, for example with fetch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:46:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The width attribute on <pre> is obsolete.
+  
+    44 │ <table summary="Results" frame="box" rules="all" datapagesize="10" background="/bg.png" bordercolor="red"></table>;
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+  > 46 │ <pre width="80">Text</pre>;
+       │      ^^^^^^^^^^
+    47 │ <head profile="https://example.com/profile"></head>;
+    48 │ <html version="-//W3C//DTD HTML 4.01//EN"></html>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:47:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The profile attribute on <head> is obsolete.
+  
+    45 │ <div datasrc="#data" datafld="name" dataformatas="text"></div>;
+    46 │ <pre width="80">Text</pre>;
+  > 47 │ <head profile="https://example.com/profile"></head>;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ <html version="-//W3C//DTD HTML 4.01//EN"></html>;
+    49 │ <link target="_blank" href="/page" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:48:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version attribute on <html> is obsolete.
+  
+    46 │ <pre width="80">Text</pre>;
+    47 │ <head profile="https://example.com/profile"></head>;
+  > 48 │ <html version="-//W3C//DTD HTML 4.01//EN"></html>;
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ <link target="_blank" href="/page" />;
+    50 │ <input type="text" hspace="10" vspace="10" />;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:49:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The target attribute on <link> is obsolete.
+  
+    47 │ <head profile="https://example.com/profile"></head>;
+    48 │ <html version="-//W3C//DTD HTML 4.01//EN"></html>;
+  > 49 │ <link target="_blank" href="/page" />;
+       │       ^^^^^^^^^^^^^^^
+    50 │ <input type="text" hspace="10" vspace="10" />;
+    51 │ <tr char="." charoff="2"></tr>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. It has no effect.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:20 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The hspace attribute on <input> is obsolete.
+  
+    48 │ <html version="-//W3C//DTD HTML 4.01//EN"></html>;
+    49 │ <link target="_blank" href="/page" />;
+  > 50 │ <input type="text" hspace="10" vspace="10" />;
+       │                    ^^^^^^^^^^^
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:50:32 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The vspace attribute on <input> is obsolete.
+  
+    48 │ <html version="-//W3C//DTD HTML 4.01//EN"></html>;
+    49 │ <link target="_blank" href="/page" />;
+  > 50 │ <input type="text" hspace="10" vspace="10" />;
+       │                                ^^^^^^^^^^^
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:51:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The char attribute on <tr> is obsolete.
+  
+    49 │ <link target="_blank" href="/page" />;
+    50 │ <input type="text" hspace="10" vspace="10" />;
+  > 51 │ <tr char="." charoff="2"></tr>;
+       │     ^^^^^^^^
+    52 │ <dl compact></dl>;
+    53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:51:14 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The charoff attribute on <tr> is obsolete.
+  
+    49 │ <link target="_blank" href="/page" />;
+    50 │ <input type="text" hspace="10" vspace="10" />;
+  > 51 │ <tr char="." charoff="2"></tr>;
+       │              ^^^^^^^^^^^
+    52 │ <dl compact></dl>;
+    53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:52:5 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The compact attribute on <dl> is obsolete.
+  
+    50 │ <input type="text" hspace="10" vspace="10" />;
+    51 │ <tr char="." charoff="2"></tr>;
+  > 52 │ <dl compact></dl>;
+       │     ^^^^^^^
+    53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:7 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The alink attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │       ^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:19 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The vlink attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                   ^^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:34 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The leftmargin attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                                  ^^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:49 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The topmargin attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                                                 ^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:63 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rightmargin attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                                                               ^^^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:79 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bottommargin attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                                                                               ^^^^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:96 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The marginHeight attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                                                                                                ^^^^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:53:113 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The marginWidth attribute on <body> is obsolete.
+  
+    51 │ <tr char="." charoff="2"></tr>;
+    52 │ <dl compact></dl>;
+  > 53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+       │                                                                                                                 ^^^^^^^^^^^^^^^
+    54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+    55 │ <svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:54:21 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The marginheight attribute on <iframe> is obsolete.
+  
+    52 │ <dl compact></dl>;
+    53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+  > 54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+       │                     ^^^^^^^^^^^^^^^^
+    55 │ <svg>
+    56 │ 	<foreignObject>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:54:38 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The marginwidth attribute on <iframe> is obsolete.
+  
+    52 │ <dl compact></dl>;
+    53 │ <body alink="red" vlink="purple" leftmargin="0" topmargin="0" rightmargin="0" bottommargin="0" marginHeight="0" marginWidth="0"></body>;
+  > 54 │ <iframe src="/page" marginheight="0" marginwidth="0"></iframe>;
+       │                                      ^^^^^^^^^^^^^^^
+    55 │ <svg>
+    56 │ 	<foreignObject>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:57:10 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgcolor attribute on <table> is obsolete.
+  
+    55 │ <svg>
+    56 │ 	<foreignObject>
+  > 57 │ 		<table bgcolor="#ffffff"></table>
+       │ 		       ^^^^^^^^^^^^^^^^^
+    58 │ 	</foreignObject>
+    59 │ </svg>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:60:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The contextMenu attribute on <svg> is obsolete.
+  
+    58 │ 	</foreignObject>
+    59 │ </svg>;
+  > 60 │ <svg contextMenu="menu"></svg>;
+       │      ^^^^^^^^^^^^^^^^^^
+    61 │ <svg contextMenu="menu" />;
+    62 │ <iframe src="/page" allowTransparency="true"></iframe>;
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Custom context menus are no longer supported. Handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:61:6 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The contextMenu attribute on <svg> is obsolete.
+  
+    59 │ </svg>;
+    60 │ <svg contextMenu="menu"></svg>;
+  > 61 │ <svg contextMenu="menu" />;
+       │      ^^^^^^^^^^^^^^^^^^
+    62 │ <iframe src="/page" allowTransparency="true"></iframe>;
+    63 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Custom context menus are no longer supported. Handle the contextmenu event in a script instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:62:21 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The allowTransparency attribute on <iframe> is obsolete.
+  
+    60 │ <svg contextMenu="menu"></svg>;
+    61 │ <svg contextMenu="menu" />;
+  > 62 │ <iframe src="/page" allowTransparency="true"></iframe>;
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

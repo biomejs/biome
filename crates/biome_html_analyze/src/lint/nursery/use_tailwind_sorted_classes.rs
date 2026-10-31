@@ -1,4 +1,6 @@
-use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_html_syntax::HtmlAttribute;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -22,10 +24,6 @@ declare_lint_rule! {
     /// option at the CSS file that holds your Tailwind CSS configuration. Without it, the rule
     /// only knows the default configuration, and treats classes that use your own theme values,
     /// utilities, or variants like classes that Tailwind CSS doesn't know.
-    ///
-    /// Biome scans your project when this rule is enabled, so that it can read the stylesheet
-    /// and the files it imports. The scan happens even if `tailwind.stylesheet` isn't set,
-    /// although the rule then only uses the default configuration.
     ///
     /// ## Examples
     ///
@@ -57,7 +55,6 @@ declare_lint_rule! {
         recommended: false,
         domains: &[RuleDomain::Tailwind, RuleDomain::Project],
         fix_kind: FixKind::Unsafe,
-        issue_number: Some("9181"),
     }
 }
 
@@ -89,7 +86,10 @@ impl Rule for UseTailwindSortedClasses {
             rule_category!(),
             ctx.query().node().html_string()?.range(),
             "These CSS classes should be sorted.",
-        ))
+        )
+        .note(markup! {
+            "A consistent class order makes class lists easier to read and keeps changes to them small."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {

@@ -1,0 +1,12 @@
+.expression {
+  value: « +;
+  after-expression: »;
+}
+
+.escape {
+  value: «\
+;
+  after-escape: £;
+}
+
+.after { value: café; other: 𐐀; }

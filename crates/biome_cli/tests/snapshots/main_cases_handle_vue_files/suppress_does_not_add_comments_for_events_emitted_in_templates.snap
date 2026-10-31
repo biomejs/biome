@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --suppress --only=nursery/noVueUnusedEmitDeclarations file.vue
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<script>
+export default {
+  emits: [
+    // biome-ignore lint/nursery/noVueUnusedEmitDeclarations: ignored using `--suppress`
+    "unused",
+    "close",
+  ],
+};
+</script>
+
+<template>
+  <button @click="$emit('close')">Close</button>
+</template>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

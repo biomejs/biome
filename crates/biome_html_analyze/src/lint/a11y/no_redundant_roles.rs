@@ -130,13 +130,18 @@ impl Rule for NoRedundantRoles {
         let element_name = ctx.query().tag_name()?;
         let element_name = element_name.text();
         let role_attribute = state.role_attribute_value.text();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.redundant_attribute.range(),
-            markup! {
-                "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant, because it is implied by its semantics."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.redundant_attribute.range(),
+                markup! {
+                    "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant."
+                },
+            )
+            .note(markup! {
+                "The element already has this role because of its semantics, so the attribute has no effect."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {

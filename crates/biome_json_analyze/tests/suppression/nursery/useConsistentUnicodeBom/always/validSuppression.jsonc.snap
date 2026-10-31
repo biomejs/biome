@@ -1,0 +1,11 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: validSuppression.jsonc
+---
+# Input
+```jsonc
+// should not generate diagnostics
+// biome-ignore-all lint/nursery/useConsistentUnicodeBom: encoding required
+{"value": 1}
+
+```

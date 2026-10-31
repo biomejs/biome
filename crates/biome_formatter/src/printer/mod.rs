@@ -9,7 +9,7 @@ pub use printer_options::*;
 use crate::format_element::{BestFittingVariants, LineMode, PrintMode, TextWidth};
 use crate::{
     ActualStart, FormatElement, GroupId, IndentStyle, InvalidDocumentError, PrintError,
-    PrintResult, Printed, SourceMarker, TextRange,
+    PrintResult, Printed, Source, SourceMarker, TextRange,
 };
 
 use self::call_stack::PrintIndentStack;
@@ -26,18 +26,18 @@ use crate::printer::line_suffixes::{LineSuffixEntry, LineSuffixes};
 use crate::printer::queue::{
     AllPredicate, FitsEndPredicate, FitsQueue, PrintQueue, Queue, SingleEntryPredicate,
 };
-use biome_rowan::{TextLen, TextSize};
+use biome_text_size::{TextLen, TextSize};
 use drop_bomb::DebugDropBomb;
 use unicode_width::UnicodeWidthChar;
 
 /// Prints the format elements into a string
 #[derive(Debug, Default)]
-pub struct Printer<'a> {
+pub struct Printer<'a, S: Source> {
     options: PrinterOptions,
-    state: PrinterState<'a>,
+    state: PrinterState<'a, S>,
 }
 
-impl<'a> Printer<'a> {
+impl<'a, S: Source> Printer<'a, S> {
     pub fn new(options: PrinterOptions) -> Self {
         Self {
             options,
@@ -46,7 +46,7 @@ impl<'a> Printer<'a> {
     }
 
     /// Prints the passed in element as well as all its content
-    pub fn print(self, document: &'a Document) -> PrintResult<Printed> {
+    pub fn print(self, document: &'a Document<S>) -> PrintResult<Printed<S>> {
         self.print_with_indent(document, 0)
     }
 
@@ -54,11 +54,11 @@ impl<'a> Printer<'a> {
     /// starting at the specified indentation level
     pub fn print_with_indent(
         mut self,
-        document: &'a Document,
+        document: &'a Document<S>,
         indent: u16,
-    ) -> PrintResult<Printed> {
+    ) -> PrintResult<Printed<S>> {
         let mut stack = PrintCallStack::new(PrintElementArgs::new());
-        let mut queue: PrintQueue<'a> = PrintQueue::new(document.as_ref());
+        let mut queue: PrintQueue<'a, S> = PrintQueue::new(document.as_ref());
         let mut indent_stack = PrintIndentStack::new(Indention::Level(indent));
         self.state.pending_indent = indent_stack.indention();
         while let Some(element) = queue.pop() {
@@ -69,12 +69,33 @@ impl<'a> Printer<'a> {
             }
         }
 
-        Ok(Printed::new(
-            self.state.buffer,
-            None,
-            self.state.source_markers,
-            self.state.verbatim_markers,
-        ))
+        let PrinterState {
+            buffer,
+            source_markers,
+            verbatim_markers,
+            ..
+        } = self.state;
+
+        let mut output_positions = OutputPositions::<S>::new(&buffer);
+        let sourcemap = source_markers
+            .into_iter()
+            .map(|marker| SourceMarker {
+                source: marker.source,
+                dest: output_positions.position_at(marker.dest),
+            })
+            .collect();
+
+        let mut output_positions = OutputPositions::<S>::new(&buffer);
+        let verbatim_ranges = verbatim_markers
+            .into_iter()
+            .map(|range| {
+                let start = output_positions.position_at(range.start());
+                let end = S::advance(start, verbatim_text(&buffer, range));
+                S::span(start, end)
+            })
+            .collect();
+
+        Ok(Printed::new(buffer, None, sourcemap, verbatim_ranges))
     }
 
     /// Prints a single element and push the following elements to queue
@@ -83,8 +104,8 @@ impl<'a> Printer<'a> {
         &mut self,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
-        queue: &mut PrintQueue<'a>,
-        element: &'a FormatElement,
+        queue: &mut PrintQueue<'a, S>,
+        element: &'a FormatElement<S>,
     ) -> PrintResult<()> {
         use Tag::*;
 
@@ -183,8 +204,12 @@ impl<'a> Printer<'a> {
             }
 
             FormatElement::LineSuffixBoundary => {
-                const HARD_BREAK: &FormatElement = &FormatElement::Line(LineMode::Hard);
-                self.flush_line_suffixes(queue, stack, indent_stack, Some(HARD_BREAK));
+                self.flush_line_suffixes(
+                    queue,
+                    stack,
+                    indent_stack,
+                    Some(&FormatElement::Line(LineMode::Hard)),
+                );
             }
 
             FormatElement::BestFitting(variants) => {
@@ -359,7 +384,7 @@ impl<'a> Printer<'a> {
 
     fn fits(
         &mut self,
-        queue: &PrintQueue<'a>,
+        queue: &PrintQueue<'a, S>,
         stack: &PrintCallStack,
         indent_stack: &PrintIndentStack,
     ) -> PrintResult<bool> {
@@ -420,7 +445,7 @@ impl<'a> Printer<'a> {
             self.state.source_position = source;
         }
 
-        self.push_marker(SourceMarker {
+        self.push_marker(PrintedMarker {
             source: self.state.source_position,
             dest: self.state.buffer.text_len(),
         });
@@ -454,10 +479,10 @@ impl<'a> Printer<'a> {
                 Text::Token(s) => s,
                 Text::Text { text, .. } => text,
             };
-            self.state.source_position += text_str.text_len();
+            self.state.source_position = S::advance(self.state.source_position, text_str);
         }
 
-        self.push_marker(SourceMarker {
+        self.push_marker(PrintedMarker {
             source: self.state.source_position,
             dest: self.state.buffer.text_len(),
         });
@@ -469,24 +494,24 @@ impl<'a> Printer<'a> {
     /// Leading, trailing, and consecutive literal lines may have no adjacent
     /// text element to provide either marker. The marker after the line also
     /// maps one source byte to a multi-byte output line ending such as CRLF.
-    fn print_mapped_literal_line_break(&mut self, source_position: TextSize) {
+    fn print_mapped_literal_line_break(&mut self, source_position: S::Position) {
         self.state.pending_source_position = None;
         self.state.source_position = source_position;
-        self.push_marker(SourceMarker {
+        self.push_marker(PrintedMarker {
             source: self.state.source_position,
             dest: self.state.buffer.text_len(),
         });
 
         self.print_char('\n');
 
-        self.state.source_position += "\n".text_len();
-        self.push_marker(SourceMarker {
+        self.state.source_position = S::advance(self.state.source_position, "\n");
+        self.push_marker(PrintedMarker {
             source: self.state.source_position,
             dest: self.state.buffer.text_len(),
         });
     }
 
-    fn push_marker(&mut self, marker: SourceMarker) {
+    fn push_marker(&mut self, marker: PrintedMarker<S::Position>) {
         if self.options.source_map_generation().is_disabled() {
             return;
         }
@@ -502,10 +527,10 @@ impl<'a> Printer<'a> {
 
     fn flush_line_suffixes(
         &mut self,
-        queue: &mut PrintQueue<'a>,
+        queue: &mut PrintQueue<'a, S>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
-        line_break: Option<&'a FormatElement>,
+        line_break: Option<&'a FormatElement<S>>,
     ) {
         let suffixes = self.state.line_suffixes.take_pending();
 
@@ -522,10 +547,7 @@ impl<'a> Printer<'a> {
                     }
                     LineSuffixEntry::Args(args) => {
                         stack.push(TagKind::LineSuffix, args);
-                        const LINE_SUFFIX_END: &FormatElement =
-                            &FormatElement::Tag(Tag::EndLineSuffix);
-
-                        queue.push(LINE_SUFFIX_END);
+                        queue.push(&FormatElement::Tag(Tag::EndLineSuffix));
                     }
                 }
             }
@@ -534,8 +556,8 @@ impl<'a> Printer<'a> {
 
     fn print_best_fitting(
         &mut self,
-        variants: &'a BestFittingVariants,
-        queue: &mut PrintQueue<'a>,
+        variants: &'a BestFittingVariants<S>,
+        queue: &mut PrintQueue<'a, S>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
     ) -> PrintResult<()> {
@@ -624,7 +646,7 @@ impl<'a> Printer<'a> {
     ///   Print the *item* and *separator* in expanded mode.
     fn print_fill_entries(
         &mut self,
-        queue: &mut PrintQueue<'a>,
+        queue: &mut PrintQueue<'a, S>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
     ) -> PrintResult<()> {
@@ -767,7 +789,7 @@ impl<'a> Printer<'a> {
     /// Semantic alias for [Self::print_entry] for fill items.
     fn print_fill_item(
         &mut self,
-        queue: &mut PrintQueue<'a>,
+        queue: &mut PrintQueue<'a, S>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
         args: PrintElementArgs,
@@ -778,7 +800,7 @@ impl<'a> Printer<'a> {
     /// Semantic alias for [Self::print_entry] for fill separators.
     fn print_fill_separator(
         &mut self,
-        queue: &mut PrintQueue<'a>,
+        queue: &mut PrintQueue<'a, S>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
         args: PrintElementArgs,
@@ -792,7 +814,7 @@ impl<'a> Printer<'a> {
     /// been printed when it returns and the queue is back to its original state
     fn print_entry(
         &mut self,
-        queue: &mut PrintQueue<'a>,
+        queue: &mut PrintQueue<'a, S>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
         args: PrintElementArgs,
@@ -868,6 +890,52 @@ impl<'a> Printer<'a> {
     }
 }
 
+/// A source map marker whose output position is a byte offset in the
+/// printed code.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+struct PrintedMarker<P> {
+    source: P,
+    dest: TextSize,
+}
+
+/// Converts byte offsets in the printed code to positions of the source `S`.
+///
+/// The offsets must be converted in increasing order.
+struct OutputPositions<'a, S: Source> {
+    code: &'a str,
+    offset: usize,
+    position: S::Position,
+}
+
+impl<'a, S: Source> OutputPositions<'a, S> {
+    fn new(code: &'a str) -> Self {
+        Self {
+            code,
+            offset: 0,
+            position: S::Position::default(),
+        }
+    }
+
+    /// Returns the position at `offset`. `offset` must not be smaller than
+    /// the offset of the previous call.
+    fn position_at(&mut self, offset: TextSize) -> S::Position {
+        let offset = usize::from(offset);
+        self.position = S::advance(self.position, &self.code[self.offset..offset]);
+        self.offset = offset;
+        self.position
+    }
+}
+
+/// Returns the code printed for a verbatim `range`.
+///
+/// If the range goes past the end of the code, or ends in the middle of a
+/// character, the returned text runs to the end of the code.
+fn verbatim_text(code: &str, range: TextRange) -> &str {
+    let start = usize::from(range.start());
+    let end = usize::from(range.end()).min(code.len());
+    code.get(start..end).unwrap_or(&code[start..])
+}
+
 #[derive(Copy, Clone, Debug)]
 enum Text<'a> {
     /// ASCII only text that contains no line breaks or tab characters.
@@ -900,18 +968,18 @@ enum FillPairLayout {
 /// Stores the result of the print operation (buffer and mappings) and at what
 /// position the printer currently is.
 #[derive(Default, Debug)]
-struct PrinterState<'a> {
+struct PrinterState<'a, S: Source> {
     buffer: String,
-    source_markers: Vec<SourceMarker>,
-    source_position: TextSize,
+    source_markers: Vec<PrintedMarker<S::Position>>,
+    source_position: S::Position,
     /// The next source position that should be flushed when writing the next text.
-    pending_source_position: Option<TextSize>,
+    pending_source_position: Option<S::Position>,
     pending_indent: Indention,
     pending_space: bool,
     measured_group_fits: bool,
     line_width: usize,
     has_empty_line: bool,
-    line_suffixes: LineSuffixes<'a>,
+    line_suffixes: LineSuffixes<'a, S>,
     verbatim_markers: Vec<TextRange>,
     group_modes: GroupModes,
     // Re-used queue to measure if a group fits. Optimisation to avoid re-allocating a new
@@ -919,7 +987,7 @@ struct PrinterState<'a> {
     fits_stack: Vec<StackFrame>,
     fits_indent_stack: Vec<Indention>,
     fits_stack_tem_indent: Vec<Indention>,
-    fits_queue: Vec<&'a [FormatElement]>,
+    fits_queue: Vec<&'a [FormatElement<S>]>,
 }
 
 /// Tracks the mode in which groups with ids are printed. Stores the groups at `group.id()` index.
@@ -945,7 +1013,11 @@ impl GroupModes {
             .and_then(|option| option.as_ref().copied())
     }
 
-    fn unwrap_print_mode(&self, group_id: GroupId, next_element: &FormatElement) -> PrintMode {
+    fn unwrap_print_mode<S: Source>(
+        &self,
+        group_id: GroupId,
+        next_element: &FormatElement<S>,
+    ) -> PrintMode {
         self.get_print_mode(group_id).unwrap_or_else(|| {
             panic!("Expected group with id {group_id:?} to exist but it wasn't present in the document. Ensure that a group with such a document appears in the document before the element {next_element:?}.")
         })
@@ -1083,24 +1155,24 @@ impl Default for Indention {
 }
 
 #[must_use = "FitsMeasurer must be finished."]
-struct FitsMeasurer<'a, 'print> {
+struct FitsMeasurer<'a, 'print, S: Source> {
     state: FitsState,
-    queue: FitsQueue<'a, 'print>,
+    queue: FitsQueue<'a, 'print, S>,
     stack: FitsCallStack<'print>,
     indent_stack: FitsIndentStack<'print>,
-    printer: &'print mut Printer<'a>,
+    printer: &'print mut Printer<'a, S>,
     must_be_flat: bool,
 
     /// Bomb that enforces that finish is explicitly called to restore the `fits_stack` and `fits_queue` vectors.
     bomb: DebugDropBomb,
 }
 
-impl<'a, 'print> FitsMeasurer<'a, 'print> {
+impl<'a, 'print, S: Source> FitsMeasurer<'a, 'print, S> {
     fn new_flat(
-        print_queue: &'print PrintQueue<'a>,
+        print_queue: &'print PrintQueue<'a, S>,
         print_stack: &'print PrintCallStack,
         print_indent_stack: &'print PrintIndentStack,
-        printer: &'print mut Printer<'a>,
+        printer: &'print mut Printer<'a, S>,
     ) -> Self {
         let mut measurer = Self::new(print_queue, print_stack, print_indent_stack, printer);
         measurer.must_be_flat = true;
@@ -1108,10 +1180,10 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
     }
 
     fn new(
-        print_queue: &'print PrintQueue<'a>,
+        print_queue: &'print PrintQueue<'a, S>,
         print_stack: &'print PrintCallStack,
         print_indent_stack: &'print PrintIndentStack,
-        printer: &'print mut Printer<'a>,
+        printer: &'print mut Printer<'a, S>,
     ) -> Self {
         let saved_stack = std::mem::take(&mut printer.state.fits_stack);
         let saved_queue = std::mem::take(&mut printer.state.fits_queue);
@@ -1214,7 +1286,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
     /// Tests if the passed element fits on the current line or not.
     #[inline(always)]
-    fn fits_element(&mut self, element: &'a FormatElement) -> PrintResult<Fits> {
+    fn fits_element(&mut self, element: &'a FormatElement<S>) -> PrintResult<Fits> {
         use Tag::*;
 
         let args = self.stack.top();
@@ -1572,7 +1644,10 @@ fn invalid_end_tag<R>(end_tag: TagKind, start_tag: Option<TagKind>) -> PrintResu
 }
 
 #[cold]
-fn invalid_start_tag<R>(expected: TagKind, actual: Option<&FormatElement>) -> PrintResult<R> {
+fn invalid_start_tag<R, S: Source>(
+    expected: TagKind,
+    actual: Option<&FormatElement<S>>,
+) -> PrintResult<R> {
     let start = match actual {
         None => ActualStart::EndOfDocument,
         Some(FormatElement::Tag(tag)) => {
@@ -1626,9 +1701,11 @@ mod tests {
     use crate::LineEnding;
     use crate::prelude::*;
     use crate::printer::{PrintWidth, Printer, PrinterOptions};
-    use crate::{Document, FormatState, IndentStyle, Printed, VecBuffer, format_args, write};
+    use crate::{
+        Document, FormatState, IndentStyle, PlainSource, Printed, VecBuffer, format_args, write,
+    };
 
-    fn format(root: &dyn Format<SimpleFormatContext>) -> Printed {
+    fn format(root: &dyn Format<SimpleFormatContext>) -> Printed<PlainSource> {
         format_with_options(
             root,
             PrinterOptions {
@@ -1643,7 +1720,7 @@ mod tests {
     fn format_with_options(
         root: &dyn Format<SimpleFormatContext>,
         options: PrinterOptions,
-    ) -> Printed {
+    ) -> Printed<PlainSource> {
         let formatted = crate::format!(SimpleFormatContext::default(), [root]).unwrap();
 
         Printer::new(options)
@@ -1655,7 +1732,7 @@ mod tests {
         root: &dyn Format<SimpleFormatContext>,
         options: PrinterOptions,
         indent: u16,
-    ) -> Printed {
+    ) -> Printed<PlainSource> {
         let formatted = crate::format!(SimpleFormatContext::default(), [root]).unwrap();
 
         Printer::new(options)
@@ -2061,7 +2138,7 @@ two lines`,
 
     #[test]
     fn test_fill_breaks() {
-        let mut state = FormatState::new(());
+        let mut state = FormatState::new(SimpleFormatContext::default());
         let mut buffer = VecBuffer::new(&mut state);
         let mut formatter = Formatter::new(&mut buffer);
 
@@ -2266,7 +2343,7 @@ Group 1 breaks"#
 
     #[test]
     fn test_fill_breaks_with_indent() {
-        let mut state = FormatState::new(());
+        let mut state = FormatState::new(SimpleFormatContext::default());
         let mut buffer = VecBuffer::new(&mut state);
         let mut formatter = Formatter::new(&mut buffer);
 

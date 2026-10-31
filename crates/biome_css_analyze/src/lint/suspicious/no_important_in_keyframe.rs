@@ -97,11 +97,14 @@ impl Rule for NoImportantInKeyframe {
                 rule_category!(),
                 span,
                 markup! {
-                    "Using "<Emphasis>"!important"</Emphasis>" within keyframes declaration is completely ignored in some browsers."
+                    "Unexpected "<Emphasis>"!important"</Emphasis>" within a keyframes declaration."
                 },
             )
             .note(markup! {
-                    "Consider removing useless "<Emphasis>"!important"</Emphasis>" declaration."
+                    "Declarations marked "<Emphasis>"!important"</Emphasis>" inside keyframes are completely ignored in some browsers, so they have no effect there."
+            })
+            .note(markup! {
+                    "Remove the "<Emphasis>"!important"</Emphasis>" annotation and keep the declaration."
             }),
         )
     }

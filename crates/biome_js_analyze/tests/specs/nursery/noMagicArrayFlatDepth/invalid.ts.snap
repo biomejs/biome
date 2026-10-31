@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function f(foo: number[][]) { foo.flat(2); }
+array.flat(-2 as number);
+array.flat(2 satisfies number);
+array.flat(<number>2);
+array.flat(2!);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:40 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function f(foo: number[][]) { foo.flat(2); }
+      │                                        ^
+    3 │ array.flat(-2 as number);
+    4 │ array.flat(2 satisfies number);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f(foo: number[][]) { foo.flat(2); }
+  > 3 │ array.flat(-2 as number);
+      │            ^^^^^^^^^^^^
+    4 │ array.flat(2 satisfies number);
+    5 │ array.flat(<number>2);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    2 │ function f(foo: number[][]) { foo.flat(2); }
+    3 │ array.flat(-2 as number);
+  > 4 │ array.flat(2 satisfies number);
+      │            ^^^^^^^^^^^^^^^^^^
+    5 │ array.flat(<number>2);
+    6 │ array.flat(2!);
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    3 │ array.flat(-2 as number);
+    4 │ array.flat(2 satisfies number);
+  > 5 │ array.flat(<number>2);
+      │            ^^^^^^^^^
+    6 │ array.flat(2!);
+    7 │ 
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:12 lint/nursery/noMagicArrayFlatDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The depth passed to flat() is an unexplained number.
+  
+    4 │ array.flat(2 satisfies number);
+    5 │ array.flat(<number>2);
+  > 6 │ array.flat(2!);
+      │            ^^
+    7 │ 
+  
+  i A bare number doesn't say why the array needs to be flattened to this depth.
+  
+  i Store the depth in a variable with a descriptive name, or add a comment inside the parentheses that explains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

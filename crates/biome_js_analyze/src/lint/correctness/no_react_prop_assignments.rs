@@ -106,6 +106,9 @@ impl Rule for NoReactPropAssignments {
                 },
             )
             .note(markup! {
+                "Props are read-only. Changing them can change data that belongs to the parent component, and React does not rerender when a prop is mutated."
+            })
+            .note(markup! {
                 "Consider using a local variable instead."
             }),
         )

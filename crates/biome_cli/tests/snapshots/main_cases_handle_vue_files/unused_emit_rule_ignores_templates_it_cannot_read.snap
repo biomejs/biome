@@ -1,0 +1,28 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noVueUnusedEmitDeclarations file.vue
+```
+
+## `file.vue`
+
+```vue
+<script setup>
+defineEmits(["close"]);
+</script>
+
+<template>
+  <button @click="$emit('close')">Close</button>
+</template>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

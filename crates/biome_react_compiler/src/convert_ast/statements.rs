@@ -435,7 +435,7 @@ pub(super) fn convert_function_parameters(
 /// TS type-only declarations (`type`, `interface`, `enum`) carry no runtime
 /// behavior the compiler models, but it still expects them as typed statements
 /// (the OXC frontend emits them too), with type bodies left as opaque raw nodes.
-fn convert_ts_type_alias_declaration(
+pub(super) fn convert_ts_type_alias_declaration(
     ctx: &ConvertCtx<'_>,
     declaration: &biome_js_syntax::TsTypeAliasDeclaration,
 ) -> Result<react_compiler_ast::declarations::TSTypeAliasDeclaration> {
@@ -453,7 +453,7 @@ fn convert_ts_type_alias_declaration(
     })
 }
 
-fn convert_ts_interface_declaration(
+pub(super) fn convert_ts_interface_declaration(
     ctx: &ConvertCtx<'_>,
     declaration: &biome_js_syntax::TsInterfaceDeclaration,
 ) -> Result<react_compiler_ast::declarations::TSInterfaceDeclaration> {
@@ -472,7 +472,7 @@ fn convert_ts_interface_declaration(
     })
 }
 
-fn convert_ts_enum_declaration(
+pub(super) fn convert_ts_enum_declaration(
     ctx: &ConvertCtx<'_>,
     declaration: &biome_js_syntax::TsEnumDeclaration,
 ) -> Result<react_compiler_ast::declarations::TSEnumDeclaration> {

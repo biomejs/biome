@@ -6,7 +6,7 @@ use crate::{
     CssModuleInfo, HtmlModuleInfo, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
     JsOwnExport, JsReexport,
 };
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_js_type_info::FormatTypeContext;
 use biome_rowan::{TextRange, TextSize};

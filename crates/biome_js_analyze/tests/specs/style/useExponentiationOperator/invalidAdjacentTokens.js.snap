@@ -38,6 +38,8 @@ invalidAdjacentTokens.js:2:3 lint/style/useExponentiationOperator  FIXABLE  ━�
     3 │ (a)+(Math).pow((++b), c);
     4 │ Math.pow(a, b)in c
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │   // tokens that cannot be adjacent
@@ -60,6 +62,8 @@ invalidAdjacentTokens.js:3:5 lint/style/useExponentiationOperator  FIXABLE  ━�
       │     ^^^^^^^^^^^^^^^^^^^^
     4 │ Math.pow(a, b)in c
     5 │ Math.pow(a, (b))in (c)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -85,6 +89,8 @@ invalidAdjacentTokens.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━�
     5 │ Math.pow(a, (b))in (c)
     6 │ a+Math.pow(++b, c)in d
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      2  2 │   a+Math.pow(++b, c);
@@ -108,6 +114,8 @@ invalidAdjacentTokens.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━�
       │ ^^^^^^^^^^^^^^^^
     6 │ a+Math.pow(++b, c)in d
     7 │ a+Math.pow( ++b, c )in d
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -133,6 +141,8 @@ invalidAdjacentTokens.js:6:3 lint/style/useExponentiationOperator  FIXABLE  ━�
     7 │ a+Math.pow( ++b, c )in d
     8 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      4  4 │   Math.pow(a, b)in c
@@ -157,6 +167,8 @@ invalidAdjacentTokens.js:7:3 lint/style/useExponentiationOperator  FIXABLE  ━�
     8 │ 
     9 │ // tokens that cannot be adjacent, but there is already space or something else between
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      5  5 │   Math.pow(a, (b))in (c)
@@ -179,6 +191,8 @@ invalidAdjacentTokens.js:10:4 lint/style/useExponentiationOperator  FIXABLE  ━
        │    ^^^^^^^^^^^^^^^^
     11 │ // a+/**/Math.pow(++b, c)/**/in d // ignored because of comments
     12 │ a+(Math.pow(++b, c))in d
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -204,6 +218,8 @@ invalidAdjacentTokens.js:12:4 lint/style/useExponentiationOperator  FIXABLE  ━
     13 │ 
     14 │ // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     10 10 │   a+ Math.pow(++b, c) in d
@@ -226,6 +242,8 @@ invalidAdjacentTokens.js:15:2 lint/style/useExponentiationOperator  FIXABLE  ━
        │  ^^^^^^^^^^^^^^^^
     16 │ Math.pow(a, b + c)in d
     17 │ Math.pow(a, b) + Math.pow(c, d)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -251,6 +269,8 @@ invalidAdjacentTokens.js:16:1 lint/style/useExponentiationOperator  FIXABLE  ━
     17 │ Math.pow(a, b) + Math.pow(c, d)
     18 │ Math.pow(Math.pow(a, b), Math.pow(c, d))
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     14 14 │   // tokens that cannot be adjacent, but the autofix inserts parens required for precedence
@@ -274,6 +294,8 @@ invalidAdjacentTokens.js:17:1 lint/style/useExponentiationOperator  FIXABLE  ━
        │ ^^^^^^^^^^^^^^
     18 │ Math.pow(Math.pow(a, b), Math.pow(c, d))
     19 │ Math.pow(a, b)**Math.pow(c, d)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -299,6 +321,8 @@ invalidAdjacentTokens.js:17:18 lint/style/useExponentiationOperator  FIXABLE  �
     18 │ Math.pow(Math.pow(a, b), Math.pow(c, d))
     19 │ Math.pow(a, b)**Math.pow(c, d)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     15 15 │   +Math.pow(++a, b)
@@ -322,6 +346,8 @@ invalidAdjacentTokens.js:18:1 lint/style/useExponentiationOperator  FIXABLE  ━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ Math.pow(a, b)**Math.pow(c, d)
     20 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -347,6 +373,8 @@ invalidAdjacentTokens.js:18:10 lint/style/useExponentiationOperator  FIXABLE  �
     19 │ Math.pow(a, b)**Math.pow(c, d)
     20 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     16 16 │   Math.pow(a, b + c)in d
@@ -371,6 +399,8 @@ invalidAdjacentTokens.js:18:26 lint/style/useExponentiationOperator  FIXABLE  �
     19 │ Math.pow(a, b)**Math.pow(c, d)
     20 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     16 16 │   Math.pow(a, b + c)in d
@@ -394,6 +424,8 @@ invalidAdjacentTokens.js:19:1 lint/style/useExponentiationOperator  FIXABLE  ━
        │ ^^^^^^^^^^^^^^
     20 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     17 17 │   Math.pow(a, b) + Math.pow(c, d)
@@ -415,6 +447,8 @@ invalidAdjacentTokens.js:19:17 lint/style/useExponentiationOperator  FIXABLE  �
   > 19 │ Math.pow(a, b)**Math.pow(c, d)
        │                 ^^^^^^^^^^^^^^
     20 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   

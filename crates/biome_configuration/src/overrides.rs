@@ -646,9 +646,9 @@ impl OverrideGlobs {
     }
 }
 impl biome_deserialize::Deserializable for OverrideGlobs {
-    fn deserialize(
-        ctx: &mut dyn biome_deserialize::DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         biome_deserialize::Deserializable::deserialize(ctx, value, name).map(OverrideGlobs::Globs)
@@ -1077,6 +1077,7 @@ mod tests {
             line_width: Some(LineWidth::try_from(80).expect("valid line width")),
             trailing_newline: global_formatter.trailing_newline,
             prose_wrap: Some(ProseWrap::Always),
+            format_embeds: None,
         };
         assert_eq!(
             configuration

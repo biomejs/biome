@@ -16,6 +16,10 @@ invalid.jsonc:1:13 lint/suspicious/noAsyncPromiseExecutor ━━━━━━━�
   > 1 │ new Promise(async function foo(resolve, reject) {})
       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i If an async executor throws or awaits a rejected promise, the error is not caught by the Promise constructor. The promise can stay pending forever.
+  
+  i Remove the async keyword and call resolve or reject instead. If you need await, run it outside the Promise constructor.
+  
 
 ```
 
@@ -33,6 +37,10 @@ invalid.jsonc:1:13 lint/suspicious/noAsyncPromiseExecutor ━━━━━━━�
   > 1 │ new Promise(async (resolve, reject) => {})
       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i If an async executor throws or awaits a rejected promise, the error is not caught by the Promise constructor. The promise can stay pending forever.
+  
+  i Remove the async keyword and call resolve or reject instead. If you need await, run it outside the Promise constructor.
+  
 
 ```
 
@@ -49,6 +57,10 @@ invalid.jsonc:1:17 lint/suspicious/noAsyncPromiseExecutor ━━━━━━━�
   
   > 1 │ new Promise(((((async () => {})))))
       │                 ^^^^^^^^^^^^^^
+  
+  i If an async executor throws or awaits a rejected promise, the error is not caught by the Promise constructor. The promise can stay pending forever.
+  
+  i Remove the async keyword and call resolve or reject instead. If you need await, run it outside the Promise constructor.
   
 
 ```

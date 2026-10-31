@@ -1,0 +1,56 @@
+/* should not generate diagnostics */
+@layer base, theme;
+
+@layer base {
+	@layer reset {
+	}
+
+	@layer reset {
+	}
+}
+
+@layer base.reset {
+}
+
+@layer base {
+	@layer reset.base {
+	}
+}
+
+@layer a.b {
+	@layer b {
+	}
+
+	@layer a {
+	}
+}
+
+@layer {
+	@layer base {
+	}
+}
+
+@layer base-legacy {
+	@layer base {
+	}
+}
+
+@layer base {
+	@layer base-legacy {
+	}
+}
+
+@layer Base {
+	@layer base {
+	}
+}
+
+@layer base {
+	@layer {
+	}
+}
+
+@layer base, theme {
+	@layer base {
+	}
+}

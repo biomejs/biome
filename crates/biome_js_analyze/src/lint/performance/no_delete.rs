@@ -128,13 +128,18 @@ impl Rule for NoDelete {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Avoid the "<Emphasis>"delete"</Emphasis>" operator which can impact performance."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Avoid the "<Emphasis>"delete"</Emphasis>" operator."
+                },
+            )
+            .note(markup! {
+                "Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, argument: &Self::State) -> Option<JsRuleAction> {

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validDefaultExport.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare const value: any;
+
+export default class {
+	method(): unknown {
+		return value;
+	}
+}
+
+```

@@ -1,0 +1,235 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<script>
+	let { active, isActive, props } = $props();
+</script>
+
+<div class:active={isActive}></div>
+<div class:active></div>
+<div class="button" class:active={isActive}></div>
+<div class:active class:inactive={!active}></div>
+<div class:my-class={isActive}></div>
+<div class:active="{isActive}"></div>
+<div
+	class="button"
+	class:active={isActive}
+></div>
+<svelte:element this="div" class:active={isActive}></svelte:element>
+<button {...props} class:active></button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:7:6 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+    5 │ </script>
+    6 │ 
+  > 7 │ <div class:active={isActive}></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <div class:active></div>
+    9 │ <div class="button" class:active={isActive}></div>
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:6 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+     7 │ <div class:active={isActive}></div>
+   > 8 │ <div class:active></div>
+       │      ^^^^^^^^^^^^
+     9 │ <div class="button" class:active={isActive}></div>
+    10 │ <div class:active class:inactive={!active}></div>
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:21 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+     7 │ <div class:active={isActive}></div>
+     8 │ <div class:active></div>
+   > 9 │ <div class="button" class:active={isActive}></div>
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <div class:active class:inactive={!active}></div>
+    11 │ <div class:my-class={isActive}></div>
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:10:6 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+     8 │ <div class:active></div>
+     9 │ <div class="button" class:active={isActive}></div>
+  > 10 │ <div class:active class:inactive={!active}></div>
+       │      ^^^^^^^^^^^^
+    11 │ <div class:my-class={isActive}></div>
+    12 │ <div class:active="{isActive}"></div>
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:10:19 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+     8 │ <div class:active></div>
+     9 │ <div class="button" class:active={isActive}></div>
+  > 10 │ <div class:active class:inactive={!active}></div>
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <div class:my-class={isActive}></div>
+    12 │ <div class:active="{isActive}"></div>
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:11:6 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+     9 │ <div class="button" class:active={isActive}></div>
+    10 │ <div class:active class:inactive={!active}></div>
+  > 11 │ <div class:my-class={isActive}></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <div class:active="{isActive}"></div>
+    13 │ <div
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:6 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+    10 │ <div class:active class:inactive={!active}></div>
+    11 │ <div class:my-class={isActive}></div>
+  > 12 │ <div class:active="{isActive}"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <div
+    14 │ 	class="button"
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:2 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+    13 │ <div
+    14 │ 	class="button"
+  > 15 │ 	class:active={isActive}
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ ></div>
+    17 │ <svelte:element this="div" class:active={isActive}></svelte:element>
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:17:28 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+    15 │ 	class:active={isActive}
+    16 │ ></div>
+  > 17 │ <svelte:element this="div" class:active={isActive}></svelte:element>
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <button {...props} class:active></button>
+    19 │ 
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:18:20 lint/nursery/noSvelteClassDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class: directive can be replaced with the class attribute.
+  
+    16 │ ></div>
+    17 │ <svelte:element this="div" class:active={isActive}></svelte:element>
+  > 18 │ <button {...props} class:active></button>
+       │                    ^^^^^^^^^^^^
+    19 │ 
+  
+  i Since Svelte 5.16, the class attribute accepts objects and arrays. Unlike the directive, they can add several classes with one condition and can be combined with other class values.
+  
+  i Move the class into the element's class attribute, using an object such as class={{ active: isActive }}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

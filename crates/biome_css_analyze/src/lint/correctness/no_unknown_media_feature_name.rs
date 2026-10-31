@@ -123,11 +123,11 @@ impl Rule for NoUnknownMediaFeatureName {
                 rule_category!(),
                 span,
                 markup! {
-                    "Don't use unknown media feature names."
+                    "Unexpected unknown media feature name."
                 },
             )
             .note(markup! {
-                "Unexpected unknown media feature name."
+                "Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match."
             })
             .note(markup! {
                 "You should use media feature names defined in the CSS Specifications."
@@ -394,7 +394,10 @@ fn media_feature_name_from_query_name(name: AnyCssQueryFeatureName) -> Option<Me
         AnyCssQueryFeatureName::CssIdentifier(identifier) => Some(MediaFeatureName::Literal(
             identifier.value_token().ok()?.token_text_trimmed(),
         )),
-        AnyCssQueryFeatureName::CssDashedIdentifier(_)
+        AnyCssQueryFeatureName::AnyCssFunction(_)
+        | AnyCssQueryFeatureName::CssDashedIdentifier(_)
+        | AnyCssQueryFeatureName::ScssExpression(_)
+        | AnyCssQueryFeatureName::ScssInterpolation(_)
         | AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_)
         | AnyCssQueryFeatureName::ScssVariable(_) => Some(MediaFeatureName::Dynamic),
     }

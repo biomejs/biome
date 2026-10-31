@@ -437,6 +437,82 @@ impl VueSetupComponent {
         }
         result
     }
+
+    /// Returns the top-level `defineEmits()` calls of the component.
+    pub fn define_emits_calls(&self) -> Vec<VueDefineEmitsCall> {
+        let model = &self.model;
+        let mut result = Vec::new();
+        for item in self.js_module.items() {
+            let AnyJsModuleItem::AnyJsStatement(statement) = item else {
+                continue;
+            };
+            match statement {
+                AnyJsStatement::JsExpressionStatement(expression_statement) => {
+                    if let Ok(expression) = expression_statement.expression() {
+                        result.extend(VueDefineEmitsCall::from_expression(
+                            &expression,
+                            model,
+                            None,
+                        ));
+                    }
+                }
+                AnyJsStatement::JsVariableStatement(variable_statement) => {
+                    let Ok(declaration) = variable_statement.declaration() else {
+                        continue;
+                    };
+                    for declarator in declaration.declarators().iter().flatten() {
+                        let Some(expression) = declarator
+                            .initializer()
+                            .and_then(|initializer| initializer.expression().ok())
+                        else {
+                            continue;
+                        };
+                        let binding = declarator.id().ok().and_then(|id| {
+                            id.as_any_js_binding()?.as_js_identifier_binding().cloned()
+                        });
+                        result.extend(VueDefineEmitsCall::from_expression(
+                            &expression,
+                            model,
+                            binding,
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        }
+        result
+    }
+}
+
+/// A `defineEmits()` call in `<script setup>`, along with the variable it is assigned to.
+#[derive(Debug)]
+pub struct VueDefineEmitsCall {
+    call: JsCallExpression,
+    /// The variable holding the emit function, as in `const emit = defineEmits(['change'])`.
+    binding: Option<JsIdentifierBinding>,
+}
+
+impl VueDefineEmitsCall {
+    fn from_expression(
+        expression: &AnyJsExpression,
+        model: &SemanticModel,
+        binding: Option<JsIdentifierBinding>,
+    ) -> Option<Self> {
+        let call = expression.inner_expression()?;
+        let call = call.as_js_call_expression()?;
+        is_vue_compiler_macro_call(call, model, "defineEmits").then(|| Self {
+            call: call.clone(),
+            binding,
+        })
+    }
+
+    pub fn call(&self) -> &JsCallExpression {
+        &self.call
+    }
+
+    pub fn binding(&self) -> Option<&JsIdentifierBinding> {
+        self.binding.as_ref()
+    }
 }
 
 /// A `defineProps()` call in `<script setup>`, along with the sources of default values for its
@@ -658,7 +734,10 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
                         continue;
                     };
                     if let Ok(expression) = property.value() {
-                        result.extend(collect_computed_and_method_declarations(&expression));
+                        result.extend(collect_computed_and_method_declarations(
+                            &expression,
+                            VueDeclaration::Computed,
+                        ));
                     }
                 }
                 "methods" => {
@@ -670,7 +749,10 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
                         continue;
                     };
                     if let Ok(expression) = property.value() {
-                        result.extend(collect_computed_and_method_declarations(&expression));
+                        result.extend(collect_computed_and_method_declarations(
+                            &expression,
+                            VueDeclaration::Method,
+                        ));
                     }
                 }
                 "data" => {
@@ -905,7 +987,8 @@ impl AnyVueSetupDeclaration {
 }
 
 /// Checks if the reference resolves to a variable initialized by a `defineProps()` call,
-/// as in `const props = defineProps(['foo'])`.
+/// as in `const props = defineProps(['foo'])` or
+/// `const props = withDefaults(defineProps<Props>(), {})`.
 fn is_props_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) -> bool {
     model
         .binding(reference)
@@ -918,13 +1001,8 @@ fn is_props_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) 
         })
         .and_then(|declarator| declarator.initializer())
         .and_then(|initializer| initializer.expression().ok())
-        .and_then(|expression| expression.inner_expression())
-        .is_some_and(|expression| match expression {
-            AnyJsExpression::JsCallExpression(call) => {
-                is_vue_compiler_macro_call(&call, model, "defineProps")
-            }
-            _ => false,
-        })
+        .and_then(|expression| VueDefinePropsCall::from_expression(&expression, model, None))
+        .is_some()
 }
 
 impl VueDeclarationName for AnyVueSetupDeclaration {
@@ -1118,7 +1196,12 @@ fn collect_props_declarations_from_expression(expression: &AnyJsExpression) -> V
     }
 }
 
-fn collect_computed_and_method_declarations(expression: &AnyJsExpression) -> Vec<VueDeclaration> {
+/// Collects the members of a `computed` or `methods` group. `declaration` wraps each member in
+/// the declaration kind of the group.
+fn collect_computed_and_method_declarations(
+    expression: &AnyJsExpression,
+    declaration: fn(AnyVueMethod) -> VueDeclaration,
+) -> Vec<VueDeclaration> {
     let AnyJsExpression::JsObjectExpression(object_expression) = expression else {
         return vec![];
     };
@@ -1127,12 +1210,12 @@ fn collect_computed_and_method_declarations(expression: &AnyJsExpression) -> Vec
         .iter()
         .flatten()
         .filter_map(|member| match member {
-            AnyJsObjectMember::JsPropertyObjectMember(property) => Some(VueDeclaration::Computed(
-                AnyVueMethod::JsPropertyObjectMember(property),
-            )),
-            AnyJsObjectMember::JsMethodObjectMember(method) => Some(VueDeclaration::Computed(
-                AnyVueMethod::JsMethodObjectMember(method),
-            )),
+            AnyJsObjectMember::JsPropertyObjectMember(property) => {
+                Some(declaration(AnyVueMethod::JsPropertyObjectMember(property)))
+            }
+            AnyJsObjectMember::JsMethodObjectMember(method) => {
+                Some(declaration(AnyVueMethod::JsMethodObjectMember(method)))
+            }
             _ => None,
         })
         .collect()

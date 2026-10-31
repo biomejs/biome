@@ -2,6 +2,7 @@ use super::EmbedContent;
 use biome_languages::DocumentFileSource;
 use biome_languages::HtmlFileSource;
 use biome_languages::YamlFileSource;
+use biome_languages::html::HtmlEmbeddingKind;
 use biome_rowan::Text;
 use biome_string_case::StrLikeExtension;
 
@@ -43,7 +44,9 @@ impl EmbedDetectorsRegistry {
             EmbedCandidate::CodeBlock { info_string, .. } => {
                 resolve_code_block_language(info_string.text())?
             }
-            EmbedCandidate::HtmlBlock { .. } => HtmlFileSource::html().into(),
+            EmbedCandidate::HtmlBlock { .. } => HtmlFileSource::html()
+                .with_embedding_kind(HtmlEmbeddingKind::MarkdownBlock)
+                .into(),
         };
         Some(EmbedMatch { file_source })
     }

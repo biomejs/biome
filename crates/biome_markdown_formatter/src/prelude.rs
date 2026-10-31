@@ -6,7 +6,7 @@ pub(crate) use crate::{
     AsFormat, FormatNodeRule, FormattedIterExt as _, FormattedIterExt, IntoFormat,
     MarkdownFormatContext, MarkdownFormatter, format_removed, format_replaced, verbatim::*,
 };
-pub(crate) use biome_formatter::prelude::*;
+pub(crate) use biome_formatter::rowan::prelude::*;
 pub(crate) use biome_rowan::{
     AstNode as _, AstNodeList as _, AstNodeSlotMap as _, AstSeparatedList as _,
 };

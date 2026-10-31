@@ -1,223 +1,39 @@
+//! The Salsa database shared by the Biome crates.
+//!
+//! A file enters the database as a [Source] input, which holds the text
+//! of the file and the file source it's parsed as. Parsing is a capability of
+//! the databases built on top of this one, see `biome_parser::db`.
+
 pub mod testing;
 
-use biome_diagnostics::{Diagnostic, Severity};
-use biome_parser::AnyParse;
-use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{AstNode, Language, SendNode, SyntaxNode, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
+use std::sync::Arc;
 
 #[salsa::db]
 pub trait Db: salsa::Database {
-    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource>;
-
-    fn parsed_snippets_for_path(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
-        self.parsed_source_for_path(path)
-            .map(|source| source.snippets(self).clone())
-            .unwrap_or_default()
-    }
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source>;
 }
 
-/// The primordial type of the biome database. It represents a parsed file.
-/// The `path` is the ID.
+/// One content of the file at `path`, such as its content on disk or the
+/// content of an editor. A path can have several of them.
 #[salsa::input]
 #[derive(Debug)]
-pub struct ParsedSource {
+pub struct Source {
     pub path: Utf8PathBuf,
 
-    #[no_eq]
-    pub parsed: AnyParse,
+    #[returns(ref)]
+    pub text: Arc<str>,
 
+    /// The index of the file source that the text is parsed as, in the table
+    /// of file sources of the database.
     #[returns(copy)]
-    pub document_source_index: usize,
+    pub file_source_index: usize,
 
-    pub snippets: Vec<ParsedSnippet>,
-}
-
-impl ParsedSource {
-    pub fn error_count(&self, db: &dyn Db) -> usize {
-        self.parsed(db)
-            .diagnostics()
-            .iter()
-            .filter(|d| d.severity() >= Severity::Error)
-            .count()
-            + self
-                .snippets(db)
-                .iter()
-                .filter(|s| s.has_errors(db))
-                .count()
-    }
-
-    pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        self.parsed(db).clone().into_serde_diagnostics()
-    }
-
-    pub fn parse_diagnostics(&self, db: &dyn Db) -> Vec<ParseDiagnostic> {
-        self.parsed(db).diagnostics().to_vec()
-    }
-
-    pub fn snippets_parse_diagnostics(&self, db: &dyn Db) -> Vec<ParseDiagnostic> {
-        let mut diagnostics = vec![];
-        for snippet in self.snippets(db) {
-            diagnostics.extend((*snippet).parsed(db).diagnostics().to_vec())
-        }
-        diagnostics
-    }
-
-    pub fn has_errors(&self, db: &dyn Db) -> bool {
-        self.error_count(db) > 0
-    }
-}
-
-/// Represents embedded content extracted from HTML documents.
-///
-/// This struct stores parsing metadata and provides access to the parsed
-/// content with offset-aware positioning to maintain correct source locations.
-#[salsa::input]
-#[derive(Debug)]
-pub struct ParsedSnippet {
-    #[no_eq]
-    pub parsed: AnyParse,
-
-    /// The range of the entire script element in the HTML document,
-    /// including the opening and closing tags.
-    #[returns(clone)]
-    pub element_range: TextRange,
-
-    /// The range of just the JavaScript content within the script element,
-    /// excluding the script tags themselves.
-    #[returns(clone)]
-    pub content_range: TextRange,
-
-    /// The offset where the JavaScript content starts in the parent document.
-    /// This is used for offset-aware parsing.
-    #[returns(clone)]
-    pub content_offset: TextSize,
-
-    /// The file source of the document
+    /// The index of the inline configuration of the client that published the
+    /// text, if the client has one. The configuration applies on top of the
+    /// settings of the file, and the index refers to the table of
+    /// configurations of the database.
+    #[default]
     #[returns(copy)]
-    pub document_source_index: usize,
-}
-
-impl ParsedSnippet {
-    pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        self.parsed(db).clone().into_serde_diagnostics()
-    }
-
-    pub fn has_errors(&self, db: &dyn Db) -> bool {
-        self.parsed(db).has_errors()
-    }
-}
-
-/// Convenient type for source
-#[derive(Debug, Clone)]
-pub enum AnyParsedSource {
-    ParsedSource(ParsedSource),
-    ParsedSnippet(ParsedSnippet),
-}
-
-impl AnyParsedSource {
-    pub fn tree<N>(&self, db: &dyn Db) -> N
-    where
-        N: AstNode,
-        N::Language: 'static,
-    {
-        match self {
-            Self::ParsedSource(parsed) => parsed.parsed(db).tree::<N>(),
-            Self::ParsedSnippet(parsed) => parsed.parsed(db).tree::<N>(),
-        }
-    }
-
-    pub fn into_language_root<N>(self, db: &dyn Db) -> Option<N>
-    where
-        N: AstNode,
-        N::Language: 'static,
-    {
-        match self {
-            Self::ParsedSource(parsed) => parsed.parsed(db).clone().into_language_root(),
-            Self::ParsedSnippet(_) => None,
-        }
-    }
-
-    pub fn syntax<L>(&self, db: &dyn Db) -> SyntaxNode<L>
-    where
-        L: Language + 'static,
-    {
-        match self {
-            Self::ParsedSource(parsed) => parsed.parsed(db).syntax(),
-            Self::ParsedSnippet(parsed) => parsed.parsed(db).syntax(),
-        }
-    }
-
-    pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        match self {
-            Self::ParsedSource(parsed) => parsed.serde_diagnostics(db),
-            Self::ParsedSnippet(parsed) => parsed.serde_diagnostics(db),
-        }
-    }
-
-    pub fn diagnostics<'db>(&self, db: &'db dyn Db) -> &'db [ParseDiagnostic] {
-        match self {
-            Self::ParsedSource(parsed) => parsed.parsed(db).diagnostics(),
-            Self::ParsedSnippet(parsed) => parsed.parsed(db).diagnostics(),
-        }
-    }
-
-    pub fn diagnostic_offset(&self, db: &dyn Db) -> Option<TextSize> {
-        match self {
-            Self::ParsedSource(_) => None,
-            Self::ParsedSnippet(snippet) => Some(snippet.content_offset(db)),
-        }
-    }
-
-    pub fn document_file_index(&self, db: &dyn Db) -> usize {
-        match self {
-            Self::ParsedSource(source) => source.document_source_index(db),
-            Self::ParsedSnippet(snippet) => snippet.document_source_index(db),
-        }
-    }
-
-    pub fn unwrap_as_send_node(&self, db: &dyn Db) -> SendNode {
-        match self {
-            Self::ParsedSource(source) => source.parsed(db).unwrap_as_send_node(),
-            Self::ParsedSnippet(_) => panic!("Cannot unwrap ParsedSnippet into SendNode"),
-        }
-    }
-
-    pub fn any_parse<'a>(&self, db: &'a dyn Db) -> &'a AnyParse {
-        match self {
-            Self::ParsedSource(source) => source.parsed(db),
-            Self::ParsedSnippet(snippet) => snippet.parsed(db),
-        }
-    }
-
-    pub fn has_errors(&self, db: &dyn Db) -> bool {
-        match self {
-            Self::ParsedSource(source) => source.has_errors(db),
-            Self::ParsedSnippet(snippet) => snippet.has_errors(db),
-        }
-    }
-}
-
-impl From<ParsedSource> for AnyParsedSource {
-    fn from(source: ParsedSource) -> Self {
-        AnyParsedSource::ParsedSource(source)
-    }
-}
-
-impl From<ParsedSnippet> for AnyParsedSource {
-    fn from(snippet: ParsedSnippet) -> Self {
-        AnyParsedSource::ParsedSnippet(snippet)
-    }
-}
-
-impl From<&ParsedSource> for AnyParsedSource {
-    fn from(source: &ParsedSource) -> Self {
-        AnyParsedSource::ParsedSource(*source)
-    }
-}
-
-impl From<&ParsedSnippet> for AnyParsedSource {
-    fn from(snippet: &ParsedSnippet) -> Self {
-        AnyParsedSource::ParsedSnippet(*snippet)
-    }
+    pub configuration_index: Option<usize>,
 }
