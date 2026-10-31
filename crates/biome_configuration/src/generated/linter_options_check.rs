@@ -869,6 +869,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noMissingThrow",
+        TypeId::of::<biome_rule_options::no_missing_throw::NoMissingThrowOptions>(),
+    ));
+    result.push((
         "correctness",
         "noMissingVarFunction",
         TypeId::of::<biome_rule_options::no_missing_var_function::NoMissingVarFunctionOptions>(),

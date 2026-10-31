@@ -184,6 +184,7 @@ pub mod no_misplaced_assertion;
 pub mod no_misplaced_list_elements;
 pub mod no_misrefactored_shorthand_assign;
 pub mod no_missing_scss_interpolation;
+pub mod no_missing_throw;
 pub mod no_missing_var_function;
 pub mod no_misused_promises;
 pub mod no_multi_assign;
