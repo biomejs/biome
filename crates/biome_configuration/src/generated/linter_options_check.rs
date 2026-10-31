@@ -855,6 +855,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "noMismatchedMapKey",
+        TypeId::of::<biome_rule_options::no_mismatched_map_key::NoMismatchedMapKeyOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noMisplacedAssertion",
         TypeId::of::<biome_rule_options::no_misplaced_assertion::NoMisplacedAssertionOptions>(),
