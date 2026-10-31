@@ -9306,6 +9306,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueDefaultExport": {
+					"description": "Require the \\<script> block of a Vue component to have a default export.\nSee https://biomejs.dev/linter/rules/use-vue-default-export",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueDefaultExportConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefineOptions": {
 					"description": "Enforce defineOptions() instead of a default export in components that use \\<script setup>.\nSee https://biomejs.dev/linter/rules/use-vue-define-options",
 					"anyOf": [
@@ -16946,6 +16953,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueDefaultExportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueDefaultExportOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefineMacrosOrderOptions": {
 			"type": "object",
 			"properties": {
@@ -22470,6 +22486,16 @@
 					]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueDefaultExportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueDefaultExportOptions" }
+			]
+		},
+		"UseVueDefaultExportOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueDefineMacrosOrderConfiguration": {

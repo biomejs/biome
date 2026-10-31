@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-export-as-default-from.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export { component as default } from "./component.js";
+</script>
+
+```

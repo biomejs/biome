@@ -418,6 +418,11 @@ impl Collector<'_, '_> {
         let Some(scope) = self.output.module_scope else {
             return;
         };
+        // A block that holds only comments has an empty range, which has no
+        // scope, and declares nothing.
+        if self.input.root.syntax().text_trimmed_range().is_empty() {
+            return;
+        }
         let module_scope = self.input.js.scope(self.input.root.syntax());
         // The semantic model stores the bindings of a module in a child of
         // the global scope when the root is a module.
