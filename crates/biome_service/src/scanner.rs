@@ -356,9 +356,12 @@ impl Scanner {
         project_path: &Utf8Path,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         self.index_with_context(workspace, project_key, IndexTrigger::Update, true, |ctx| {
-            ctx.workspace.index_framework_files(project_key, &|paths| {
+            let diagnostics = ctx.workspace.index_framework_files(project_key, &|paths| {
                 ctx.index_files_in_parallel(paths);
             });
+            for diagnostic in diagnostics {
+                ctx.push_diagnostic(diagnostic);
+            }
             let dependencies = mem::take(&mut ctx.dependencies)
                 .into_inner()
                 .unwrap()
@@ -574,9 +577,12 @@ impl Scanner {
                     && (scan_options.scan_kind.is_project()
                         || scan_options.scan_kind.is_type_aware())
                 {
-                    ctx.workspace.index_framework_files(project_key, &|paths| {
+                    let diagnostics = ctx.workspace.index_framework_files(project_key, &|paths| {
                         ctx.index_files_in_parallel(paths);
                     });
+                    for diagnostic in diagnostics {
+                        ctx.push_diagnostic(diagnostic);
+                    }
                 }
                 let traversal_ctx = &*ctx;
                 ctx.workspace
@@ -889,8 +895,13 @@ impl DiagnosticsCollector {
     }
 
     /// Checks whether the given `diagnostic` should be collected or not.
+    ///
+    /// The diagnostics that tell why the rules that rely on frameworks don't
+    /// report are always collected, like the errors of configuration files.
     fn should_collect(&self, diagnostic: &Diagnostic) -> bool {
-        diagnostic.severity() >= self.diagnostic_level || diagnostic.tags().is_internal()
+        diagnostic.severity() >= self.diagnostic_level
+            || diagnostic.tags().is_internal()
+            || diagnostic.category() == Some(biome_diagnostics::category!("project/frameworks"))
     }
 
     fn run(&self, receiver: Receiver<Diagnostic>) -> Vec<Diagnostic> {

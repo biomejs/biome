@@ -8,6 +8,11 @@ use crate::db::{DbReadGuard, DbState, ViewId, WorkspaceDb};
 use crate::diagnostics::{
     FileTooLarge, NoIgnoreFileFound, TailwindStylesheetNotFound, VcsDiagnostic,
 };
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use crate::diagnostics::{
+    UnknownFrameworkModules, UnknownFrameworkModulesAdvice, UnknownFrameworkStylesheets,
+    UnknownFrameworkStylesheetsAdvice, UnreadableCssGlobal,
+};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
@@ -19,9 +24,12 @@ use crate::file_handlers::{
 };
 #[cfg(all(feature = "lang_js", feature = "lang_html"))]
 use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
+#[cfg(all(feature = "module_graph", feature = "lang_js", feature = "lang_css"))]
+use crate::frameworks::{CssGlobals, css_global_stylesheets, is_css_global};
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use crate::frameworks::{
-    FrameworkModules, PackageFrameworks, WorkspaceLoaderHost, referenced_declaration_files,
+    FrameworkModules, LoadedPackage, PackageFrameworks, WorkspaceLoaderHost,
+    referenced_declaration_files,
 };
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
@@ -58,6 +66,10 @@ use crate::workspace::{
     UpdateSettingsResult,
 };
 use crate::{Workspace, WorkspaceError};
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_analyze::{RuleDomain, RuleFilter};
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_configuration::analyzer::RuleDomainValue;
 use biome_configuration::bool::Bool;
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::VcsClientKind;
@@ -2448,19 +2460,19 @@ impl WorkspaceServerWithDb<'_> {
     /// `node_modules`, and returns what they contribute by the path of the
     /// package.
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-    fn load_package_frameworks(
-        &self,
-        project_key: ProjectKey,
-    ) -> Vec<(Utf8PathBuf, FrameworkContributions)> {
+    fn load_package_frameworks(&self, project_key: ProjectKey) -> (Vec<LoadedPackage>, Vec<Error>) {
         let Some(project_path) = self.project_get_path(project_key) else {
-            return Vec::new();
+            return (Vec::new(), Vec::new());
         };
         let db = self.get_db();
         let host = WorkspaceLoaderHost {
             fs: self.fs.as_ref(),
             db: &db,
         };
-        self.project_layout
+        #[cfg(feature = "lang_css")]
+        let mut css_globals = CssGlobals::default();
+        let packages = self
+            .project_layout
             .package_paths()
             .into_iter()
             .filter(|package_path| {
@@ -2470,11 +2482,78 @@ impl WorkspaceServerWithDb<'_> {
                 let manifest = self
                     .project_layout
                     .get_node_manifest_for_package(&package_path)?;
-                let contributions =
+                #[cfg_attr(not(feature = "lang_css"), expect(unused_mut))]
+                let mut contributions =
                     biome_frameworks::load_frameworks(&host, LOADERS, &package_path, &manifest);
-                Some((package_path, contributions))
+                #[cfg(feature = "lang_css")]
+                let css_globals = self.add_css_globals(
+                    &db,
+                    &host,
+                    project_key,
+                    &package_path,
+                    &mut contributions,
+                    &mut css_globals,
+                );
+                #[cfg(not(feature = "lang_css"))]
+                let css_globals = None;
+                Some(LoadedPackage {
+                    package_path,
+                    contributions,
+                    css_globals,
+                })
             })
-            .collect()
+            .collect();
+        #[cfg(feature = "lang_css")]
+        let diagnostics = css_globals.diagnostics;
+        #[cfg(not(feature = "lang_css"))]
+        let diagnostics = Vec::new();
+        (packages, diagnostics)
+    }
+
+    /// Adds the stylesheets that the `css.globals` option of the configuration
+    /// of the package in `package_path` names to `contributions`, and returns
+    /// whether the option has entries.
+    ///
+    /// The entries are absolute, because the configuration that declares them
+    /// resolves them. Any entry makes the user authoritative for the
+    /// stylesheets that apply to every page, so the styles of the package are
+    /// no longer incomplete.
+    #[cfg(all(feature = "module_graph", feature = "lang_js", feature = "lang_css"))]
+    fn add_css_globals(
+        &self,
+        db: &WorkspaceDb,
+        host: &WorkspaceLoaderHost,
+        project_key: ProjectKey,
+        package_path: &Utf8Path,
+        contributions: &mut FrameworkContributions,
+        css_globals: &mut CssGlobals,
+    ) -> Option<Vec<Utf8PathBuf>> {
+        let (_, settings, _) = self.project_get_settings_query(
+            db,
+            project_key,
+            &package_path.join("package.json"),
+            None,
+        )?;
+        let globals = settings
+            .languages
+            .css
+            .globals
+            .as_ref()
+            .filter(|globals| !globals.is_empty())?;
+        let mut entries: Vec<_> = globals.iter().collect();
+        entries.sort_unstable();
+        let mut stylesheets = Vec::new();
+        for entry in entries {
+            stylesheets.extend(
+                css_globals
+                    .stylesheets(entry, |entry| css_global_stylesheets(host, entry))
+                    .iter()
+                    .cloned(),
+            );
+        }
+        contributions.visits.extend(stylesheets.iter().cloned());
+        contributions.incomplete.remove(&Facet::Styles);
+        Some(stylesheets)
     }
 
     /// Records what the frameworks of the package in `package_path` inject.
@@ -2490,10 +2569,12 @@ impl WorkspaceServerWithDb<'_> {
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
     fn register_frameworks(
         &self,
+        project_key: ProjectKey,
         package_path: Utf8PathBuf,
         files: &[Utf8PathBuf],
         contributions: &FrameworkContributions,
-    ) {
+        css_globals: Option<&[Utf8PathBuf]>,
+    ) -> Vec<Error> {
         let mut modules = FrameworkModules::default();
         let mut scope = FrameworkScope {
             package_path: package_path.clone(),
@@ -2538,12 +2619,104 @@ impl WorkspaceServerWithDb<'_> {
                 (declaration.name.clone(), definition)
             })
             .collect();
+        let mut diagnostics = Vec::new();
+        // The user lists the stylesheets that apply to every page, unless
+        // Biome can't read one of them.
+        if let Some(css_globals) = css_globals {
+            let mut has_unreadable_css_global = false;
+            for path in css_globals {
+                if !scope.stylesheets.contains(path) {
+                    has_unreadable_css_global = true;
+                    diagnostics.push(Error::from(UnreadableCssGlobal {
+                        path: path.to_string(),
+                    }));
+                }
+            }
+            if !has_unreadable_css_global {
+                scope.has_unknown_styles = false;
+            }
+        }
+        let manifest_path = package_path.join("package.json");
+        let enables =
+            |names: &[&str]| self.enables_project_rule(project_key, &manifest_path, names);
+        let manifest_path_text = manifest_path.to_string();
+        if scope.has_unknown_styles
+            && enables(&[
+                "noUndeclaredClasses",
+                "noUndeclaredCustomProperties",
+                "noUnusedClasses",
+            ])
+        {
+            diagnostics.push(Error::from(UnknownFrameworkStylesheets {
+                manifest_path: manifest_path_text.clone(),
+                advice: UnknownFrameworkStylesheetsAdvice,
+            }));
+        }
+        if scope.has_unknown_modules && enables(&["noUnresolvedImports"]) {
+            diagnostics.push(Error::from(UnknownFrameworkModules {
+                manifest_path: manifest_path_text,
+                advice: UnknownFrameworkModulesAdvice,
+            }));
+        }
         let frameworks = PackageFrameworks {
             modules,
             scope: Arc::new(scope),
         };
         self.db_state
             .set_frameworks(package_path, Arc::new(frameworks));
+        diagnostics
+    }
+
+    /// Returns whether the configuration of `path` enables any of the rules
+    /// `names`, which belong to the project domain: in its rules, in the
+    /// rules of an override, or with the domain.
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn enables_project_rule(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        names: &[&str],
+    ) -> bool {
+        let db = self.get_db();
+        let Some(configuration) = self
+            .project_get_settings_query(&db, project_key, path, None)
+            .and_then(|(_, settings, _)| settings.source())
+        else {
+            return false;
+        };
+        if configuration
+            .linter
+            .as_ref()
+            .is_some_and(|linter| !linter.is_enabled())
+        {
+            return false;
+        }
+        let overrides = configuration
+            .overrides
+            .iter()
+            .flat_map(|overrides| &overrides.0)
+            .filter_map(|pattern| pattern.linter.as_ref())
+            .map(|linter| (linter.rules.as_ref(), linter.domains.as_ref()));
+        let linters = configuration
+            .linter
+            .iter()
+            .map(|linter| (linter.rules.as_ref(), linter.domains.as_ref()))
+            .chain(overrides);
+        let mut enabled_rules = FxHashSet::default();
+        let mut enables_domain = false;
+        for (rules, domains) in linters {
+            if let Some(rules) = rules {
+                enabled_rules.extend(rules.as_enabled_rules());
+            }
+            enables_domain |= domains.is_some_and(|domains| {
+                domains.get(&RuleDomain::Project) == Some(&RuleDomainValue::All)
+            });
+        }
+        enables_domain
+            || enabled_rules.iter().any(|filter| match filter {
+                RuleFilter::Rule(_, name) => names.contains(name),
+                RuleFilter::Group(_) => false,
+            })
     }
 
     // #region DATABASE OPERATIONS
@@ -3213,6 +3386,32 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 .or_else(|| self.project_get_path(project_key))
                 .unwrap_or_default();
             *stylesheet = normalize_path(&base.join(stylesheet.as_str())).into_string();
+        }
+        // Like the Tailwind CSS stylesheet, the entries of `css.globals` are
+        // relative to the configuration that declares them. A negated entry
+        // isn't a path, and it's reported when the entries are expanded.
+        #[cfg(feature = "lang_css")]
+        if let Some(globals) = configuration
+            .css
+            .as_mut()
+            .and_then(|css| css.globals.as_mut())
+        {
+            let base = workspace_directory
+                .clone()
+                .or_else(|| self.project_get_path(project_key))
+                .unwrap_or_default();
+            *globals = globals
+                .iter()
+                .map(|entry| {
+                    if entry.starts_with('!') {
+                        entry.clone()
+                    } else {
+                        normalize_path(&base.join(entry.as_ref()))
+                            .into_string()
+                            .into_boxed_str()
+                    }
+                })
+                .collect();
         }
 
         settings.merge_with_configuration(
@@ -5020,15 +5219,27 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-    fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
+    fn index_framework_files(
+        &self,
+        project_key: ProjectKey,
+        index: &dyn Fn(Vec<Utf8PathBuf>),
+    ) -> Vec<Error> {
+        let mut diagnostics = Vec::new();
         // Outside the epoch of a scan, such as when the watcher reports a
         // change, a concurrent client update can cancel the database reads.
-        let loaded = retry_on_pending_write(|| self.load_package_frameworks(project_key));
+        let (loaded, css_globals_diagnostics) =
+            retry_on_pending_write(|| self.load_package_frameworks(project_key));
+        diagnostics.extend(css_globals_diagnostics);
         let loaded_packages: FxHashSet<_> = loaded
             .iter()
-            .map(|(package_path, _)| package_path.clone())
+            .map(|package| package.package_path.clone())
             .collect();
-        for (package_path, contributions) in loaded {
+        for LoadedPackage {
+            package_path,
+            contributions,
+            css_globals,
+        } in loaded
+        {
             let mut seen: FxHashSet<_> = contributions.visits.iter().cloned().collect();
             let mut pending: Vec<_> = contributions.visits.iter().cloned().collect();
             let mut files = Vec::new();
@@ -5059,16 +5270,22 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                 files.append(&mut pending);
                 pending = references;
             }
-            retry_on_pending_write(|| {
-                self.register_frameworks(package_path.clone(), &files, &contributions);
-            });
+            diagnostics.extend(retry_on_pending_write(|| {
+                self.register_frameworks(
+                    project_key,
+                    package_path.clone(),
+                    &files,
+                    &contributions,
+                    css_globals.as_deref(),
+                )
+            }));
         }
 
         // The package of a removed manifest no longer has frameworks, and its
         // files use the frameworks of an enclosing package.
         let Some(project_path) = retry_on_pending_write(|| self.project_get_path(project_key))
         else {
-            return;
+            return diagnostics;
         };
         let removed_packages: Vec<_> =
             retry_on_pending_write(|| self.db_state.fork().framework_package_paths())
@@ -5081,6 +5298,18 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
         for package_path in removed_packages {
             retry_on_pending_write(|| self.db_state.remove_frameworks(&package_path));
         }
+        diagnostics
+    }
+
+    #[cfg(all(feature = "module_graph", feature = "lang_js", feature = "lang_css"))]
+    fn is_css_global(&self, path: &Utf8Path) -> bool {
+        let db = self.get_db();
+        let Some(project_key) = db.find_project_for_path(path) else {
+            return false;
+        };
+        self.project_get_settings_query(&db, project_key, path, None)
+            .and_then(|(_, settings, _)| settings.languages.css.globals.clone())
+            .is_some_and(|globals| globals.iter().any(|entry| is_css_global(entry, path)))
     }
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
@@ -5206,9 +5435,13 @@ impl WorkspaceScannerBridge for LocalWorkspace {
             .index_new_module_dependencies(project_key)
     }
 
-    fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
+    fn index_framework_files(
+        &self,
+        project_key: ProjectKey,
+        index: &dyn Fn(Vec<Utf8PathBuf>),
+    ) -> Vec<Error> {
         self.as_workspace()
-            .index_framework_files(project_key, index);
+            .index_framework_files(project_key, index)
     }
 
     fn is_framework_config(&self, path: &Utf8Path) -> bool {
@@ -5217,6 +5450,10 @@ impl WorkspaceScannerBridge for LocalWorkspace {
 
     fn contains_package(&self, path: &Utf8Path) -> bool {
         self.as_workspace().contains_package(path)
+    }
+
+    fn is_css_global(&self, path: &Utf8Path) -> bool {
+        self.as_workspace().is_css_global(path)
     }
 }
 

@@ -32,7 +32,19 @@ pub struct CssConfiguration {
     #[cfg_attr(feature = "cli", bpaf(external(css_assist_configuration), optional))]
     pub assist: Option<CssAssistConfiguration>,
 
-    /// Reserved for future CSS analyzer support. This option currently has no effect.
+    /// Stylesheets that apply to every page without an import, such as the stylesheets that a
+    /// framework or a build tool adds. Each entry is a path or a glob pattern, relative to the
+    /// folder of the configuration file that declares it. A glob pattern matches only stylesheets
+    /// and doesn't match files in `node_modules`, so list those files by path. Negated patterns
+    /// aren't supported.
+    ///
+    /// Rules that check classes and custom properties, such as `noUndeclaredClasses`, treat these
+    /// stylesheets as available to every file of each package under the configuration, where a
+    /// package is a folder with a `package.json` file. When the
+    /// option has entries, these rules also report in packages where Biome can't find all the
+    /// stylesheets that a framework adds, for example because a function computes them.
+    ///
+    /// This option isn't supported in `overrides`.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,

@@ -83,6 +83,18 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+package.json project/frameworks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Biome can't find all the modules that the frameworks of this package provide.
+  
+  i The rule noUnresolvedImports doesn't report the imports in this package whose specifier is neither a path nor a package name, such as astro:content.
+  
+  i Install the dependencies of the package, and check that Biome supports the installed version of the framework.
+  
+
+```
+
+```block
 src/index.ts:3:24 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The path ./missing cannot be resolved: module not found

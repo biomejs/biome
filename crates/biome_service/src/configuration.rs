@@ -66,7 +66,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use tracing::instrument;
 
-fn display_path(path: &Utf8Path) -> Cow<'_, str> {
+pub(crate) fn display_path(path: &Utf8Path) -> Cow<'_, str> {
     if cfg!(any(test, windows)) {
         Cow::Owned(path.as_str().replace('\\', "/"))
     } else {
