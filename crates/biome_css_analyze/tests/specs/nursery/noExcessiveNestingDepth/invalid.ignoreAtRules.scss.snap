@@ -1,0 +1,135 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.ignoreAtRules.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+	.b {
+		@media (min-width: 600px) {
+			.c {
+				.d {
+					.e {
+						color: red;
+					}
+				}
+			}
+		}
+	}
+}
+
+@media print {
+	.a {
+		.b {
+			.c {
+				.d {
+					.e {
+						.f {
+							color: red;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+.a {
+	@include breakpoint {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ignoreAtRules.scss:7:6 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    5 │ 			.c {
+    6 │ 				.d {
+  > 7 │ 					.e {
+      │ 					^^
+    8 │ 						color: red;
+    9 │ 					}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ignoreAtRules.scss:21:6 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    19 │ 			.c {
+    20 │ 				.d {
+  > 21 │ 					.e {
+       │ 					^^
+    22 │ 						.f {
+    23 │ 							color: red;
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ignoreAtRules.scss:22:7 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 5 levels deep, but the maximum is 3.
+  
+    20 │ 				.d {
+    21 │ 					.e {
+  > 22 │ 						.f {
+       │ 						^^
+    23 │ 							color: red;
+    24 │ 						}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ignoreAtRules.scss:36:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    34 │ 		.b {
+    35 │ 			.c {
+  > 36 │ 				.d {
+       │ 				^^
+    37 │ 					color: red;
+    38 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

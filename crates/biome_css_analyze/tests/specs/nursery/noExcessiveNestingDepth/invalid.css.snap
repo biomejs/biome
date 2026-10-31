@@ -1,0 +1,230 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+	.b {
+		.c {
+			.d {
+				.e {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@media (min-width: 600px) {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	@media (min-width: 600px) {
+		.b {
+			@supports (display: grid) {
+				.c {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			@keyframes fade {
+				from {
+					opacity: 0;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				.e {
+					.f {
+						color: red;
+					}
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		@MEDIA (min-width: 600px) {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:6:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    4 │ 		.c {
+    5 │ 			.d {
+  > 6 │ 				.e {
+      │ 				^^
+    7 │ 					color: red;
+    8 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:18:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    16 │ 		.c {
+    17 │ 			.d {
+  > 18 │ 				@media (min-width: 600px) {
+       │ 				^^^^^^
+    19 │ 					color: red;
+    20 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:30:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    28 │ 		.b {
+    29 │ 			@supports (display: grid) {
+  > 30 │ 				.c {
+       │ 				^^
+    31 │ 					color: red;
+    32 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:42:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    40 │ 		.c {
+    41 │ 			@keyframes fade {
+  > 42 │ 				from {
+       │ 				^^^^
+    43 │ 					opacity: 0;
+    44 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:54:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    52 │ 		.c {
+    53 │ 			.d {
+  > 54 │ 				.e {
+       │ 				^^
+    55 │ 					.f {
+    56 │ 						color: red;
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:55:6 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 5 levels deep, but the maximum is 3.
+  
+    53 │ 			.d {
+    54 │ 				.e {
+  > 55 │ 					.f {
+       │ 					^^
+    56 │ 						color: red;
+    57 │ 					}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:68:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    66 │ 		@MEDIA (min-width: 600px) {
+    67 │ 			.c {
+  > 68 │ 				.d {
+       │ 				^^
+    69 │ 					color: red;
+    70 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

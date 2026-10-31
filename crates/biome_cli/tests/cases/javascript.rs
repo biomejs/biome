@@ -99,6 +99,55 @@ const Bar = styled.div`background-color: red !important; align: center; padding:
 }
 
 #[test]
+fn embedded_css_top_level_at_rule_does_not_add_nesting_level() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let js_file = Utf8Path::new("file.js");
+    fs.insert(
+        js_file.into(),
+        r#"const Valid = styled.div`@media (min-width: 600px) { .a { .b { .c { .d { color: red; } } } } }`;
+const Invalid = styled.div`.a { .b { .c { .d { .e { color: red; } } } } }`;
+"#
+        .as_bytes(),
+    );
+
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{
+    "javascript": {
+        "experimentalEmbeddedSnippetsEnabled": true
+    },
+    "linter": {
+        "rules": {
+            "preset": "none",
+            "nursery": {
+                "noExcessiveNestingDepth": "error"
+            }
+        }
+    }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "embedded_css_top_level_at_rule_does_not_add_nesting_level",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn javascript_comments_suppress_embedded_css_and_graphql_rules() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

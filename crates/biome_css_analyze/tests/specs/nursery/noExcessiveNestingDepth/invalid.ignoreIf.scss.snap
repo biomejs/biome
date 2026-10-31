@@ -1,0 +1,83 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.ignoreIf.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+	.b {
+		@if $x {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		} @else {
+			.c {
+				.d {
+					color: blue;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@if $x {
+					color: red;
+				} @else {
+					color: blue;
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ignoreIf.scss:12:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    10 │ 		} @else {
+    11 │ 			.c {
+  > 12 │ 				.d {
+       │ 				^^
+    13 │ 					color: blue;
+    14 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ignoreIf.scss:26:7 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    24 │ 				@if $x {
+    25 │ 					color: red;
+  > 26 │ 				} @else {
+       │ 				  ^^^^^
+    27 │ 					color: blue;
+    28 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

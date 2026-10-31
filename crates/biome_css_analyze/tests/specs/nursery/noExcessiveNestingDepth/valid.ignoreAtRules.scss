@@ -1,0 +1,50 @@
+/* should not generate diagnostics */
+.a {
+	.b {
+		@media (min-width: 600px) {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		@MEDIA (min-width: 600px) {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		@supports (display: grid) {
+			@container (min-width: 300px) {
+				.c {
+					.d {
+						color: red;
+					}
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@media (min-width: 600px) {
+					color: red;
+				}
+			}
+		}
+	}
+}

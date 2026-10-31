@@ -1,0 +1,16 @@
+/* should generate diagnostics */
+.a {
+	.b {
+		.c {
+			color: red;
+		}
+	}
+}
+
+.a {
+	@font-feature-values Font {
+		@swash {
+			fancy: 1;
+		}
+	}
+}

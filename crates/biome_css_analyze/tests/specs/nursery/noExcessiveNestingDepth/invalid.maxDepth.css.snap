@@ -1,0 +1,67 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.maxDepth.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+	.b {
+		.c {
+			color: red;
+		}
+	}
+}
+
+.a {
+	@font-feature-values Font {
+		@swash {
+			fancy: 1;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.maxDepth.css:4:3 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 2 levels deep, but the maximum is 1.
+  
+    2 │ .a {
+    3 │ 	.b {
+  > 4 │ 		.c {
+      │ 		^^
+    5 │ 			color: red;
+    6 │ 		}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.maxDepth.css:12:3 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 2 levels deep, but the maximum is 1.
+  
+    10 │ .a {
+    11 │ 	@font-feature-values Font {
+  > 12 │ 		@swash {
+       │ 		^^^^^^
+    13 │ 			fancy: 1;
+    14 │ 		}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

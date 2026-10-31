@@ -1,0 +1,32 @@
+/* should generate diagnostics */
+.a {
+	.b {
+		@if $x {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		} @else {
+			.c {
+				.d {
+					color: blue;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@if $x {
+					color: red;
+				} @else {
+					color: blue;
+				}
+			}
+		}
+	}
+}
