@@ -38,3 +38,10 @@ namespace Ns {
 declare class Class {}
 
 export {}
+
+function run1() {
+	declare class A extends B { [B.name](): void; }
+	class B {}
+}
+export declare class C extends D {}
+class D {}
