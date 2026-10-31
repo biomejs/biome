@@ -1,8 +1,11 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{CssDeclarationOrRuleList, CssKeyframesAtRule};
+use biome_css_syntax::{
+    AnyCssDeclarationOrRule, AnyCssProperty, CssDeclaration, CssDeclarationOrRuleList,
+    CssKeyframesAtRule, CssSyntaxKind, ScssNestingDeclaration,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxKind, TextRange, TokenText};
 use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::Entry;
@@ -57,11 +60,20 @@ impl Rule for NoDuplicateProperties {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
+
+        if node.syntax().parent().is_some_and(|block| {
+            block
+                .parent()
+                .is_some_and(|parent| ScssNestingDeclaration::can_cast(parent.kind()))
+        }) {
+            return None;
+        }
+
         let model = ctx.model();
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
+        let mut declarations = Vec::new();
 
         for declaration in rule.declarations().iter().filter(|declaration| {
             declaration
@@ -92,6 +104,20 @@ impl Rule for NoDuplicateProperties {
                 continue;
             }
 
+            declarations.push((prop_range, prop_range, prop_name));
+        }
+
+        for item in node.iter() {
+            if let AnyCssDeclarationOrRule::ScssNestingDeclaration(nesting) = item {
+                collect_scss_nesting_declarations(&nesting, None, &mut declarations);
+            }
+        }
+
+        declarations.sort_by_key(|(position, _, _)| position.start());
+
+        let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
+
+        for (_, prop_range, prop_name) in declarations {
             match seen.entry(prop_name.clone()) {
                 Entry::Occupied(entry) => {
                     return Some((*entry.get(), (prop_range, prop_name)));
@@ -122,5 +148,93 @@ impl Rule for NoDuplicateProperties {
                 "Remove or rename the duplicate property to ensure consistent styling."
             }),
         )
+    }
+}
+
+fn collect_scss_nesting_declarations(
+    declaration: &ScssNestingDeclaration,
+    parent_name: Option<&str>,
+    declarations: &mut Vec<(TextRange, TextRange, TokenText)>,
+) {
+    let Ok(name_node) = declaration.name() else {
+        return;
+    };
+    let Some(name) = name_node.identifier_text() else {
+        return;
+    };
+
+    let name_range = name_node.syntax().text_trimmed_range();
+
+    if name_node
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .any(|node| CssKeyframesAtRule::can_cast(node.kind()))
+    {
+        return;
+    }
+
+    let expanded_name = match parent_name {
+        Some(parent_name) => format!("{parent_name}-{}", name.text()),
+        None => name.text().to_string(),
+    };
+
+    if declaration
+        .value()
+        .is_ok_and(|value| !value.syntax().text_trimmed().is_empty())
+    {
+        declarations.push((
+            name_range,
+            name_range,
+            TokenText::new_raw(CssSyntaxKind::IDENT.to_raw(), &expanded_name),
+        ));
+    }
+
+    let Ok(block) = declaration.block() else {
+        return;
+    };
+    let Some(block) = block.as_css_declaration_or_rule_block() else {
+        return;
+    };
+
+    for item in block.items().iter() {
+        match item {
+            AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration) => {
+                let Ok(declaration) = declaration.declaration() else {
+                    continue;
+                };
+                let Some((name, range)) = declaration_property(&declaration) else {
+                    continue;
+                };
+                declarations.push((
+                    range,
+                    range,
+                    TokenText::new_raw(
+                        CssSyntaxKind::IDENT.to_raw(),
+                        &format!("{expanded_name}-{}", name.text()),
+                    ),
+                ));
+            }
+            AnyCssDeclarationOrRule::ScssNestingDeclaration(nesting) => {
+                collect_scss_nesting_declarations(&nesting, Some(&expanded_name), declarations);
+            }
+            _ => {}
+        }
+    }
+}
+
+fn declaration_property(declaration: &CssDeclaration) -> Option<(TokenText, TextRange)> {
+    match declaration.property().ok()? {
+        AnyCssProperty::CssComposesProperty(property) => {
+            let name = property.name().ok()?;
+            let range = name.syntax().text_trimmed_range();
+            Some((name.value_token().ok()?.token_text_trimmed(), range))
+        }
+        AnyCssProperty::CssGenericProperty(property) => {
+            let name = property.name().ok()?;
+            let range = name.syntax().text_trimmed_range();
+            Some((name.identifier_text()?, range))
+        }
+        AnyCssProperty::CssBogusProperty(_) => None,
     }
 }
