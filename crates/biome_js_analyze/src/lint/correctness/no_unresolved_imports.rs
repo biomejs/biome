@@ -1,6 +1,8 @@
 use crate::services::database::ResolvedImports;
+use crate::utils::parse_package_name;
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -9,7 +11,7 @@ use biome_module_graph::{
     JsExportedSymbolLookup, ModuleDb, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS,
     SymbolFromModuleInfo, find_js_exported_symbol,
 };
-use biome_resolver::ResolveError;
+use biome_resolver::{ResolveError, is_relative_specifier};
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -57,6 +59,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintImport("named").inspired()],
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro],
         severity: Severity::Error,
     }
 }
@@ -121,6 +124,15 @@ impl Rule for NoUnresolvedImports {
                 // imports — they simply cannot be resolved to a file path.
                 if *resolve_error == ResolveError::NodeBuiltIn
                     || *resolve_error == ResolveError::BunBuiltIn
+                {
+                    return Vec::new();
+                }
+
+                if can_only_name_framework_module(&specifier)
+                    && ctx
+                        .db()
+                        .framework_scope(ctx.file_path())
+                        .is_some_and(|scope| scope.has_unknown_modules)
                 {
                     return Vec::new();
                 }
@@ -251,6 +263,15 @@ struct GetUnresolvedImportsOptions<'a> {
 
     /// Module info of the module we're importing from.
     target_info: ModuleInfo,
+}
+
+/// Returns whether `specifier` can name a module that a framework provides,
+/// but is neither a path nor a package name, such as `astro:content`,
+/// `$lib/utils`, `#internal` or `~/utils`.
+fn can_only_name_framework_module(specifier: &str) -> bool {
+    !Utf8Path::new(specifier).is_absolute()
+        && !is_relative_specifier(specifier)
+        && parse_package_name(specifier).is_none()
 }
 
 fn get_unresolved_imports_from_module_source(

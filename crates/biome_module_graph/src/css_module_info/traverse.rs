@@ -322,6 +322,16 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         self.last_property_in_module_context_from(path, CssPropertyBranch::default())
     }
 
+    /// Returns the last definition that the module at `path` makes visible to
+    /// every page: a definition in a stylesheet or the stylesheets it imports,
+    /// or in the global styles of an HTML-like component.
+    pub(crate) fn last_property_in_global_context(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<CssPropertyDefinition> {
+        self.last_property_in_module_context_from(path, CssPropertyBranch::default())
+    }
+
     fn last_property_in_module_context_from(
         &self,
         path: &Utf8Path,
@@ -633,7 +643,7 @@ fn js_import_paths_in_source_order(
 
 /// Returns the CSS classes defined by the module at `path`, or `None` when the
 /// path does not identify a CSS module.
-fn css_class_step(db: &dyn ModuleDb, path: &Utf8Path) -> Option<CssClassStep> {
+pub(crate) fn css_class_step(db: &dyn ModuleDb, path: &Utf8Path) -> Option<CssClassStep> {
     let info = db.css_module_info_for_path(path)?;
     Some(CssClassStep {
         css_path: path.to_path_buf(),
@@ -674,11 +684,16 @@ struct RelativePath<'a> {
 
 impl<'a> biome_console::fmt::Display for RelativePath<'a> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        if let Some(wd) = self.working_directory {
-            let relative = self.path.strip_prefix(wd).unwrap_or(self.path);
-            fmt.write_str(relative.as_str())
+        let path = match self.working_directory {
+            Some(wd) => self.path.strip_prefix(wd).unwrap_or(self.path),
+            None => self.path,
+        };
+        // Like the file names of diagnostics, so that snapshots print the
+        // same separators on every platform.
+        if cfg!(debug_assertions) && cfg!(windows) {
+            fmt.write_str(&path.as_str().replace('\\', "/"))
         } else {
-            fmt.write_str(self.path.as_str())
+            fmt.write_str(path.as_str())
         }
     }
 }

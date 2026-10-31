@@ -3,19 +3,33 @@
 //!
 //! A framework loads files that no source file imports, such as the
 //! stylesheets of Starlight, and declares modules that no file provides, such
-//! as `astro:content`. The scanner indexes the files that the loaders visit.
-//! The modules that the visited declaration files declare become
-//! [FrameworkModules], which module resolution falls back to.
+//! as `astro:content`. The scanner indexes the files that the loaders visit,
+//! and each visited file contributes by its kind to the [PackageFrameworks]
+//! of its package:
+//!
+//! - The modules that a declaration file declares become [FrameworkModules],
+//!   which module resolution falls back to.
+//! - A stylesheet applies to every page of the package.
+//! - An HTML-like component is rendered on every page of the package.
 
+use biome_module_graph::FrameworkScope;
 use biome_resolver::{match_pattern_key, pattern_key_compare};
 use camino::Utf8PathBuf;
 use rustc_hash::FxHashMap;
+use std::sync::Arc;
 
 #[cfg(feature = "lang_js")]
 mod host;
 
 #[cfg(feature = "lang_js")]
 pub(crate) use host::{WorkspaceLoaderHost, referenced_declaration_files};
+
+/// What the frameworks of a package inject.
+#[derive(Debug, Default, Eq, PartialEq)]
+pub(crate) struct PackageFrameworks {
+    pub(crate) modules: FrameworkModules,
+    pub(crate) scope: Arc<FrameworkScope>,
+}
 
 /// The modules that the frameworks of a package declare, by the specifier
 /// that imports them.

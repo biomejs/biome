@@ -46,6 +46,9 @@ pub struct RuleMetadata {
     pub severity: Severity,
     /// Domains applied by this rule
     pub domains: &'static [RuleDomain],
+    /// Frameworks whose injected files and configuration this rule
+    /// understands
+    pub frameworks: &'static [RuleFramework],
     /// Use this field to tag the rule as being worked, which means the rule is still far from being completed.
     /// Possible bugs should be reported in that issue.
     pub issue_number: Option<&'static str>,
@@ -910,6 +913,49 @@ impl FromStr for RuleDomain {
     }
 }
 
+/// A framework whose injected files and configuration a rule understands.
+///
+/// Unlike a [RuleDomain], a framework doesn't enable rules. It documents what
+/// Biome reads from the framework, such as the stylesheets that it adds to
+/// every page, for the rules that use it.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+pub enum RuleFramework {
+    Astro,
+    Starlight,
+}
+
+impl RuleFramework {
+    /// The name of the framework, as its documentation spells it.
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::Astro => "Astro",
+            Self::Starlight => "Starlight",
+        }
+    }
+
+    /// What Biome does for the framework, one Markdown list item each, for
+    /// the documentation of the rules that use it.
+    pub const fn capabilities(self) -> &'static [&'static str] {
+        match self {
+            Self::Astro => &[
+                "Reads the Astro configuration, `astro.config.*`, and the integrations that it registers, such as Starlight.",
+                "Resolves the modules that Astro provides, such as `astro:content` and `astro:assets`, from the type declarations of the installed `astro` package.",
+                "Defines the CSS custom property that the `cssVariable` of each font names, such as `--font-body`.",
+                "Considers every class of the stylesheets that frameworks add to every page as used when the package contains Markdown or MDX pages, or Astro files that Biome reads without full HTML support, because Biome can't read the classes that these files use.",
+                "When Biome can't read a configuration value without running the configuration, for example because a function computes it, the rules that depend on the value don't report anything in the package.",
+            ],
+            Self::Starlight => &[
+                "Adds the stylesheets of Starlight, and the stylesheets listed in its `customCss` option, to every page. Their classes and custom properties are available to every file of the package.",
+                "Reads the Astro components of Starlight, even when `html.experimentalFullSupportEnabled` is disabled. Their global styles define classes, and their class attributes and scoped styles use classes.",
+                "Adds the stylesheets that the packages listed in its `plugins` option export to every page.",
+                "When Biome can't read the `customCss` option, for example because a function computes it, the rules that depend on stylesheets don't report anything in the package.",
+            ],
+        }
+    }
+}
+
 impl RuleMetadata {
     pub const fn new(
         version: &'static str,
@@ -928,6 +974,7 @@ impl RuleMetadata {
             sources: &[],
             severity: Severity::Information,
             domains: &[],
+            frameworks: &[],
             issue_number: None,
             rule_presets: &[],
         }
@@ -965,6 +1012,11 @@ impl RuleMetadata {
 
     pub const fn domains(mut self, domains: &'static [RuleDomain]) -> Self {
         self.domains = domains;
+        self
+    }
+
+    pub const fn frameworks(mut self, frameworks: &'static [RuleFramework]) -> Self {
+        self.frameworks = frameworks;
         self
     }
 

@@ -1,0 +1,74 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint src/index.ts
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": { "correctness": { "noUnresolvedImports": "error" } }
+  }
+}
+```
+
+## `package.json`
+
+```json
+{ "dependencies": { "astro": "^5.0.0" } }
+```
+
+## `src/index.ts`
+
+```ts
+import { getCollection } from "astro:content";
+import { config } from "virtual:starlight/user-config";
+import { helper } from "./missing";
+import { alias } from "~/lib/alias";
+import { internal } from "#internal";
+import { kit } from "$lib/kit";
+
+export { alias, config, getCollection, helper, internal, kit };
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.ts:3:24 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The path ./missing cannot be resolved: module not found
+  
+    1 │ import { getCollection } from "astro:content";
+    2 │ import { config } from "virtual:starlight/user-config";
+  > 3 │ import { helper } from "./missing";
+      │                        ^^^^^^^^^^^
+    4 │ import { alias } from "~/lib/alias";
+    5 │ import { internal } from "#internal";
+  
+  i Make sure that the path exists and is readable.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```
