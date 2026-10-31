@@ -3,7 +3,7 @@ use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Error, StdError};
 use biome_package::node_semver::Version;
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use self_update::backends::github::Update;
 use std::env;
 use std::fmt;
