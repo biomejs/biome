@@ -75,7 +75,7 @@ use biome_diagnostics::{
 use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
 use biome_formatter::rowan::Printed;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
-use biome_frameworks::{DeclarationKind, Facet, FrameworkContributions, LOADERS};
+use biome_frameworks::{Activation, DeclarationKind, Facet, FrameworkContributions, LOADERS};
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_fs::is_node_modules_path;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
@@ -5021,21 +5021,33 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
     fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
-        for (package_path, contributions) in self.load_package_frameworks(project_key) {
+        // Outside the epoch of a scan, such as when the watcher reports a
+        // change, a concurrent client update can cancel the database reads.
+        let loaded = retry_on_pending_write(|| self.load_package_frameworks(project_key));
+        let loaded_packages: FxHashSet<_> = loaded
+            .iter()
+            .map(|(package_path, _)| package_path.clone())
+            .collect();
+        for (package_path, contributions) in loaded {
             let mut seen: FxHashSet<_> = contributions.visits.iter().cloned().collect();
             let mut pending: Vec<_> = contributions.visits.iter().cloned().collect();
             let mut files = Vec::new();
             while !pending.is_empty() {
-                {
+                // A file indexed before a loader visited it, such as a
+                // component that a source file imports, is indexed again
+                // with full HTML support.
+                let newly_visited: FxHashSet<_> = {
                     let framework_files = self.framework_files.pin();
-                    for path in &pending {
-                        framework_files.insert(path.clone());
-                    }
-                }
+                    pending
+                        .iter()
+                        .filter(|path| framework_files.insert((*path).clone()))
+                        .cloned()
+                        .collect()
+                };
                 index(
                     pending
                         .iter()
-                        .filter(|path| !self.is_indexed(path))
+                        .filter(|path| newly_visited.contains(*path) || !self.is_indexed(path))
                         .cloned()
                         .collect(),
                 );
@@ -5047,8 +5059,48 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                 files.append(&mut pending);
                 pending = references;
             }
-            self.register_frameworks(package_path, &files, &contributions);
+            retry_on_pending_write(|| {
+                self.register_frameworks(package_path.clone(), &files, &contributions);
+            });
         }
+
+        // The package of a removed manifest no longer has frameworks, and its
+        // files use the frameworks of an enclosing package.
+        let Some(project_path) = self.project_get_path(project_key) else {
+            return;
+        };
+        let removed_packages: Vec<_> = self
+            .db_state
+            .fork()
+            .framework_package_paths()
+            .into_iter()
+            .filter(|package_path| {
+                package_path.starts_with(&project_path) && !loaded_packages.contains(package_path)
+            })
+            .collect();
+        for package_path in removed_packages {
+            self.db_state.remove_frameworks(&package_path);
+        }
+    }
+
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn is_framework_config(&self, path: &Utf8Path) -> bool {
+        // Loaders read only the configuration files in the folder of a
+        // package.
+        let is_in_package = path.parent().is_some_and(|directory| {
+            self.project_layout
+                .get_node_manifest_for_package(directory)
+                .is_some()
+        });
+        is_in_package
+            && path.file_name().is_some_and(|file_name| {
+                LOADERS.iter().any(|loader| {
+                    matches!(
+                        loader.activation(),
+                        Activation::Dependency { config_files } if config_files.contains(&file_name)
+                    )
+                })
+            })
     }
 }
 
@@ -5149,6 +5201,10 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     fn index_framework_files(&self, project_key: ProjectKey, index: &dyn Fn(Vec<Utf8PathBuf>)) {
         self.as_workspace()
             .index_framework_files(project_key, index);
+    }
+
+    fn is_framework_config(&self, path: &Utf8Path) -> bool {
+        self.as_workspace().is_framework_config(path)
     }
 }
 

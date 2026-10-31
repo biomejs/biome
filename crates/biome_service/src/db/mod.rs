@@ -468,6 +468,13 @@ impl WorkspaceDbData {
         self.frameworks.pin().insert(package_path, frameworks);
     }
 
+    /// Removes what the frameworks of the package in `package_path` inject,
+    /// so that its files use the frameworks of an enclosing package.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_frameworks(&self, package_path: &Utf8Path) {
+        self.frameworks.pin().remove(package_path);
+    }
+
     /// Removes all files and modules that start with the given path. That's
     /// usually used when removing a library or a folder from the project.
     pub fn unload_path(&self, path: &Utf8Path) {
@@ -1166,6 +1173,20 @@ impl WorkspaceDb {
             scope: Arc::new(scope),
         };
         self.set_frameworks(package_path, Arc::new(frameworks));
+    }
+
+    /// Returns the paths of the packages whose frameworks were recorded.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn framework_package_paths(&self) -> Vec<Utf8PathBuf> {
+        self.frameworks.pin().keys().cloned().collect()
+    }
+
+    /// Removes what the frameworks of the package in `package_path` inject,
+    /// and advances the module graph generation.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_frameworks(&mut self, package_path: &Utf8Path) {
+        let data = self.data();
+        self.write_module_data(|_| data.remove_frameworks(package_path));
     }
 
     /// Returns what the frameworks of the nearest package that contains

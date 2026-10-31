@@ -134,6 +134,12 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// `/// <reference path="..." />` directives name, are indexed with `index`
     /// first.
     fn index_framework_files(&self, _project_key: ProjectKey, _index: &dyn Fn(Vec<Utf8PathBuf>)) {}
+
+    /// Returns whether `path` is the configuration file of a framework that a
+    /// framework loader reads, such as `astro.config.mjs`.
+    fn is_framework_config(&self, _path: &Utf8Path) -> bool {
+        false
+    }
 }
 
 /// Trait used to give access to workspace functionality required by the
@@ -235,6 +241,40 @@ impl<'a, W: WorkspaceScannerBridge> ScannerWatcherBridge<'a, W> {
     pub fn new((scanner, workspace): (&'a Scanner, &'a W)) -> Self {
         Self { scanner, workspace }
     }
+
+    /// Returns whether the change at `path` affects what the framework
+    /// loaders read: a manifest, when `manifest_changed` is set, or the
+    /// configuration file of a framework.
+    fn affects_frameworks(&self, path: &Utf8Path, manifest_changed: bool) -> bool {
+        manifest_changed || self.workspace.is_framework_config(path)
+    }
+
+    /// Runs the framework loaders of the project again when `affected` is
+    /// set. See [Self::affects_frameworks].
+    ///
+    /// Like the initial scan, only project and type-aware scans run the
+    /// loaders.
+    fn reload_frameworks(
+        &self,
+        project_key: ProjectKey,
+        affected: bool,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError> {
+        if !affected {
+            return Ok(Vec::new());
+        }
+        let runs_loaders = self
+            .scanner
+            .get_scan_kind_for_project(project_key)
+            .is_some_and(|scan_kind| scan_kind.is_project() || scan_kind.is_type_aware());
+        let Some(project_path) = self.workspace.get_project_path(project_key) else {
+            return Ok(Vec::new());
+        };
+        if !runs_loaders {
+            return Ok(Vec::new());
+        }
+        self.scanner
+            .reindex_framework_files(self.workspace, project_key, &project_path)
+    }
 }
 
 impl<W> WorkspaceWatcherBridge for ScannerWatcherBridge<'_, W>
@@ -291,6 +331,7 @@ where
         // The file is indexed with the refreshed path info, so its imports resolve
         // against the current filesystem.
         let manifest_changed = self.workspace.sync_path_info(&path);
+        let affects_frameworks = self.affects_frameworks(&path, manifest_changed);
         let (dependencies, diagnostics) =
             self.workspace
                 .index_file(project_key, path, IndexTrigger::Update)?;
@@ -312,6 +353,7 @@ where
         if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(self.reload_frameworks(project_key, affects_frameworks)?);
         Ok(diagnostics)
     }
 
@@ -327,6 +369,9 @@ where
         if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(
+            self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
+        );
         Ok(diagnostics)
     }
 
@@ -346,9 +391,13 @@ where
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let mut diagnostics = self.workspace.unload_file(path, project_key)?;
-        if self.workspace.sync_path_info(path) {
+        let manifest_changed = self.workspace.sync_path_info(path);
+        if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(
+            self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
+        );
         Ok(diagnostics)
     }
 
@@ -360,9 +409,13 @@ where
         let mut diagnostics = self.workspace.unload_path(path, project_key)?;
         // Renames and directory removals also unload manifests, which may make
         // other dependencies reachable.
-        if self.workspace.sync_path_info(path) {
+        let manifest_changed = self.workspace.sync_path_info(path);
+        if manifest_changed {
             diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
         }
+        diagnostics.extend(
+            self.reload_frameworks(project_key, self.affects_frameworks(path, manifest_changed))?,
+        );
         Ok(diagnostics)
     }
 
