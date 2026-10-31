@@ -96,7 +96,7 @@ impl CssGlobals {
 /// Returns the stylesheets that `entry`, an absolute path or glob pattern of
 /// `css.globals`, names.
 ///
-/// A glob pattern matches only stylesheets, and doesn't enter `node_modules`.
+/// Only stylesheets match, and a glob pattern doesn't enter `node_modules`.
 /// Returns the error of a glob pattern that isn't valid.
 #[cfg(all(feature = "lang_js", feature = "lang_css"))]
 pub(crate) fn css_global_stylesheets(
@@ -107,7 +107,7 @@ pub(crate) fn css_global_stylesheets(
 
     let Some((directory, glob)) = split_css_global(entry) else {
         let path = camino::Utf8Path::new(entry);
-        return Ok(if host.is_file(path) {
+        return Ok(if is_stylesheet(&path) && host.is_file(path) {
             vec![path.to_path_buf()]
         } else {
             Vec::new()
@@ -130,7 +130,7 @@ pub(crate) fn is_css_global(entry: &str, path: &camino::Utf8Path) -> bool {
         return false;
     }
     match split_css_global(entry) {
-        None => camino::Utf8Path::new(entry) == path,
+        None => is_stylesheet(&path) && camino::Utf8Path::new(entry) == path,
         Some((directory, Ok(glob))) => {
             is_stylesheet(&path)
                 && !is_node_modules_path(path)

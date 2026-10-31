@@ -7869,7 +7869,7 @@ fn css_globals_globs_match_stylesheets_outside_node_modules() {
     }
     let configuration = Configuration {
         css: Some(biome_configuration::CssConfiguration {
-            globals: Some(["**/*".into()].into_iter().collect()),
+            globals: Some(["**/*".into(), "src/notes.md".into()].into_iter().collect()),
             ..Default::default()
         }),
         ..Default::default()
@@ -7887,6 +7887,14 @@ fn css_globals_globs_match_stylesheets_outside_node_modules() {
         stylesheets
     };
     assert_eq!(stylesheets(), [Utf8PathBuf::from("/project/src/theme.css")]);
+    // A listed file that isn't a stylesheet doesn't make the styles unknown.
+    assert!(
+        !workspace
+            .get_db()
+            .framework_scope(Utf8Path::new("/project/src/theme.css"))
+            .unwrap()
+            .has_unknown_styles
+    );
 
     fs.insert(NEW_STYLESHEET.into(), ".new {}");
     watcher(&workspace)
