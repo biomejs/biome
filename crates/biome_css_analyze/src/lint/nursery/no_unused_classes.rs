@@ -1,5 +1,7 @@
 use crate::services::module_graph::CssModuleGraph;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_css_syntax::CssClassSelector;
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
@@ -61,6 +63,7 @@ declare_lint_rule! {
         recommended: false,
         issue_number: Some("9156"),
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro, RuleFramework::Starlight],
     }
 }
 

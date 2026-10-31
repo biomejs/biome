@@ -322,6 +322,16 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         self.last_property_in_module_context_from(path, CssPropertyBranch::default())
     }
 
+    /// Returns the last definition that the module at `path` makes visible to
+    /// every page: a definition in a stylesheet or the stylesheets it imports,
+    /// or in the global styles of an HTML-like component.
+    pub(crate) fn last_property_in_global_context(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<CssPropertyDefinition> {
+        self.last_property_in_module_context_from(path, CssPropertyBranch::default())
+    }
+
     fn last_property_in_module_context_from(
         &self,
         path: &Utf8Path,
@@ -633,7 +643,7 @@ fn js_import_paths_in_source_order(
 
 /// Returns the CSS classes defined by the module at `path`, or `None` when the
 /// path does not identify a CSS module.
-fn css_class_step(db: &dyn ModuleDb, path: &Utf8Path) -> Option<CssClassStep> {
+pub(crate) fn css_class_step(db: &dyn ModuleDb, path: &Utf8Path) -> Option<CssClassStep> {
     let info = db.css_module_info_for_path(path)?;
     Some(CssClassStep {
         css_path: path.to_path_buf(),

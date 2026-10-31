@@ -64,6 +64,7 @@ struct BiomeRule {
     deprecated: Option<&'static str>,
     fix_kind: serde_json::Value,
     domains: serde_json::Value,
+    frameworks: serde_json::Value,
     url: String,
 }
 
@@ -323,6 +324,7 @@ impl<L: Language> RegistryVisitor<L> for Collector {
             deprecated: metadata.deprecated,
             fix_kind: serde_json::to_value(metadata.fix_kind).expect("FixKind to serialize"),
             domains: serde_json::to_value(metadata.domains).expect("domains to serialize"),
+            frameworks: serde_json::to_value(metadata.frameworks).expect("frameworks to serialize"),
             url,
         });
         for source in metadata.sources {

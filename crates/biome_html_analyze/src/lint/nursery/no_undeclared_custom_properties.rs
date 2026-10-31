@@ -1,5 +1,7 @@
 use crate::services::module_graph::HtmlModuleGraph;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_semantic::semantic_model;
@@ -10,7 +12,9 @@ use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttribute, HtmlElement, element_ext::AnyHtmlTagElement,
 };
 use biome_languages::{CssFileSource, HtmlFileSource, css::CssEmbeddingKind};
-use biome_module_graph::{SymbolFromModuleInfo, css_property_definitions};
+use biome_module_graph::{
+    SymbolFromModuleInfo, css_property_definitions, has_unknown_framework_styles,
+};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
@@ -43,6 +47,7 @@ declare_lint_rule! {
         language: "html",
         recommended: false,
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro, RuleFramework::Starlight],
     }
 }
 
@@ -62,6 +67,9 @@ impl Rule for NoUndeclaredCustomProperties {
         let Some(module) = db.module_for_path(ctx.file_path()) else {
             return Vec::new();
         };
+        if has_unknown_framework_styles(db, module) {
+            return Vec::new();
+        }
         let properties = inline_custom_properties(text.text());
 
         properties

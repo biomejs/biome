@@ -53,6 +53,8 @@ mod database;
 mod expected_argument_inference;
 #[path = "spec_tests/expressions.test.rs"]
 mod expressions;
+#[path = "spec_tests/framework_scope.test.rs"]
+mod framework_scope;
 #[path = "spec_tests/globals.test.rs"]
 mod globals;
 #[path = "spec_tests/html_classes.test.rs"]
