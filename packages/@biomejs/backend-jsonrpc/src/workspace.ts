@@ -3833,6 +3833,11 @@ export interface Nursery {
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 	/**
+	 * Require the render function of a Vue component to return a value.
+	 * See https://biomejs.dev/linter/rules/use-vue-render-return
+	 */
+	useVueRenderReturn?: UseVueRenderReturnConfiguration;
+	/**
 	 * Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.
 	 * See https://biomejs.dev/linter/rules/use-vue-template-ref
 	 */
@@ -6584,6 +6589,9 @@ export type UseVueDefinePropsDestructuringConfiguration =
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVueRenderReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueRenderReturnOptions;
 export type UseVueTemplateRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTemplateRefOptions;
@@ -9649,6 +9657,10 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVueRenderReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueRenderReturnOptions;
+}
 export interface RuleWithUseVueTemplateRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTemplateRefOptions;
@@ -12137,6 +12149,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVueRenderReturnOptions = {};
 export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedPropsOptions = {};
@@ -13778,6 +13791,7 @@ export type Category =
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedProps"

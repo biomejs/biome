@@ -457,3 +457,16 @@ fn data_function_range_is_absent_without_a_function() {
         assert_eq!(component.data_function_range(), None, "{code}");
     }
 }
+
+#[test]
+fn render_option_range_covers_the_member() {
+    let code = "export default { name: 'A', render() { return null; } }";
+    let model = js_model(code, JsFileSource::vue());
+    let component = model.components().next().expect("a component");
+    let range = component.render_range().expect("a render option");
+    assert_eq!(&code[range], "render() { return null; }");
+
+    let model = js_model("export default { name: 'A' }", JsFileSource::vue());
+    let component = model.components().next().expect("a component");
+    assert_eq!(component.render_range(), None);
+}

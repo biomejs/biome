@@ -3064,6 +3064,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueRenderReturn",
+        TypeId::of::<biome_rule_options::use_vue_render_return::UseVueRenderReturnOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueTemplateRef",
         TypeId::of::<biome_rule_options::use_vue_template_ref::UseVueTemplateRefOptions>(),
     ));
