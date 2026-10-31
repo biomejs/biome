@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeMemberTypeParameter.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type Foo<TYPE_PARAMETER> = {
+	Invalid_property: string;
+};
+
+```
+
+# Diagnostics
+```
+invalidTypeMemberTypeParameter.ts:3:2 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type member name should be in camelCase.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type Foo<TYPE_PARAMETER> = {
+  > 3 │ 	Invalid_property: string;
+      │ 	^^^^^^^^^^^^^^^^
+    4 │ };
+    5 │ 
+  
+
+```
