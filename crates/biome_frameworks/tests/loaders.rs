@@ -257,11 +257,12 @@ fn load(
     )
 }
 
-fn visits(contributions: &biome_frameworks::FrameworkContributions) -> Vec<&str> {
+/// Returns the visited paths, with `/` separators on every platform.
+fn visits(contributions: &biome_frameworks::FrameworkContributions) -> Vec<String> {
     contributions
         .visits
         .iter()
-        .map(|path| path.as_str())
+        .map(|path| path.as_str().replace('\\', "/"))
         .collect()
 }
 
