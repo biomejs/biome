@@ -41,26 +41,14 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
     // color-profile => "color-profile"
     let all_keyword_strings = all_keywords.iter().map(|name| (*name).to_string());
     let all_keyword_to_strings = all_keywords.iter().map(|name| (*name).to_string()).clone();
-    // we need to replace "-" with "_" for the keywords
-    // e.g. we have `color-profile` in css but it's an invalid ident in rust code
-    // color-profile => "color_profile"
-    // also mark uppercase differently from lowercase
-    // e.g. "query" => "QUERY", "QUERY" => "QUERY_UPPERCASE"
     let all_keywords_values = all_keywords
         .iter()
-        .map(|kw| {
-            let kw = kw.replace('-', "_");
-            if kw.chars().all(|c| c.is_uppercase()) {
-                "UPPER_".to_string() + kw.as_str()
-            } else {
-                kw
-            }
-        })
+        .map(|kw| keyword_ident(kw))
         .collect::<Vec<_>>();
-    // "color_profile" => COLOR_PROFILE_KW
-    let full_keywords = all_keywords_values
+    // color-profile => COLOR_PROFILE_KW
+    let full_keywords = all_keywords
         .iter()
-        .map(|kw| format_ident!("{}_KW", Case::Constant.convert(kw)))
+        .map(|kw| format_ident!("{}", keyword_kind_name(kw)))
         .collect::<Vec<_>>();
 
     // "color_profile" => color_profile
@@ -310,4 +298,24 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
     };
 
     xtask_glue::reformat(ast)
+}
+
+/// Returns the Rust identifier spelling of `keyword`, used in the `T!` macro.
+///
+/// `-` becomes `_`, since `color-profile` is not a valid identifier, and
+/// all-uppercase keywords get an `UPPER_` prefix so that `QUERY` does not
+/// collide with `query`.
+fn keyword_ident(keyword: &str) -> String {
+    let keyword = keyword.replace('-', "_");
+    if keyword.chars().all(|c| c.is_uppercase()) {
+        format!("UPPER_{keyword}")
+    } else {
+        keyword
+    }
+}
+
+/// Returns the syntax kind variant name of `keyword`, e.g. `COLOR_PROFILE_KW`
+/// for `color-profile`.
+pub(crate) fn keyword_kind_name(keyword: &str) -> String {
+    format!("{}_KW", Case::Constant.convert(&keyword_ident(keyword)))
 }

@@ -48,7 +48,7 @@ impl JsAstToken {
         let token = Self::from_value(this).ok_or_else(|| {
             JsNativeError::typ().with_message("Cannot read token.kind because this value is not a token. Use a token returned by node.token(field), node.childrenWithTokens(), or factory.token().")
         })?;
-        Ok(JsString::from(format!("{:?}", token.token.kind())).into())
+        Ok(JsAstNode::kind_name(token.token.kind()).into())
     }
 
     fn get_text(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
