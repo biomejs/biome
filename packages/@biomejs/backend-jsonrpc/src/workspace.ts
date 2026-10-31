@@ -3443,6 +3443,11 @@ export interface Nursery {
 	 */
 	noVueRequiredPropWithDefault?: NoVueRequiredPropWithDefaultConfiguration;
 	/**
+	 * Disallow calling configured functions after an await in setup().
+	 * See https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await
+	 */
+	noVueRestrictedCallAfterAwait?: NoVueRestrictedCallAfterAwaitConfiguration;
+	/**
 	 * Disallow v-if on the root element of a Vue component template.
 	 * See https://biomejs.dev/linter/rules/no-vue-root-v-if
 	 */
@@ -6380,6 +6385,9 @@ export type NoVueMutatingPropsConfiguration =
 export type NoVueRequiredPropWithDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRequiredPropWithDefaultOptions;
+export type NoVueRestrictedCallAfterAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRestrictedCallAfterAwaitOptions;
 export type NoVueRootVIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRootVIfOptions;
@@ -9249,6 +9257,10 @@ export interface RuleWithNoVueRequiredPropWithDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRequiredPropWithDefaultOptions;
 }
+export interface RuleWithNoVueRestrictedCallAfterAwaitOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRestrictedCallAfterAwaitOptions;
+}
 export interface RuleWithNoVueRootVIfOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRootVIfOptions;
@@ -11935,6 +11947,12 @@ export type NoVueMixinOptions = {};
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
+export interface NoVueRestrictedCallAfterAwaitOptions {
+	/**
+	 * Functions that must not be called after an `await` in `setup()`. Defaults to an empty list.
+	 */
+	functions?: RestrictedFunction[];
+}
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export type NoVueSideEffectsInComputedOptions = {};
@@ -13110,6 +13128,21 @@ export interface TailwindComponentAllowance {
 	 */
 	components: TailwindAllowedComponents;
 }
+export interface RestrictedFunction {
+	/**
+	 * The message to show in place of the default message.
+	 */
+	message?: string;
+	/**
+	 * The module that exports the function, written as it appears in the `import` statement.
+	 */
+	module: string;
+	/**
+	 * The name the function is exported as, or a list of names that leads to the function
+	 * through the module's exports. Defaults to `"default"`, the module's default export.
+	 */
+	path?: RestrictedFunctionPath;
+}
 /**
  * The checks for one top-level block.
  */
@@ -13238,6 +13271,7 @@ export type AvailabilityTarget = AvailabilityNamed | number;
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
 export type TailwindAllowedComponents = string | string[];
+export type RestrictedFunctionPath = string | string[];
 export interface PathOptions {
 	/**
 	 * Names of the exported members that allowed to be not be used.
@@ -13762,6 +13796,7 @@ export type Category =
 	| "lint/nursery/noVueMixin"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
+	| "lint/nursery/noVueRestrictedCallAfterAwait"
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
