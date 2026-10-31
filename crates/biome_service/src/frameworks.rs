@@ -13,6 +13,8 @@
 //! - An HTML-like component is rendered on every page of the package.
 
 #[cfg(all(feature = "lang_js", feature = "lang_css"))]
+use crate::configuration::display_path;
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
 use crate::diagnostics::{InvalidCssGlobal, NegatedCssGlobal, UnmatchedCssGlobal};
 #[cfg(all(feature = "lang_js", feature = "lang_css"))]
 use biome_fs::is_node_modules_path;
@@ -62,7 +64,7 @@ impl CssGlobals {
             let stylesheets = if entry.starts_with('!') {
                 self.diagnostics
                     .push(biome_diagnostics::Error::from(NegatedCssGlobal {
-                        entry: entry.to_string(),
+                        entry: display_path(camino::Utf8Path::new(entry)).into_owned(),
                     }));
                 Vec::new()
             } else {
@@ -71,7 +73,7 @@ impl CssGlobals {
                         if stylesheets.is_empty() {
                             self.diagnostics.push(biome_diagnostics::Error::from(
                                 UnmatchedCssGlobal {
-                                    entry: entry.to_string(),
+                                    entry: display_path(camino::Utf8Path::new(entry)).into_owned(),
                                 },
                             ));
                         }
@@ -80,7 +82,7 @@ impl CssGlobals {
                     Err(error) => {
                         self.diagnostics
                             .push(biome_diagnostics::Error::from(InvalidCssGlobal {
-                                entry: entry.to_string(),
+                                entry: display_path(camino::Utf8Path::new(entry)).into_owned(),
                                 error,
                             }));
                         Vec::new()
