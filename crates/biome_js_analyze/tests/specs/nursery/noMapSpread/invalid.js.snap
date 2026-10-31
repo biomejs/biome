@@ -1,0 +1,1451 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Object and array spreads returned directly
+b.map((x) => ({ ...x }));
+b.map((x) => ({ ...x, ...y }));
+b.map((x) => {
+	return { ...x };
+});
+b.map((x) => [...x]);
+b.map((x) => [...x, ...y]);
+b.map(function (x) {
+	return [...x, 1];
+});
+
+// Method variations
+a.map?.((x) => ({ ...x }));
+b.flatMap((x) => ({ ...x }));
+b["map"]((x) => ({ ...x }));
+foo().map((x) => ({ ...x }));
+foo[1].map((x) => ({ ...x }));
+foo?.bar?.map((x) => ({ ...x }));
+(foo ?? bar).map((x) => ({ ...x }));
+obj.#foo.map((x) => ({ ...x }));
+
+// The array is never read again
+let unused = [];
+unused.map((x) => ({ ...x }));
+
+// The array is read before the call, but not after
+let readBefore = [];
+console.log(readBefore);
+readBefore.map((x) => ({ ...x }));
+
+// Spread arguments
+b.map((x) => ({ ...x.y }));
+b.map((x) => ({ ...x[y] }));
+b.map((x) => ({ ...(x ?? y) }));
+
+// Variables declared in the callback
+b.map((x) => {
+	let x2 = { ...x };
+	return x2;
+});
+b.map((x) => {
+	let x2 = { ...x };
+	let x3 = x2;
+	return x3;
+});
+b.map((x) => {
+	let y = { ...x };
+	if (y.foo) {
+		return y;
+	} else {
+		return x;
+	}
+});
+result.map((obj) => {
+	const { a = { ...obj }, b = a } = obj;
+	return b;
+});
+result.map((obj) => {
+	const [first = [...obj]] = obj;
+	return first;
+});
+
+// Conditional, logical, and sequence expressions
+b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+b.map((x, i) => (y ? { ...x, i } : x));
+b.map((x, i) => (y ? x : { ...x, i }));
+b.map((x) => (0, { ...x }));
+b.map(({ x, y }) => x ?? { ...y });
+
+// Fixable: the object starts with a spread
+b.map(({ x, y }) => ({ ...x, ...y }));
+b.map(({ x, y }) => {
+	return { ...x, ...y };
+});
+b.map(({ x, y }) => ({ ...x, y }));
+b.map(({ x, y, z }) => ({ ...x, y, z }));
+b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+
+// Not fixable: the object doesn't start with a spread
+b.map(({ x, y }) => ({ x, ...y }));
+b.map(({ x, y, z }) => ({ x, y, ...z }));
+
+// Not fixable: the object has comments
+b.map(({ x, y }) => ({ ...x /* keep */, y }));
+
+// Not fixable: a comment inside the parentheses would be lost
+b.map(({ x, y }) => (/* keep */ { ...x, y }));
+
+// Calls aren't followed to the function, even when it's called again
+function getItems() {}
+getItems().map((x) => ({ ...x }));
+getItems();
+
+```
+
+# Diagnostics
+```
+invalid.js:4:15 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    3 │ // Object and array spreads returned directly
+  > 4 │ b.map((x) => ({ ...x }));
+      │               ^^^^^^^^
+    5 │ b.map((x) => ({ ...x, ...y }));
+    6 │ b.map((x) => {
+  
+  i The callback runs once for each item in the array.
+  
+    3 │ // Object and array spreads returned directly
+  > 4 │ b.map((x) => ({ ...x }));
+      │   ^^^
+    5 │ b.map((x) => ({ ...x, ...y }));
+    6 │ b.map((x) => {
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:15 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    3 │ // Object and array spreads returned directly
+    4 │ b.map((x) => ({ ...x }));
+  > 5 │ b.map((x) => ({ ...x, ...y }));
+      │               ^^^^^^^^^^^^^^
+    6 │ b.map((x) => {
+    7 │ 	return { ...x };
+  
+  i The callback runs once for each item in the array.
+  
+    3 │ // Object and array spreads returned directly
+    4 │ b.map((x) => ({ ...x }));
+  > 5 │ b.map((x) => ({ ...x, ...y }));
+      │   ^^^
+    6 │ b.map((x) => {
+    7 │ 	return { ...x };
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+     3  3 │   // Object and array spreads returned directly
+     4  4 │   b.map((x) => ({ ...x }));
+     5    │ - b.map((x)·=>·({·...x,·...y·}));
+        5 │ + b.map((x)·=>·Object.assign(x,·y));
+     6  6 │   b.map((x) => {
+     7  7 │   	return { ...x };
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    5 │ b.map((x) => ({ ...x, ...y }));
+    6 │ b.map((x) => {
+  > 7 │ 	return { ...x };
+      │ 	       ^^^^^^^^
+    8 │ });
+    9 │ b.map((x) => [...x]);
+  
+  i The callback runs once for each item in the array.
+  
+    4 │ b.map((x) => ({ ...x }));
+    5 │ b.map((x) => ({ ...x, ...y }));
+  > 6 │ b.map((x) => {
+      │   ^^^
+    7 │ 	return { ...x };
+    8 │ });
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:14 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array spread copies an array for each item in the map() callback.
+  
+     7 │ 	return { ...x };
+     8 │ });
+   > 9 │ b.map((x) => [...x]);
+       │              ^^^^^^
+    10 │ b.map((x) => [...x, ...y]);
+    11 │ b.map(function (x) {
+  
+  i The callback runs once for each item in the array.
+  
+     7 │ 	return { ...x };
+     8 │ });
+   > 9 │ b.map((x) => [...x]);
+       │   ^^^
+    10 │ b.map((x) => [...x, ...y]);
+    11 │ b.map(function (x) {
+  
+  i A spread creates a new array and copies every element into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original arrays, add the elements with push(). Keep the spread if other code needs the original arrays to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:14 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array spread copies an array for each item in the map() callback.
+  
+     8 │ });
+     9 │ b.map((x) => [...x]);
+  > 10 │ b.map((x) => [...x, ...y]);
+       │              ^^^^^^^^^^^^
+    11 │ b.map(function (x) {
+    12 │ 	return [...x, 1];
+  
+  i The callback runs once for each item in the array.
+  
+     8 │ });
+     9 │ b.map((x) => [...x]);
+  > 10 │ b.map((x) => [...x, ...y]);
+       │   ^^^
+    11 │ b.map(function (x) {
+    12 │ 	return [...x, 1];
+  
+  i A spread creates a new array and copies every element into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original arrays, add the elements with push(). Keep the spread if other code needs the original arrays to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:9 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array spread copies an array for each item in the map() callback.
+  
+    10 │ b.map((x) => [...x, ...y]);
+    11 │ b.map(function (x) {
+  > 12 │ 	return [...x, 1];
+       │ 	       ^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i The callback runs once for each item in the array.
+  
+     9 │ b.map((x) => [...x]);
+    10 │ b.map((x) => [...x, ...y]);
+  > 11 │ b.map(function (x) {
+       │   ^^^
+    12 │ 	return [...x, 1];
+    13 │ });
+  
+  i A spread creates a new array and copies every element into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original arrays, add the elements with push(). Keep the spread if other code needs the original arrays to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:17 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    15 │ // Method variations
+  > 16 │ a.map?.((x) => ({ ...x }));
+       │                 ^^^^^^^^
+    17 │ b.flatMap((x) => ({ ...x }));
+    18 │ b["map"]((x) => ({ ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    15 │ // Method variations
+  > 16 │ a.map?.((x) => ({ ...x }));
+       │   ^^^
+    17 │ b.flatMap((x) => ({ ...x }));
+    18 │ b["map"]((x) => ({ ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:19 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the flatMap() callback.
+  
+    15 │ // Method variations
+    16 │ a.map?.((x) => ({ ...x }));
+  > 17 │ b.flatMap((x) => ({ ...x }));
+       │                   ^^^^^^^^
+    18 │ b["map"]((x) => ({ ...x }));
+    19 │ foo().map((x) => ({ ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    15 │ // Method variations
+    16 │ a.map?.((x) => ({ ...x }));
+  > 17 │ b.flatMap((x) => ({ ...x }));
+       │   ^^^^^^^
+    18 │ b["map"]((x) => ({ ...x }));
+    19 │ foo().map((x) => ({ ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:18 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    16 │ a.map?.((x) => ({ ...x }));
+    17 │ b.flatMap((x) => ({ ...x }));
+  > 18 │ b["map"]((x) => ({ ...x }));
+       │                  ^^^^^^^^
+    19 │ foo().map((x) => ({ ...x }));
+    20 │ foo[1].map((x) => ({ ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    16 │ a.map?.((x) => ({ ...x }));
+    17 │ b.flatMap((x) => ({ ...x }));
+  > 18 │ b["map"]((x) => ({ ...x }));
+       │   ^^^^^
+    19 │ foo().map((x) => ({ ...x }));
+    20 │ foo[1].map((x) => ({ ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:19 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    17 │ b.flatMap((x) => ({ ...x }));
+    18 │ b["map"]((x) => ({ ...x }));
+  > 19 │ foo().map((x) => ({ ...x }));
+       │                   ^^^^^^^^
+    20 │ foo[1].map((x) => ({ ...x }));
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    17 │ b.flatMap((x) => ({ ...x }));
+    18 │ b["map"]((x) => ({ ...x }));
+  > 19 │ foo().map((x) => ({ ...x }));
+       │       ^^^
+    20 │ foo[1].map((x) => ({ ...x }));
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:20 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    18 │ b["map"]((x) => ({ ...x }));
+    19 │ foo().map((x) => ({ ...x }));
+  > 20 │ foo[1].map((x) => ({ ...x }));
+       │                    ^^^^^^^^
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+    22 │ (foo ?? bar).map((x) => ({ ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    18 │ b["map"]((x) => ({ ...x }));
+    19 │ foo().map((x) => ({ ...x }));
+  > 20 │ foo[1].map((x) => ({ ...x }));
+       │        ^^^
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+    22 │ (foo ?? bar).map((x) => ({ ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:23 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    19 │ foo().map((x) => ({ ...x }));
+    20 │ foo[1].map((x) => ({ ...x }));
+  > 21 │ foo?.bar?.map((x) => ({ ...x }));
+       │                       ^^^^^^^^
+    22 │ (foo ?? bar).map((x) => ({ ...x }));
+    23 │ obj.#foo.map((x) => ({ ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    19 │ foo().map((x) => ({ ...x }));
+    20 │ foo[1].map((x) => ({ ...x }));
+  > 21 │ foo?.bar?.map((x) => ({ ...x }));
+       │           ^^^
+    22 │ (foo ?? bar).map((x) => ({ ...x }));
+    23 │ obj.#foo.map((x) => ({ ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:26 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    20 │ foo[1].map((x) => ({ ...x }));
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+  > 22 │ (foo ?? bar).map((x) => ({ ...x }));
+       │                          ^^^^^^^^
+    23 │ obj.#foo.map((x) => ({ ...x }));
+    24 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    20 │ foo[1].map((x) => ({ ...x }));
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+  > 22 │ (foo ?? bar).map((x) => ({ ...x }));
+       │              ^^^
+    23 │ obj.#foo.map((x) => ({ ...x }));
+    24 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:22 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+    22 │ (foo ?? bar).map((x) => ({ ...x }));
+  > 23 │ obj.#foo.map((x) => ({ ...x }));
+       │                      ^^^^^^^^
+    24 │ 
+    25 │ // The array is never read again
+  
+  i The callback runs once for each item in the array.
+  
+    21 │ foo?.bar?.map((x) => ({ ...x }));
+    22 │ (foo ?? bar).map((x) => ({ ...x }));
+  > 23 │ obj.#foo.map((x) => ({ ...x }));
+       │          ^^^
+    24 │ 
+    25 │ // The array is never read again
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:20 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    25 │ // The array is never read again
+    26 │ let unused = [];
+  > 27 │ unused.map((x) => ({ ...x }));
+       │                    ^^^^^^^^
+    28 │ 
+    29 │ // The array is read before the call, but not after
+  
+  i The callback runs once for each item in the array.
+  
+    25 │ // The array is never read again
+    26 │ let unused = [];
+  > 27 │ unused.map((x) => ({ ...x }));
+       │        ^^^
+    28 │ 
+    29 │ // The array is read before the call, but not after
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:24 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    30 │ let readBefore = [];
+    31 │ console.log(readBefore);
+  > 32 │ readBefore.map((x) => ({ ...x }));
+       │                        ^^^^^^^^
+    33 │ 
+    34 │ // Spread arguments
+  
+  i The callback runs once for each item in the array.
+  
+    30 │ let readBefore = [];
+    31 │ console.log(readBefore);
+  > 32 │ readBefore.map((x) => ({ ...x }));
+       │            ^^^
+    33 │ 
+    34 │ // Spread arguments
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:15 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    34 │ // Spread arguments
+  > 35 │ b.map((x) => ({ ...x.y }));
+       │               ^^^^^^^^^^
+    36 │ b.map((x) => ({ ...x[y] }));
+    37 │ b.map((x) => ({ ...(x ?? y) }));
+  
+  i The callback runs once for each item in the array.
+  
+    34 │ // Spread arguments
+  > 35 │ b.map((x) => ({ ...x.y }));
+       │   ^^^
+    36 │ b.map((x) => ({ ...x[y] }));
+    37 │ b.map((x) => ({ ...(x ?? y) }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:15 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    34 │ // Spread arguments
+    35 │ b.map((x) => ({ ...x.y }));
+  > 36 │ b.map((x) => ({ ...x[y] }));
+       │               ^^^^^^^^^^^
+    37 │ b.map((x) => ({ ...(x ?? y) }));
+    38 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    34 │ // Spread arguments
+    35 │ b.map((x) => ({ ...x.y }));
+  > 36 │ b.map((x) => ({ ...x[y] }));
+       │   ^^^
+    37 │ b.map((x) => ({ ...(x ?? y) }));
+    38 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:15 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    35 │ b.map((x) => ({ ...x.y }));
+    36 │ b.map((x) => ({ ...x[y] }));
+  > 37 │ b.map((x) => ({ ...(x ?? y) }));
+       │               ^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ // Variables declared in the callback
+  
+  i The callback runs once for each item in the array.
+  
+    35 │ b.map((x) => ({ ...x.y }));
+    36 │ b.map((x) => ({ ...x[y] }));
+  > 37 │ b.map((x) => ({ ...(x ?? y) }));
+       │   ^^^
+    38 │ 
+    39 │ // Variables declared in the callback
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:11 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    39 │ // Variables declared in the callback
+    40 │ b.map((x) => {
+  > 41 │ 	let x2 = { ...x };
+       │ 	         ^^^^^^^^
+    42 │ 	return x2;
+    43 │ });
+  
+  i The callback runs once for each item in the array.
+  
+    39 │ // Variables declared in the callback
+  > 40 │ b.map((x) => {
+       │   ^^^
+    41 │ 	let x2 = { ...x };
+    42 │ 	return x2;
+  
+  i The callback returns the copy here.
+  
+    40 │ b.map((x) => {
+    41 │ 	let x2 = { ...x };
+  > 42 │ 	return x2;
+       │ 	       ^^
+    43 │ });
+    44 │ b.map((x) => {
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:11 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    43 │ });
+    44 │ b.map((x) => {
+  > 45 │ 	let x2 = { ...x };
+       │ 	         ^^^^^^^^
+    46 │ 	let x3 = x2;
+    47 │ 	return x3;
+  
+  i The callback runs once for each item in the array.
+  
+    42 │ 	return x2;
+    43 │ });
+  > 44 │ b.map((x) => {
+       │   ^^^
+    45 │ 	let x2 = { ...x };
+    46 │ 	let x3 = x2;
+  
+  i The callback returns the copy here.
+  
+    45 │ 	let x2 = { ...x };
+    46 │ 	let x3 = x2;
+  > 47 │ 	return x3;
+       │ 	       ^^
+    48 │ });
+    49 │ b.map((x) => {
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:10 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    48 │ });
+    49 │ b.map((x) => {
+  > 50 │ 	let y = { ...x };
+       │ 	        ^^^^^^^^
+    51 │ 	if (y.foo) {
+    52 │ 		return y;
+  
+  i The callback runs once for each item in the array.
+  
+    47 │ 	return x3;
+    48 │ });
+  > 49 │ b.map((x) => {
+       │   ^^^
+    50 │ 	let y = { ...x };
+    51 │ 	if (y.foo) {
+  
+  i The callback returns the copy here.
+  
+    50 │ 	let y = { ...x };
+    51 │ 	if (y.foo) {
+  > 52 │ 		return y;
+       │ 		       ^
+    53 │ 	} else {
+    54 │ 		return x;
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:58:14 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    56 │ });
+    57 │ result.map((obj) => {
+  > 58 │ 	const { a = { ...obj }, b = a } = obj;
+       │ 	            ^^^^^^^^^^
+    59 │ 	return b;
+    60 │ });
+  
+  i The callback runs once for each item in the array.
+  
+    55 │ 	}
+    56 │ });
+  > 57 │ result.map((obj) => {
+       │        ^^^
+    58 │ 	const { a = { ...obj }, b = a } = obj;
+    59 │ 	return b;
+  
+  i The callback returns the copy here.
+  
+    57 │ result.map((obj) => {
+    58 │ 	const { a = { ...obj }, b = a } = obj;
+  > 59 │ 	return b;
+       │ 	       ^
+    60 │ });
+    61 │ result.map((obj) => {
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:17 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array spread copies an array for each item in the map() callback.
+  
+    60 │ });
+    61 │ result.map((obj) => {
+  > 62 │ 	const [first = [...obj]] = obj;
+       │ 	               ^^^^^^^^
+    63 │ 	return first;
+    64 │ });
+  
+  i The callback runs once for each item in the array.
+  
+    59 │ 	return b;
+    60 │ });
+  > 61 │ result.map((obj) => {
+       │        ^^^
+    62 │ 	const [first = [...obj]] = obj;
+    63 │ 	return first;
+  
+  i The callback returns the copy here.
+  
+    61 │ result.map((obj) => {
+    62 │ 	const [first = [...obj]] = obj;
+  > 63 │ 	return first;
+       │ 	       ^^^^^
+    64 │ });
+    65 │ 
+  
+  i A spread creates a new array and copies every element into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original arrays, add the elements with push(). Keep the spread if other code needs the original arrays to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:26 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    66 │ // Conditional, logical, and sequence expressions
+  > 67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+       │                          ^^^^^^^^^^^^^^^^^^^
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+  
+  i The callback runs once for each item in the array.
+  
+    66 │ // Conditional, logical, and sequence expressions
+  > 67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+       │   ^^^
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    65 65 │   
+    66 66 │   // Conditional, logical, and sequence expressions
+    67    │ - b.map((x)·=>·(someCond·?·{·...x,·foo:·true·}·:·{·...x,·foo:·false·}));
+       67 │ + b.map((x)·=>·(someCond·?·Object.assign(x,·{·foo:·true·})·:·{·...x,·foo:·false·}));
+    68 68 │   b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 69 │   b.map((x, i) => (y ? { ...x, i } : x));
+  
+
+```
+
+```
+invalid.js:67:48 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    66 │ // Conditional, logical, and sequence expressions
+  > 67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+       │                                                ^^^^^^^^^^^^^^^^^^^^
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+  
+  i The callback runs once for each item in the array.
+  
+    66 │ // Conditional, logical, and sequence expressions
+  > 67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+       │   ^^^
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    65 65 │   
+    66 66 │   // Conditional, logical, and sequence expressions
+    67    │ - b.map((x)·=>·(someCond·?·{·...x,·foo:·true·}·:·{·...x,·foo:·false·}));
+       67 │ + b.map((x)·=>·(someCond·?·{·...x,·foo:·true·}·:·Object.assign(x,·{·foo:·false·})));
+    68 68 │   b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 69 │   b.map((x, i) => (y ? { ...x, i } : x));
+  
+
+```
+
+```
+invalid.js:68:22 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    66 │ // Conditional, logical, and sequence expressions
+    67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+  > 68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+       │                      ^^^^^^^^^^^^^^^^^^^^^
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+  
+  i The callback runs once for each item in the array.
+  
+    66 │ // Conditional, logical, and sequence expressions
+    67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+  > 68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+       │   ^^^
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:22 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+  > 69 │ b.map((x, i) => (y ? { ...x, i } : x));
+       │                      ^^^^^^^^^^^
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+    71 │ b.map((x) => (0, { ...x }));
+  
+  i The callback runs once for each item in the array.
+  
+    67 │ b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+  > 69 │ b.map((x, i) => (y ? { ...x, i } : x));
+       │   ^^^
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+    71 │ b.map((x) => (0, { ...x }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    67 67 │   b.map((x) => (someCond ? { ...x, foo: true } : { ...x, foo: false }));
+    68 68 │   b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69    │ - b.map((x,·i)·=>·(y·?·{·...x,·i·}·:·x));
+       69 │ + b.map((x,·i)·=>·(y·?·Object.assign(x,·{·i·})·:·x));
+    70 70 │   b.map((x, i) => (y ? x : { ...x, i }));
+    71 71 │   b.map((x) => (0, { ...x }));
+  
+
+```
+
+```
+invalid.js:70:26 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+  > 70 │ b.map((x, i) => (y ? x : { ...x, i }));
+       │                          ^^^^^^^^^^^
+    71 │ b.map((x) => (0, { ...x }));
+    72 │ b.map(({ x, y }) => x ?? { ...y });
+  
+  i The callback runs once for each item in the array.
+  
+    68 │ b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+  > 70 │ b.map((x, i) => (y ? x : { ...x, i }));
+       │   ^^^
+    71 │ b.map((x) => (0, { ...x }));
+    72 │ b.map(({ x, y }) => x ?? { ...y });
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    68 68 │   b.map(({ x, y }) => ({ ...(cond ? x : y) }));
+    69 69 │   b.map((x, i) => (y ? { ...x, i } : x));
+    70    │ - b.map((x,·i)·=>·(y·?·x·:·{·...x,·i·}));
+       70 │ + b.map((x,·i)·=>·(y·?·x·:·Object.assign(x,·{·i·})));
+    71 71 │   b.map((x) => (0, { ...x }));
+    72 72 │   b.map(({ x, y }) => x ?? { ...y });
+  
+
+```
+
+```
+invalid.js:71:18 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+  > 71 │ b.map((x) => (0, { ...x }));
+       │                  ^^^^^^^^
+    72 │ b.map(({ x, y }) => x ?? { ...y });
+    73 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    69 │ b.map((x, i) => (y ? { ...x, i } : x));
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+  > 71 │ b.map((x) => (0, { ...x }));
+       │   ^^^
+    72 │ b.map(({ x, y }) => x ?? { ...y });
+    73 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:26 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+    71 │ b.map((x) => (0, { ...x }));
+  > 72 │ b.map(({ x, y }) => x ?? { ...y });
+       │                          ^^^^^^^^
+    73 │ 
+    74 │ // Fixable: the object starts with a spread
+  
+  i The callback runs once for each item in the array.
+  
+    70 │ b.map((x, i) => (y ? x : { ...x, i }));
+    71 │ b.map((x) => (0, { ...x }));
+  > 72 │ b.map(({ x, y }) => x ?? { ...y });
+       │   ^^^
+    73 │ 
+    74 │ // Fixable: the object starts with a spread
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:75:22 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    74 │ // Fixable: the object starts with a spread
+  > 75 │ b.map(({ x, y }) => ({ ...x, ...y }));
+       │                      ^^^^^^^^^^^^^^
+    76 │ b.map(({ x, y }) => {
+    77 │ 	return { ...x, ...y };
+  
+  i The callback runs once for each item in the array.
+  
+    74 │ // Fixable: the object starts with a spread
+  > 75 │ b.map(({ x, y }) => ({ ...x, ...y }));
+       │   ^^^
+    76 │ b.map(({ x, y }) => {
+    77 │ 	return { ...x, ...y };
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    73 73 │   
+    74 74 │   // Fixable: the object starts with a spread
+    75    │ - b.map(({·x,·y·})·=>·({·...x,·...y·}));
+       75 │ + b.map(({·x,·y·})·=>·Object.assign(x,·y));
+    76 76 │   b.map(({ x, y }) => {
+    77 77 │   	return { ...x, ...y };
+  
+
+```
+
+```
+invalid.js:77:9 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    75 │ b.map(({ x, y }) => ({ ...x, ...y }));
+    76 │ b.map(({ x, y }) => {
+  > 77 │ 	return { ...x, ...y };
+       │ 	       ^^^^^^^^^^^^^^
+    78 │ });
+    79 │ b.map(({ x, y }) => ({ ...x, y }));
+  
+  i The callback runs once for each item in the array.
+  
+    74 │ // Fixable: the object starts with a spread
+    75 │ b.map(({ x, y }) => ({ ...x, ...y }));
+  > 76 │ b.map(({ x, y }) => {
+       │   ^^^
+    77 │ 	return { ...x, ...y };
+    78 │ });
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    75 75 │   b.map(({ x, y }) => ({ ...x, ...y }));
+    76 76 │   b.map(({ x, y }) => {
+    77    │ - → return·{·...x,·...y·};
+       77 │ + → return·Object.assign(x,·y);
+    78 78 │   });
+    79 79 │   b.map(({ x, y }) => ({ ...x, y }));
+  
+
+```
+
+```
+invalid.js:79:22 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    77 │ 	return { ...x, ...y };
+    78 │ });
+  > 79 │ b.map(({ x, y }) => ({ ...x, y }));
+       │                      ^^^^^^^^^^^
+    80 │ b.map(({ x, y, z }) => ({ ...x, y, z }));
+    81 │ b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+  
+  i The callback runs once for each item in the array.
+  
+    77 │ 	return { ...x, ...y };
+    78 │ });
+  > 79 │ b.map(({ x, y }) => ({ ...x, y }));
+       │   ^^^
+    80 │ b.map(({ x, y, z }) => ({ ...x, y, z }));
+    81 │ b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    77 77 │   	return { ...x, ...y };
+    78 78 │   });
+    79    │ - b.map(({·x,·y·})·=>·({·...x,·y·}));
+       79 │ + b.map(({·x,·y·})·=>·Object.assign(x,·{·y·}));
+    80 80 │   b.map(({ x, y, z }) => ({ ...x, y, z }));
+    81 81 │   b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+  
+
+```
+
+```
+invalid.js:80:25 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    78 │ });
+    79 │ b.map(({ x, y }) => ({ ...x, y }));
+  > 80 │ b.map(({ x, y, z }) => ({ ...x, y, z }));
+       │                         ^^^^^^^^^^^^^^
+    81 │ b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+    82 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    78 │ });
+    79 │ b.map(({ x, y }) => ({ ...x, y }));
+  > 80 │ b.map(({ x, y, z }) => ({ ...x, y, z }));
+       │   ^^^
+    81 │ b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+    82 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    78 78 │   });
+    79 79 │   b.map(({ x, y }) => ({ ...x, y }));
+    80    │ - b.map(({·x,·y,·z·})·=>·({·...x,·y,·z·}));
+       80 │ + b.map(({·x,·y,·z·})·=>·Object.assign(x,·{·y,·z·}));
+    81 81 │   b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+    82 82 │   
+  
+
+```
+
+```
+invalid.js:81:25 lint/nursery/noMapSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    79 │ b.map(({ x, y }) => ({ ...x, y }));
+    80 │ b.map(({ x, y, z }) => ({ ...x, y, z }));
+  > 81 │ b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ 
+    83 │ // Not fixable: the object doesn't start with a spread
+  
+  i The callback runs once for each item in the array.
+  
+    79 │ b.map(({ x, y }) => ({ ...x, y }));
+    80 │ b.map(({ x, y, z }) => ({ ...x, y, z }));
+  > 81 │ b.map(({ x, y, z }) => ({ ...x, y, ...z, w: 1 }));
+       │   ^^^
+    82 │ 
+    83 │ // Not fixable: the object doesn't start with a spread
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Object.assign() instead.
+  
+    79 79 │   b.map(({ x, y }) => ({ ...x, y }));
+    80 80 │   b.map(({ x, y, z }) => ({ ...x, y, z }));
+    81    │ - b.map(({·x,·y,·z·})·=>·({·...x,·y,·...z,·w:·1·}));
+       81 │ + b.map(({·x,·y,·z·})·=>·Object.assign(x,·{·y·},·z,·{·w:·1·}));
+    82 82 │   
+    83 83 │   // Not fixable: the object doesn't start with a spread
+  
+
+```
+
+```
+invalid.js:84:22 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    83 │ // Not fixable: the object doesn't start with a spread
+  > 84 │ b.map(({ x, y }) => ({ x, ...y }));
+       │                      ^^^^^^^^^^^
+    85 │ b.map(({ x, y, z }) => ({ x, y, ...z }));
+    86 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    83 │ // Not fixable: the object doesn't start with a spread
+  > 84 │ b.map(({ x, y }) => ({ x, ...y }));
+       │   ^^^
+    85 │ b.map(({ x, y, z }) => ({ x, y, ...z }));
+    86 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:25 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    83 │ // Not fixable: the object doesn't start with a spread
+    84 │ b.map(({ x, y }) => ({ x, ...y }));
+  > 85 │ b.map(({ x, y, z }) => ({ x, y, ...z }));
+       │                         ^^^^^^^^^^^^^^
+    86 │ 
+    87 │ // Not fixable: the object has comments
+  
+  i The callback runs once for each item in the array.
+  
+    83 │ // Not fixable: the object doesn't start with a spread
+    84 │ b.map(({ x, y }) => ({ x, ...y }));
+  > 85 │ b.map(({ x, y, z }) => ({ x, y, ...z }));
+       │   ^^^
+    86 │ 
+    87 │ // Not fixable: the object has comments
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:88:22 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    87 │ // Not fixable: the object has comments
+  > 88 │ b.map(({ x, y }) => ({ ...x /* keep */, y }));
+       │                      ^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 
+    90 │ // Not fixable: a comment inside the parentheses would be lost
+  
+  i The callback runs once for each item in the array.
+  
+    87 │ // Not fixable: the object has comments
+  > 88 │ b.map(({ x, y }) => ({ ...x /* keep */, y }));
+       │   ^^^
+    89 │ 
+    90 │ // Not fixable: a comment inside the parentheses would be lost
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:91:33 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    90 │ // Not fixable: a comment inside the parentheses would be lost
+  > 91 │ b.map(({ x, y }) => (/* keep */ { ...x, y }));
+       │                                 ^^^^^^^^^^^
+    92 │ 
+    93 │ // Calls aren't followed to the function, even when it's called again
+  
+  i The callback runs once for each item in the array.
+  
+    90 │ // Not fixable: a comment inside the parentheses would be lost
+  > 91 │ b.map(({ x, y }) => (/* keep */ { ...x, y }));
+       │   ^^^
+    92 │ 
+    93 │ // Calls aren't followed to the function, even when it's called again
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:95:24 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    93 │ // Calls aren't followed to the function, even when it's called again
+    94 │ function getItems() {}
+  > 95 │ getItems().map((x) => ({ ...x }));
+       │                        ^^^^^^^^
+    96 │ getItems();
+    97 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    93 │ // Calls aren't followed to the function, even when it's called again
+    94 │ function getItems() {}
+  > 95 │ getItems().map((x) => ({ ...x }));
+       │            ^^^
+    96 │ getItems();
+    97 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
