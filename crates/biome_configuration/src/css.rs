@@ -39,7 +39,8 @@ pub struct CssConfiguration {
     /// aren't supported.
     ///
     /// Rules that check classes and custom properties, such as `noUndeclaredClasses`, treat these
-    /// stylesheets as available to every file of each package under the configuration. When the
+    /// stylesheets as available to every file of each package under the configuration, where a
+    /// package is a folder with a `package.json` file. When the
     /// option has entries, these rules also report in packages where Biome can't find all the
     /// stylesheets that a framework adds, for example because a function computes them.
     ///

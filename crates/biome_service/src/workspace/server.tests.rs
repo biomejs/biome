@@ -7854,6 +7854,53 @@ fn css_globals_of_the_root_configuration_apply_to_nested_configurations() {
     assert_eq!(scope.stylesheets, [Utf8PathBuf::from(STYLESHEET)]);
 }
 
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn css_globals_globs_match_stylesheets_outside_node_modules() {
+    const NEW_STYLESHEET: &str = "/project/src/new.css";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        ("/project/src/theme.css", ".theme {}"),
+        ("/project/src/notes.md", "# Notes"),
+        ("/project/node_modules/library/index.css", ".library {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let configuration = Configuration {
+        css: Some(biome_configuration::CssConfiguration {
+            globals: Some(["**/*".into()].into_iter().collect()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let (workspace, project_key) =
+        scanned_lsp_workspace_with_configuration(&fs, "/project", configuration);
+    let stylesheets = || {
+        let mut stylesheets = workspace
+            .get_db()
+            .framework_scope(Utf8Path::new("/project/src/theme.css"))
+            .unwrap()
+            .stylesheets
+            .clone();
+        stylesheets.sort();
+        stylesheets
+    };
+    assert_eq!(stylesheets(), [Utf8PathBuf::from("/project/src/theme.css")]);
+
+    fs.insert(NEW_STYLESHEET.into(), ".new {}");
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(NEW_STYLESHEET))
+        .unwrap();
+    assert_eq!(
+        stylesheets(),
+        [
+            Utf8PathBuf::from(NEW_STYLESHEET),
+            Utf8PathBuf::from("/project/src/theme.css"),
+        ]
+    );
+}
+
 #[cfg(feature = "module_graph")]
 #[test]
 fn modules_that_frameworks_declare_disappear_with_their_declaring_file() {
