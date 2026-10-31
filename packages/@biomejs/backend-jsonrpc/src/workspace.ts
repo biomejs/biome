@@ -3403,6 +3403,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
+	 * Disallow the deprecated slot-scope attribute in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-slot-scope
+	 */
+	noVueDeprecatedSlotScope?: NoVueDeprecatedSlotScopeConfiguration;
+	/**
 	 * Disallow registering Vue lifecycle hooks after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
@@ -6316,6 +6321,9 @@ export type NoVueDeprecatedScopeAttributeConfiguration =
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
+export type NoVueDeprecatedSlotScopeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedSlotScopeOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
@@ -9145,6 +9153,14 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedScopedSlotsOptions;
 }
+export interface RuleWithNoVueDeprecatedSlotScopeOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedSlotScopeOptions;
+}
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
@@ -11821,6 +11837,7 @@ export interface NoVueDeprecatedRouterLinkTagPropOptions {
 }
 export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
+export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
@@ -13635,6 +13652,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueDeprecatedSlotScope"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
