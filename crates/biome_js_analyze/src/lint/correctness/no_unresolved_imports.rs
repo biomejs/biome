@@ -1,6 +1,7 @@
 use crate::services::database::ResolvedImports;
 use biome_analyze::{
-    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, RuleSource, context::RuleContext,
+    declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -57,6 +58,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintImport("named").inspired()],
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro],
         severity: Severity::Error,
     }
 }
@@ -121,6 +123,15 @@ impl Rule for NoUnresolvedImports {
                 // imports — they simply cannot be resolved to a file path.
                 if *resolve_error == ResolveError::NodeBuiltIn
                     || *resolve_error == ResolveError::BunBuiltIn
+                {
+                    return Vec::new();
+                }
+
+                if can_only_name_framework_module(&specifier)
+                    && ctx
+                        .db()
+                        .framework_scope(ctx.file_path())
+                        .is_some_and(|scope| scope.has_unknown_modules)
                 {
                     return Vec::new();
                 }
@@ -251,6 +262,25 @@ struct GetUnresolvedImportsOptions<'a> {
 
     /// Module info of the module we're importing from.
     target_info: ModuleInfo,
+}
+
+/// Returns whether `specifier` can name a module that a framework provides,
+/// but is neither a path nor a package name: it starts with a URL scheme,
+/// such as `astro:` or `virtual:`, or with `$`, `#`, or `~`.
+///
+/// A scheme has at least two characters, so that a Windows path such as
+/// `C:/file.js` isn't one.
+fn can_only_name_framework_module(specifier: &str) -> bool {
+    if specifier.starts_with(['$', '#', '~']) {
+        return true;
+    }
+    specifier.split_once(':').is_some_and(|(scheme, _)| {
+        scheme.len() > 1
+            && scheme.starts_with(|c: char| c.is_ascii_alphabetic())
+            && scheme
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'))
+    })
 }
 
 fn get_unresolved_imports_from_module_source(

@@ -9,7 +9,7 @@ pub use state::DbState;
 
 use crate::WorkspaceError;
 #[cfg(feature = "module_graph")]
-use crate::frameworks::FrameworkModules;
+use crate::frameworks::PackageFrameworks;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
 pub(crate) use crate::workspace::views::ViewId;
@@ -21,8 +21,8 @@ use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration, ModuleInfo,
-    ModuleInfoKind, TypeDb, ambient_module_declaring_file, module_for_key,
+    FrameworkScope, InferredLocalTypeId, InferredModuleKey, ModuleDb, ModuleGraphGeneration,
+    ModuleInfo, ModuleInfoKind, TypeDb, ambient_module_declaring_file, module_for_key,
 };
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -49,7 +49,7 @@ const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
 
 type NodeCaches = Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>;
 #[cfg(feature = "module_graph")]
-type FrameworkModulesByPackage = Arc<HashMap<Utf8PathBuf, Arc<FrameworkModules>>>;
+type FrameworksByPackage = Arc<HashMap<Utf8PathBuf, Arc<PackageFrameworks>>>;
 
 /// Returns whether the module at `module_path` belongs to `path`: the file or
 /// directory at `path` contains the module, or declares it with
@@ -245,10 +245,10 @@ pub struct WorkspaceDb {
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
-    /// The modules that the frameworks of each package declare, by the path
-    /// of the package.
+    /// What the frameworks of each package inject, by the path of the
+    /// package.
     #[cfg(feature = "module_graph")]
-    framework_modules: FrameworkModulesByPackage,
+    frameworks: FrameworksByPackage,
     /// The path info observed by the resolver.
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
@@ -289,7 +289,7 @@ pub struct WorkspaceDbData {
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     #[cfg(feature = "module_graph")]
-    framework_modules: FrameworkModulesByPackage,
+    frameworks: FrameworksByPackage,
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
@@ -455,18 +455,17 @@ impl WorkspaceDbData {
         self.modules.pin().remove(path);
     }
 
-    /// Replaces the modules that the frameworks of the package in
-    /// `package_path` declare.
+    /// Replaces what the frameworks of the package in `package_path` inject.
     ///
-    /// A package without such modules keeps an empty entry, so that its
-    /// files don't resolve the modules of an enclosing package.
+    /// A package without frameworks keeps an empty entry, so that its files
+    /// don't use what the frameworks of an enclosing package inject.
     #[cfg(feature = "module_graph")]
-    pub(crate) fn set_framework_modules(
+    pub(crate) fn set_frameworks(
         &self,
         package_path: Utf8PathBuf,
-        modules: Arc<FrameworkModules>,
+        frameworks: Arc<PackageFrameworks>,
     ) {
-        self.framework_modules.pin().insert(package_path, modules);
+        self.frameworks.pin().insert(package_path, frameworks);
     }
 
     /// Removes all files and modules that start with the given path. That's
@@ -524,7 +523,7 @@ impl WorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: Arc::default(),
             #[cfg(feature = "module_graph")]
-            framework_modules: Arc::default(),
+            frameworks: Arc::default(),
             #[cfg(feature = "module_graph")]
             resolver_paths: ResolverPaths::default(),
             #[cfg(feature = "module_graph")]
@@ -624,7 +623,7 @@ impl WorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
-            framework_modules: self.framework_modules.clone(),
+            frameworks: self.frameworks.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
@@ -1135,26 +1134,52 @@ impl WorkspaceDb {
         }
     }
 
-    /// Returns the modules that the frameworks of the package in
-    /// `package_path` declare, if they were recorded.
+    /// Returns what the frameworks of the package in `package_path` inject,
+    /// if it was recorded.
     #[cfg(feature = "module_graph")]
-    pub(crate) fn framework_modules(
-        &self,
-        package_path: &Utf8Path,
-    ) -> Option<Arc<FrameworkModules>> {
-        self.framework_modules.pin().get(package_path).cloned()
+    pub(crate) fn frameworks(&self, package_path: &Utf8Path) -> Option<Arc<PackageFrameworks>> {
+        self.frameworks.pin().get(package_path).cloned()
     }
 
-    /// Replaces the modules that the frameworks of the package in
-    /// `package_path` declare, and advances the module graph generation.
+    /// Replaces what the frameworks of the package in `package_path` inject,
+    /// and advances the module graph generation.
     #[cfg(feature = "module_graph")]
-    pub(crate) fn set_framework_modules(
+    pub(crate) fn set_frameworks(
         &mut self,
         package_path: Utf8PathBuf,
-        modules: Arc<FrameworkModules>,
+        frameworks: Arc<PackageFrameworks>,
     ) {
         let data = self.data();
-        self.write_module_data(|_| data.set_framework_modules(package_path, modules));
+        self.write_module_data(|_| data.set_frameworks(package_path, frameworks));
+    }
+
+    /// Replaces what the frameworks of the package in `package_path` inject
+    /// into its pages, for test purposes. The package declares no modules.
+    #[cfg(all(feature = "module_graph", feature = "testing"))]
+    pub fn set_framework_scope_for_test(
+        &mut self,
+        package_path: Utf8PathBuf,
+        scope: FrameworkScope,
+    ) {
+        let frameworks = PackageFrameworks {
+            modules: Default::default(),
+            scope: Arc::new(scope),
+        };
+        self.set_frameworks(package_path, Arc::new(frameworks));
+    }
+
+    /// Returns what the frameworks of the nearest package that contains
+    /// `path` inject.
+    ///
+    /// The entries change with the module graph generation, so reading it
+    /// makes the queries that read the entries run again.
+    #[cfg(feature = "module_graph")]
+    fn package_frameworks(&self, path: &Utf8Path) -> Option<Arc<PackageFrameworks>> {
+        let _ = self.module_graph_generation();
+        let frameworks = self.frameworks.pin();
+        path.ancestors()
+            .find_map(|directory| frameworks.get(directory))
+            .cloned()
     }
 
     #[cfg(feature = "module_graph")]
@@ -1443,7 +1468,7 @@ pub struct SharedWorkspaceDb {
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     #[cfg(feature = "module_graph")]
-    framework_modules: FrameworkModulesByPackage,
+    frameworks: FrameworksByPackage,
     #[cfg(feature = "module_graph")]
     resolver_paths: ResolverPaths,
     #[cfg(feature = "module_graph")]
@@ -1474,7 +1499,7 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules,
             #[cfg(feature = "module_graph")]
-            framework_modules,
+            frameworks,
             #[cfg(feature = "module_graph")]
             resolver_paths,
             #[cfg(feature = "module_graph")]
@@ -1492,7 +1517,7 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules,
             #[cfg(feature = "module_graph")]
-            framework_modules,
+            frameworks,
             #[cfg(feature = "module_graph")]
             resolver_paths,
             #[cfg(feature = "module_graph")]
@@ -1513,7 +1538,7 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
-            framework_modules: self.framework_modules.clone(),
+            frameworks: self.frameworks.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
@@ -1532,7 +1557,7 @@ impl SharedWorkspaceDb {
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
-            framework_modules: self.framework_modules.clone(),
+            frameworks: self.frameworks.clone(),
             #[cfg(feature = "module_graph")]
             resolver_paths: self.resolver_paths.clone(),
             #[cfg(feature = "module_graph")]
@@ -1568,16 +1593,10 @@ impl ResolverDb for WorkspaceDb {
     }
 
     fn framework_module_path(&self, directory: &Utf8Path, specifier: &str) -> Option<Utf8PathBuf> {
-        // The tables change with the module graph generation, so reading it
-        // makes the resolutions that read the tables run again.
-        let _ = self.module_graph_generation();
-        let framework_modules = self.framework_modules.pin();
-        let modules = directory
-            .ancestors()
-            .find_map(|directory| framework_modules.get(directory))?;
         // The declaring file can be removed before the frameworks are
         // registered again.
-        modules
+        self.package_frameworks(directory)?
+            .modules
             .module_path(specifier)
             .filter(|path| self.modules.pin().contains_key(path.as_path()))
             .cloned()
@@ -1644,6 +1663,20 @@ impl ModuleDb for WorkspaceDb {
         for (_, module) in iter {
             f(*module);
         }
+    }
+
+    fn framework_scope(&self, path: &Utf8Path) -> Option<Arc<FrameworkScope>> {
+        Some(self.package_frameworks(path)?.scope.clone())
+    }
+
+    fn framework_scopes(&self) -> Vec<Arc<FrameworkScope>> {
+        // Read the generation before reading the entries.
+        let _ = self.module_graph_generation();
+        self.frameworks
+            .pin()
+            .values()
+            .map(|frameworks| frameworks.scope.clone())
+            .collect()
     }
 }
 

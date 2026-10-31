@@ -1,0 +1,314 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint site/src/styles/partial.css site/src/components/Card.jsx site/src/components/Plain.jsx site/src/pages/index.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noUndeclaredClasses": "error",
+        "noUndeclaredCustomProperties": "error",
+        "noUnusedClasses": "error"
+      }
+    }
+  }
+}
+```
+
+## `site/astro.config.mjs`
+
+```mjs
+import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+
+export default defineConfig({
+	fonts: [{ name: "Inter", cssVariable: "--font-body" }],
+	integrations: [starlight({ customCss: ["./src/styles/custom.css"] })],
+});
+
+```
+
+## `site/node_modules/@astrojs/starlight/dist/components/PageFrame.astro`
+
+```astro
+---
+---
+<div class="sidebar-content"><slot /></div>
+<style is:global>
+	.sl-flex { display: flex; }
+</style>
+
+```
+
+## `site/node_modules/@astrojs/starlight/dist/style/props.css`
+
+```css
+:root {
+  --sl-color-text: black;
+}
+```
+
+## `site/node_modules/@astrojs/starlight/package.json`
+
+```json
+{ "name": "@astrojs/starlight", "version": "0.30.0" }
+```
+
+## `site/node_modules/astro/client.d.ts`
+
+```ts
+declare module "astro:content" {
+	export const getCollection: (...args: any[]) => any;
+}
+
+```
+
+## `site/node_modules/astro/package.json`
+
+```json
+{ "name": "astro", "version": "5.0.0" }
+```
+
+## `site/package.json`
+
+```json
+{ "dependencies": { "astro": "^5.0.0", "@astrojs/starlight": "^0.30.0" } }
+```
+
+## `site/src/components/Card.jsx`
+
+```jsx
+import "./card.css";
+
+export const Card = () => (
+	<div
+		className="card card-body sl-flex missing-class"
+		style="color: var(--sl-color-text); margin: var(--jsx-missing-space)"
+	/>
+);
+
+```
+
+## `site/src/components/Plain.jsx`
+
+```jsx
+export const Plain = () => <div className="unchecked-class" />;
+
+```
+
+## `site/src/components/card.css`
+
+```css
+.card-body {
+  padding: 1rem;
+}
+```
+
+## `site/src/pages/index.astro`
+
+```astro
+---
+import "../styles/page.css";
+---
+<div class="page sl-flex astro-missing" style="color: var(--sl-color-text); margin: var(--astro-missing-space)"></div>
+
+```
+
+## `site/src/styles/custom.css`
+
+```css
+@import "./partial.css";
+```
+
+## `site/src/styles/page.css`
+
+```css
+.page {
+  display: block;
+}
+```
+
+## `site/src/styles/partial.css`
+
+```css
+.sidebar-content {
+  color: var(--sl-color-text);
+}
+.card {
+  color: var(--missing-color);
+  font-family: var(--font-body);
+}
+.unused {
+  color: red;
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+site/src/components/Card.jsx:5:37 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS class missing-class is not defined in any imported stylesheet.
+  
+    3 │ export const Card = () => (
+    4 │ 	<div
+  > 5 │ 		className="card card-body sl-flex missing-class"
+      │ 		                                  ^^^^^^^^^^^^^
+    6 │ 		style="color: var(--sl-color-text); margin: var(--jsx-missing-space)"
+    7 │ 	/>
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    site/src/components/Card.jsx (this file) -> which imports site/src/components/card.css
+  
+  
+  i The stylesheets that frameworks add to every page were checked too.
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+site/src/components/Card.jsx:6:51 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom property --jsx-missing-space is not defined.
+  
+    4 │ 	<div
+    5 │ 		className="card card-body sl-flex missing-class"
+  > 6 │ 		style="color: var(--sl-color-text); margin: var(--jsx-missing-space)"
+      │ 		                                                ^^^^^^^^^^^^^^^^^^^
+    7 │ 	/>
+    8 │ );
+  
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
+  
+  i Define the custom property in an available stylesheet, rename it or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+site/src/pages/index.astro:4:26 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS class astro-missing is not defined in any available stylesheet.
+  
+    2 │ import "../styles/page.css";
+    3 │ ---
+  > 4 │ <div class="page sl-flex astro-missing" style="color: var(--sl-color-text); margin: var(--astro-missing-space)"></div>
+      │                          ^^^^^^^^^^^^^
+    5 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    site/src/pages/index.astro (this file) -> which imports site/src/styles/page.css
+  
+  
+  i The stylesheets that frameworks add to every page were checked too.
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+site/src/pages/index.astro:4:89 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom property --astro-missing-space is not defined.
+  
+    2 │ import "../styles/page.css";
+    3 │ ---
+  > 4 │ <div class="page sl-flex astro-missing" style="color: var(--sl-color-text); margin: var(--astro-missing-space)"></div>
+      │                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
+  
+  i Define the custom property in an available stylesheet, rename it or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+site/src/styles/partial.css:2:20 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom property --missing-color is not defined.
+  
+    1 │ .sidebar-content { color: var(--sl-color-text); }
+  > 2 │ .card { color: var(--missing-color); font-family: var(--font-body); }
+      │                    ^^^^^^^^^^^^^^^
+    3 │ .unused { color: red; }
+    4 │ 
+  
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
+  
+  i Define the custom property in an available stylesheet, rename it or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+site/src/styles/partial.css:3:1 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The CSS class unused is not referenced in any HTML or JSX file.
+  
+    1 │ .sidebar-content { color: var(--sl-color-text); }
+    2 │ .card { color: var(--missing-color); font-family: var(--font-body); }
+  > 3 │ .unused { color: red; }
+      │ ^^^^^^^
+    4 │ 
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 6 errors.
+```
