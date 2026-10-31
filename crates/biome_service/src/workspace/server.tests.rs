@@ -7822,6 +7822,38 @@ fn new_package_folders_get_their_framework_modules() {
     );
 }
 
+#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[test]
+fn css_globals_of_the_root_configuration_apply_to_nested_configurations() {
+    const STYLESHEET: &str = "/project/site/src/theme.css";
+    let fs = Arc::new(MemoryFileSystem::default());
+    for (path, content) in [
+        ("/project/package.json", "{}"),
+        ("/project/site/package.json", "{}"),
+        (
+            "/project/site/biome.json",
+            r#"{ "root": false, "extends": "//" }"#,
+        ),
+        (STYLESHEET, ".theme {}"),
+    ] {
+        fs.insert(path.into(), content);
+    }
+    let configuration = Configuration {
+        css: Some(biome_configuration::CssConfiguration {
+            globals: Some(["site/src/theme.css".into()].into_iter().collect()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let (workspace, _) = scanned_lsp_workspace_with_configuration(&fs, "/project", configuration);
+    let scope = workspace
+        .get_db()
+        .framework_scope(Utf8Path::new(STYLESHEET))
+        .unwrap();
+    assert_eq!(scope.package_path, "/project/site");
+    assert_eq!(scope.stylesheets, [Utf8PathBuf::from(STYLESHEET)]);
+}
+
 #[cfg(feature = "module_graph")]
 #[test]
 fn modules_that_frameworks_declare_disappear_with_their_declaring_file() {

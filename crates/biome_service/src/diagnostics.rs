@@ -1095,3 +1095,31 @@ impl Advices for UnknownFrameworkModulesAdvice {
         )
     }
 }
+
+/// An entry of `css.globals` names no stylesheet.
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project/frameworks",
+    severity = Warning,
+    message(
+        message("The entry "<Emphasis>{self.entry}</Emphasis>" of "<Emphasis>"css.globals"</Emphasis>" doesn't match any stylesheet."),
+        description = "The entry {entry} of css.globals doesn't match any stylesheet.",
+    ),
+)]
+pub struct UnmatchedCssGlobal {
+    pub entry: String,
+}
+
+/// A negated entry of `css.globals`, which Biome doesn't support.
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "project/frameworks",
+    severity = Warning,
+    message(
+        message("The negated entry "<Emphasis>{self.entry}</Emphasis>" of "<Emphasis>"css.globals"</Emphasis>" isn't supported, so Biome ignores it."),
+        description = "The negated entry {entry} of css.globals isn't supported, so Biome ignores it.",
+    ),
+)]
+pub struct NegatedCssGlobal {
+    pub entry: String,
+}

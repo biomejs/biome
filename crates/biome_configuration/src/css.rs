@@ -34,7 +34,9 @@ pub struct CssConfiguration {
 
     /// Stylesheets that apply to every page without an import, such as the stylesheets that a
     /// framework or a build tool adds. Each entry is a path or a glob pattern, relative to the
-    /// folder of the configuration file.
+    /// folder of the configuration file that declares it. A glob pattern matches only stylesheets
+    /// and doesn't match files in `node_modules`, so list those files by path. Negated patterns
+    /// aren't supported.
     ///
     /// Rules that check classes and custom properties, such as `noUndeclaredClasses`, treat these
     /// stylesheets as available to every file of each package under the configuration. When the
