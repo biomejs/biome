@@ -180,6 +180,7 @@ pub mod no_meaningless_void_operator;
 pub mod no_misleading_character_class;
 pub mod no_misleading_instantiator;
 pub mod no_misleading_return_type;
+pub mod no_mismatched_map_key;
 pub mod no_misplaced_assertion;
 pub mod no_misplaced_list_elements;
 pub mod no_misrefactored_shorthand_assign;
