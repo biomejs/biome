@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
     pub UseTailwindVariablesShorthand {
-        version: "next",
+        version: "2.6.5",
         name: "useTailwindVariablesShorthand",
         language: "jsx",
         domains: &[RuleDomain::Tailwind],

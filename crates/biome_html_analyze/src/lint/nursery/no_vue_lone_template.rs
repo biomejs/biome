@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueLoneTemplate {
-        version: "next",
+        version: "2.6.5",
         name: "noVueLoneTemplate",
         language: "html",
         recommended: true,
