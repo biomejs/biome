@@ -91,3 +91,7 @@ first > second ? first : second; // trailing line comment
 commentedObject.left /* object left in condition */ > commentedObject.right /* object right in condition */
     ? commentedObject.left /* object left in consequent */
     : /* object right in alternate */ commentedObject.right;
+
+// numeric unary and binary expressions are still numbers
+negControl < -1 ? -1 : negControl;
+negControl > 2 ** 62 - 1 ? 2 ** 62 - 1 : negControl;

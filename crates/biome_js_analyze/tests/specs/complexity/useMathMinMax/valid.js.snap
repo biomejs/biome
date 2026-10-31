@@ -11,6 +11,24 @@ foo ? foo : bar;
 
 foo > 10n ? 10n : foo;
 foo > BigInt(10) ? BigInt(10) : foo;
+foo < -1n ? -1n : foo;
+foo < ~1n ? ~1n : foo;
+foo > 2n ** 62n - 1n ? 2n ** 62n - 1n : foo;
+foo > (2n ** 62n - 1n) ? (2n ** 62n - 1n) : foo;
+foo > (2n ** 62n) - 1n ? (2n ** 62n) - 1n : foo;
+foo < -(1n) ? -(1n) : foo;
+
+const NEG_BIGINT = -1n;
+const MAX_BIGINT = 2n ** 62n - 1n;
+const CALL_BIGINT = BigInt(10);
+var inlineNeg = (x) => (x < NEG_BIGINT ? NEG_BIGINT : x);
+var inlineMax = (x) => (x > MAX_BIGINT ? MAX_BIGINT : x);
+var inlineCall = (x) => (x > CALL_BIGINT ? CALL_BIGINT : x);
+
+function keepBigintDefault(a = -1n, b) {
+    return a > b ? a : b;
+}
+
 foo > "10" ? "10" : foo;
 foo > true ? true : foo;
 foo > null ? null : foo;

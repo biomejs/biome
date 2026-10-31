@@ -703,14 +703,45 @@ fn is_supported_numeric_annotation(annotation: &AnyTsType) -> bool {
             .is_some_and(|name| name.syntax().text_trimmed() == "Number")
 }
 
-// Is it a `bigint` literal or a `BigInt()` call? Math.min/max don't work with bigints, so we want to
-// avoid suggesting a replacement that would break the code.
+/// Is it obviously a `bigint`, without type information?
+///
+/// Matches a `bigint` literal, a `BigInt()` call, `-` or `~` applied to a bigint, and an
+/// arithmetic or bitwise binary expression whose operands are both bigints, such as
+/// `-1n` or `2n ** 62n - 1n`. `Math.min`/`Math.max` throw on bigints, so a replacement
+/// would break the code.
+///
+/// Unary `+` and `>>>` are excluded because they throw on bigints instead of producing one.
 fn is_bigint_like(expression: &AnyJsExpression) -> bool {
-    match expression {
+    match expression.clone().omit_parentheses() {
         AnyJsExpression::AnyJsLiteralExpression(literal) => {
             literal.as_js_bigint_literal_expression().is_some()
         }
-        AnyJsExpression::JsCallExpression(call) => is_named_call(call, "BigInt"),
+        AnyJsExpression::JsCallExpression(call) => is_named_call(&call, "BigInt"),
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            matches!(
+                unary.operator(),
+                Ok(JsUnaryOperator::Minus | JsUnaryOperator::BitwiseNot)
+            ) && unary
+                .argument()
+                .is_ok_and(|argument| is_bigint_like(&argument))
+        }
+        AnyJsExpression::JsBinaryExpression(binary) => {
+            matches!(
+                binary.operator(),
+                Ok(JsBinaryOperator::Plus
+                    | JsBinaryOperator::Minus
+                    | JsBinaryOperator::Times
+                    | JsBinaryOperator::Divide
+                    | JsBinaryOperator::Remainder
+                    | JsBinaryOperator::Exponent
+                    | JsBinaryOperator::LeftShift
+                    | JsBinaryOperator::RightShift
+                    | JsBinaryOperator::BitwiseAnd
+                    | JsBinaryOperator::BitwiseOr
+                    | JsBinaryOperator::BitwiseXor)
+            ) && binary.left().is_ok_and(|left| is_bigint_like(&left))
+                && binary.right().is_ok_and(|right| is_bigint_like(&right))
+        }
         _ => false,
     }
 }
@@ -757,7 +788,9 @@ fn parameter_has_unsupported_metadata(parameter: &JsFormalParameter) -> bool {
             .initializer()
             .and_then(|initializer| initializer.expression().ok())
             .is_some_and(|expression| {
-                is_non_number_literal(&expression) || is_date_construction(&expression)
+                is_non_number_literal(&expression)
+                    || is_bigint_like(&expression)
+                    || is_date_construction(&expression)
             })
 }
 
@@ -773,7 +806,9 @@ fn declarator_has_unsupported_metadata(declarator: &JsVariableDeclarator) -> boo
         .initializer()
         .and_then(|initializer| initializer.expression().ok())
         .is_some_and(|expression| {
-            is_non_number_literal(&expression) || is_date_construction(&expression)
+            is_non_number_literal(&expression)
+                || is_bigint_like(&expression)
+                || is_date_construction(&expression)
         })
 }
 

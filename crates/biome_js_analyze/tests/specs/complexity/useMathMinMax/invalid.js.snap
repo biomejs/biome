@@ -98,6 +98,10 @@ commentedObject.left /* object left in condition */ > commentedObject.right /* o
     ? commentedObject.left /* object left in consequent */
     : /* object right in alternate */ commentedObject.right;
 
+// numeric unary and binary expressions are still numbers
+negControl < -1 ? -1 : negControl;
+negControl > 2 ** 62 - 1 ? 2 ** 62 - 1 : negControl;
+
 ```
 
 # Diagnostics
@@ -1039,6 +1043,7 @@ invalid.js:91:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━
   > 93 │     : /* object right in alternate */ commentedObject.right;
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     94 │ 
+    95 │ // numeric unary and binary expressions are still numbers
   
   i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
   
@@ -1051,6 +1056,56 @@ invalid.js:91:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━
     93    │ - ····:·/*·object·right·in·alternate·*/·commentedObject.right;
        91 │ + Math.max(commentedObject.left/*·object·left·in·condition·*//*·object·left·in·consequent·*/·,·/*·object·right·in·alternate·*/commentedObject.right/*·object·right·in·condition·*/);
     94 92 │   
+    95 93 │   // numeric unary and binary expressions are still numbers
+  
+
+```
+
+```
+invalid.js:96:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    95 │ // numeric unary and binary expressions are still numbers
+  > 96 │ negControl < -1 ? -1 : negControl;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    97 │ negControl > 2 ** 62 - 1 ? 2 ** 62 - 1 : negControl;
+    98 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    94 94 │   
+    95 95 │   // numeric unary and binary expressions are still numbers
+    96    │ - negControl·<·-1·?·-1·:·negControl;
+       96 │ + Math.max(negControl·,·-1);
+    97 97 │   negControl > 2 ** 62 - 1 ? 2 ** 62 - 1 : negControl;
+    98 98 │   
+  
+
+```
+
+```
+invalid.js:97:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    95 │ // numeric unary and binary expressions are still numbers
+    96 │ negControl < -1 ? -1 : negControl;
+  > 97 │ negControl > 2 ** 62 - 1 ? 2 ** 62 - 1 : negControl;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    98 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    95 95 │   // numeric unary and binary expressions are still numbers
+    96 96 │   negControl < -1 ? -1 : negControl;
+    97    │ - negControl·>·2·**·62·-·1·?·2·**·62·-·1·:·negControl;
+       97 │ + Math.min(negControl·,·2·**·62·-·1);
+    98 98 │   
   
 
 ```
