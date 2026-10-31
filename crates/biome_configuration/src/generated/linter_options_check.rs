@@ -3069,6 +3069,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueSlotNameCasing",
+        TypeId::of::<biome_rule_options::use_vue_slot_name_casing::UseVueSlotNameCasingOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueTemplateRef",
         TypeId::of::<biome_rule_options::use_vue_template_ref::UseVueTemplateRefOptions>(),
     ));

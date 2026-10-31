@@ -9334,6 +9334,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSlotNameCasing": {
+					"description": "Enforce a consistent casing for the names of Vue slots.\nSee https://biomejs.dev/linter/rules/use-vue-slot-name-casing",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSlotNameCasingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTemplateRef": {
 					"description": "Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.\nSee https://biomejs.dev/linter/rules/use-vue-template-ref",
 					"anyOf": [
@@ -17037,6 +17044,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSlotNameCasingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSlotNameCasingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTemplateRefOptions": {
 			"type": "object",
 			"properties": {
@@ -17559,6 +17575,25 @@
 			"anyOf": [
 				{ "$ref": "#/$defs/GroupPlainConfiguration" },
 				{ "$ref": "#/$defs/Suspicious" }
+			]
+		},
+		"SlotNameCasing": {
+			"oneOf": [
+				{
+					"description": "Slot names must be in camelCase, e.g. `fooBar`.",
+					"type": "string",
+					"const": "camelCase"
+				},
+				{
+					"description": "Slot names must be in kebab-case, e.g. `foo-bar`.",
+					"type": "string",
+					"const": "kebab-case"
+				},
+				{
+					"description": "Slot names must only contain lowercase letters from `a` to `z`, e.g. `foo`.",
+					"type": "string",
+					"const": "singleword"
+				}
 			]
 		},
 		"SortOrder": { "type": "string", "enum": ["natural", "lexicographic"] },
@@ -22596,6 +22631,22 @@
 		},
 		"UseVueRenderReturnOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueSlotNameCasingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSlotNameCasingOptions" }
+			]
+		},
+		"UseVueSlotNameCasingOptions": {
+			"type": "object",
+			"properties": {
+				"casing": {
+					"description": "The casing that slot names must follow. If omitted, slot names must be in camelCase.",
+					"anyOf": [{ "$ref": "#/$defs/SlotNameCasing" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueTemplateRefConfiguration": {
