@@ -12,6 +12,8 @@
 //! - A stylesheet applies to every page of the package.
 //! - An HTML-like component is rendered on every page of the package.
 
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+use crate::diagnostics::{NegatedCssGlobal, UnmatchedCssGlobal};
 use biome_module_graph::FrameworkScope;
 use biome_resolver::{match_pattern_key, pattern_key_compare};
 use camino::Utf8PathBuf;
@@ -23,6 +25,94 @@ mod host;
 
 #[cfg(feature = "lang_js")]
 pub(crate) use host::{WorkspaceLoaderHost, referenced_declaration_files};
+
+/// What the framework loaders contribute to a package.
+pub(crate) struct LoadedPackage {
+    pub(crate) package_path: Utf8PathBuf,
+    pub(crate) contributions: biome_frameworks::FrameworkContributions,
+    /// Whether the configuration of the package lists stylesheets in
+    /// `css.globals`.
+    pub(crate) has_css_globals: bool,
+}
+
+/// The stylesheets that the entries of `css.globals` name, expanded once for
+/// all the packages that a run of the loaders reads.
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+#[derive(Default)]
+pub(crate) struct CssGlobals {
+    stylesheets: FxHashMap<Box<str>, Vec<Utf8PathBuf>>,
+    /// Warnings about the entries that name no stylesheet.
+    pub(crate) diagnostics: Vec<biome_diagnostics::Error>,
+}
+
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+impl CssGlobals {
+    /// Returns the stylesheets that `entry` names, expanding it with `expand`
+    /// the first time.
+    ///
+    /// A negated entry, which starts with `!`, names no stylesheet.
+    pub(crate) fn stylesheets(
+        &mut self,
+        entry: &str,
+        expand: impl FnOnce(&str) -> Vec<Utf8PathBuf>,
+    ) -> &[Utf8PathBuf] {
+        if !self.stylesheets.contains_key(entry) {
+            let stylesheets = if entry.starts_with('!') {
+                self.diagnostics
+                    .push(biome_diagnostics::Error::from(NegatedCssGlobal {
+                        entry: entry.to_string(),
+                    }));
+                Vec::new()
+            } else {
+                let stylesheets = expand(entry);
+                if stylesheets.is_empty() {
+                    self.diagnostics
+                        .push(biome_diagnostics::Error::from(UnmatchedCssGlobal {
+                            entry: entry.to_string(),
+                        }));
+                }
+                stylesheets
+            };
+            self.stylesheets.insert(entry.into(), stylesheets);
+        }
+        &self.stylesheets[entry]
+    }
+}
+
+/// Returns the stylesheets that `entry`, an absolute path or glob pattern of
+/// `css.globals`, names.
+///
+/// A glob pattern matches only stylesheets, and doesn't enter `node_modules`.
+#[cfg(all(feature = "lang_js", feature = "lang_css"))]
+pub(crate) fn css_global_stylesheets(host: &WorkspaceLoaderHost, entry: &str) -> Vec<Utf8PathBuf> {
+    use biome_frameworks::LoaderHost;
+    use biome_languages::DocumentFileSource;
+
+    let path = camino::Utf8Path::new(entry);
+    if !entry.contains(['*', '{']) {
+        return if host.is_file(path) {
+            vec![path.to_path_buf()]
+        } else {
+            Vec::new()
+        };
+    }
+    let mut directory = Utf8PathBuf::new();
+    let mut pattern = Vec::new();
+    for component in path.components() {
+        if pattern.is_empty() && !component.as_str().contains(['*', '{']) {
+            directory.push(component);
+        } else {
+            pattern.push(component.as_str());
+        }
+    }
+    let Ok(glob) = pattern.join("/").parse::<biome_glob::Glob>() else {
+        return Vec::new();
+    };
+    host.glob(&directory, &glob)
+        .into_iter()
+        .filter(|path| DocumentFileSource::from_well_known(path, true).is_css_like())
+        .collect()
+}
 
 /// What the frameworks of a package inject.
 #[derive(Debug, Default, Eq, PartialEq)]

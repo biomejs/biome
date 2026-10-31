@@ -7,7 +7,7 @@ use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{Configuration, ConfigurationPathHint};
 use biome_console::markup;
 use biome_deserialize::Merge;
-use biome_diagnostics::{PrintDescription, Severity};
+use biome_diagnostics::{Diagnostic as _, PrintDescription, Severity};
 use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
@@ -1219,10 +1219,12 @@ impl Session {
                     spawn(async move {
                         for diagnostic in result.diagnostics {
                             let message = PrintDescription(&diagnostic).to_string();
-                            session
-                                .client
-                                .log_message(MessageType::ERROR, message)
-                                .await;
+                            let message_type = match diagnostic.severity() {
+                                Severity::Hint | Severity::Information => MessageType::INFO,
+                                Severity::Warning => MessageType::WARNING,
+                                Severity::Error | Severity::Fatal => MessageType::ERROR,
+                            };
+                            session.client.log_message(message_type, message).await;
                         }
                     });
                 }

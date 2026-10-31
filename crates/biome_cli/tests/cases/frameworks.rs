@@ -576,3 +576,61 @@ fn css_globals_are_not_supported_in_overrides() {
         result,
     ));
 }
+
+#[test]
+fn css_globals_list_the_stylesheets_of_every_page() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    insert_starlight_site(
+        &fs,
+        br#"{
+    "html": { "experimentalFullSupportEnabled": true },
+    "css": {
+        "globals": ["./site/src/styles/*.css", "site/src/missing.css", "!site/src/styles/partial.css"]
+    },
+    "linter": {
+        "rules": {
+            "nursery": {
+                "noUndeclaredClasses": "error",
+                "noUndeclaredCustomProperties": "error",
+                "noUnusedClasses": "error"
+            }
+        }
+    }
+}
+"#,
+        br#"import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+
+export default defineConfig({
+	integrations: [starlight({ customCss: ["./src/styles/theme.styl"] })],
+});
+"#,
+    );
+    fs.insert(
+        Utf8Path::new("site/src/styles/theme.styl").into(),
+        b".theme\n  color red\n",
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(
+            ["lint"]
+                .into_iter()
+                .chain(STARLIGHT_SITE_FILES)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        ),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "css_globals_list_the_stylesheets_of_every_page",
+        fs,
+        console,
+        result,
+    ));
+}
