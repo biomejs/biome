@@ -3203,6 +3203,11 @@ export interface Nursery {
 	 */
 	noSvelteAddEventListener?: NoSvelteAddEventListenerConfiguration;
 	/**
+	 * Disallow passing async functions to Svelte stores.
+	 * See https://biomejs.dev/linter/rules/no-svelte-async-store
+	 */
+	noSvelteAsyncStore?: NoSvelteAsyncStoreConfiguration;
+	/**
 	 * Disallow the use of Svelte's {@debug} tag.
 	 * See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags
 	 */
@@ -6221,6 +6226,9 @@ export type NoShortTimeValuesConfiguration =
 export type NoSvelteAddEventListenerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAddEventListenerOptions;
+export type NoSvelteAsyncStoreConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAsyncStoreOptions;
 export type NoSvelteAtDebugTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtDebugTagsOptions;
@@ -8992,6 +9000,10 @@ export interface RuleWithNoSvelteAddEventListenerOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoSvelteAddEventListenerOptions;
+}
+export interface RuleWithNoSvelteAsyncStoreOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteAsyncStoreOptions;
 }
 export interface RuleWithNoSvelteAtDebugTagsOptions {
 	/**
@@ -11809,6 +11821,7 @@ export interface NoShortTimeValuesOptions {
 	minimum?: number;
 }
 export type NoSvelteAddEventListenerOptions = {};
+export type NoSvelteAsyncStoreOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteClassDirectiveOptions = {};
@@ -13606,15 +13619,15 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -13674,6 +13687,7 @@ export type Category =
 	| "lint/nursery/noSelfNestedLayer"
 	| "lint/nursery/noShortTimeValues"
 	| "lint/nursery/noSvelteAddEventListener"
+	| "lint/nursery/noSvelteAsyncStore"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteClassDirective"
