@@ -95,3 +95,11 @@ commentedObject.left /* object left in condition */ > commentedObject.right /* o
 // numeric unary and binary expressions are still numbers
 negControl < -1 ? -1 : negControl;
 negControl > 2 ** 62 - 1 ? 2 ** 62 - 1 : negControl;
+
+// only one operand is a bigint, so the expression is not known to be a bigint
+negControl > (1n + bar) ? (1n + bar) : negControl;
+negControl > (bar + 1n) ? (bar + 1n) : negControl;
+
+// unary plus and unsigned right shift throw on bigints and never produce one
+negControl > +1n ? +1n : negControl;
+negControl > (8n >>> 1n) ? (8n >>> 1n) : negControl;

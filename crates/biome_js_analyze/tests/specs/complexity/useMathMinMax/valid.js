@@ -11,6 +11,15 @@ foo > 2n ** 62n - 1n ? 2n ** 62n - 1n : foo;
 foo > (2n ** 62n - 1n) ? (2n ** 62n - 1n) : foo;
 foo > (2n ** 62n) - 1n ? (2n ** 62n) - 1n : foo;
 foo < -(1n) ? -(1n) : foo;
+foo > (1n + 2n) ? (1n + 2n) : foo;
+foo > (2n * 3n) ? (2n * 3n) : foo;
+foo > (6n / 3n) ? (6n / 3n) : foo;
+foo > (7n % 4n) ? (7n % 4n) : foo;
+foo > (1n << 2n) ? (1n << 2n) : foo;
+foo > (8n >> 2n) ? (8n >> 2n) : foo;
+foo > (6n & 3n) ? (6n & 3n) : foo;
+foo > (6n | 3n) ? (6n | 3n) : foo;
+foo > (6n ^ 3n) ? (6n ^ 3n) : foo;
 
 const NEG_BIGINT = -1n;
 const MAX_BIGINT = 2n ** 62n - 1n;
