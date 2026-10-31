@@ -85,11 +85,11 @@ fn load(config: &str, removed: &[&str], added: &[(&str, &str)]) -> FrameworkCont
     load_frameworks(&host, LOADERS, Utf8Path::new("/project"), &manifest)
 }
 
-fn visits(contributions: &FrameworkContributions) -> Vec<&str> {
+fn visits(contributions: &FrameworkContributions) -> Vec<String> {
     contributions
         .visits
         .iter()
-        .map(|path| path.as_str())
+        .map(|path| path.as_str().replace('\\', "/"))
         .collect()
 }
 
@@ -218,7 +218,8 @@ export default { integrations: [[starlight()]] };
 
     assert!(
         visits(&contributions)
-            .contains(&"/project/node_modules/@astrojs/starlight/dist/style/props.css")
+            .iter()
+            .any(|path| path == "/project/node_modules/@astrojs/starlight/dist/style/props.css")
     );
 }
 
