@@ -156,6 +156,10 @@ impl Driver<'_> {
                             config_path: config_path.map(Utf8Path::to_path_buf),
                             depth: depth + 1,
                         });
+                    } else if !self.loaded.contains(&package) {
+                        // The integration that isn't loaded can inject
+                        // anything. A package that already ran was loaded.
+                        self.contributions.incomplete.extend(Facet::ALL);
                     }
                 }
             }

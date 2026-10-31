@@ -7,6 +7,7 @@ use biome_js_syntax::{
     JsSyntaxNode, JsTemplateExpression, JsVariableDeclarator, binding_ext::AnyJsBindingDeclaration,
     inner_string_text, numbers::parse_js_number_with_single_rounding, try_unescape_js_string,
 };
+use biome_resolver::package_specifier_parts;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, TextRange};
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -182,17 +183,14 @@ impl ConfigCall {
 /// importing package (`#name`), and a specifier with a protocol
 /// (`node:path`).
 pub fn package_name(specifier: &str) -> Option<&str> {
-    if specifier.starts_with(['.', '/', '#']) {
+    // The resolver also parses subpath imports and specifiers with a protocol
+    // as package names, but neither names an installed package.
+    if specifier.starts_with('#') || specifier.contains(':') {
         return None;
     }
-    let mut separators = specifier.match_indices('/').map(|(index, _)| index);
-    let end = if specifier.starts_with('@') {
-        separators.nth(1)
-    } else {
-        separators.next()
-    };
-    let name = end.map_or(specifier, |end| &specifier[..end]);
-    (!name.is_empty() && !name.contains(':')).then_some(name)
+    package_specifier_parts(specifier)
+        .ok()
+        .map(|(package_name, _)| package_name)
 }
 
 /// The maximum nesting of values that [Evaluator] evaluates. Deeper values

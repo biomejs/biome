@@ -698,6 +698,7 @@ dependencies = [
  "biome_json_value",
  "biome_languages",
  "biome_package",
+ "biome_resolver",
  "biome_rowan",
  "camino",
  "indexmap",

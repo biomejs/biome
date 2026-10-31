@@ -562,7 +562,9 @@ fn loaders_run_only_for_dependencies_of_the_package() {
 /// Loads the integrations that `config` registers, where `first` registers
 /// `second`, `second` registers `third`, and `third` registers `first`, and
 /// returns the names of the integrations that ran, in order.
-fn run_integration_chain(config: &str) -> Vec<String> {
+/// Returns the names that the chain declares, and the facets that it leaves
+/// incomplete.
+fn run_integration_chain(config: &str) -> (Vec<String>, BTreeSet<Facet>) {
     let packages: Vec<_> = ["first", "second", "third"]
         .into_iter()
         .map(|name| {
@@ -595,33 +597,37 @@ fn run_integration_chain(config: &str) -> Vec<String> {
         name: "third",
         next: "first",
     };
-    load(&host, &[&RootLoader, &first, &second, &third])
+    let contributions = load(&host, &[&RootLoader, &first, &second, &third]);
+    let declared = contributions
         .declarations
         .iter()
         .map(|declaration| declaration.name.to_string())
-        .collect()
+        .collect();
+    (declared, contributions.incomplete)
 }
 
 #[test]
 fn integrations_nest_at_most_three_levels_and_load_once() {
     // `framework` registers `first` twice, at the second level. `first`
     // registers `second` at the third level, and `second` registers `third`
-    // at the fourth level, which is ignored.
-    let declared = run_integration_chain(
+    // at the fourth level, which isn't loaded, so every facet is incomplete.
+    let (declared, incomplete) = run_integration_chain(
         r#"import first from "first";
 export default { integrations: [first(), first()] };
 "#,
     );
 
     assert_eq!(declared, ["first", "second"]);
+    assert_eq!(incomplete, BTreeSet::from(Facet::ALL));
 }
 
 #[test]
 fn integrations_load_breadth_first() {
     // `framework` registers `first` and `second` at the second level, so
     // `second` runs there and registers `third` at the third level. `first`
-    // also registers `second`, which already ran.
-    let declared = run_integration_chain(
+    // also registers `second`, which already ran. `third` registers `first`
+    // at the fourth level, which already ran too, so nothing is incomplete.
+    let (declared, incomplete) = run_integration_chain(
         r#"import first from "first";
 import second from "second";
 export default { integrations: [first(), second()] };
@@ -629,6 +635,7 @@ export default { integrations: [first(), second()] };
     );
 
     assert_eq!(declared, ["first", "second", "third"]);
+    assert!(incomplete.is_empty());
 }
 
 // #endregion
@@ -771,6 +778,8 @@ fn package_names_of_specifiers() {
     assert_eq!(package_name("#integrations/local"), None);
     assert_eq!(package_name("node:path"), None);
     assert_eq!(package_name("jsr:@std/path"), None);
+    assert_eq!(package_name("@scope/../outside"), None);
+    assert_eq!(package_name("a\\..\\outside"), None);
 }
 
 #[test]
