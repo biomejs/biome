@@ -1,4 +1,5 @@
 use crate::services::database::ResolvedImports;
+use crate::utils::parse_package_name;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleFramework, RuleSource, context::RuleContext,
     declare_lint_rule,
@@ -10,7 +11,7 @@ use biome_module_graph::{
     JsExportedSymbolLookup, ModuleDb, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS,
     SymbolFromModuleInfo, find_js_exported_symbol,
 };
-use biome_resolver::ResolveError;
+use biome_resolver::{ResolveError, is_relative_specifier};
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -265,22 +266,12 @@ struct GetUnresolvedImportsOptions<'a> {
 }
 
 /// Returns whether `specifier` can name a module that a framework provides,
-/// but is neither a path nor a package name: it starts with a URL scheme,
-/// such as `astro:` or `virtual:`, or with `$`, `#`, or `~`.
-///
-/// A scheme has at least two characters, so that a Windows path such as
-/// `C:/file.js` isn't one.
+/// but is neither a path nor a package name, such as `astro:content`,
+/// `$lib/utils`, `#internal` or `~/utils`.
 fn can_only_name_framework_module(specifier: &str) -> bool {
-    if specifier.starts_with(['$', '#', '~']) {
-        return true;
-    }
-    specifier.split_once(':').is_some_and(|(scheme, _)| {
-        scheme.len() > 1
-            && scheme.starts_with(|c: char| c.is_ascii_alphabetic())
-            && scheme
-                .chars()
-                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'))
-    })
+    !Utf8Path::new(specifier).is_absolute()
+        && !is_relative_specifier(specifier)
+        && parse_package_name(specifier).is_none()
 }
 
 fn get_unresolved_imports_from_module_source(

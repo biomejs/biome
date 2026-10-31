@@ -19,7 +19,7 @@ use std::path::PathBuf;
 use xtask_glue::Result;
 
 /// Bump when the shape of the output changes.
-const SCHEMA_VERSION: u32 = 1;
+const SCHEMA_VERSION: u32 = 2;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

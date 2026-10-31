@@ -1,8 +1,9 @@
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_module_graph::{
     CssPropertyDefinition, FrameworkScope, ModuleDb, SymbolFromModuleInfo,
-    css_property_definitions, framework_class_steps, has_unknown_framework_styles,
-    is_class_referenced_by_importers, traverse_import_tree_for_classes,
+    css_property_definitions, find_css_class_definition, framework_class_steps,
+    has_unknown_framework_styles, is_class_referenced_by_importers,
+    traverse_import_tree_for_classes,
 };
 use biome_rowan::{TextRange, TextSize};
 use biome_service::db::WorkspaceDb;
@@ -267,6 +268,14 @@ fn framework_components_provide_global_styles_and_use_classes() {
         .map(|class| class.text().to_string())
         .collect();
     assert_eq!(component_classes, ["global"]);
+
+    let definitions =
+        find_css_class_definition(&db, SymbolFromModuleInfo::new(&db, "global", page));
+    let paths: Vec<_> = definitions
+        .iter()
+        .map(|(path, _, _)| path.as_str())
+        .collect();
+    assert_eq!(paths, ["/src/vendor/Frame.astro"]);
 
     assert!(is_used(&db, "/src/site/global.css", "attribute"));
     assert!(is_used(&db, "/src/site/global.css", "scoped"));

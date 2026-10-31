@@ -943,7 +943,7 @@ impl RuleFramework {
                 "Reads the Astro configuration, `astro.config.*`, and the integrations that it registers, such as Starlight.",
                 "Resolves the modules that Astro provides, such as `astro:content` and `astro:assets`, from the type declarations of the installed `astro` package.",
                 "Defines the CSS custom property that the `cssVariable` of each font names, such as `--font-body`.",
-                "Considers every class of the stylesheets that frameworks add to every page used when the package contains Markdown or MDX pages, or Astro files that Biome reads without full HTML support, because Biome can't read the classes that these files use.",
+                "Considers every class of the stylesheets that frameworks add to every page as used when the package contains Markdown or MDX pages, or Astro files that Biome reads without full HTML support, because Biome can't read the classes that these files use.",
                 "When Biome can't read a configuration value without running the configuration, for example because a function computes it, the rules that depend on the value don't report anything in the package.",
             ],
             Self::Starlight => &[
