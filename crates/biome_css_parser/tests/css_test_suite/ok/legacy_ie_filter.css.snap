@@ -10,6 +10,7 @@ div {
     -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
     filter: alpha(opacity=40);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#4d000000", endColorstr="#00000000", GradientType=1);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#4d000000, endColorstr=#00000000);
     f\ilter: pro\gid:DXImageTransform.Microsoft.Alpha(Opacity=40);
     filter: \61 lpha(opacity=40);
 }
@@ -211,218 +212,288 @@ CssRoot {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@229..241 "f\\ilter" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@229..240 "filter" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@241..243 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@240..242 ":" [] [Whitespace(" ")],
                                 value: CssLegacyFilterValue {
                                     components: CssCustomPropertyComponentList [
                                         CssCustomIdentifier {
-                                            value_token: IDENT@243..250 "pro\\gid" [] [],
+                                            value_token: IDENT@242..248 "progid" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
-                                            value: COLON@250..251 ":" [] [],
+                                            value: COLON@248..249 ":" [] [],
                                         },
                                         CssCustomIdentifier {
-                                            value_token: IDENT@251..267 "DXImageTransform" [] [],
+                                            value_token: IDENT@249..265 "DXImageTransform" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
-                                            value: DOT@267..268 "." [] [],
+                                            value: DOT@265..266 "." [] [],
                                         },
                                         CssCustomIdentifier {
-                                            value_token: IDENT@268..277 "Microsoft" [] [],
+                                            value_token: IDENT@266..275 "Microsoft" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
-                                            value: DOT@277..278 "." [] [],
+                                            value: DOT@275..276 "." [] [],
                                         },
                                         CssCustomPropertyFunction {
                                             name: CssCustomIdentifier {
-                                                value_token: IDENT@278..283 "Alpha" [] [],
+                                                value_token: IDENT@276..284 "gradient" [] [],
                                             },
-                                            l_paren_token: L_PAREN@283..284 "(" [] [],
+                                            l_paren_token: L_PAREN@284..285 "(" [] [],
                                             components: CssCustomPropertyComponentList [
                                                 CssCustomIdentifier {
-                                                    value_token: IDENT@284..291 "Opacity" [] [],
+                                                    value_token: IDENT@285..298 "startColorstr" [] [],
                                                 },
                                                 CssCustomPropertyDelimiter {
-                                                    value: EQ@291..292 "=" [] [],
+                                                    value: EQ@298..299 "=" [] [],
                                                 },
-                                                CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@292..294 "40" [] [],
+                                                CssCustomPropertyDelimiter {
+                                                    value: HASH@299..300 "#" [] [],
+                                                },
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@300..308 "4d000000" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: COMMA@308..310 "," [] [Whitespace(" ")],
+                                                },
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@310..321 "endColorstr" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: EQ@321..322 "=" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: HASH@322..323 "#" [] [],
+                                                },
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@323..331 "00000000" [] [],
                                                 },
                                             ],
-                                            r_paren_token: R_PAREN@294..295 ")" [] [],
+                                            r_paren_token: R_PAREN@331..332 ")" [] [],
                                         },
                                     ],
                                 },
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@295..296 ";" [] [],
+                        semicolon_token: SEMICOLON@332..333 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@296..307 "filter" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@333..345 "f\\ilter" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@307..309 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@345..347 ":" [] [Whitespace(" ")],
                                 value: CssLegacyFilterValue {
                                     components: CssCustomPropertyComponentList [
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@347..354 "pro\\gid" [] [],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: COLON@354..355 ":" [] [],
+                                        },
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@355..371 "DXImageTransform" [] [],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: DOT@371..372 "." [] [],
+                                        },
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@372..381 "Microsoft" [] [],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: DOT@381..382 "." [] [],
+                                        },
                                         CssCustomPropertyFunction {
                                             name: CssCustomIdentifier {
-                                                value_token: IDENT@309..317 "\\61 lpha" [] [],
+                                                value_token: IDENT@382..387 "Alpha" [] [],
                                             },
-                                            l_paren_token: L_PAREN@317..318 "(" [] [],
+                                            l_paren_token: L_PAREN@387..388 "(" [] [],
                                             components: CssCustomPropertyComponentList [
                                                 CssCustomIdentifier {
-                                                    value_token: IDENT@318..325 "opacity" [] [],
+                                                    value_token: IDENT@388..395 "Opacity" [] [],
                                                 },
                                                 CssCustomPropertyDelimiter {
-                                                    value: EQ@325..326 "=" [] [],
+                                                    value: EQ@395..396 "=" [] [],
                                                 },
                                                 CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@326..328 "40" [] [],
+                                                    value_token: CSS_NUMBER_LITERAL@396..398 "40" [] [],
                                                 },
                                             ],
-                                            r_paren_token: R_PAREN@328..329 ")" [] [],
+                                            r_paren_token: R_PAREN@398..399 ")" [] [],
                                         },
                                     ],
                                 },
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@329..330 ";" [] [],
+                        semicolon_token: SEMICOLON@399..400 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@400..411 "filter" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@411..413 ":" [] [Whitespace(" ")],
+                                value: CssLegacyFilterValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@413..421 "\\61 lpha" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@421..422 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@422..429 "opacity" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: EQ@429..430 "=" [] [],
+                                                },
+                                                CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@430..432 "40" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@432..433 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@433..434 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@330..332 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@434..436 "}" [Newline("\n")] [],
             },
         },
         CssAtRule {
-            at_token: AT@332..335 "@" [Newline("\n"), Newline("\n")] [],
+            at_token: AT@436..439 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
-                    supports_token: SUPPORTS_KW@335..344 "supports" [] [Whitespace(" ")],
+                    supports_token: SUPPORTS_KW@439..448 "supports" [] [Whitespace(" ")],
                     condition: CssSupportsFeatureDeclaration {
-                        l_paren_token: L_PAREN@344..345 "(" [] [],
+                        l_paren_token: L_PAREN@448..449 "(" [] [],
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@345..351 "filter" [] [],
+                                    value_token: IDENT@449..455 "filter" [] [],
                                 },
-                                colon_token: COLON@351..353 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@455..457 ":" [] [Whitespace(" ")],
                                 value: CssLegacyFilterValue {
                                     components: CssCustomPropertyComponentList [
                                         CssCustomIdentifier {
-                                            value_token: IDENT@353..359 "progid" [] [],
+                                            value_token: IDENT@457..463 "progid" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
-                                            value: COLON@359..360 ":" [] [],
+                                            value: COLON@463..464 ":" [] [],
                                         },
                                         CssCustomIdentifier {
-                                            value_token: IDENT@360..376 "DXImageTransform" [] [],
+                                            value_token: IDENT@464..480 "DXImageTransform" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
-                                            value: DOT@376..377 "." [] [],
+                                            value: DOT@480..481 "." [] [],
                                         },
                                         CssCustomIdentifier {
-                                            value_token: IDENT@377..386 "Microsoft" [] [],
+                                            value_token: IDENT@481..490 "Microsoft" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
-                                            value: DOT@386..387 "." [] [],
+                                            value: DOT@490..491 "." [] [],
                                         },
                                         CssCustomPropertyFunction {
                                             name: CssCustomIdentifier {
-                                                value_token: IDENT@387..392 "Alpha" [] [],
+                                                value_token: IDENT@491..496 "Alpha" [] [],
                                             },
-                                            l_paren_token: L_PAREN@392..393 "(" [] [],
+                                            l_paren_token: L_PAREN@496..497 "(" [] [],
                                             components: CssCustomPropertyComponentList [
                                                 CssCustomIdentifier {
-                                                    value_token: IDENT@393..400 "Opacity" [] [],
+                                                    value_token: IDENT@497..504 "Opacity" [] [],
                                                 },
                                                 CssCustomPropertyDelimiter {
-                                                    value: EQ@400..401 "=" [] [],
+                                                    value: EQ@504..505 "=" [] [],
                                                 },
                                                 CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@401..403 "40" [] [],
+                                                    value_token: CSS_NUMBER_LITERAL@505..507 "40" [] [],
                                                 },
                                             ],
-                                            r_paren_token: R_PAREN@403..404 ")" [] [],
+                                            r_paren_token: R_PAREN@507..508 ")" [] [],
                                         },
                                     ],
                                 },
                             },
                             important: missing (optional),
                         },
-                        r_paren_token: R_PAREN@404..406 ")" [] [Whitespace(" ")],
+                        r_paren_token: R_PAREN@508..510 ")" [] [Whitespace(" ")],
                     },
                 },
                 block: CssRuleBlock {
-                    l_curly_token: L_CURLY@406..407 "{" [] [],
+                    l_curly_token: L_CURLY@510..511 "{" [] [],
                     rules: CssRuleList [],
-                    r_curly_token: R_CURLY@407..409 "}" [Newline("\n")] [],
+                    r_curly_token: R_CURLY@511..513 "}" [Newline("\n")] [],
                 },
             },
         },
         CssAtRule {
-            at_token: AT@409..412 "@" [Newline("\n"), Newline("\n")] [],
+            at_token: AT@513..516 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssSupportsAtRule {
                 declarator: CssSupportsAtRuleDeclarator {
-                    supports_token: SUPPORTS_KW@412..421 "supports" [] [Whitespace(" ")],
+                    supports_token: SUPPORTS_KW@516..525 "supports" [] [Whitespace(" ")],
                     condition: CssSupportsFeatureDeclaration {
-                        l_paren_token: L_PAREN@421..422 "(" [] [],
+                        l_paren_token: L_PAREN@525..526 "(" [] [],
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@422..432 "-ms-filter" [] [],
+                                    value_token: IDENT@526..536 "-ms-filter" [] [],
                                 },
-                                colon_token: COLON@432..434 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@536..538 ":" [] [Whitespace(" ")],
                                 value: CssLegacyFilterValue {
                                     components: CssCustomPropertyComponentList [
                                         CssCustomPropertyFunction {
                                             name: CssCustomIdentifier {
-                                                value_token: IDENT@434..439 "alpha" [] [],
+                                                value_token: IDENT@538..543 "alpha" [] [],
                                             },
-                                            l_paren_token: L_PAREN@439..440 "(" [] [],
+                                            l_paren_token: L_PAREN@543..544 "(" [] [],
                                             components: CssCustomPropertyComponentList [
                                                 CssCustomIdentifier {
-                                                    value_token: IDENT@440..447 "opacity" [] [],
+                                                    value_token: IDENT@544..551 "opacity" [] [],
                                                 },
                                                 CssCustomPropertyDelimiter {
-                                                    value: EQ@447..448 "=" [] [],
+                                                    value: EQ@551..552 "=" [] [],
                                                 },
                                                 CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@448..450 "40" [] [],
+                                                    value_token: CSS_NUMBER_LITERAL@552..554 "40" [] [],
                                                 },
                                             ],
-                                            r_paren_token: R_PAREN@450..451 ")" [] [],
+                                            r_paren_token: R_PAREN@554..555 ")" [] [],
                                         },
                                     ],
                                 },
                             },
                             important: missing (optional),
                         },
-                        r_paren_token: R_PAREN@451..453 ")" [] [Whitespace(" ")],
+                        r_paren_token: R_PAREN@555..557 ")" [] [Whitespace(" ")],
                     },
                 },
                 block: CssRuleBlock {
-                    l_curly_token: L_CURLY@453..454 "{" [] [],
+                    l_curly_token: L_CURLY@557..558 "{" [] [],
                     rules: CssRuleList [],
-                    r_curly_token: R_CURLY@454..456 "}" [Newline("\n")] [],
+                    r_curly_token: R_CURLY@558..560 "}" [Newline("\n")] [],
                 },
             },
         },
     ],
-    eof_token: EOF@456..457 "" [Newline("\n")] [],
+    eof_token: EOF@560..561 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..457
+0: CSS_ROOT@0..561
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..456
-    0: CSS_QUALIFIED_RULE@0..332
+  1: CSS_ROOT_ITEM_LIST@0..560
+    0: CSS_QUALIFIED_RULE@0..436
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPOUND_SELECTOR@0..4
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -431,9 +502,9 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "div" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_OR_RULE_BLOCK@4..332
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..436
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@5..330
+        1: CSS_DECLARATION_OR_RULE_LIST@5..434
           0: CSS_DECLARATION_WITH_SEMICOLON@5..74
             0: CSS_DECLARATION@5..73
               0: CSS_GENERIC_PROPERTY@5..73
@@ -540,139 +611,185 @@ CssRoot {
                       3: R_PAREN@227..228 ")" [] []
               1: (empty)
             1: SEMICOLON@228..229 ";" [] []
-          3: CSS_DECLARATION_WITH_SEMICOLON@229..296
-            0: CSS_DECLARATION@229..295
-              0: CSS_GENERIC_PROPERTY@229..295
-                0: CSS_IDENTIFIER@229..241
-                  0: IDENT@229..241 "f\\ilter" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@241..243 ":" [] [Whitespace(" ")]
-                2: CSS_LEGACY_FILTER_VALUE@243..295
-                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@243..295
-                    0: CSS_CUSTOM_IDENTIFIER@243..250
-                      0: IDENT@243..250 "pro\\gid" [] []
-                    1: CSS_CUSTOM_PROPERTY_DELIMITER@250..251
-                      0: COLON@250..251 ":" [] []
-                    2: CSS_CUSTOM_IDENTIFIER@251..267
-                      0: IDENT@251..267 "DXImageTransform" [] []
-                    3: CSS_CUSTOM_PROPERTY_DELIMITER@267..268
-                      0: DOT@267..268 "." [] []
-                    4: CSS_CUSTOM_IDENTIFIER@268..277
-                      0: IDENT@268..277 "Microsoft" [] []
-                    5: CSS_CUSTOM_PROPERTY_DELIMITER@277..278
-                      0: DOT@277..278 "." [] []
-                    6: CSS_CUSTOM_PROPERTY_FUNCTION@278..295
-                      0: CSS_CUSTOM_IDENTIFIER@278..283
-                        0: IDENT@278..283 "Alpha" [] []
-                      1: L_PAREN@283..284 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@284..294
-                        0: CSS_CUSTOM_IDENTIFIER@284..291
-                          0: IDENT@284..291 "Opacity" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@291..292
-                          0: EQ@291..292 "=" [] []
-                        2: CSS_NUMBER@292..294
-                          0: CSS_NUMBER_LITERAL@292..294 "40" [] []
-                      3: R_PAREN@294..295 ")" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@229..333
+            0: CSS_DECLARATION@229..332
+              0: CSS_GENERIC_PROPERTY@229..332
+                0: CSS_IDENTIFIER@229..240
+                  0: IDENT@229..240 "filter" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@240..242 ":" [] [Whitespace(" ")]
+                2: CSS_LEGACY_FILTER_VALUE@242..332
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@242..332
+                    0: CSS_CUSTOM_IDENTIFIER@242..248
+                      0: IDENT@242..248 "progid" [] []
+                    1: CSS_CUSTOM_PROPERTY_DELIMITER@248..249
+                      0: COLON@248..249 ":" [] []
+                    2: CSS_CUSTOM_IDENTIFIER@249..265
+                      0: IDENT@249..265 "DXImageTransform" [] []
+                    3: CSS_CUSTOM_PROPERTY_DELIMITER@265..266
+                      0: DOT@265..266 "." [] []
+                    4: CSS_CUSTOM_IDENTIFIER@266..275
+                      0: IDENT@266..275 "Microsoft" [] []
+                    5: CSS_CUSTOM_PROPERTY_DELIMITER@275..276
+                      0: DOT@275..276 "." [] []
+                    6: CSS_CUSTOM_PROPERTY_FUNCTION@276..332
+                      0: CSS_CUSTOM_IDENTIFIER@276..284
+                        0: IDENT@276..284 "gradient" [] []
+                      1: L_PAREN@284..285 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@285..331
+                        0: CSS_CUSTOM_IDENTIFIER@285..298
+                          0: IDENT@285..298 "startColorstr" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@298..299
+                          0: EQ@298..299 "=" [] []
+                        2: CSS_CUSTOM_PROPERTY_DELIMITER@299..300
+                          0: HASH@299..300 "#" [] []
+                        3: CSS_CUSTOM_IDENTIFIER@300..308
+                          0: IDENT@300..308 "4d000000" [] []
+                        4: CSS_CUSTOM_PROPERTY_DELIMITER@308..310
+                          0: COMMA@308..310 "," [] [Whitespace(" ")]
+                        5: CSS_CUSTOM_IDENTIFIER@310..321
+                          0: IDENT@310..321 "endColorstr" [] []
+                        6: CSS_CUSTOM_PROPERTY_DELIMITER@321..322
+                          0: EQ@321..322 "=" [] []
+                        7: CSS_CUSTOM_PROPERTY_DELIMITER@322..323
+                          0: HASH@322..323 "#" [] []
+                        8: CSS_CUSTOM_IDENTIFIER@323..331
+                          0: IDENT@323..331 "00000000" [] []
+                      3: R_PAREN@331..332 ")" [] []
               1: (empty)
-            1: SEMICOLON@295..296 ";" [] []
-          4: CSS_DECLARATION_WITH_SEMICOLON@296..330
-            0: CSS_DECLARATION@296..329
-              0: CSS_GENERIC_PROPERTY@296..329
-                0: CSS_IDENTIFIER@296..307
-                  0: IDENT@296..307 "filter" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@307..309 ":" [] [Whitespace(" ")]
-                2: CSS_LEGACY_FILTER_VALUE@309..329
-                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@309..329
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@309..329
-                      0: CSS_CUSTOM_IDENTIFIER@309..317
-                        0: IDENT@309..317 "\\61 lpha" [] []
-                      1: L_PAREN@317..318 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@318..328
-                        0: CSS_CUSTOM_IDENTIFIER@318..325
-                          0: IDENT@318..325 "opacity" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@325..326
-                          0: EQ@325..326 "=" [] []
-                        2: CSS_NUMBER@326..328
-                          0: CSS_NUMBER_LITERAL@326..328 "40" [] []
-                      3: R_PAREN@328..329 ")" [] []
+            1: SEMICOLON@332..333 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@333..400
+            0: CSS_DECLARATION@333..399
+              0: CSS_GENERIC_PROPERTY@333..399
+                0: CSS_IDENTIFIER@333..345
+                  0: IDENT@333..345 "f\\ilter" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@345..347 ":" [] [Whitespace(" ")]
+                2: CSS_LEGACY_FILTER_VALUE@347..399
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@347..399
+                    0: CSS_CUSTOM_IDENTIFIER@347..354
+                      0: IDENT@347..354 "pro\\gid" [] []
+                    1: CSS_CUSTOM_PROPERTY_DELIMITER@354..355
+                      0: COLON@354..355 ":" [] []
+                    2: CSS_CUSTOM_IDENTIFIER@355..371
+                      0: IDENT@355..371 "DXImageTransform" [] []
+                    3: CSS_CUSTOM_PROPERTY_DELIMITER@371..372
+                      0: DOT@371..372 "." [] []
+                    4: CSS_CUSTOM_IDENTIFIER@372..381
+                      0: IDENT@372..381 "Microsoft" [] []
+                    5: CSS_CUSTOM_PROPERTY_DELIMITER@381..382
+                      0: DOT@381..382 "." [] []
+                    6: CSS_CUSTOM_PROPERTY_FUNCTION@382..399
+                      0: CSS_CUSTOM_IDENTIFIER@382..387
+                        0: IDENT@382..387 "Alpha" [] []
+                      1: L_PAREN@387..388 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@388..398
+                        0: CSS_CUSTOM_IDENTIFIER@388..395
+                          0: IDENT@388..395 "Opacity" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@395..396
+                          0: EQ@395..396 "=" [] []
+                        2: CSS_NUMBER@396..398
+                          0: CSS_NUMBER_LITERAL@396..398 "40" [] []
+                      3: R_PAREN@398..399 ")" [] []
               1: (empty)
-            1: SEMICOLON@329..330 ";" [] []
-        2: R_CURLY@330..332 "}" [Newline("\n")] []
-    1: CSS_AT_RULE@332..409
-      0: AT@332..335 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_SUPPORTS_AT_RULE@335..409
-        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@335..406
-          0: SUPPORTS_KW@335..344 "supports" [] [Whitespace(" ")]
-          1: CSS_SUPPORTS_FEATURE_DECLARATION@344..406
-            0: L_PAREN@344..345 "(" [] []
-            1: CSS_DECLARATION@345..404
-              0: CSS_GENERIC_PROPERTY@345..404
-                0: CSS_IDENTIFIER@345..351
-                  0: IDENT@345..351 "filter" [] []
-                1: COLON@351..353 ":" [] [Whitespace(" ")]
-                2: CSS_LEGACY_FILTER_VALUE@353..404
-                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@353..404
-                    0: CSS_CUSTOM_IDENTIFIER@353..359
-                      0: IDENT@353..359 "progid" [] []
-                    1: CSS_CUSTOM_PROPERTY_DELIMITER@359..360
-                      0: COLON@359..360 ":" [] []
-                    2: CSS_CUSTOM_IDENTIFIER@360..376
-                      0: IDENT@360..376 "DXImageTransform" [] []
-                    3: CSS_CUSTOM_PROPERTY_DELIMITER@376..377
-                      0: DOT@376..377 "." [] []
-                    4: CSS_CUSTOM_IDENTIFIER@377..386
-                      0: IDENT@377..386 "Microsoft" [] []
-                    5: CSS_CUSTOM_PROPERTY_DELIMITER@386..387
-                      0: DOT@386..387 "." [] []
-                    6: CSS_CUSTOM_PROPERTY_FUNCTION@387..404
-                      0: CSS_CUSTOM_IDENTIFIER@387..392
-                        0: IDENT@387..392 "Alpha" [] []
-                      1: L_PAREN@392..393 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@393..403
-                        0: CSS_CUSTOM_IDENTIFIER@393..400
-                          0: IDENT@393..400 "Opacity" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@400..401
-                          0: EQ@400..401 "=" [] []
-                        2: CSS_NUMBER@401..403
-                          0: CSS_NUMBER_LITERAL@401..403 "40" [] []
-                      3: R_PAREN@403..404 ")" [] []
+            1: SEMICOLON@399..400 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@400..434
+            0: CSS_DECLARATION@400..433
+              0: CSS_GENERIC_PROPERTY@400..433
+                0: CSS_IDENTIFIER@400..411
+                  0: IDENT@400..411 "filter" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@411..413 ":" [] [Whitespace(" ")]
+                2: CSS_LEGACY_FILTER_VALUE@413..433
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@413..433
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@413..433
+                      0: CSS_CUSTOM_IDENTIFIER@413..421
+                        0: IDENT@413..421 "\\61 lpha" [] []
+                      1: L_PAREN@421..422 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@422..432
+                        0: CSS_CUSTOM_IDENTIFIER@422..429
+                          0: IDENT@422..429 "opacity" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@429..430
+                          0: EQ@429..430 "=" [] []
+                        2: CSS_NUMBER@430..432
+                          0: CSS_NUMBER_LITERAL@430..432 "40" [] []
+                      3: R_PAREN@432..433 ")" [] []
               1: (empty)
-            2: R_PAREN@404..406 ")" [] [Whitespace(" ")]
-        1: CSS_RULE_BLOCK@406..409
-          0: L_CURLY@406..407 "{" [] []
-          1: CSS_RULE_LIST@407..407
-          2: R_CURLY@407..409 "}" [Newline("\n")] []
-    2: CSS_AT_RULE@409..456
-      0: AT@409..412 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_SUPPORTS_AT_RULE@412..456
-        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@412..453
-          0: SUPPORTS_KW@412..421 "supports" [] [Whitespace(" ")]
-          1: CSS_SUPPORTS_FEATURE_DECLARATION@421..453
-            0: L_PAREN@421..422 "(" [] []
-            1: CSS_DECLARATION@422..451
-              0: CSS_GENERIC_PROPERTY@422..451
-                0: CSS_IDENTIFIER@422..432
-                  0: IDENT@422..432 "-ms-filter" [] []
-                1: COLON@432..434 ":" [] [Whitespace(" ")]
-                2: CSS_LEGACY_FILTER_VALUE@434..451
-                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@434..451
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@434..451
-                      0: CSS_CUSTOM_IDENTIFIER@434..439
-                        0: IDENT@434..439 "alpha" [] []
-                      1: L_PAREN@439..440 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@440..450
-                        0: CSS_CUSTOM_IDENTIFIER@440..447
-                          0: IDENT@440..447 "opacity" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@447..448
-                          0: EQ@447..448 "=" [] []
-                        2: CSS_NUMBER@448..450
-                          0: CSS_NUMBER_LITERAL@448..450 "40" [] []
-                      3: R_PAREN@450..451 ")" [] []
+            1: SEMICOLON@433..434 ";" [] []
+        2: R_CURLY@434..436 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@436..513
+      0: AT@436..439 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@439..513
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@439..510
+          0: SUPPORTS_KW@439..448 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_FEATURE_DECLARATION@448..510
+            0: L_PAREN@448..449 "(" [] []
+            1: CSS_DECLARATION@449..508
+              0: CSS_GENERIC_PROPERTY@449..508
+                0: CSS_IDENTIFIER@449..455
+                  0: IDENT@449..455 "filter" [] []
+                1: COLON@455..457 ":" [] [Whitespace(" ")]
+                2: CSS_LEGACY_FILTER_VALUE@457..508
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@457..508
+                    0: CSS_CUSTOM_IDENTIFIER@457..463
+                      0: IDENT@457..463 "progid" [] []
+                    1: CSS_CUSTOM_PROPERTY_DELIMITER@463..464
+                      0: COLON@463..464 ":" [] []
+                    2: CSS_CUSTOM_IDENTIFIER@464..480
+                      0: IDENT@464..480 "DXImageTransform" [] []
+                    3: CSS_CUSTOM_PROPERTY_DELIMITER@480..481
+                      0: DOT@480..481 "." [] []
+                    4: CSS_CUSTOM_IDENTIFIER@481..490
+                      0: IDENT@481..490 "Microsoft" [] []
+                    5: CSS_CUSTOM_PROPERTY_DELIMITER@490..491
+                      0: DOT@490..491 "." [] []
+                    6: CSS_CUSTOM_PROPERTY_FUNCTION@491..508
+                      0: CSS_CUSTOM_IDENTIFIER@491..496
+                        0: IDENT@491..496 "Alpha" [] []
+                      1: L_PAREN@496..497 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@497..507
+                        0: CSS_CUSTOM_IDENTIFIER@497..504
+                          0: IDENT@497..504 "Opacity" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@504..505
+                          0: EQ@504..505 "=" [] []
+                        2: CSS_NUMBER@505..507
+                          0: CSS_NUMBER_LITERAL@505..507 "40" [] []
+                      3: R_PAREN@507..508 ")" [] []
               1: (empty)
-            2: R_PAREN@451..453 ")" [] [Whitespace(" ")]
-        1: CSS_RULE_BLOCK@453..456
-          0: L_CURLY@453..454 "{" [] []
-          1: CSS_RULE_LIST@454..454
-          2: R_CURLY@454..456 "}" [Newline("\n")] []
-  2: EOF@456..457 "" [Newline("\n")] []
+            2: R_PAREN@508..510 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@510..513
+          0: L_CURLY@510..511 "{" [] []
+          1: CSS_RULE_LIST@511..511
+          2: R_CURLY@511..513 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@513..560
+      0: AT@513..516 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@516..560
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@516..557
+          0: SUPPORTS_KW@516..525 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_FEATURE_DECLARATION@525..557
+            0: L_PAREN@525..526 "(" [] []
+            1: CSS_DECLARATION@526..555
+              0: CSS_GENERIC_PROPERTY@526..555
+                0: CSS_IDENTIFIER@526..536
+                  0: IDENT@526..536 "-ms-filter" [] []
+                1: COLON@536..538 ":" [] [Whitespace(" ")]
+                2: CSS_LEGACY_FILTER_VALUE@538..555
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@538..555
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@538..555
+                      0: CSS_CUSTOM_IDENTIFIER@538..543
+                        0: IDENT@538..543 "alpha" [] []
+                      1: L_PAREN@543..544 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@544..554
+                        0: CSS_CUSTOM_IDENTIFIER@544..551
+                          0: IDENT@544..551 "opacity" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@551..552
+                          0: EQ@551..552 "=" [] []
+                        2: CSS_NUMBER@552..554
+                          0: CSS_NUMBER_LITERAL@552..554 "40" [] []
+                      3: R_PAREN@554..555 ")" [] []
+              1: (empty)
+            2: R_PAREN@555..557 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@557..560
+          0: L_CURLY@557..558 "{" [] []
+          1: CSS_RULE_LIST@558..558
+          2: R_CURLY@558..560 "}" [Newline("\n")] []
+  2: EOF@560..561 "" [Newline("\n")] []
 
 ```
