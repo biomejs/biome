@@ -711,6 +711,8 @@ fn is_supported_numeric_annotation(annotation: &AnyTsType) -> bool {
 /// would break the code.
 ///
 /// Unary `+` and `>>>` are excluded because they throw on bigints instead of producing one.
+///
+/// `as`, `satisfies` and `!` wrappers are unwrapped, so `2n as const` is also a bigint.
 fn is_bigint_like(expression: &AnyJsExpression) -> bool {
     match expression.clone().omit_parentheses() {
         AnyJsExpression::AnyJsLiteralExpression(literal) => {
@@ -742,6 +744,15 @@ fn is_bigint_like(expression: &AnyJsExpression) -> bool {
             ) && binary.left().is_ok_and(|left| is_bigint_like(&left))
                 && binary.right().is_ok_and(|right| is_bigint_like(&right))
         }
+        AnyJsExpression::TsAsExpression(expr) => expr
+             .expression()
+             .is_ok_and(|inner| is_bigint_like(&inner)),
+        AnyJsExpression::TsSatisfiesExpression(expr) => expr
+             .expression()
+             .is_ok_and(|inner| is_bigint_like(&inner)),
+        AnyJsExpression::TsNonNullAssertionExpression(expr) => expr
+             .expression()
+             .is_ok_and(|inner| is_bigint_like(&inner)),
         _ => false,
     }
 }

@@ -57,4 +57,16 @@ function nonNullAngleString(a, b) {
     return (<string>a)! > b ? (<string>a)! : b;
 }
 
+const A = 2n as const;
+const B = 3n;
+const asConstBigint = A > B ? B : A;
+
+const satisfiesBigint = 2n satisfies bigint;
+const C = 3n;
+const satisfiesResult = satisfiesBigint > C ? C : satisfiesBigint;
+
+const nonNullBigint = 2n!;
+const D = 3n;
+const nonNullResult = nonNullBigint > D ? D : nonNullBigint;
+
 ```

@@ -33,3 +33,7 @@ function numericAngleAssertion(a, b) {
 function nonNullNumber(a, b) {
     return a! > b ? a! : b;
 }
+
+const numericAsConst = 1 as const;
+const numericOther = 2;
+const numericAsConstResult = numericAsConst > numericOther ? numericOther : numericAsConst;

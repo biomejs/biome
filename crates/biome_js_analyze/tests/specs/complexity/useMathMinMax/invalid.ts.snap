@@ -40,6 +40,10 @@ function nonNullNumber(a, b) {
     return a! > b ? a! : b;
 }
 
+const numericAsConst = 1 as const;
+const numericOther = 2;
+const numericAsConstResult = numericAsConst > numericOther ? numericOther : numericAsConst;
+
 ```
 
 # Diagnostics
@@ -242,6 +246,30 @@ invalid.ts:34:12 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━�
        34 │ + ····return·Math.max(a!·,·b);
     35 35 │   }
     36 36 │   
+  
+
+```
+
+```
+invalid.ts:39:30 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    37 │ const numericAsConst = 1 as const;
+    38 │ const numericOther = 2;
+  > 39 │ const numericAsConstResult = numericAsConst > numericOther ? numericOther : numericAsConst;
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    37 37 │   const numericAsConst = 1 as const;
+    38 38 │   const numericOther = 2;
+    39    │ - const·numericAsConstResult·=·numericAsConst·>·numericOther·?·numericOther·:·numericAsConst;
+       39 │ + const·numericAsConstResult·=·Math.min(numericAsConst·,·numericOther);
+    40 40 │   
   
 
 ```
