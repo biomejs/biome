@@ -736,11 +736,9 @@ impl JsModuleInfoCollector {
                     local_name,
                     scope,
                 } => {
-                    if let Some(binding_ref) = self
-                        .semantic_model
-                        .scope_from_id(scope)
-                        .get_binding_reference(&local_name)
-                    {
+                    // An ambient module can export a declaration of the
+                    // enclosing file by name.
+                    if let Some(binding_ref) = self.find_binding_in_scope(&local_name, scope) {
                         let export = self.export_for_binding_reference(binding_ref);
                         finalised_exports.insert(export_name, JsExport::Own(export));
                     }

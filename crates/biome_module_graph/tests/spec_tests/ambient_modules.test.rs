@@ -353,3 +353,21 @@ fn modules_that_frameworks_declare_are_not_dependencies() {
 
     assert!(module_dependencies(&db, module).is_empty());
 }
+
+#[test]
+fn ambient_module_exports_declarations_of_the_enclosing_file_by_name() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/env.d.ts".into(),
+        r#"declare const shared: number;
+        declare module "shared-module" {
+            export { shared };
+        }"#,
+    );
+
+    let info = js_module_info(&fs, "/env.d.ts");
+    let [module] = info.ambient_modules.as_ref() else {
+        panic!("the file must declare one ambient module");
+    };
+    assert_eq!(export_names(ambient_module_info(module)), ["shared"]);
+}
