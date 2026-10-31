@@ -527,7 +527,12 @@ impl Collector<'_, '_> {
                     let range = self.host(member.syntax().text_trimmed_range());
                     self.builder.component_mut(component).render = Some(range);
                 }
-                "extends" | "mixins" => self.builder.open_all(component, OpenReason::Extends),
+                "extends" => self.builder.open_all(component, OpenReason::Extends),
+                "mixins" => {
+                    let range = self.host(member.syntax().text_trimmed_range());
+                    self.builder.component_mut(component).mixins = Some(range);
+                    self.builder.open_all(component, OpenReason::Extends);
+                }
                 // The template is a string the model does not read, and it
                 // may use any declaration.
                 "template" => self.builder.open_all_uses(component),

@@ -732,6 +732,8 @@ pub(crate) struct ComponentData {
     pub(crate) macro_options: MacroOptions,
     /// The function the `data` option is written as.
     pub(crate) data_function: Option<TextRange>,
+    /// The range of the `mixins` option.
+    pub(crate) mixins: Option<TextRange>,
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
@@ -1967,6 +1969,13 @@ impl Component {
     /// `render() {}` or `render: h`, whatever its value is.
     pub fn render_range(&self) -> Option<TextRange> {
         let range = self.row().render?;
+        Some(self.data.local(range, self.row().snippet))
+    }
+
+    /// The range of the `mixins` option, in the coordinates of the tree that
+    /// holds it.
+    pub fn mixins_range(&self) -> Option<TextRange> {
+        let range = self.row().mixins?;
         Some(self.data.local(range, self.row().snippet))
     }
 
