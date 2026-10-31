@@ -3098,6 +3098,11 @@ export interface Nursery {
 	 */
 	noMagicArrayFlatDepth?: NoMagicArrayFlatDepthConfiguration;
 	/**
+	 * Disallow spreading objects or arrays in the values returned by map() and flatMap() callbacks.
+	 * See https://biomejs.dev/linter/rules/no-map-spread
+	 */
+	noMapSpread?: NoMapSpreadConfiguration;
+	/**
 	 * Disallow void when it does not discard a call's return value or a thenable.
 	 * See https://biomejs.dev/linter/rules/no-meaningless-void-operator
 	 */
@@ -6503,6 +6508,9 @@ export type NoLateEventControlConfiguration =
 export type NoMagicArrayFlatDepthConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMagicArrayFlatDepthOptions;
+export type NoMapSpreadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMapSpreadOptions;
 export type NoMeaninglessVoidOperatorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMeaninglessVoidOperatorOptions;
@@ -9428,6 +9436,14 @@ export interface RuleWithNoLateEventControlOptions {
 export interface RuleWithNoMagicArrayFlatDepthOptions {
 	level: RulePlainConfiguration;
 	options?: NoMagicArrayFlatDepthOptions;
+}
+export interface RuleWithNoMapSpreadOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoMapSpreadOptions;
 }
 export interface RuleWithNoMeaninglessVoidOperatorOptions {
 	/**
@@ -12719,6 +12735,20 @@ export interface NoJsRestrictedPropertiesOptions {
 export type NoJsonUnsafeValuesOptions = {};
 export type NoLateEventControlOptions = {};
 export type NoMagicArrayFlatDepthOptions = {};
+export interface NoMapSpreadOptions {
+	/**
+	 * Ignores `map()` and `flatMap()` calls on a function parameter. The caller owns the
+	 * array, so changing its items in place could affect code outside the
+	 * function. Enabled by default.
+	 */
+	ignoreArgs?: boolean;
+	/**
+	 * Ignores `map()` and `flatMap()` calls on a variable that is read again after the call.
+	 * Code that reads the original array later may rely on the copies to keep
+	 * the original items unchanged. Enabled by default.
+	 */
+	ignoreRereads?: boolean;
+}
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
@@ -14868,6 +14898,7 @@ export type Category =
 	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noLateEventControl"
 	| "lint/nursery/noMagicArrayFlatDepth"
+	| "lint/nursery/noMapSpread"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMisplacedListElements"
