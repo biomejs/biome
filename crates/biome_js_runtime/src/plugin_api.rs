@@ -1,9 +1,10 @@
 use crate::ast::JsAstNode;
+use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
 use crate::mutation::{JsMutation, create_mutation};
 use crate::token::factory_token;
 use biome_analyze::{PluginActionData, PluginDiagnosticEntry, RuleDiagnostic};
 use biome_diagnostics::{Applicability, Severity, category};
-use biome_js_syntax::JsSyntaxNode;
+use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use boa_engine::module::SyntheticModuleInitializer;
 use boa_engine::object::builtins::JsArray;
 use boa_engine::object::{FunctionObjectBuilder, ObjectInitializer};
@@ -121,6 +122,22 @@ impl JsPluginApi {
         .length(1)
         .name("createMutation")
         .build();
+        let node_kinds = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(JsNodeKindSet::<JsLanguage>::create),
+        )
+        .length(0)
+        .name("nodeKinds")
+        .build();
+
+        let token_kinds = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(JsTokenKindSet::<JsLanguage>::create),
+        )
+        .length(0)
+        .name("tokenKinds")
+        .build();
+
         let factory = ObjectInitializer::new(context)
             .function(
                 NativeFunction::from_fn_ptr(factory_token),
@@ -137,10 +154,21 @@ impl JsPluginApi {
                 js_string!("defineRule"),
                 js_string!("createMutation"),
                 js_string!("factory"),
+                js_string!("nodeKinds"),
+                js_string!("tokenKinds"),
             ],
             SyntheticModuleInitializer::from_copy_closure_with_captures(
                 |module,
-                 (register_diagnostic, ast, semantic, define_rule, create_mutation, factory),
+                 (
+                    register_diagnostic,
+                    ast,
+                    semantic,
+                    define_rule,
+                    create_mutation,
+                    factory,
+                    node_kinds,
+                    token_kinds,
+                ),
                  _| {
                     module.set_export(
                         &js_string!("registerDiagnostic"),
@@ -153,7 +181,9 @@ impl JsPluginApi {
                         &js_string!("createMutation"),
                         create_mutation.clone().into(),
                     )?;
-                    module.set_export(&js_string!("factory"), factory.clone().into())
+                    module.set_export(&js_string!("factory"), factory.clone().into())?;
+                    module.set_export(&js_string!("nodeKinds"), node_kinds.clone().into())?;
+                    module.set_export(&js_string!("tokenKinds"), token_kinds.clone().into())
                 },
                 (
                     register_diagnostic,
@@ -162,6 +192,8 @@ impl JsPluginApi {
                     define_rule,
                     create_mutation,
                     factory,
+                    node_kinds,
+                    token_kinds,
                 ),
             ),
             None,
