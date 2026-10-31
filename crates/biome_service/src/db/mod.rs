@@ -643,13 +643,28 @@ impl WorkspaceDb {
         text: impl Into<Arc<str>>,
         file_source: DocumentFileSource,
     ) -> Source {
+        self.upsert_file_with_configuration(path, text, file_source, None)
+    }
+
+    /// Publishes `text` as the disk view of `path`, parsed as `file_source`
+    /// with `configuration` on top of the settings of the path. The existing
+    /// [Source] input of the view changes through Salsa setters.
+    pub fn upsert_file_with_configuration(
+        &mut self,
+        path: &Utf8Path,
+        text: impl Into<Arc<str>>,
+        file_source: DocumentFileSource,
+        configuration: Option<Configuration>,
+    ) -> Source {
         let file_source_index = self.insert_source(file_source);
+        let configuration_index = configuration
+            .map(|configuration| self.data().insert_inline_configuration(configuration));
         self.update_or_insert_view(
             path,
             ViewId::Disk,
             text.into(),
             file_source_index,
-            None,
+            configuration_index,
             ParsedSourceUpdateMode::Setters,
         )
     }
