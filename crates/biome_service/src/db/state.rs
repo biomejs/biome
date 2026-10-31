@@ -1275,6 +1275,24 @@ impl DbState {
         }
     }
 
+    /// Removes what the frameworks of the package in `package_path` inject.
+    /// See [WorkspaceDb::remove_frameworks].
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_frameworks(&self, package_path: &camino::Utf8Path) {
+        if self.fork().frameworks(package_path).is_none() {
+            return;
+        }
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().data().remove_frameworks(package_path);
+                self.mark_module_graph_dirty();
+            }
+            DbStorage::Owned(db) => {
+                db.with_setter(|db| db.remove_frameworks(package_path));
+            }
+        }
+    }
+
     /// Records that a project was replaced.
     ///
     /// In the view of a scan, the scan advances the projects generation when
