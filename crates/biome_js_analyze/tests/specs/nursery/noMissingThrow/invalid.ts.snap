@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+new Error<string>("generic");
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new Error<string>("generic");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    2 │ throw·new·Error<string>("generic");
+      │ ++++++                             
+
+```

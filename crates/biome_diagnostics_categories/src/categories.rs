@@ -267,6 +267,7 @@ define_categories! {
     "lint/nursery/noMisplacedListElements": "https://biomejs.dev/linter/rules/no-misplaced-list-elements",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMissingScssInterpolation": "https://biomejs.dev/linter/rules/no-missing-scss-interpolation",
+    "lint/nursery/noMissingThrow": "https://biomejs.dev/linter/rules/no-missing-throw",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
     "lint/nursery/noNestedSwitch": "https://biomejs.dev/linter/rules/no-nested-switch",
