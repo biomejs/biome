@@ -1,0 +1,113 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint src/index.ts
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": { "correctness": { "noUnresolvedImports": "error" } }
+  }
+}
+```
+
+## `node_modules/astro/client.d.ts`
+
+```ts
+/// <reference path="./types/content.d.ts" />
+
+declare module "astro:assets" {
+	export const Image: (props: unknown) => unknown;
+}
+
+```
+
+## `node_modules/astro/package.json`
+
+```json
+{ "name": "astro", "version": "7.4.2" }
+```
+
+## `node_modules/astro/types/content.d.ts`
+
+```ts
+declare module "astro:content" {
+	export const getCollection: (...args: any[]) => any;
+}
+
+```
+
+## `package.json`
+
+```json
+{ "dependencies": { "astro": "^7.0.0" } }
+```
+
+## `src/index.ts`
+
+```ts
+import { Image } from "astro:assets";
+import { getCollection, missing } from "astro:content";
+import { unknown } from "astro:unknown";
+
+export { getCollection, Image, missing, unknown };
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.ts:2:25 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module astro:content has no export named missing.
+  
+    1 │ import { Image } from "astro:assets";
+  > 2 │ import { getCollection, missing } from "astro:content";
+      │                         ^^^^^^^
+    3 │ import { unknown } from "astro:unknown";
+    4 │ 
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+src/index.ts:3:25 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier astro:unknown cannot be resolved: module not found
+  
+    1 │ import { Image } from "astro:assets";
+    2 │ import { getCollection, missing } from "astro:content";
+  > 3 │ import { unknown } from "astro:unknown";
+      │                         ^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ export { getCollection, Image, missing, unknown };
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

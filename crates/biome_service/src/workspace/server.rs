@@ -19,6 +19,10 @@ use crate::file_handlers::{
 };
 #[cfg(all(feature = "lang_js", feature = "lang_html"))]
 use crate::file_handlers::{SvelteFileHandler, VueFileHandler};
+#[cfg(feature = "module_graph")]
+use crate::frameworks::FrameworkModules;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use crate::frameworks::{WorkspaceLoaderHost, referenced_declaration_files};
 use crate::module_graph::ModuleDependencies;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use crate::module_graph::resolve_css_module;
@@ -27,7 +31,7 @@ use crate::module_graph::resolve_html_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use crate::module_graph::resolve_js_module;
 #[cfg(feature = "module_graph")]
-use crate::module_graph::{ModuleDb, ModuleInfoKind, module_dependencies};
+use crate::module_graph::{ModuleDb, ModuleInfoKind, ambient_module_path, module_dependencies};
 use crate::projects::{GetFileFeaturesParams, ProjectDb, ProjectKey};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ProjectScan, ScanOptions, Scanner, ScannerWatcherBridge,
@@ -70,6 +74,10 @@ use biome_diagnostics::{
 #[cfg(feature = "html_embeds")]
 use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
 use biome_formatter::rowan::Printed;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_frameworks::LOADERS;
+#[cfg(all(feature = "module_graph", feature = "lang_js"))]
+use biome_fs::is_node_modules_path;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_syntax::HtmlRoot;
@@ -2188,17 +2196,28 @@ impl WorkspaceServerWithDb<'_> {
             }
             UpdateKind::Removed => ResolvedModuleGraphUpdate::Remove,
         };
-        self.commit_module_graph_update(path, resolved)
+        let previous_ambient_modules = self
+            .get_db()
+            .js_module_info_for_path(path)
+            .map_or(0, |info| info.ambient_modules.len());
+        self.commit_module_graph_update(path, resolved, previous_ambient_modules)
     }
 
     #[cfg(feature = "module_graph")]
     /// Commits a resolved module graph update.
+    ///
+    /// Each module that a script declares with `declare module "name"` is
+    /// stored at its [ambient_module_path], so that resolution can lead to it.
+    /// `previous_ambient_modules` is the number of these modules that the
+    /// previous version of the file declared, whose entries are removed when
+    /// they no longer exist.
     ///
     /// This function and everything it calls must not create a database fork.
     fn commit_module_graph_update(
         &self,
         path: &BiomePath,
         update: ResolvedModuleGraphUpdate,
+        previous_ambient_modules: usize,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         match update {
             ResolvedModuleGraphUpdate::Upsert {
@@ -2206,11 +2225,35 @@ impl WorkspaceServerWithDb<'_> {
                 dependencies,
                 diagnostics,
             } => {
+                let ambient_modules = kind
+                    .as_js_module_info()
+                    .map(|info| info.ambient_modules.clone())
+                    .unwrap_or_default();
                 self.db_state.upsert_module_kind(path.to_path_buf(), kind);
+                for (index, ambient_module) in ambient_modules.iter().enumerate() {
+                    let module_path = ambient_module_path(path, index);
+                    // A declaration without body has no module: imports of
+                    // the module resolve, but any import name is accepted.
+                    match &ambient_module.info {
+                        Some(info) => {
+                            self.db_state
+                                .upsert_module_kind(module_path, ModuleInfoKind::Js(info.clone()));
+                        }
+                        None => self.db_state.remove_module(&module_path),
+                    }
+                }
+                for index in ambient_modules.len()..previous_ambient_modules {
+                    self.db_state
+                        .remove_module(&ambient_module_path(path, index));
+                }
                 Ok((dependencies, diagnostics))
             }
             ResolvedModuleGraphUpdate::Remove => {
                 self.db_state.remove_module(path);
+                for index in 0..previous_ambient_modules {
+                    self.db_state
+                        .remove_module(&ambient_module_path(path, index));
+                }
                 Ok(Default::default())
             }
             ResolvedModuleGraphUpdate::Noop => Ok(Default::default()),
@@ -4864,6 +4907,56 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             Ok(Vec::new())
         }
     }
+
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn framework_visits(&self, project_key: ProjectKey) -> Vec<(Utf8PathBuf, Vec<Utf8PathBuf>)> {
+        let Some(project_path) = self.project_get_path(project_key) else {
+            return Vec::new();
+        };
+        let db = self.get_db();
+        let host = WorkspaceLoaderHost {
+            fs: self.fs.as_ref(),
+            db: &db,
+        };
+        self.project_layout
+            .package_paths()
+            .into_iter()
+            .filter(|package_path| {
+                package_path.starts_with(&project_path) && !is_node_modules_path(package_path)
+            })
+            .filter_map(|package_path| {
+                let manifest = self
+                    .project_layout
+                    .get_node_manifest_for_package(&package_path)?;
+                let contributions =
+                    biome_frameworks::load_frameworks(&host, LOADERS, &package_path, &manifest);
+                Some((package_path, contributions.visits.into_iter().collect()))
+            })
+            .collect()
+    }
+
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn declaration_references(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        referenced_declaration_files(self.fs.as_ref(), path)
+    }
+
+    #[cfg(feature = "module_graph")]
+    fn register_framework_modules(&self, package_path: &Utf8Path, files: &[Utf8PathBuf]) {
+        let mut modules = FrameworkModules::default();
+        {
+            let db = self.get_db();
+            for file in files {
+                let Some(info) = db.js_module_info_for_path(file) else {
+                    continue;
+                };
+                for (index, ambient_module) in info.ambient_modules.iter().enumerate() {
+                    modules.insert(ambient_module.name.text(), ambient_module_path(file, index));
+                }
+            }
+        }
+        self.db_state
+            .set_framework_modules(package_path.to_path_buf(), Arc::new(modules));
+    }
 }
 
 impl WorkspaceScannerBridge for LocalWorkspace {
@@ -4958,6 +5051,19 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
         self.as_workspace()
             .index_new_module_dependencies(project_key)
+    }
+
+    fn framework_visits(&self, project_key: ProjectKey) -> Vec<(Utf8PathBuf, Vec<Utf8PathBuf>)> {
+        self.as_workspace().framework_visits(project_key)
+    }
+
+    fn declaration_references(&self, path: &Utf8Path) -> Vec<Utf8PathBuf> {
+        self.as_workspace().declaration_references(path)
+    }
+
+    fn register_framework_modules(&self, package_path: &Utf8Path, files: &[Utf8PathBuf]) {
+        self.as_workspace()
+            .register_framework_modules(package_path, files);
     }
 }
 
