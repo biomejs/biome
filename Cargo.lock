@@ -687,6 +687,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_frameworks"
+version = "0.7.0"
+dependencies = [
+ "biome_fs",
+ "biome_glob",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_json_value",
+ "biome_languages",
+ "biome_package",
+ "biome_resolver",
+ "biome_rowan",
+ "camino",
+ "indexmap",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
 name = "biome_fs"
 version = "0.7.0"
 dependencies = [
