@@ -5084,6 +5084,14 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(all(feature = "module_graph", feature = "lang_js"))]
+    fn contains_package(&self, path: &Utf8Path) -> bool {
+        self.project_layout
+            .package_paths()
+            .iter()
+            .any(|package_path| package_path.starts_with(path))
+    }
+
+    #[cfg(all(feature = "module_graph", feature = "lang_js"))]
     fn is_framework_config(&self, path: &Utf8Path) -> bool {
         // Loaders read only the configuration files in the folder of a
         // package.
@@ -5205,6 +5213,10 @@ impl WorkspaceScannerBridge for LocalWorkspace {
 
     fn is_framework_config(&self, path: &Utf8Path) -> bool {
         self.as_workspace().is_framework_config(path)
+    }
+
+    fn contains_package(&self, path: &Utf8Path) -> bool {
+        self.as_workspace().contains_package(path)
     }
 }
 
