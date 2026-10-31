@@ -27,7 +27,7 @@ fn property_definitions(db: &WorkspaceDb, path: &str) -> Vec<String> {
     let mut definitions: Vec<_> =
         css_property_definitions(db, SymbolFromModuleInfo::new(db, "--value", module))
             .iter()
-            .map(|definition| definition.module_path.to_string())
+            .map(|definition| definition.module_path.as_str().replace('\\', "/"))
             .collect();
     definitions.sort_unstable();
     definitions
@@ -273,7 +273,7 @@ fn framework_components_provide_global_styles_and_use_classes() {
         find_css_class_definition(&db, SymbolFromModuleInfo::new(&db, "global", page));
     let paths: Vec<_> = definitions
         .iter()
-        .map(|(path, _, _)| path.as_str())
+        .map(|(path, _, _)| path.as_str().replace('\\', "/"))
         .collect();
     assert_eq!(paths, ["/src/vendor/Frame.astro"]);
 

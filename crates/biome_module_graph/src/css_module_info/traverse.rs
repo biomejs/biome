@@ -684,11 +684,16 @@ struct RelativePath<'a> {
 
 impl<'a> biome_console::fmt::Display for RelativePath<'a> {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        if let Some(wd) = self.working_directory {
-            let relative = self.path.strip_prefix(wd).unwrap_or(self.path);
-            fmt.write_str(relative.as_str())
+        let path = match self.working_directory {
+            Some(wd) => self.path.strip_prefix(wd).unwrap_or(self.path),
+            None => self.path,
+        };
+        // Like the file names of diagnostics, so that snapshots print the
+        // same separators on every platform.
+        if cfg!(debug_assertions) && cfg!(windows) {
+            fmt.write_str(&path.as_str().replace('\\', "/"))
         } else {
-            fmt.write_str(self.path.as_str())
+            fmt.write_str(path.as_str())
         }
     }
 }
