@@ -3106,6 +3106,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueValidDefineOptions",
+        TypeId::of::<
+            biome_rule_options::use_vue_valid_define_options::UseVueValidDefineOptionsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useVueValidDefineProps",
         TypeId::of::<biome_rule_options::use_vue_valid_define_props::UseVueValidDefinePropsOptions>(
         ),

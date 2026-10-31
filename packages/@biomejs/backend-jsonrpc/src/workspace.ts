@@ -3873,6 +3873,11 @@ export interface Nursery {
 	 */
 	useVueValidDefineEmits?: UseVueValidDefineEmitsConfiguration;
 	/**
+	 * Enforce valid usage of Vue's defineOptions() macro.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-options
+	 */
+	useVueValidDefineOptions?: UseVueValidDefineOptionsConfiguration;
+	/**
 	 * Enforce valid defineProps() calls in Vue components.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-props
 	 */
@@ -6613,6 +6618,9 @@ export type UseVueVOnExactConfiguration =
 export type UseVueValidDefineEmitsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidDefineEmitsOptions;
+export type UseVueValidDefineOptionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidDefineOptionsOptions;
 export type UseVueValidDefinePropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidDefinePropsOptions;
@@ -9693,6 +9701,10 @@ export interface RuleWithUseVueValidDefineEmitsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidDefineEmitsOptions;
 }
+export interface RuleWithUseVueValidDefineOptionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidDefineOptionsOptions;
+}
 export interface RuleWithUseVueValidDefinePropsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidDefinePropsOptions;
@@ -12157,6 +12169,7 @@ export type UseVueTypedRefOptions = {};
 export type UseVueVModelOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidDefineEmitsOptions = {};
+export type UseVueValidDefineOptionsOptions = {};
 export type UseVueValidDefinePropsOptions = {};
 export type UseVueValidNextTickOptions = {};
 export type UseVueValidVIsOptions = {};
@@ -13797,6 +13810,7 @@ export type Category =
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidDefineEmits"
+	| "lint/nursery/useVueValidDefineOptions"
 	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidNextTick"
 	| "lint/nursery/useVueVOnExact"
