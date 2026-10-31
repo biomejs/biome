@@ -112,36 +112,6 @@ invalid.js:12:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE
 ```
 
 ```
-invalid.js:13:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━
-
-  ! The properties of this infinite query are in the wrong order.
-  
-    11 │ useData({
-    12 │ 	getNextPageParam: (p) => p.next,
-  > 13 │ 	getPreviousPageParam: (p) => p.prev,
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 	queryFn() {},
-    15 │ });
-  
-  i TanStack Query infers types from the order of the properties. Write queryFn, then getPreviousPageParam, then getNextPageParam.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Reorder the properties.
-  
-    11 11 │   useData({
-    12 12 │     getNextPageParam: (p) => p.next,
-    13    │ - → getPreviousPageParam:·(p)·=>·p.prev,
-    14    │ - → queryFn()·{},
-       13 │ + → queryFn()·{},
-       14 │ + → getPreviousPageParam:·(p)·=>·p.prev,
-    15 15 │   });
-    16 16 │   
-  
-
-```
-
-```
 invalid.js:18:2 lint/nursery/useTanstackQueryInfiniteQueryPropertyOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━
 
   ! The properties of this infinite query are in the wrong order.

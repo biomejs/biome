@@ -1,6 +1,5 @@
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
@@ -118,18 +117,16 @@ type Inversion = (AnyJsObjectMember, AnyJsObjectMember);
 impl Rule for UseTanstackQueryInfiniteQueryPropertyOrder {
     type Query = Semantic<JsCallExpression>;
     type State = Inversion;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = UseTanstackQueryInfiniteQueryPropertyOrderOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
         if !is_infinite_query_function(call, ctx.model()) {
-            return Box::default();
+            return None;
         }
 
-        let Some(object) = options_object(call) else {
-            return Box::default();
-        };
+        let object = options_object(call)?;
 
         let ordered: Vec<_> = object
             .members()
@@ -143,9 +140,8 @@ impl Rule for UseTanstackQueryInfiniteQueryPropertyOrder {
 
         ordered
             .windows(2)
-            .filter(|pair| pair[0].1 > pair[1].1)
+            .find(|pair| pair[0].1 > pair[1].1)
             .map(|pair| (pair[0].0.clone(), pair[1].0.clone()))
-            .collect()
     }
 
     fn diagnostic(_: &RuleContext<Self>, (first, _): &Self::State) -> Option<RuleDiagnostic> {
