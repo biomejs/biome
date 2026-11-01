@@ -3403,6 +3403,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedDeleteSet?: NoVueDeprecatedDeleteSetConfiguration;
 	/**
+	 * Disallow the inline-template attribute on Vue components.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-inline-template
+	 */
+	noVueDeprecatedInlineTemplate?: NoVueDeprecatedInlineTemplateConfiguration;
+	/**
 	 * Disallow the deprecated Vue $listeners API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-listeners
 	 */
@@ -6411,6 +6416,9 @@ export type NoVueDeprecatedConfigKeyCodesConfiguration =
 export type NoVueDeprecatedDeleteSetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDeleteSetOptions;
+export type NoVueDeprecatedInlineTemplateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedInlineTemplateOptions;
 export type NoVueDeprecatedListenersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedListenersOptions;
@@ -9297,6 +9305,10 @@ export interface RuleWithNoVueDeprecatedDeleteSetOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDeleteSetOptions;
 }
+export interface RuleWithNoVueDeprecatedInlineTemplateOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedInlineTemplateOptions;
+}
 export interface RuleWithNoVueDeprecatedListenersOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedListenersOptions;
@@ -12056,6 +12068,7 @@ export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
+export type NoVueDeprecatedInlineTemplateOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
 export type NoVueDeprecatedModelDefinitionOptions = {};
 export type NoVueDeprecatedPropsDefaultThisOptions = {};
@@ -13957,6 +13970,7 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
+	| "lint/nursery/noVueDeprecatedInlineTemplate"
 	| "lint/nursery/noVueDeprecatedListeners"
 	| "lint/nursery/noVueDeprecatedModelDefinition"
 	| "lint/nursery/noVueDeprecatedPropsDefaultThis"

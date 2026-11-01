@@ -7700,6 +7700,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedInlineTemplateConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedInlineTemplateOptions" }
+			]
+		},
+		"NoVueDeprecatedInlineTemplateOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedListenersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8837,6 +8847,13 @@
 					"description": "Disallow the $set and $delete functions that Vue 3 removed.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedDeleteSetConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedInlineTemplate": {
+					"description": "Disallow the inline-template attribute on Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-inline-template",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedInlineTemplateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14536,6 +14553,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedDeleteSetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedInlineTemplateOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedInlineTemplateOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
