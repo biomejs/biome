@@ -198,6 +198,21 @@ pub(crate) fn template_expression_trailing_code(p: &JsParser, range: TextRange) 
     .with_hint("Remove the extra code or split into multiple template expressions.")
 }
 
+/// A statement other than `import` or `export` in an MDX ESM block.
+pub(crate) fn mdx_esm_unexpected_statement(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Unexpected statement in an MDX ESM block, only `import` and `export` statements are allowed.",
+        range,
+    )
+    .with_hint("To compute a value, export it, as in `export const value = compute()`.")
+}
+
+/// Code after the single JSX tag of an MDX tag snippet.
+pub(crate) fn mdx_tag_trailing_code(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder("Expected the JSX tag to end here.", range)
+        .with_hint("A tag in MDX is a single opening, closing, or self-closing tag.")
+}
+
 pub(crate) fn expected_unary_expression(p: &JsParser, range: TextRange) -> ParseDiagnostic {
     expected_node("unary expression", range, p)
 }

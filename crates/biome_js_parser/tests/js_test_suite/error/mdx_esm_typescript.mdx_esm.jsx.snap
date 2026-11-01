@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+export const a: number = 1
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        JsBogusVariableDeclaration {
+                            items: [
+                                CONST_KW@7..13 "const" [] [Whitespace(" ")],
+                                JsBogus {
+                                    items: [
+                                        JsBogus {
+                                            items: [
+                                                JsIdentifierBinding {
+                                                    name_token: IDENT@13..14 "a" [] [],
+                                                },
+                                                JsBogus {
+                                                    items: [
+                                                        COLON@14..16 ":" [] [Whitespace(" ")],
+                                                        TsNumberType {
+                                                            number_token: NUMBER_KW@16..23 "number" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
+                                                },
+                                                JsInitializerClause {
+                                                    eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+                                                    expression: JsNumberLiteralExpression {
+                                                        value_token: JS_NUMBER_LITERAL@25..26 "1" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..27
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..26
+    0: JS_BOGUS_STATEMENT@0..26
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_BOGUS@7..26
+        0: JS_BOGUS_VARIABLE_DECLARATION@7..26
+          0: CONST_KW@7..13 "const" [] [Whitespace(" ")]
+          1: JS_BOGUS@13..26
+            0: JS_BOGUS@13..26
+              0: JS_IDENTIFIER_BINDING@13..14
+                0: IDENT@13..14 "a" [] []
+              1: JS_BOGUS@14..23
+                0: COLON@14..16 ":" [] [Whitespace(" ")]
+                1: TS_NUMBER_TYPE@16..23
+                  0: NUMBER_KW@16..23 "number" [] [Whitespace(" ")]
+              2: JS_INITIALIZER_CLAUSE@23..26
+                0: EQ@23..25 "=" [] [Whitespace(" ")]
+                1: JS_NUMBER_LITERAL_EXPRESSION@25..26
+                  0: JS_NUMBER_LITERAL@25..26 "1" [] []
+  4: EOF@26..27 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+mdx_esm_typescript.mdx_esm.jsx:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type annotation are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+  > 1 │ export const a: number = 1
+      │               ^^^^^^^^
+    2 │ 
+  
+  i TypeScript only syntax
+  
+```

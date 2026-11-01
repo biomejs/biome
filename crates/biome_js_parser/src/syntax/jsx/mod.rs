@@ -78,6 +78,42 @@ pub(crate) fn parse_jsx_tag_expression(p: &mut JsParser) -> ParsedSyntax {
     Present(m.complete(p, JSX_TAG_EXPRESSION))
 }
 
+/// Parses one JSX tag without its children: an opening tag, a closing tag, a
+/// self-closing element, or one of the fragment tags.
+///
+/// MDX keeps the Markdown between an opening and a closing tag outside
+/// JavaScript, so each of its tags is parsed on its own.
+pub(crate) fn parse_jsx_single_tag(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![<]) {
+        return Absent;
+    }
+
+    if p.nth_at(1, T![/]) {
+        let m = p.start();
+        p.bump(T![<]);
+        p.bump(T![/]);
+        let name = parse_jsx_any_element_name(p);
+        p.expect(T![>]);
+        let kind = if name.is_present() {
+            JSX_CLOSING_ELEMENT
+        } else {
+            JSX_CLOSING_FRAGMENT
+        };
+        return Present(m.complete(p, kind));
+    }
+
+    match parse_any_jsx_opening_tag(p, true) {
+        Some(
+            OpeningElement::SelfClosing(marker)
+            | OpeningElement::Fragment(marker)
+            | OpeningElement::Element {
+                opening: marker, ..
+            },
+        ) => Present(marker),
+        None => Absent,
+    }
+}
+
 /// Returns whether an Astro template continues with another JSX tag after a
 /// completed one, which Astro reads as an implicit fragment but JSX rejects.
 /// Skips any `<!-- -->` comments at the current position first.

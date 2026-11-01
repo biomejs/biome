@@ -752,6 +752,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsxShorthandAttribute::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JSX_SINGLE_TAG_ROOT => {
+                    let $pattern = unsafe { $crate::JsxSingleTagRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => {
                     let $pattern = unsafe { $crate::JsxSpreadAttribute::new_unchecked(node) };
                     $body

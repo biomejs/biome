@@ -11,12 +11,13 @@ use crate::syntax::function::{
     ParameterContext, parse_parameter_list, parse_vue_slot_parameters_list,
 };
 use crate::syntax::js_parse_error;
-use crate::syntax::jsx::skip_astro_html_comments;
+use crate::syntax::jsx::{parse_jsx_single_tag, skip_astro_html_comments};
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::{TypeContext, parse_vue_generic_type_parameters};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
+use biome_parser::diagnostic::expected_node;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
 
@@ -52,6 +53,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
 
     if p.source_type().is_vue_generics_list() {
         return parse_vue_generic(p, m);
+    }
+
+    if p.source_type().as_embedding_kind().is_mdx_tag() {
+        return parse_mdx_tag(p, m);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -141,11 +146,14 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
 
     let has_expression = !expr_result.is_absent();
 
-    // Astro renders a body that holds only comments as nothing, the way JSX does
-    // for `{/* c */}` children.
-    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro_template();
+    // Astro and MDX render a body that holds only comments as nothing, the way
+    // JSX does for `{/* c */}` children.
+    let is_empty_body = p.at(EOF)
+        && p.source_type()
+            .as_embedding_kind()
+            .allows_empty_expression();
 
-    if !has_expression && is_empty_astro_body {
+    if !has_expression && is_empty_body {
         expr_marker.abandon(p);
         return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
     }
@@ -183,6 +191,28 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     // Always complete as JS_EXPRESSION_TEMPLATE_ROOT
     // The expression child might be bogus, but the root should always be this type
     m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT)
+}
+
+/// Parses the single JSX tag of an MDX tag snippet: an opening, closing, or
+/// self-closing tag, or a fragment tag. The children of an MDX element are
+/// Markdown, so they never belong to the snippet.
+fn parse_mdx_tag(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let tag =
+        parse_jsx_single_tag(p).or_add_diagnostic(p, |p, range| expected_node("JSX tag", range, p));
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::mdx_tag_trailing_code(p, p.cur_range()));
+        let bogus = match tag {
+            Some(tag) => tag.precede(p),
+            None => p.start(),
+        };
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        bogus.complete(p, JS_BOGUS);
+    }
+
+    m.complete(p, JSX_SINGLE_TAG_ROOT)
 }
 
 fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
