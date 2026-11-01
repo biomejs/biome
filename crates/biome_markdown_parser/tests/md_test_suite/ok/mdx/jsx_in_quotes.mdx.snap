@@ -1,0 +1,151 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+> <Note>
+>
+> Quoted text with a <B /> tag.
+>
+> </Note>
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdxJsxBlockTag {
+                    indent: MdIndentTokenList [],
+                    value_token: MDX_JSX_TAG_LITERAL@2..8 "<Note>" [] [],
+                },
+                MdNewline {
+                    value_token: NEWLINE@8..9 "\n" [] [],
+                },
+                MdQuotePrefix {
+                    pre_marker_indent: MdQuoteIndentList [],
+                    marker_token: R_ANGLE@9..10 ">" [] [],
+                    post_marker_space_token: missing (optional),
+                },
+                MdNewline {
+                    value_token: NEWLINE@10..11 "\n" [] [],
+                },
+                MdQuotePrefix {
+                    pre_marker_indent: MdQuoteIndentList [],
+                    marker_token: R_ANGLE@11..12 ">" [] [],
+                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@12..13 " " [] [],
+                },
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@13..32 "Quoted text with a " [] [],
+                        },
+                        MdxJsxInlineTag {
+                            value_token: MDX_JSX_TAG_LITERAL@32..37 "<B />" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@37..42 " tag." [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@42..43 "\n" [] [],
+                        },
+                    ],
+                },
+                MdQuotePrefix {
+                    pre_marker_indent: MdQuoteIndentList [],
+                    marker_token: R_ANGLE@43..44 ">" [] [],
+                    post_marker_space_token: missing (optional),
+                },
+                MdNewline {
+                    value_token: NEWLINE@44..45 "\n" [] [],
+                },
+                MdQuotePrefix {
+                    pre_marker_indent: MdQuoteIndentList [],
+                    marker_token: R_ANGLE@45..46 ">" [] [],
+                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@46..47 " " [] [],
+                },
+                MdxJsxBlockTag {
+                    indent: MdIndentTokenList [],
+                    value_token: MDX_JSX_TAG_LITERAL@47..54 "</Note>" [] [],
+                },
+                MdNewline {
+                    value_token: NEWLINE@54..55 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@55..55 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..55
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..55
+    0: MD_QUOTE@0..55
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..55
+        0: MDX_JSX_BLOCK_TAG@2..8
+          0: MD_INDENT_TOKEN_LIST@2..2
+          1: MDX_JSX_TAG_LITERAL@2..8 "<Note>" [] []
+        1: MD_NEWLINE@8..9
+          0: NEWLINE@8..9 "\n" [] []
+        2: MD_QUOTE_PREFIX@9..10
+          0: MD_QUOTE_INDENT_LIST@9..9
+          1: R_ANGLE@9..10 ">" [] []
+          2: (empty)
+        3: MD_NEWLINE@10..11
+          0: NEWLINE@10..11 "\n" [] []
+        4: MD_QUOTE_PREFIX@11..13
+          0: MD_QUOTE_INDENT_LIST@11..11
+          1: R_ANGLE@11..12 ">" [] []
+          2: MD_QUOTE_POST_MARKER_SPACE@12..13 " " [] []
+        5: MD_PARAGRAPH@13..43
+          0: MD_INLINE_ITEM_LIST@13..43
+            0: MD_TEXTUAL@13..32
+              0: MD_TEXTUAL_LITERAL@13..32 "Quoted text with a " [] []
+            1: MDX_JSX_INLINE_TAG@32..37
+              0: MDX_JSX_TAG_LITERAL@32..37 "<B />" [] []
+            2: MD_TEXTUAL@37..42
+              0: MD_TEXTUAL_LITERAL@37..42 " tag." [] []
+            3: MD_TEXTUAL@42..43
+              0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
+        6: MD_QUOTE_PREFIX@43..44
+          0: MD_QUOTE_INDENT_LIST@43..43
+          1: R_ANGLE@43..44 ">" [] []
+          2: (empty)
+        7: MD_NEWLINE@44..45
+          0: NEWLINE@44..45 "\n" [] []
+        8: MD_QUOTE_PREFIX@45..47
+          0: MD_QUOTE_INDENT_LIST@45..45
+          1: R_ANGLE@45..46 ">" [] []
+          2: MD_QUOTE_POST_MARKER_SPACE@46..47 " " [] []
+        9: MDX_JSX_BLOCK_TAG@47..54
+          0: MD_INDENT_TOKEN_LIST@47..47
+          1: MDX_JSX_TAG_LITERAL@47..54 "</Note>" [] []
+        10: MD_NEWLINE@54..55
+          0: NEWLINE@54..55 "\n" [] []
+  3: EOF@55..55 "" [] []
+
+```

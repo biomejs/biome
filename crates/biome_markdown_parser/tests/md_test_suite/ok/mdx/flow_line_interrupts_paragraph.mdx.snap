@@ -1,0 +1,108 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+A paragraph
+{props.value}
+
+Another paragraph
+<Note />
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..11 "A paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@11..12 "\n" [] [],
+                },
+            ],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@12..13 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@13..24 "props.value" [] [],
+            },
+            r_curly_token: R_CURLY@24..25 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@25..26 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@26..27 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@27..44 "Another paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@44..45 "\n" [] [],
+                },
+            ],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@45..53 "<Note />" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@53..54 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@54..54 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..54
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..54
+    0: MD_PARAGRAPH@0..12
+      0: MD_INLINE_ITEM_LIST@0..12
+        0: MD_TEXTUAL@0..11
+          0: MD_TEXTUAL_LITERAL@0..11 "A paragraph" [] []
+        1: MD_TEXTUAL@11..12
+          0: MD_TEXTUAL_LITERAL@11..12 "\n" [] []
+    1: MDX_BLOCK_EXPRESSION@12..25
+      0: MD_INDENT_TOKEN_LIST@12..12
+      1: L_CURLY@12..13 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@13..24
+        0: MDX_EXPRESSION_LITERAL@13..24 "props.value" [] []
+      3: R_CURLY@24..25 "}" [] []
+    2: MD_NEWLINE@25..26
+      0: NEWLINE@25..26 "\n" [] []
+    3: MD_NEWLINE@26..27
+      0: NEWLINE@26..27 "\n" [] []
+    4: MD_PARAGRAPH@27..45
+      0: MD_INLINE_ITEM_LIST@27..45
+        0: MD_TEXTUAL@27..44
+          0: MD_TEXTUAL_LITERAL@27..44 "Another paragraph" [] []
+        1: MD_TEXTUAL@44..45
+          0: MD_TEXTUAL_LITERAL@44..45 "\n" [] []
+    5: MDX_JSX_BLOCK_TAG@45..53
+      0: MD_INDENT_TOKEN_LIST@45..45
+      1: MDX_JSX_TAG_LITERAL@45..53 "<Note />" [] []
+    6: MD_NEWLINE@53..54
+      0: NEWLINE@53..54 "\n" [] []
+  3: EOF@54..54 "" [] []
+
+```
