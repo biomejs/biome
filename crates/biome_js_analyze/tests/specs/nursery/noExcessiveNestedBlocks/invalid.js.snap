@@ -1,0 +1,408 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function fiveLevels() {
+    if (a) {
+        if (b) {
+            if (c) {
+                if (d) {
+                    if (e) {}
+                }
+            }
+        }
+    }
+}
+
+// Only the outermost statement exceeding the limit is reported.
+function sevenLevels() {
+    if (a) {
+        if (b) {
+            if (c) {
+                if (d) {
+                    if (e) {
+                        if (f) {
+                            if (g) {}
+                        }
+                    } else {
+                        while (h) {}
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Sibling statements that exceed the limit are reported separately.
+function siblings() {
+    if (a) {
+        if (b) {
+            if (c) {
+                if (d) {
+                    for (;;) {}
+                    while (e) {}
+                }
+            }
+        }
+    }
+}
+
+// An `else if` doesn't add a level, but statements inside its body do.
+function elseIfBody() {
+    if (a) {
+        if (b) {
+            if (c) {
+                if (d) {
+                } else if (e) {
+                    if (f) {}
+                }
+            }
+        }
+    }
+}
+
+// Statements at the top level of a module are counted too.
+if (a) {
+    if (b) {
+        if (c) {
+            if (d) {
+                if (e) {}
+            }
+        }
+    }
+}
+
+// A nested function starts counting from zero, and is checked on its own.
+function nestedFunction() {
+    if (a) {
+        if (b) {
+            if (c) {
+                if (d) {
+                    if (e) {
+                        const inner = () => {
+                            if (a) {
+                                if (b) {
+                                    if (c) {
+                                        if (d) {
+                                            if (e) {}
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    }
+                }
+            }
+        }
+    }
+}
+
+const arrow = () => {
+    if (a) {
+        if (b) {
+            if (c) {
+                if (d) {
+                    if (e) {}
+                }
+            }
+        }
+    }
+};
+
+class Foo {
+    method() {
+        if (a) {
+            if (b) {
+                if (c) {
+                    if (d) {
+                        if (e) {}
+                    }
+                }
+            }
+        }
+    }
+
+    static {
+        if (a) {
+            if (b) {
+                if (c) {
+                    if (d) {
+                        if (e) {}
+                    }
+                }
+            }
+        }
+    }
+}
+
+const object = {
+    get value() {
+        if (a) {
+            if (b) {
+                if (c) {
+                    if (d) {
+                        if (e) {}
+                    }
+                }
+            }
+        }
+    },
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:7:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    5 │             if (c) {
+    6 │                 if (d) {
+  > 7 │                     if (e) {}
+      │                     ^^
+    8 │                 }
+    9 │             }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    18 │             if (c) {
+    19 │                 if (d) {
+  > 20 │                     if (e) {
+       │                     ^^
+    21 │                         if (f) {
+    22 │                             if (g) {}
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    37 │             if (c) {
+    38 │                 if (d) {
+  > 39 │                     for (;;) {}
+       │                     ^^^
+    40 │                     while (e) {}
+    41 │                 }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    38 │                 if (d) {
+    39 │                     for (;;) {}
+  > 40 │                     while (e) {}
+       │                     ^^^^^
+    41 │                 }
+    42 │             }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:54:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    52 │                 if (d) {
+    53 │                 } else if (e) {
+  > 54 │                     if (f) {}
+       │                     ^^
+    55 │                 }
+    56 │             }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:17 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    64 │         if (c) {
+    65 │             if (d) {
+  > 66 │                 if (e) {}
+       │                 ^^
+    67 │             }
+    68 │         }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    76 │             if (c) {
+    77 │                 if (d) {
+  > 78 │                     if (e) {
+       │                     ^^
+    79 │                         const inner = () => {
+    80 │                             if (a) {
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:45 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    82 │                                     if (c) {
+    83 │                                         if (d) {
+  > 84 │                                             if (e) {}
+       │                                             ^^
+    85 │                                         }
+    86 │                                     }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:102:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    100 │             if (c) {
+    101 │                 if (d) {
+  > 102 │                     if (e) {}
+        │                     ^^
+    103 │                 }
+    104 │             }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:115:25 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    113 │                 if (c) {
+    114 │                     if (d) {
+  > 115 │                         if (e) {}
+        │                         ^^
+    116 │                     }
+    117 │                 }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:127:25 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    125 │                 if (c) {
+    126 │                     if (d) {
+  > 127 │                         if (e) {}
+        │                         ^^
+    128 │                     }
+    129 │                 }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:141:25 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    139 │                 if (c) {
+    140 │                     if (d) {
+  > 141 │                         if (e) {}
+        │                         ^^
+    142 │                     }
+    143 │                 }
+  
+  i Blocks nested 5 levels deep are hard to read and maintain. The configured maximum is 4.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

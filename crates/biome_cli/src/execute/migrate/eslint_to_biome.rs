@@ -851,6 +851,26 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::MaxDepth(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+                && let Some(options) = rule_options.into_biome_options()
+            {
+                // An empty ESLint options object keeps the default maximum.
+                if options.max.is_some() {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_excessive_nested_blocks =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options,
+                                },
+                            ));
+                    }
+                }
+            }
+        }
         eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.complexity.get_or_insert_with(Default::default);
@@ -1881,6 +1901,40 @@ mod tests {
                 .get(&EslintRuleName::from_str("svelte/block-lang")),
             Some(&UnsupportedRuleReason::NotApplicable),
         );
+    }
+
+    #[test]
+    fn max_depth_with_unsupported_maximum_is_not_migrated() {
+        let options = MigrationOptions {
+            include_inspired: true,
+            include_nursery: true,
+        };
+        for (rule_conf, is_migrated) in [
+            (r#"["error", 3]"#, true),
+            (r#"["error", 300]"#, false),
+            (r#"["error", { "max": 300 }]"#, false),
+            (r#"["error", { "maximum": 300, "max": 3 }]"#, false),
+        ] {
+            let input = format!(r#"{{ "rules": {{ "max-depth": {rule_conf} }} }}"#);
+            let (config, diagnostics) =
+                biome_deserialize::json::deserialize_from_json_str::<LegacyConfigData>(
+                    &input,
+                    biome_json_parser::JsonParserOptions::default(),
+                    "",
+                )
+                .consume();
+            assert_eq!(diagnostics.is_empty(), is_migrated, "{rule_conf}");
+            let mut results = MigrationResults::default();
+            let rules =
+                config
+                    .unwrap()
+                    .rules
+                    .into_biome_rules(&Default::default(), &options, &mut results);
+            let has_rule = rules
+                .nursery
+                .is_some_and(|nursery| nursery.unwrap_group().no_excessive_nested_blocks.is_some());
+            assert_eq!(has_rule, is_migrated, "{rule_conf}");
+        }
     }
 
     #[test]
