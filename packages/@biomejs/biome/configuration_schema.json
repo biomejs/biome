@@ -7650,6 +7650,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedConfigKeyCodesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedConfigKeyCodesOptions" }
+			]
+		},
+		"NoVueDeprecatedConfigKeyCodesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedDeleteSetConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8735,6 +8745,13 @@
 					"description": "Disallow using computed properties inside the data function of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueComputedPropertiesInDataConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedConfigKeyCodes": {
+					"description": "Disallow the deprecated Vue.config.keyCodes option.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-config-key-codes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedConfigKeyCodesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14332,6 +14349,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDataObjectDeclarationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedConfigKeyCodesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedConfigKeyCodesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

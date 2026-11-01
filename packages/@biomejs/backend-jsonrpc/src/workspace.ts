@@ -3378,6 +3378,11 @@ export interface Nursery {
 	 */
 	noVueComputedPropertiesInData?: NoVueComputedPropertiesInDataConfiguration;
 	/**
+	 * Disallow the deprecated Vue.config.keyCodes option.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-config-key-codes
+	 */
+	noVueDeprecatedConfigKeyCodes?: NoVueDeprecatedConfigKeyCodesConfiguration;
+	/**
 	 * Disallow the $set and $delete functions that Vue 3 removed.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set
 	 */
@@ -6351,6 +6356,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueComputedPropertiesInDataConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueComputedPropertiesInDataOptions;
+export type NoVueDeprecatedConfigKeyCodesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedConfigKeyCodesOptions;
 export type NoVueDeprecatedDeleteSetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDeleteSetOptions;
@@ -9201,6 +9209,10 @@ export interface RuleWithNoVueComputedPropertiesInDataOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueComputedPropertiesInDataOptions;
 }
+export interface RuleWithNoVueDeprecatedConfigKeyCodesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedConfigKeyCodesOptions;
+}
 export interface RuleWithNoVueDeprecatedDeleteSetOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDeleteSetOptions;
@@ -11935,6 +11947,7 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
+export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
 export type NoVueDeprecatedModelDefinitionOptions = {};
@@ -13797,6 +13810,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedListeners"
 	| "lint/nursery/noVueDeprecatedModelDefinition"
