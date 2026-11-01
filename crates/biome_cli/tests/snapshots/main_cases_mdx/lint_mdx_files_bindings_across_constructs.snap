@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.mdx
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "analyzeEmbeds": true
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "useTopLevelHeading": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.mdx`
+
+```mdx
+import {Chart} from './chart.js'
+import {format} from './format.js'
+
+# Hello
+
+```jsx
+<Chart />
+```
+
+> {format(
+>   1
+> )}
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.mdx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This import is unused.
+  
+  > 1 │ import {Chart} from './chart.js'
+      │        ^^^^^^^
+    2 │ import {format} from './format.js'
+    3 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{Chart}·from·'./chart.js'
+      │ --------------------------------
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

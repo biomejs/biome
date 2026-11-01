@@ -1,0 +1,30 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+assertion_line: 137
+expression: invalidMdxComments.mdx
+---
+# Input
+```md
+{/* only a comment */}
+
+{/* another */} {/* and another */}
+
+```
+
+# Diagnostics
+```
+invalidMdxComments.mdx:1:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty source is not allowed.
+  
+  > 1 │ {/* only a comment */}
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ 
+  > 3 │ {/* another */} {/* and another */}
+  > 4 │ 
+      │ 
+  
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
+  
+
+```

@@ -647,12 +647,27 @@ pub(crate) fn lint_with_inspector(
     // The syntax errors of MDX JavaScript belong to the document. Snippets
     // that aren't analyzed don't report them, so they're added here.
     #[cfg(feature = "lang_mdx")]
-    if !analyze_embeds_enabled(params.settings.as_ref(), params.path) {
+    {
+        let analyzed: Vec<_> = params
+            .parsed_source
+            .snippets(&params.workspace_db)
+            .for_analysis(
+                &params.parsed_source,
+                params.language,
+                params.settings.as_ref(),
+                params.path.as_path(),
+                &params.workspace_db,
+            )
+            .map(|snippet| snippet.content_range())
+            .collect();
         diagnostics.extend(
             params
                 .parsed_source
                 .snippets(&params.workspace_db)
-                .filter(|snippet| super::is_mdx_snippet(snippet, &params.workspace_db))
+                .filter(|snippet| {
+                    super::is_mdx_snippet(snippet, &params.workspace_db)
+                        && !analyzed.contains(&snippet.content_range())
+                })
                 .flat_map(|snippet| snippet.serde_diagnostics()),
         );
     }
@@ -864,6 +879,41 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     Ok(Some(
         process_fix_all.finish(tree.syntax().as_send().unwrap()),
     ))
+}
+
+/// Returns whether `snippet` is the JavaScript of an MDX construct that spans
+/// lines inside a block quote. Its code was parsed with the quote's `>`
+/// markers blanked, so a fix computed from it would drop those markers from
+/// the document. Such a snippet only contributes its syntax errors and its
+/// references.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_quoted_multiline_mdx_snippet(
+    host: &super::ParsedOrigin,
+    snippet: &super::ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    use biome_markdown_syntax::MarkdownSyntaxKind;
+
+    // Only MDX documents have MDX snippets, so the host is a Markdown tree.
+    if !super::is_mdx_snippet(snippet, db) {
+        return false;
+    }
+    let root: MarkdownSyntaxNode = host.syntax(db);
+    let Some(token) = root
+        .token_at_offset(snippet.content_range().start())
+        .right_biased()
+    else {
+        return false;
+    };
+    matches!(
+        token.kind(),
+        MarkdownSyntaxKind::MDX_ESM_LITERAL
+            | MarkdownSyntaxKind::MDX_EXPRESSION_LITERAL
+            | MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL
+    ) && token.text_trimmed().contains(['\n', '\r'])
+        && token
+            .ancestors()
+            .any(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
 }
 
 /// Returns whether `snippet` is an MDX expression that holds only comments,

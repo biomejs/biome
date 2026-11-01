@@ -411,7 +411,9 @@ impl<'a> SnippetsIterator<'a> {
                 return false;
             }
             #[cfg(feature = "lang_mdx")]
-            if md::is_mdx_comment_snippet(snippet, db) {
+            if md::is_mdx_comment_snippet(snippet, db)
+                || md::is_quoted_multiline_mdx_snippet(host, snippet, db)
+            {
                 return false;
             }
             true

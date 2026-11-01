@@ -297,3 +297,73 @@ import {Unused} from './unused.js'
         result,
     ));
 }
+
+#[test]
+fn lint_mdx_files_bindings_across_constructs() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(Utf8Path::new("biome.json").into(), LINT_CONFIG.as_bytes());
+    let file_path = Utf8Path::new("file.mdx");
+    let content = r#"import {Chart} from './chart.js'
+import {format} from './format.js'
+
+# Hello
+
+```jsx
+<Chart />
+```
+
+> {format(
+>   1
+> )}
+"#;
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_bindings_across_constructs",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_mdx_files_with_top_level_suppression_comments() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(Utf8Path::new("biome.json").into(), LINT_CONFIG.as_bytes());
+    let file_path = Utf8Path::new("file.mdx");
+    let content = r#"{/* biome-ignore-all lint/correctness/noUnusedImports: generated imports */}
+import {Unused} from './unused.js'
+
+# Hello
+"#;
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_with_top_level_suppression_comments",
+        fs,
+        console,
+        result,
+    ));
+}
