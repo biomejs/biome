@@ -2,8 +2,8 @@
 
 use crate::TestArgs as Args;
 use crate::run_cli_with_dyn_fs;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
-use biome_console::BufferConsole;
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, markup_to_string};
+use biome_console::{BufferConsole, markup};
 use biome_fs::TemporaryFs;
 
 #[test]
@@ -302,6 +302,76 @@ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "tailwind_stylesheet_functional_utilities_parse",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn use_tailwind_sorted_classes_reads_stylesheet_via_stdin() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("use_tailwind_sorted_classes_reads_stylesheet_via_stdin");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "tailwind": { "stylesheet": "./src/app.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "src/app.css",
+        r#"@import "tailwindcss";
+@theme {
+    --color-brand: #00f;
+}
+@utility btn-primary {
+    color: white;
+    background-color: blue;
+}
+"#,
+    );
+
+    // Unsorted: theme utility + custom utility should sort like the disk path.
+    console
+        .in_buffer
+        .push(r#"export const a = <div className="btn-primary bg-brand flex" />;"#.into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--unsafe",
+                "--only=nursery/useTailwindSortedClasses",
+                "--stdin-file-path=src/App.jsx",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "{result:?}");
+    let output = console
+        .out_buffer
+        .iter()
+        .map(|msg| markup_to_string(markup! { {msg.content} }))
+        .collect::<String>();
+    // With stylesheet loaded, sorting must match the non-stdin path (flex first).
+    assert!(
+        output.contains("className=\"flex"),
+        "expected sorted class output via stdin, got: {output}"
+    );
+    assert!(
+        !output.contains("btn-primary bg-brand flex"),
+        "stdin path must not leave the unsorted class string: {output}"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_tailwind_sorted_classes_reads_stylesheet_via_stdin",
         fs.create_mem(),
         console,
         result,

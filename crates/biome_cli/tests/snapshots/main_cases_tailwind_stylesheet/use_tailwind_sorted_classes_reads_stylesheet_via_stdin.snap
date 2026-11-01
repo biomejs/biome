@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write --unsafe --only=nursery/useTailwindSortedClasses --stdin-file-path=src/App.jsx
+```
+
+## `biome.json`
+
+```json
+{
+  "tailwind": { "stylesheet": "./src/app.css" },
+  "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}
+```
+
+## `src/app.css`
+
+```css
+@import "tailwindcss";
+@theme {
+    --color-brand: #00f;
+}
+@utility btn-primary {
+    color: white;
+    background-color: blue;
+}
+```
+
+# Input messages
+
+```block
+export const a = <div className="btn-primary bg-brand flex" />;
+```
+
+# Emitted Messages
+
+```block
+export const a = <div className="flex btn-primary bg-brand" />;
+
+```

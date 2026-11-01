@@ -9,8 +9,20 @@ fn get_forced_scan_kind(
     root_configuration_dir: &Utf8Path,
     working_dir: &Utf8Path,
     maybe_scan_kind: Option<ScanKind>,
+    requested_scan_kind: &ScanKind,
 ) -> Option<ScanKind> {
     if let Some(stdin_file_path) = stdin_file_path {
+        // Project / type-aware analysis needs the module graph (for example
+        // `tailwind.stylesheet`). Skipping the scanner on stdin would drop that
+        // data and make rules like `useTailwindSortedClasses` disagree with the
+        // non-stdin path (format → code action → format thrash).
+        if matches!(
+            requested_scan_kind,
+            ScanKind::Project | ScanKind::TypeAware
+        ) {
+            return None;
+        }
+
         if stdin_file_path
             .parent()
             .is_some_and(|dir| dir == root_configuration_dir)
@@ -32,7 +44,9 @@ fn get_forced_scan_kind(
 /// Rules:
 /// - When processing from `stdin`, we return [ScanKind::NoScanner] if the stdin
 ///   file path is in the directory of the root configuration, and
-///   [ScanKind::TargetedKnownFiles] otherwise.
+///   [ScanKind::TargetedKnownFiles] otherwise — unless the requested scan kind
+///   is [ScanKind::Project] or [ScanKind::TypeAware], which need the module graph
+///   (e.g. `tailwind.stylesheet` for `useTailwindSortedClasses`).
 /// - Returns [ScanKind::KnownFiles] for `biome format`, `biome migrate`, and
 ///   `biome search`, because we know there is no use for project analysis with
 ///   these commands.
@@ -52,6 +66,7 @@ pub(crate) fn derive_best_scan_kind(
         root_configuration_dir,
         working_dir,
         command_scan_kind,
+        &requested_scan_kind,
     )
     .unwrap_or({
         let required_minimum_scan_kind =
@@ -71,4 +86,49 @@ pub(crate) fn derive_best_scan_kind(
             requested_scan_kind
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_configuration::Configuration;
+    use biome_configuration::analyzer::linter::LinterConfiguration;
+    use camino::Utf8Path;
+
+    fn config_with_linter() -> Configuration {
+        Configuration {
+            linter: Some(LinterConfiguration::default()),
+            ..Configuration::default()
+        }
+    }
+
+    #[test]
+    fn stdin_keeps_project_scan_when_project_rules_need_module_graph() {
+        let root = Utf8Path::new("/proj");
+        let stdin = Utf8Path::new("App.jsx");
+        let kind = derive_best_scan_kind(
+            ScanKind::Project,
+            Some(stdin),
+            root,
+            root,
+            &config_with_linter(),
+            None,
+        );
+        assert_eq!(kind, ScanKind::Project);
+    }
+
+    #[test]
+    fn stdin_at_root_still_skips_scanner_without_project_rules() {
+        let root = Utf8Path::new("/proj");
+        let stdin = Utf8Path::new("/proj/App.jsx");
+        let kind = derive_best_scan_kind(
+            ScanKind::NoScanner,
+            Some(stdin),
+            root,
+            root,
+            &Configuration::default(),
+            None,
+        );
+        assert_eq!(kind, ScanKind::NoScanner);
+    }
 }
