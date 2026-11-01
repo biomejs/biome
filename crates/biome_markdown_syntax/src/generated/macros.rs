@@ -229,6 +229,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdxInlineExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG => {
+                    let $pattern = unsafe { $crate::MdxJsxBlockTag::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MDX_JSX_INLINE_TAG => {
+                    let $pattern = unsafe { $crate::MdxJsxInlineTag::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MD_BOGUS => {
                     let $pattern = unsafe { $crate::MdBogus::new_unchecked(node) };
                     $body

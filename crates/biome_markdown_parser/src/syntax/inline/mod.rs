@@ -114,12 +114,17 @@ fn parse_inline_item_list_until_impl(
             continue;
         }
 
-        // Autolinks and inline HTML can contain `]`
+        // Autolinks, inline HTML, and MDX tags can contain `]`
         if p.at(L_ANGLE) {
             if html::parse_autolink(p).is_present() {
                 continue;
             }
             if html::parse_inline_html(p).is_present() {
+                continue;
+            }
+            if MarkdownSyntaxFeatures::Mdx.is_supported(p)
+                && super::parse_mdx_inline_tag(p).is_present()
+            {
                 continue;
             }
             let _ = super::parse_textual(p);
@@ -317,6 +322,12 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         let result = html::parse_inline_html(p);
         if result.is_present() {
             return result;
+        }
+        if MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+            let result = super::parse_mdx_inline_tag(p);
+            if result.is_present() {
+                return result;
+            }
         }
         // Fall back to textual
         super::parse_textual(p)

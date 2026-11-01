@@ -1,0 +1,116 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+<Note>
+
+</Note type="tip">
+
+<B icon=<Icon /> />
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@6..7 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@7..8 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@8..26 "</Note type=\"tip\">" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@26..27 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@27..28 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@28..47 "<B icon=<Icon /> />" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@47..48 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@48..48 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..48
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..48
+    0: MDX_JSX_BLOCK_TAG@0..6
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] []
+    1: MD_NEWLINE@6..7
+      0: NEWLINE@6..7 "\n" [] []
+    2: MD_NEWLINE@7..8
+      0: NEWLINE@7..8 "\n" [] []
+    3: MDX_JSX_BLOCK_TAG@8..26
+      0: MD_INDENT_TOKEN_LIST@8..8
+      1: MDX_JSX_TAG_LITERAL@8..26 "</Note type=\"tip\">" [] []
+    4: MD_NEWLINE@26..27
+      0: NEWLINE@26..27 "\n" [] []
+    5: MD_NEWLINE@27..28
+      0: NEWLINE@27..28 "\n" [] []
+    6: MDX_JSX_BLOCK_TAG@28..47
+      0: MD_INDENT_TOKEN_LIST@28..28
+      1: MDX_JSX_TAG_LITERAL@28..47 "<B icon=<Icon /> />" [] []
+    7: MD_NEWLINE@47..48
+      0: NEWLINE@47..48 "\n" [] []
+  3: EOF@48..48 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_tag_shapes.mdx:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected attribute in a closing tag.
+  
+    1 │ <Note>
+    2 │ 
+  > 3 │ </Note type="tip">
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ <B icon=<Icon /> />
+  
+  i Move the attributes to the opening tag.
+  
+jsx_tag_shapes.mdx:5:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected element as an attribute value.
+  
+    3 │ </Note type="tip">
+    4 │ 
+  > 5 │ <B icon=<Icon /> />
+      │         ^
+    6 │ 
+  
+  i Wrap the element in braces, as in `icon={<Icon />}`.
+  
+```

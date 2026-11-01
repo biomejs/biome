@@ -83,6 +83,7 @@ AnyMdLeafBlock =
 	| GfmTable
 	| MdxEsmBlock
 	| MdxBlockExpression
+	| MdxJsxBlockTag
 
 AnyMdContainerBlock =
 	MdQuote
@@ -286,6 +287,7 @@ AnyMdInline =
 	| MdQuotePrefix
 	| MdIndentToken
 	| MdxInlineExpression
+	| MdxJsxInlineTag
 
 
 // *italic*
@@ -503,3 +505,16 @@ MdxInlineExpression =
 // The JavaScript between the braces of an expression, parsed as an embedded
 // snippet. An empty expression `{}` has no content.
 MdxExpressionContent = value: 'mdx_expression_literal'
+
+// <Note type="tip">
+// ^^^^^^^^^^^^^^^^^
+// A JSX tag on a line that holds only tags and expressions. Each tag is its
+// own node: an opening tag and its closing tag are siblings around the
+// Markdown between them. The tag is parsed as an embedded JSX snippet.
+MdxJsxBlockTag =
+	indent: MdIndentTokenList
+	value: 'mdx_jsx_tag_literal'
+
+// Some <Badge>new</Badge> text
+//      ^^^^^^^   ^^^^^^^^
+MdxJsxInlineTag = value: 'mdx_jsx_tag_literal'

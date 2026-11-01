@@ -1,0 +1,167 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+<Note>
+
+</Card>
+
+Some <B>text
+
+</Note>
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@6..7 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@7..8 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@8..15 "</Card>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@15..16 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@16..17 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..22 "Some " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@22..25 "<B>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..29 "text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@30..31 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@31..38 "</Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@38..39 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@39..39 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..39
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..39
+    0: MDX_JSX_BLOCK_TAG@0..6
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] []
+    1: MD_NEWLINE@6..7
+      0: NEWLINE@6..7 "\n" [] []
+    2: MD_NEWLINE@7..8
+      0: NEWLINE@7..8 "\n" [] []
+    3: MDX_JSX_BLOCK_TAG@8..15
+      0: MD_INDENT_TOKEN_LIST@8..8
+      1: MDX_JSX_TAG_LITERAL@8..15 "</Card>" [] []
+    4: MD_NEWLINE@15..16
+      0: NEWLINE@15..16 "\n" [] []
+    5: MD_NEWLINE@16..17
+      0: NEWLINE@16..17 "\n" [] []
+    6: MD_PARAGRAPH@17..30
+      0: MD_INLINE_ITEM_LIST@17..30
+        0: MD_TEXTUAL@17..22
+          0: MD_TEXTUAL_LITERAL@17..22 "Some " [] []
+        1: MDX_JSX_INLINE_TAG@22..25
+          0: MDX_JSX_TAG_LITERAL@22..25 "<B>" [] []
+        2: MD_TEXTUAL@25..29
+          0: MD_TEXTUAL_LITERAL@25..29 "text" [] []
+        3: MD_TEXTUAL@29..30
+          0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
+    7: MD_NEWLINE@30..31
+      0: NEWLINE@30..31 "\n" [] []
+    8: MDX_JSX_BLOCK_TAG@31..38
+      0: MD_INDENT_TOKEN_LIST@31..31
+      1: MDX_JSX_TAG_LITERAL@31..38 "</Note>" [] []
+    9: MD_NEWLINE@38..39
+      0: NEWLINE@38..39 "\n" [] []
+  3: EOF@39..39 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_pairing.mdx:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected closing tag `</Card>`, expected the closing tag of `<Note>`.
+  
+    1 │ <Note>
+    2 │ 
+  > 3 │ </Card>
+      │ ^^^^^^^
+    4 │ 
+    5 │ Some <B>text
+  
+  i the open tag is here
+  
+  > 1 │ <Note>
+      │ ^^^^^^
+    2 │ 
+    3 │ </Card>
+  
+jsx_pairing.mdx:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected closing tag `</Note>`, there is no open tag to close.
+  
+    5 │ Some <B>text
+    6 │ 
+  > 7 │ </Note>
+      │ ^^^^^^^
+    8 │ 
+  
+  i Remove the closing tag, or add its opening tag before it.
+  
+jsx_pairing.mdx:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag for `<B>` before the end of its paragraph.
+  
+    3 │ </Card>
+    4 │ 
+  > 5 │ Some <B>text
+      │      ^^^
+    6 │ 
+    7 │ </Note>
+  
+  i Add the closing tag, or make the tag self-closing with `/>`.
+  
+```

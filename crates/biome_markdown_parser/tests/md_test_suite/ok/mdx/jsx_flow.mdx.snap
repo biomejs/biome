@@ -1,0 +1,329 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdx-jsx: flow tags */}
+<Note type="tip">
+
+Some **Markdown** inside.
+
+</Note>
+
+<Note>
+  An indented paragraph.
+</Note>
+
+<Chart
+  data={[1, 2]}
+  title="a > b"
+/>
+
+<A><B /></A>
+
+<Card>{props.children}</Card>
+
+<></>
+
+<a.b c:d="e" {...props} />
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..45 "/* micromark-extension-mdx-jsx: flow tags */" [] [],
+            },
+            r_curly_token: R_CURLY@45..46 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@46..47 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@47..64 "<Note type=\"tip\">" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@64..65 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@65..66 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@66..71 "Some " [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@71..73 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@73..81 "Markdown" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@81..83 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@83..91 " inside." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@91..92 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@92..93 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@93..100 "</Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@100..101 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@101..102 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@102..108 "<Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@108..109 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@109..110 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@110..111 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@111..133 "An indented paragraph." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@133..134 "\n" [] [],
+                },
+            ],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@134..141 "</Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@141..142 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@142..143 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@143..184 "<Chart\n  data={[1, 2]}\n  title=\"a > b\"\n/>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@184..185 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@185..186 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@186..189 "<A>" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@189..194 "<B />" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@194..198 "</A>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@198..199 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@199..200 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@200..206 "<Card>" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@206..207 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@207..221 "props.children" [] [],
+            },
+            r_curly_token: R_CURLY@221..222 "}" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@222..229 "</Card>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@229..230 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@230..231 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@231..233 "<>" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@233..236 "</>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@236..237 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@237..238 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@238..264 "<a.b c:d=\"e\" {...props} />" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@264..265 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@265..265 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..265
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..265
+    0: MDX_BLOCK_EXPRESSION@0..46
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..45
+        0: MDX_EXPRESSION_LITERAL@1..45 "/* micromark-extension-mdx-jsx: flow tags */" [] []
+      3: R_CURLY@45..46 "}" [] []
+    1: MD_NEWLINE@46..47
+      0: NEWLINE@46..47 "\n" [] []
+    2: MDX_JSX_BLOCK_TAG@47..64
+      0: MD_INDENT_TOKEN_LIST@47..47
+      1: MDX_JSX_TAG_LITERAL@47..64 "<Note type=\"tip\">" [] []
+    3: MD_NEWLINE@64..65
+      0: NEWLINE@64..65 "\n" [] []
+    4: MD_NEWLINE@65..66
+      0: NEWLINE@65..66 "\n" [] []
+    5: MD_PARAGRAPH@66..92
+      0: MD_INLINE_ITEM_LIST@66..92
+        0: MD_TEXTUAL@66..71
+          0: MD_TEXTUAL_LITERAL@66..71 "Some " [] []
+        1: MD_INLINE_EMPHASIS@71..83
+          0: DOUBLE_STAR@71..73 "**" [] []
+          1: MD_INLINE_ITEM_LIST@73..81
+            0: MD_TEXTUAL@73..81
+              0: MD_TEXTUAL_LITERAL@73..81 "Markdown" [] []
+          2: DOUBLE_STAR@81..83 "**" [] []
+        2: MD_TEXTUAL@83..91
+          0: MD_TEXTUAL_LITERAL@83..91 " inside." [] []
+        3: MD_TEXTUAL@91..92
+          0: MD_TEXTUAL_LITERAL@91..92 "\n" [] []
+    6: MD_NEWLINE@92..93
+      0: NEWLINE@92..93 "\n" [] []
+    7: MDX_JSX_BLOCK_TAG@93..100
+      0: MD_INDENT_TOKEN_LIST@93..93
+      1: MDX_JSX_TAG_LITERAL@93..100 "</Note>" [] []
+    8: MD_NEWLINE@100..101
+      0: NEWLINE@100..101 "\n" [] []
+    9: MD_NEWLINE@101..102
+      0: NEWLINE@101..102 "\n" [] []
+    10: MDX_JSX_BLOCK_TAG@102..108
+      0: MD_INDENT_TOKEN_LIST@102..102
+      1: MDX_JSX_TAG_LITERAL@102..108 "<Note>" [] []
+    11: MD_NEWLINE@108..109
+      0: NEWLINE@108..109 "\n" [] []
+    12: MD_PARAGRAPH@109..134
+      0: MD_INLINE_ITEM_LIST@109..134
+        0: MD_TEXTUAL@109..110
+          0: MD_TEXTUAL_LITERAL@109..110 " " [] []
+        1: MD_TEXTUAL@110..111
+          0: MD_TEXTUAL_LITERAL@110..111 " " [] []
+        2: MD_TEXTUAL@111..133
+          0: MD_TEXTUAL_LITERAL@111..133 "An indented paragraph." [] []
+        3: MD_TEXTUAL@133..134
+          0: MD_TEXTUAL_LITERAL@133..134 "\n" [] []
+    13: MDX_JSX_BLOCK_TAG@134..141
+      0: MD_INDENT_TOKEN_LIST@134..134
+      1: MDX_JSX_TAG_LITERAL@134..141 "</Note>" [] []
+    14: MD_NEWLINE@141..142
+      0: NEWLINE@141..142 "\n" [] []
+    15: MD_NEWLINE@142..143
+      0: NEWLINE@142..143 "\n" [] []
+    16: MDX_JSX_BLOCK_TAG@143..184
+      0: MD_INDENT_TOKEN_LIST@143..143
+      1: MDX_JSX_TAG_LITERAL@143..184 "<Chart\n  data={[1, 2]}\n  title=\"a > b\"\n/>" [] []
+    17: MD_NEWLINE@184..185
+      0: NEWLINE@184..185 "\n" [] []
+    18: MD_NEWLINE@185..186
+      0: NEWLINE@185..186 "\n" [] []
+    19: MDX_JSX_BLOCK_TAG@186..189
+      0: MD_INDENT_TOKEN_LIST@186..186
+      1: MDX_JSX_TAG_LITERAL@186..189 "<A>" [] []
+    20: MDX_JSX_BLOCK_TAG@189..194
+      0: MD_INDENT_TOKEN_LIST@189..189
+      1: MDX_JSX_TAG_LITERAL@189..194 "<B />" [] []
+    21: MDX_JSX_BLOCK_TAG@194..198
+      0: MD_INDENT_TOKEN_LIST@194..194
+      1: MDX_JSX_TAG_LITERAL@194..198 "</A>" [] []
+    22: MD_NEWLINE@198..199
+      0: NEWLINE@198..199 "\n" [] []
+    23: MD_NEWLINE@199..200
+      0: NEWLINE@199..200 "\n" [] []
+    24: MDX_JSX_BLOCK_TAG@200..206
+      0: MD_INDENT_TOKEN_LIST@200..200
+      1: MDX_JSX_TAG_LITERAL@200..206 "<Card>" [] []
+    25: MDX_BLOCK_EXPRESSION@206..222
+      0: MD_INDENT_TOKEN_LIST@206..206
+      1: L_CURLY@206..207 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@207..221
+        0: MDX_EXPRESSION_LITERAL@207..221 "props.children" [] []
+      3: R_CURLY@221..222 "}" [] []
+    26: MDX_JSX_BLOCK_TAG@222..229
+      0: MD_INDENT_TOKEN_LIST@222..222
+      1: MDX_JSX_TAG_LITERAL@222..229 "</Card>" [] []
+    27: MD_NEWLINE@229..230
+      0: NEWLINE@229..230 "\n" [] []
+    28: MD_NEWLINE@230..231
+      0: NEWLINE@230..231 "\n" [] []
+    29: MDX_JSX_BLOCK_TAG@231..233
+      0: MD_INDENT_TOKEN_LIST@231..231
+      1: MDX_JSX_TAG_LITERAL@231..233 "<>" [] []
+    30: MDX_JSX_BLOCK_TAG@233..236
+      0: MD_INDENT_TOKEN_LIST@233..233
+      1: MDX_JSX_TAG_LITERAL@233..236 "</>" [] []
+    31: MD_NEWLINE@236..237
+      0: NEWLINE@236..237 "\n" [] []
+    32: MD_NEWLINE@237..238
+      0: NEWLINE@237..238 "\n" [] []
+    33: MDX_JSX_BLOCK_TAG@238..264
+      0: MD_INDENT_TOKEN_LIST@238..238
+      1: MDX_JSX_TAG_LITERAL@238..264 "<a.b c:d=\"e\" {...props} />" [] []
+    34: MD_NEWLINE@264..265
+      0: NEWLINE@264..265 "\n" [] []
+  3: EOF@265..265 "" [] []
+
+```
