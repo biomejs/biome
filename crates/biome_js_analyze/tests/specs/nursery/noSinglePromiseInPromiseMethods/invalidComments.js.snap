@@ -1,0 +1,430 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComments.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Fixed, the comments are kept.
+await Promise.race([read(/* keep */)]);
+await Promise.race([(/* keep */ promise)]);
+const [a] = await Promise.all([(/* keep */ promise)]);
+const b = (await Promise.all([read(/* keep */)]))[0];
+/* keep */ await Promise.race([promise]) /* keep */;
+Promise.race([read(/* keep */)]);
+Promise./* keep */race([promise]);
+
+// Reported without a fix, a comment would be lost.
+await Promise./* lost */race([promise]);
+await Promise.race([/* lost */ promise]);
+await Promise.race([promise /* lost */]);
+await Promise.race([promise, /* lost */]);
+await Promise.race([
+	// lost
+	promise,
+]);
+await /* lost */ Promise.race([promise]);
+const [/* lost */ c] = await Promise.all([promise]);
+const d = (await Promise.all([promise]) /* lost */)[0];
+const e = (await Promise.all([promise]))[/* lost */ 0];
+Promise.race([/* lost */ promise]);
+
+```
+
+# Diagnostics
+```
+invalidComments.js:3:20 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Fixed, the comments are kept.
+  > 3 │ await Promise.race([read(/* keep */)]);
+      │                    ^^^^^^^^^^^^^^^^^^
+    4 │ await Promise.race([(/* keep */ promise)]);
+    5 │ const [a] = await Promise.all([(/* keep */ promise)]);
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    3 │ await·Promise.race([read(/*·keep·*/)]);
+      │       --------------               --  
+
+```
+
+```
+invalidComments.js:4:20 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    2 │ // Fixed, the comments are kept.
+    3 │ await Promise.race([read(/* keep */)]);
+  > 4 │ await Promise.race([(/* keep */ promise)]);
+      │                    ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const [a] = await Promise.all([(/* keep */ promise)]);
+    6 │ const b = (await Promise.all([read(/* keep */)]))[0];
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    4 │ await·Promise.race([(/*·keep·*/·promise)]);
+      │       --------------                   --  
+
+```
+
+```
+invalidComments.js:5:31 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    3 │ await Promise.race([read(/* keep */)]);
+    4 │ await Promise.race([(/* keep */ promise)]);
+  > 5 │ const [a] = await Promise.all([(/* keep */ promise)]);
+      │                               ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const b = (await Promise.all([read(/* keep */)]))[0];
+    7 │ /* keep */ await Promise.race([promise]) /* keep */;
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    5 │ const·[a]·=·await·Promise.all([(/*·keep·*/·promise)]);
+      │       - -         -------------                   --  
+
+```
+
+```
+invalidComments.js:6:30 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    4 │ await Promise.race([(/* keep */ promise)]);
+    5 │ const [a] = await Promise.all([(/* keep */ promise)]);
+  > 6 │ const b = (await Promise.all([read(/* keep */)]))[0];
+      │                              ^^^^^^^^^^^^^^^^^^
+    7 │ /* keep */ await Promise.race([promise]) /* keep */;
+    8 │ Promise.race([read(/* keep */)]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    6 │ const·b·=·(await·Promise.all([read(/*·keep·*/)]))[0];
+      │           -      -------------               --- --- 
+
+```
+
+```
+invalidComments.js:7:31 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    5 │ const [a] = await Promise.all([(/* keep */ promise)]);
+    6 │ const b = (await Promise.all([read(/* keep */)]))[0];
+  > 7 │ /* keep */ await Promise.race([promise]) /* keep */;
+      │                               ^^^^^^^^^
+    8 │ Promise.race([read(/* keep */)]);
+    9 │ Promise./* keep */race([promise]);
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    7 │ /*·keep·*/·await·Promise.race([promise])·/*·keep·*/;
+      │                  --------------       --            
+
+```
+
+```
+invalidComments.js:8:14 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+     6 │ const b = (await Promise.all([read(/* keep */)]))[0];
+     7 │ /* keep */ await Promise.race([promise]) /* keep */;
+   > 8 │ Promise.race([read(/* keep */)]);
+       │              ^^^^^^^^^^^^^^^^^^
+     9 │ Promise./* keep */race([promise]);
+    10 │ 
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Promise.resolve() instead.
+  
+     6  6 │   const b = (await Promise.all([read(/* keep */)]))[0];
+     7  7 │   /* keep */ await Promise.race([promise]) /* keep */;
+     8    │ - Promise.race([read(/*·keep·*/)]);
+        8 │ + Promise.resolve(read(/*·keep·*/));
+     9  9 │   Promise./* keep */race([promise]);
+    10 10 │   
+  
+
+```
+
+```
+invalidComments.js:9:24 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+     7 │ /* keep */ await Promise.race([promise]) /* keep */;
+     8 │ Promise.race([read(/* keep */)]);
+   > 9 │ Promise./* keep */race([promise]);
+       │                        ^^^^^^^^^
+    10 │ 
+    11 │ // Reported without a fix, a comment would be lost.
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Promise.resolve() instead.
+  
+     7  7 │   /* keep */ await Promise.race([promise]) /* keep */;
+     8  8 │   Promise.race([read(/* keep */)]);
+     9    │ - Promise./*·keep·*/race([promise]);
+        9 │ + Promise./*·keep·*/resolve(promise);
+    10 10 │   
+    11 11 │   // Reported without a fix, a comment would be lost.
+  
+
+```
+
+```
+invalidComments.js:12:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    11 │ // Reported without a fix, a comment would be lost.
+  > 12 │ await Promise./* lost */race([promise]);
+       │                              ^^^^^^^^^
+    13 │ await Promise.race([/* lost */ promise]);
+    14 │ await Promise.race([promise /* lost */]);
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:13:20 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    11 │ // Reported without a fix, a comment would be lost.
+    12 │ await Promise./* lost */race([promise]);
+  > 13 │ await Promise.race([/* lost */ promise]);
+       │                    ^^^^^^^^^^^^^^^^^^^^
+    14 │ await Promise.race([promise /* lost */]);
+    15 │ await Promise.race([promise, /* lost */]);
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:14:20 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    12 │ await Promise./* lost */race([promise]);
+    13 │ await Promise.race([/* lost */ promise]);
+  > 14 │ await Promise.race([promise /* lost */]);
+       │                    ^^^^^^^^^^^^^^^^^^^^
+    15 │ await Promise.race([promise, /* lost */]);
+    16 │ await Promise.race([
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:15:20 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    13 │ await Promise.race([/* lost */ promise]);
+    14 │ await Promise.race([promise /* lost */]);
+  > 15 │ await Promise.race([promise, /* lost */]);
+       │                    ^^^^^^^^^^^^^^^^^^^^^
+    16 │ await Promise.race([
+    17 │ 	// lost
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:16:20 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    14 │ await Promise.race([promise /* lost */]);
+    15 │ await Promise.race([promise, /* lost */]);
+  > 16 │ await Promise.race([
+       │                    ^
+  > 17 │ 	// lost
+  > 18 │ 	promise,
+  > 19 │ ]);
+       │ ^
+    20 │ await /* lost */ Promise.race([promise]);
+    21 │ const [/* lost */ c] = await Promise.all([promise]);
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:20:31 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    18 │ 	promise,
+    19 │ ]);
+  > 20 │ await /* lost */ Promise.race([promise]);
+       │                               ^^^^^^^^^
+    21 │ const [/* lost */ c] = await Promise.all([promise]);
+    22 │ const d = (await Promise.all([promise]) /* lost */)[0];
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:21:42 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    19 │ ]);
+    20 │ await /* lost */ Promise.race([promise]);
+  > 21 │ const [/* lost */ c] = await Promise.all([promise]);
+       │                                          ^^^^^^^^^
+    22 │ const d = (await Promise.all([promise]) /* lost */)[0];
+    23 │ const e = (await Promise.all([promise]))[/* lost */ 0];
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:22:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    20 │ await /* lost */ Promise.race([promise]);
+    21 │ const [/* lost */ c] = await Promise.all([promise]);
+  > 22 │ const d = (await Promise.all([promise]) /* lost */)[0];
+       │                              ^^^^^^^^^
+    23 │ const e = (await Promise.all([promise]))[/* lost */ 0];
+    24 │ Promise.race([/* lost */ promise]);
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:23:30 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+    21 │ const [/* lost */ c] = await Promise.all([promise]);
+    22 │ const d = (await Promise.all([promise]) /* lost */)[0];
+  > 23 │ const e = (await Promise.all([promise]))[/* lost */ 0];
+       │                              ^^^^^^^^^
+    24 │ Promise.race([/* lost */ promise]);
+    25 │ 
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:24:14 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    22 │ const d = (await Promise.all([promise]) /* lost */)[0];
+    23 │ const e = (await Promise.all([promise]))[/* lost */ 0];
+  > 24 │ Promise.race([/* lost */ promise]);
+       │              ^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1293,6 +1293,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noShoutyConstants",
         TypeId::of::<biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions>(),
     ));
+    result.push(("nursery", "noSinglePromiseInPromiseMethods", TypeId::of::<biome_rule_options::no_single_promise_in_promise_methods::NoSinglePromiseInPromiseMethodsOptions>()));
     result.push((
         "suspicious",
         "noSkippedTests",
