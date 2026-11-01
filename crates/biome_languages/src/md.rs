@@ -9,6 +9,10 @@ use camino::Utf8Path;
 enum MarkdownVariant {
     #[default]
     Standard,
+    /// [MDX](https://mdxjs.com/): Markdown with JavaScript `import` and
+    /// `export` statements, `{expressions}`, and JSX.
+    #[cfg(feature = "lang_mdx")]
+    Mdx,
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -35,6 +39,26 @@ impl MdFileSource {
         }
     }
 
+    #[cfg(feature = "lang_mdx")]
+    pub fn mdx() -> Self {
+        Self {
+            variant: MarkdownVariant::Mdx,
+            cjk_friendly_emphasis: false,
+        }
+    }
+
+    /// Returns whether the file is MDX rather than standard Markdown.
+    pub const fn is_mdx(&self) -> bool {
+        #[cfg(feature = "lang_mdx")]
+        {
+            matches!(self.variant, MarkdownVariant::Mdx)
+        }
+        #[cfg(not(feature = "lang_mdx"))]
+        {
+            false
+        }
+    }
+
     /// Returns whether bold, italic, and strikethrough markers follow the CommonMark
     /// CJK-friendly amendments. The amendments change the syntax tree, so the parser,
     /// the formatter, and the analyzer read this flag from the same file source.
@@ -52,7 +76,7 @@ impl MdFileSource {
     ///
     /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
     pub const fn file_extension(&self) -> &'static str {
-        "md"
+        if self.is_mdx() { "mdx" } else { "md" }
     }
 
     /// Try to return the Markdown file source corresponding to this file name from well-known files
@@ -63,6 +87,8 @@ impl MdFileSource {
     pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
         match extension {
             "md" | "markdown" => Ok(Self::markdown()),
+            #[cfg(feature = "lang_mdx")]
+            "mdx" => Ok(Self::mdx()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -70,6 +96,8 @@ impl MdFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "markdown" => Ok(Self::markdown()),
+            #[cfg(feature = "lang_mdx")]
+            "mdx" => Ok(Self::mdx()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
     }

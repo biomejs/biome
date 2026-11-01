@@ -97,6 +97,7 @@ biome_css_parser     = { path = "../biome_css_parser" }
 biome_js_formatter   = { path = "../biome_js_formatter" }
 biome_json_formatter = { path = "../biome_json_formatter" }
 biome_json_parser    = { path = "../biome_json_parser" }
+biome_service        = { path = "../biome_service", features = ["lang_mdx"] }
 directories          = { workspace = true }
 insta                = { workspace = true }
 regex                = { workspace = true }

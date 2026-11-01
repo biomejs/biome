@@ -25,7 +25,7 @@ fn snippet_ranges(parsed: &biome_markdown_parser::MarkdownParse) -> Vec<TextRang
                     | MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL
             )
         })
-        .map(|token| token.text_range())
+        .map(|token| token.text_trimmed_range())
         .collect()
 }
 
@@ -39,7 +39,7 @@ fn mdx_constructs_keep_their_text_without_embedded_formatting() {
 
 #[test]
 fn embedded_snippets_are_replaced_in_place() {
-    let source = "import {a} from 'a'\n\n<Note>{ props.x }</Note>\n\nText {b} and <B />.\n";
+    let source = "import {a} from 'a'\n\n<Note> { props.x } </Note>\n\nText {b} and <B />.\n";
     let parsed = parse_mdx(source);
     let ranges = snippet_ranges(&parsed);
     assert_eq!(ranges.len(), 6);
@@ -55,7 +55,7 @@ fn embedded_snippets_are_replaced_in_place() {
     });
     assert_eq!(
         formatted.print().unwrap().as_code(),
-        "ESM\n\nOPEN{EXPR}CLOSE\n\nText {B} and TAG.\n"
+        "ESM\n\nOPEN {EXPR} CLOSE\n\nText {B} and TAG.\n"
     );
 }
 
@@ -68,4 +68,12 @@ fn markdown_around_mdx_constructs_is_formatted() {
         formatted.print().unwrap().as_code(),
         "<Note>\n\nSome _text_ {x}.\n\n- item <B />\n\n</Note>\n"
     );
+}
+
+#[test]
+fn spaces_between_flow_constructs_are_kept() {
+    let source = "<Note> {props.x} </Note>\n";
+    let parsed = parse_mdx(source);
+    let formatted = format_node(MdFormatOptions::default(), &parsed.syntax(), Vec::new()).unwrap();
+    assert_eq!(formatted.print().unwrap().as_code(), source);
 }

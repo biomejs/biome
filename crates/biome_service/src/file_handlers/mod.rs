@@ -415,18 +415,34 @@ impl<'a> SnippetsIterator<'a> {
 
     /// Excludes the snippets whose syntax errors don't stop formatting the
     /// containing file: the formatter of a Markdown file keeps such snippets as
-    /// written.
+    /// written. The JavaScript of an MDX construct is part of the document's
+    /// syntax, so its syntax errors stop formatting like the document's own.
     pub(crate) fn blocking_formatting(
         self,
         source: DocumentFileSource,
+        db: &'a WorkspaceDb,
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
-        let _ = source;
+        let _ = (source, db);
         #[cfg(feature = "lang_md")]
         let blocks = source.to_markdown_file_source().is_none();
         #[cfg(not(feature = "lang_md"))]
         let blocks = true;
-        self.filter(move |_| blocks)
+        self.filter(move |snippet| blocks || is_mdx_snippet(snippet, db))
     }
+}
+
+/// Returns whether `snippet` holds the JavaScript of an MDX construct.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_mdx_snippet(snippet: &ParsedSnippetOrigin, db: &WorkspaceDb) -> bool {
+    snippet
+        .file_source(db)
+        .and_then(|source| source.to_js_file_source())
+        .is_some_and(|source| source.as_embedding_kind().is_mdx())
+}
+
+#[cfg(not(feature = "lang_mdx"))]
+fn is_mdx_snippet(_snippet: &ParsedSnippetOrigin, _db: &WorkspaceDb) -> bool {
+    false
 }
 
 impl Iterator for SnippetsIterator<'_> {

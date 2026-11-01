@@ -307,7 +307,7 @@ impl ProcessFileState {
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
             || self
                 .iter_snippets()
-                .blocking_formatting(self.file_source)
+                .blocking_formatting(self.file_source, &self.db)
                 .any(|snippet| snippet.has_errors())
     }
 
@@ -326,7 +326,7 @@ impl ProcessFileState {
             || !self.parsed.diagnostics(&self.db).is_empty()
             || self
                 .iter_snippets()
-                .blocking_formatting(self.file_source)
+                .blocking_formatting(self.file_source, &self.db)
                 .any(|snippet| {
                     !snippet.diagnostics().is_empty()
                         || snippet
@@ -341,7 +341,7 @@ impl ProcessFileState {
     fn error_count(&self, settings: &Settings, path: &Utf8Path, analyzed: bool) -> usize {
         let mut counted: FxHashSet<_> = self
             .iter_snippets()
-            .blocking_formatting(self.file_source)
+            .blocking_formatting(self.file_source, &self.db)
             .map(|snippet| snippet.content_range())
             .collect();
         if analyzed {
@@ -1750,7 +1750,10 @@ impl WorkspaceServerWithDb<'_> {
                 .iter()
                 .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count();
-            for embedded_node in state.iter_snippets().blocking_formatting(state.file_source) {
+            for embedded_node in state
+                .iter_snippets()
+                .blocking_formatting(state.file_source, &state.db)
+            {
                 let embedded_diagnostics: Vec<_> = embedded_node
                     .serde_diagnostics()
                     .into_iter()
@@ -4134,7 +4137,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && (parse.parsed(&*workspace_db).has_errors()
                 || SnippetsIterator::from_source(parse, &workspace_db)
-                    .blocking_formatting(document_file_source)
+                    .blocking_formatting(document_file_source, &workspace_db)
                     .any(|snippet| snippet.has_errors()))
         {
             return Err(WorkspaceError::format_with_errors_disabled());

@@ -1,0 +1,73 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.mdx
+```
+
+## `file.mdx`
+
+```mdx
+#   Hello
+
+{1 +}
+
+```
+
+# Termination Message
+
+```block
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+  i Check your biome.json or biome.jsonc to ensure the paths are not ignored by the configuration.
+  
+  i These paths were provided but ignored:
+  
+  - file.mdx
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.mdx:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    1 │ #   Hello
+    2 │ 
+  > 3 │ {1 +}
+      │     
+    4 │ 
+  
+  i Expected an expression here.
+  
+    1 │ #   Hello
+    2 │ 
+  > 3 │ {1 +}
+      │     
+    4 │ 
+  
+
+```
+
+```block
+file.mdx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

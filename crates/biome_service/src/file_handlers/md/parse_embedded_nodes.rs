@@ -23,11 +23,17 @@ use biome_js_syntax::JsLanguage;
 use biome_json_parser::parse_json_with_offset_and_cache;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::DocumentFileSource;
+#[cfg(feature = "lang_mdx")]
+use biome_languages::javascript::{JsEmbeddingKind, JsFileSource, MdxEmbeddingKind};
 use biome_markdown_parser::parse_markdown_with_offset_and_cache;
+#[cfg(feature = "lang_mdx")]
+use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::{
     MarkdownLanguage, MarkdownSyntaxToken, MdFencedCodeBlock, MdFrontmatter, MdHtmlBlock, MdRoot,
 };
 use biome_parser::AnyParse;
+#[cfg(feature = "lang_mdx")]
+use biome_rowan::Direction;
 use biome_rowan::{AstNode, AstNodeList, NodeCache, TextRange, TextSize};
 #[cfg(feature = "lang_yaml")]
 use biome_yaml_parser::parse_yaml_with_offset_and_cache;
@@ -47,13 +53,14 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         node_cache,
     } = params;
 
-    if file_source.to_markdown_file_source().is_none() {
+    let Some(markdown_source) = file_source.to_markdown_file_source() else {
         return ParseEmbedResult::default();
-    }
-    // Snippets are only parsed to format or lint their code.
-    if !format_embeds_enabled(settings.as_ref(), path)
-        && !analyze_embeds_enabled(settings.as_ref(), path)
-    {
+    };
+    // Snippets are only parsed to format or lint their code, except for the
+    // JavaScript of MDX constructs, whose syntax errors belong to the document.
+    let embeds_enabled = format_embeds_enabled(settings.as_ref(), path)
+        || analyze_embeds_enabled(settings.as_ref(), path);
+    if !embeds_enabled && !markdown_source.is_mdx() {
         return ParseEmbedResult::default();
     }
 
@@ -64,6 +71,14 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
         path,
         settings,
     };
+
+    #[cfg(feature = "lang_mdx")]
+    if markdown_source.is_mdx() {
+        push_mdx_snippets(&root, &mut context, &mut nodes);
+    }
+    if !embeds_enabled {
+        return ParseEmbedResult { nodes };
+    }
 
     if let Some(frontmatter) = root.frontmatter()
         && let Some(candidate) = build_frontmatter_candidate(&frontmatter)
@@ -88,6 +103,58 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
     }
 
     ParseEmbedResult { nodes }
+}
+
+/// Parses the JavaScript of every MDX construct of `root` as a JSX snippet:
+/// ESM blocks as modules, `{...}` expressions as single expressions, and
+/// each JSX tag on its own.
+///
+/// A snippet covers the literal without its trivia, so formatting it keeps
+/// the spaces between the constructs of a line.
+#[cfg(feature = "lang_mdx")]
+fn push_mdx_snippets(
+    root: &MdRoot,
+    context: &mut EmbedParseContext,
+    nodes: &mut Vec<(AnyParse, EmbedContent, DocumentFileSource)>,
+) {
+    for token in root.syntax().descendants_tokens(Direction::Next) {
+        let kind = match token.kind() {
+            MarkdownSyntaxKind::MDX_ESM_LITERAL => MdxEmbeddingKind::Esm,
+            MarkdownSyntaxKind::MDX_EXPRESSION_LITERAL => MdxEmbeddingKind::Expression,
+            MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL => MdxEmbeddingKind::Tag,
+            _ => continue,
+        };
+        let Some(element) = token.parent() else {
+            continue;
+        };
+        // The lines of a literal in a block quote start with `>` markers,
+        // which aren't JavaScript.
+        if token.text_trimmed().contains(['\n', '\r'])
+            && token
+                .ancestors()
+                .any(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
+        {
+            continue;
+        }
+        let content_range = token.text_trimmed_range();
+        let content = EmbedContent {
+            element_range: element.text_trimmed_range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: token.token_text_trimmed(),
+        };
+        let file_source = DocumentFileSource::Js(
+            JsFileSource::jsx().with_embedding_kind(JsEmbeddingKind::Mdx { kind }),
+        );
+        if let Some(parse) = parse_code(
+            content.text.text(),
+            content.content_offset,
+            file_source,
+            context,
+        ) {
+            nodes.push((parse, content, file_source));
+        }
+    }
 }
 
 fn parse_and_push(

@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.mdx
+```
+
+## `file.mdx`
+
+```mdx
+See <Link href="https://example.com/docs/getting-started" target="_blank" rel="noopener">the docs</Link>.
+
+- An item with {value} and <Badge color="green" />
+
+> A quote with <Badge color="green" />
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

@@ -139,14 +139,16 @@ impl ServiceLanguage for MarkdownLanguage {
         _path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
-        MarkdownParserOptions::default()
+        let markdown_source = file_source.to_markdown_file_source();
+        let options = MarkdownParserOptions::default()
             .with_frontmatter(language.frontmatter.unwrap_or_default().into())
             .with_gfm(language.gfm.unwrap_or_default().into())
             .with_cjk_friendly_emphasis(
-                file_source
-                    .to_markdown_file_source()
-                    .is_some_and(|source| source.cjk_friendly_emphasis()),
-            )
+                markdown_source.is_some_and(|source| source.cjk_friendly_emphasis()),
+            );
+        #[cfg(feature = "lang_mdx")]
+        let options = options.with_mdx(markdown_source.is_some_and(|source| source.is_mdx()));
+        options
     }
 
     fn resolve_format_options(
@@ -640,6 +642,20 @@ pub(crate) fn lint_with_inspector(
     };
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    #[cfg(feature = "lang_mdx")]
+    let mut diagnostics = diagnostics;
+    // The syntax errors of MDX JavaScript belong to the document. Snippets
+    // that aren't analyzed don't report them, so they're added here.
+    #[cfg(feature = "lang_mdx")]
+    if !analyze_embeds_enabled(params.settings.as_ref(), params.path) {
+        diagnostics.extend(
+            params
+                .parsed_source
+                .snippets(&params.workspace_db)
+                .filter(|snippet| super::is_mdx_snippet(snippet, &params.workspace_db))
+                .flat_map(|snippet| snippet.serde_diagnostics()),
+        );
+    }
 
     let results = process_lint.into_result(diagnostics, analyze_diagnostics);
     #[cfg(feature = "md_embeds")]
