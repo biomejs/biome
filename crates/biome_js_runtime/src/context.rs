@@ -1,5 +1,6 @@
 use crate::JsModuleLoader;
 use crate::ast::JsAstNode;
+use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
 use crate::mutation::JsMutation;
 use crate::plugin_api::JsPluginApi;
 use crate::rule_context::create_rule_context;
@@ -8,7 +9,7 @@ use crate::source::read_module_source;
 use crate::token::JsAstToken;
 use biome_analyze::{PluginDiagnosticEntry, ServiceBag};
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode};
+use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsSyntaxNode};
 use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
 use boa_engine::builtins::promise::PromiseState;
@@ -57,6 +58,8 @@ impl JsExecContext {
 
         JsAstNode::register(&mut ctx)?;
         JsAstToken::register(&mut ctx)?;
+        JsNodeKindSet::<JsLanguage>::register(&mut ctx)?;
+        JsTokenKindSet::<JsLanguage>::register(&mut ctx)?;
         JsMutation::register(&mut ctx)?;
         register_semantic(&mut ctx)?;
 
