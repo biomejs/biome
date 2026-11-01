@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.cjs
+---
+# Input
+```cjs
+// Legacy octal escapes in sloppy mode strings - should not be fixed
+RegExp("\01");
+new RegExp("\173");
+RegExp("\01", "g");
+new RegExp("\173", "g");
+new RegExp("\8", "g");
+
+```
+
+# Diagnostics
+```
+invalidNoFix.cjs:2:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    1 │ // Legacy octal escapes in sloppy mode strings - should not be fixed
+  > 2 │ RegExp("\01");
+      │ ^^^^^^^^^^^^^
+    3 │ new RegExp("\173");
+    4 │ RegExp("\01", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+
+```
+
+```
+invalidNoFix.cjs:3:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    1 │ // Legacy octal escapes in sloppy mode strings - should not be fixed
+    2 │ RegExp("\01");
+  > 3 │ new RegExp("\173");
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ RegExp("\01", "g");
+    5 │ new RegExp("\173", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+
+```
+
+```
+invalidNoFix.cjs:4:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    2 │ RegExp("\01");
+    3 │ new RegExp("\173");
+  > 4 │ RegExp("\01", "g");
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ new RegExp("\173", "g");
+    6 │ new RegExp("\8", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+
+```
+
+```
+invalidNoFix.cjs:5:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    3 │ new RegExp("\173");
+    4 │ RegExp("\01", "g");
+  > 5 │ new RegExp("\173", "g");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ new RegExp("\8", "g");
+    7 │ 
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+
+```
+
+```
+invalidNoFix.cjs:6:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    4 │ RegExp("\01", "g");
+    5 │ new RegExp("\173", "g");
+  > 6 │ new RegExp("\8", "g");
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+
+```
