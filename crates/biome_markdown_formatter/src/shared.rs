@@ -215,3 +215,24 @@ impl Format<MarkdownFormatContext> for FormatLiteralLines<'_> {
         Ok(())
     }
 }
+
+/// Formats the literal that holds the JavaScript of an MDX construct.
+///
+/// When the workspace parsed the literal as an embedded snippet, the
+/// literal becomes an embedded element that the JavaScript formatter fills
+/// in. Otherwise the literal prints as written.
+pub(crate) struct FormatMdxSnippet<'a> {
+    pub(crate) token: &'a MarkdownSyntaxToken,
+}
+
+impl Format<MarkdownFormatContext> for FormatMdxSnippet<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        let range = self.token.text_range();
+        if f.context().is_embedded_node_range(range) {
+            let embedded = FormatEmbedded::new(range, &self.token.format(), f)?;
+            write!(f, [embedded])
+        } else {
+            write!(f, [self.token.format()])
+        }
+    }
+}
