@@ -90,6 +90,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAwaitInLoops",
         TypeId::of::<biome_rule_options::no_await_in_loops::NoAwaitInLoopsOptions>(),
     ));
+    result.push(("nursery", "noAwaitInPromiseMethods", TypeId::of::<biome_rule_options::no_await_in_promise_methods::NoAwaitInPromiseMethodsOptions>()));
     result.push((
         "complexity",
         "noBannedTypes",

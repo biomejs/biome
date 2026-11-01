@@ -2973,6 +2973,11 @@ export interface Nursery {
 	 */
 	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
 	/**
+	 * Disallow using await inside the array passed to Promise.all(), Promise.allSettled(), Promise.any(), or Promise.race().
+	 * See https://biomejs.dev/linter/rules/no-await-in-promise-methods
+	 */
+	noAwaitInPromiseMethods?: NoAwaitInPromiseMethodsConfiguration;
+	/**
 	 * Require stringification to avoid values that only use the default object representation.
 	 * See https://biomejs.dev/linter/rules/no-base-to-string
 	 */
@@ -6113,6 +6118,9 @@ export type NoAstroConflictingSetDirectivesConfiguration =
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
+export type NoAwaitInPromiseMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAwaitInPromiseMethodsOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -8800,6 +8808,14 @@ export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
+}
+export interface RuleWithNoAwaitInPromiseMethodsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoAwaitInPromiseMethodsOptions;
 }
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
@@ -11793,6 +11809,7 @@ export type NoArgumentsCallerOrCalleeOptions = {};
 export type NoArraySortForMinMaxOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
+export type NoAwaitInPromiseMethodsOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -13701,6 +13718,7 @@ export type Category =
 	| "lint/nursery/noArraySortForMinMax"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
+	| "lint/nursery/noAwaitInPromiseMethods"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
