@@ -1571,6 +1571,51 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MDX_INLINE_EXPRESSION, children)
             }
+            MDX_JSX_BLOCK_TAG => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == MDX_JSX_TAG_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MDX_JSX_BLOCK_TAG.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MDX_JSX_BLOCK_TAG, children)
+            }
+            MDX_JSX_INLINE_TAG => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MDX_JSX_TAG_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MDX_JSX_INLINE_TAG.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MDX_JSX_INLINE_TAG, children)
+            }
             GFM_TABLE_CELL_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

@@ -89,6 +89,10 @@ mod mdx {
         false
     }
 
+    pub(crate) fn at_mdx_flow_line(_p: &MarkdownParser) -> bool {
+        false
+    }
+
     pub(crate) fn parse_mdx_block(_p: &mut MarkdownParser) -> ParsedSyntax {
         ParsedSyntax::Absent
     }
@@ -100,9 +104,15 @@ mod mdx {
     pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
         bytes.len()
     }
+
+    pub(crate) fn parse_mdx_inline_tag(_p: &mut MarkdownParser) -> ParsedSyntax {
+        ParsedSyntax::Absent
+    }
 }
 
-pub(crate) use mdx::{mdx_expression_len, parse_mdx_inline_expression};
+#[cfg(feature = "lang_mdx")]
+pub(crate) use mdx::jsx_tag_pairing_diagnostics;
+pub(crate) use mdx::{mdx_expression_len, parse_mdx_inline_expression, parse_mdx_inline_tag};
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -1990,6 +2000,11 @@ fn consume_partial_quote_prefix_lookahead(p: &mut MarkdownParser, depth: usize) 
 /// - Ordered lists can interrupt paragraphs ONLY if starting with `1` AND not empty
 #[inline]
 pub(crate) fn at_block_interrupt(p: &mut MarkdownParser) -> bool {
+    // A line of JSX tags and expressions interrupts a paragraph at any
+    // indentation, because MDX has no indented code.
+    if MarkdownSyntaxFeatures::Mdx.is_supported(p) && mdx::at_mdx_flow_line(p) {
+        return true;
+    }
     let Some((byte, dispatch)) = block_interrupt_candidate(p) else {
         return false;
     };
