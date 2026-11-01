@@ -190,6 +190,7 @@ impl JsAstNode {
             }
             JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => js_string!("JS_VUE_SLOT_PROPS_ROOT"),
             JsSyntaxKind::JS_VUE_GENERIC_ROOT => js_string!("JS_VUE_GENERIC_ROOT"),
+            JsSyntaxKind::JSX_SINGLE_TAG_ROOT => js_string!("JSX_SINGLE_TAG_ROOT"),
             JsSyntaxKind::JS_DIRECTIVE => js_string!("JS_DIRECTIVE"),
             JsSyntaxKind::JS_DIRECTIVE_LIST => js_string!("JS_DIRECTIVE_LIST"),
             JsSyntaxKind::JS_STATEMENT_LIST => js_string!("JS_STATEMENT_LIST"),
