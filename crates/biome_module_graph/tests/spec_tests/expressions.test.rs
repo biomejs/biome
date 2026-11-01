@@ -951,6 +951,96 @@ fn test_infer_module_types_evaluates_destructuring_edge_expressions_on_build() {
 }
 
 #[test]
+fn test_infer_module_types_removes_undefined_from_destructuring_defaults_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export const object: {
+                b?: number;
+                c?: number;
+                d?: string | null;
+                inner?: { x: number };
+            } = {};
+            export const { b = 1, c: renamed = 1, d = "value", inner: { x } = { x: 1 } } = object;
+            export const { b: withoutDefault } = object;
+
+            export const numbers: (number | undefined)[] = [];
+            export const [head = 0] = numbers;
+            export const [withoutDefaultHead] = numbers;
+
+            export function pick({ b: picked = 1 }: { b?: number }) {
+                return picked;
+            }
+            export const fromCall = pick({});
+
+            export function pickGeneric<T extends { b?: number }>({ b: picked = 1 }: T) {
+                return picked;
+            }
+            export const fromGenericCall = pickGeneric({});
+
+            export function identity<T>(value: T): T {
+                return value;
+            }
+            export const { b: viaCall = 1 } = identity(object);
+            export const [headViaCall = 0] = identity(numbers);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in [
+        "b",
+        "renamed",
+        "x",
+        "head",
+        "fromCall",
+        "fromGenericCall",
+        "viaCall",
+        "headViaCall",
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_number(&db, ty),
+            "{name} must stay a number"
+        );
+        assert!(
+            !contains_inferred_undefined(&db, ty),
+            "{name} must not include undefined"
+        );
+    }
+
+    let d_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "d")
+        .expect("d binding type must be inferred");
+    let d_ty = inferred.resolve_type(&db, d_ty);
+    assert!(contains_inferred_string(&db, d_ty));
+    assert!(contains_inferred_null(&db, d_ty));
+    assert!(!contains_inferred_undefined(&db, d_ty));
+
+    for name in ["withoutDefault", "withoutDefaultHead"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must keep undefined"
+        );
+    }
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_removes_undefined_from_destructuring_defaults_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
 fn test_infer_module_types_evaluates_this_and_super_edge_expressions_on_build() {
     let fs = MemoryFileSystem::default();
     fs.insert(

@@ -853,7 +853,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                 ])]
             ),
             Self::Destructure(expr) => match &expr.destructure_field {
-                DestructureField::Index(index) => write!(
+                DestructureField::Index { index, .. } => write!(
                     f,
                     [&format_args![
                         &expr.ty,
@@ -862,7 +862,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                         token("]")
                     ]]
                 ),
-                DestructureField::Name(name) => {
+                DestructureField::Name { name, .. } => {
                     write!(f, [&format_args![&expr.ty, token("."), name]])
                 }
                 DestructureField::RestExcept(names) => write!(
