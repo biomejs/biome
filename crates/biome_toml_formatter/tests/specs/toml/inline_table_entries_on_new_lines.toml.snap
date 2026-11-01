@@ -1,0 +1,50 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+x = { a = 1, # a
+b = 2, # b
+c = 3 }
+y = { a = 1
+, b = 2 }
+z = { a = [1, # one
+2], b = 3 }
+w = { a = 1,
+b = 2 }
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+x = {
+	a = 1, # a
+	b = 2, # b
+	c = 3,
+}
+y = {
+	a = 1,
+	b = 2,
+}
+z = { a = [
+	1, # one
+	2,
+], b = 3 }
+w = {
+	a = 1,
+	b = 2,
+}
+```

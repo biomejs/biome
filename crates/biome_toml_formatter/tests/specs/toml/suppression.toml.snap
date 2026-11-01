@@ -1,0 +1,40 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+# biome-ignore format: aligned on purpose
+matrix   =   [ 1,  0,
+               0,  1 ]
+formatted   =   [ 1,  0 ]
+
+# biome-ignore format: keep the header
+[  table  ]
+a   =   1
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+# biome-ignore format: aligned on purpose
+matrix   =   [ 1,  0,
+               0,  1 ]
+formatted = [1, 0]
+
+# biome-ignore format: keep the header
+[  table  ]
+a   =   1
+```

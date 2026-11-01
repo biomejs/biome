@@ -112,6 +112,10 @@
 /crates/biome_yaml_formatter/src/generated.rs linguist-generated=true text=auto eol=lf
 /crates/biome_yaml_formatter/src/yaml/**/mod.rs linguist-generated=true text=auto eol=lf
 /crates/biome_yaml_formatter/src/yaml/any/*.rs linguist-generated=true text=auto eol=lf
+# TOML
+/crates/biome_toml_formatter/src/generated.rs linguist-generated=true text=auto eol=lf
+/crates/biome_toml_formatter/src/toml/**/mod.rs linguist-generated=true text=auto eol=lf
+/crates/biome_toml_formatter/src/toml/any/*.rs linguist-generated=true text=auto eol=lf
 
 # Other
 /crates/biome_aria_metadata/aria-data/dpub-aria-1-1.json linguist-generated=true text=auto eol=lf

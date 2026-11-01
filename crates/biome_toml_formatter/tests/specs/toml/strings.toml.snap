@@ -1,0 +1,52 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+basic = "a \"quoted\" string"
+literal = 'C:\path'
+multiline = """
+  indentation is
+     preserved
+"""
+in_array = [
+  """
+multi
+line""",
+  '''
+raw
+''',
+]
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+basic = "a \"quoted\" string"
+literal = 'C:\path'
+multiline = """
+  indentation is
+     preserved
+"""
+in_array = [
+	"""
+multi
+line""",
+	'''
+raw
+''',
+]
+```
