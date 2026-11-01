@@ -1333,6 +1333,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_substr::NoSubstrOptions>(),
     ));
     result.push((
+        "nursery",
+        "noSubtractionComparison",
+        TypeId::of::<biome_rule_options::no_subtraction_comparison::NoSubtractionComparisonOptions>(
+        ),
+    ));
+    result.push((
         "suspicious",
         "noSuspiciousSemicolonInJsx",
         TypeId::of::<

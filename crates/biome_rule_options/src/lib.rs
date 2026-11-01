@@ -283,6 +283,7 @@ pub mod no_static_element_interactions;
 pub mod no_static_only_class;
 pub mod no_string_case_mismatch;
 pub mod no_substr;
+pub mod no_subtraction_comparison;
 pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_svelte_add_event_listener;
 pub mod no_svelte_at_debug_tags;

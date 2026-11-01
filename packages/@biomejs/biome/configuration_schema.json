@@ -6391,6 +6391,16 @@
 			]
 		},
 		"NoSubstrOptions": { "type": "object", "additionalProperties": false },
+		"NoSubtractionComparisonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSubtractionComparisonOptions" }
+			]
+		},
+		"NoSubtractionComparisonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSuspiciousSemicolonInJsxConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8493,6 +8503,13 @@
 					"description": "Disallow animation and transition times that are shorter than a configured minimum.\nSee https://biomejs.dev/linter/rules/no-short-time-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShortTimeValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSubtractionComparison": {
+					"description": "Disallow subtracting two values only to compare the result with 0.\nSee https://biomejs.dev/linter/rules/no-subtraction-comparison",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSubtractionComparisonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13205,6 +13222,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSubstrOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSubtractionComparisonOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSubtractionComparisonOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
