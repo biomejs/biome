@@ -1,0 +1,32 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "my-package",
+	"private": true
+}
+
+```
+
+# Diagnostics
+```
+package.json:1:1 lint/nursery/usePackageJsonCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This package.json file is missing the cpu field.
+  
+  > 1 │ {
+      │ ^
+    2 │ 	"name": "my-package",
+    3 │ 	"private": true
+  
+  i Package managers read this field to avoid installing the package on a processor that the package doesn't support.
+  
+  i Add a cpu field that lists the processor types the package supports, for example ["x64", "arm64"].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
