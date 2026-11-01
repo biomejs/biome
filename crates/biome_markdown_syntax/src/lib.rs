@@ -84,6 +84,10 @@ impl SyntaxKind for MarkdownSyntaxKind {
                 | Self::MD_FRONTMATTER_LITERAL
                 | Self::NEWLINE
                 | Self::MD_INDENT_CHAR
+                // `{/* biome-ignore-all ... */}`, the MDX form of a comment
+                | Self::L_CURLY
+                | Self::MDX_EXPRESSION_LITERAL
+                | Self::R_CURLY
         )
     }
 }

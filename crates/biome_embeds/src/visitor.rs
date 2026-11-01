@@ -345,7 +345,13 @@ fn collect_embedded_references(
         // A Svelte component's `<script module>` and `<script>` compile to
         // one module and share a top-level scope, so a binding used only in
         // the other block must still count as used.
-        if !js_file_source.is_embedded_source() || is_svelte || is_mdx {
+        // In an MDX document, only the snippets of MDX constructs are part of
+        // the module: code fences are examples.
+        if is_mdx {
+            if js_file_source.as_embedding_kind().is_mdx() {
+                builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
+            }
+        } else if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
         } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
             builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);
