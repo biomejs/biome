@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
 expression: invalid.jsx
 ---
 # Input
@@ -198,6 +199,16 @@ function createWrappedHook(key) {
     return useState(key);
   });
   return useWrapped;
+}
+
+// Factory returning components as object properties
+function createSlots(theme) {
+  return {
+    Header: () => <header style={{ color: theme.primary }} />,
+    Footer: function () {
+      return <footer style={{ color: theme.secondary }} />;
+    },
+  };
 }
 
 ```
@@ -607,6 +618,40 @@ invalid.jsx:191:9 lint/correctness/noComponentHookFactories ━━━━━━�
     193 │   });
   
   i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+
+```
+
+```
+invalid.jsx:200:5 lint/correctness/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Header inside a function.
+  
+    198 │ function createSlots(theme) {
+    199 │   return {
+  > 200 │     Header: () => <header style={{ color: theme.primary }} />,
+        │     ^^^^^^
+    201 │     Footer: function () {
+    202 │       return <footer style={{ color: theme.secondary }} />;
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+
+```
+
+```
+invalid.jsx:201:5 lint/correctness/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define component Footer inside a function.
+  
+    199 │   return {
+    200 │     Header: () => <header style={{ color: theme.primary }} />,
+  > 201 │     Footer: function () {
+        │     ^^^^^^
+    202 │       return <footer style={{ color: theme.secondary }} />;
+    203 │     },
+  
+  i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
   
 
 ```
