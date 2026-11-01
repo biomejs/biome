@@ -154,3 +154,14 @@ export default component$(() => {
 new Map([
     ["None", <TriangleDownIcon sx={{ fontSize: "1.25rem", color: "error.main" }} />],
 ]);
+
+// variables used inside a keyed conditional return don't need a key
+xs.map((x) => {
+    const inner = <b>{x}</b>;
+    return f ? <li key={x}>{inner}</li> : <p key={x}>{inner}</p>;
+});
+
+xs.map((x) => {
+    const inner = <b>{x}</b>;
+    return f ? <li key={x}>{inner}</li> : g ? <p key={x}>{inner}</p> : null;
+});

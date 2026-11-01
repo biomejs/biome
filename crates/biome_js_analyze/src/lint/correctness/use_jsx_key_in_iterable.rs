@@ -6,10 +6,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
-    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
-    JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild, JsxTagExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsMemberExpression,
+    AnyJsObjectMember, AnyJsStatement, AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild,
+    JsArrayElementList, JsArrayExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsFunctionBody, JsNewExpression, JsObjectExpression, JsStatementList, JsxAttributeList,
+    JsxExpressionChild, JsxTagExpression,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
@@ -251,13 +252,7 @@ fn handle_function_body(
         .find_map(|statement| statement.as_js_return_statement().cloned());
     let is_return_component = return_statement
         .as_ref()
-        .and_then(|ret| {
-            let returned_value = ret.argument()?;
-            let returned_value = unwrap_parenthesis(returned_value)?;
-            Some(ReactComponentExpression::can_cast(
-                returned_value.syntax().kind(),
-            ))
-        })
+        .and_then(|ret| is_component_expression(ret.argument()?))
         .unwrap_or_default();
     let ranges = return_statement.and_then(|ret| {
         let returned_value = ret.argument()?;
@@ -268,6 +263,33 @@ fn handle_function_body(
     }
 
     handle_statements(&node.statements(), model, is_inside_jsx, options)
+}
+
+/// Returns `true` if the expression is a component, or a conditional expression
+/// whose branches are all components or `null`, with at least one component.
+fn is_component_expression(expr: AnyJsExpression) -> Option<bool> {
+    let expr = unwrap_parenthesis(expr)?;
+    let AnyJsExpression::JsConditionalExpression(expr) = expr else {
+        return Some(ReactComponentExpression::can_cast(expr.syntax().kind()));
+    };
+    let consequent = unwrap_parenthesis(expr.consequent().ok()?)?;
+    let alternate = unwrap_parenthesis(expr.alternate().ok()?)?;
+    let is_null = |expr: &AnyJsExpression| {
+        matches!(
+            expr,
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNullLiteralExpression(_)
+            )
+        )
+    };
+    Some(match (is_null(&consequent), is_null(&alternate)) {
+        (true, true) => false,
+        (true, false) => is_component_expression(alternate)?,
+        (false, true) => is_component_expression(consequent)?,
+        (false, false) => {
+            is_component_expression(consequent)? && is_component_expression(alternate)?
+        }
+    })
 }
 
 fn handle_statements(

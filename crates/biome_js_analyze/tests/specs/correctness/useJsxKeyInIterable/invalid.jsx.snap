@@ -135,6 +135,11 @@ new Map([
     ["None", [<TriangleDownIcon sx={{ fontSize: "1.25rem", color: "error.main" }} />]],
 ]);
 
+xs.map((x) => {
+    const inner = <b>{x}</b>;
+    return f ? <li key={x}>{inner}</li> : <p>{inner}</p>;
+});
+
 ```
 
 _Note: The parser emitted 1 diagnostics which are not shown here._
@@ -1039,6 +1044,43 @@ invalid.jsx:129:15 lint/correctness/useJsxKeyInIterable ━━━━━━━━
         │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     130 │ ]);
     131 │ 
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:133:19 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    132 │ xs.map((x) => {
+  > 133 │     const inner = <b>{x}</b>;
+        │                   ^^^
+    134 │     return f ? <li key={x}>{inner}</li> : <p>{inner}</p>;
+    135 │ });
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:134:43 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    132 │ xs.map((x) => {
+    133 │     const inner = <b>{x}</b>;
+  > 134 │     return f ? <li key={x}>{inner}</li> : <p>{inner}</p>;
+        │                                           ^^^
+    135 │ });
+    136 │ 
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   
