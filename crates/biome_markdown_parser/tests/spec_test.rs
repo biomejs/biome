@@ -63,6 +63,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     } else {
         MarkdownParserOptions::default()
     };
+    let is_mdx = test_case_path
+        .extension()
+        .is_some_and(|extension| extension == "mdx");
+    let options = options.with_mdx(is_mdx);
     let parsed = parse_markdown_with_cache(&content, &mut NodeCache::default(), options);
     validate_eof_token(parsed.syntax());
     validate_text_trimmed_ranges(&parsed.syntax());

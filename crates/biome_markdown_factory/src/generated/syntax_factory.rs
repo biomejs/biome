@@ -1460,6 +1460,117 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MD_THEMATIC_BREAK_CHAR, children)
             }
+            MDX_BLOCK_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && MdIndentTokenList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdxExpressionContent::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MDX_BLOCK_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MDX_BLOCK_EXPRESSION, children)
+            }
+            MDX_ESM_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MDX_ESM_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MDX_ESM_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MDX_ESM_BLOCK, children)
+            }
+            MDX_EXPRESSION_CONTENT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == MDX_EXPRESSION_LITERAL
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MDX_EXPRESSION_CONTENT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MDX_EXPRESSION_CONTENT, children)
+            }
+            MDX_INLINE_EXPRESSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['{']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && MdxExpressionContent::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['}']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MDX_INLINE_EXPRESSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MDX_INLINE_EXPRESSION, children)
+            }
             GFM_TABLE_CELL_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

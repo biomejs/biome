@@ -18,6 +18,8 @@ impl FormatRule<AnyMdLeafBlock> for FormatAnyMdLeafBlock {
             AnyMdLeafBlock::MdParagraph(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdSetextHeader(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdThematicBreakBlock(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdxBlockExpression(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdxEsmBlock(node) => node.format().fmt(f),
         }
     }
 }

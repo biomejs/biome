@@ -33,14 +33,13 @@
 
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::{self, *};
-use biome_parser::Parser;
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::RecoveryResult;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_parser::{Parser, SyntaxFeature};
 use biome_rowan::TextSize;
 use std::rc::Rc;
 
-use crate::MarkdownParser;
 use crate::parser::OpenQuote;
 use crate::syntax::parse_any_block_with_indent_code_policy;
 use crate::syntax::parse_error::quote_nesting_too_deep;
@@ -48,6 +47,7 @@ use crate::syntax::{
     INDENT_CODE_BLOCK_SPACES, MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES,
     is_dash_only_thematic_break_text, is_paragraph_like, is_whitespace_only, parse_empty_paragraph,
 };
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 /// Check if we're at the start of a block quote (`>`).
 pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
@@ -747,6 +747,10 @@ fn has_empty_line_before(p: &MarkdownParser) -> bool {
 }
 
 pub(crate) fn at_quote_indented_code_start(p: &MarkdownParser) -> bool {
+    // MDX has no indented code.
+    if MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+        return false;
+    }
     // Tab expansion is relative to the absolute column position in the line:
     // a tab at column 2 (e.g. just after `> `) only advances 2 columns to the
     // next tab stop, not a full TAB_STOP_SPACES. Counting from column 0 here

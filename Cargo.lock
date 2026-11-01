@@ -1634,6 +1634,7 @@ dependencies = [
  "biome_configuration",
  "biome_console",
  "biome_diagnostics",
+ "biome_js_extent",
  "biome_markdown_factory",
  "biome_markdown_parser",
  "biome_markdown_syntax",

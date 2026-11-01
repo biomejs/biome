@@ -1,0 +1,113 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+>     indented text in a quote
+
+-     indented text in a list item
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..30 "    indented text in a quote" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@32..33 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@33..66 "     indented text in a list item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@66..67 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@67..67 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..67
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..67
+    0: MD_QUOTE@0..31
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..31
+        0: MD_PARAGRAPH@2..31
+          0: MD_INLINE_ITEM_LIST@2..31
+            0: MD_TEXTUAL@2..30
+              0: MD_TEXTUAL_LITERAL@2..30 "    indented text in a quote" [] []
+            1: MD_TEXTUAL@30..31
+              0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
+    1: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@32..67
+      0: MD_BULLET_LIST@32..67
+        0: MD_BULLET@32..67
+          0: MD_LIST_MARKER_PREFIX@32..33
+            0: MD_INDENT_TOKEN_LIST@32..32
+            1: MINUS@32..33 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@33..33
+          1: MD_BLOCK_LIST@33..67
+            0: MD_PARAGRAPH@33..67
+              0: MD_INLINE_ITEM_LIST@33..67
+                0: MD_TEXTUAL@33..66
+                  0: MD_TEXTUAL_LITERAL@33..66 "     indented text in a list item" [] []
+                1: MD_TEXTUAL@66..67
+                  0: MD_TEXTUAL_LITERAL@66..67 "\n" [] []
+  3: EOF@67..67 "" [] []
+
+```
