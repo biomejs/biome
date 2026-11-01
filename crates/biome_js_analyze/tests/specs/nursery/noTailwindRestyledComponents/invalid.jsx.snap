@@ -346,14 +346,14 @@ invalid.jsx:11:28 lint/nursery/noTailwindRestyledComponents ━━━━━━�
 ```
 
 ```
-invalid.jsx:11:52 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:51 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This Tailwind utility restyles a component.
   
      9 │ <Button className={active && "opacity-50"} />;
     10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
   > 11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
-       │                                                    ^^^^^^
+       │                                                   ^^^^^^
     12 │ <Button className={`mt-4 ${extra} text-sm`} />;
     13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
   
