@@ -329,6 +329,43 @@ impl GreenNodeData {
         slots.splice(range, replace_with);
         GreenNode::new(self.kind(), slots)
     }
+
+    /// Returns a copy of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` must be sorted by slot index in ascending order, without
+    /// duplicates, and only name existing slots. The result is the same as
+    /// calling [Self::splice_slots] once per edit in descending order, but the
+    /// slots are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(&self, edits: E) -> GreenNode
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<GreenElement>>,
+    {
+        let mut edits = edits.into_iter().peekable();
+        let mut slots = Vec::with_capacity(self.slice().len());
+
+        for (index, slot) in self.slots().enumerate() {
+            if let Some((_, replacement)) = edits.next_if(|(edit_index, _)| *edit_index == index) {
+                slots.extend(replacement);
+            } else {
+                slots.push(match slot {
+                    Slot::Empty { .. } => None,
+                    Slot::Node { node, .. } => Some(NodeOrToken::Node(node.clone())),
+                    Slot::Token { token, .. } => Some(NodeOrToken::Token(token.clone())),
+                });
+            }
+        }
+
+        assert!(
+            edits.next().is_none(),
+            "slot edits must be sorted, unique, and within the slots of the node"
+        );
+
+        GreenNode::new(self.kind(), slots)
+    }
 }
 
 impl ops::Deref for GreenNode {
