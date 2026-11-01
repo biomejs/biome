@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::shared::FormatMdxSnippet;
+use crate::shared::{FormatMdxSnippet, follows_space};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdxJsxBlockTag, MdxJsxBlockTagFields};
 
@@ -13,6 +13,9 @@ impl FormatNodeRule<MdxJsxBlockTag> for FormatMdxJsxBlockTag {
         } = node.as_fields();
         let value_token = value_token?;
 
+        if follows_space(&value_token) {
+            write!(f, [space()])?;
+        }
         write!(
             f,
             [

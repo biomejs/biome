@@ -216,21 +216,34 @@ impl Format<MarkdownFormatContext> for FormatLiteralLines<'_> {
     }
 }
 
+/// Returns whether `token` follows spaces on its line. The constructs of an
+/// MDX flow line, such as `<Note> {props.x} </Note>`, keep a single space
+/// where the author separated them.
+pub(crate) fn follows_space(token: &MarkdownSyntaxToken) -> bool {
+    token
+        .leading_trivia()
+        .pieces()
+        .any(|piece| piece.is_whitespace())
+}
+
 /// Formats the literal that holds the JavaScript of an MDX construct.
 ///
 /// When the workspace parsed the literal as an embedded snippet, the
 /// literal becomes an embedded element that the JavaScript formatter fills
-/// in. Otherwise the literal prints as written.
+/// in. Otherwise the literal prints as written. The snippet covers the
+/// literal without its trivia, such as the space before the second tag of
+/// `<A> <B />`, so the trivia prints around the embedded element.
 pub(crate) struct FormatMdxSnippet<'a> {
     pub(crate) token: &'a MarkdownSyntaxToken,
 }
 
 impl Format<MarkdownFormatContext> for FormatMdxSnippet<'_> {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        let range = self.token.text_range();
+        let range = self.token.text_trimmed_range();
         if f.context().is_embedded_node_range(range) {
-            let embedded = FormatEmbedded::new(range, &self.token.format(), f)?;
-            write!(f, [embedded])
+            let text = located_token_text(self.token, range);
+            let embedded = FormatEmbedded::new(range, &text, f)?;
+            write!(f, [format_replaced(self.token, &embedded)])
         } else {
             write!(f, [self.token.format()])
         }
