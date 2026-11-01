@@ -85,32 +85,3 @@ semicolon.css:7:11 assist/source/useSortedProperties  FIXABLE  ━━━━━�
   
 
 ```
-
-```
-semicolon.css:13:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    11 │ }
-    12 │ 
-  > 13 │ .nested {
-       │         ^
-  > 14 │   .child {}
-  > 15 │   color: red
-  > 16 │ }
-       │ ^
-    17 │ 
-  
-  i Safe fix: Sort these properties
-  
-    12 12 │   
-    13 13 │   .nested {
-    14    │ - ··.child·{}
-    15    │ - ··color:·red
-       14 │ + ··color:·red;
-       15 │ + ··.child·{}
-    16 16 │   }
-    17 17 │   
-  
-
-```
