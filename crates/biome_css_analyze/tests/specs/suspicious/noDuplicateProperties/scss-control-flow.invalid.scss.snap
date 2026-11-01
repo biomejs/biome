@@ -17,9 +17,18 @@ $condition: true;
 
 # Diagnostics
 ```
-scss-control-flow.invalid.scss:6:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss-control-flow.invalid.scss:5:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The property color is declared more than once in the same block.
+  
+    3 │ .selector {
+    4 │   @if $condition {
+  > 5 │     color: red;
+      │     ^^^^^
+    6 │     color: blue;
+    7 │   }
+  
+  i color is declared again here.
   
     4 │   @if $condition {
     5 │     color: red;
@@ -28,14 +37,7 @@ scss-control-flow.invalid.scss:6:5 lint/suspicious/noDuplicateProperties ━━�
     7 │   }
     8 │ }
   
-  i color is already defined here.
-  
-    3 │ .selector {
-    4 │   @if $condition {
-  > 5 │     color: red;
-      │     ^^^^^
-    6 │     color: blue;
-    7 │   }
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

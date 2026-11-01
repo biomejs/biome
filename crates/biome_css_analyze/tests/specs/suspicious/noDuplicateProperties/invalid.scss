@@ -1,5 +1,23 @@
 /* should generate diagnostics */
 .themed {
-  color: red;
-  color: blue;
+	color: red;
+	color: blue;
+}
+
+.multiple {
+	color: red;
+	background: blue;
+	color: green;
+	background: yellow;
+	color: black;
+}
+
+.nested {
+	color: red;
+	color: blue;
+
+	&:hover {
+		background: red;
+		background: blue;
+	}
 }

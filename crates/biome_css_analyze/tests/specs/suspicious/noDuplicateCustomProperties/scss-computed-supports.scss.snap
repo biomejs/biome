@@ -23,9 +23,18 @@ expression: scss-computed-supports.scss
 
 # Diagnostics
 ```
-scss-computed-supports.scss:12:5 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━
+scss-computed-supports.scss:11:5 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The custom property --theme is declared more than once in the same block.
+  
+     9 │ @supports ("--theme": green) {
+    10 │   .invalid {
+  > 11 │     --theme: red;
+       │     ^^^^^^^
+    12 │     --theme: blue;
+    13 │   }
+  
+  i --theme is declared again here.
   
     10 │   .invalid {
     11 │     --theme: red;
@@ -34,14 +43,7 @@ scss-computed-supports.scss:12:5 lint/suspicious/noDuplicateCustomProperties ━
     13 │   }
     14 │ }
   
-  i --theme is already defined here.
-  
-     9 │ @supports ("--theme": green) {
-    10 │   .invalid {
-  > 11 │     --theme: red;
-       │     ^^^^^^^
-    12 │     --theme: blue;
-    13 │   }
+  i Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate custom property to ensure consistent styling.
   
