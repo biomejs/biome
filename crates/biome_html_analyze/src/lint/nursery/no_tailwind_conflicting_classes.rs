@@ -33,9 +33,6 @@ declare_lint_rule! {
     /// only knows the default configuration, and skips classes that use your own theme values
     /// or variants.
     ///
-    /// When `tailwind.stylesheet` is set, Biome scans your project when this rule is
-    /// enabled, so that it can read the stylesheet and the files it imports.
-    ///
     /// ## Examples
     ///
     /// ### Invalid

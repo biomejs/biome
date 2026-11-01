@@ -10,20 +10,22 @@
 use std::str::FromStr;
 
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration};
-use biome_configuration::{Configuration, FilesConfiguration};
+use biome_configuration::{Configuration, FilesConfiguration, TailwindConfiguration};
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
 use biome_glob::NormalizedGlob;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use super::{ScanKind, WorkspaceScannerBridge};
-use crate::scanner::IndexTrigger;
+use crate::projects::ProjectKey;
+use crate::scanner::{IndexRequestKind, IndexTrigger};
+
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::{
     CloseFileParams, FileContent, GetFileContentParams, OpenFileParams, ScanProjectParams,
     UpdateSettingsParams,
 };
-use crate::{Workspace, WorkspaceError};
+use crate::{LocalWorkspace, Workspace, WorkspaceError};
 
 #[test]
 fn close_file_through_watcher_before_client() {
@@ -544,4 +546,239 @@ fn should_index_used_type_definition_of_used_dependency() {
     assert!(workspace.is_indexed(&entry_file_path));
     assert!(workspace.is_indexed(&used_file_path));
     assert!(!workspace.is_indexed(&unused_file_path));
+}
+
+/// Opens a workspace on `fs` whose root settings point `tailwind.stylesheet`
+/// at `stylesheet`, relative to `/project`.
+fn setup_workspace_with_tailwind_stylesheet(
+    fs: MemoryFileSystem,
+    stylesheet: &str,
+) -> (LocalWorkspace, ProjectKey) {
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    update_settings_with_tailwind_stylesheet(
+        &workspace,
+        project_key,
+        stylesheet,
+        Configuration::default(),
+    );
+    (workspace, project_key)
+}
+
+/// Updates the root settings of `project_key` to `configuration`, with
+/// `tailwind.stylesheet` pointing at `stylesheet`, relative to `/project`.
+fn update_settings_with_tailwind_stylesheet(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    stylesheet: &str,
+    configuration: Configuration,
+) {
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                tailwind: Some(TailwindConfiguration {
+                    stylesheet: Some(stylesheet.into()),
+                    ..Default::default()
+                }),
+                ..configuration
+            },
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .expect("can update settings");
+}
+
+#[test]
+fn should_index_tailwind_stylesheet_and_its_imports_with_scan_kind_known_files() {
+    let stylesheet_path = Utf8PathBuf::from("/project/src/app.css");
+    let theme_path = Utf8PathBuf::from("/project/src/theme.css");
+    let source_path = Utf8PathBuf::from("/project/src/App.jsx");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(stylesheet_path.clone(), "@import \"./theme.css\";\n");
+    fs.insert(theme_path.clone(), "@theme { --color-brand: #00f; }\n");
+    fs.insert(source_path.clone(), "import './theme.css';\n");
+
+    let (workspace, project_key) = setup_workspace_with_tailwind_stylesheet(fs, "./src/app.css");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&stylesheet_path));
+    assert!(workspace.is_indexed(&theme_path));
+    assert!(!workspace.is_indexed(&source_path));
+}
+
+#[test]
+fn should_index_tailwind_stylesheet_outside_the_scan_targets() {
+    let stylesheet_path = Utf8PathBuf::from("/project/styles/app.css");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(stylesheet_path.clone(), "@theme { --color-brand: #00f; }\n");
+    fs.insert(
+        Utf8PathBuf::from("/project/src/App.jsx"),
+        "export const a = 1;\n",
+    );
+
+    let (workspace, project_key) = setup_workspace_with_tailwind_stylesheet(fs, "./styles/app.css");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TargetedKnownFiles {
+                target_paths: vec![BiomePath::new("/project/src")],
+                descend_from_targets: true,
+            },
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&stylesheet_path));
+}
+
+#[test]
+fn should_index_tailwind_stylesheet_of_nested_configuration() {
+    let stylesheet_path = Utf8PathBuf::from("/project/admin/admin.css");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/biome.json"), "{}");
+    fs.insert(
+        Utf8PathBuf::from("/project/admin/biome.json"),
+        r#"{ "root": false, "tailwind": { "stylesheet": "./admin.css" } }"#,
+    );
+    fs.insert(stylesheet_path.clone(), "@theme { --color-admin: #f00; }\n");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    assert!(workspace.is_indexed(&stylesheet_path));
+}
+
+#[test]
+fn should_index_tailwind_stylesheet_in_an_ignored_folder() {
+    let stylesheet_path = Utf8PathBuf::from("/project/styles/app.css");
+
+    for scan_kind in [ScanKind::KnownFiles, ScanKind::Project] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(stylesheet_path.clone(), "@theme { --color-brand: #00f; }\n");
+
+        let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+        update_settings_with_tailwind_stylesheet(
+            &workspace,
+            project_key,
+            "./styles/app.css",
+            Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        NormalizedGlob::from_str("**").unwrap(),
+                        NormalizedGlob::from_str("!**/styles").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        );
+
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: scan_kind.clone(),
+                verbose: false,
+            })
+            .expect("can scan the project");
+
+        assert!(
+            workspace.is_indexed(&stylesheet_path),
+            "the stylesheet should be indexed with {scan_kind:?}"
+        );
+    }
+}
+
+#[test]
+fn should_only_accept_known_files_and_css_files_on_update_with_tailwind_stylesheet() {
+    let stylesheet_path = Utf8PathBuf::from("/project/src/app.css");
+    let theme_path = Utf8PathBuf::from("/project/src/theme.css");
+    let source_path = Utf8PathBuf::from("/project/src/App.jsx");
+    let ignored_css_path = Utf8PathBuf::from("/project/src/ignored.css");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(stylesheet_path.clone(), "@import \"./theme.css\";\n");
+    fs.insert(theme_path.clone(), "@theme { --color-brand: #00f; }\n");
+    fs.insert(source_path.clone(), "export const a = 1;\n");
+    fs.insert(ignored_css_path.clone(), "a {}\n");
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    update_settings_with_tailwind_stylesheet(
+        &workspace,
+        project_key,
+        "./src/app.css",
+        Configuration {
+            files: Some(FilesConfiguration {
+                includes: Some(vec![
+                    NormalizedGlob::from_str("**").unwrap(),
+                    NormalizedGlob::from_str("!**/ignored.css").unwrap(),
+                ]),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+    );
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        })
+        .expect("can scan the project");
+
+    // The scan watches the folder of the stylesheet, which also holds the
+    // source files.
+    let is_ignored_on_update = |path: &Utf8Path| {
+        workspace
+            .is_ignored(
+                project_key,
+                &ScanKind::KnownFiles,
+                path,
+                IndexRequestKind::Explicit(IndexTrigger::Update),
+                None,
+            )
+            .expect("can check whether the path is ignored")
+    };
+
+    assert!(is_ignored_on_update(&source_path));
+    assert!(is_ignored_on_update(&ignored_css_path));
+
+    // Removing a file from disk unloads it, so its next creation must be
+    // accepted.
+    for path in [&stylesheet_path, &theme_path] {
+        workspace
+            .unload_file(path, project_key)
+            .expect("can unload the file");
+        assert!(!workspace.is_indexed(path));
+        assert!(!is_ignored_on_update(path), "{path} should be accepted");
+    }
 }
