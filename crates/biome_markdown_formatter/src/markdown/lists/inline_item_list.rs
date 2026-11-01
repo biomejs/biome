@@ -858,7 +858,7 @@ impl FormatMdInlineItemList {
         f: &mut MarkdownFormatter,
         text_context: TextContext,
     ) -> FormatResult<()> {
-        let mut items = ProseItemList::from_inline_item_list(node, f)?;
+        let mut items = ProseItemList::from_inline_item_list(node, f, text_context)?;
         let inside_list = text_context.is_list();
         let prose_wrap = f.options().prose_wrap();
         // Must run before the indentation is removed below.
@@ -881,7 +881,7 @@ impl FormatMdInlineItemList {
             ProseWrap::Never => self.fmt_prose_never(items, f)?,
         }
 
-        if !inside_list {
+        if !inside_list && text_context != TextContext::Inline {
             write!(f, [hard_line_break()])?;
         }
 
@@ -1029,7 +1029,11 @@ impl FormatMdInlineItemList {
 
             match item {
                 ProseItem::HardBreak(hard_break) => {
-                    Self::format_fill_segment(&items[segment_start..index], f)?;
+                    Self::format_fill_segment(
+                        &items[segment_start..index],
+                        self.text_context == TextContext::Inline && segment_start > 0,
+                        f,
+                    )?;
                     write!(
                         f,
                         [hard_break
@@ -1042,7 +1046,11 @@ impl FormatMdInlineItemList {
                 }
                 ProseItem::Space | ProseItem::SoftBreak | ProseItem::OutdentedLineStart => {
                     if let Some(separator_range) = find_preserved_soft_break_range(items, index) {
-                        Self::format_fill_segment(&items[segment_start..index], f)?;
+                        Self::format_fill_segment(
+                            &items[segment_start..index],
+                            self.text_context == TextContext::Inline && segment_start > 0,
+                            f,
+                        )?;
                         write!(f, [hard_line_break()])?;
                         segment_start = separator_range.end;
                     }
@@ -1051,10 +1059,27 @@ impl FormatMdInlineItemList {
             }
         }
 
-        Self::format_fill_segment(&items[segment_start..], f)
+        Self::format_fill_segment(
+            &items[segment_start..],
+            self.text_context == TextContext::Inline && segment_start > 0,
+            f,
+        )
     }
 
-    fn format_fill_segment(items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
+    fn format_fill_segment(
+        items: &[ProseItem],
+        protect_line_start: bool,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        if protect_line_start
+            && items
+                .iter()
+                .find_map(ProseItem::as_word_group)
+                .is_some_and(WordGroup::starts_with_block_marker)
+        {
+            // Four spaces prevent a continuation from interrupting the open paragraph.
+            write!(f, [token("    ")])?;
+        }
         let no_separator = format_with(|_| Ok(()));
         let mut fill = f.fill();
         let mut has_separator = false;
@@ -1192,7 +1217,7 @@ impl Iterator for FencedCodeContentIterator {
 
 impl FusedIterator for FencedCodeContentIterator {}
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub(crate) struct FormatMdFormatInlineItemListOptions {
     /// When `true`, and there's a [MdInlineItalic], it instructions the formatter to keep the fences.
     /// When `false`, it lets the node figure it out.
