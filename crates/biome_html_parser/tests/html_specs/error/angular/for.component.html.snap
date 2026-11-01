@@ -1,0 +1,177 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+@for (item of items; track item.id; let idx = $index, e = $even) {
+	<li>Item</li>
+} @empty
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        AngularForBlock {
+            opening_block: AngularForOpeningBlock {
+                at_token: AT@0..1 "@" [] [],
+                for_token: FOR_KW@1..5 "for" [] [Whitespace(" ")],
+                parameters: AngularForParameters {
+                    l_paren_token: L_PAREN@5..6 "(" [] [],
+                    expression: AngularForExpression {
+                        variable: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@6..11 "item " [] [],
+                        },
+                        of_token: OF_KW@11..13 "of" [] [],
+                        iterable: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@13..19 " items" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@19..21 ";" [] [Whitespace(" ")],
+                    track_clause: AngularForTrackClause {
+                        track_token: TRACK_KW@21..26 "track" [] [],
+                        expression: HtmlTextExpression {
+                            html_literal_token: HTML_LITERAL@26..34 " item.id" [] [],
+                        },
+                    },
+                    let_clause: AngularForLetClause {
+                        semicolon_token: SEMICOLON@34..36 ";" [] [Whitespace(" ")],
+                        let_token: LET_KW@36..39 "let" [] [],
+                        bindings: AngularForLetBindingList [
+                            HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@39..52 " idx = $index" [] [],
+                            },
+                            COMMA@52..53 "," [] [],
+                            HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@53..63 " e = $even" [] [],
+                            },
+                        ],
+                    },
+                    r_paren_token: R_PAREN@63..65 ")" [] [Whitespace(" ")],
+                },
+                children: AngularBlockBody {
+                    l_curly_token: L_CURLY@65..66 "{" [] [],
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@66..69 "<" [Newline("\n"), Whitespace("\t")] [],
+                                name: HtmlTagName {
+                                    value_token: LI_KW@69..71 "li" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@71..72 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@72..76 "Item" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@76..77 "<" [] [],
+                                slash_token: SLASH@77..78 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_LITERAL@78..80 "li" [] [],
+                                },
+                                r_angle_token: R_ANGLE@80..81 ">" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@81..84 "}" [Newline("\n")] [Whitespace(" ")],
+                },
+            },
+            empty_clause: AngularEmptyClause {
+                at_token: AT@84..85 "@" [] [],
+                empty_token: EMPTY_KW@85..90 "empty" [] [],
+                children: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@90..91 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..91
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..90
+    0: ANGULAR_FOR_BLOCK@0..90
+      0: ANGULAR_FOR_OPENING_BLOCK@0..84
+        0: AT@0..1 "@" [] []
+        1: FOR_KW@1..5 "for" [] [Whitespace(" ")]
+        2: ANGULAR_FOR_PARAMETERS@5..65
+          0: L_PAREN@5..6 "(" [] []
+          1: ANGULAR_FOR_EXPRESSION@6..19
+            0: HTML_TEXT_EXPRESSION@6..11
+              0: HTML_LITERAL@6..11 "item " [] []
+            1: OF_KW@11..13 "of" [] []
+            2: HTML_TEXT_EXPRESSION@13..19
+              0: HTML_LITERAL@13..19 " items" [] []
+          2: SEMICOLON@19..21 ";" [] [Whitespace(" ")]
+          3: ANGULAR_FOR_TRACK_CLAUSE@21..34
+            0: TRACK_KW@21..26 "track" [] []
+            1: HTML_TEXT_EXPRESSION@26..34
+              0: HTML_LITERAL@26..34 " item.id" [] []
+          4: ANGULAR_FOR_LET_CLAUSE@34..63
+            0: SEMICOLON@34..36 ";" [] [Whitespace(" ")]
+            1: LET_KW@36..39 "let" [] []
+            2: ANGULAR_FOR_LET_BINDING_LIST@39..63
+              0: HTML_TEXT_EXPRESSION@39..52
+                0: HTML_LITERAL@39..52 " idx = $index" [] []
+              1: COMMA@52..53 "," [] []
+              2: HTML_TEXT_EXPRESSION@53..63
+                0: HTML_LITERAL@53..63 " e = $even" [] []
+          5: R_PAREN@63..65 ")" [] [Whitespace(" ")]
+        3: ANGULAR_BLOCK_BODY@65..84
+          0: L_CURLY@65..66 "{" [] []
+          1: HTML_ELEMENT_LIST@66..81
+            0: HTML_ELEMENT@66..81
+              0: HTML_OPENING_ELEMENT@66..72
+                0: L_ANGLE@66..69 "<" [Newline("\n"), Whitespace("\t")] []
+                1: HTML_TAG_NAME@69..71
+                  0: LI_KW@69..71 "li" [] []
+                2: HTML_ATTRIBUTE_LIST@71..71
+                3: R_ANGLE@71..72 ">" [] []
+              1: HTML_ELEMENT_LIST@72..76
+                0: HTML_CONTENT@72..76
+                  0: HTML_LITERAL@72..76 "Item" [] []
+              2: HTML_CLOSING_ELEMENT@76..81
+                0: L_ANGLE@76..77 "<" [] []
+                1: SLASH@77..78 "/" [] []
+                2: HTML_TAG_NAME@78..80
+                  0: HTML_LITERAL@78..80 "li" [] []
+                3: R_ANGLE@80..81 ">" [] []
+          2: R_CURLY@81..84 "}" [Newline("\n")] [Whitespace(" ")]
+      1: ANGULAR_EMPTY_CLAUSE@84..90
+        0: AT@84..85 "@" [] []
+        1: EMPTY_KW@85..90 "empty" [] []
+        2: (empty)
+  4: EOF@90..91 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+for.component.html:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block body.
+  
+    2 │ 	<li>Item</li>
+    3 │ } @empty
+  > 4 │ 
+      │ 
+  
+```
