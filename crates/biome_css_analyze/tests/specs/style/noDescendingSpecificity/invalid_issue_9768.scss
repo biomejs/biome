@@ -1,0 +1,97 @@
+/* should generate diagnostics */
+// Different parents resolve to different subjects: `li` and `a`.
+.c1a {
+  ul li {
+    &:hover { color: red; }
+  }
+}
+
+.c1b {
+  a {
+    &:hover { color: blue; }
+  }
+}
+
+// BEM suffixes resolve to different classes.
+.c2 {
+  &--x + &--y { color: red; }
+
+  &--z { color: blue; }
+}
+
+// Pseudo-elements under different parents.
+.c3a .x {
+  &::after { color: red; }
+}
+
+.c3b {
+  &::after { color: blue; }
+}
+
+// Pseudo-classes don't change the subject, so `.c5` is reported.
+.c5a .c5:hover { color: red; }
+
+.c5 { color: blue; }
+
+// A legacy single-colon pseudo-element is a different subject.
+.c7a .c7:before { color: red; }
+
+.c7 { color: blue; }
+
+// A descending pair through BEM nesting, so `.c8i` is reported.
+.c8 {
+  &--x .c8i { color: red; }
+}
+
+.c8i { color: blue; }
+
+// A rule without declarations can't lose the cascade.
+.c4a .c4 { color: red; }
+
+.c4 {
+  /* note */
+}
+
+// Declarations inside a nested `@media` still count, so `.c6` is reported.
+.c6a .c6 { color: red; }
+
+.c6 {
+  @media (min-width: 1px) {
+    color: blue;
+  }
+}
+
+// An `@include` can emit declarations, so `.c9` is reported.
+.c9a .c9 { color: red; }
+
+.c9 {
+  @include theme;
+}
+
+// An `@include` inside control flow still counts, so `.c10` is reported.
+.c10a .c10 { color: red; }
+
+.c10 {
+  @if $condition {
+    @include theme;
+  }
+}
+
+// Nested selectors are compared as written out in full, like `nav label:hover {}`, so
+// `aside label` is reported.
+nav {
+  label {
+    color: green;
+
+    &:hover { background: #ccc; }
+  }
+}
+
+aside {
+  label { color: blue; }
+}
+
+// The order of simple selectors doesn't change the subject, so `.baz.bar` is reported.
+#foo .bar.baz { color: red; }
+
+.baz.bar { color: blue; }
