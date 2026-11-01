@@ -1,0 +1,18 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: mdx_tag/self_closing_tag.jsx
+---
+
+# Input
+
+```jsx
+<Card icon={<Icon   name="x" />}   {...props}   />
+```
+
+
+# Formatted
+
+```jsx
+<Card icon={<Icon name="x" />} {...props} />
+```
