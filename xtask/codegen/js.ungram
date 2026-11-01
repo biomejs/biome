@@ -59,6 +59,7 @@ AnyJsRoot =
 	| JsSvelteDeclarationRoot
 	| JsVueSlotPropsRoot
 	| JsVueGenericRoot
+	| JsxSingleTagRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -111,6 +112,21 @@ JsVueGenericRoot =
 
 AnyJsVueGenericTypeParameters =
 	TsTypeParameterList
+	| JsBogus
+
+// Special root created for a single JSX tag of an MDX document: `<Note type="tip">`.
+// MDX keeps the Markdown between an opening and a closing tag outside JavaScript,
+// so each tag is parsed on its own, without children.
+JsxSingleTagRoot =
+	tag: AnyJsxSingleTag
+	eof: 'EOF'
+
+AnyJsxSingleTag =
+	JsxOpeningElement
+	| JsxClosingElement
+	| JsxSelfClosingElement
+	| JsxOpeningFragment
+	| JsxClosingFragment
 	| JsBogus
 
 // Special root created for Svelte declaration tags

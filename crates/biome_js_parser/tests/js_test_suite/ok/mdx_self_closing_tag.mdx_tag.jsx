@@ -1,0 +1,1 @@
+<Chart data={[1, 2]} icon={<Icon />} />

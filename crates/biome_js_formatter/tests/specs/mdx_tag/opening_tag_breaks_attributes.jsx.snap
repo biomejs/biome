@@ -1,0 +1,22 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: mdx_tag/opening_tag_breaks_attributes.jsx
+---
+
+# Input
+
+```jsx
+<Link   href="https://example.com/docs/getting-started"   target="_blank"   rel="noopener noreferrer">
+```
+
+
+# Formatted
+
+```jsx
+<Link
+	href="https://example.com/docs/getting-started"
+	target="_blank"
+	rel="noopener noreferrer"
+>
+```

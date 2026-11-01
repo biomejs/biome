@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+<a.b c:d="e">
+```
+
+
+## AST
+
+```
+JsxSingleTagRoot {
+    tag: JsxOpeningElement {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        name: JsxMemberName {
+            object: JsxReferenceIdentifier {
+                value_token: JSX_IDENT@1..2 "a" [] [],
+            },
+            dot_token: DOT@2..3 "." [] [],
+            member: JsName {
+                value_token: IDENT@3..5 "b" [] [Whitespace(" ")],
+            },
+        },
+        type_arguments: missing (optional),
+        attributes: JsxAttributeList [
+            JsxAttribute {
+                name: JsxNamespaceName {
+                    namespace: JsxName {
+                        value_token: JSX_IDENT@5..6 "c" [] [],
+                    },
+                    colon_token: COLON@6..7 ":" [] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@7..8 "d" [] [],
+                    },
+                },
+                initializer: JsxAttributeInitializerClause {
+                    eq_token: EQ@8..9 "=" [] [],
+                    value: JsxString {
+                        value_token: JSX_STRING_LITERAL@9..12 "\"e\"" [] [],
+                    },
+                },
+            },
+        ],
+        r_angle_token: R_ANGLE@12..13 ">" [] [],
+    },
+    eof_token: EOF@13..13 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSX_SINGLE_TAG_ROOT@0..13
+  0: JSX_OPENING_ELEMENT@0..13
+    0: L_ANGLE@0..1 "<" [] []
+    1: JSX_MEMBER_NAME@1..5
+      0: JSX_REFERENCE_IDENTIFIER@1..2
+        0: JSX_IDENT@1..2 "a" [] []
+      1: DOT@2..3 "." [] []
+      2: JS_NAME@3..5
+        0: IDENT@3..5 "b" [] [Whitespace(" ")]
+    2: (empty)
+    3: JSX_ATTRIBUTE_LIST@5..12
+      0: JSX_ATTRIBUTE@5..12
+        0: JSX_NAMESPACE_NAME@5..8
+          0: JSX_NAME@5..6
+            0: JSX_IDENT@5..6 "c" [] []
+          1: COLON@6..7 ":" [] []
+          2: JSX_NAME@7..8
+            0: JSX_IDENT@7..8 "d" [] []
+        1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@8..12
+          0: EQ@8..9 "=" [] []
+          1: JSX_STRING@9..12
+            0: JSX_STRING_LITERAL@9..12 "\"e\"" [] []
+    4: R_ANGLE@12..13 ">" [] []
+  1: EOF@13..13 "" [] []
+
+```

@@ -1,0 +1,86 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+<A b={} />
+```
+
+
+## AST
+
+```
+JsxSingleTagRoot {
+    tag: JsxSelfClosingElement {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        name: JsxReferenceIdentifier {
+            value_token: JSX_IDENT@1..3 "A" [] [Whitespace(" ")],
+        },
+        type_arguments: missing (optional),
+        attributes: JsxAttributeList [
+            JsxAttribute {
+                name: JsxName {
+                    value_token: JSX_IDENT@3..4 "b" [] [],
+                },
+                initializer: JsxAttributeInitializerClause {
+                    eq_token: EQ@4..5 "=" [] [],
+                    value: JsxExpressionAttributeValue {
+                        l_curly_token: L_CURLY@5..6 "{" [] [],
+                        expression: missing (required),
+                        r_curly_token: R_CURLY@6..8 "}" [] [Whitespace(" ")],
+                    },
+                },
+            },
+        ],
+        slash_token: SLASH@8..9 "/" [] [],
+        r_angle_token: R_ANGLE@9..10 ">" [] [],
+    },
+    eof_token: EOF@10..10 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSX_SINGLE_TAG_ROOT@0..10
+  0: JSX_SELF_CLOSING_ELEMENT@0..10
+    0: L_ANGLE@0..1 "<" [] []
+    1: JSX_REFERENCE_IDENTIFIER@1..3
+      0: JSX_IDENT@1..3 "A" [] [Whitespace(" ")]
+    2: (empty)
+    3: JSX_ATTRIBUTE_LIST@3..8
+      0: JSX_ATTRIBUTE@3..8
+        0: JSX_NAME@3..4
+          0: JSX_IDENT@3..4 "b" [] []
+        1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@4..8
+          0: EQ@4..5 "=" [] []
+          1: JSX_EXPRESSION_ATTRIBUTE_VALUE@5..8
+            0: L_CURLY@5..6 "{" [] []
+            1: (empty)
+            2: R_CURLY@6..8 "}" [] [Whitespace(" ")]
+    4: SLASH@8..9 "/" [] []
+    5: R_ANGLE@9..10 ">" [] []
+  1: EOF@10..10 "" [] []
+
+```
+
+## Diagnostics
+
+```
+mdx_tag_empty_attribute.mdx_tag.jsx:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+  > 1 │ <A b={} />
+      │       ^
+  
+  i Expected an expression here.
+  
+  > 1 │ <A b={} />
+      │       ^
+  
+```

@@ -86,6 +86,10 @@ export type JsEmbeddingKind =
 				| "snippetSignature"
 				| "legacyConst"
 				| "declaration";
+	  }
+	| {
+			readonly kind: "mdx";
+			readonly embeddingKind: "esm" | "expression" | "tag";
 	  };
 
 /**

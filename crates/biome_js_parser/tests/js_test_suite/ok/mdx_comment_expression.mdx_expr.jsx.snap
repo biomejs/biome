@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+assertion_line: 251
+expression: snapshot
+---
+
+## Input
+
+```jsx
+/* a comment */
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: missing (optional),
+    eof_token: EOF@0..16 "" [Comments("/* a comment */"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..16
+  0: (empty)
+  1: EOF@0..16 "" [Comments("/* a comment */"), Newline("\n")] []
+
+```

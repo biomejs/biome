@@ -4172,6 +4172,15 @@ pub fn jsx_shorthand_attribute(
         ],
     ))
 }
+pub fn jsx_single_tag_root(tag: AnyJsxSingleTag, eof_token: SyntaxToken) -> JsxSingleTagRoot {
+    JsxSingleTagRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JSX_SINGLE_TAG_ROOT,
+        [
+            Some(SyntaxElement::Node(tag.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn jsx_spread_attribute(
     l_curly_token: SyntaxToken,
     dotdotdot_token: SyntaxToken,
