@@ -39,7 +39,9 @@ use biome_parser::parse_recovery::RecoveryResult;
 use rustc_hash::FxHashMap;
 
 use super::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};
-use super::js_parse_error::{expected_named_import, expected_namespace_import};
+use super::js_parse_error::{
+    expected_named_import, expected_namespace_import, mdx_esm_unexpected_statement,
+};
 use super::metavariable::{is_at_metavariable, parse_metavariable};
 
 // test js module
@@ -99,6 +101,14 @@ pub(crate) fn parse_module_item_list(
         progress.assert_progressing(p);
 
         let module_item = parse_module_item(p);
+
+        if parent.is_module()
+            && p.source_type().as_embedding_kind().is_mdx_esm()
+            && let Present(item) = &module_item
+            && !matches!(item.kind(p), JS_IMPORT | JS_EXPORT)
+        {
+            p.error(mdx_esm_unexpected_statement(p, item.range(p)));
+        }
 
         let recovered = module_item.or_recover_with_token_set(
             p,

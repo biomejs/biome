@@ -88,7 +88,8 @@ use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
-    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteEmbeddingKind, SvelteFileKind,
+    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, MdxEmbeddingKind,
+    SvelteEmbeddingKind, SvelteFileKind,
 };
 use biome_languages::{DocumentFileSource, LanguageDb};
 #[cfg(feature = "module_graph")]
@@ -186,6 +187,7 @@ fn is_js_program(source: JsFileSource) -> bool {
         JsEmbeddingKind::Svelte { embedding_kind, .. } => {
             matches!(embedding_kind, SvelteEmbeddingKind::Source)
         }
+        JsEmbeddingKind::Mdx { kind } => matches!(kind, MdxEmbeddingKind::Esm),
         JsEmbeddingKind::None => true,
     }
 }
@@ -1513,7 +1515,7 @@ impl Features {
                     file_kind: SvelteFileKind::Component,
                     ..
                 } => self.js.capabilities(),
-                JsEmbeddingKind::None => self.js.capabilities(),
+                JsEmbeddingKind::Mdx { .. } | JsEmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             #[cfg(feature = "lang_css")]
