@@ -15904,7 +15904,8 @@ export type JsEmbeddingKind =
 				 */
 				is_module_script: boolean;
 			};
-	  };
+	  }
+	| { Mdx: { kind: MdxEmbeddingKind } };
 export type Language =
 	| "javaScript"
 	| { typeScript: { definition_file: boolean } };
@@ -15974,6 +15975,13 @@ export type SvelteEmbeddingKind =
 	| "LegacyConst"
 	| "Declaration";
 export type SvelteFileKind = "Component" | "SourceModule";
+/**
+ * Identifies the JavaScript construct an MDX snippet comes from.
+ *
+ * MDX keeps the Markdown between an opening and a closing JSX tag outside
+ * JavaScript, so each construct is a separate snippet with its own root.
+ */
+export type MdxEmbeddingKind = "Esm" | "Expression" | "Tag";
 export type EmbeddingHtmlKind =
 	| "None"
 	| "Html"
