@@ -1,5 +1,5 @@
-//! A lexer that tokenizes a whole source text ahead of parsing, into flat arrays of token starts
-//! and kinds.
+//! A lexer that tokenizes a whole source text ahead of parsing, into the stream of tokens that the
+//! parser reads.
 //!
 //! [JsLexer] lexes one token at a time in the context the parser asks for: inside a template
 //! literal, among JSX children, after `=` in a JSX tag. It never decides between a regex and a
@@ -13,27 +13,30 @@
 //!    and records those tokens. It tracks the nesting of template substitutions and JSX elements,
 //!    and decides from the tokens before a `/` or `<` whether it starts a regex or a JSX element.
 //! 3. `coalesce` merges the bytes of numbers and of operators longer than one byte.
-//! 4. `compress` writes the start and the kind of every token, and then finds the keywords.
+//! 4. `compress` writes the stream: the non-trivia tokens, keywords included, and the trivia
+//!    between them as the parser's tree takes it. It finds which starts are trivia, and the flags
+//!    that each token takes from the trivia before it, from the bitmaps of a block at once.
 //!
-//! Each token records the lexing contexts in which [JsLexer] would return it as is, so that
-//! [BulkTokenSource] can check its prediction against the context the parser asks for. A regex
-//! the parser reads as a division, a JSX element the parser reads as type parameters, and the
-//! contexts this lexer doesn't predict, such as Astro templates, leave the parser asking for a
-//! token no bulk token matches. The token source lexes those with [JsLexer] until it reaches a
-//! bulk token that fits again.
+//! The parser reads the tokens as this lexer decided them, a regex included. Each token records
+//! the lexing contexts in which [JsLexer] would return it as is, so that [BulkTokenSource] can
+//! check it where the grammar asks for a token in a context. A division the grammar reads as a
+//! regex, a JSX element it reads as type parameters, and the contexts this lexer doesn't
+//! predict, such as Astro templates, leave the grammar asking for a token that the stream doesn't
+//! have. The token source lexes those with [JsLexer] and splices them into the stream.
 //!
 //! Tokens that need escapes, Unicode identifier tables or diagnostics are lexed with [JsLexer]
 //! too, one at a time, so that they and their diagnostics match it exactly.
 
 mod carve;
 mod classify;
+mod compress;
 mod scan;
+mod stream;
 mod token_source;
 
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature = "bulk_lexer")]
 pub(crate) use token_source::{BulkTokenSource, BulkTokenSourceCheckpoint};
 
 use crate::lexer::{JsLexContext, JsLexer, TextSize};
@@ -42,8 +45,10 @@ use biome_languages::JsFileSource;
 use biome_languages::javascript::LanguageVariant;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::Lexer;
+use biome_parser::token_source::Trivia;
 use classify::{Block, classify};
-use scan::{BYTE_TOKENS, KEYWORD_KINDS, keyword, operator, scan_number};
+use scan::{operator, scan_number};
+use stream::Token;
 
 /// Mask of the [JsSyntaxKind] in a token's kind and flags.
 pub(crate) const KIND_MASK: u16 = 0x03FF;
@@ -52,7 +57,7 @@ pub(crate) const UNICODE_ESCAPE: u16 = 1 << 10;
 /// [BulkTokens::diagnostics] has diagnostics for the token.
 pub(crate) const DIAGNOSTICS: u16 = 1 << 11;
 /// [JsLexer] returns the token in [JsLexContext::Regular], except that a regex here is a `/` or
-/// `/=` there, which the parser re-lexes into the regex.
+/// `/=` there. The parser takes the regex as it is in the regular context.
 pub(crate) const REGULAR: u16 = 1 << 12;
 /// [JsLexer] returns the token in [JsLexContext::TemplateElement].
 pub(crate) const TEMPLATE: u16 = 1 << 13;
@@ -62,6 +67,19 @@ pub(crate) const JSX_CHILD: u16 = 1 << 14;
 pub(crate) const JSX_ATTRIBUTE_VALUE: u16 = 1 << 15;
 
 const _: () = assert!(JsSyntaxKind::__LAST as u16 <= KIND_MASK);
+
+/// A token of the stream holds its kind and the flags above in the low 16 bits of its word, and
+/// the flags below above them.
+///
+/// A line break separates the token from the previous one.
+pub(crate) const LINE_BREAK: u32 = 1 << 16;
+/// How far the context flags of the trivia before a token are shifted: the trivia before a token
+/// is what [JsLexer] returns in a context if all of it has that context's flag there.
+pub(crate) const GAP_SHIFT: u32 = 5;
+/// Some trivia before the token has diagnostics in [BulkTokens::diagnostics].
+pub(crate) const GAP_DIAGNOSTICS: u32 = 1 << 21;
+/// The context flags.
+pub(crate) const CONTEXTS: u32 = (REGULAR | TEMPLATE | JSX_CHILD | JSX_ATTRIBUTE_VALUE) as u32;
 
 /// What the source allows, which decides how [BulkTokens] reads a `<`.
 #[derive(Clone, Copy, Debug, Default)]
@@ -97,11 +115,12 @@ pub(crate) struct TokenDiagnostic {
 
 /// The tokens of a source text, lexed ahead of parsing.
 pub(crate) struct BulkTokens {
-    /// The start of each token, followed by the source length.
-    starts: Vec<u32>,
-    /// The kind and flags of each token. The last two tokens are `EOF`s.
-    kinds: Vec<u16>,
-    /// The diagnostics of the tokens with [DIAGNOSTICS], ordered by their start.
+    /// The non-trivia tokens, ending with `EOF`.
+    tokens: Vec<Token>,
+    /// The trivia between them, as the parser's tree takes it.
+    trivia: Vec<Trivia>,
+    /// The diagnostics of the tokens with [DIAGNOSTICS] and of the trivia before the tokens with
+    /// [GAP_DIAGNOSTICS], ordered by their start.
     diagnostics: Vec<TokenDiagnostic>,
 }
 
@@ -116,10 +135,14 @@ impl BulkTokens {
             && std::arch::is_x86_feature_detected!("lzcnt")
             && std::arch::is_x86_feature_detected!("popcnt")
         {
+            if let Some(extract) = compress::Avx512Extract::new() {
+                // SAFETY: the CPU supports the features, as `extract` exists.
+                return unsafe { Self::new_with_avx512(lexer, options, extract) };
+            }
             // SAFETY: the CPU supports the features.
             return unsafe { Self::new_with_bit_instructions(lexer, options) };
         }
-        Self::new_portable(lexer, options)
+        Self::new_portable(lexer, options, compress::ScalarExtract)
     }
 
     /// [Self::new], compiled with the bit manipulation instructions of x86_64 CPUs since 2013,
@@ -130,82 +153,104 @@ impl BulkTokens {
     #[cfg(target_arch = "x86_64")]
     #[target_feature(enable = "avx2,bmi1,bmi2,lzcnt,popcnt")]
     unsafe fn new_with_bit_instructions(lexer: &mut JsLexer, options: BulkLexOptions) -> Self {
-        Self::new_portable(lexer, options)
+        Self::new_portable(lexer, options, compress::ScalarExtract)
+    }
+
+    /// [Self::new_with_bit_instructions], with AVX-512 too, which finds the offsets of the bits
+    /// of a bitmap without a loop.
+    ///
+    /// # Safety
+    /// The CPU must support AVX2, BMI1, BMI2, LZCNT and POPCNT, and AVX-512 F, BW and VBMI2.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx2,bmi1,bmi2,lzcnt,popcnt,avx512f,avx512bw,avx512vbmi2")]
+    unsafe fn new_with_avx512(
+        lexer: &mut JsLexer,
+        options: BulkLexOptions,
+        extract: compress::Avx512Extract,
+    ) -> Self {
+        Self::new_portable(lexer, options, extract)
     }
 
     #[inline(always)]
-    fn new_portable(lexer: &mut JsLexer, options: BulkLexOptions) -> Self {
+    fn new_portable(
+        lexer: &mut JsLexer,
+        options: BulkLexOptions,
+        extract: impl compress::Extract,
+    ) -> Self {
         let source = lexer.source().as_bytes();
         let blocks = classify(source);
         let mut pass = Pass::new(source, blocks, lexer, options);
         pass.carve();
         pass.coalesce();
-        pass.compress()
+        pass.compress(extract)
     }
 
-    /// Tokens that hold only the end of the file, so that every token comes from [JsLexer].
-    pub(crate) fn new_empty(len: TextSize) -> Self {
-        let len = u32::from(len);
+    /// No tokens, so that [JsLexer] lexes every token.
+    pub(crate) fn new_empty() -> Self {
         Self {
-            starts: vec![len, len, len],
-            kinds: vec![EOF as u16 | REGULAR, EOF as u16 | REGULAR],
+            tokens: Vec::new(),
+            trivia: Vec::new(),
             diagnostics: Vec::new(),
         }
     }
 
-    /// Returns the kind and flags of token `index`.
-    #[inline(always)]
-    pub(crate) fn get(&self, index: u32) -> Option<u16> {
-        self.kinds.get(index as usize).copied()
+    /// Takes the tokens and the trivia, leaving the diagnostics.
+    pub(crate) fn take_tokens(&mut self) -> (Vec<Token>, Vec<Trivia>) {
+        (
+            std::mem::take(&mut self.tokens),
+            std::mem::take(&mut self.trivia),
+        )
     }
 
-    /// Returns the start of token `index`, or the source length after the last token.
-    #[inline(always)]
-    pub(crate) fn start(&self, index: u32) -> u32 {
-        self.starts[index as usize]
-    }
-
-    /// Returns the index of the token starting at `offset`, searching forward from token `hint`
-    /// first, as the token source moves forward through the source.
-    pub(crate) fn find_from(&self, offset: TextSize, hint: u32) -> Option<u32> {
-        let offset = u32::from(offset);
-        let starts = &self.starts[..self.kinds.len()];
-        let mut low = 0;
-        let mut high = starts.len();
-        let hint = hint as usize;
-        if starts.get(hint).is_some_and(|&start| start <= offset) {
-            // Gallop forward from the hint to bound the binary search.
-            low = hint;
-            let mut step = 1;
-            while low + step < high && starts[low + step] <= offset {
-                low += step;
-                step *= 2;
-            }
-            high = high.min(low + step + 1);
-        }
-        let index = low + starts[low..high].partition_point(|&start| start < offset);
-        (starts.get(index) == Some(&offset)).then_some(index as u32)
-    }
-
-    /// Returns the diagnostics of the token starting at `start`.
-    pub(crate) fn diagnostics_at(&self, start: TextSize) -> &[TokenDiagnostic] {
-        let start = u32::from(start);
+    /// Returns the diagnostics of the tokens and trivia that start in `start..end`.
+    pub(crate) fn diagnostics_in(&self, start: u32, end: u32) -> &[TokenDiagnostic] {
         let first = self
             .diagnostics
             .partition_point(|diagnostic| diagnostic.start < start);
         let len = self.diagnostics[first..]
             .iter()
-            .take_while(|diagnostic| diagnostic.start == start)
+            .take_while(|diagnostic| diagnostic.start < end)
             .count();
         &self.diagnostics[first..first + len]
     }
 
+    /// Returns the diagnostics of the token starting at `start`.
+    pub(crate) fn diagnostics_at(&self, start: TextSize) -> &[TokenDiagnostic] {
+        let start = u32::from(start);
+        self.diagnostics_in(start, start + 1)
+    }
+
+    /// Returns the start, end, and kind and flags of every token, trivia included. The flags of
+    /// trivia are those that all trivia before the same token has.
     #[cfg(test)]
     pub(crate) fn iter(&self) -> impl Iterator<Item = (u32, u32, u16)> + '_ {
-        self.kinds
-            .iter()
-            .enumerate()
-            .map(|(index, &kind)| (self.starts[index], self.starts[index + 1], kind))
+        let mut trivia = self.trivia.iter().peekable();
+        self.tokens.iter().flat_map(move |token| {
+            let gap = ((token.word >> GAP_SHIFT) & CONTEXTS) as u16;
+            let mut pieces = Vec::new();
+            while let Some(piece) = trivia.next_if(|piece| u32::from(piece.offset()) < token.start)
+            {
+                let kind = match piece.kind() {
+                    biome_rowan::TriviaPieceKind::Newline => NEWLINE,
+                    biome_rowan::TriviaPieceKind::Whitespace => WHITESPACE,
+                    biome_rowan::TriviaPieceKind::SingleLineComment => COMMENT,
+                    _ => MULTILINE_COMMENT,
+                };
+                let start = u32::from(piece.offset());
+                let diagnostics = if self.diagnostics_in(start, start + 1).is_empty() {
+                    0
+                } else {
+                    DIAGNOSTICS
+                };
+                pieces.push((
+                    start,
+                    u32::from(piece.end_offset()),
+                    kind as u16 | gap | diagnostics,
+                ));
+            }
+            pieces.push((token.start, token.end, token.word as u16));
+            pieces
+        })
     }
 }
 
@@ -510,118 +555,6 @@ impl<'a, 'src> Pass<'a, 'src> {
                 return;
             }
             start = end;
-        }
-    }
-
-    /// Writes the start and kind of every token.
-    #[inline(always)]
-    fn compress(mut self) -> BulkTokens {
-        let overrides = self.merge_overrides();
-        let count: usize = self
-            .blocks
-            .iter()
-            .map(|block| block.starts.count_ones() as usize)
-            .sum();
-        let mut starts: Vec<u32> = Vec::with_capacity(count + 3);
-        let mut kinds: Vec<u16> = Vec::with_capacity(count + 2);
-        let starts_out = starts.as_mut_ptr();
-        let kinds_out = kinds.as_mut_ptr();
-        let source = self.source;
-        let mut written = 0;
-        let mut next_override = 0;
-        for (index, block) in self.blocks.iter().enumerate() {
-            let mut bits = block.starts;
-            while bits != 0 {
-                let bit = bits.trailing_zeros() as usize;
-                bits &= bits - 1;
-                let start = index * 64 + bit;
-                // Pick the override or the kind of the first byte without a branch, as either is
-                // common.
-                let overridden = ((block.overridden >> bit) & 1) as usize;
-                // SAFETY: starts are offsets in the source.
-                let by_byte = BYTE_TOKENS[unsafe { *source.get_unchecked(start) } as usize];
-                // SAFETY: every overridden start has an override, and one more follows them.
-                let by_override = unsafe { *overrides.get_unchecked(next_override) };
-                let kind = if overridden != 0 {
-                    by_override
-                } else {
-                    by_byte
-                };
-                next_override += overridden;
-                // SAFETY: there are `count` starts, which both vectors have room for.
-                unsafe {
-                    starts_out.add(written).write(start as u32);
-                    kinds_out.add(written).write(kind);
-                }
-                written += 1;
-            }
-        }
-        assert_eq!(written, count);
-        // SAFETY: the loop initialized `count` elements.
-        unsafe {
-            starts.set_len(count);
-            kinds.set_len(count);
-        }
-        self.find_keywords(&mut kinds);
-
-        let len = self.source.len() as u32;
-        starts.extend([len, len, len]);
-        kinds.extend([EOF as u16 | REGULAR, EOF as u16 | REGULAR]);
-        // `carve` and `coalesce` each report in source order.
-        self.diagnostics.sort_by_key(|diagnostic| diagnostic.start);
-        BulkTokens {
-            starts,
-            kinds,
-            diagnostics: self.diagnostics,
-        }
-    }
-
-    /// Returns the kinds of the carved and coalesced tokens that are still tokens, in source
-    /// order, followed by one extra kind that `compress` may read but never uses.
-    fn merge_overrides(&mut self) -> Vec<u16> {
-        let mut merged = Vec::with_capacity(self.carved.len() + self.coalesced.len() + 1);
-        let (mut carved, mut coalesced) = (0, 0);
-        while carved < self.carved.len() || coalesced < self.coalesced.len() {
-            let take_carved = match (self.carved.get(carved), self.coalesced.get(coalesced)) {
-                (Some(left), Some(right)) => left.start < right.start,
-                (left, _) => left.is_some(),
-            };
-            let token = if take_carved {
-                carved += 1;
-                self.carved[carved - 1]
-            } else {
-                coalesced += 1;
-                self.coalesced[coalesced - 1]
-            };
-            if self.is_start(token.start as usize) {
-                merged.push(token.kind);
-            }
-        }
-        merged.push(0);
-        merged
-    }
-
-    /// Replaces the kind of the identifiers in `kinds` that are keywords.
-    #[inline(always)]
-    fn find_keywords(&self, kinds: &mut [u16]) {
-        // The index in `kinds` of the first token of the block.
-        let mut first = 0;
-        for (index, block) in self.blocks.iter().enumerate() {
-            let mut bits = block.starts & block.lower_pair & !block.overridden;
-            while bits != 0 {
-                let bit = bits.trailing_zeros() as usize;
-                bits &= bits - 1;
-                let start = index * 64 + bit;
-                let token = first + (block.starts & ((1 << bit) - 1)).count_ones() as usize;
-                let rest = block.starts >> bit >> 1;
-                let end = if rest != 0 {
-                    start + 1 + rest.trailing_zeros() as usize
-                } else {
-                    self.token_end(start)
-                };
-                kinds[token] = KEYWORD_KINDS[keyword(self.source, start, end) as usize];
-            }
-            first += block.starts.count_ones() as usize;
         }
     }
 }
