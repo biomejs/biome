@@ -6599,6 +6599,28 @@
 			},
 			"additionalProperties": false
 		},
+		"NoTailwindRestrictedClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindRestrictedClassesOptions" }
+			]
+		},
+		"NoTailwindRestrictedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"classes": {
+					"description": "Classes to restrict.\n\nEach key is a class without variants or `!`, such as `text-green-500`.\nA `*` can stand for the whole utility name, as in `*-md`, the whole\nvalue, as in `bg-*`, or the value of an arbitrary property, as in\n`[color:*]`. Each value is either the message to show, or an object with\nan optional `message` and an optional `use` replacement.",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/$defs/TailwindRestriction" }
+				},
+				"variants": {
+					"description": "Variants to restrict.\n\nEach key is a variant, such as `dark` or `group-hover`. A `*` can stand\nfor the parts at the end, as in `group-*`, or at the start, as in\n`*-hover`, and `[*]` matches any arbitrary variant. Each value is either\nthe message to show, or an object with an optional `message` and an\noptional `use` replacement.",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/$defs/TailwindRestriction" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoTailwindRestyledComponentsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8491,6 +8513,13 @@
 					"description": "Disallow Tailwind CSS utility classes that use raw palette colors.\nSee https://biomejs.dev/linter/rules/no-tailwind-raw-colors",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindRawColorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindRestrictedClasses": {
+					"description": "Disallow Tailwind CSS classes and variants that your project doesn't allow.\nSee https://biomejs.dev/linter/rules/no-tailwind-restricted-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindRestrictedClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13175,6 +13204,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindRawColorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindRestrictedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindRestrictedClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -19446,6 +19488,27 @@
 					"description": "Functions that describe a component's styles with an object, such as\n`cva` and `tv`.\n\nBiome checks every string passed directly to these functions. In an\nobject passed to them, Biome checks the classes under these properties:\n\n- `base`, `class`, and `className`: classes that always apply.\n- `variants`: classes for each version of the component, such as each\n  button size.\n- `slots`: classes for each part of the component, such as its icon.\n- `compoundVariants` and `compoundSlots`: only the `class` and\n  `className` of each entry.\n\nOther properties, such as `defaultVariants`, hold names rather than\nclasses, so Biome skips them. For example, Biome checks `\"rounded\"`,\n`\"px-2\"`, and `\"px-4\"` here, but not `\"small\"`:\n\n```js\ncva(\"rounded\", {\n    variants: {\n        size: { small: \"px-2\", large: \"px-4\" },\n    },\n    defaultVariants: { size: \"small\" },\n});\n```\n\nDefaults to `cva` and `tv`.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"TailwindRestriction": {
+			"description": "The message and replacement of a restricted class or variant.",
+			"anyOf": [
+				{ "type": "string" },
+				{ "$ref": "#/$defs/TailwindRestrictionOptions" }
+			]
+		},
+		"TailwindRestrictionOptions": {
+			"type": "object",
+			"properties": {
+				"message": {
+					"description": "The message to show.",
+					"type": ["string", "null"]
+				},
+				"use": {
+					"description": "The class or variant to use instead. Biome suggests a fix that uses it\nwhen the key has no `*`.",
+					"type": ["string", "null"]
 				}
 			},
 			"additionalProperties": false
