@@ -7700,6 +7700,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedHtmlElementIsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedHtmlElementIsOptions" }
+			]
+		},
+		"NoVueDeprecatedHtmlElementIsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedInlineTemplateConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8847,6 +8857,13 @@
 					"description": "Disallow the $set and $delete functions that Vue 3 removed.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedDeleteSetConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedHtmlElementIs": {
+					"description": "Disallow the is attribute on HTML elements in Vue templates.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-html-element-is",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedHtmlElementIsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14553,6 +14570,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedDeleteSetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedHtmlElementIsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedHtmlElementIsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
