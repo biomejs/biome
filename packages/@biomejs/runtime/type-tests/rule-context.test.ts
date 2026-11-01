@@ -42,6 +42,9 @@ defineRule({
 					| "legacyConst"
 					| "declaration";
 				break;
+			case "mdx":
+				embedding.embeddingKind satisfies "esm" | "expression" | "tag";
+				break;
 			case "none":
 				break;
 			default:
