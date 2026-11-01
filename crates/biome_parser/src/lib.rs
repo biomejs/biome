@@ -8,7 +8,7 @@ use crate::event::Event::Token;
 use crate::lexer::LexerWithCheckpoint;
 use crate::parsed_syntax::ParsedSyntax;
 use crate::parsed_syntax::ParsedSyntax::{Absent, Present};
-use crate::token_source::{BumpWithContext, NthToken, TokenSource, TokenSourceWithBufferedLexer};
+use crate::token_source::{BumpWithContext, NthToken, TokenSource};
 use biome_console::fmt::Display;
 use biome_diagnostics::location::AsSpan;
 use biome_diagnostics::serde::Diagnostic as SerdeDiagnostic;
@@ -210,7 +210,7 @@ pub trait Parser: Sized {
     fn nth_text<'l, Lex>(&mut self, n: usize) -> Option<&str>
     where
         Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
-        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+        Self::Source: NthToken<Lex>,
     {
         let range = self.source_mut().nth_range(n)?;
         let range: Range<usize> = range.into();
@@ -232,7 +232,7 @@ pub trait Parser: Sized {
     fn nth<'l, Lex>(&mut self, n: usize) -> Self::Kind
     where
         Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
-        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+        Self::Source: NthToken<Lex>,
     {
         self.source_mut().nth(n)
     }
@@ -241,7 +241,7 @@ pub trait Parser: Sized {
     fn nth_at<'l, Lex>(&mut self, n: usize, kind: Self::Kind) -> bool
     where
         Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
-        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+        Self::Source: NthToken<Lex>,
     {
         self.nth(n) == kind
     }
@@ -250,7 +250,7 @@ pub trait Parser: Sized {
     fn nth_at_ts<'l, Lex>(&mut self, n: usize, kinds: TokenSet<Self::Kind>) -> bool
     where
         Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
-        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+        Self::Source: NthToken<Lex>,
     {
         kinds.contains(self.nth(n))
     }
@@ -260,7 +260,7 @@ pub trait Parser: Sized {
     fn has_nth_preceding_line_break<'l, Lex>(&mut self, n: usize) -> bool
     where
         Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
-        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+        Self::Source: NthToken<Lex>,
     {
         self.source_mut().has_nth_preceding_line_break(n)
     }
@@ -270,7 +270,7 @@ pub trait Parser: Sized {
     fn has_nth_preceding_whitespace<'l, Lex>(&mut self, n: usize) -> bool
     where
         Lex: LexerWithCheckpoint<'l, Kind = Self::Kind>,
-        Self::Source: NthToken<Lex> + TokenSourceWithBufferedLexer<Lex>,
+        Self::Source: NthToken<Lex>,
     {
         self.source_mut().has_nth_preceding_whitespace(n)
     }
