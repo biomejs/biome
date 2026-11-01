@@ -176,6 +176,7 @@ pub mod no_leaked_render;
 pub mod no_loop_func;
 pub mod no_magic_array_flat_depth;
 pub mod no_magic_numbers;
+pub mod no_map_spread;
 pub mod no_meaningless_void_operator;
 pub mod no_misleading_character_class;
 pub mod no_misleading_instantiator;

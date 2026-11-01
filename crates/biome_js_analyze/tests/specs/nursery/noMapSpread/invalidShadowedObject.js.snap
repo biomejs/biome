@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShadowedObject.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// The fix isn't offered because `Object` doesn't refer to the global object.
+function withShadowedObject(Object) {
+	return b.map(({ x, y }) => ({ ...x, y }));
+}
+
+```
+
+# Diagnostics
+```
+invalidShadowedObject.js:4:30 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    2 │ // The fix isn't offered because `Object` doesn't refer to the global object.
+    3 │ function withShadowedObject(Object) {
+  > 4 │ 	return b.map(({ x, y }) => ({ ...x, y }));
+      │ 	                            ^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    2 │ // The fix isn't offered because `Object` doesn't refer to the global object.
+    3 │ function withShadowedObject(Object) {
+  > 4 │ 	return b.map(({ x, y }) => ({ ...x, y }));
+      │ 	         ^^^
+    5 │ }
+    6 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
