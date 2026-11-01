@@ -463,6 +463,7 @@ define_categories! {
     "lint/nursery/useVueDefineOptions": "https://biomejs.dev/linter/rules/use-vue-define-options",
     "lint/nursery/useVueMatchingComponentFileName": "https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
+    "lint/nursery/useVuePropTypeConstructor": "https://biomejs.dev/linter/rules/use-vue-prop-type-constructor",
     "lint/nursery/useVueRenderReturn": "https://biomejs.dev/linter/rules/use-vue-render-return",
     "lint/nursery/useVueTemplateRef": "https://biomejs.dev/linter/rules/use-vue-template-ref",
     "lint/nursery/useVueSlotNameCasing": "https://biomejs.dev/linter/rules/use-vue-slot-name-casing",

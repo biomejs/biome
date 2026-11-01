@@ -3918,6 +3918,11 @@ export interface Nursery {
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 	/**
+	 * Require the type of a Vue prop to be a constructor.
+	 * See https://biomejs.dev/linter/rules/use-vue-prop-type-constructor
+	 */
+	useVuePropTypeConstructor?: UseVuePropTypeConstructorConfiguration;
+	/**
 	 * Require the render function of a Vue component to return a value.
 	 * See https://biomejs.dev/linter/rules/use-vue-render-return
 	 */
@@ -6735,6 +6740,9 @@ export type UseVueDefinePropsDestructuringConfiguration =
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVuePropTypeConstructorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVuePropTypeConstructorOptions;
 export type UseVueRenderReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueRenderReturnOptions;
@@ -9889,6 +9897,14 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVuePropTypeConstructorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVuePropTypeConstructorOptions;
+}
 export interface RuleWithUseVueRenderReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueRenderReturnOptions;
@@ -12418,6 +12434,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVuePropTypeConstructorOptions = {};
 export type UseVueRenderReturnOptions = {};
 export interface UseVueSlotNameCasingOptions {
 	/**
@@ -14124,6 +14141,7 @@ export type Category =
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVuePropTypeConstructor"
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueSlotNameCasing"
