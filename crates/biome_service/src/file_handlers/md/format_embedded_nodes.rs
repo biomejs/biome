@@ -24,7 +24,8 @@ use biome_json_formatter::JsonFormatLanguage;
 use biome_languages::DocumentFileSource;
 use biome_markdown_formatter::{MdFormatLanguage, format_node};
 use biome_markdown_syntax::{
-    MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken, MdFencedCodeBlock,
+    MarkdownLanguage, MarkdownSyntaxKind, MarkdownSyntaxNode, MarkdownSyntaxToken,
+    MdFencedCodeBlock,
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize};
@@ -63,6 +64,7 @@ pub(super) fn format_embedded(
     // be formatted keeps the Markdown formatter's output.
     let snippets: FxHashMap<_, _> = embedded_nodes
         .into_iter()
+        .filter(|snippet| !is_multiline_mdx_snippet_in_container(&tree, snippet.content_range()))
         .map(|snippet| (snippet.content_range(), snippet))
         .collect();
     let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
@@ -95,6 +97,32 @@ pub(super) fn format_embedded(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+/// Returns whether the MDX literal at `range` spans lines inside a list item
+/// or a block quote. Its lines carry the indentation or the `>` markers of
+/// their container, which the formatted JavaScript would lose after its
+/// first line, so such a literal stays as written.
+fn is_multiline_mdx_snippet_in_container(root: &MarkdownSyntaxNode, range: TextRange) -> bool {
+    let Some(token) = root.token_at_offset(range.start()).right_biased() else {
+        return false;
+    };
+    let is_mdx_literal = matches!(
+        token.kind(),
+        MarkdownSyntaxKind::MDX_ESM_LITERAL
+            | MarkdownSyntaxKind::MDX_EXPRESSION_LITERAL
+            | MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL
+    );
+    is_mdx_literal
+        && token.text_trimmed().contains(['\n', '\r'])
+        && token.ancestors().any(|node| {
+            matches!(
+                node.kind(),
+                MarkdownSyntaxKind::MD_QUOTE
+                    | MarkdownSyntaxKind::MD_BULLET_LIST_ITEM
+                    | MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM
+            )
+        })
 }
 
 /// Parses the Markdown code of the fenced code block of `root` whose code
