@@ -7539,6 +7539,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessTypeAssertionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessTypeAssertionOptions" }
+			]
+		},
+		"NoUselessTypeAssertionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessTypeConstraintConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8741,6 +8751,13 @@
 					"description": "Disallow splice() calls that have a simpler alternative.\nSee https://biomejs.dev/linter/rules/no-useless-splice",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessSpliceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessTypeAssertion": {
+					"description": "Disallow type assertions that don't change the type of an expression.\nSee https://biomejs.dev/linter/rules/no-useless-type-assertion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessTypeAssertionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14237,6 +14254,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessThisAliasOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessTypeAssertionOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessTypeAssertionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
