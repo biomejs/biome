@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const x = 10;
+const y = 12;
+
+await page.evaluate((value: number) => value + y, x);
+
+await page.evaluate(() => x as number);
+
+await page.evaluate(<T,>() => x);
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:48 lint/nursery/noPlaywrightUnsafeReferences ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable y is declared outside the function passed to evaluate().
+  
+    3 │ const y = 12;
+    4 │ 
+  > 5 │ await page.evaluate((value: number) => value + y, x);
+      │                                                ^
+    6 │ 
+    7 │ await page.evaluate(() => x as number);
+  
+  i Playwright runs this function inside the browser page, where variables from your test don't exist. Using them throws an error when the test runs.
+  
+  i Pass the values as the second argument of evaluate(), and read them from the function's parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:27 lint/nursery/noPlaywrightUnsafeReferences  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable x is declared outside the function passed to evaluate().
+  
+    5 │ await page.evaluate((value: number) => value + y, x);
+    6 │ 
+  > 7 │ await page.evaluate(() => x as number);
+      │                           ^
+    8 │ 
+    9 │ await page.evaluate(<T,>() => x);
+  
+  i Playwright runs this function inside the browser page, where variables from your test don't exist. Using them throws an error when the test runs.
+  
+  i Pass the values as the second argument of evaluate(), and read them from the function's parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the variables as an argument.
+  
+    7 │ await·page.evaluate(([x])·=>·x·as·number,·[x]);
+      │                      +++                +++++  
+
+```
+
+```
+invalid.ts:9:31 lint/nursery/noPlaywrightUnsafeReferences  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable x is declared outside the function passed to evaluate().
+  
+     7 │ await page.evaluate(() => x as number);
+     8 │ 
+   > 9 │ await page.evaluate(<T,>() => x);
+       │                               ^
+    10 │ 
+  
+  i Playwright runs this function inside the browser page, where variables from your test don't exist. Using them throws an error when the test runs.
+  
+  i Pass the values as the second argument of evaluate(), and read them from the function's parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the variables as an argument.
+  
+    9 │ await·page.evaluate(<T,>([x])·=>·x,·[x]);
+      │                          +++      +++++  
+
+```

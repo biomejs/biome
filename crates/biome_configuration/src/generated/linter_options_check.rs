@@ -1048,6 +1048,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noPlaywrightPagePause",
         TypeId::of::<biome_rule_options::no_playwright_page_pause::NoPlaywrightPagePauseOptions>(),
     ));
+    result.push(("nursery", "noPlaywrightUnsafeReferences", TypeId::of::<biome_rule_options::no_playwright_unsafe_references::NoPlaywrightUnsafeReferencesOptions>()));
     result.push((
         "complexity",
         "noPlaywrightUselessAwait",

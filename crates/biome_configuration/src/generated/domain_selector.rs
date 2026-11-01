@@ -38,6 +38,7 @@ static PLAYWRIGHT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(||
         RuleFilter::Rule("correctness", "noPlaywrightMissingAwait"),
         RuleFilter::Rule("correctness", "usePlaywrightValidDescribeCallback"),
         RuleFilter::Rule("nursery", "noPlaywrightNthMethods"),
+        RuleFilter::Rule("nursery", "noPlaywrightUnsafeReferences"),
         RuleFilter::Rule("style", "noPlaywrightElementHandle"),
         RuleFilter::Rule("style", "noPlaywrightEval"),
         RuleFilter::Rule("style", "noPlaywrightWaitForSelector"),

@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const x = 10;
+const foo = 10;
+const bar = 20;
+
+page.pause();
+page.evaluate();
+page.evaluate("1 + 2");
+page.addInitScript();
+page.addInitScript("1 + 2");
+
+await page.evaluate(() => Promise.resolve(12), []);
+
+await page.evaluate(function (x) {
+	return Promise.resolve(x);
+}, [x]);
+
+await page.evaluate(([foo, bar]) => Promise.resolve(foo + bar), [foo, bar]);
+
+await page.evaluate(([a, b]) => Promise.resolve(a + b), [foo, bar]);
+
+await page.evaluate(() => {
+	const x = 20;
+	return Promise.resolve(x);
+}, []);
+
+await page.evaluate((x) => {
+	const y = 20;
+	return Promise.resolve(x + y);
+}, [x]);
+
+test("test", async () => {
+	const y = 10;
+	await page.evaluate(([x, y]) => Promise.resolve(x + y), [x, y]);
+});
+
+await page.evaluate(() => document.title + window.location.href + undeclared);
+
+await page.evaluate(function named() {
+	return named;
+});
+
+// Only `page` and frame objects run functions in the browser.
+await locator.evaluate(() => x);
+await something.evaluate(() => x);
+await page.click(() => x);
+
+```
