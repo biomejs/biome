@@ -127,6 +127,15 @@ fn push_mdx_snippets(
         let Some(element) = token.parent() else {
             continue;
         };
+        // The lines of a literal in a block quote start with `>` markers,
+        // which aren't JavaScript.
+        if token.text_trimmed().contains(['\n', '\r'])
+            && token
+                .ancestors()
+                .any(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
+        {
+            continue;
+        }
         let content_range = token.text_trimmed_range();
         let content = EmbedContent {
             element_range: element.text_trimmed_range(),

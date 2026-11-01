@@ -1,7 +1,7 @@
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{normalize_newlines, write};
 use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxToken};
 use biome_rowan::TextSize;
 use std::borrow::Cow;
@@ -231,8 +231,8 @@ pub(crate) fn follows_space(token: &MarkdownSyntaxToken) -> bool {
 /// When the workspace parsed the literal as an embedded snippet, the
 /// literal becomes an embedded element that the JavaScript formatter fills
 /// in. Otherwise the literal prints as written. The snippet covers the
-/// literal without its trivia, such as the space before the second tag of
-/// `<A> <B />`, so the trivia prints around the embedded element.
+/// literal without its trivia, and the caller writes the space that may
+/// separate the construct from the previous one, see [follows_space].
 pub(crate) struct FormatMdxSnippet<'a> {
     pub(crate) token: &'a MarkdownSyntaxToken,
 }
@@ -241,7 +241,11 @@ impl Format<MarkdownFormatContext> for FormatMdxSnippet<'_> {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let range = self.token.text_trimmed_range();
         if f.context().is_embedded_node_range(range) {
-            let text = located_token_text(self.token, range);
+            let text = syntax_token_cow_slice(
+                normalize_newlines(self.token.text_trimmed(), ['\r']),
+                self.token,
+                range.start(),
+            );
             let embedded = FormatEmbedded::new(range, &text, f)?;
             write!(f, [format_replaced(self.token, &embedded)])
         } else {

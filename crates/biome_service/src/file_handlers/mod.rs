@@ -433,7 +433,7 @@ impl<'a> SnippetsIterator<'a> {
 
 /// Returns whether `snippet` holds the JavaScript of an MDX construct.
 #[cfg(feature = "lang_mdx")]
-fn is_mdx_snippet(snippet: &ParsedSnippetOrigin, db: &WorkspaceDb) -> bool {
+pub(crate) fn is_mdx_snippet(snippet: &ParsedSnippetOrigin, db: &WorkspaceDb) -> bool {
     snippet
         .file_source(db)
         .and_then(|source| source.to_js_file_source())
