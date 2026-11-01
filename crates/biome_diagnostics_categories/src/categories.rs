@@ -352,6 +352,7 @@ define_categories! {
     "lint/nursery/noVueLifecycleAfterAwait": "https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
     "lint/nursery/noVueLoneTemplate": "https://biomejs.dev/linter/rules/no-vue-lone-template",
     "lint/nursery/noVueMixin": "https://biomejs.dev/linter/rules/no-vue-mixin",
+    "lint/nursery/noVueMultipleObjectsInClass": "https://biomejs.dev/linter/rules/no-vue-multiple-objects-in-class",
     "lint/nursery/noVueMultipleSlotArgs": "https://biomejs.dev/linter/rules/no-vue-multiple-slot-args",
     "lint/nursery/noVueMutatingProps": "https://biomejs.dev/linter/rules/no-vue-mutating-props",
     "lint/nursery/noVueRestrictedCallAfterAwait": "https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await",

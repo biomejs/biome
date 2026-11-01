@@ -1931,6 +1931,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueMixin",
         TypeId::of::<biome_rule_options::no_vue_mixin::NoVueMixinOptions>(),
     ));
+    result.push(("nursery", "noVueMultipleObjectsInClass", TypeId::of::<biome_rule_options::no_vue_multiple_objects_in_class::NoVueMultipleObjectsInClassOptions>()));
     result.push((
         "nursery",
         "noVueMultipleSlotArgs",

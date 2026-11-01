@@ -7860,6 +7860,16 @@
 			]
 		},
 		"NoVueMixinOptions": { "type": "object", "additionalProperties": false },
+		"NoVueMultipleObjectsInClassConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueMultipleObjectsInClassOptions" }
+			]
+		},
+		"NoVueMultipleObjectsInClassOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueMultipleSlotArgsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8960,6 +8970,13 @@
 					"description": "Disallow the mixins option in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-mixin",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueMixinConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueMultipleObjectsInClass": {
+					"description": "Disallow more than one object in an array passed to :class.\nSee https://biomejs.dev/linter/rules/no-vue-multiple-objects-in-class",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueMultipleObjectsInClassConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14745,6 +14762,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueMixinOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueMultipleObjectsInClassOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueMultipleObjectsInClassOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

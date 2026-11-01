@@ -411,6 +411,7 @@ pub mod no_vue_import_compiler_macros;
 pub mod no_vue_lifecycle_after_await;
 pub mod no_vue_lone_template;
 pub mod no_vue_mixin;
+pub mod no_vue_multiple_objects_in_class;
 pub mod no_vue_multiple_slot_args;
 pub mod no_vue_mutating_props;
 pub mod no_vue_options_api;
