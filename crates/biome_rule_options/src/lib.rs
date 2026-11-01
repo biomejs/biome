@@ -367,6 +367,7 @@ pub mod no_useless_escape_in_regex;
 pub mod no_useless_escape_in_string;
 pub mod no_useless_fragments;
 pub mod no_useless_label;
+pub mod no_useless_length_check;
 pub mod no_useless_lone_block_statements;
 pub mod no_useless_recursion;
 pub mod no_useless_regex_backrefs;
