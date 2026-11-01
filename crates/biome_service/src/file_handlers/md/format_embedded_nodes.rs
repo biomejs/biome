@@ -394,7 +394,7 @@ where
         .ok()?
         .print()
         .ok()?;
-    if single_line && printed.as_code().contains('\n') {
+    if single_line && printed.as_code().contains(['\n', '\r']) {
         return None;
     }
     printed_document(printed.as_code())
