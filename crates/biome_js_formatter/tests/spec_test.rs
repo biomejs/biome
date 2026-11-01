@@ -2,7 +2,7 @@ use biome_configuration::Configuration;
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_languages::{
     DocumentFileSource, JsFileSource, javascript::JsEmbeddingKind, javascript::LanguageVariant,
-    javascript::ModuleKind,
+    javascript::MdxEmbeddingKind, javascript::ModuleKind,
 };
 use camino::Utf8Path;
 
@@ -18,6 +18,11 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
         JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
             frontmatter: false,
             is_class_attribute: false,
+        })
+    } else if file_type == "mdx_tag" {
+        // Fixture text is a single JSX tag of an MDX document.
+        JsFileSource::jsx().with_embedding_kind(JsEmbeddingKind::Mdx {
+            kind: MdxEmbeddingKind::Tag,
         })
     } else {
         test_file.input_file().as_path().try_into().unwrap()
