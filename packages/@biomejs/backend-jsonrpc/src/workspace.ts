@@ -3298,6 +3298,11 @@ export interface Nursery {
 	 */
 	noUnmodifiedLoopCondition?: NoUnmodifiedLoopConditionConfiguration;
 	/**
+	 * Disallow trim() before startsWith() or endsWith() when only one side of the string matters.
+	 * See https://biomejs.dev/linter/rules/no-unnecessary-string-trim
+	 */
+	noUnnecessaryStringTrim?: NoUnnecessaryStringTrimConfiguration;
+	/**
 	 * Disallow complex expressions as the value that a for...of loop goes through.
 	 * See https://biomejs.dev/linter/rules/no-unreadable-for-of-expression
 	 */
@@ -6308,6 +6313,9 @@ export type NoUndeclaredCustomPropertiesConfiguration =
 export type NoUnmodifiedLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnmodifiedLoopConditionOptions;
+export type NoUnnecessaryStringTrimConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnnecessaryStringTrimOptions;
 export type NoUnreadableForOfExpressionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnreadableForOfExpressionOptions;
@@ -9133,6 +9141,14 @@ export interface RuleWithNoUnmodifiedLoopConditionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnmodifiedLoopConditionOptions;
 }
+export interface RuleWithNoUnnecessaryStringTrimOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUnnecessaryStringTrimOptions;
+}
 export interface RuleWithNoUnreadableForOfExpressionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnreadableForOfExpressionOptions;
@@ -11931,6 +11947,7 @@ export type NoThisOutsideOfClassOptions = {};
 export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
 export type NoUnmodifiedLoopConditionOptions = {};
+export type NoUnnecessaryStringTrimOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
 export type NoUnreadableIifeOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
@@ -13794,6 +13811,7 @@ export type Category =
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"
+	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"

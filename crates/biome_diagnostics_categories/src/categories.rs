@@ -318,6 +318,7 @@ define_categories! {
     "lint/nursery/noUnmodifiedLoopCondition": "https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
     "lint/nursery/noUnreadableForOfExpression": "https://biomejs.dev/linter/rules/no-unreadable-for-of-expression",
     "lint/nursery/noUnreadableIife": "https://biomejs.dev/linter/rules/no-unreadable-iife",
+    "lint/nursery/noUnnecessaryStringTrim": "https://biomejs.dev/linter/rules/no-unnecessary-string-trim",
     "lint/nursery/noUnsafeIframeSandbox": "https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUnsafeReturn": "https://biomejs.dev/linter/rules/no-unsafe-return",
