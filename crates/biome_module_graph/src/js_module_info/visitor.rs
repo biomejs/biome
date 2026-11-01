@@ -9,12 +9,15 @@ use biome_js_syntax::{
     TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
+use either::Either;
 
 use crate::{
     JsImport, JsImportPhase, JsModuleInfo, JsReexport,
     js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
+    js_module_info::flow::FlowRootScanner,
 };
 
 use super::collector::JsModuleInfoCollector;
@@ -43,15 +46,30 @@ impl JsModuleVisitor {
 
     pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
+        let mut flow_roots = FlowRootScanner::default();
+        // Declaration files contain no code that runs, so no root can need flow.
+        let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled
+            && !JsFileSource::try_from(self.file_path.as_path())
+                .is_ok_and(|source| source.language().is_definition_file());
 
         let kinds = AnyJsImportLike::KIND_SET
             .union(JsExport::KIND_SET)
             .union(JsxAttribute::KIND_SET)
             .union(JsModuleInfoCollector::LEAVE_NODE_KINDS);
         let root = self.root.syntax().clone();
-        for event in root.preorder_of_kinds(kinds) {
+        // The flow root scanner must see every node, not only the kinds that
+        // the collector visits.
+        let events = if scan_flow_roots {
+            Either::Left(root.preorder())
+        } else {
+            Either::Right(root.preorder_of_kinds(kinds))
+        };
+        for event in events {
             match event {
                 WalkEvent::Enter(node) => {
+                    if scan_flow_roots {
+                        flow_roots.enter(&node, &self.semantic_model);
+                    }
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
                     } else if let Some(export) = JsExport::cast_ref(&node) {
@@ -61,12 +79,20 @@ impl JsModuleVisitor {
                     }
                 }
                 WalkEvent::Leave(node) => {
+                    if scan_flow_roots {
+                        flow_roots.leave(&node);
+                    }
                     collector.leave_node(&node);
                 }
             }
         }
 
-        JsModuleInfo::new(collector, self.semantic_model, self.inference_mode)
+        JsModuleInfo::new(
+            collector,
+            self.semantic_model,
+            self.inference_mode,
+            flow_roots,
+        )
     }
 
     /// Collects static CSS class references from JSX `class` and `className`
