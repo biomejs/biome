@@ -3918,6 +3918,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Require a default value for optional props in Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-default-prop
+	 */
+	useVueDefaultProp?: UseVueDefaultPropConfiguration;
+	/**
 	 * Enforce defineOptions() instead of a default export in components that use \<script setup>.
 	 * See https://biomejs.dev/linter/rules/use-vue-define-options
 	 */
@@ -6755,6 +6760,9 @@ export type UseVueConsistentDefineEmitsDeclarationConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueDefaultPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefaultPropOptions;
 export type UseVueDefineOptionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefineOptionsOptions;
@@ -9917,6 +9925,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueDefaultPropOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefaultPropOptions;
+}
 export interface RuleWithUseVueDefineOptionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefineOptionsOptions;
@@ -12470,6 +12482,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueDefaultPropOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
@@ -14181,6 +14194,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefaultProp"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVuePropTypeConstructor"
