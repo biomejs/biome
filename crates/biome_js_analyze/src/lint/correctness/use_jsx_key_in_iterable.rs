@@ -9,8 +9,8 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsMemberExpression,
     AnyJsObjectMember, AnyJsStatement, AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild,
     JsArrayElementList, JsArrayExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsFunctionBody, JsNewExpression, JsObjectExpression, JsStatementList, JsxAttributeList,
-    JsxExpressionChild, JsxTagExpression,
+    JsConditionalExpression, JsFunctionBody, JsNewExpression, JsObjectExpression, JsStatementList,
+    JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
@@ -259,37 +259,47 @@ fn handle_function_body(
         handle_potential_react_component(returned_value, model, is_inside_jsx, options)
     });
     if ranges.is_none() && is_return_component {
-        return vec![];
+        // Variables are likely children of the returned component, but other
+        // statements (e.g. an early return inside an `if`) still need a check.
+        return node
+            .statements()
+            .iter()
+            .filter(|statement| !matches!(statement, AnyJsStatement::JsVariableStatement(_)))
+            .filter_map(|statement| handle_statement(&statement, model, is_inside_jsx, options))
+            .flatten()
+            .collect();
     }
 
     handle_statements(&node.statements(), model, is_inside_jsx, options)
 }
 
 /// Returns `true` if the expression is a component, or a conditional expression
-/// whose branches are all components or `null`, with at least one component.
+/// whose branches are all JSX elements or `null`, with at least one JSX element.
 fn is_component_expression(expr: AnyJsExpression) -> Option<bool> {
-    let expr = unwrap_parenthesis(expr)?;
-    let AnyJsExpression::JsConditionalExpression(expr) = expr else {
-        return Some(ReactComponentExpression::can_cast(expr.syntax().kind()));
-    };
-    let consequent = unwrap_parenthesis(expr.consequent().ok()?)?;
-    let alternate = unwrap_parenthesis(expr.alternate().ok()?)?;
-    let is_null = |expr: &AnyJsExpression| {
-        matches!(
-            expr,
+    match unwrap_parenthesis(expr)? {
+        AnyJsExpression::JsConditionalExpression(expr) => is_jsx_conditional(&expr),
+        expr => Some(ReactComponentExpression::can_cast(expr.syntax().kind())),
+    }
+}
+
+fn is_jsx_conditional(expr: &JsConditionalExpression) -> Option<bool> {
+    let mut has_jsx = false;
+    for branch in [expr.consequent().ok()?, expr.alternate().ok()?] {
+        match unwrap_parenthesis(branch)? {
+            AnyJsExpression::JsxTagExpression(_) => has_jsx = true,
             AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsNullLiteralExpression(_)
-            )
-        )
-    };
-    Some(match (is_null(&consequent), is_null(&alternate)) {
-        (true, true) => false,
-        (true, false) => is_component_expression(alternate)?,
-        (false, true) => is_component_expression(consequent)?,
-        (false, false) => {
-            is_component_expression(consequent)? && is_component_expression(alternate)?
+                AnyJsLiteralExpression::JsNullLiteralExpression(_),
+            ) => {}
+            AnyJsExpression::JsConditionalExpression(nested) => {
+                if !is_jsx_conditional(&nested)? {
+                    return Some(false);
+                }
+                has_jsx = true;
+            }
+            _ => return Some(false),
         }
-    })
+    }
+    Some(has_jsx)
 }
 
 fn handle_statements(

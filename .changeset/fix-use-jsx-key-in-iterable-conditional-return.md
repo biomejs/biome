@@ -10,3 +10,5 @@ xs.map((x) => {
   return f ? <li key={x}>{inner}</li> : <p key={x}>{inner}</p>;
 });
 ```
+
+The rule now also reports elements without a key returned early from an `if` block, when the last return has a key.

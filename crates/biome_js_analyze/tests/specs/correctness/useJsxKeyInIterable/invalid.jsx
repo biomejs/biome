@@ -133,3 +133,15 @@ xs.map((x) => {
     const inner = <b>{x}</b>;
     return f ? <li key={x}>{inner}</li> : <p>{inner}</p>;
 });
+
+xs.map((x) => {
+    if (x.skip) {
+        return <li />;
+    }
+    return x.ok ? <li key={x.id} /> : null;
+});
+
+xs.map((x) => {
+    const element = <li />;
+    return x.ok ? identity(element) : null;
+});
