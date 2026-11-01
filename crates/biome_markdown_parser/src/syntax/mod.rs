@@ -96,9 +96,13 @@ mod mdx {
     pub(crate) fn parse_mdx_inline_expression(_p: &mut MarkdownParser) -> ParsedSyntax {
         ParsedSyntax::Absent
     }
+
+    pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
+        bytes.len()
+    }
 }
 
-pub(crate) use mdx::parse_mdx_inline_expression;
+pub(crate) use mdx::{mdx_expression_len, parse_mdx_inline_expression};
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
