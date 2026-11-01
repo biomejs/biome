@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/expression/post_update_first_in_statement.js
+---
+
+# Input
+
+```js
+({}).a++;
+({}).a--;
+({})[key]++;
+({}).a.b++;
+(function () {}).a++;
+(async function () {}).a--;
+(class {}).a++;
+label: ({}).a++;
+if (condition) ({}).a++;
+const increment = () => ({}).a++;
+x = ({}).a++;
+++({}).a;
+
+```
+
+
+# Formatted
+
+```js
+({}).a++;
+({}).a--;
+({})[key]++;
+({}).a.b++;
+(function () {}).a++;
+(async function () {}).a--;
+(class {}).a++;
+label: ({}).a++;
+if (condition) ({}).a++;
+const increment = () => ({}).a++;
+x = {}.a++;
+++{}.a;
+
+```

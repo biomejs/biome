@@ -1054,6 +1054,8 @@ fn is_first_in_statement(node: &JsSyntaxNode, mode: FirstInStatementMode) -> boo
             }
             JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
             | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT
+            | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+            | JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT
             | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
             | JsSyntaxKind::JS_CALL_EXPRESSION
             | JsSyntaxKind::JS_NEW_EXPRESSION
