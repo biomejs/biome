@@ -28,9 +28,15 @@ issue_5407_lone_comment.js:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━
   
   i Unsafe fix: Remove the unused imports.
   
-    3 3 │    */
-    4 4 │   
+    1   │ - /*
+    2   │ - ·*·This·program·is·free·software:·you·can·redistribute·it·and/or·modify
+    3   │ - ·*/
+    4   │ - 
     5   │ - import·x·from·"jquery";
+      1 │ + /*
+      2 │ + ·*·This·program·is·free·software:·you·can·redistribute·it·and/or·modify
+      3 │ + ·*/
+      4 │ + 
     6 5 │   
   
 
