@@ -1,0 +1,167 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnsafeToFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Removing the `!` would remove the comment.
+const a = ! /* comment */ array.some(element => test(element));
+const b = !array.some(element => ! /* comment */ test(element));
+// Removing the `!` would change how these statements are parsed.
+foo()
+![].some(element => test(element));
+!{ array: [1] }.array.some(value => value);
+!(array.some(element => test(element)));
+![1].some(value => value) && ready;
+foo
+!async function () {}.items.some(value => value);
+
+```
+
+# Diagnostics
+```
+invalidUnsafeToFix.js:3:33 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Removing the `!` would remove the comment.
+  > 3 │ const a = ! /* comment */ array.some(element => test(element));
+      │                                 ^^^^
+    4 │ const b = !array.some(element => ! /* comment */ test(element));
+    5 │ // Removing the `!` would change how these statements are parsed.
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnsafeToFix.js:4:18 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    2 │ // Removing the `!` would remove the comment.
+    3 │ const a = ! /* comment */ array.some(element => test(element));
+  > 4 │ const b = !array.some(element => ! /* comment */ test(element));
+      │                  ^^^^
+    5 │ // Removing the `!` would change how these statements are parsed.
+    6 │ foo()
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnsafeToFix.js:7:5 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    5 │ // Removing the `!` would change how these statements are parsed.
+    6 │ foo()
+  > 7 │ ![].some(element => test(element));
+      │     ^^^^
+    8 │ !{ array: [1] }.array.some(value => value);
+    9 │ !(array.some(element => test(element)));
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnsafeToFix.js:8:23 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+     6 │ foo()
+     7 │ ![].some(element => test(element));
+   > 8 │ !{ array: [1] }.array.some(value => value);
+       │                       ^^^^
+     9 │ !(array.some(element => test(element)));
+    10 │ ![1].some(value => value) && ready;
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnsafeToFix.js:9:9 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+     7 │ ![].some(element => test(element));
+     8 │ !{ array: [1] }.array.some(value => value);
+   > 9 │ !(array.some(element => test(element)));
+       │         ^^^^
+    10 │ ![1].some(value => value) && ready;
+    11 │ foo
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnsafeToFix.js:10:6 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+     8 │ !{ array: [1] }.array.some(value => value);
+     9 │ !(array.some(element => test(element)));
+  > 10 │ ![1].some(value => value) && ready;
+       │      ^^^^
+    11 │ foo
+    12 │ !async function () {}.items.some(value => value);
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnsafeToFix.js:12:29 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    10 │ ![1].some(value => value) && ready;
+    11 │ foo
+  > 12 │ !async function () {}.items.some(value => value);
+       │                             ^^^^
+    13 │ 
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

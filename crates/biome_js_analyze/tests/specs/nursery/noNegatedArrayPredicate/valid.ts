@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+!array.some((element): boolean => test(element));
+!array.some((element): element is string => typeof element === "string");
+!array.some(function <T>(element) { return test(element); });
+!array.some(<T,>(element: T) => test(element));
+!array.some<string>(element => test(element));
+function collections(map: Map<string, number>, set: ReadonlySet<string>) {
+	!map.some(element => test(element));
+	!set.every(element => test(element));
+}

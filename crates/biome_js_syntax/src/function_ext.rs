@@ -1,9 +1,9 @@
 use crate::{
-    AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsCallExpression,
-    JsConstructorClassMember, JsMethodClassMember, JsMethodObjectMember, JsParameters,
-    JsParenthesizedExpression, JsStatementList, JsSyntaxToken,
+    AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement,
+    JsCallArguments, JsCallExpression, JsConstructorClassMember, JsMethodClassMember,
+    JsMethodObjectMember, JsParameters, JsParenthesizedExpression, JsStatementList, JsSyntaxToken,
 };
-use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, declare_node_union};
 
 declare_node_union! {
     pub AnyFunctionLike = AnyJsFunction | JsMethodObjectMember | JsMethodClassMember | JsConstructorClassMember
@@ -27,6 +27,26 @@ impl AnyJsFunction {
         self.parent::<JsParenthesizedExpression>()
             .and_then(|expr| expr.parent::<JsCallExpression>())
             .is_some()
+    }
+
+    /// Returns the expression that the function returns when its body is a single expression,
+    /// as in `(x) => x + 1`, or a single `return` statement, as in `function (x) { return x + 1; }`.
+    ///
+    /// Returns `None` for any other body, including `return;` without a value.
+    pub fn single_return_expression(&self) -> Option<AnyJsExpression> {
+        match self.body().ok()? {
+            AnyJsFunctionBody::AnyJsExpression(expression) => Some(expression),
+            AnyJsFunctionBody::JsFunctionBody(body) => {
+                let statements = body.statements();
+                if statements.len() != 1 {
+                    return None;
+                }
+                match statements.first()? {
+                    AnyJsStatement::JsReturnStatement(statement) => statement.argument(),
+                    _ => None,
+                }
+            }
+        }
     }
 }
 

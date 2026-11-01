@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidExportDefault.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export default !array.some(value => value);
+
+```
+
+# Diagnostics
+```
+invalidExportDefault.js:2:23 lint/nursery/noNegatedArrayPredicate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default !array.some(value => value);
+      │                       ^^^^
+    3 │ 
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use every() with a negated callback function.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - export·default·!array.some(value·=>·value);
+      2 │ + export·default·array.every(value·=>·!value);
+    3 3 │   
+  
+
+```

@@ -898,6 +898,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noNamespaceImport",
         TypeId::of::<biome_rule_options::no_namespace_import::NoNamespaceImportOptions>(),
     ));
+    result.push(("nursery", "noNegatedArrayPredicate", TypeId::of::<biome_rule_options::no_negated_array_predicate::NoNegatedArrayPredicateOptions>()));
     result.push((
         "style",
         "noNegationElse",

@@ -8,15 +8,19 @@ use biome_js_semantic::SemanticModel;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunction, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsMemberExpression,
-    AnyJsParameter, AnyJsStatement, AnyTsCastExpression, AnyTsReturnType, AnyTsType,
-    AnyTsTypeMember, JsBinaryOperator, JsCallExpression, JsReferenceIdentifier, JsSyntaxToken,
-    JsUnaryOperator, OperatorPrecedence, T, TsTypeMemberList,
+    AnyJsFunction, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsParameter,
+    AnyTsCastExpression, AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsBinaryOperator,
+    JsCallExpression, JsReferenceIdentifier, JsSyntaxToken, JsUnaryOperator, OperatorPrecedence, T,
+    TsTypeMemberList,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_boolean_sort_comparator::NoBooleanSortComparatorOptions;
 
-use crate::{JsRuleAction, services::semantic::Semantic, utils::is_node_equal};
+use crate::{
+    JsRuleAction,
+    services::semantic::Semantic,
+    utils::{indexed_collection::is_known_non_indexed_collection, is_node_equal},
+};
 
 declare_lint_rule! {
     /// Disallow sort comparators that return a boolean.
@@ -202,35 +206,6 @@ const BOOLEAN_STATIC_METHODS: &[(&str, &str)] = &[
     ("URL", "canParse"),
 ];
 
-/// Constructors whose instances have a `sort()` method that accepts a comparator, sorted.
-const INDEXED_COLLECTION_CONSTRUCTORS: &[&str] = &[
-    "Array",
-    "BigInt64Array",
-    "BigUint64Array",
-    "Float16Array",
-    "Float32Array",
-    "Float64Array",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-];
-
-/// Type names of built-in collections that have no `sort()` method, sorted.
-const NON_INDEXED_COLLECTION_TYPES: &[&str] = &[
-    "CanvasRenderingContext2D",
-    "Map",
-    "OffscreenCanvasRenderingContext2D",
-    "ReadonlyMap",
-    "ReadonlySet",
-    "Set",
-    "WeakMap",
-    "WeakSet",
-];
-
 /// Returns `true` if `callee` reads the `sort` or `toSorted` property, either by name or
 /// through a `const` variable that holds the name, as in `const method = "sort"; array[method]`.
 fn is_sort_method(callee: &AnyJsMemberExpression, model: &SemanticModel) -> bool {
@@ -284,7 +259,7 @@ fn boolean_comparator(
         }
         let is_unwrapped = comparator.clone().omit_parentheses().syntax() == unwrapped.syntax();
         return Some(if is_unwrapped {
-            return_expression(&function)
+            function.single_return_expression()
         } else {
             None
         });
@@ -327,24 +302,6 @@ fn has_boolean_function_type_assertion(
     }
 }
 
-/// Returns the expression that `function` returns when its body is a single expression or a
-/// single `return` statement.
-fn return_expression(function: &AnyJsFunction) -> Option<AnyJsExpression> {
-    match function.body().ok()? {
-        AnyJsFunctionBody::AnyJsExpression(expression) => Some(expression),
-        AnyJsFunctionBody::JsFunctionBody(body) => {
-            let statements = body.statements();
-            if statements.len() != 1 {
-                return None;
-            }
-            match statements.first()? {
-                AnyJsStatement::JsReturnStatement(statement) => statement.argument(),
-                _ => None,
-            }
-        }
-    }
-}
-
 /// Returns `true` if `function` always returns a boolean, based on its return type or on the
 /// expression it returns.
 fn is_boolean_function(function: &AnyJsFunction, model: &SemanticModel, depth: u8) -> bool {
@@ -358,7 +315,8 @@ fn is_boolean_function(function: &AnyJsFunction, model: &SemanticModel, depth: u
     {
         return true;
     }
-    return_expression(function)
+    function
+        .single_return_expression()
         .is_some_and(|expression| is_boolean_expression(&expression, model, depth))
 }
 
@@ -676,82 +634,6 @@ fn type_declaration(
     Some((declaration, depth))
 }
 
-/// Returns `true` if `object` is known not to be an array or a typed array, such as an
-/// object literal, a `new Set()`, or a variable with the type `Map`.
-fn is_known_non_indexed_collection(
-    object: &AnyJsExpression,
-    model: &SemanticModel,
-    depth: u8,
-) -> bool {
-    let Some(object) = object.clone().omit_type_wrappers() else {
-        return false;
-    };
-    match object {
-        AnyJsExpression::JsObjectExpression(_)
-        | AnyJsExpression::JsFunctionExpression(_)
-        | AnyJsExpression::JsArrowFunctionExpression(_)
-        | AnyJsExpression::JsClassExpression(_) => true,
-        AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
-        AnyJsExpression::JsNewExpression(new) => new
-            .callee()
-            .ok()
-            .and_then(|callee| callee.as_js_reference_identifier())
-            .and_then(|callee| callee.value_token().ok())
-            .is_none_or(|name| {
-                INDEXED_COLLECTION_CONSTRUCTORS
-                    .binary_search(&name.text_trimmed())
-                    .is_err()
-            }),
-        AnyJsExpression::JsIdentifierExpression(identifier) => {
-            let Some(depth) = depth.checked_sub(1) else {
-                return false;
-            };
-            let Some(declaration) = identifier
-                .name()
-                .ok()
-                .and_then(|reference| model.binding(&reference))
-                .and_then(|binding| binding.tree().declaration())
-            else {
-                return false;
-            };
-            let annotation = match &declaration {
-                AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => declarator
-                    .variable_annotation()
-                    .and_then(|annotation| annotation.type_annotation().ok().flatten()),
-                AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
-                    parameter.type_annotation()
-                }
-                _ => None,
-            };
-            if let Some(annotation) = annotation {
-                return annotation
-                    .ty()
-                    .ok()
-                    .as_ref()
-                    .and_then(AnyTsType::as_ts_reference_type)
-                    .and_then(|reference| reference.name().ok())
-                    .and_then(|name| name.as_js_reference_identifier()?.value_token().ok())
-                    .is_some_and(|name| {
-                        NON_INDEXED_COLLECTION_TYPES
-                            .binary_search(&name.text_trimmed())
-                            .is_ok()
-                    });
-            }
-            let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) = declaration else {
-                return false;
-            };
-            declarator
-                .declaration()
-                .is_some_and(|declaration| declaration.is_const())
-                && declarator
-                    .initializer()
-                    .and_then(|initializer| initializer.expression().ok())
-                    .is_some_and(|value| is_known_non_indexed_collection(&value, model, depth))
-        }
-        _ => false,
-    }
-}
-
 /// Returns the names of the two parameters of `function` when both are plain identifiers
 /// with distinct names, no type annotation, no default value, and no `?`.
 fn plain_parameter_names(function: &AnyJsFunction) -> Option<(JsSyntaxToken, JsSyntaxToken)> {
@@ -857,20 +739,6 @@ mod tests {
                 pair[0],
                 pair[1]
             );
-        }
-    }
-
-    #[test]
-    fn indexed_collection_constructors_sorted() {
-        for pair in INDEXED_COLLECTION_CONSTRUCTORS.windows(2) {
-            assert!(pair[0] < pair[1], "{} must come after {}", pair[0], pair[1]);
-        }
-    }
-
-    #[test]
-    fn non_indexed_collection_types_sorted() {
-        for pair in NON_INDEXED_COLLECTION_TYPES.windows(2) {
-            assert!(pair[0] < pair[1], "{} must come after {}", pair[0], pair[1]);
         }
     }
 }

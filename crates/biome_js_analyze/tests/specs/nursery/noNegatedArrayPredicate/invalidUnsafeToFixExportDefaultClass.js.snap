@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnsafeToFixExportDefaultClass.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Removing the `!` would turn the expression into a class declaration.
+export default !class {}.items.some(value => value);
+
+```
+
+# Diagnostics
+```
+invalidUnsafeToFixExportDefaultClass.js:3:32 lint/nursery/noNegatedArrayPredicate ━━━━━━━━━━━━━━━━━━
+
+  i The result of some() is negated with !.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Removing the `!` would turn the expression into a class declaration.
+  > 3 │ export default !class {}.items.some(value => value);
+      │                                ^^^^
+    4 │ 
+  
+  i Negating the whole call hides the condition that is actually checked. Calling every() with a negated callback function gives the same result and is easier to read.
+  
+  i Remove the ! before the call, use every() instead, and negate the value that the callback function returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
