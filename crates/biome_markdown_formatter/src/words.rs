@@ -422,7 +422,8 @@ impl ProseItemList {
                 | AnyMdInline::MdInlineHtml(_)
                 | AnyMdInline::MdEntityReference(_)
                 | AnyMdInline::GfmStrikethrough(_)
-                | AnyMdInline::GfmTaskListItem(_) => {
+                | AnyMdInline::GfmTaskListItem(_)
+                | AnyMdInline::MdxInlineExpression(_) => {
                     current_word_group.push(ProseAtom::InlineElement(item));
                 }
 

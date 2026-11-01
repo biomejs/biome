@@ -22,6 +22,7 @@ name    = "markdown_parser"
 [dependencies]
 biome_console          = { workspace = true }
 biome_diagnostics      = { workspace = true }
+biome_js_extent        = { workspace = true, optional = true }
 biome_markdown_factory = { workspace = true }
 biome_markdown_syntax  = { workspace = true }
 biome_parser           = { workspace = true }
@@ -39,7 +40,7 @@ unicode-bom            = { workspace = true }
 # Integration tests are compiled as separate crates and can only access public API,
 # so we need to enable the feature here to make to_html available for spec tests.
 biome_configuration   = { path = "../biome_configuration", features = ["lang_md"] }
-biome_markdown_parser = { path = ".", features = ["test_utils"] }
+biome_markdown_parser = { path = ".", features = ["lang_mdx", "test_utils"] }
 biome_test_utils      = { path = "../biome_test_utils" }
 criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta                 = { workspace = true }
@@ -57,6 +58,9 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
+# Enables the MDX variant of Markdown. MDX is still in development and stays
+# out of release builds until this feature is removed.
+lang_mdx   = ["dep:biome_js_extent"]
 # Enables test utilities (to_html module) for CommonMark spec compliance testing.
 # Not included in production builds to avoid unnecessary dependencies and code.
 test_utils = ["dep:htmlize", "dep:percent-encoding"]

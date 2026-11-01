@@ -81,6 +81,8 @@ AnyMdLeafBlock =
 	| MdNewline
 	| MdContinuationIndent
 	| GfmTable
+	| MdxEsmBlock
+	| MdxBlockExpression
 
 AnyMdContainerBlock =
 	MdQuote
@@ -283,6 +285,7 @@ AnyMdInline =
 	| GfmTaskListItem
 	| MdQuotePrefix
 	| MdIndentToken
+	| MdxInlineExpression
 
 
 // *italic*
@@ -470,3 +473,33 @@ GfmTableDelimiterDashList = GfmTableDelimiterDash*
 // -
 // ^
 GfmTableDelimiterDash = '-'
+
+// ==================================
+// MDX
+// ==================================
+
+// import { Chart } from "./chart.js"
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// Top-level `import` and `export` statements, up to the next blank line.
+// The content is JavaScript and is parsed as an embedded snippet.
+MdxEsmBlock = content: 'mdx_esm_literal'
+
+// {props.title}
+// ^^^^^^^^^^^^^
+// An expression that is alone on its line.
+MdxBlockExpression =
+	indent: MdIndentTokenList
+	l_curly: '{'
+	content: MdxExpressionContent?
+	r_curly: '}'
+
+// Hello, {props.name}!
+//        ^^^^^^^^^^^^
+MdxInlineExpression =
+	l_curly: '{'
+	content: MdxExpressionContent?
+	r_curly: '}'
+
+// The JavaScript between the braces of an expression, parsed as an embedded
+// snippet. An empty expression `{}` has no content.
+MdxExpressionContent = value: 'mdx_expression_literal'

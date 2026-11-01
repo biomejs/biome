@@ -1,10 +1,10 @@
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_parser::{Parser, SyntaxFeature};
 use biome_rowan::TextSize;
 
-use crate::MarkdownParser;
 use crate::syntax::{inline_span_crosses_block_boundary, inline_span_crosses_setext};
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 // #region is_inline_html — top-level dispatcher and HTML construct predicates
 
@@ -394,7 +394,8 @@ fn is_html_attr_name_continue(b: u8) -> bool {
 // #region parse_inline_html — CST node construction
 
 fn inline_html_len(p: &mut MarkdownParser) -> Option<usize> {
-    if !p.at(L_ANGLE) {
+    // MDX has no inline HTML: there, `<` starts JSX.
+    if !p.at(L_ANGLE) || MarkdownSyntaxFeatures::Mdx.is_supported(p) {
         return None;
     }
 
@@ -576,7 +577,8 @@ fn autolink_content(source: &str) -> Option<&str> {
 /// Per CommonMark §6.4 and §6.5, autolinks are URIs or email addresses
 /// wrapped in angle brackets.
 pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
-    if !p.at(L_ANGLE) {
+    // MDX has no autolinks: there, `<` starts JSX.
+    if !p.at(L_ANGLE) || MarkdownSyntaxFeatures::Mdx.is_supported(p) {
         return Absent;
     }
 

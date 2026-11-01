@@ -1,0 +1,110 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+Hello {props.name
+
+Next paragraph
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..6 "Hello " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@6..7 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@7..17 "props.name" [] [],
+                    },
+                    r_curly_token: missing (required),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@18..19 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@19..33 "Next paragraph" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@33..34 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@34..34 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..34
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..34
+    0: MD_PARAGRAPH@0..18
+      0: MD_INLINE_ITEM_LIST@0..18
+        0: MD_TEXTUAL@0..6
+          0: MD_TEXTUAL_LITERAL@0..6 "Hello " [] []
+        1: MDX_INLINE_EXPRESSION@6..17
+          0: L_CURLY@6..7 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@7..17
+            0: MDX_EXPRESSION_LITERAL@7..17 "props.name" [] []
+          2: (empty)
+        2: MD_TEXTUAL@17..18
+          0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
+    1: MD_NEWLINE@18..19
+      0: NEWLINE@18..19 "\n" [] []
+    2: MD_PARAGRAPH@19..34
+      0: MD_INLINE_ITEM_LIST@19..34
+        0: MD_TEXTUAL@19..33
+          0: MD_TEXTUAL_LITERAL@19..33 "Next paragraph" [] []
+        1: MD_TEXTUAL@33..34
+          0: MD_TEXTUAL_LITERAL@33..34 "\n" [] []
+  3: EOF@34..34 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_inline_expression.mdx:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+  > 1 │ Hello {props.name
+      │       ^
+    2 │ 
+    3 │ Next paragraph
+  
+  i expression started here
+  
+  > 1 │ Hello {props.name
+      │       ^
+    2 │ 
+    3 │ Next paragraph
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```

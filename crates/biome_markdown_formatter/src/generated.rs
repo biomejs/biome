@@ -1857,6 +1857,158 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdThematicBrea
         )
     }
 }
+impl FormatRule<biome_markdown_syntax::MdxBlockExpression>
+    for crate::mdx::auxiliary::block_expression::FormatMdxBlockExpression
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdxBlockExpression,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdxBlockExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxBlockExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdxBlockExpression,
+        crate::mdx::auxiliary::block_expression::FormatMdxBlockExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::mdx::auxiliary::block_expression::FormatMdxBlockExpression::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxBlockExpression {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdxBlockExpression,
+        crate::mdx::auxiliary::block_expression::FormatMdxBlockExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::mdx::auxiliary::block_expression::FormatMdxBlockExpression::default(),
+        )
+    }
+}
+impl FormatRule<biome_markdown_syntax::MdxEsmBlock>
+    for crate::mdx::auxiliary::esm_block::FormatMdxEsmBlock
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdxEsmBlock,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdxEsmBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxEsmBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdxEsmBlock,
+        crate::mdx::auxiliary::esm_block::FormatMdxEsmBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::mdx::auxiliary::esm_block::FormatMdxEsmBlock::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxEsmBlock {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdxEsmBlock,
+        crate::mdx::auxiliary::esm_block::FormatMdxEsmBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::mdx::auxiliary::esm_block::FormatMdxEsmBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_markdown_syntax::MdxExpressionContent>
+    for crate::mdx::auxiliary::expression_content::FormatMdxExpressionContent
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdxExpressionContent,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdxExpressionContent>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxExpressionContent {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdxExpressionContent,
+        crate::mdx::auxiliary::expression_content::FormatMdxExpressionContent,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::mdx::auxiliary::expression_content::FormatMdxExpressionContent::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxExpressionContent {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdxExpressionContent,
+        crate::mdx::auxiliary::expression_content::FormatMdxExpressionContent,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::mdx::auxiliary::expression_content::FormatMdxExpressionContent::default(),
+        )
+    }
+}
+impl FormatRule<biome_markdown_syntax::MdxInlineExpression>
+    for crate::mdx::auxiliary::inline_expression::FormatMdxInlineExpression
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdxInlineExpression,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_markdown_syntax::MdxInlineExpression>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxInlineExpression {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdxInlineExpression,
+        crate::mdx::auxiliary::inline_expression::FormatMdxInlineExpression,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::mdx::auxiliary::inline_expression::FormatMdxInlineExpression::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdxInlineExpression {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdxInlineExpression,
+        crate::mdx::auxiliary::inline_expression::FormatMdxInlineExpression,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::mdx::auxiliary::inline_expression::FormatMdxInlineExpression::default(),
+        )
+    }
+}
 impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::GfmTableCellList {
     type Format<'a> = FormatRefWithRule<
         'a,

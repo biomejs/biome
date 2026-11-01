@@ -1,0 +1,142 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdxjs-esm: import and export statements */}
+import a from "a"
+import {b, c} from "c"
+
+export const meta = {title: "Hello"}
+
+export {
+  d
+
+} from "d"
+
+# Hello
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..66 "/* micromark-extension-mdxjs-esm: import and export statements */" [] [],
+            },
+            r_curly_token: R_CURLY@66..67 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@67..68 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@68..108 "import a from \"a\"\nimport {b, c} from \"c\"" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@108..109 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@109..110 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@110..146 "export const meta = {title: \"Hello\"}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@146..147 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@147..148 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@148..172 "export {\n  d\n\n} from \"d\"" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@172..173 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@173..174 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@174..175 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@175..181 " Hello" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@181..182 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@182..182 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..182
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..182
+    0: MDX_BLOCK_EXPRESSION@0..67
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..66
+        0: MDX_EXPRESSION_LITERAL@1..66 "/* micromark-extension-mdxjs-esm: import and export statements */" [] []
+      3: R_CURLY@66..67 "}" [] []
+    1: MD_NEWLINE@67..68
+      0: NEWLINE@67..68 "\n" [] []
+    2: MDX_ESM_BLOCK@68..108
+      0: MDX_ESM_LITERAL@68..108 "import a from \"a\"\nimport {b, c} from \"c\"" [] []
+    3: MD_NEWLINE@108..109
+      0: NEWLINE@108..109 "\n" [] []
+    4: MD_NEWLINE@109..110
+      0: NEWLINE@109..110 "\n" [] []
+    5: MDX_ESM_BLOCK@110..146
+      0: MDX_ESM_LITERAL@110..146 "export const meta = {title: \"Hello\"}" [] []
+    6: MD_NEWLINE@146..147
+      0: NEWLINE@146..147 "\n" [] []
+    7: MD_NEWLINE@147..148
+      0: NEWLINE@147..148 "\n" [] []
+    8: MDX_ESM_BLOCK@148..172
+      0: MDX_ESM_LITERAL@148..172 "export {\n  d\n\n} from \"d\"" [] []
+    9: MD_NEWLINE@172..173
+      0: NEWLINE@172..173 "\n" [] []
+    10: MD_NEWLINE@173..174
+      0: NEWLINE@173..174 "\n" [] []
+    11: MD_HEADER@174..181
+      0: MD_INDENT_TOKEN_LIST@174..174
+      1: MD_HASH_LIST@174..175
+        0: MD_HASH@174..175
+          0: HASH@174..175 "#" [] []
+      2: MD_PARAGRAPH@175..181
+        0: MD_INLINE_ITEM_LIST@175..181
+          0: MD_TEXTUAL@175..181
+            0: MD_TEXTUAL_LITERAL@175..181 " Hello" [] []
+      3: MD_HASH_LIST@181..181
+    12: MD_NEWLINE@181..182
+      0: NEWLINE@181..182 "\n" [] []
+  3: EOF@182..182 "" [] []
+
+```

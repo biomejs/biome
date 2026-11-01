@@ -2149,6 +2149,9 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
         AnyMdInline::MdCodeContent(_) => {
             // Fenced code content never appears inside link or image text
         }
+        AnyMdInline::MdxInlineExpression(_) => {
+            // MDX expressions produce JavaScript values, not CommonMark text
+        }
     }
 }
 

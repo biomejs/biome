@@ -323,6 +323,13 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
     } else if p.at(MD_ENTITY_LITERAL) {
         // Entity or numeric character reference (already validated by lexer)
         entities::parse_entity_reference(p)
+    } else if p.at(T!['{']) && MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+        let result = super::parse_mdx_inline_expression(p);
+        if result.is_absent() {
+            super::parse_textual(p)
+        } else {
+            result
+        }
     } else {
         super::parse_textual(p)
     }

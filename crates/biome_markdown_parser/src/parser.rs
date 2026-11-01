@@ -35,6 +35,10 @@ pub struct MarkdownParserOptions {
     /// Applies the CommonMark CJK-friendly amendments to the emphasis and
     /// strikethrough flanking rules.
     pub(crate) cjk_friendly_emphasis: bool,
+
+    /// Parses the MDX variant of Markdown.
+    #[cfg(feature = "lang_mdx")]
+    pub(crate) mdx: bool,
 }
 
 impl MarkdownParserOptions {
@@ -58,6 +62,28 @@ impl MarkdownParserOptions {
         self.cjk_friendly_emphasis = cjk_friendly_emphasis;
         self
     }
+
+    /// Controls whether the source is parsed as [MDX](https://mdxjs.com/), the
+    /// variant of Markdown that adds JavaScript `import` and `export`
+    /// statements, `{expressions}`, and JSX. MDX also drops indented code,
+    /// HTML, and `<url>` autolinks.
+    #[cfg(feature = "lang_mdx")]
+    pub fn with_mdx(mut self, mdx: bool) -> Self {
+        self.mdx = mdx;
+        self
+    }
+
+    /// Returns whether the source is parsed as MDX.
+    pub(crate) fn is_mdx(&self) -> bool {
+        #[cfg(feature = "lang_mdx")]
+        {
+            self.mdx
+        }
+        #[cfg(not(feature = "lang_mdx"))]
+        {
+            false
+        }
+    }
 }
 
 impl Default for MarkdownParserOptions {
@@ -67,6 +93,8 @@ impl Default for MarkdownParserOptions {
             frontmatter: false,
             gfm: false,
             cjk_friendly_emphasis: false,
+            #[cfg(feature = "lang_mdx")]
+            mdx: false,
         }
     }
 }

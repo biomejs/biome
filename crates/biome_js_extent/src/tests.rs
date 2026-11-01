@@ -337,3 +337,58 @@ fn a_bracket_in_a_string_does_not_end_an_argument() {
     let source = "'a]b']";
     assert_eq!(argument(source), Some(source.len() - 1));
 }
+
+/// The offset where the content of an MDX ESM block ends.
+fn esm(source: &str) -> usize {
+    JsExtent::esm_length(source.as_bytes())
+}
+
+#[test]
+fn a_blank_line_ends_an_esm_block() {
+    assert_eq!(esm("import a from \"a\"\n\nb"), 17);
+}
+
+#[test]
+fn a_line_of_spaces_ends_an_esm_block() {
+    assert_eq!(esm("import a from \"a\"\n \t\nb"), 17);
+}
+
+#[test]
+fn an_esm_block_without_a_blank_line_runs_to_the_end() {
+    let source = "import a from \"a\"\nexport const b = 1";
+    assert_eq!(esm(source), source.len());
+}
+
+#[test]
+fn a_blank_line_inside_braces_does_not_end_an_esm_block() {
+    let source = "export {\n\n  a\n\n} from \"b\"\n\nc";
+    assert_eq!(esm(source), source.len() - 3);
+}
+
+#[test]
+fn a_blank_line_inside_a_template_does_not_end_an_esm_block() {
+    let source = "export const a = `x\n\ny`\n\nb";
+    assert_eq!(esm(source), source.len() - 3);
+}
+
+#[test]
+fn a_blank_line_inside_a_block_comment_does_not_end_an_esm_block() {
+    let source = "import a from \"a\" /*\n\n*/\n\nb";
+    assert_eq!(esm(source), source.len() - 3);
+}
+
+#[test]
+fn a_blank_line_after_a_line_comment_ends_an_esm_block() {
+    assert_eq!(esm("import a from \"a\" // a\n\nb"), 22);
+}
+
+#[test]
+fn a_blank_line_inside_jsx_does_not_end_an_esm_block() {
+    let source = "export const a = <div>\n\n</div>\n\nb";
+    assert_eq!(esm(source), source.len() - 3);
+}
+
+#[test]
+fn a_blank_line_after_crlf_ends_an_esm_block() {
+    assert_eq!(esm("import a\r\n\r\nb"), 8);
+}

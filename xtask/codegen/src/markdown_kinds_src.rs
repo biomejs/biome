@@ -27,6 +27,8 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         (",", "COMMA"),
         (":", "COLON"),
         ("|", "PIPE"),
+        ("{", "L_CURLY"),
+        ("}", "R_CURLY"),
     ],
     keywords: &["null"],
     literals: &[
@@ -43,6 +45,8 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_QUOTE_POST_MARKER_SPACE",
         "MD_INDENT_CHAR",
         "MD_LIST_POST_MARKER_SPACE",
+        "MDX_ESM_LITERAL",
+        "MDX_EXPRESSION_LITERAL",
     ],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "TAB"],
     nodes: &[
@@ -114,5 +118,9 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "GFM_TABLE_DELIMITER_CELL",
         "GFM_TABLE_DELIMITER_DASH_LIST",
         "GFM_TABLE_DELIMITER_DASH",
+        "MDX_ESM_BLOCK",
+        "MDX_BLOCK_EXPRESSION",
+        "MDX_INLINE_EXPRESSION",
+        "MDX_EXPRESSION_CONTENT",
     ],
 };
