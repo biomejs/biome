@@ -1,0 +1,174 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+import {Chart} from "./chart.js"
+<Chart data={[1, 2]} />
+
+export const meta = {title: "x"}
+<Note>
+  Text
+</Note>
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@0..32 "import {Chart} from \"./chart.js\"" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@32..33 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@33..56 "<Chart data={[1, 2]} />" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@56..57 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@57..58 "\n" [] [],
+        },
+        MdxEsmBlock {
+            content_token: MDX_ESM_LITERAL@58..90 "export const meta = {title: \"x\"}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@90..91 "\n" [] [],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@91..97 "<Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@97..98 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@98..99 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@99..100 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..104 "Text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@104..105 "\n" [] [],
+                },
+            ],
+        },
+        MdxJsxBlockTag {
+            indent: MdIndentTokenList [],
+            value_token: MDX_JSX_TAG_LITERAL@105..112 "</Note>" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@112..113 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@113..113 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..113
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..113
+    0: MDX_ESM_BLOCK@0..32
+      0: MDX_ESM_LITERAL@0..32 "import {Chart} from \"./chart.js\"" [] []
+    1: MD_NEWLINE@32..33
+      0: NEWLINE@32..33 "\n" [] []
+    2: MDX_JSX_BLOCK_TAG@33..56
+      0: MD_INDENT_TOKEN_LIST@33..33
+      1: MDX_JSX_TAG_LITERAL@33..56 "<Chart data={[1, 2]} />" [] []
+    3: MD_NEWLINE@56..57
+      0: NEWLINE@56..57 "\n" [] []
+    4: MD_NEWLINE@57..58
+      0: NEWLINE@57..58 "\n" [] []
+    5: MDX_ESM_BLOCK@58..90
+      0: MDX_ESM_LITERAL@58..90 "export const meta = {title: \"x\"}" [] []
+    6: MD_NEWLINE@90..91
+      0: NEWLINE@90..91 "\n" [] []
+    7: MDX_JSX_BLOCK_TAG@91..97
+      0: MD_INDENT_TOKEN_LIST@91..91
+      1: MDX_JSX_TAG_LITERAL@91..97 "<Note>" [] []
+    8: MD_NEWLINE@97..98
+      0: NEWLINE@97..98 "\n" [] []
+    9: MD_PARAGRAPH@98..105
+      0: MD_INLINE_ITEM_LIST@98..105
+        0: MD_TEXTUAL@98..99
+          0: MD_TEXTUAL_LITERAL@98..99 " " [] []
+        1: MD_TEXTUAL@99..100
+          0: MD_TEXTUAL_LITERAL@99..100 " " [] []
+        2: MD_TEXTUAL@100..104
+          0: MD_TEXTUAL_LITERAL@100..104 "Text" [] []
+        3: MD_TEXTUAL@104..105
+          0: MD_TEXTUAL_LITERAL@104..105 "\n" [] []
+    10: MDX_JSX_BLOCK_TAG@105..112
+      0: MD_INDENT_TOKEN_LIST@105..105
+      1: MDX_JSX_TAG_LITERAL@105..112 "</Note>" [] []
+    11: MD_NEWLINE@112..113
+      0: NEWLINE@112..113 "\n" [] []
+  3: EOF@113..113 "" [] []
+
+```
+
+## Diagnostics
+
+```
+esm_followed_by_jsx_tag.mdx:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+  > 1 │ import {Chart} from "./chart.js"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ <Chart data={[1, 2]} />
+    3 │ 
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    1 │ import {Chart} from "./chart.js"
+  > 2 │ <Chart data={[1, 2]} />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ export const meta = {title: "x"}
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+esm_followed_by_jsx_tag.mdx:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a blank line after the `import` and `export` statements.
+  
+    2 │ <Chart data={[1, 2]} />
+    3 │ 
+  > 4 │ export const meta = {title: "x"}
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <Note>
+    6 │   Text
+  
+  i this line isn't part of an `import` or `export` statement
+  
+    4 │ export const meta = {title: "x"}
+  > 5 │ <Note>
+      │ ^^^^^^
+    6 │   Text
+    7 │ </Note>
+  
+  i MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.
+  
+```
