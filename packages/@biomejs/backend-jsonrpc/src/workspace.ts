@@ -3548,6 +3548,11 @@ export interface Nursery {
 	 */
 	useAwaitThenable?: UseAwaitThenableConfiguration;
 	/**
+	 * Enforce that every file starts with a configured banner comment.
+	 * See https://biomejs.dev/linter/rules/use-banner-comment
+	 */
+	useBannerComment?: UseBannerCommentConfiguration;
+	/**
 	 * Prefer modern DOM traversal APIs over positional indexes and chained walks.
 	 * See https://biomejs.dev/linter/rules/use-better-dom-traversing
 	 */
@@ -6458,6 +6463,9 @@ export type UseAstroClientOnlyDirectiveValueConfiguration =
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
+export type UseBannerCommentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBannerCommentOptions;
 export type UseBetterDomTraversingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBetterDomTraversingOptions;
@@ -9369,6 +9377,14 @@ export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
 }
+export interface RuleWithUseBannerCommentOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseBannerCommentOptions;
+}
 export interface RuleWithUseBetterDomTraversingOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12004,6 +12020,15 @@ export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
+export interface UseBannerCommentOptions {
+	/**
+	 * The expected banner content.
+	 *
+	 * Accepts either a single string (one canonical banner) or an array of
+	 * strings (any one of which is an acceptable banner).
+	 */
+	content?: BannerContent;
+}
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
 export type UseBlockStatementOverIifeOptions = {};
@@ -13169,6 +13194,7 @@ export interface RestrictedFunction {
 	 */
 	path?: RestrictedFunctionPath;
 }
+export type BannerContent = string | string[];
 /**
  * The checks for one top-level block.
  */
@@ -13847,6 +13873,7 @@ export type Category =
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
+	| "lint/nursery/useBannerComment"
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
