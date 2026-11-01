@@ -2037,6 +2037,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noZeroLengthUnit",
         TypeId::of::<biome_rule_options::no_zero_length_unit::NoZeroLengthUnitOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useAccessorPairs",
+        TypeId::of::<biome_rule_options::use_accessor_pairs::UseAccessorPairsOptions>(),
+    ));
     result.push(("suspicious", "useAdjacentOverloadSignatures", TypeId::of::<biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions>()));
     result.push((
         "a11y",
