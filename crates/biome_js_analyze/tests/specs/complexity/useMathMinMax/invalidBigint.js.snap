@@ -1,0 +1,306 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalidBigint.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// number versions of bigint expressions
+foo < -1 ? -1 : foo;
+foo > 2 ** 62 - 1 ? 2 ** 62 - 1 : foo;
+
+// methods that aren't on BigInt
+foo > Other.asIntN(64, bar) ? Other.asIntN(64, bar) : foo;
+foo > BigInt.other(64, bar) ? BigInt.other(64, bar) : foo;
+
+// expressions whose possible values are all numbers
+foo > (bar ?? 1) ? (bar ?? 1) : foo;
+foo > (bar ? 1 : 2) ? (bar ? 1 : 2) : foo;
+
+// only `const` variables are followed inside an expression
+let notConst = 1n;
+foo < -notConst ? -notConst : foo;
+
+// only one level of variables is followed
+const firstLevel = 1n;
+const secondLevel = firstLevel;
+foo < -secondLevel ? -secondLevel : foo;
+
+// call arguments and function bodies are not searched
+foo > Number(1n) ? Number(1n) : foo;
+foo > (() => 1n) ? (() => 1n) : foo;
+
+// declarations that refer to each other
+const cycleA = cycleB;
+const cycleB = cycleA;
+foo > cycleA ? cycleA : foo;
+
+```
+
+# Diagnostics
+```
+invalidBigint.js:3:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // number versions of bigint expressions
+  > 3 │ foo < -1 ? -1 : foo;
+      │ ^^^^^^^^^^^^^^^^^^^
+    4 │ foo > 2 ** 62 - 1 ? 2 ** 62 - 1 : foo;
+    5 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   // number versions of bigint expressions
+     3    │ - foo·<·-1·?·-1·:·foo;
+        3 │ + Math.max(foo·,·-1);
+     4  4 │   foo > 2 ** 62 - 1 ? 2 ** 62 - 1 : foo;
+     5  5 │   
+  
+
+```
+
+```
+invalidBigint.js:4:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    2 │ // number versions of bigint expressions
+    3 │ foo < -1 ? -1 : foo;
+  > 4 │ foo > 2 ** 62 - 1 ? 2 ** 62 - 1 : foo;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ // methods that aren't on BigInt
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     2  2 │   // number versions of bigint expressions
+     3  3 │   foo < -1 ? -1 : foo;
+     4    │ - foo·>·2·**·62·-·1·?·2·**·62·-·1·:·foo;
+        4 │ + Math.min(foo·,·2·**·62·-·1);
+     5  5 │   
+     6  6 │   // methods that aren't on BigInt
+  
+
+```
+
+```
+invalidBigint.js:7:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    6 │ // methods that aren't on BigInt
+  > 7 │ foo > Other.asIntN(64, bar) ? Other.asIntN(64, bar) : foo;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ foo > BigInt.other(64, bar) ? BigInt.other(64, bar) : foo;
+    9 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidBigint.js:8:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+     6 │ // methods that aren't on BigInt
+     7 │ foo > Other.asIntN(64, bar) ? Other.asIntN(64, bar) : foo;
+   > 8 │ foo > BigInt.other(64, bar) ? BigInt.other(64, bar) : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // expressions whose possible values are all numbers
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidBigint.js:11:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    10 │ // expressions whose possible values are all numbers
+  > 11 │ foo > (bar ?? 1) ? (bar ?? 1) : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ foo > (bar ? 1 : 2) ? (bar ? 1 : 2) : foo;
+    13 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     9  9 │   
+    10 10 │   // expressions whose possible values are all numbers
+    11    │ - foo·>·(bar·??·1)·?·(bar·??·1)·:·foo;
+       11 │ + Math.min(foo·,·(bar·??·1));
+    12 12 │   foo > (bar ? 1 : 2) ? (bar ? 1 : 2) : foo;
+    13 13 │   
+  
+
+```
+
+```
+invalidBigint.js:12:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    10 │ // expressions whose possible values are all numbers
+    11 │ foo > (bar ?? 1) ? (bar ?? 1) : foo;
+  > 12 │ foo > (bar ? 1 : 2) ? (bar ? 1 : 2) : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ // only `const` variables are followed inside an expression
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    10 10 │   // expressions whose possible values are all numbers
+    11 11 │   foo > (bar ?? 1) ? (bar ?? 1) : foo;
+    12    │ - foo·>·(bar·?·1·:·2)·?·(bar·?·1·:·2)·:·foo;
+       12 │ + Math.min(foo·,·(bar·?·1·:·2));
+    13 13 │   
+    14 14 │   // only `const` variables are followed inside an expression
+  
+
+```
+
+```
+invalidBigint.js:16:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    14 │ // only `const` variables are followed inside an expression
+    15 │ let notConst = 1n;
+  > 16 │ foo < -notConst ? -notConst : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // only one level of variables is followed
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    14 14 │   // only `const` variables are followed inside an expression
+    15 15 │   let notConst = 1n;
+    16    │ - foo·<·-notConst·?·-notConst·:·foo;
+       16 │ + Math.max(foo·,·-notConst);
+    17 17 │   
+    18 18 │   // only one level of variables is followed
+  
+
+```
+
+```
+invalidBigint.js:21:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    19 │ const firstLevel = 1n;
+    20 │ const secondLevel = firstLevel;
+  > 21 │ foo < -secondLevel ? -secondLevel : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // call arguments and function bodies are not searched
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    19 19 │   const firstLevel = 1n;
+    20 20 │   const secondLevel = firstLevel;
+    21    │ - foo·<·-secondLevel·?·-secondLevel·:·foo;
+       21 │ + Math.max(foo·,·-secondLevel);
+    22 22 │   
+    23 23 │   // call arguments and function bodies are not searched
+  
+
+```
+
+```
+invalidBigint.js:24:1 lint/complexity/useMathMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    23 │ // call arguments and function bodies are not searched
+  > 24 │ foo > Number(1n) ? Number(1n) : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ foo > (() => 1n) ? (() => 1n) : foo;
+    26 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Consider using Math.min() instead.
+  
+  i Biome could not provide a fix because it can't guarantee that both arguments don't have side effects.
+  
+
+```
+
+```
+invalidBigint.js:25:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    23 │ // call arguments and function bodies are not searched
+    24 │ foo > Number(1n) ? Number(1n) : foo;
+  > 25 │ foo > (() => 1n) ? (() => 1n) : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // declarations that refer to each other
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    23 23 │   // call arguments and function bodies are not searched
+    24 24 │   foo > Number(1n) ? Number(1n) : foo;
+    25    │ - foo·>·(()·=>·1n)·?·(()·=>·1n)·:·foo;
+       25 │ + Math.min(foo·,·(()·=>·1n));
+    26 26 │   
+    27 27 │   // declarations that refer to each other
+  
+
+```
+
+```
+invalidBigint.js:30:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    28 │ const cycleA = cycleB;
+    29 │ const cycleB = cycleA;
+  > 30 │ foo > cycleA ? cycleA : foo;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    28 28 │   const cycleA = cycleB;
+    29 29 │   const cycleB = cycleA;
+    30    │ - foo·>·cycleA·?·cycleA·:·foo;
+       30 │ + Math.min(foo·,·cycleA);
+    31 31 │   
+  
+
+```
