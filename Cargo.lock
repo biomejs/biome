@@ -1027,6 +1027,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_html_factory",
  "biome_html_syntax",
+ "biome_js_extent",
  "biome_languages",
  "biome_parser",
  "biome_rowan",
@@ -1039,7 +1040,6 @@ dependencies = [
  "mimalloc",
  "quickcheck",
  "quickcheck_macros",
- "smallvec",
  "tests_macros",
  "tikv-jemallocator",
  "tracing",
@@ -1143,6 +1143,14 @@ dependencies = [
  "rustc-hash 2.1.3",
  "salsa",
  "static_assertions",
+]
+
+[[package]]
+name = "biome_js_extent"
+version = "0.7.0"
+dependencies = [
+ "biome_unicode_table",
+ "smallvec",
 ]
 
 [[package]]
