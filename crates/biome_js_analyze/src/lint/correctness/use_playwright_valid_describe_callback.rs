@@ -72,14 +72,13 @@ impl Rule for UsePlaywrightValidDescribeCallback {
             return None;
         }
 
-        // Get the callback argument (should be the second argument for describe calls)
-        let args = call_expr.arguments().ok()?;
-        let [_, callback_arg] = args.get_arguments_by_index([0, 1]);
-
-        // Check if callback is missing
-        let Some(callback_arg) = callback_arg else {
+        // Playwright accepts `describe(title, callback)` and `describe(title, details, callback)`,
+        // so the callback is always the last argument.
+        let args = call_expr.arguments().ok()?.args();
+        if args.len() < 2 {
             return Some(InvalidReason::MissingCallback);
-        };
+        }
+        let callback_arg = args.last()?.ok()?;
 
         let Some(callback_expr) = callback_arg.as_any_js_expression() else {
             return Some(InvalidReason::NotFunction);
@@ -141,12 +140,12 @@ impl Rule for UsePlaywrightValidDescribeCallback {
             ),
             InvalidReason::MissingCallback => (
                 markup! { "Describe requires a callback function." },
-                markup! { "The second argument to describe must be a function that contains the test definitions." },
-                markup! { "Add a callback function as the second argument to describe." },
+                markup! { "The last argument to describe must be a function that contains the test definitions." },
+                markup! { "Add a callback function as the last argument to describe." },
             ),
             InvalidReason::NotFunction => (
                 markup! { "Describe callback must be a function." },
-                markup! { "The second argument to describe must be a function, not a "<Emphasis>"string"</Emphasis>", "<Emphasis>"number"</Emphasis>", "<Emphasis>"object"</Emphasis>", or other type." },
+                markup! { "The last argument to describe must be a function, not a "<Emphasis>"string"</Emphasis>", "<Emphasis>"number"</Emphasis>", "<Emphasis>"object"</Emphasis>", or other type." },
                 markup! { "Replace the callback with a function expression or arrow function." },
             ),
         };
