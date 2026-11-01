@@ -7870,6 +7870,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRefObjectReactivityLossConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRefObjectReactivityLossOptions" }
+			]
+		},
+		"NoVueRefObjectReactivityLossOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueRequiredPropWithDefaultConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8894,6 +8904,13 @@
 					"description": "Disallow changing the props of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-mutating-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueMutatingPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRefObjectReactivityLoss": {
+					"description": "Disallow reading the value of a Vue ref in a place where the read runs only once.\nSee https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRefObjectReactivityLossConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14617,6 +14634,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueRefAsOperandOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRefObjectReactivityLossOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRefObjectReactivityLossOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
