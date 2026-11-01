@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
     declare_lint_rule,
 };
 use biome_console::markup;
@@ -9,7 +9,10 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_playwright_useless_await::NoPlaywrightUselessAwaitOptions;
 
 use crate::JsRuleAction;
-use crate::frameworks::playwright::{LOCATOR_METHODS, get_page_or_frame_name};
+use crate::frameworks::playwright::{
+    LOCATOR_METHODS, get_page_or_frame_name, is_playwright_call_chain_or_resolved,
+};
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow unnecessary `await` for Playwright methods that don't return promises.
@@ -63,7 +66,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoPlaywrightUselessAwait {
-    type Query = Ast<JsAwaitExpression>;
+    type Query = Semantic<JsAwaitExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoPlaywrightUselessAwaitOptions;
@@ -82,15 +85,18 @@ impl Rule for NoPlaywrightUselessAwait {
             let member_token = member_name.as_js_name()?.value_token().ok()?;
             let method_name = member_token.text_trimmed();
 
-            // Check if it's a locator method
-            if LOCATOR_METHODS.binary_search(&method_name).is_ok() {
+            let object = member_expr.object().ok()?;
+
+            // Check if it's a locator method called on a Playwright chain or locator
+            if LOCATOR_METHODS.binary_search(&method_name).is_ok()
+                && is_playwright_call_chain_or_resolved(&object, ctx.model())
+            {
                 return Some(());
             }
 
             // Check if it's a sync page method
             if SYNC_PAGE_METHODS.binary_search(&method_name).is_ok() {
                 // Verify it's called on page/frame
-                let object = member_expr.object().ok()?;
                 if get_page_or_frame_name(&object).is_some() {
                     return Some(());
                 }
