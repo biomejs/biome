@@ -54,14 +54,19 @@ pub(crate) struct ScriptOutput {
     pub(crate) default_export: Option<ComponentId>,
 }
 
+/// Options that register a lifecycle hook. `beforeDestroy` and `destroyed`
+/// are the names Vue 2 used for `beforeUnmount` and `unmounted`. Sorted, so
+/// it can be searched with a binary search.
 const LIFECYCLE_OPTIONS: &[&str] = &[
     "activated",
     "beforeCreate",
+    "beforeDestroy",
     "beforeMount",
     "beforeUnmount",
     "beforeUpdate",
     "created",
     "deactivated",
+    "destroyed",
     "errorCaptured",
     "mounted",
     "renderTracked",
@@ -538,7 +543,7 @@ impl Collector<'_, '_> {
                 // may use any declaration.
                 "template" => self.builder.open_all_uses(component),
                 other => {
-                    if LIFECYCLE_OPTIONS.contains(&other) {
+                    if LIFECYCLE_OPTIONS.binary_search(&other).is_ok() {
                         self.add_instance_symbol(
                             component,
                             name.clone(),
@@ -2235,4 +2240,16 @@ fn type_set_of(ty: &AnyTsType) -> TypeSet {
         _ => types.insert(PropType::Unknown),
     }
     types
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LIFECYCLE_OPTIONS;
+
+    #[test]
+    fn lifecycle_options_are_sorted() {
+        for items in LIFECYCLE_OPTIONS.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+    }
 }

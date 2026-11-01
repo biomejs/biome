@@ -184,6 +184,24 @@ defineComponent({
 }
 
 #[test]
+fn vue_2_lifecycle_option_names() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  beforeDestroy() {},
+  destroyed: () => {},
+});"#,
+        JsFileSource::js_module(),
+    );
+    let component = model.components().next().unwrap();
+    let names: Vec<_> = component
+        .hooks()
+        .map(|symbol| symbol.name().to_string())
+        .collect();
+    assert_eq!(names, ["beforeDestroy", "destroyed"]);
+}
+
+#[test]
 fn script_mode_file_with_vue_global() {
     let model = js_model(
         "Vue.createApp({ props: ['key'] });",
