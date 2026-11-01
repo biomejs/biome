@@ -1,0 +1,472 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPropertyDescriptor.js
+---
+# Input
+```js
+/* should generate diagnostics */
+let v;
+const o = {};
+
+Object.defineProperty(o, "arrowExpressionBody", {
+	get: () => v,
+	set: (nv) => (v = nv),
+});
+
+Object.defineProperty(o, "arrowBlockBody", {
+	set: (nv) => {
+		return nv;
+	},
+});
+
+Object.defineProperty(o, "functionExpression", {
+	set: function (nv) {
+		return nv;
+	},
+});
+
+Object.defineProperty(o, "method", {
+	set(nv) {
+		if (nv) {
+			return nv;
+		}
+	},
+});
+
+Reflect.defineProperty(o, "reflect", {
+	set(nv) {
+		return nv;
+	},
+});
+
+Object.defineProperties(o, {
+	defineProperties: {
+		set(nv) {
+			return nv;
+		},
+	},
+});
+
+Object.create(null, {
+	create: {
+		set: (nv) => nv,
+	},
+});
+
+Object.defineProperty(o, "stringKey", {
+	"set"(nv) {
+		return nv;
+	},
+});
+
+Object.defineProperty(o, "computedKey", {
+	["set"]: (nv) => nv,
+});
+
+Object.defineProperty(o, "templateKey", {
+	[`set`]: (nv) => nv,
+});
+
+Object.defineProperty(o, "parentheses", ({
+	set: ((nv) => nv),
+}));
+
+Object?.defineProperty(o, "optionalChain", {
+	set(nv) {
+		return nv;
+	},
+});
+
+Object["defineProperty"](o, "computedMethod", {
+	set(nv) {
+		return nv;
+	},
+});
+
+globalThis.Object.defineProperty(o, "globalThis", {
+	set(nv) {
+		return nv;
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalidPropertyDescriptor.js:7:15 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    5 │ Object.defineProperty(o, "arrowExpressionBody", {
+    6 │ 	get: () => v,
+  > 7 │ 	set: (nv) => (v = nv),
+      │ 	             ^^^^^^^^
+    8 │ });
+    9 │ 
+  
+  i The setter is here:
+  
+    5 │ Object.defineProperty(o, "arrowExpressionBody", {
+    6 │ 	get: () => v,
+  > 7 │ 	set: (nv) => (v = nv),
+      │ 	^^^^^^^^^^^^^^^^^^^^^
+    8 │ });
+    9 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:12:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    10 │ Object.defineProperty(o, "arrowBlockBody", {
+    11 │ 	set: (nv) => {
+  > 12 │ 		return nv;
+       │ 		^^^^^^^^^^
+    13 │ 	},
+    14 │ });
+  
+  i The setter is here:
+  
+    10 │ Object.defineProperty(o, "arrowBlockBody", {
+  > 11 │ 	set: (nv) => {
+       │ 	^^^^^^^^^^^^^^
+  > 12 │ 		return nv;
+  > 13 │ 	},
+       │ 	^
+    14 │ });
+    15 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:18:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    16 │ Object.defineProperty(o, "functionExpression", {
+    17 │ 	set: function (nv) {
+  > 18 │ 		return nv;
+       │ 		^^^^^^^^^^
+    19 │ 	},
+    20 │ });
+  
+  i The setter is here:
+  
+    16 │ Object.defineProperty(o, "functionExpression", {
+  > 17 │ 	set: function (nv) {
+       │ 	^^^^^^^^^^^^^^^^^^^^
+  > 18 │ 		return nv;
+  > 19 │ 	},
+       │ 	^
+    20 │ });
+    21 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:25:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    23 │ 	set(nv) {
+    24 │ 		if (nv) {
+  > 25 │ 			return nv;
+       │ 			^^^^^^^^^^
+    26 │ 		}
+    27 │ 	},
+  
+  i The setter is here:
+  
+    22 │ Object.defineProperty(o, "method", {
+  > 23 │ 	set(nv) {
+       │ 	^^^^^^^^^
+  > 24 │ 		if (nv) {
+  > 25 │ 			return nv;
+  > 26 │ 		}
+  > 27 │ 	},
+       │ 	^
+    28 │ });
+    29 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:32:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    30 │ Reflect.defineProperty(o, "reflect", {
+    31 │ 	set(nv) {
+  > 32 │ 		return nv;
+       │ 		^^^^^^^^^^
+    33 │ 	},
+    34 │ });
+  
+  i The setter is here:
+  
+    30 │ Reflect.defineProperty(o, "reflect", {
+  > 31 │ 	set(nv) {
+       │ 	^^^^^^^^^
+  > 32 │ 		return nv;
+  > 33 │ 	},
+       │ 	^
+    34 │ });
+    35 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:39:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    37 │ 	defineProperties: {
+    38 │ 		set(nv) {
+  > 39 │ 			return nv;
+       │ 			^^^^^^^^^^
+    40 │ 		},
+    41 │ 	},
+  
+  i The setter is here:
+  
+    36 │ Object.defineProperties(o, {
+    37 │ 	defineProperties: {
+  > 38 │ 		set(nv) {
+       │ 		^^^^^^^^^
+  > 39 │ 			return nv;
+  > 40 │ 		},
+       │ 		^
+    41 │ 	},
+    42 │ });
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:46:16 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    44 │ Object.create(null, {
+    45 │ 	create: {
+  > 46 │ 		set: (nv) => nv,
+       │ 		             ^^
+    47 │ 	},
+    48 │ });
+  
+  i The setter is here:
+  
+    44 │ Object.create(null, {
+    45 │ 	create: {
+  > 46 │ 		set: (nv) => nv,
+       │ 		^^^^^^^^^^^^^^^
+    47 │ 	},
+    48 │ });
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:52:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    50 │ Object.defineProperty(o, "stringKey", {
+    51 │ 	"set"(nv) {
+  > 52 │ 		return nv;
+       │ 		^^^^^^^^^^
+    53 │ 	},
+    54 │ });
+  
+  i The setter is here:
+  
+    50 │ Object.defineProperty(o, "stringKey", {
+  > 51 │ 	"set"(nv) {
+       │ 	^^^^^^^^^^^
+  > 52 │ 		return nv;
+  > 53 │ 	},
+       │ 	^
+    54 │ });
+    55 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:57:19 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    56 │ Object.defineProperty(o, "computedKey", {
+  > 57 │ 	["set"]: (nv) => nv,
+       │ 	                 ^^
+    58 │ });
+    59 │ 
+  
+  i The setter is here:
+  
+    56 │ Object.defineProperty(o, "computedKey", {
+  > 57 │ 	["set"]: (nv) => nv,
+       │ 	^^^^^^^^^^^^^^^^^^^
+    58 │ });
+    59 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:61:19 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    60 │ Object.defineProperty(o, "templateKey", {
+  > 61 │ 	[`set`]: (nv) => nv,
+       │ 	                 ^^
+    62 │ });
+    63 │ 
+  
+  i The setter is here:
+  
+    60 │ Object.defineProperty(o, "templateKey", {
+  > 61 │ 	[`set`]: (nv) => nv,
+       │ 	^^^^^^^^^^^^^^^^^^^
+    62 │ });
+    63 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:65:16 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    64 │ Object.defineProperty(o, "parentheses", ({
+  > 65 │ 	set: ((nv) => nv),
+       │ 	              ^^
+    66 │ }));
+    67 │ 
+  
+  i The setter is here:
+  
+    64 │ Object.defineProperty(o, "parentheses", ({
+  > 65 │ 	set: ((nv) => nv),
+       │ 	^^^^^^^^^^^^^^^^^
+    66 │ }));
+    67 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:70:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    68 │ Object?.defineProperty(o, "optionalChain", {
+    69 │ 	set(nv) {
+  > 70 │ 		return nv;
+       │ 		^^^^^^^^^^
+    71 │ 	},
+    72 │ });
+  
+  i The setter is here:
+  
+    68 │ Object?.defineProperty(o, "optionalChain", {
+  > 69 │ 	set(nv) {
+       │ 	^^^^^^^^^
+  > 70 │ 		return nv;
+  > 71 │ 	},
+       │ 	^
+    72 │ });
+    73 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:76:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    74 │ Object["defineProperty"](o, "computedMethod", {
+    75 │ 	set(nv) {
+  > 76 │ 		return nv;
+       │ 		^^^^^^^^^^
+    77 │ 	},
+    78 │ });
+  
+  i The setter is here:
+  
+    74 │ Object["defineProperty"](o, "computedMethod", {
+  > 75 │ 	set(nv) {
+       │ 	^^^^^^^^^
+  > 76 │ 		return nv;
+  > 77 │ 	},
+       │ 	^
+    78 │ });
+    79 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalidPropertyDescriptor.js:82:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    80 │ globalThis.Object.defineProperty(o, "globalThis", {
+    81 │ 	set(nv) {
+  > 82 │ 		return nv;
+       │ 		^^^^^^^^^^
+    83 │ 	},
+    84 │ });
+  
+  i The setter is here:
+  
+    80 │ globalThis.Object.defineProperty(o, "globalThis", {
+  > 81 │ 	set(nv) {
+       │ 	^^^^^^^^^
+  > 82 │ 		return nv;
+  > 83 │ 	},
+       │ 	^
+    84 │ });
+    85 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
