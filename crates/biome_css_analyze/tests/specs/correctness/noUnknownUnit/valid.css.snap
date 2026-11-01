@@ -81,6 +81,7 @@ a: { --test: attr(data-test %); }
 a: { --test: attr(data-test type(*)); }
 a: { --test: attr(data-test type(length)); }
 a: { --test: attr(data-test type(<color>)); }
+a { filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#4d000000, endColorstr=#00000000); }
 
 ```
 
