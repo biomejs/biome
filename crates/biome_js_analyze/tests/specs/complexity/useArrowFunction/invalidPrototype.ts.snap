@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPrototype.ts
+---
+# Input
+```ts
+// A type assertion that isn't used in a way that requires a `prototype`
+const asCall = function () {};
+(asCall as any)();
+
+// `.name` through a non-null assertion
+const nonNullName = function () {};
+nonNullName!.name;
+
+```
+
+# Diagnostics
+```
+invalidPrototype.ts:2:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    1 │ // A type assertion that isn't used in a way that requires a `prototype`
+  > 2 │ const asCall = function () {};
+      │                ^^^^^^^^^^^^^^
+    3 │ (asCall as any)();
+    4 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    1 1 │   // A type assertion that isn't used in a way that requires a `prototype`
+    2   │ - const·asCall·=·function·()·{};
+      2 │ + const·asCall·=·()·=>·{};
+    3 3 │   (asCall as any)();
+    4 4 │   
+  
+
+```
+
+```
+invalidPrototype.ts:6:21 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    5 │ // `.name` through a non-null assertion
+  > 6 │ const nonNullName = function () {};
+      │                     ^^^^^^^^^^^^^^
+    7 │ nonNullName!.name;
+    8 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    4 4 │   
+    5 5 │   // `.name` through a non-null assertion
+    6   │ - const·nonNullName·=·function·()·{};
+      6 │ + const·nonNullName·=·()·=>·{};
+    7 7 │   nonNullName!.name;
+    8 8 │   
+  
+
+```
