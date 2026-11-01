@@ -25,6 +25,7 @@ use crate::syntax::parse_error::{
 };
 use biome_js_extent::{JsExtent, Jsx};
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::text_ext::blank_quote_markers;
 use biome_markdown_syntax::{MarkdownSyntaxNode, T};
 use biome_parser::Parser;
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -54,7 +55,7 @@ pub(crate) fn at_mdx_flow_line(p: &MarkdownParser) -> bool {
     p.is_at_line_start()
         && is_flow_line(
             p.source_after_current().trim_start_matches([' ', '\t']),
-            p.state().block_quote_depth > 0,
+            p.state().block_quote_depth,
         )
 }
 
@@ -75,7 +76,7 @@ pub(crate) fn parse_mdx_block(p: &mut MarkdownParser) -> ParsedSyntax {
     loop {
         let item = flow_item(
             p.source_after_current().trim_start_matches([' ', '\t']),
-            p.state().block_quote_depth > 0,
+            p.state().block_quote_depth,
         );
         let block = match item {
             Some(FlowItem::Tag { length }) => parse_block_tag(p, length, first),
@@ -145,7 +146,7 @@ enum FlowItem {
 ///
 /// An expression on a flow line may span blank lines, so its `}` is searched
 /// up to the end of the source. A tag must end before the next blank line.
-fn flow_item(text: &str, in_quote: bool) -> Option<FlowItem> {
+fn flow_item(text: &str, quote_depth: usize) -> Option<FlowItem> {
     if let Some(body) = text.strip_prefix('{') {
         let length = JsExtent::expression_length(body.as_bytes(), JSX);
         let close = (length < body.len()).then_some(1 + length);
@@ -154,8 +155,7 @@ fn flow_item(text: &str, in_quote: bool) -> Option<FlowItem> {
     if !text.starts_with('<') || tag_start(text) != TagStart::Tag {
         return None;
     }
-    let limit = tag_scan_end(text, in_quote);
-    let length = JsExtent::tag_length(&text.as_bytes()[..limit])?;
+    let length = tag_length(text, quote_depth)?;
     Some(FlowItem::Tag { length })
 }
 
@@ -167,11 +167,11 @@ fn flow_item(text: &str, in_quote: bool) -> Option<FlowItem> {
 /// An expression can only be followed by a tag on the same line: `{a} {b}`
 /// is a paragraph with two inline expressions, while `<A>{b}</A>` is a flow
 /// line.
-fn is_flow_line(text: &str, in_quote: bool) -> bool {
+fn is_flow_line(text: &str, quote_depth: usize) -> bool {
     let mut rest = text;
     let mut after_expression = false;
     loop {
-        let item = flow_item(rest, in_quote);
+        let item = flow_item(rest, quote_depth);
         if after_expression && !matches!(item, Some(FlowItem::Tag { .. })) {
             return false;
         }
@@ -277,8 +277,7 @@ pub(crate) fn parse_mdx_inline_tag(p: &mut MarkdownParser) -> ParsedSyntax {
             Absent
         }
         TagStart::Tag => {
-            let limit = tag_scan_end(rest, p.state().block_quote_depth > 0);
-            let Some(length) = JsExtent::tag_length(&rest.as_bytes()[..limit]) else {
+            let Some(length) = tag_length(rest, p.state().block_quote_depth) else {
                 p.error(unclosed_mdx_tag(p, opening));
                 return Absent;
             };
@@ -449,15 +448,18 @@ fn paragraph_end(text: &str, in_quote: bool) -> usize {
     text.len()
 }
 
-/// Returns where the scan for the end of the JSX tag at the start of `text`
-/// stops. Inside a block quote, the scan stays on the tag's line: the next
-/// line starts with a `>` marker, which would read as the end of the tag.
-fn tag_scan_end(text: &str, in_quote: bool) -> usize {
-    if in_quote {
-        text.find(['\n', '\r']).unwrap_or(text.len())
-    } else {
-        paragraph_end(text, false)
+/// Returns the length of the JSX tag at the start of `text`, or `None` when
+/// no `>` closes it before the end of its paragraph.
+///
+/// Inside block quotes, the `>` markers that start the tag's other lines
+/// belong to the quote, so they're blanked before the tag is measured.
+fn tag_length(text: &str, quote_depth: usize) -> Option<usize> {
+    let limit = paragraph_end(text, quote_depth > 0);
+    if quote_depth == 0 {
+        return JsExtent::tag_length(&text.as_bytes()[..limit]);
     }
+    let blanked = blank_quote_markers(&text[..limit], quote_depth);
+    JsExtent::tag_length(blanked.as_bytes())
 }
 
 // #endregion
