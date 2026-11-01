@@ -1,0 +1,5 @@
+a = 1 b = 2
+[table] c = 3
+d = "x" "y"
+[[array]] [other]
+e = 4

@@ -1,0 +1,5 @@
+https://cdn.jsdelivr.net/gh/rust-lang/rust@16d1ffac17ad8b739e32483ac2e65fe7e1804977/Cargo.lock
+https://cdn.jsdelivr.net/gh/rust-lang/rust@16d1ffac17ad8b739e32483ac2e65fe7e1804977/bootstrap.example.toml
+https://cdn.jsdelivr.net/gh/rust-lang/rust@16d1ffac17ad8b739e32483ac2e65fe7e1804977/triagebot.toml
+https://cdn.jsdelivr.net/gh/astral-sh/uv@f8bec5eac866c5dd3794b4420e21e5dbd44045c6/uv.lock
+https://cdn.jsdelivr.net/gh/astral-sh/uv@f8bec5eac866c5dd3794b4420e21e5dbd44045c6/Cargo.toml

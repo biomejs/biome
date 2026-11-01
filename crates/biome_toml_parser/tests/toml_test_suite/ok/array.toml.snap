@@ -1,0 +1,716 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+integers = [ 1, 2, 3 ]
+colors = [ "red", "yellow", "green" ]
+nested_arrays_of_ints = [ [ 1, 2 ], [3, 4, 5] ]
+nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
+string_array = [ "all", 'strings', """are the same""", '''type''' ]
+numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
+contributors = [
+  "Foo Bar <foo@example.com>",
+  { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
+]
+integers2 = [
+  1, 2, 3
+]
+integers3 = [
+  1,
+  2, # this is ok
+]
+empty = []
+empty_with_comment = [ # comment
+]
+deeply_nested = [[[[]]]]
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..9 "integers" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@9..11 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@11..13 "[" [] [Whitespace(" ")],
+                elements: TomlArrayElementList [
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@13..14 "1" [] [],
+                    },
+                    COMMA@14..16 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@16..17 "2" [] [],
+                    },
+                    COMMA@17..19 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@19..21 "3" [] [Whitespace(" ")],
+                    },
+                ],
+                r_brack_token: R_BRACK@21..22 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@22..30 "colors" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@30..32 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@32..34 "[" [] [Whitespace(" ")],
+                elements: TomlArrayElementList [
+                    TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@34..39 "\"red\"" [] [],
+                    },
+                    COMMA@39..41 "," [] [Whitespace(" ")],
+                    TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@41..49 "\"yellow\"" [] [],
+                    },
+                    COMMA@49..51 "," [] [Whitespace(" ")],
+                    TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@51..59 "\"green\"" [] [Whitespace(" ")],
+                    },
+                ],
+                r_brack_token: R_BRACK@59..60 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@60..83 "nested_arrays_of_ints" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@83..85 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@85..87 "[" [] [Whitespace(" ")],
+                elements: TomlArrayElementList [
+                    TomlArray {
+                        l_brack_token: L_BRACK@87..89 "[" [] [Whitespace(" ")],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@89..90 "1" [] [],
+                            },
+                            COMMA@90..92 "," [] [Whitespace(" ")],
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@92..94 "2" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@94..95 "]" [] [],
+                    },
+                    COMMA@95..97 "," [] [Whitespace(" ")],
+                    TomlArray {
+                        l_brack_token: L_BRACK@97..98 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@98..99 "3" [] [],
+                            },
+                            COMMA@99..101 "," [] [Whitespace(" ")],
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@101..102 "4" [] [],
+                            },
+                            COMMA@102..104 "," [] [Whitespace(" ")],
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@104..105 "5" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@105..107 "]" [] [Whitespace(" ")],
+                    },
+                ],
+                r_brack_token: R_BRACK@107..108 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@108..128 "nested_mixed_array" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@128..130 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@130..132 "[" [] [Whitespace(" ")],
+                elements: TomlArrayElementList [
+                    TomlArray {
+                        l_brack_token: L_BRACK@132..134 "[" [] [Whitespace(" ")],
+                        elements: TomlArrayElementList [
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@134..135 "1" [] [],
+                            },
+                            COMMA@135..137 "," [] [Whitespace(" ")],
+                            TomlInteger {
+                                value_token: TOML_INTEGER_LITERAL@137..139 "2" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@139..140 "]" [] [],
+                    },
+                    COMMA@140..142 "," [] [Whitespace(" ")],
+                    TomlArray {
+                        l_brack_token: L_BRACK@142..143 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlString {
+                                value_token: TOML_BASIC_STRING_LITERAL@143..146 "\"a\"" [] [],
+                            },
+                            COMMA@146..148 "," [] [Whitespace(" ")],
+                            TomlString {
+                                value_token: TOML_BASIC_STRING_LITERAL@148..151 "\"b\"" [] [],
+                            },
+                            COMMA@151..153 "," [] [Whitespace(" ")],
+                            TomlString {
+                                value_token: TOML_BASIC_STRING_LITERAL@153..156 "\"c\"" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@156..158 "]" [] [Whitespace(" ")],
+                    },
+                ],
+                r_brack_token: R_BRACK@158..159 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@159..173 "string_array" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@173..175 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@175..177 "[" [] [Whitespace(" ")],
+                elements: TomlArrayElementList [
+                    TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@177..182 "\"all\"" [] [],
+                    },
+                    COMMA@182..184 "," [] [Whitespace(" ")],
+                    TomlString {
+                        value_token: TOML_LITERAL_STRING_LITERAL@184..193 "'strings'" [] [],
+                    },
+                    COMMA@193..195 "," [] [Whitespace(" ")],
+                    TomlString {
+                        value_token: TOML_ML_BASIC_STRING_LITERAL@195..213 "\"\"\"are the same\"\"\"" [] [],
+                    },
+                    COMMA@213..215 "," [] [Whitespace(" ")],
+                    TomlString {
+                        value_token: TOML_ML_LITERAL_STRING_LITERAL@215..226 "'''type'''" [] [Whitespace(" ")],
+                    },
+                ],
+                r_brack_token: R_BRACK@226..227 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@227..236 "numbers" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@236..238 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@238..240 "[" [] [Whitespace(" ")],
+                elements: TomlArrayElementList [
+                    TomlFloat {
+                        value_token: TOML_FLOAT_LITERAL@240..243 "0.1" [] [],
+                    },
+                    COMMA@243..245 "," [] [Whitespace(" ")],
+                    TomlFloat {
+                        value_token: TOML_FLOAT_LITERAL@245..248 "0.2" [] [],
+                    },
+                    COMMA@248..250 "," [] [Whitespace(" ")],
+                    TomlFloat {
+                        value_token: TOML_FLOAT_LITERAL@250..253 "0.5" [] [],
+                    },
+                    COMMA@253..255 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@255..256 "1" [] [],
+                    },
+                    COMMA@256..258 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@258..259 "2" [] [],
+                    },
+                    COMMA@259..261 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@261..263 "5" [] [Whitespace(" ")],
+                    },
+                ],
+                r_brack_token: R_BRACK@263..264 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@264..278 "contributors" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@278..280 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@280..281 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@281..311 "\"Foo Bar <foo@example.com>\"" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    COMMA@311..312 "," [] [],
+                    TomlInlineTable {
+                        l_curly_token: L_CURLY@312..317 "{" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        entries: TomlInlineTableEntryList [
+                            TomlKeyValue {
+                                key: TomlKey {
+                                    parts: TomlKeyPartList [
+                                        TomlBareKey {
+                                            value_token: TOML_BARE_KEY_LITERAL@317..322 "name" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                                eq_token: EQ@322..324 "=" [] [Whitespace(" ")],
+                                value: TomlString {
+                                    value_token: TOML_BASIC_STRING_LITERAL@324..333 "\"Baz Qux\"" [] [],
+                                },
+                            },
+                            COMMA@333..335 "," [] [Whitespace(" ")],
+                            TomlKeyValue {
+                                key: TomlKey {
+                                    parts: TomlKeyPartList [
+                                        TomlBareKey {
+                                            value_token: TOML_BARE_KEY_LITERAL@335..341 "email" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                                eq_token: EQ@341..343 "=" [] [Whitespace(" ")],
+                                value: TomlString {
+                                    value_token: TOML_BASIC_STRING_LITERAL@343..363 "\"bazqux@example.com\"" [] [],
+                                },
+                            },
+                            COMMA@363..365 "," [] [Whitespace(" ")],
+                            TomlKeyValue {
+                                key: TomlKey {
+                                    parts: TomlKeyPartList [
+                                        TomlBareKey {
+                                            value_token: TOML_BARE_KEY_LITERAL@365..369 "url" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                                eq_token: EQ@369..371 "=" [] [Whitespace(" ")],
+                                value: TomlString {
+                                    value_token: TOML_BASIC_STRING_LITERAL@371..400 "\"https://example.com/bazqux\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@400..401 "}" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACK@401..403 "]" [Newline("\n")] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@403..414 "integers2" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@414..416 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@416..417 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@417..421 "1" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    COMMA@421..423 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@423..424 "2" [] [],
+                    },
+                    COMMA@424..426 "," [] [Whitespace(" ")],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@426..427 "3" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACK@427..429 "]" [Newline("\n")] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@429..440 "integers3" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@440..442 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@442..443 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@443..447 "1" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    COMMA@447..448 "," [] [],
+                    TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@448..452 "2" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    COMMA@452..466 "," [] [Whitespace(" "), Comments("# this is ok")],
+                ],
+                r_brack_token: R_BRACK@466..468 "]" [Newline("\n")] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@468..475 "empty" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@475..477 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@477..478 "[" [] [],
+                elements: TomlArrayElementList [],
+                r_brack_token: R_BRACK@478..479 "]" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@479..499 "empty_with_comment" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@499..501 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@501..512 "[" [] [Whitespace(" "), Comments("# comment")],
+                elements: TomlArrayElementList [],
+                r_brack_token: R_BRACK@512..514 "]" [Newline("\n")] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@514..529 "deeply_nested" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@529..531 "=" [] [Whitespace(" ")],
+            value: TomlArray {
+                l_brack_token: L_BRACK@531..532 "[" [] [],
+                elements: TomlArrayElementList [
+                    TomlArray {
+                        l_brack_token: L_BRACK@532..533 "[" [] [],
+                        elements: TomlArrayElementList [
+                            TomlArray {
+                                l_brack_token: L_BRACK@533..534 "[" [] [],
+                                elements: TomlArrayElementList [
+                                    TomlArray {
+                                        l_brack_token: L_BRACK@534..535 "[" [] [],
+                                        elements: TomlArrayElementList [],
+                                        r_brack_token: R_BRACK@535..536 "]" [] [],
+                                    },
+                                ],
+                                r_brack_token: R_BRACK@536..537 "]" [] [],
+                            },
+                        ],
+                        r_brack_token: R_BRACK@537..538 "]" [] [],
+                    },
+                ],
+                r_brack_token: R_BRACK@538..539 "]" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@539..540 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..540
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..539
+    0: TOML_KEY_VALUE@0..22
+      0: TOML_KEY@0..9
+        0: TOML_KEY_PART_LIST@0..9
+          0: TOML_BARE_KEY@0..9
+            0: TOML_BARE_KEY_LITERAL@0..9 "integers" [] [Whitespace(" ")]
+      1: EQ@9..11 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@11..22
+        0: L_BRACK@11..13 "[" [] [Whitespace(" ")]
+        1: TOML_ARRAY_ELEMENT_LIST@13..21
+          0: TOML_INTEGER@13..14
+            0: TOML_INTEGER_LITERAL@13..14 "1" [] []
+          1: COMMA@14..16 "," [] [Whitespace(" ")]
+          2: TOML_INTEGER@16..17
+            0: TOML_INTEGER_LITERAL@16..17 "2" [] []
+          3: COMMA@17..19 "," [] [Whitespace(" ")]
+          4: TOML_INTEGER@19..21
+            0: TOML_INTEGER_LITERAL@19..21 "3" [] [Whitespace(" ")]
+        2: R_BRACK@21..22 "]" [] []
+    1: TOML_KEY_VALUE@22..60
+      0: TOML_KEY@22..30
+        0: TOML_KEY_PART_LIST@22..30
+          0: TOML_BARE_KEY@22..30
+            0: TOML_BARE_KEY_LITERAL@22..30 "colors" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@30..32 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@32..60
+        0: L_BRACK@32..34 "[" [] [Whitespace(" ")]
+        1: TOML_ARRAY_ELEMENT_LIST@34..59
+          0: TOML_STRING@34..39
+            0: TOML_BASIC_STRING_LITERAL@34..39 "\"red\"" [] []
+          1: COMMA@39..41 "," [] [Whitespace(" ")]
+          2: TOML_STRING@41..49
+            0: TOML_BASIC_STRING_LITERAL@41..49 "\"yellow\"" [] []
+          3: COMMA@49..51 "," [] [Whitespace(" ")]
+          4: TOML_STRING@51..59
+            0: TOML_BASIC_STRING_LITERAL@51..59 "\"green\"" [] [Whitespace(" ")]
+        2: R_BRACK@59..60 "]" [] []
+    2: TOML_KEY_VALUE@60..108
+      0: TOML_KEY@60..83
+        0: TOML_KEY_PART_LIST@60..83
+          0: TOML_BARE_KEY@60..83
+            0: TOML_BARE_KEY_LITERAL@60..83 "nested_arrays_of_ints" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@83..85 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@85..108
+        0: L_BRACK@85..87 "[" [] [Whitespace(" ")]
+        1: TOML_ARRAY_ELEMENT_LIST@87..107
+          0: TOML_ARRAY@87..95
+            0: L_BRACK@87..89 "[" [] [Whitespace(" ")]
+            1: TOML_ARRAY_ELEMENT_LIST@89..94
+              0: TOML_INTEGER@89..90
+                0: TOML_INTEGER_LITERAL@89..90 "1" [] []
+              1: COMMA@90..92 "," [] [Whitespace(" ")]
+              2: TOML_INTEGER@92..94
+                0: TOML_INTEGER_LITERAL@92..94 "2" [] [Whitespace(" ")]
+            2: R_BRACK@94..95 "]" [] []
+          1: COMMA@95..97 "," [] [Whitespace(" ")]
+          2: TOML_ARRAY@97..107
+            0: L_BRACK@97..98 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@98..105
+              0: TOML_INTEGER@98..99
+                0: TOML_INTEGER_LITERAL@98..99 "3" [] []
+              1: COMMA@99..101 "," [] [Whitespace(" ")]
+              2: TOML_INTEGER@101..102
+                0: TOML_INTEGER_LITERAL@101..102 "4" [] []
+              3: COMMA@102..104 "," [] [Whitespace(" ")]
+              4: TOML_INTEGER@104..105
+                0: TOML_INTEGER_LITERAL@104..105 "5" [] []
+            2: R_BRACK@105..107 "]" [] [Whitespace(" ")]
+        2: R_BRACK@107..108 "]" [] []
+    3: TOML_KEY_VALUE@108..159
+      0: TOML_KEY@108..128
+        0: TOML_KEY_PART_LIST@108..128
+          0: TOML_BARE_KEY@108..128
+            0: TOML_BARE_KEY_LITERAL@108..128 "nested_mixed_array" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@128..130 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@130..159
+        0: L_BRACK@130..132 "[" [] [Whitespace(" ")]
+        1: TOML_ARRAY_ELEMENT_LIST@132..158
+          0: TOML_ARRAY@132..140
+            0: L_BRACK@132..134 "[" [] [Whitespace(" ")]
+            1: TOML_ARRAY_ELEMENT_LIST@134..139
+              0: TOML_INTEGER@134..135
+                0: TOML_INTEGER_LITERAL@134..135 "1" [] []
+              1: COMMA@135..137 "," [] [Whitespace(" ")]
+              2: TOML_INTEGER@137..139
+                0: TOML_INTEGER_LITERAL@137..139 "2" [] [Whitespace(" ")]
+            2: R_BRACK@139..140 "]" [] []
+          1: COMMA@140..142 "," [] [Whitespace(" ")]
+          2: TOML_ARRAY@142..158
+            0: L_BRACK@142..143 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@143..156
+              0: TOML_STRING@143..146
+                0: TOML_BASIC_STRING_LITERAL@143..146 "\"a\"" [] []
+              1: COMMA@146..148 "," [] [Whitespace(" ")]
+              2: TOML_STRING@148..151
+                0: TOML_BASIC_STRING_LITERAL@148..151 "\"b\"" [] []
+              3: COMMA@151..153 "," [] [Whitespace(" ")]
+              4: TOML_STRING@153..156
+                0: TOML_BASIC_STRING_LITERAL@153..156 "\"c\"" [] []
+            2: R_BRACK@156..158 "]" [] [Whitespace(" ")]
+        2: R_BRACK@158..159 "]" [] []
+    4: TOML_KEY_VALUE@159..227
+      0: TOML_KEY@159..173
+        0: TOML_KEY_PART_LIST@159..173
+          0: TOML_BARE_KEY@159..173
+            0: TOML_BARE_KEY_LITERAL@159..173 "string_array" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@173..175 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@175..227
+        0: L_BRACK@175..177 "[" [] [Whitespace(" ")]
+        1: TOML_ARRAY_ELEMENT_LIST@177..226
+          0: TOML_STRING@177..182
+            0: TOML_BASIC_STRING_LITERAL@177..182 "\"all\"" [] []
+          1: COMMA@182..184 "," [] [Whitespace(" ")]
+          2: TOML_STRING@184..193
+            0: TOML_LITERAL_STRING_LITERAL@184..193 "'strings'" [] []
+          3: COMMA@193..195 "," [] [Whitespace(" ")]
+          4: TOML_STRING@195..213
+            0: TOML_ML_BASIC_STRING_LITERAL@195..213 "\"\"\"are the same\"\"\"" [] []
+          5: COMMA@213..215 "," [] [Whitespace(" ")]
+          6: TOML_STRING@215..226
+            0: TOML_ML_LITERAL_STRING_LITERAL@215..226 "'''type'''" [] [Whitespace(" ")]
+        2: R_BRACK@226..227 "]" [] []
+    5: TOML_KEY_VALUE@227..264
+      0: TOML_KEY@227..236
+        0: TOML_KEY_PART_LIST@227..236
+          0: TOML_BARE_KEY@227..236
+            0: TOML_BARE_KEY_LITERAL@227..236 "numbers" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@236..238 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@238..264
+        0: L_BRACK@238..240 "[" [] [Whitespace(" ")]
+        1: TOML_ARRAY_ELEMENT_LIST@240..263
+          0: TOML_FLOAT@240..243
+            0: TOML_FLOAT_LITERAL@240..243 "0.1" [] []
+          1: COMMA@243..245 "," [] [Whitespace(" ")]
+          2: TOML_FLOAT@245..248
+            0: TOML_FLOAT_LITERAL@245..248 "0.2" [] []
+          3: COMMA@248..250 "," [] [Whitespace(" ")]
+          4: TOML_FLOAT@250..253
+            0: TOML_FLOAT_LITERAL@250..253 "0.5" [] []
+          5: COMMA@253..255 "," [] [Whitespace(" ")]
+          6: TOML_INTEGER@255..256
+            0: TOML_INTEGER_LITERAL@255..256 "1" [] []
+          7: COMMA@256..258 "," [] [Whitespace(" ")]
+          8: TOML_INTEGER@258..259
+            0: TOML_INTEGER_LITERAL@258..259 "2" [] []
+          9: COMMA@259..261 "," [] [Whitespace(" ")]
+          10: TOML_INTEGER@261..263
+            0: TOML_INTEGER_LITERAL@261..263 "5" [] [Whitespace(" ")]
+        2: R_BRACK@263..264 "]" [] []
+    6: TOML_KEY_VALUE@264..403
+      0: TOML_KEY@264..278
+        0: TOML_KEY_PART_LIST@264..278
+          0: TOML_BARE_KEY@264..278
+            0: TOML_BARE_KEY_LITERAL@264..278 "contributors" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@278..280 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@280..403
+        0: L_BRACK@280..281 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@281..401
+          0: TOML_STRING@281..311
+            0: TOML_BASIC_STRING_LITERAL@281..311 "\"Foo Bar <foo@example.com>\"" [Newline("\n"), Whitespace("  ")] []
+          1: COMMA@311..312 "," [] []
+          2: TOML_INLINE_TABLE@312..401
+            0: L_CURLY@312..317 "{" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: TOML_INLINE_TABLE_ENTRY_LIST@317..400
+              0: TOML_KEY_VALUE@317..333
+                0: TOML_KEY@317..322
+                  0: TOML_KEY_PART_LIST@317..322
+                    0: TOML_BARE_KEY@317..322
+                      0: TOML_BARE_KEY_LITERAL@317..322 "name" [] [Whitespace(" ")]
+                1: EQ@322..324 "=" [] [Whitespace(" ")]
+                2: TOML_STRING@324..333
+                  0: TOML_BASIC_STRING_LITERAL@324..333 "\"Baz Qux\"" [] []
+              1: COMMA@333..335 "," [] [Whitespace(" ")]
+              2: TOML_KEY_VALUE@335..363
+                0: TOML_KEY@335..341
+                  0: TOML_KEY_PART_LIST@335..341
+                    0: TOML_BARE_KEY@335..341
+                      0: TOML_BARE_KEY_LITERAL@335..341 "email" [] [Whitespace(" ")]
+                1: EQ@341..343 "=" [] [Whitespace(" ")]
+                2: TOML_STRING@343..363
+                  0: TOML_BASIC_STRING_LITERAL@343..363 "\"bazqux@example.com\"" [] []
+              3: COMMA@363..365 "," [] [Whitespace(" ")]
+              4: TOML_KEY_VALUE@365..400
+                0: TOML_KEY@365..369
+                  0: TOML_KEY_PART_LIST@365..369
+                    0: TOML_BARE_KEY@365..369
+                      0: TOML_BARE_KEY_LITERAL@365..369 "url" [] [Whitespace(" ")]
+                1: EQ@369..371 "=" [] [Whitespace(" ")]
+                2: TOML_STRING@371..400
+                  0: TOML_BASIC_STRING_LITERAL@371..400 "\"https://example.com/bazqux\"" [] [Whitespace(" ")]
+            2: R_CURLY@400..401 "}" [] []
+        2: R_BRACK@401..403 "]" [Newline("\n")] []
+    7: TOML_KEY_VALUE@403..429
+      0: TOML_KEY@403..414
+        0: TOML_KEY_PART_LIST@403..414
+          0: TOML_BARE_KEY@403..414
+            0: TOML_BARE_KEY_LITERAL@403..414 "integers2" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@414..416 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@416..429
+        0: L_BRACK@416..417 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@417..427
+          0: TOML_INTEGER@417..421
+            0: TOML_INTEGER_LITERAL@417..421 "1" [Newline("\n"), Whitespace("  ")] []
+          1: COMMA@421..423 "," [] [Whitespace(" ")]
+          2: TOML_INTEGER@423..424
+            0: TOML_INTEGER_LITERAL@423..424 "2" [] []
+          3: COMMA@424..426 "," [] [Whitespace(" ")]
+          4: TOML_INTEGER@426..427
+            0: TOML_INTEGER_LITERAL@426..427 "3" [] []
+        2: R_BRACK@427..429 "]" [Newline("\n")] []
+    8: TOML_KEY_VALUE@429..468
+      0: TOML_KEY@429..440
+        0: TOML_KEY_PART_LIST@429..440
+          0: TOML_BARE_KEY@429..440
+            0: TOML_BARE_KEY_LITERAL@429..440 "integers3" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@440..442 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@442..468
+        0: L_BRACK@442..443 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@443..466
+          0: TOML_INTEGER@443..447
+            0: TOML_INTEGER_LITERAL@443..447 "1" [Newline("\n"), Whitespace("  ")] []
+          1: COMMA@447..448 "," [] []
+          2: TOML_INTEGER@448..452
+            0: TOML_INTEGER_LITERAL@448..452 "2" [Newline("\n"), Whitespace("  ")] []
+          3: COMMA@452..466 "," [] [Whitespace(" "), Comments("# this is ok")]
+        2: R_BRACK@466..468 "]" [Newline("\n")] []
+    9: TOML_KEY_VALUE@468..479
+      0: TOML_KEY@468..475
+        0: TOML_KEY_PART_LIST@468..475
+          0: TOML_BARE_KEY@468..475
+            0: TOML_BARE_KEY_LITERAL@468..475 "empty" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@475..477 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@477..479
+        0: L_BRACK@477..478 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@478..478
+        2: R_BRACK@478..479 "]" [] []
+    10: TOML_KEY_VALUE@479..514
+      0: TOML_KEY@479..499
+        0: TOML_KEY_PART_LIST@479..499
+          0: TOML_BARE_KEY@479..499
+            0: TOML_BARE_KEY_LITERAL@479..499 "empty_with_comment" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@499..501 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@501..514
+        0: L_BRACK@501..512 "[" [] [Whitespace(" "), Comments("# comment")]
+        1: TOML_ARRAY_ELEMENT_LIST@512..512
+        2: R_BRACK@512..514 "]" [Newline("\n")] []
+    11: TOML_KEY_VALUE@514..539
+      0: TOML_KEY@514..529
+        0: TOML_KEY_PART_LIST@514..529
+          0: TOML_BARE_KEY@514..529
+            0: TOML_BARE_KEY_LITERAL@514..529 "deeply_nested" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@529..531 "=" [] [Whitespace(" ")]
+      2: TOML_ARRAY@531..539
+        0: L_BRACK@531..532 "[" [] []
+        1: TOML_ARRAY_ELEMENT_LIST@532..538
+          0: TOML_ARRAY@532..538
+            0: L_BRACK@532..533 "[" [] []
+            1: TOML_ARRAY_ELEMENT_LIST@533..537
+              0: TOML_ARRAY@533..537
+                0: L_BRACK@533..534 "[" [] []
+                1: TOML_ARRAY_ELEMENT_LIST@534..536
+                  0: TOML_ARRAY@534..536
+                    0: L_BRACK@534..535 "[" [] []
+                    1: TOML_ARRAY_ELEMENT_LIST@535..535
+                    2: R_BRACK@535..536 "]" [] []
+                2: R_BRACK@536..537 "]" [] []
+            2: R_BRACK@537..538 "]" [] []
+        2: R_BRACK@538..539 "]" [] []
+  2: EOF@539..540 "" [Newline("\n")] []
+
+```

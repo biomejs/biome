@@ -147,3 +147,6 @@ pnpm-lock.yaml linguist-generated=true text=auto eol=lf
 /crates/biome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
 /crates/biome_js_formatter/tests/**/*.js.snap linguist-language=Markdown
 Dockerfile.benchmark linguist-language=Dockerfile
+
+# TOML parser fixtures that must keep their exact bytes, including CR and control characters.
+/crates/biome_toml_parser/tests/toml_test_suite/err/control_characters.toml -text
