@@ -75,7 +75,7 @@ fn parse_esm_block(p: &mut MarkdownParser) -> ParsedSyntax {
     p.re_lex_span(end, MDX_ESM_LITERAL);
     p.bump(MDX_ESM_LITERAL);
     let block = m.complete(p, MDX_ESM_BLOCK);
-    parse_line_ending(p);
+    parse_line_ending(p).ok();
     Present(block)
 }
 
@@ -130,7 +130,7 @@ fn parse_block_expression(p: &mut MarkdownParser, close: ExpressionClose) -> Par
         ExpressionClose::At(offset) => Some(offset),
         ExpressionClose::Missing => None,
     };
-    parse_expression_body(p, close, p.source_after_current().len());
+    bump_expression_body(p, close, p.source_after_current().len());
     // Spaces and tabs after the `}` don't belong to the expression.
     loop {
         if p.at(MD_HARD_LINE_LITERAL) {
@@ -147,7 +147,7 @@ fn parse_block_expression(p: &mut MarkdownParser, close: ExpressionClose) -> Par
         p.consume_as_whitespace_trivia();
     }
     let block = m.complete(p, MDX_BLOCK_EXPRESSION);
-    parse_line_ending(p);
+    parse_line_ending(p).ok();
     Present(block)
 }
 
@@ -168,15 +168,16 @@ pub(crate) fn parse_mdx_inline_expression(p: &mut MarkdownParser) -> ParsedSynta
     let length = JsExtent::expression_length(body.as_bytes(), JSX);
     let close =
         (length < body.len()).then(|| p.cur_range().start() + TextSize::from((1 + length) as u32));
-    parse_expression_body(p, close, limit);
+    bump_expression_body(p, close, limit);
     Present(m.complete(p, MDX_INLINE_EXPRESSION))
 }
 
-/// Parses `{`, the expression content, and `}` when `close` is known.
+/// Consumes the `{`, the expression content, and the `}` of an expression
+/// into the node that the caller started.
 ///
 /// Without a `close`, the content runs to `limit`, measured in bytes from
 /// the `{`, and the missing `}` is reported.
-fn parse_expression_body(p: &mut MarkdownParser, close: Option<TextSize>, limit: usize) {
+fn bump_expression_body(p: &mut MarkdownParser, close: Option<TextSize>, limit: usize) {
     let open = p.cur_range();
     let content_end = match close {
         Some(close) => close,
@@ -186,12 +187,7 @@ fn parse_expression_body(p: &mut MarkdownParser, close: Option<TextSize>, limit:
         }
     };
     p.bump(T!['{']);
-    if content_end > p.cur_range().start() {
-        let content = p.start();
-        p.re_lex_span(content_end, MDX_EXPRESSION_LITERAL);
-        p.bump(MDX_EXPRESSION_LITERAL);
-        content.complete(p, MDX_EXPRESSION_CONTENT);
-    }
+    parse_expression_content(p, content_end).ok();
     match close {
         Some(close) => {
             p.re_lex_span(close + TextSize::from(1), T!['}']);
@@ -202,6 +198,20 @@ fn parse_expression_body(p: &mut MarkdownParser, close: Option<TextSize>, limit:
             p.error(unclosed_mdx_expression(p, opening));
         }
     }
+}
+
+/// Parses the JavaScript of an expression, from the current position up to
+/// `end`, as one literal. An empty expression `{}` has no content.
+///
+/// Grammar: MdxExpressionContent = value: 'mdx_expression_literal'
+fn parse_expression_content(p: &mut MarkdownParser, end: TextSize) -> ParsedSyntax {
+    if end <= p.cur_range().start() {
+        return Absent;
+    }
+    let m = p.start();
+    p.re_lex_span(end, MDX_EXPRESSION_LITERAL);
+    p.bump(MDX_EXPRESSION_LITERAL);
+    Present(m.complete(p, MDX_EXPRESSION_CONTENT))
 }
 
 /// Returns the length of the expression at the start of `bytes`, which
@@ -217,13 +227,16 @@ pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
     }
 }
 
-/// Emits the line ending after a block as its own newline node.
-fn parse_line_ending(p: &mut MarkdownParser) {
-    if p.at(NEWLINE) {
-        let m = p.start();
-        p.bump(NEWLINE);
-        m.complete(p, MD_NEWLINE);
+/// Parses the line ending after a block as its own newline node.
+///
+/// Grammar: MdNewline = value: 'NEWLINE'
+fn parse_line_ending(p: &mut MarkdownParser) -> ParsedSyntax {
+    if !p.at(NEWLINE) {
+        return Absent;
     }
+    let m = p.start();
+    p.bump(NEWLINE);
+    Present(m.complete(p, MD_NEWLINE))
 }
 
 /// Returns the length of `text` without its trailing blank lines. The last
