@@ -1,0 +1,131 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidVue.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div :class="['bg-green-500', selected && 'hover:float-left']" />
+  <div v-bind:class="{ 'dark:p-4': active }" />
+  <div :class="`bg-green-500 ${active ? 'w-1/2' : ''}`" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidVue.vue:3:18 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['bg-green-500', selected && 'hover:float-left']" />
+      │                  ^^^^^^^^^^^^
+    4 │   <div v-bind:class="{ 'dark:p-4': active }" />
+    5 │   <div :class="`bg-green-500 ${active ? 'w-1/2' : ''}`" />
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+  - ['bg-green-500',·selected·&&·'hover:float-left']
+  + ['bg-success',·selected·&&·'hover:float-left']
+  
+
+```
+
+```
+invalidVue.vue:3:52 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class float-left isn't allowed in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['bg-green-500', selected && 'hover:float-left']" />
+      │                                                    ^^^^^^^^^^
+    4 │   <div v-bind:class="{ 'dark:p-4': active }" />
+    5 │   <div :class="`bg-green-500 ${active ? 'w-1/2' : ''}`" />
+  
+  i Use flexbox or grid for layout.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidVue.vue:4:25 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS variant dark isn't allowed in this project.
+  
+    2 │ <template>
+    3 │   <div :class="['bg-green-500', selected && 'hover:float-left']" />
+  > 4 │   <div v-bind:class="{ 'dark:p-4': active }" />
+      │                         ^^^^
+    5 │   <div :class="`bg-green-500 ${active ? 'w-1/2' : ''}`" />
+    6 │ </template>
+  
+  i This project does not support dark mode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidVue.vue:5:17 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    3 │   <div :class="['bg-green-500', selected && 'hover:float-left']" />
+    4 │   <div v-bind:class="{ 'dark:p-4': active }" />
+  > 5 │   <div :class="`bg-green-500 ${active ? 'w-1/2' : ''}`" />
+      │                 ^^^^^^^^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+  - `bg-green-500·${active·?·'w-1/2'·:·''}`
+  + `bg-success·${active·?·'w-1/2'·:·''}`
+  
+
+```
+
+```
+invalidVue.vue:5:42 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Tailwind CSS class w-1/2 isn't allowed in this project.
+  
+    3 │   <div :class="['bg-green-500', selected && 'hover:float-left']" />
+    4 │   <div v-bind:class="{ 'dark:p-4': active }" />
+  > 5 │   <div :class="`bg-green-500 ${active ? 'w-1/2' : ''}`" />
+      │                                          ^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i The configuration of this rule restricts this class.
+  
+  i Use w-half instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use w-half instead.
+  
+  - `bg-green-500·${active·?·'w-1/2'·:·''}`
+  + `bg-green-500·${active·?·'w-half'·:·''}`
+  
+
+```

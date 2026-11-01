@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNoOptions.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<div className="text-green-500 float-left dark:p-4" />;
+
+```

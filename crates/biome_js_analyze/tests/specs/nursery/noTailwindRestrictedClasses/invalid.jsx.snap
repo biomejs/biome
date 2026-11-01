@@ -1,0 +1,374 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div className="text-green-500" />;
+<div className="p-4 md:hover:bg-green-500/50! flex" />;
+<div className='bg-green-500' />;
+<div className="float-left" />;
+<div className="-mt-4" />;
+<div className="w-1/2" />;
+<div className="order-none" />;
+<div className="dark:p-4" />;
+<div className="group-hover/menu:p-4" />;
+<div className="[&_p]:mt-2" />;
+<div className="dark:text-green-500" />;
+cn("bg-green-500");
+clsx({ "float-right": isActive });
+tw`bg-green-500`;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class text-green-500 isn't allowed in this project.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className="text-green-500" />;
+      │                 ^^^^^^^^^^^^^^
+    3 │ <div className="p-4 md:hover:bg-green-500/50! flex" />;
+    4 │ <div className='bg-green-500' />;
+  
+  i Use the success color from the design system.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:30 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div className="text-green-500" />;
+  > 3 │ <div className="p-4 md:hover:bg-green-500/50! flex" />;
+      │                              ^^^^^^^^^^^^
+    4 │ <div className='bg-green-500' />;
+    5 │ <div className="float-left" />;
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   <div className="text-green-500" />;
+     3    │ - <div·className="p-4·md:hover:bg-green-500/50!·flex"·/>;
+        3 │ + <div·className="p-4·md:hover:bg-success/50!·flex"·/>;
+     4  4 │   <div className='bg-green-500' />;
+     5  5 │   <div className="float-left" />;
+  
+
+```
+
+```
+invalid.jsx:4:17 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    2 │ <div className="text-green-500" />;
+    3 │ <div className="p-4 md:hover:bg-green-500/50! flex" />;
+  > 4 │ <div className='bg-green-500' />;
+      │                 ^^^^^^^^^^^^
+    5 │ <div className="float-left" />;
+    6 │ <div className="-mt-4" />;
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+     2  2 │   <div className="text-green-500" />;
+     3  3 │   <div className="p-4 md:hover:bg-green-500/50! flex" />;
+     4    │ - <div·className='bg-green-500'·/>;
+        4 │ + <div·className='bg-success'·/>;
+     5  5 │   <div className="float-left" />;
+     6  6 │   <div className="-mt-4" />;
+  
+
+```
+
+```
+invalid.jsx:5:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class float-left isn't allowed in this project.
+  
+    3 │ <div className="p-4 md:hover:bg-green-500/50! flex" />;
+    4 │ <div className='bg-green-500' />;
+  > 5 │ <div className="float-left" />;
+      │                 ^^^^^^^^^^
+    6 │ <div className="-mt-4" />;
+    7 │ <div className="w-1/2" />;
+  
+  i Use flexbox or grid for layout.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class -mt-4 isn't allowed in this project.
+  
+    4 │ <div className='bg-green-500' />;
+    5 │ <div className="float-left" />;
+  > 6 │ <div className="-mt-4" />;
+      │                 ^^^^^
+    7 │ <div className="w-1/2" />;
+    8 │ <div className="order-none" />;
+  
+  i Avoid negative margins.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:17 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class w-1/2 isn't allowed in this project.
+  
+    5 │ <div className="float-left" />;
+    6 │ <div className="-mt-4" />;
+  > 7 │ <div className="w-1/2" />;
+      │                 ^^^^^
+    8 │ <div className="order-none" />;
+    9 │ <div className="dark:p-4" />;
+  
+  i The configuration of this rule restricts this class.
+  
+  i Use w-half instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use w-half instead.
+  
+     5  5 │   <div className="float-left" />;
+     6  6 │   <div className="-mt-4" />;
+     7    │ - <div·className="w-1/2"·/>;
+        7 │ + <div·className="w-half"·/>;
+     8  8 │   <div className="order-none" />;
+     9  9 │   <div className="dark:p-4" />;
+  
+
+```
+
+```
+invalid.jsx:8:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class order-none isn't allowed in this project.
+  
+     6 │ <div className="-mt-4" />;
+     7 │ <div className="w-1/2" />;
+   > 8 │ <div className="order-none" />;
+       │                 ^^^^^^^^^^
+     9 │ <div className="dark:p-4" />;
+    10 │ <div className="group-hover/menu:p-4" />;
+  
+  i The configuration of this rule restricts this class.
+  
+  i Remove it, or replace it with a class that's allowed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant dark isn't allowed in this project.
+  
+     7 │ <div className="w-1/2" />;
+     8 │ <div className="order-none" />;
+   > 9 │ <div className="dark:p-4" />;
+       │                 ^^^^
+    10 │ <div className="group-hover/menu:p-4" />;
+    11 │ <div className="[&_p]:mt-2" />;
+  
+  i This project does not support dark mode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:17 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant group-hover isn't allowed in this project.
+  
+     8 │ <div className="order-none" />;
+     9 │ <div className="dark:p-4" />;
+  > 10 │ <div className="group-hover/menu:p-4" />;
+       │                 ^^^^^^^^^^^
+    11 │ <div className="[&_p]:mt-2" />;
+    12 │ <div className="dark:text-green-500" />;
+  
+  i The configuration of this rule restricts this variant.
+  
+  i Use group-focus instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use group-focus instead.
+  
+     8  8 │   <div className="order-none" />;
+     9  9 │   <div className="dark:p-4" />;
+    10    │ - <div·className="group-hover/menu:p-4"·/>;
+       10 │ + <div·className="group-focus/menu:p-4"·/>;
+    11 11 │   <div className="[&_p]:mt-2" />;
+    12 12 │   <div className="dark:text-green-500" />;
+  
+
+```
+
+```
+invalid.jsx:11:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant [&_p] isn't allowed in this project.
+  
+     9 │ <div className="dark:p-4" />;
+    10 │ <div className="group-hover/menu:p-4" />;
+  > 11 │ <div className="[&_p]:mt-2" />;
+       │                 ^^^^^
+    12 │ <div className="dark:text-green-500" />;
+    13 │ cn("bg-green-500");
+  
+  i Add a named variant instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:17 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS variant dark isn't allowed in this project.
+  
+    10 │ <div className="group-hover/menu:p-4" />;
+    11 │ <div className="[&_p]:mt-2" />;
+  > 12 │ <div className="dark:text-green-500" />;
+       │                 ^^^^
+    13 │ cn("bg-green-500");
+    14 │ clsx({ "float-right": isActive });
+  
+  i This project does not support dark mode.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:22 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class text-green-500 isn't allowed in this project.
+  
+    10 │ <div className="group-hover/menu:p-4" />;
+    11 │ <div className="[&_p]:mt-2" />;
+  > 12 │ <div className="dark:text-green-500" />;
+       │                      ^^^^^^^^^^^^^^
+    13 │ cn("bg-green-500");
+    14 │ clsx({ "float-right": isActive });
+  
+  i Use the success color from the design system.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:5 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    11 │ <div className="[&_p]:mt-2" />;
+    12 │ <div className="dark:text-green-500" />;
+  > 13 │ cn("bg-green-500");
+       │     ^^^^^^^^^^^^
+    14 │ clsx({ "float-right": isActive });
+    15 │ tw`bg-green-500`;
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+    11 11 │   <div className="[&_p]:mt-2" />;
+    12 12 │   <div className="dark:text-green-500" />;
+    13    │ - cn("bg-green-500");
+       13 │ + cn("bg-success");
+    14 14 │   clsx({ "float-right": isActive });
+    15 15 │   tw`bg-green-500`;
+  
+
+```
+
+```
+invalid.jsx:14:9 lint/nursery/noTailwindRestrictedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class float-right isn't allowed in this project.
+  
+    12 │ <div className="dark:text-green-500" />;
+    13 │ cn("bg-green-500");
+  > 14 │ clsx({ "float-right": isActive });
+       │         ^^^^^^^^^^^
+    15 │ tw`bg-green-500`;
+    16 │ 
+  
+  i Use flexbox or grid for layout.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:4 lint/nursery/noTailwindRestrictedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Tailwind CSS class bg-green-500 isn't allowed in this project.
+  
+    13 │ cn("bg-green-500");
+    14 │ clsx({ "float-right": isActive });
+  > 15 │ tw`bg-green-500`;
+       │    ^^^^^^^^^^^^
+    16 │ 
+  
+  i Use the success color.
+  
+  i Use bg-success instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use bg-success instead.
+  
+    13 13 │   cn("bg-green-500");
+    14 14 │   clsx({ "float-right": isActive });
+    15    │ - tw`bg-green-500`;
+       15 │ + tw`bg-success`;
+    16 16 │   
+  
+
+```

@@ -1,0 +1,24 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noTailwindRestrictedClasses": {
+					"level": "error",
+					"options": {
+						"classes": {
+							"bg-*": "Use a semantic background class.",
+							"*-md": "Use the project size scale.",
+							"[color:*]": "Use a text color utility.",
+							"-*-4": "Avoid negative spacing."
+						},
+						"variants": {
+							"group-*": "Use the group component instead.",
+							"*-hover": "Hover styles are not allowed.",
+							"[*]": "Add a named variant instead."
+						}
+					}
+				}
+			}
+		}
+	}
+}

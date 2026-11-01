@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+<div className="text-red-500 shadow-lg text-red-md text-mdx" />;
+<div className="mt-4 -mt-2 [background:red]" />;
+<div className="hover:p-2 focus:p-2 data-[open]:p-2" />;
