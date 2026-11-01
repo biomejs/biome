@@ -10,7 +10,7 @@ use std::{
     mem::swap,
     os::windows::process::CommandExt,
     pin::Pin,
-    process::Command,
+    process::{Command, Stdio},
     sync::Arc,
     task::{Context, Poll},
     time::Duration,
@@ -96,6 +96,13 @@ fn spawn_daemon(
     ));
 
     cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
+
+    // The daemon outlives the spawning client, which may be reading its
+    // standard output. Inherited pipes would stay open as long as the daemon
+    // runs and keep that reader waiting.
+    cmd.stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
 
     cmd.spawn()?;
 

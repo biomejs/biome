@@ -7,7 +7,7 @@ import type {
 	TsIdentifierBinding,
 	TsLiteralEnumMemberName,
 	TsTypeParameterName,
-} from "./js_ast";
+} from "./js_ast.js";
 
 /** Identifier nodes that refer to a binding or an external name. */
 export type AnyJsIdentifierReference =

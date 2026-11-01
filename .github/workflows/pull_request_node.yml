@@ -58,10 +58,8 @@ jobs:
       - name: Install just
         uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
-      - name: Test plugin API declarations
-        run: |
-          pnpm --filter @biomejs/runtime i
-          pnpm --filter @biomejs/runtime run test:types
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build TypeScript code
         # We use the `*-dev` builds below because release builds take very long.
@@ -72,14 +70,15 @@ jobs:
         # breaks something, we'll discover it later, possibly when creating a
         # prerelease.
         run: |
-          pnpm --filter @biomejs/backend-jsonrpc i
           pnpm --filter @biomejs/backend-jsonrpc run build
           pnpm --filter @biomejs/js-api run build:wasm-bundler-dev
           pnpm --filter @biomejs/js-api run build:wasm-node-dev
           pnpm --filter @biomejs/js-api run build:wasm-web-dev
-          pnpm --filter @biomejs/js-api i
           pnpm --filter @biomejs/js-api run build
+
       - name: Run JS tests
         run: |
           pnpm --filter @biomejs/backend-jsonrpc run test:ci
           pnpm --filter @biomejs/js-api run test:ci
+          pnpm --filter @biomejs/runtime run test:types
+          pnpm --filter @biomejs/runtime test

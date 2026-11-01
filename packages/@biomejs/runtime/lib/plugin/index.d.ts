@@ -1,4 +1,4 @@
-import type { Severity } from "./diagnostics";
+import type { Severity } from "./diagnostics.js";
 import type {
 	AnyJsAstNode,
 	JsAstElement,
@@ -6,12 +6,12 @@ import type {
 	JsAstToken,
 	JsNodeByKind,
 	JsTokenKind,
-} from "./js_ast";
-import type { SemanticModel } from "./semantic";
+} from "./js_ast.js";
+import type { SemanticModel } from "./semantic.js";
 
-export * from "./diagnostics";
-export * from "./js_ast";
-export * from "./semantic";
+export type * from "./diagnostics.js";
+export type * from "./js_ast.js";
+export type * from "./semantic.js";
 
 declare const queriedNode: unique symbol;
 declare const nativeMutation: unique symbol;
