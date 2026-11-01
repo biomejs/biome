@@ -64,7 +64,7 @@ declare_lint_rule! {
             RuleSource::EslintTailwindcss("classnames-order").inspired(),
         ],
         recommended: false,
-        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
+        domains: &[RuleDomain::Tailwind],
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -33,9 +33,8 @@ declare_lint_rule! {
     /// only knows the default configuration, and skips classes that use your own theme values
     /// or variants.
     ///
-    /// Biome scans your project when this rule is enabled, so that it can read the stylesheet
-    /// and the files it imports. The scan happens even if `tailwind.stylesheet` isn't set,
-    /// although the rule then only uses the default configuration.
+    /// When `tailwind.stylesheet` is set, Biome scans your project when this rule is
+    /// enabled, so that it can read the stylesheet and the files it imports.
     ///
     /// ## Examples
     ///
@@ -85,7 +84,7 @@ declare_lint_rule! {
         version: "next",
         name: "noTailwindConflictingClasses",
         language: "html",
-        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
+        domains: &[RuleDomain::Tailwind],
         sources: &[RuleSource::EslintBetterTailwindcss("no-conflicting-classes").same()],
         recommended: true,
         severity: Severity::Warning,
