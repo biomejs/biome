@@ -7429,6 +7429,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessParameterPropertyAssignmentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithNoUselessParameterPropertyAssignmentOptions"
+				}
+			]
+		},
+		"NoUselessParameterPropertyAssignmentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessRecursionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8710,6 +8722,15 @@
 					"description": "Disallow calling .getTime() on a date before passing it to the Date constructor.\nSee https://biomejs.dev/linter/rules/no-useless-date-get-time",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessDateGetTimeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessParameterPropertyAssignment": {
+					"description": "Disallow assigning a parameter property to itself in the constructor.\nSee https://biomejs.dev/linter/rules/no-useless-parameter-property-assignment",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoUselessParameterPropertyAssignmentConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -14086,6 +14107,17 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessLoneBlockStatementsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessParameterPropertyAssignmentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoUselessParameterPropertyAssignmentOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
