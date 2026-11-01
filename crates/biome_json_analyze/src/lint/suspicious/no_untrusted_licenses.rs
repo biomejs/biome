@@ -366,7 +366,23 @@ fn check_dep(
                     .check_trust(trust_config)
                     .err()
                     .map(|r| Reason::Rejected(r, license_str))?,
-                None => Reason::Rejected(RejectReason::Untrusted, license_str),
+                None => {
+                    if trust_config
+                        .deny
+                        .iter()
+                        .any(|d| d.eq_ignore_ascii_case(&license_str))
+                    {
+                        Reason::Rejected(RejectReason::Denied, license_str)
+                    } else if trust_config
+                        .allow
+                        .iter()
+                        .any(|a| a.eq_ignore_ascii_case(&license_str))
+                    {
+                        return None;
+                    } else {
+                        Reason::Rejected(RejectReason::Untrusted, license_str)
+                    }
+                }
             }
         }
     };
