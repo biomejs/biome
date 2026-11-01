@@ -1,6 +1,8 @@
 use crate::prelude::*;
-use biome_markdown_syntax::MdxExpressionContent;
-use biome_rowan::AstNode;
+use crate::shared::FormatMdxSnippet;
+use biome_formatter::write;
+use biome_markdown_syntax::{MdxExpressionContent, MdxExpressionContentFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdxExpressionContent;
 impl FormatNodeRule<MdxExpressionContent> for FormatMdxExpressionContent {
@@ -9,6 +11,14 @@ impl FormatNodeRule<MdxExpressionContent> for FormatMdxExpressionContent {
         node: &MdxExpressionContent,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let MdxExpressionContentFields { value_token } = node.as_fields();
+        let value_token = value_token?;
+
+        write!(
+            f,
+            [FormatMdxSnippet {
+                token: &value_token
+            }]
+        )
     }
 }

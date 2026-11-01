@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_markdown_syntax::MdxInlineExpression;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_markdown_syntax::{MdxInlineExpression, MdxInlineExpressionFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdxInlineExpression;
 impl FormatNodeRule<MdxInlineExpression> for FormatMdxInlineExpression {
@@ -9,6 +10,19 @@ impl FormatNodeRule<MdxInlineExpression> for FormatMdxInlineExpression {
         node: &MdxInlineExpression,
         f: &mut MarkdownFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let MdxInlineExpressionFields {
+            l_curly_token,
+            content,
+            r_curly_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                l_curly_token.format(),
+                content.format(),
+                r_curly_token.format()
+            ]
+        )
     }
 }
