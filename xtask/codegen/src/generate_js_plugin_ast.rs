@@ -1,4 +1,5 @@
 use crate::generate_nodes::token_kind_to_code;
+use crate::generate_syntax_kinds::keyword_kind_name;
 use crate::js_kinds_src::{AstSrc, Field, JS_KINDS_SRC, TokenKind};
 use crate::language_kind::LanguageKind;
 use crate::update;
@@ -136,12 +137,25 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
         let kind = format_ident!("{name}");
         quote! { #name => JsSyntaxKind::#kind }
     });
+    let syntax_kind_name_arms = syntax_kind_names().into_iter().map(|name| {
+        let kind = format_ident!("{name}");
+        quote! { JsSyntaxKind::#kind => js_string!(#name) }
+    });
     let tokens = quote! {
         use crate::ast::{JsAstField, JsAstFieldValue, JsAstNode, JsAstNodeFields};
         use biome_js_syntax::{*, JsSyntaxKind::*};
         use biome_rowan::AstNode;
+        use boa_engine::{JsString, js_string};
 
         impl JsAstNode {
+            /// Returns the variant name of `kind`, which plugins read as the `kind` of
+            /// nodes and tokens. The string is static, so returning it never allocates.
+            pub(crate) fn kind_name(kind: JsSyntaxKind) -> JsString {
+                match kind {
+                    #(#syntax_kind_name_arms,)*
+                }
+            }
+
             /// Resolves a constructible token kind by its exact native enum name.
             pub(crate) fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
                 Some(match name {
@@ -716,6 +730,31 @@ fn validate_bindings(ast: &AstSrc) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// Returns the name of every `JsSyntaxKind` variant, in the order `generate_syntax_kinds`
+/// declares them.
+fn syntax_kind_names() -> Vec<String> {
+    ["TOMBSTONE", "EOF", "UNICODE_BOM"]
+        .into_iter()
+        .map(str::to_owned)
+        .chain(
+            JS_KINDS_SRC
+                .punct
+                .iter()
+                .map(|(_, name)| (*name).to_owned()),
+        )
+        .chain(
+            JS_KINDS_SRC
+                .keywords
+                .iter()
+                .map(|keyword| keyword_kind_name(keyword)),
+        )
+        .chain(JS_KINDS_SRC.literals.iter().map(|name| (*name).to_owned()))
+        .chain(JS_KINDS_SRC.tokens.iter().map(|name| (*name).to_owned()))
+        .chain(JS_KINDS_SRC.nodes.iter().map(|name| (*name).to_owned()))
+        .chain(["__LAST".to_owned()])
+        .collect()
 }
 
 fn token_kind_names() -> Vec<String> {
