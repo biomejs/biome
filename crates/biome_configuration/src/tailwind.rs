@@ -67,9 +67,9 @@ pub struct TailwindConfiguration {
     /// this file and in the files it imports with `@import`, so that the
     /// Tailwind rules know your theme values, utilities, and variants.
     ///
-    /// To read the file, Biome scans your project when a Tailwind rule is
-    /// enabled. Setting this option also turns on `css.parser.tailwindDirectives`,
-    /// unless you set that option yourself.
+    /// Biome doesn't scan the rest of your project to read them. Setting this
+    /// option also turns on `css.parser.tailwindDirectives`, unless you set
+    /// that option yourself.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stylesheet: Option<String>,
 }

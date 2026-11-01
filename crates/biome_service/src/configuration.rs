@@ -2090,6 +2090,56 @@ mod tests {
         );
     }
 
+    fn configuration_from_json(json: &str) -> Configuration {
+        deserialize_from_json_str::<Configuration>(json, JsonParserOptions::default(), "")
+            .into_deserialized()
+            .unwrap()
+    }
+
+    #[test]
+    fn should_not_scan_project_for_tailwind_rule() {
+        let configuration = configuration_from_json(
+            r#"{ "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } } }"#,
+        );
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::NoScanner
+        );
+    }
+
+    #[test]
+    fn should_not_scan_project_for_tailwind_rule_with_stylesheet() {
+        let configuration = configuration_from_json(
+            r#"{
+                "tailwind": { "stylesheet": "./app.css" },
+                "linter": { "rules": { "nursery": { "noTailwindRawColors": "error" } } }
+            }"#,
+        );
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration).compute(),
+            ScanKind::NoScanner
+        );
+    }
+
+    #[test]
+    fn should_not_scan_project_for_tailwind_domain_with_stylesheet() {
+        let configuration = configuration_from_json(
+            r#"{
+                "tailwind": { "stylesheet": "./app.css" },
+                "linter": { "domains": { "tailwind": "all" } }
+            }"#,
+        );
+
+        assert_eq!(
+            ProjectScanComputer::new(&configuration)
+                .with_rule_selectors(&[], &[DomainSelector("tailwind").into()])
+                .compute(),
+            ScanKind::NoScanner
+        );
+    }
+
     #[test]
     fn should_not_return_type_aware_if_non_type_aware_domain() {
         let configuration = Configuration::default();

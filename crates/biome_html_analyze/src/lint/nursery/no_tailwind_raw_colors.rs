@@ -30,10 +30,6 @@ declare_lint_rule! {
     /// `--color-brand: #00f`. It skips colors that refer to another value, such as
     /// `--color-brand: var(--brand)`.
     ///
-    /// Biome scans your project when this rule is enabled, so that it can read the
-    /// stylesheet and the files it imports. The scan happens even if `tailwind.stylesheet`
-    /// isn't set.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -89,7 +85,7 @@ declare_lint_rule! {
         version: "2.5.15",
         name: "noTailwindRawColors",
         language: "html",
-        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
+        domains: &[RuleDomain::Tailwind],
         recommended: false,
         sources: &[RuleSource::EslintShadcn("no-raw-colors").inspired()],
         issue_number: Some("11342"),
