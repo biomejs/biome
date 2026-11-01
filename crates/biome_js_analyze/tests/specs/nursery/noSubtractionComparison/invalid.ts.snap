@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+(a as number) - (b as number) > 0;
+0 < (a as number) - (b as number);
+a! - b! > 0;
+x = 0 < (a as number) - (b as number);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (a as number) - (b as number) > 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 0 < (a as number) - (b as number);
+    4 │ a! - b! > 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - (a·as·number)·-·(b·as·number)·>·0;
+      2 │ + (a·as·number)·>·(b·as·number);
+    3 3 │   0 < (a as number) - (b as number);
+    4 4 │   a! - b! > 0;
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (a as number) - (b as number) > 0;
+  > 3 │ 0 < (a as number) - (b as number);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ a! - b! > 0;
+    5 │ x = 0 < (a as number) - (b as number);
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    2 │ (a as number) - (b as number) > 0;
+    3 │ 0 < (a as number) - (b as number);
+  > 4 │ a! - b! > 0;
+      │ ^^^^^^^^^^^
+    5 │ x = 0 < (a as number) - (b as number);
+    6 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    2 2 │   (a as number) - (b as number) > 0;
+    3 3 │   0 < (a as number) - (b as number);
+    4   │ - a!·-·b!·>·0;
+      4 │ + a!·>·b!;
+    5 5 │   x = 0 < (a as number) - (b as number);
+    6 6 │   
+  
+
+```
+
+```
+invalid.ts:5:5 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    3 │ 0 < (a as number) - (b as number);
+    4 │ a! - b! > 0;
+  > 5 │ x = 0 < (a as number) - (b as number);
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    3 3 │   0 < (a as number) - (b as number);
+    4 4 │   a! - b! > 0;
+    5   │ - x·=·0·<·(a·as·number)·-·(b·as·number);
+      5 │ + x·=·(a·as·number)·>·(b·as·number);
+    6 6 │   
+  
+
+```
