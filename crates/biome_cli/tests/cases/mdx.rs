@@ -212,3 +212,88 @@ fn format_inline_and_contained_mdx_constructs() {
         result,
     ));
 }
+
+const LINT_CONFIG: &str = r#"{
+    "markdown": {
+        "analyzeEmbeds": true
+    },
+    "linter": {
+        "rules": {
+            "correctness": {
+                "noUndeclaredVariables": "error",
+                "noUnusedImports": "error"
+            },
+            "nursery": {
+                "useTopLevelHeading": "error"
+            }
+        }
+    }
+}"#;
+
+#[test]
+fn lint_mdx_files() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(Utf8Path::new("biome.json").into(), LINT_CONFIG.as_bytes());
+    let file_path = Utf8Path::new("file.mdx");
+    let content = r#"import {Chart} from './chart.js'
+import {Unused} from './unused.js'
+
+# Hello, {props.name}
+
+<Callout>
+
+<Chart data={values} />
+
+</Callout>
+"#;
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_mdx_files_with_suppression_comments() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(Utf8Path::new("biome.json").into(), LINT_CONFIG.as_bytes());
+    let file_path = Utf8Path::new("file.mdx");
+    let content = r#"{/* biome-ignore lint/correctness/noUnusedImports: the example shows an import */}
+import {Unused} from './unused.js'
+
+# Hello
+"#;
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_with_suppression_comments",
+        fs,
+        console,
+        result,
+    ));
+}

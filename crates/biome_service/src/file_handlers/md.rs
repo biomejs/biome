@@ -865,3 +865,33 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         process_fix_all.finish(tree.syntax().as_send().unwrap()),
     ))
 }
+
+/// Returns whether `snippet` is an MDX expression that holds only comments,
+/// such as `{/* biome-ignore lint: reason */}`. Its comments belong to the
+/// Markdown document, which reads them as suppression comments, so the
+/// snippet isn't analyzed on its own.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_mdx_comment_snippet(
+    snippet: &super::ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    use biome_js_syntax::AnyJsRoot;
+    use biome_languages::javascript::{JsEmbeddingKind, MdxEmbeddingKind};
+
+    let is_expression = snippet
+        .file_source(db)
+        .and_then(|source| source.to_js_file_source())
+        .is_some_and(|source| {
+            matches!(
+                source.as_embedding_kind(),
+                JsEmbeddingKind::Mdx {
+                    kind: MdxEmbeddingKind::Expression
+                }
+            )
+        });
+    is_expression
+        && matches!(
+            snippet.parsed_origin().parse(db).tree::<AnyJsRoot>(),
+            AnyJsRoot::JsExpressionTemplateRoot(root) if root.expression().is_none()
+        )
+}

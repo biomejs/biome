@@ -90,6 +90,17 @@ impl AnyMdBlock {
         }
     }
 
+    /// Returns whether the block is an MDX expression that holds only
+    /// comments, such as `{/* comment */}`, the comment syntax of MDX.
+    pub fn is_mdx_comment(&self) -> bool {
+        let Self::AnyMdLeafBlock(AnyMdLeafBlock::MdxBlockExpression(expression)) = self else {
+            return false;
+        };
+        expression
+            .content()
+            .is_some_and(|content| matches!(content.comment_ranges(), Ok(Some(_))))
+    }
+
     pub fn as_any_list_item(&self) -> Option<AnyListItem> {
         match self {
             Self::AnyMdContainerBlock(AnyMdContainerBlock::MdBulletListItem(item)) => {
