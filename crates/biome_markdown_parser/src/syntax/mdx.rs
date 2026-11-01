@@ -204,6 +204,19 @@ fn parse_expression_body(p: &mut MarkdownParser, close: Option<TextSize>, limit:
     }
 }
 
+/// Returns the length of the expression at the start of `bytes`, which
+/// starts with `{`, including both braces, or `bytes.len()` when no `}`
+/// closes it.
+pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
+    let body = &bytes[1..];
+    let length = JsExtent::expression_length(body, JSX);
+    if length < body.len() {
+        length + 2
+    } else {
+        bytes.len()
+    }
+}
+
 /// Emits the line ending after a block as its own newline node.
 fn parse_line_ending(p: &mut MarkdownParser) {
     if p.at(NEWLINE) {
