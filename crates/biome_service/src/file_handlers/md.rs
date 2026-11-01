@@ -641,7 +641,19 @@ pub(crate) fn lint_with_inspector(
         }),
     };
 
-    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    // The syntax errors of MDX JavaScript belong to the document. Snippets
+    // that aren't analyzed don't report them, so they're added here.
+    #[cfg(feature = "lang_mdx")]
+    if !analyze_embeds_enabled(params.settings.as_ref(), params.path) {
+        diagnostics.extend(
+            params
+                .parsed_source
+                .snippets(&params.workspace_db)
+                .filter(|snippet| super::is_mdx_snippet(snippet, &params.workspace_db))
+                .flat_map(|snippet| snippet.serde_diagnostics()),
+        );
+    }
 
     let results = process_lint.into_result(diagnostics, analyze_diagnostics);
     #[cfg(feature = "md_embeds")]
