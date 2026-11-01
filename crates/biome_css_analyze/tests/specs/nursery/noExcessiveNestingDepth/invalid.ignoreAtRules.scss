@@ -1,0 +1,42 @@
+/* should generate diagnostics */
+.a {
+	.b {
+		@media (min-width: 600px) {
+			.c {
+				.d {
+					.e {
+						color: red;
+					}
+				}
+			}
+		}
+	}
+}
+
+@media print {
+	.a {
+		.b {
+			.c {
+				.d {
+					.e {
+						.f {
+							color: red;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+.a {
+	@include breakpoint {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,59 @@
+/* should not generate diagnostics */
+.a {
+	.b {
+		.c {
+			.d {
+				color: red;
+			}
+		}
+	}
+}
+
+@media (min-width: 600px) {
+	.a {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+@media (min-width: 600px) {
+	@supports (display: grid) {
+		.a {
+			.b {
+				.c {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			@media (min-width: 600px) {
+				color: red;
+			}
+		}
+	}
+}
+
+@keyframes fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@page {
+	@top-left {
+		content: "title";
+	}
+}

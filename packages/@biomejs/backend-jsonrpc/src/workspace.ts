@@ -3013,6 +3013,11 @@ export interface Nursery {
 	 */
 	noEagerArrayMethodsInLoops?: NoEagerArrayMethodsInLoopsConfiguration;
 	/**
+	 * Limit how deeply rules and at-rules can be nested.
+	 * See https://biomejs.dev/linter/rules/no-excessive-nesting-depth
+	 */
+	noExcessiveNestingDepth?: NoExcessiveNestingDepthConfiguration;
+	/**
 	 * Enforce a maximum number of statements allowed in a function.
 	 * See https://biomejs.dev/linter/rules/no-excessive-statements-per-function
 	 */
@@ -6137,6 +6142,9 @@ export type NoDuplicateMapKeysConfiguration =
 export type NoEagerArrayMethodsInLoopsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEagerArrayMethodsInLoopsOptions;
+export type NoExcessiveNestingDepthConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveNestingDepthOptions;
 export type NoExcessiveStatementsPerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveStatementsPerFunctionOptions;
@@ -8844,6 +8852,10 @@ export interface RuleWithNoDuplicateMapKeysOptions {
 export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
 	level: RulePlainConfiguration;
 	options?: NoEagerArrayMethodsInLoopsOptions;
+}
+export interface RuleWithNoExcessiveNestingDepthOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveNestingDepthOptions;
 }
 export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
 	level: RulePlainConfiguration;
@@ -11803,6 +11815,16 @@ export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export type NoEagerArrayMethodsInLoopsOptions = {};
+export interface NoExcessiveNestingDepthOptions {
+	/**
+	 * At-rule names, without the `@`, that don't add a nesting level (case-insensitive).
+	 */
+	ignoreAtRules?: string[];
+	/**
+	 * The maximum number of levels a rule or at-rule can be nested. Defaults to `3`.
+	 */
+	maxDepth?: number;
+}
 export interface NoExcessiveStatementsPerFunctionOptions {
 	/**
 	 * When this option is set to `true`, a function that isn't nested in another function is
@@ -13718,6 +13740,7 @@ export type Category =
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
+	| "lint/nursery/noExcessiveNestingDepth"
 	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noExcessiveStatementsPerFunction"
 	| "lint/nursery/noExtendNative"

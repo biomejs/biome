@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+.a {
+	.b {
+		color: red;
+	}
+}

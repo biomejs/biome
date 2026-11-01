@@ -391,3 +391,55 @@ fn migrate_stylelint_lightness_notation() {
         result,
     ));
 }
+
+#[test]
+fn migrate_stylelint_max_nesting_depth() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let stylelintrc = r#"{
+        "rules": {
+            "max-nesting-depth": [5, { "ignoreAtRules": "supports" }]
+        },
+        "overrides": [
+            {
+                "files": ["*.scss"],
+                "rules": {
+                    "max-nesting-depth": [
+                        2,
+                        { "severity": "warning", "ignoreAtRules": ["media", "/^my-/", "/^x/i"] }
+                    ]
+                }
+            }
+        ]
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(
+        Utf8Path::new(".stylelintrc.json").into(),
+        stylelintrc.as_bytes(),
+    );
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "migrate",
+                "stylelint",
+                "--include-inspired",
+                "--include-nursery",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_stylelint_max_nesting_depth",
+        fs,
+        console,
+        result,
+    ));
+}

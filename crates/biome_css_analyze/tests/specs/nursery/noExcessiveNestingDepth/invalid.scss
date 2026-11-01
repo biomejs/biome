@@ -1,0 +1,48 @@
+/* should generate diagnostics */
+.a {
+	@include breakpoint {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		@if $x {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		} @else if $y {
+			.c {
+				.d {
+					color: blue;
+				}
+			}
+		} @else {
+			.c {
+				.d {
+					color: green;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	@each $name in $names {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}

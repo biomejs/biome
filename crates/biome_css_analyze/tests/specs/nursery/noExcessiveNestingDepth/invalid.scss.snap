@@ -1,0 +1,162 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+	@include breakpoint {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		@if $x {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		} @else if $y {
+			.c {
+				.d {
+					color: blue;
+				}
+			}
+		} @else {
+			.c {
+				.d {
+					color: green;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	@each $name in $names {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:6:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    4 │ 		.b {
+    5 │ 			.c {
+  > 6 │ 				.d {
+      │ 				^^
+    7 │ 					color: red;
+    8 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:18:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    16 │ 		@if $x {
+    17 │ 			.c {
+  > 18 │ 				.d {
+       │ 				^^
+    19 │ 					color: red;
+    20 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:24:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    22 │ 		} @else if $y {
+    23 │ 			.c {
+  > 24 │ 				.d {
+       │ 				^^
+    25 │ 					color: blue;
+    26 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:30:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    28 │ 		} @else {
+    29 │ 			.c {
+  > 30 │ 				.d {
+       │ 				^^
+    31 │ 					color: green;
+    32 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:42:5 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This block is nested 4 levels deep, but the maximum is 3.
+  
+    40 │ 		.b {
+    41 │ 			.c {
+  > 42 │ 				.d {
+       │ 				^^
+    43 │ 					color: red;
+    44 │ 				}
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,72 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": {
+    "experimentalEmbeddedSnippetsEnabled": true
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "nursery": {
+        "noExcessiveNestingDepth": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+const Valid = styled.div`@media (min-width: 600px) { .a { .b { .c { .d { color: red; } } } } }`;
+const Invalid = styled.div`.a { .b { .c { .d { .e { color: red; } } } } }`;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.js:2:48 lint/nursery/noExcessiveNestingDepth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This block is nested 4 levels deep, but the maximum is 3.
+  
+    1 │ const Valid = styled.div`@media (min-width: 600px) { .a { .b { .c { .d { color: red; } } } } }`;
+  > 2 │ const Invalid = styled.div`.a { .b { .c { .d { .e { color: red; } } } } }`;
+      │                                                ^^
+    3 │ 
+  
+  i Deeply nested blocks are hard to read, and each nested rule makes the resulting selector longer and more specific, which makes it harder to override.
+  
+  i Move this block to a shallower level, or split the nesting into separate rules.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

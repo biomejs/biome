@@ -242,6 +242,7 @@ define_categories! {
     "lint/nursery/noEagerArrayMethodsInLoops": "https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops",
     "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
     "lint/nursery/noExcessiveNestedCallbacks": "https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
+    "lint/nursery/noExcessiveNestingDepth": "https://biomejs.dev/linter/rules/no-excessive-nesting-depth",
     "lint/nursery/noExcessiveSelectorClasses": "https://biomejs.dev/linter/rules/no-excessive-selector-classes",
     "lint/nursery/noExcessiveStatementsPerFunction": "https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
     "lint/nursery/noExtendNative": "https://biomejs.dev/linter/rules/no-extend-native",

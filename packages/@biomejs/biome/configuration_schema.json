@@ -4589,6 +4589,30 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoExcessiveNestingDepthConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveNestingDepthOptions" }
+			]
+		},
+		"NoExcessiveNestingDepthOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreAtRules": {
+					"description": "At-rule names, without the `@`, that don't add a nesting level (case-insensitive).",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"maxDepth": {
+					"description": "The maximum number of levels a rule or at-rule can be nested. Defaults to `3`.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoExcessiveSelectorClassesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8235,6 +8259,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveNestingDepth": {
+					"description": "Limit how deeply rules and at-rules can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nesting-depth",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveNestingDepthConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveStatementsPerFunction": {
 					"description": "Enforce a maximum number of statements allowed in a function.\nSee https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
 					"anyOf": [
@@ -11462,6 +11493,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoExcessiveNestedTestSuitesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoExcessiveNestingDepthOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveNestingDepthOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

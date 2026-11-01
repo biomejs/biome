@@ -16,6 +16,7 @@ use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
+use biome_rule_options::no_excessive_nesting_depth::NoExcessiveNestingDepthOptions;
 use biome_rule_options::use_consistent_lightness_notation::UseConsistentLightnessNotationOptions;
 
 #[derive(Debug, Default)]
@@ -300,7 +301,7 @@ impl stylelint_stylelint::Rules {
             if migrate_stylelint_any_rule(&mut rules, &name, level, options, results)
                 && let Some(primary_option) = data.primary_option
             {
-                primary_option.migrate(&mut rules);
+                primary_option.migrate(&mut rules, &data.ignore_at_rules);
             }
         }
         rules
@@ -310,7 +311,10 @@ impl stylelint_stylelint::Rules {
 impl stylelint_stylelint::PrimaryOption {
     /// Sets the options of the Biome rule that [migrate_stylelint_any_rule] enabled for this
     /// Stylelint rule, keeping its level.
-    fn migrate(self, rules: &mut biome_config::Rules) {
+    ///
+    /// Entries of `ignore_at_rules` written as regular expressions (`/.../` or `/.../i`)
+    /// are dropped, because Biome only matches at-rule names.
+    fn migrate(self, rules: &mut biome_config::Rules, ignore_at_rules: &[Box<str>]) {
         match self {
             Self::LightnessNotation(notation) => {
                 let group = rules.nursery.get_or_insert_with(Default::default);
@@ -327,6 +331,25 @@ impl stylelint_stylelint::PrimaryOption {
                         },
                     },
                 );
+            }
+            Self::MaxNestingDepth(max_depth) => {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                let rule = group
+                    .unwrap_group_as_mut()
+                    .no_excessive_nesting_depth
+                    .get_or_insert(Default::default());
+                *rule =
+                    biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
+                        level: rule.level(),
+                        options: NoExcessiveNestingDepthOptions {
+                            max_depth: Some(max_depth),
+                            ignore_at_rules: ignore_at_rules
+                                .iter()
+                                .filter(|name| !name.starts_with('/'))
+                                .map(|name| name.to_string())
+                                .collect(),
+                        },
+                    });
             }
         }
     }

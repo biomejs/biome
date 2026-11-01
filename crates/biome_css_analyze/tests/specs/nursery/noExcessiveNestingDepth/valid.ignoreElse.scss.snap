@@ -1,0 +1,46 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.ignoreElse.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.a {
+	.b {
+		@if $x {
+			color: red;
+		} @else if $y {
+			.c {
+				.d {
+					color: blue;
+				}
+			}
+		} @else {
+			.c {
+				.d {
+					color: green;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	@if $x {
+		color: red;
+	} @else {
+		.b {
+			@if $y {
+				color: red;
+			} @else {
+				.c {
+					.d {
+						color: blue;
+					}
+				}
+			}
+		}
+	}
+}
+
+```

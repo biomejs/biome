@@ -1,0 +1,70 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@mixin card {
+	.a {
+		.b {
+			.c {
+				.d {
+					color: red;
+				}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@include card;
+				@extend %placeholder;
+				$local: 1px;
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		@if $x {
+			.c {
+				color: red;
+			}
+		} @else if $y {
+			.c {
+				color: blue;
+			}
+		} @else {
+			.c {
+				color: green;
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@extend .icon-#{$name}
+			}
+		}
+	}
+}
+
+.a {
+	.b {
+		.c {
+			.d {
+				@debug "#{$name}" + #{$size}
+			}
+		}
+	}
+}
+
+```
