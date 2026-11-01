@@ -1413,7 +1413,7 @@ impl Features {
                     file_kind: SvelteFileKind::Component,
                     ..
                 } => self.js.capabilities(),
-                JsEmbeddingKind::None => self.js.capabilities(),
+                JsEmbeddingKind::Mdx { .. } | JsEmbeddingKind::None => self.js.capabilities(),
             },
             DocumentFileSource::Json(_) => self.json.capabilities(),
             #[cfg(feature = "lang_css")]
