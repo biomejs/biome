@@ -3868,6 +3868,11 @@ export interface Nursery {
 	 */
 	useVueComponentIs?: UseVueComponentIsConfiguration;
 	/**
+	 * Require computed properties in Vue components to return a value.
+	 * See https://biomejs.dev/linter/rules/use-vue-computed-property-return
+	 */
+	useVueComputedPropertyReturn?: UseVueComputedPropertyReturnConfiguration;
+	/**
 	 * Enforce a consistent declaration style for Vue's defineEmits macro.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-define-emits-declaration
 	 */
@@ -6680,6 +6685,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueComponentIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComponentIsOptions;
+export type UseVueComputedPropertyReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueComputedPropertyReturnOptions;
 export type UseVueConsistentDefineEmitsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefineEmitsDeclarationOptions;
@@ -9797,6 +9805,10 @@ export interface RuleWithUseVueComponentIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComponentIsOptions;
 }
+export interface RuleWithUseVueComputedPropertyReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueComputedPropertyReturnOptions;
+}
 export interface RuleWithUseVueConsistentDefineEmitsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefineEmitsDeclarationOptions;
@@ -12317,6 +12329,7 @@ export interface UseValidTestTitleOptions {
 }
 export type UseVueBaseImportOptions = {};
 export type UseVueComponentIsOptions = {};
+export type UseVueComputedPropertyReturnOptions = {};
 export interface UseVueConsistentDefineEmitsDeclarationOptions {
 	/**
 	 * The style that `defineEmits` calls must use to declare events.
@@ -14013,6 +14026,7 @@ export type Category =
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueComponentIs"
+	| "lint/nursery/useVueComputedPropertyReturn"
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"

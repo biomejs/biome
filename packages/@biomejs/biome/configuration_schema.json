@@ -9480,6 +9480,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueComputedPropertyReturn": {
+					"description": "Require computed properties in Vue components to return a value.\nSee https://biomejs.dev/linter/rules/use-vue-computed-property-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueComputedPropertyReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentDefineEmitsDeclaration": {
 					"description": "Enforce a consistent declaration style for Vue's defineEmits macro.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-emits-declaration",
 					"anyOf": [
@@ -17232,6 +17239,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueComputedPropertyReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueComputedPropertyReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefineEmitsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -22774,6 +22790,16 @@
 			]
 		},
 		"UseVueComponentIsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueComputedPropertyReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueComputedPropertyReturnOptions" }
+			]
+		},
+		"UseVueComputedPropertyReturnOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
