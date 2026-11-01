@@ -7927,6 +7927,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueRestrictedVOnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRestrictedVOnOptions" }
+			]
+		},
+		"NoVueRestrictedVOnOptions": {
+			"type": "object",
+			"properties": {
+				"listeners": {
+					"description": "Event listeners to restrict.\n\nA `v-on` directive is reported when it matches every condition of an entry.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/RestrictedVOnListener" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueRootVIfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8925,6 +8942,13 @@
 					"description": "Disallow calling configured functions after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRestrictedCallAfterAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRestrictedVOn": {
+					"description": "Disallow configured event listeners in v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-restricted-v-on",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRestrictedVOnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10235,6 +10259,29 @@
 				"property": {
 					"description": "Property name to restrict.\n\nExample: `\"ensure\"` or `\"__defineGetter__\"`.",
 					"type": ["string", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RestrictedVOnListener": {
+			"type": "object",
+			"properties": {
+				"element": {
+					"description": "The element or component name the entry applies to, such as `\"MyButton\"`.\nWhen omitted, the entry applies to all elements.",
+					"type": ["string", "null"]
+				},
+				"event": {
+					"description": "The event name to restrict, such as `\"click\"` for `@click` and `v-on:click`.\n\nWhen omitted, the entry restricts `v-on` used without an event name, such as\n`v-on=\"handlers\"`.",
+					"type": ["string", "null"]
+				},
+				"message": {
+					"description": "A custom message shown in the diagnostic.",
+					"type": ["string", "null"]
+				},
+				"modifiers": {
+					"description": "Modifiers that must all be present for the entry to apply, such as `[\"prevent\"]`\nfor `@click.prevent`.",
+					"type": "array",
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -14690,6 +14737,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueRestrictedCallAfterAwaitOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRestrictedVOnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRestrictedVOnOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
