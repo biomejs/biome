@@ -2134,6 +2134,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_html_syntax",
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_languages",
  "biome_module_graph",

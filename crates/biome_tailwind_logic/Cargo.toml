@@ -38,10 +38,11 @@ salsa                  = { workspace = true }
 smallvec               = { workspace = true }
 
 [dev-dependencies]
-criterion     = { package = "codspeed-criterion-compat", version = "=5.0.1" }
-insta         = { workspace = true, features = ["glob"] }
-json_comments = "0.2.2"
-serde_json    = { workspace = true }
+biome_js_parser = { path = "../biome_js_parser" }
+criterion       = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+insta           = { workspace = true, features = ["glob"] }
+json_comments   = "0.2.2"
+serde_json      = { workspace = true }
 
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
 tikv-jemallocator = { workspace = true }
