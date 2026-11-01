@@ -1,0 +1,25 @@
+<script>
+/* should not generate diagnostics */
+export default {
+  props: {
+    ...props,
+    myProp: Number,
+    anotherType: [Number, String],
+    extraProp: { type: Number, default: 10 },
+    lastProp: { type: [Number, Boolean] },
+    nullProp: null,
+    nullTypeProp: { type: null },
+    customClass: Foo,
+    member: Foo.Bar,
+    call: getType(),
+    tagged: tag`String`,
+    logical: Foo || Bar,
+    holes: [String,,],
+    leadingHoles: [,,Number],
+    holesInType: { type: [String,,] },
+    shorthand,
+    noType: { default: 'abc' },
+    typeAsString: { 'type': Number },
+  },
+};
+</script>

@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  beforeDestroy() {},
+  destroyed() {},
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:3 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The beforeDestroy hook was renamed to beforeUnmount in Vue 3.
+  
+    2 │ <script>
+    3 │ export default {
+  > 4 │   beforeDestroy() {},
+      │   ^^^^^^^^^^^^^
+    5 │   destroyed() {},
+    6 │ };
+  
+  i Vue 3 doesn't call the beforeDestroy hook, so the code inside it never runs.
+  
+  i Rename the hook to beforeUnmount.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to beforeUnmount.
+  
+    1 1 │   
+    2 2 │   export default {
+    3   │ - ··beforeDestroy()·{},
+      3 │ + ··beforeUnmount()·{},
+    4 4 │     destroyed() {},
+    5 5 │   };
+  
+
+```
+
+```
+invalid.vue:5:3 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The destroyed hook was renamed to unmounted in Vue 3.
+  
+    3 │ export default {
+    4 │   beforeDestroy() {},
+  > 5 │   destroyed() {},
+      │   ^^^^^^^^^
+    6 │ };
+    7 │ </script>
+  
+  i Vue 3 doesn't call the destroyed hook, so the code inside it never runs.
+  
+  i Rename the hook to unmounted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to unmounted.
+  
+    2 2 │   export default {
+    3 3 │     beforeDestroy() {},
+    4   │ - ··destroyed()·{},
+      4 │ + ··unmounted()·{},
+    5 5 │   };
+    6 6 │   
+  
+
+```

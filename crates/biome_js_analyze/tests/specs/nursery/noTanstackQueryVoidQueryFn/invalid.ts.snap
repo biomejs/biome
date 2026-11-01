@@ -1,0 +1,1013 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { QueryClient, queryOptions, useInfiniteQuery, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+
+declare function someOperation(): Promise<number>;
+
+// The function body never returns.
+useQuery({
+	queryKey: ["test"],
+	queryFn: () => {
+		console.log("test");
+	},
+});
+
+// The function returns `undefined`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: () => undefined,
+});
+
+// The async function body never returns.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		await someOperation();
+	},
+});
+
+// The return type says that the promise has no result.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async (): Promise<void> => {
+		await someOperation();
+	},
+});
+
+// The return type is `void`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: (): void => {
+		console.log("test");
+	},
+});
+
+// The returned promise results in `undefined`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: () => Promise.resolve(undefined),
+});
+
+// The function is declared somewhere else.
+async function voidOperation(): Promise<void> {
+	await someOperation();
+}
+
+useQuery({
+	queryKey: ["test"],
+	queryFn: voidOperation,
+});
+
+// Only one path returns.
+useQuery({
+	queryKey: ["test"],
+	queryFn: () => {
+		if (Math.random() > 0.5) {
+			return { data: "test" };
+		}
+	},
+});
+
+// One branch of the conditional expression is `undefined`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: () => (Math.random() > 0.5 ? { data: "test" } : undefined),
+});
+
+// The `catch` clause doesn't return.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		try {
+			return { data: "test" };
+		} catch (error) {
+			console.error(error);
+		}
+	},
+});
+
+// The declared return type includes `undefined`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async (): Promise<string | undefined> => {
+		return "test";
+	},
+});
+
+useInfiniteQuery({
+	queryKey: ["test"],
+	queryFn: async ({ pageParam }) => {
+		await fetch("/api/test?page=" + pageParam);
+	},
+	initialPageParam: 0,
+	getNextPageParam: (lastPage) => undefined,
+});
+
+useSuspenseQuery({
+	queryKey: ["test"],
+	queryFn: () => {
+		console.log("fetching");
+	},
+});
+
+const options = queryOptions({
+	queryKey: ["test"],
+	queryFn: async () => {
+		await fetch("/api/test");
+	},
+});
+
+const queryClient = new QueryClient();
+
+queryClient.fetchQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		await fetch("/api/test");
+	},
+});
+
+queryClient.prefetchInfiniteQuery({
+	queryKey: ["test"],
+	queryFn: async ({ pageParam }: { pageParam: number }) => {
+		await fetch(`/api/test?page=${pageParam}`);
+	},
+	initialPageParam: 0,
+});
+
+// The returned call can result in `undefined`.
+declare function findData(): { data: string } | undefined;
+
+useQuery({
+	queryKey: ["test"],
+	queryFn: () => findData(),
+});
+
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		return findData();
+	},
+});
+
+// The returned variable is always `undefined`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		const result = await voidOperation();
+		return result;
+	},
+});
+
+// A `return` statement without a value returns `undefined`.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		const response = await fetch("/api/test");
+		if (!response.ok) {
+			return;
+		}
+		return response.json();
+	},
+});
+
+// The value of the other path is unknown, but the end of the function is still reachable.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		const response = await fetch("/api/test");
+		if (response.ok) {
+			return response.json();
+		}
+	},
+});
+
+// An async function returns the result of a function that returns a promise without a result.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => voidOperation(),
+});
+
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		return voidOperation();
+	},
+});
+
+// The call at the end returns normally, so the end of the function is reachable.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		if (Math.random() > 0.5) {
+			return { data: "test" };
+		}
+		await someOperation();
+	},
+});
+
+// Leaving a loop reaches the end of the function.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		for (const url of ["/api/a", "/api/b"]) {
+			const response = await fetch(url);
+			if (response.ok) {
+				return url;
+			}
+		}
+	},
+});
+
+useQuery({
+	queryKey: ["test"],
+	queryFn: async () => {
+		try {
+			await someOperation();
+		} finally {
+			console.log("done");
+		}
+	},
+});
+
+// Function expressions, methods, and shorthand properties are checked too.
+useQuery({
+	queryKey: ["test"],
+	queryFn: async function () {
+		await someOperation();
+	},
+});
+
+useQuery({
+	queryKey: ["test"],
+	async queryFn() {
+		await someOperation();
+	},
+});
+
+useQuery({
+	queryKey: ["test"],
+	queryFn() {
+		if (Math.random() > 0.5) {
+			return { data: "test" };
+		}
+	},
+});
+
+useQuery({
+	queryKey: ["test"],
+	queryFn() {
+		return undefined;
+	},
+});
+
+useQuery({
+	queryKey: ["test"],
+	async queryFn(): Promise<void> {
+		await someOperation();
+	},
+});
+
+const queryFn = async () => {
+	await someOperation();
+};
+
+useQuery({
+	queryKey: ["test"],
+	queryFn,
+});
+
+// The name can be quoted, and the function can be in parentheses.
+useQuery({
+	queryKey: ["test"],
+	"queryFn": (async () => {
+		await someOperation();
+	}),
+});
+
+// Query options don't have to be passed to a TanStack Query function directly.
+const sharedOptions = {
+	queryKey: ["test"],
+	queryFn: voidOperation,
+};
+
+```
+
+# Diagnostics
+```
+invalid.ts:9:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+     7 │ useQuery({
+     8 │ 	queryKey: ["test"],
+   > 9 │ 	queryFn: () => {
+       │ 	^^^^^^^
+    10 │ 		console.log("test");
+    11 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    15 │ useQuery({
+    16 │ 	queryKey: ["test"],
+  > 17 │ 	queryFn: () => undefined,
+       │ 	^^^^^^^
+    18 │ });
+    19 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    21 │ useQuery({
+    22 │ 	queryKey: ["test"],
+  > 23 │ 	queryFn: async () => {
+       │ 	^^^^^^^
+    24 │ 		await someOperation();
+    25 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    29 │ useQuery({
+    30 │ 	queryKey: ["test"],
+  > 31 │ 	queryFn: async (): Promise<void> => {
+       │ 	^^^^^^^
+    32 │ 		await someOperation();
+    33 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:39:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    37 │ useQuery({
+    38 │ 	queryKey: ["test"],
+  > 39 │ 	queryFn: (): void => {
+       │ 	^^^^^^^
+    40 │ 		console.log("test");
+    41 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:47:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    45 │ useQuery({
+    46 │ 	queryKey: ["test"],
+  > 47 │ 	queryFn: () => Promise.resolve(undefined),
+       │ 	^^^^^^^
+    48 │ });
+    49 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:57:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    55 │ useQuery({
+    56 │ 	queryKey: ["test"],
+  > 57 │ 	queryFn: voidOperation,
+       │ 	^^^^^^^
+    58 │ });
+    59 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:63:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    61 │ useQuery({
+    62 │ 	queryKey: ["test"],
+  > 63 │ 	queryFn: () => {
+       │ 	^^^^^^^
+    64 │ 		if (Math.random() > 0.5) {
+    65 │ 			return { data: "test" };
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:73:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    71 │ useQuery({
+    72 │ 	queryKey: ["test"],
+  > 73 │ 	queryFn: () => (Math.random() > 0.5 ? { data: "test" } : undefined),
+       │ 	^^^^^^^
+    74 │ });
+    75 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:79:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    77 │ useQuery({
+    78 │ 	queryKey: ["test"],
+  > 79 │ 	queryFn: async () => {
+       │ 	^^^^^^^
+    80 │ 		try {
+    81 │ 			return { data: "test" };
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:91:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    89 │ useQuery({
+    90 │ 	queryKey: ["test"],
+  > 91 │ 	queryFn: async (): Promise<string | undefined> => {
+       │ 	^^^^^^^
+    92 │ 		return "test";
+    93 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:98:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+     96 │ useInfiniteQuery({
+     97 │ 	queryKey: ["test"],
+   > 98 │ 	queryFn: async ({ pageParam }) => {
+        │ 	^^^^^^^
+     99 │ 		await fetch("/api/test?page=" + pageParam);
+    100 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:107:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    105 │ useSuspenseQuery({
+    106 │ 	queryKey: ["test"],
+  > 107 │ 	queryFn: () => {
+        │ 	^^^^^^^
+    108 │ 		console.log("fetching");
+    109 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:114:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    112 │ const options = queryOptions({
+    113 │ 	queryKey: ["test"],
+  > 114 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    115 │ 		await fetch("/api/test");
+    116 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:123:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    121 │ queryClient.fetchQuery({
+    122 │ 	queryKey: ["test"],
+  > 123 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    124 │ 		await fetch("/api/test");
+    125 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:130:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    128 │ queryClient.prefetchInfiniteQuery({
+    129 │ 	queryKey: ["test"],
+  > 130 │ 	queryFn: async ({ pageParam }: { pageParam: number }) => {
+        │ 	^^^^^^^
+    131 │ 		await fetch(`/api/test?page=${pageParam}`);
+    132 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:141:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    139 │ useQuery({
+    140 │ 	queryKey: ["test"],
+  > 141 │ 	queryFn: () => findData(),
+        │ 	^^^^^^^
+    142 │ });
+    143 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:146:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    144 │ useQuery({
+    145 │ 	queryKey: ["test"],
+  > 146 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    147 │ 		return findData();
+    148 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:154:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    152 │ useQuery({
+    153 │ 	queryKey: ["test"],
+  > 154 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    155 │ 		const result = await voidOperation();
+    156 │ 		return result;
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:163:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    161 │ useQuery({
+    162 │ 	queryKey: ["test"],
+  > 163 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    164 │ 		const response = await fetch("/api/test");
+    165 │ 		if (!response.ok) {
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:175:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    173 │ useQuery({
+    174 │ 	queryKey: ["test"],
+  > 175 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    176 │ 		const response = await fetch("/api/test");
+    177 │ 		if (response.ok) {
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:186:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    184 │ useQuery({
+    185 │ 	queryKey: ["test"],
+  > 186 │ 	queryFn: async () => voidOperation(),
+        │ 	^^^^^^^
+    187 │ });
+    188 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:191:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    189 │ useQuery({
+    190 │ 	queryKey: ["test"],
+  > 191 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    192 │ 		return voidOperation();
+    193 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:199:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    197 │ useQuery({
+    198 │ 	queryKey: ["test"],
+  > 199 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    200 │ 		if (Math.random() > 0.5) {
+    201 │ 			return { data: "test" };
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:210:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    208 │ useQuery({
+    209 │ 	queryKey: ["test"],
+  > 210 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    211 │ 		for (const url of ["/api/a", "/api/b"]) {
+    212 │ 			const response = await fetch(url);
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:222:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    220 │ useQuery({
+    221 │ 	queryKey: ["test"],
+  > 222 │ 	queryFn: async () => {
+        │ 	^^^^^^^
+    223 │ 		try {
+    224 │ 			await someOperation();
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:234:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    232 │ useQuery({
+    233 │ 	queryKey: ["test"],
+  > 234 │ 	queryFn: async function () {
+        │ 	^^^^^^^
+    235 │ 		await someOperation();
+    236 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:241:8 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    239 │ useQuery({
+    240 │ 	queryKey: ["test"],
+  > 241 │ 	async queryFn() {
+        │ 	      ^^^^^^^
+    242 │ 		await someOperation();
+    243 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:248:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    246 │ useQuery({
+    247 │ 	queryKey: ["test"],
+  > 248 │ 	queryFn() {
+        │ 	^^^^^^^
+    249 │ 		if (Math.random() > 0.5) {
+    250 │ 			return { data: "test" };
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:257:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    255 │ useQuery({
+    256 │ 	queryKey: ["test"],
+  > 257 │ 	queryFn() {
+        │ 	^^^^^^^
+    258 │ 		return undefined;
+    259 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:264:8 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    262 │ useQuery({
+    263 │ 	queryKey: ["test"],
+  > 264 │ 	async queryFn(): Promise<void> {
+        │ 	      ^^^^^^^
+    265 │ 		await someOperation();
+    266 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:275:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    273 │ useQuery({
+    274 │ 	queryKey: ["test"],
+  > 275 │ 	queryFn,
+        │ 	^^^^^^^
+    276 │ });
+    277 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:281:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    279 │ useQuery({
+    280 │ 	queryKey: ["test"],
+  > 281 │ 	"queryFn": (async () => {
+        │ 	^^^^^^^^^
+    282 │ 		await someOperation();
+    283 │ 	}),
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:289:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    287 │ const sharedOptions = {
+    288 │ 	queryKey: ["test"],
+  > 289 │ 	queryFn: voidOperation,
+        │ 	^^^^^^^
+    290 │ };
+    291 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

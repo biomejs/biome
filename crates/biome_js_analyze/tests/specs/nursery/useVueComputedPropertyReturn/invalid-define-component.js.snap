@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  computed: {
+    foo() {},
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:6:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property foo doesn't always return a value.
+  
+    4 │ export default defineComponent({
+    5 │   computed: {
+  > 6 │     foo() {},
+      │     ^^^^^^^^
+    7 │   },
+    8 │ });
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

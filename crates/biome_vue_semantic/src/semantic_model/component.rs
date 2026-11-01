@@ -54,14 +54,19 @@ pub(crate) struct ScriptOutput {
     pub(crate) default_export: Option<ComponentId>,
 }
 
+/// Options that register a lifecycle hook. `beforeDestroy` and `destroyed`
+/// are the names Vue 2 used for `beforeUnmount` and `unmounted`. Sorted, so
+/// it can be searched with a binary search.
 const LIFECYCLE_OPTIONS: &[&str] = &[
     "activated",
     "beforeCreate",
+    "beforeDestroy",
     "beforeMount",
     "beforeUnmount",
     "beforeUpdate",
     "created",
     "deactivated",
+    "destroyed",
     "errorCaptured",
     "mounted",
     "renderTracked",
@@ -509,6 +514,7 @@ impl Collector<'_, '_> {
                 "methods" => self.collect_methods_option(&member, component),
                 "watch" => self.collect_watch_option(&member, component),
                 "inject" => self.collect_inject_option(&member, component),
+                "slots" => self.collect_slots_option(&member, component),
                 "components" => self.collect_registrations(
                     &member,
                     component,
@@ -538,7 +544,7 @@ impl Collector<'_, '_> {
                 // may use any declaration.
                 "template" => self.builder.open_all_uses(component),
                 other => {
-                    if LIFECYCLE_OPTIONS.contains(&other) {
+                    if LIFECYCLE_OPTIONS.binary_search(&other).is_ok() {
                         self.add_instance_symbol(
                             component,
                             name.clone(),
@@ -652,6 +658,8 @@ impl Collector<'_, '_> {
                         types: TypeSet::empty(),
                         required: Tri::No,
                         defaults: Box::default(),
+                        external_default_sources: DefaultSources::empty(),
+                        defaults_complete: true,
                         validator: None,
                         form: PropForm::ArrayString,
                     });
@@ -697,6 +705,8 @@ impl Collector<'_, '_> {
                         types: TypeSet::from(PropType::Unknown),
                         required: Tri::Unknown,
                         defaults: Box::default(),
+                        external_default_sources: DefaultSources::empty(),
+                        defaults_complete: true,
                         validator: None,
                         form: PropForm::Constructor,
                     });
@@ -731,6 +741,8 @@ impl Collector<'_, '_> {
                 },
                 required: Tri::No,
                 defaults: Box::default(),
+                external_default_sources: DefaultSources::empty(),
+                defaults_complete: true,
                 validator: None,
                 form: PropForm::Constructor,
             };
@@ -739,11 +751,16 @@ impl Collector<'_, '_> {
             types: TypeSet::empty(),
             required: Tri::No,
             defaults: Box::default(),
+            external_default_sources: DefaultSources::empty(),
+            defaults_complete: true,
             validator: None,
             form: PropForm::Options,
         };
         for member in options.members().iter().flatten() {
+            // A spread or a computed key may hold a default the model cannot
+            // read.
             let Some(name) = member.name() else {
+                detail.defaults_complete = false;
                 continue;
             };
             match name.text() {
@@ -885,6 +902,8 @@ impl Collector<'_, '_> {
                 types,
                 required: (!is_optional).into(),
                 defaults: Box::default(),
+                external_default_sources: DefaultSources::empty(),
+                defaults_complete: true,
                 validator: None,
                 form: PropForm::TypeMember,
             });
@@ -1115,6 +1134,72 @@ impl Collector<'_, '_> {
                 }
                 _ => {}
             }
+        }
+    }
+
+    /// Reads the `slots` option written as `Object as SlotsType<{ ... }>`.
+    ///
+    /// Vue ignores the runtime value of the option, so its type argument is
+    /// the only place slot names are written. Any other form leaves the
+    /// slots of the component open.
+    fn collect_slots_option(&mut self, member: &AnyJsObjectMember, component: ComponentId) {
+        let ty = member_value(member)
+            .and_then(|value| match value.omit_parentheses() {
+                AnyJsExpression::TsAsExpression(expression) => expression.ty().ok(),
+                _ => None,
+            })
+            .and_then(|ty| match ty {
+                AnyTsType::TsReferenceType(reference)
+                    if reference.name().is_ok_and(|name| {
+                        name.as_js_reference_identifier()
+                            .is_some_and(|name| name.has_name("SlotsType"))
+                    }) =>
+                {
+                    reference
+                        .type_arguments()?
+                        .ts_type_argument_list()
+                        .iter()
+                        .next()?
+                        .ok()
+                }
+                _ => None,
+            });
+        self.collect_type_slots(ty.as_ref(), component);
+    }
+
+    /// Reads slots written as a type: `defineSlots<{ default(): any }>()`.
+    ///
+    /// When `ty` is `None` or its members cannot be listed, the slots of the
+    /// component are left open.
+    fn collect_type_slots(&mut self, ty: Option<&AnyTsType>, component: ComponentId) {
+        let Some(members) = ty.and_then(|ty| self.resolve_type_members(ty)) else {
+            self.builder
+                .open(component, Namespace::Slot, OpenReason::UnresolvedType);
+            return;
+        };
+        for member in members.iter() {
+            // Other members, such as index signatures, declare slots whose
+            // names the model cannot list.
+            let name = match &member {
+                AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name().ok(),
+                AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name().ok(),
+                _ => None,
+            };
+            let Some((name, name_range)) =
+                name.and_then(|node| Some((node.name()?, node.syntax().text_trimmed_range())))
+            else {
+                self.builder
+                    .open(component, Namespace::Slot, OpenReason::UnresolvedType);
+                continue;
+            };
+            self.add_instance_symbol(
+                component,
+                name,
+                Some(name_range),
+                member.syntax().text_trimmed_range(),
+                Namespace::Slot,
+                SymbolKind::Slot,
+            );
         }
     }
 
@@ -1605,24 +1690,11 @@ impl Collector<'_, '_> {
 
         // withDefaults(defineProps<Props>(), { ... })
         let (props_call, with_defaults) = if self.is_macro_call(&call, "withDefaults") {
-            let arguments: Vec<_> = call
-                .arguments()
-                .ok()
-                .into_iter()
-                .flat_map(|arguments| arguments.args().iter().flatten())
-                .collect();
-            let inner = arguments
-                .first()
-                .and_then(AnyJsCallArgument::as_any_js_expression)
+            let inner = first_argument(&call)
                 .and_then(|argument| argument.inner_expression())
                 .and_then(|argument| argument.as_js_call_expression().cloned());
-            let defaults = arguments
-                .get(1)
-                .and_then(AnyJsCallArgument::as_any_js_expression)
-                .and_then(|argument| argument.inner_expression())
-                .and_then(|argument| argument.as_js_object_expression().cloned());
             match inner {
-                Some(inner) if self.is_macro_call(&inner, "defineProps") => (inner, defaults),
+                Some(inner) if self.is_macro_call(&inner, "defineProps") => (inner, Some(&call)),
                 _ => return,
             }
         } else {
@@ -1630,7 +1702,7 @@ impl Collector<'_, '_> {
         };
 
         if self.is_macro_call(&props_call, "defineProps") {
-            self.collect_define_props(&props_call, with_defaults.as_ref(), pattern, component);
+            self.collect_define_props(&props_call, with_defaults, pattern, component);
         } else if self.is_macro_call(&call, "defineEmits") {
             if let Some(argument) = first_argument(&call) {
                 self.collect_runtime_emits(&argument, component);
@@ -1696,43 +1768,7 @@ impl Collector<'_, '_> {
                 self.set_role(binding, Origin::DefineModel, component, None);
             }
         } else if self.is_macro_call(&call, "defineSlots") {
-            match first_type_argument(&call).and_then(|ty| self.resolve_type_members(&ty)) {
-                Some(members) => {
-                    for member in members.iter() {
-                        let (name, name_range) = match &member {
-                            AnyTsTypeMember::TsPropertySignatureTypeMember(property) => (
-                                property.name().ok().and_then(|name| name.name()),
-                                property
-                                    .name()
-                                    .ok()
-                                    .map(|name| name.syntax().text_trimmed_range()),
-                            ),
-                            AnyTsTypeMember::TsMethodSignatureTypeMember(method) => (
-                                method.name().ok().and_then(|name| name.name()),
-                                method
-                                    .name()
-                                    .ok()
-                                    .map(|name| name.syntax().text_trimmed_range()),
-                            ),
-                            _ => (None, None),
-                        };
-                        let Some(name) = name else {
-                            continue;
-                        };
-                        self.add_instance_symbol(
-                            component,
-                            name,
-                            name_range,
-                            member.syntax().text_trimmed_range(),
-                            Namespace::Slot,
-                            SymbolKind::Slot,
-                        );
-                    }
-                }
-                None => self
-                    .builder
-                    .open(component, Namespace::Slot, OpenReason::UnresolvedType),
-            }
+            self.collect_type_slots(first_type_argument(&call).as_ref(), component);
             if let Some(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
                 binding,
             ))) = pattern
@@ -1747,10 +1783,12 @@ impl Collector<'_, '_> {
         }
     }
 
+    /// Reads a `defineProps()` call. `with_defaults` is the `withDefaults()`
+    /// call that `call` is passed to, if any.
     fn collect_define_props(
         &mut self,
         call: &JsCallExpression,
-        with_defaults: Option<&JsObjectExpression>,
+        with_defaults: Option<&JsCallExpression>,
         pattern: Option<&AnyJsBindingPattern>,
         component: ComponentId,
     ) {
@@ -1762,27 +1800,68 @@ impl Collector<'_, '_> {
             props.extend(self.collect_type_props(&ty, component));
         }
 
-        if let Some(defaults) = with_defaults {
-            for member in defaults.members().iter().flatten() {
-                let Some(name) = member.name() else {
-                    continue;
-                };
-                let range = match &member {
-                    AnyJsObjectMember::JsPropertyObjectMember(property) => property
-                        .value()
-                        .ok()
-                        .map(|value| value.syntax().text_trimmed_range()),
-                    other => Some(other.syntax().text_trimmed_range()),
-                };
-                if let Some(range) = range {
-                    self.add_prop_default(&props, name.text(), range, DefaultSource::WithDefaults);
+        let mut external_default_sources = DefaultSources::empty();
+        let mut defaults_complete = true;
+        if let Some(with_defaults) = with_defaults {
+            external_default_sources |= DefaultSource::WithDefaults;
+            let defaults = with_defaults
+                .arguments()
+                .ok()
+                .and_then(|arguments| arguments.args().iter().nth(1));
+            match defaults {
+                None => {}
+                Some(Ok(AnyJsCallArgument::AnyJsExpression(defaults))) => {
+                    match defaults.inner_expression() {
+                        Some(AnyJsExpression::JsObjectExpression(defaults)) => {
+                            defaults_complete = self.collect_with_defaults(&defaults, &props);
+                        }
+                        _ => defaults_complete = false,
+                    }
                 }
+                Some(_) => defaults_complete = false,
+            }
+        }
+        if matches!(
+            pattern,
+            Some(AnyJsBindingPattern::JsObjectBindingPattern(_))
+        ) {
+            external_default_sources |= DefaultSource::Destructure;
+        }
+        for &id in &props {
+            if let Detail::Prop(detail) = &mut self.builder.symbol_mut(id).detail {
+                detail.external_default_sources = external_default_sources;
+                detail.defaults_complete &= defaults_complete;
             }
         }
 
         if let Some(pattern) = pattern {
             self.assign_props_role(pattern, component, &props);
         }
+    }
+
+    /// Records the members of the object passed to `withDefaults()` as
+    /// defaults of `props`. Returns `false` when a member does not have a
+    /// static name, such as a spread, so that it may give a default to any
+    /// prop.
+    fn collect_with_defaults(&mut self, defaults: &JsObjectExpression, props: &[SymbolId]) -> bool {
+        let mut complete = true;
+        for member in defaults.members().iter().flatten() {
+            let Some(name) = member.name() else {
+                complete = false;
+                continue;
+            };
+            let range = match &member {
+                AnyJsObjectMember::JsPropertyObjectMember(property) => property
+                    .value()
+                    .ok()
+                    .map(|value| value.syntax().text_trimmed_range()),
+                other => Some(other.syntax().text_trimmed_range()),
+            };
+            if let Some(range) = range {
+                self.add_prop_default(props, name.text(), range, DefaultSource::WithDefaults);
+            }
+        }
+        complete
     }
 
     /// Records what the binding pattern that receives the props object
@@ -2235,4 +2314,16 @@ fn type_set_of(ty: &AnyTsType) -> TypeSet {
         _ => types.insert(PropType::Unknown),
     }
     types
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LIFECYCLE_OPTIONS;
+
+    #[test]
+    fn lifecycle_options_are_sorted() {
+        for items in LIFECYCLE_OPTIONS.windows(2) {
+            assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        }
+    }
 }

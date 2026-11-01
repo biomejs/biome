@@ -62,7 +62,7 @@ details.js:4:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━�
     5 │ test.describe('suite', () => {}, { tag: '@smoke' });
     6 │ 
   
-  i The last argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   
@@ -80,7 +80,7 @@ details.js:5:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
   
-  i The last argument to describe must be a function, not a string, number, object, or other type.
+  i The describe callback must be a function, not a string, number, object, or other type.
   
   i Replace the callback with a function expression or arrow function.
   

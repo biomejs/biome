@@ -3,7 +3,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression};
+use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions;
 
@@ -46,6 +46,15 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
+    /// A group without a title is also valid:
+    ///
+    /// ```js
+    /// test.describe(() => {
+    ///     test.use({ colorScheme: 'dark' });
+    ///     test('one', async ({ page }) => {});
+    /// });
+    /// ```
+    ///
     pub UsePlaywrightValidDescribeCallback {
         version: "2.4.2",
         name: "usePlaywrightValidDescribeCallback",
@@ -72,13 +81,17 @@ impl Rule for UsePlaywrightValidDescribeCallback {
             return None;
         }
 
-        // Playwright accepts `describe(title, callback)` and `describe(title, details, callback)`,
-        // so the callback is always the last argument.
+        // The callback is the last argument: `describe(title, callback)`,
+        // `describe(title, details, callback)`, or an anonymous `describe(callback)`.
         let args = call_expr.arguments().ok()?.args();
-        if args.len() < 2 {
+        let Some(callback_arg) = args.last() else {
+            return Some(InvalidReason::MissingCallback);
+        };
+        let callback_arg = callback_arg.ok()?;
+        // A lone non-function argument is a title without a callback.
+        if args.len() == 1 && !is_function_expression(&callback_arg) {
             return Some(InvalidReason::MissingCallback);
         }
-        let callback_arg = args.last()?.ok()?;
 
         let Some(callback_expr) = callback_arg.as_any_js_expression() else {
             return Some(InvalidReason::NotFunction);
@@ -140,12 +153,12 @@ impl Rule for UsePlaywrightValidDescribeCallback {
             ),
             InvalidReason::MissingCallback => (
                 markup! { "Describe requires a callback function." },
-                markup! { "The last argument to describe must be a function that contains the test definitions." },
-                markup! { "Add a callback function as the last argument to describe." },
+                markup! { "Describe must be passed a function that contains the test definitions." },
+                markup! { "Pass a callback function to describe, after the title if there is one." },
             ),
             InvalidReason::NotFunction => (
                 markup! { "Describe callback must be a function." },
-                markup! { "The last argument to describe must be a function, not a "<Emphasis>"string"</Emphasis>", "<Emphasis>"number"</Emphasis>", "<Emphasis>"object"</Emphasis>", or other type." },
+                markup! { "The describe callback must be a function, not a "<Emphasis>"string"</Emphasis>", "<Emphasis>"number"</Emphasis>", "<Emphasis>"object"</Emphasis>", or other type." },
                 markup! { "Replace the callback with a function expression or arrow function." },
             ),
         };
@@ -169,6 +182,16 @@ pub enum InvalidReason {
     MissingCallback,
     /// The provided argument is not a function.
     NotFunction,
+}
+
+fn is_function_expression(arg: &AnyJsCallArgument) -> bool {
+    matches!(
+        arg.as_any_js_expression(),
+        Some(
+            AnyJsExpression::JsArrowFunctionExpression(_)
+                | AnyJsExpression::JsFunctionExpression(_)
+        )
+    )
 }
 
 /// Checks if the callee is a Playwright describe call.

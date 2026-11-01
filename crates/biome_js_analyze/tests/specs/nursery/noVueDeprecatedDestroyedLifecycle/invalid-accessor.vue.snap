@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-accessor.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  get destroyed() {
+    return () => {};
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-accessor.vue:4:7 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × The destroyed hook was renamed to unmounted in Vue 3.
+  
+    2 │ <script>
+    3 │ export default {
+  > 4 │   get destroyed() {
+      │       ^^^^^^^^^
+    5 │     return () => {};
+    6 │   },
+  
+  i Vue 3 doesn't call the destroyed hook, so the code inside it never runs.
+  
+  i Rename the hook to unmounted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to unmounted.
+  
+    1 1 │   
+    2 2 │   export default {
+    3   │ - ··get·destroyed()·{
+      3 │ + ··get·unmounted()·{
+    4 4 │       return () => {};
+    5 5 │     },
+  
+
+```

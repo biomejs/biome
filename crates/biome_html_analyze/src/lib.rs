@@ -13,7 +13,6 @@ mod vue;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
-use crate::services::embedded::EmbeddedService;
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
 pub use crate::services::vue::{VueSemantic, VueSemanticServices};
 pub use crate::suppression::HtmlSuppression;
@@ -289,19 +288,12 @@ where
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
     }
-    if let Some(language_db) = &html_services.language_db {
-        services.insert_service(language_db.clone());
+    if let Some(language_db) = html_services.language_db {
+        services.insert_service(language_db);
         services.insert_service(options.file_path.clone());
     }
     if let Some(document) = html_services.document {
         services.insert_service(document);
-    }
-    if let Some(embedded_data) = html_services.embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data));
-    } else if let Some(language_db) = html_services.language_db
-        && let Some(document) = html_services.document
-    {
-        services.insert_service(EmbeddedService::new(language_db, document));
     }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);

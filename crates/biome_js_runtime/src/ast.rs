@@ -262,16 +262,6 @@ impl JsAstNode {
         Some(node.clone())
     }
 
-    fn get_kind(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
-        let Some(Self { node }) = Self::from_value(this) else {
-            return Err(JsNativeError::typ()
-                .with_message("Cannot read node.kind because this value is not a node. Use the node passed to run() or a node obtained by traversing it.")
-                .into());
-        };
-
-        Ok(JsString::from(format!("{:?}", node.kind())).into())
-    }
-
     fn get_text(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
         let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
@@ -545,8 +535,11 @@ impl JsAstNode {
         prototype
     }
 
-    /// Creates the prototype of `kind` with one accessor and one `withX()`
-    /// update method per field of the node.
+    /// Creates the prototype of `kind` with a read-only `kind` data property,
+    /// and one accessor and one `withX()` update method per field of the node.
+    ///
+    /// `kind` is a data property rather than an accessor so reading it does
+    /// not call into native code.
     fn create_prototype(
         kind: JsSyntaxKind,
         base_prototype: JsObject,
@@ -554,6 +547,11 @@ impl JsAstNode {
     ) -> JsObject {
         let mut prototype =
             ObjectInitializer::with_native_data_and_proto(OrdinaryObject, base_prototype, context);
+        prototype.property(
+            js_string!("kind"),
+            Self::kind_name(kind),
+            Attribute::ENUMERABLE,
+        );
         if let Some(node) = Self::node_fields(kind) {
             let fields = node
                 .fields
@@ -587,15 +585,13 @@ impl Class for JsAstNode {
     const NAME: &'static str = "__JsAstNode";
 
     fn init(class: &mut ClassBuilder<'_>) -> JsResult<()> {
-        let kind =
-            NativeFunction::from_fn_ptr(Self::get_kind).to_js_function(class.context().realm());
         let text =
             NativeFunction::from_fn_ptr(Self::get_text).to_js_function(class.context().realm());
         let parent =
             NativeFunction::from_fn_ptr(Self::get_parent).to_js_function(class.context().realm());
 
+        // `kind` is defined on the prototype of each node kind, see `create_prototype`.
         class
-            .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
             .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE)
             .accessor(js_string!("parent"), Some(parent), None, Attribute::empty())
             .method(
@@ -634,5 +630,78 @@ impl Class for JsAstNode {
         Err(JsNativeError::typ()
             .with_message("Nodes do not have a public constructor. Use the node passed to run() or a node obtained by traversing it, and create updated nodes with the field update methods defined for its type, such as withValueToken().")
             .into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use biome_js_parser::{JsParserOptions, parse_module};
+    use biome_rowan::RawSyntaxKind;
+    use boa_engine::Source;
+
+    use super::*;
+
+    #[test]
+    fn kind_is_the_syntax_kind_name_of_nodes_and_tokens() -> JsResult<()> {
+        let mut context = Context::default();
+        JsAstNode::register(&mut context)?;
+        JsAstToken::register(&mut context)?;
+        // Includes list nodes, a bogus node, and nodes without plugin API fields.
+        let root = parse_module("f(a, b); let = ;", JsParserOptions::default()).syntax();
+        for element in root.descendants_with_tokens(biome_rowan::Direction::Next) {
+            let kind = element.kind();
+            let value = match element {
+                JsSyntaxElement::Node(node) => JsAstNode::from_node(node, &mut context),
+                JsSyntaxElement::Token(token) => JsAstToken::from_token(token, &mut context),
+            };
+            let object = value.as_object().expect("wrappers are objects");
+            for _ in 0..2 {
+                let name = object.get(js_string!("kind"), &mut context)?;
+                assert_eq!(
+                    name.as_string().map(|name| name.to_std_string_lossy()),
+                    Some(format!("{kind:?}"))
+                );
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn kind_names_are_static_variant_names() {
+        for raw in 0..JsSyntaxKind::__LAST as u16 {
+            let kind = JsSyntaxKind::from_raw(RawSyntaxKind(raw));
+            let name = JsAstNode::kind_name(kind);
+            assert_eq!(name.to_std_string_lossy(), format!("{kind:?}"));
+            // Only static strings have no reference count.
+            assert_eq!(name.refcount(), None, "{kind:?} is not a static string");
+        }
+    }
+
+    #[test]
+    fn node_kind_is_read_only_and_inherited() -> JsResult<()> {
+        let mut context = Context::default();
+        JsAstNode::register(&mut context)?;
+        let root = parse_module("f();", JsParserOptions::default()).syntax();
+        let node = JsAstNode::from_node(root, &mut context);
+        context.register_global_property(js_string!("node"), node, Attribute::all())?;
+        let result = context.eval(Source::from_bytes(
+            r#""use strict";
+            let threw = false;
+            try {
+                node.kind = "OTHER";
+            } catch (error) {
+                threw = error instanceof TypeError;
+            }
+            const keys = [];
+            for (const key in node) keys.push(key);
+            `${threw}|${node.kind}|${Object.prototype.hasOwnProperty.call(node, "kind")}|${keys.filter(key => key === "kind").length}`"#,
+        ))?;
+        assert_eq!(
+            result
+                .as_string()
+                .map(|result| result.to_std_string_lossy()),
+            Some("true|JS_MODULE|false|1".to_owned())
+        );
+        Ok(())
     }
 }
