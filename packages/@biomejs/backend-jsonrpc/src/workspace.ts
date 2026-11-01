@@ -3533,6 +3533,11 @@ export interface Nursery {
 	 */
 	noVueUndeclaredEmits?: NoVueUndeclaredEmitsConfiguration;
 	/**
+	 * Disallow \<slot> elements whose slot isn't declared in the component's types.
+	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-slots
+	 */
+	noVueUndeclaredSlots?: NoVueUndeclaredSlotsConfiguration;
+	/**
 	 * Disallow declaring events that a Vue component never emits.
 	 * See https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations
 	 */
@@ -6519,6 +6524,9 @@ export type NoVueUndeclaredDirectivesConfiguration =
 export type NoVueUndeclaredEmitsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredEmitsOptions;
+export type NoVueUndeclaredSlotsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUndeclaredSlotsOptions;
 export type NoVueUnusedEmitDeclarationsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedEmitDeclarationsOptions;
@@ -9465,6 +9473,10 @@ export interface RuleWithNoVueUndeclaredEmitsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredEmitsOptions;
 }
+export interface RuleWithNoVueUndeclaredSlotsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUndeclaredSlotsOptions;
+}
 export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedEmitDeclarationsOptions;
@@ -12192,6 +12204,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	globals?: string[];
 }
 export type NoVueUndeclaredEmitsOptions = {};
+export type NoVueUndeclaredSlotsOptions = {};
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueUnusedRefsOptions = {};
 export type NoVueVForTemplateKeyOnChildOptions = {};
@@ -14071,6 +14084,7 @@ export type Category =
 	| "lint/nursery/noVueThisInBeforeRouteEnter"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUndeclaredEmits"
+	| "lint/nursery/noVueUndeclaredSlots"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"
 	| "lint/nursery/noVueVForTemplateKeyOnChild"

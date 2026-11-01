@@ -365,6 +365,41 @@ fn method_signature_in_props_type_is_a_function_prop() {
     assert!(component.is_complete(Namespace::Binding));
 }
 
+#[test]
+fn slots_option_declares_the_members_of_its_slots_type() {
+    let plain_ts = JsFileSource::ts().with_embedding_kind(*JsFileSource::vue().as_embedding_kind());
+    let model = js_model(
+        r#"import { defineComponent, SlotsType } from "vue";
+type Slots = { default: { msg: string }; "item-row"(props: {}): any };
+export default defineComponent({ slots: Object as SlotsType<Slots> });"#,
+        plain_ts,
+    );
+    let component = model.components().next().expect("a component");
+    let slots: Vec<_> = component
+        .slots()
+        .map(|slot| slot.name().to_string())
+        .collect();
+    assert_eq!(slots, ["default", "item-row"]);
+    assert!(component.is_complete(Namespace::Slot));
+
+    for code in [
+        "export default { slots: Object }",
+        "export default { slots: Object as SlotsType<Imported> }",
+        "export default { slots: Object as Other<{ a: any }> }",
+        "export default { slots: Object as SlotsType<{ [name: string]: any }> }",
+        "export default { slots: Object as SlotsType<{ [SLOT_NAME]: any }> }",
+    ] {
+        let model = js_model(code, plain_ts);
+        let component = model.components().next().expect("a component");
+        assert!(
+            component
+                .open_reasons(Namespace::Slot)
+                .contains(OpenReason::UnresolvedType),
+            "`{code}` should leave the slots open"
+        );
+    }
+}
+
 /// Returns the name of each emit of each component, the number of its uses,
 /// and whether those are all of its uses.
 fn emit_uses(code: &str, source: JsFileSource) -> Vec<(String, usize, bool)> {
