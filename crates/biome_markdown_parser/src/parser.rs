@@ -174,6 +174,9 @@ pub(crate) struct MarkdownParserState {
     pub(crate) quote_depth_exceeded: bool,
     /// Whether the next paragraph is the first block of a list item.
     pub(crate) task_list_item_allowed: bool,
+    /// Where the content of the ATX heading being parsed ends, before its
+    /// closing sequence and line ending.
+    pub(crate) atx_heading_content_end: Option<TextSize>,
 }
 
 struct MarkdownParserStateCheckpoint {
@@ -197,6 +200,7 @@ struct MarkdownParserStateCheckpoint {
     virtual_line_start: Option<TextSize>,
     quote_depth_exceeded: bool,
     task_list_item_allowed: bool,
+    atx_heading_content_end: Option<TextSize>,
 }
 
 impl MarkdownParserState {
@@ -222,6 +226,7 @@ impl MarkdownParserState {
             virtual_line_start: self.virtual_line_start,
             quote_depth_exceeded: self.quote_depth_exceeded,
             task_list_item_allowed: self.task_list_item_allowed,
+            atx_heading_content_end: self.atx_heading_content_end,
         }
     }
 
@@ -250,6 +255,7 @@ impl MarkdownParserState {
         self.virtual_line_start = checkpoint.virtual_line_start;
         self.quote_depth_exceeded = checkpoint.quote_depth_exceeded;
         self.task_list_item_allowed = checkpoint.task_list_item_allowed;
+        self.atx_heading_content_end = checkpoint.atx_heading_content_end;
     }
 }
 

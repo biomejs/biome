@@ -1,0 +1,205 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+# Title {props.title
+The next line}
+
+## Section {props.section ##
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..8 " Title " [] [],
+                    },
+                    MdxInlineExpression {
+                        l_curly_token: L_CURLY@8..9 "{" [] [],
+                        content: MdxExpressionContent {
+                            value_token: MDX_EXPRESSION_LITERAL@9..20 "props.title" [] [],
+                        },
+                        r_curly_token: missing (required),
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@20..21 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@21..35 "The next line}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@36..37 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@37..38 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@38..39 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@39..48 " Section " [] [],
+                    },
+                    MdxInlineExpression {
+                        l_curly_token: L_CURLY@48..49 "{" [] [],
+                        content: MdxExpressionContent {
+                            value_token: MDX_EXPRESSION_LITERAL@49..62 "props.section" [] [],
+                        },
+                        r_curly_token: missing (required),
+                    },
+                ],
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@62..64 "#" [Whitespace(" ")] [],
+                },
+                MdHash {
+                    hash_token: HASH@64..65 "#" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@65..66 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@66..66 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..66
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..66
+    0: MD_HEADER@0..20
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      2: MD_PARAGRAPH@1..20
+        0: MD_INLINE_ITEM_LIST@1..20
+          0: MD_TEXTUAL@1..8
+            0: MD_TEXTUAL_LITERAL@1..8 " Title " [] []
+          1: MDX_INLINE_EXPRESSION@8..20
+            0: L_CURLY@8..9 "{" [] []
+            1: MDX_EXPRESSION_CONTENT@9..20
+              0: MDX_EXPRESSION_LITERAL@9..20 "props.title" [] []
+            2: (empty)
+      3: MD_HASH_LIST@20..20
+    1: MD_NEWLINE@20..21
+      0: NEWLINE@20..21 "\n" [] []
+    2: MD_PARAGRAPH@21..36
+      0: MD_INLINE_ITEM_LIST@21..36
+        0: MD_TEXTUAL@21..35
+          0: MD_TEXTUAL_LITERAL@21..35 "The next line}" [] []
+        1: MD_TEXTUAL@35..36
+          0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
+    3: MD_NEWLINE@36..37
+      0: NEWLINE@36..37 "\n" [] []
+    4: MD_HEADER@37..65
+      0: MD_INDENT_TOKEN_LIST@37..37
+      1: MD_HASH_LIST@37..39
+        0: MD_HASH@37..38
+          0: HASH@37..38 "#" [] []
+        1: MD_HASH@38..39
+          0: HASH@38..39 "#" [] []
+      2: MD_PARAGRAPH@39..62
+        0: MD_INLINE_ITEM_LIST@39..62
+          0: MD_TEXTUAL@39..48
+            0: MD_TEXTUAL_LITERAL@39..48 " Section " [] []
+          1: MDX_INLINE_EXPRESSION@48..62
+            0: L_CURLY@48..49 "{" [] []
+            1: MDX_EXPRESSION_CONTENT@49..62
+              0: MDX_EXPRESSION_LITERAL@49..62 "props.section" [] []
+            2: (empty)
+      3: MD_HASH_LIST@62..65
+        0: MD_HASH@62..64
+          0: HASH@62..64 "#" [Whitespace(" ")] []
+        1: MD_HASH@64..65
+          0: HASH@64..65 "#" [] []
+    5: MD_NEWLINE@65..66
+      0: NEWLINE@65..66 "\n" [] []
+  3: EOF@66..66 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_expression_in_heading.mdx:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+  > 1 │ # Title {props.title
+      │         ^
+    2 │ The next line}
+    3 │ 
+  
+  i expression started here
+  
+  > 1 │ # Title {props.title
+      │         ^
+    2 │ The next line}
+    3 │ 
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+unclosed_expression_in_heading.mdx:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+    2 │ The next line}
+    3 │ 
+  > 4 │ ## Section {props.section ##
+      │            ^
+    5 │ 
+  
+  i expression started here
+  
+    2 │ The next line}
+    3 │ 
+  > 4 │ ## Section {props.section ##
+      │            ^
+    5 │ 
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```

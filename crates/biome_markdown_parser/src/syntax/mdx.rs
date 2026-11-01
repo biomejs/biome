@@ -10,8 +10,8 @@
 //! the reference implementation of MDX 3.
 
 use crate::MarkdownParser;
-use crate::syntax::parse_error::unclosed_mdx_expression;
-use biome_js_extent::{JsExtent, Jsx};
+use crate::syntax::parse_error::{missing_blank_line_after_mdx_esm, unclosed_mdx_expression};
+use biome_js_extent::{EsmEnd, JsExtent, Jsx};
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
 use biome_markdown_syntax::T;
 use biome_parser::Parser;
@@ -65,17 +65,36 @@ fn at_esm_block(p: &MarkdownParser) -> bool {
 
 /// Parses an ESM block, from its first line up to the next blank line.
 ///
+/// A line that clearly isn't JavaScript, such as a heading right after an
+/// `import`, is an error: MDX requires a blank line between the ESM block
+/// and the Markdown after it. The block ends before that line, which is then
+/// parsed as Markdown.
+///
 /// Grammar: MdxEsmBlock = content: 'mdx_esm_literal'
 fn parse_esm_block(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
+    let start = p.cur_range().start();
     let source = p.source_after_current();
-    let length = JsExtent::esm_length(source.as_bytes());
-    let length = content_end(&source[..length]);
-    let end = p.cur_range().start() + TextSize::from(length as u32);
+    let esm_end = JsExtent::esm_end(source.as_bytes());
+    let length = content_end(&source[..esm_end.length()]);
+    let last_line_start = source[..length]
+        .rfind(['\n', '\r'])
+        .map_or(0, |index| index + 1);
+    let end = start + TextSize::from(length as u32);
     p.re_lex_span(end, MDX_ESM_LITERAL);
     p.bump(MDX_ESM_LITERAL);
     let block = m.complete(p, MDX_ESM_BLOCK);
     parse_line_ending(p).ok();
+    if matches!(esm_end, EsmEnd::NonEsmLine(_)) {
+        // The error is anchored on the last line of the block rather than on
+        // the next line: the inline phase drops the diagnostics inside the
+        // paragraphs and headings it parses again.
+        let last_line = TextRange::new(start + TextSize::from(last_line_start as u32), end);
+        let line = p.source_after_current();
+        let line_length = line.find(['\n', '\r']).unwrap_or(line.len());
+        let next_line = TextRange::at(p.cur_range().start(), TextSize::from(line_length as u32));
+        p.error(missing_blank_line_after_mdx_esm(p, last_line, next_line));
+    }
     Present(block)
 }
 
@@ -153,8 +172,9 @@ fn parse_block_expression(p: &mut MarkdownParser, close: ExpressionClose) -> Par
 
 /// Parses an expression inside a paragraph or heading.
 ///
-/// An inline expression can span lines, but not a blank line: a `{` that is
-/// still open at the end of its paragraph is an error.
+/// An inline expression can span lines, but not a blank line or the end of an
+/// ATX heading: a `{` that is still open at the end of its paragraph or
+/// heading line is an error.
 ///
 /// Grammar: MdxInlineExpression = '{' content: MdxExpressionContent? '}'
 pub(crate) fn parse_mdx_inline_expression(p: &mut MarkdownParser) -> ParsedSyntax {
@@ -163,7 +183,10 @@ pub(crate) fn parse_mdx_inline_expression(p: &mut MarkdownParser) -> ParsedSynta
     }
     let m = p.start();
     let rest = p.source_after_current();
-    let limit = paragraph_end(rest);
+    let limit = match p.state().atx_heading_content_end {
+        Some(end) => usize::from(end - p.cur_range().start()),
+        None => paragraph_end(rest),
+    };
     let body = &rest[1..limit];
     let length = JsExtent::expression_length(body.as_bytes(), JSX);
     let close =

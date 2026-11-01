@@ -1,4 +1,4 @@
-use crate::{EXPRESSION_KEYWORDS, JsExtent, Jsx};
+use crate::{EXPRESSION_KEYWORDS, EsmEnd, JsExtent, Jsx};
 
 /// Two HTML void elements, matched case-sensitively as Astro matches them.
 fn is_void_element(name: &[u8]) -> bool {
@@ -345,57 +345,191 @@ fn expression_keywords_are_sorted() {
     }
 }
 
-/// The offset where the content of an MDX ESM block ends.
-fn esm(source: &str) -> usize {
-    JsExtent::esm_length(source.as_bytes())
+/// Where an MDX ESM block ends.
+fn esm(source: &str) -> EsmEnd {
+    JsExtent::esm_end(source.as_bytes())
 }
 
 #[test]
 fn a_blank_line_ends_an_esm_block() {
-    assert_eq!(esm("import a from \"a\"\n\nb"), 17);
+    assert_eq!(esm("import a from \"a\"\n\nb"), EsmEnd::BlankLine(17));
 }
 
 #[test]
 fn a_line_of_spaces_ends_an_esm_block() {
-    assert_eq!(esm("import a from \"a\"\n \t\nb"), 17);
+    assert_eq!(esm("import a from \"a\"\n \t\nb"), EsmEnd::BlankLine(17));
 }
 
 #[test]
 fn an_esm_block_without_a_blank_line_runs_to_the_end() {
     let source = "import a from \"a\"\nexport const b = 1";
-    assert_eq!(esm(source), source.len());
+    assert_eq!(esm(source), EsmEnd::BlankLine(source.len()));
 }
 
 #[test]
 fn a_blank_line_inside_braces_does_not_end_an_esm_block() {
     let source = "export {\n\n  a\n\n} from \"b\"\n\nc";
-    assert_eq!(esm(source), source.len() - 3);
+    assert_eq!(esm(source), EsmEnd::BlankLine(source.len() - 3));
 }
 
 #[test]
 fn a_blank_line_inside_a_template_does_not_end_an_esm_block() {
     let source = "export const a = `x\n\ny`\n\nb";
-    assert_eq!(esm(source), source.len() - 3);
+    assert_eq!(esm(source), EsmEnd::BlankLine(source.len() - 3));
 }
 
 #[test]
 fn a_blank_line_inside_a_block_comment_does_not_end_an_esm_block() {
     let source = "import a from \"a\" /*\n\n*/\n\nb";
-    assert_eq!(esm(source), source.len() - 3);
+    assert_eq!(esm(source), EsmEnd::BlankLine(source.len() - 3));
 }
 
 #[test]
 fn a_blank_line_after_a_line_comment_ends_an_esm_block() {
-    assert_eq!(esm("import a from \"a\" // a\n\nb"), 22);
+    assert_eq!(esm("import a from \"a\" // a\n\nb"), EsmEnd::BlankLine(22));
 }
 
 #[test]
 fn a_blank_line_inside_jsx_does_not_end_an_esm_block() {
     let source = "export const a = <div>\n\n</div>\n\nb";
-    assert_eq!(esm(source), source.len() - 3);
+    assert_eq!(esm(source), EsmEnd::BlankLine(source.len() - 3));
 }
 
 #[test]
 fn a_blank_line_after_crlf_ends_an_esm_block() {
-    assert_eq!(esm("import a\r\n\r\nb"), 8);
+    assert_eq!(esm("import a\r\n\r\nb"), EsmEnd::BlankLine(8));
+}
+
+#[test]
+fn markdown_after_a_complete_statement_ends_an_esm_block() {
+    assert_eq!(esm("import a from \"a\"\n# Title"), EsmEnd::NonEsmLine(17));
+    assert_eq!(
+        esm("import a from \"a\";\nSome text"),
+        EsmEnd::NonEsmLine(18)
+    );
+    assert_eq!(esm("export const a = 1\n1. Item"), EsmEnd::NonEsmLine(18));
+    assert_eq!(esm("export {a}\n{a}"), EsmEnd::NonEsmLine(10));
+    assert_eq!(
+        esm("export default a.from\nSome text"),
+        EsmEnd::NonEsmLine(21)
+    );
+}
+
+#[test]
+fn a_jsx_tag_after_a_complete_statement_ends_an_esm_block() {
+    assert_eq!(esm("export const a = 1\n<Chart />"), EsmEnd::NonEsmLine(18));
+    assert_eq!(esm("import a from \"a\"\n</Chart>"), EsmEnd::NonEsmLine(17));
+}
+
+#[test]
+fn a_line_after_comments_ends_an_esm_block() {
+    assert_eq!(
+        esm("import a from \"a\" // a\nSome text"),
+        EsmEnd::NonEsmLine(22)
+    );
+    assert_eq!(
+        esm("import a from \"a\"\n// a\nSome text"),
+        EsmEnd::NonEsmLine(22)
+    );
+    assert_eq!(
+        esm("import a from \"a\"\n/* a */\n# Title"),
+        EsmEnd::NonEsmLine(25)
+    );
+    assert_eq!(
+        esm("import a from \"a\" /* a */ /* b */\n# Title"),
+        EsmEnd::NonEsmLine(33)
+    );
+    assert_eq!(esm("export const a = b /* c */\nd"), EsmEnd::NonEsmLine(26));
+}
+
+#[test]
+fn markdown_after_a_module_specifier_ends_an_esm_block() {
+    assert_eq!(esm("import a from \"a\"\n- Item"), EsmEnd::NonEsmLine(17));
+    assert_eq!(esm("export * from 'a'\n> Quote"), EsmEnd::NonEsmLine(17));
+    assert_eq!(esm("import \"a\"\n[Link](./a)"), EsmEnd::NonEsmLine(10));
+}
+
+#[test]
+fn markdown_after_a_semicolon_ends_an_esm_block() {
+    assert_eq!(esm("export const a = 1;\n- Item"), EsmEnd::NonEsmLine(19));
+    assert_eq!(esm("export const a = b;\n> Quote"), EsmEnd::NonEsmLine(19));
+}
+
+#[test]
+fn markdown_after_a_jsx_element_ends_an_esm_block() {
+    assert_eq!(
+        esm("export const a = <A />\n# Title"),
+        EsmEnd::NonEsmLine(22)
+    );
+    assert_eq!(
+        esm("export const a = <A>b</A>\n# Title"),
+        EsmEnd::NonEsmLine(25)
+    );
+}
+
+#[test]
+fn an_expression_after_a_call_ends_an_esm_block() {
+    assert_eq!(
+        esm("export const meta = getMeta()\n{meta}"),
+        EsmEnd::NonEsmLine(29)
+    );
+    assert_eq!(
+        esm("export const a = b.function()\n{a}"),
+        EsmEnd::NonEsmLine(29)
+    );
+}
+
+#[test]
+fn an_expression_after_a_name_or_a_number_ends_an_esm_block() {
+    assert_eq!(
+        esm("export const year = 2024\n{year}"),
+        EsmEnd::NonEsmLine(24)
+    );
+    assert_eq!(
+        esm("export default Layout\n{children}"),
+        EsmEnd::NonEsmLine(21)
+    );
+}
+
+#[test]
+fn a_crlf_before_markdown_is_not_part_of_an_esm_block() {
+    assert_eq!(
+        esm("import a from \"a\"\r\n# Title"),
+        EsmEnd::NonEsmLine(17)
+    );
+}
+
+#[test]
+fn a_comment_line_does_not_end_an_esm_block() {
+    let source = "import a from \"a\"\n// a\n/* b */\nexport const c = 1";
+    assert_eq!(esm(source), EsmEnd::BlankLine(source.len()));
+}
+
+#[test]
+fn a_line_that_continues_a_statement_does_not_end_an_esm_block() {
+    for source in [
+        "export const a =\nb",
+        "import a\nfrom \"a\"",
+        "import a from \"a\"\nwith {type: \"json\"}",
+        "export const a = b\n  .c()",
+        "export const a = b\n(c)",
+        "export const a = 1\n- b",
+        "export const a = b\n!= c",
+        "export const a = b\n< c",
+        "export function f()\n{}",
+        "export async function f(a, (b))\n{}",
+        "export function* g()\n{}",
+        "export default function ()\n{}",
+        "export function f(\n  a\n)\n{}",
+        "export class A extends mixin(B)\n{}",
+        "export const a = b;\n// c",
+        "export default class A\n{}",
+        "export class A\n  extends B\n{}",
+        "export class A extends B // c\n{}",
+        "export const a = /b/\nc",
+        "import a from \"a\"\n;",
+        "import a from \"a\"\n  - b",
+    ] {
+        assert_eq!(esm(source), EsmEnd::BlankLine(source.len()), "{source:?}");
+    }
 }

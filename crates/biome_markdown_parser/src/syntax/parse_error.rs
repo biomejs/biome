@@ -118,6 +118,35 @@ pub(crate) fn unclosed_mdx_expression(
     .with_hint("Add the closing `}`. To write a literal brace in MDX, escape it as `\\{`.")
 }
 
+/// A line right after an MDX ESM block that isn't part of its statements.
+///
+/// The error points at the last line of the block, and its detail at the
+/// offending line.
+///
+/// ```mdx
+/// import {Chart} from "./chart.js"
+/// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected a blank line after this line
+/// # Title
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn missing_blank_line_after_mdx_esm(
+    p: &MarkdownParser,
+    last_line: TextRange,
+    next_line: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Expected a blank line after the `import` and `export` statements.",
+        last_line,
+    )
+    .with_detail(
+        next_line,
+        "this line isn't part of an `import` or `export` statement",
+    )
+    .with_hint(
+        "MDX reads the lines after `import` and `export` as JavaScript up to the next blank line. Add a blank line before this line.",
+    )
+}
+
 /// Parser made no progress while parsing a block.
 pub(crate) fn parse_any_block_no_progress(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Parser made no progress while parsing a block.", range)

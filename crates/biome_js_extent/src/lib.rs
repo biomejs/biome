@@ -11,6 +11,7 @@
 
 use biome_unicode_table::{Dispatch::*, lookup_byte};
 use smallvec::SmallVec;
+use std::ops::Range;
 
 /// How a scan reads `<` where an expression may start.
 #[derive(Debug)]
@@ -48,6 +49,39 @@ pub struct JsExtent<'src> {
     jsx: Jsx,
     /// Whether the scan ever entered JSX from code position.
     entered_jsx: bool,
+    /// The range of the latest comments in code, merged while only
+    /// whitespace separates them, so that a run of comments at the end of the
+    /// scanned code can be skipped as one.
+    comments: Option<Range<usize>>,
+    /// The offset just past the `>` of the latest JSX element that closed in
+    /// plain code. Code that ends there is complete, although it ends with a
+    /// byte that is otherwise an operator.
+    jsx_end: Option<usize>,
+    /// Whether a [`JsScanStop::BlankLine`] scan stopped before a line that
+    /// can't belong to the ESM block, rather than at a blank line.
+    stopped_at_non_esm_line: bool,
+}
+
+/// Where an MDX ESM block ends, as found by [`JsExtent::esm_end`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EsmEnd {
+    /// A blank line or the end of the source ends the block. Holds the offset
+    /// of the line ending before the blank line, or `source.len()`.
+    BlankLine(usize),
+    /// A line that is neither part of the code before it nor the start of an
+    /// `import` or `export` statement ends the block, such as `# Title` right
+    /// after `import a from "a"`. Holds the offset of the line ending before
+    /// that line.
+    NonEsmLine(usize),
+}
+
+impl EsmEnd {
+    /// Returns the offset where the content of the block ends.
+    pub const fn length(self) -> usize {
+        match self {
+            Self::BlankLine(length) | Self::NonEsmLine(length) => length,
+        }
+    }
 }
 
 const CODE_BYTES: u8 = 1 << 0;
@@ -180,29 +214,47 @@ impl<'src> JsExtent<'src> {
         Self::scan(source, JsScanStop::ArgumentEnd, Jsx::Disabled)
     }
 
-    /// Returns the offset where the content of an MDX ESM block ends: the
-    /// line ending before the first blank line, or `source.len()` when no
-    /// blank line follows. A blank line inside braces, a string, a comment,
-    /// a template literal, or JSX doesn't end the block, so
-    /// `export {\n\n  a\n\n} from "b"` is a single block.
-    pub fn esm_length(source: &'src [u8]) -> usize {
+    /// Returns where an MDX ESM block ends: before the first blank line, or
+    /// before the first line that can't belong to the block.
+    ///
+    /// A blank line inside braces, a string, a comment, a template literal, or
+    /// JSX doesn't end the block, so `export {\n\n  a\n\n} from "b"` is a
+    /// single block. A line ends the block only when it clearly starts
+    /// something other than JavaScript: it starts at column 1, the code before
+    /// it is complete, and it starts with a token that can't continue that
+    /// code, such as the `#` of a heading or the `<` of a JSX tag. Any other
+    /// line is left in the block for the JavaScript parser to judge.
+    pub fn esm_end(source: &'src [u8]) -> EsmEnd {
         let jsx = Jsx::Enabled {
             is_void_element: |_| false,
         };
-        Self::scan(source, JsScanStop::BlankLine, jsx)
+        let (length, extent) = Self::scan_extent(source, JsScanStop::BlankLine, jsx);
+        if extent.stopped_at_non_esm_line {
+            EsmEnd::NonEsmLine(length)
+        } else {
+            EsmEnd::BlankLine(length)
+        }
     }
 
     fn scan(source: &'src [u8], stop: JsScanStop, jsx: Jsx) -> usize {
+        Self::scan_extent(source, stop, jsx).0
+    }
+
+    /// Runs a scan and returns its length along with the finished scanner.
+    fn scan_extent(source: &'src [u8], stop: JsScanStop, jsx: Jsx) -> (usize, Self) {
         let mut extent = Self {
             source,
             position: 0,
             stack: SmallVec::new(),
             jsx,
             entered_jsx: false,
+            comments: None,
+            jsx_end: None,
+            stopped_at_non_esm_line: false,
         };
         let length = extent.run(stop);
         if length < source.len() || !extent.entered_jsx {
-            return length;
+            return (length, extent);
         }
 
         // Running off the end inside JSX means a `<` was really a comparison
@@ -211,7 +263,11 @@ impl<'src> JsExtent<'src> {
         extent.position = 0;
         extent.stack.clear();
         extent.jsx = Jsx::Disabled;
-        extent.run(stop)
+        extent.comments = None;
+        extent.jsx_end = None;
+        extent.stopped_at_non_esm_line = false;
+        let length = extent.run(stop);
+        (length, extent)
     }
 
     fn current_byte(&self) -> Option<u8> {
@@ -299,7 +355,17 @@ impl<'src> JsExtent<'src> {
                         if let Some(end) = self.blank_line_end() {
                             return end;
                         }
+                        let line_ending = if byte == b'\n' && self.scanned().last() == Some(&b'\r')
+                        {
+                            self.position - 1
+                        } else {
+                            self.position
+                        };
                         self.advance(1);
+                        if self.at_non_esm_line() {
+                            self.stopped_at_non_esm_line = true;
+                            return line_ending;
+                        }
                     }
                     MIN if stop == JsScanStop::FrontmatterFence
                         && self.stack.is_empty()
@@ -353,6 +419,9 @@ impl<'src> JsExtent<'src> {
                             !in_unquoted_value && self.previous_non_whitespace() == Some(b'/');
                         if !closing && !self_closing && !self.is_void_tag(name_start) {
                             self.stack.push(JsContext::JsxChildren);
+                        }
+                        if self.stack.is_empty() {
+                            self.jsx_end = Some(self.position + 1);
                         }
                         self.advance(1);
                     }
@@ -437,12 +506,16 @@ impl<'src> JsExtent<'src> {
     fn skip_slash(&mut self) {
         match self.byte_at(1) {
             Some(b'/') => {
+                let start = self.position;
                 self.advance(2);
                 self.skip_line_comment();
+                self.record_comment(start);
             }
             Some(b'*') => {
+                let start = self.position;
                 self.advance(2);
                 self.skip_block_comment();
+                self.record_comment(start);
             }
             // `/>` closes a tag that was not recognized as JSX, unless the slash
             // sits where only an operand can start: `s.replace(/>/g, "")`.
@@ -490,13 +563,14 @@ impl<'src> JsExtent<'src> {
         }
     }
 
-    /// Skips just past the terminating newline, or to the end of the source.
+    /// Skips to the line ending that ends the comment, or to the end of the
+    /// source.
     fn skip_line_comment(&mut self) {
         while let Some(byte) = self.current_byte() {
-            self.advance(1);
-            if byte == b'\n' {
+            if matches!(byte, b'\n' | b'\r') {
                 break;
             }
+            self.advance(1);
         }
     }
 
@@ -540,6 +614,47 @@ impl<'src> JsExtent<'src> {
         } else {
             previous_line_end
         })
+    }
+
+    /// Records the comment that starts at `start` and ends at the current
+    /// position, merging it into the previous comments when only whitespace
+    /// separates them.
+    fn record_comment(&mut self, start: usize) {
+        let start = match &self.comments {
+            Some(comments)
+                if self.source[comments.end..start]
+                    .iter()
+                    .all(u8::is_ascii_whitespace) =>
+            {
+                comments.start
+            }
+            _ => start,
+        };
+        self.comments = Some(start..self.position);
+    }
+
+    /// Returns the scanned code without the whitespace and comments at its end.
+    fn preceding_code(&self) -> &[u8] {
+        let code = self.scanned().trim_ascii_end();
+        match &self.comments {
+            Some(comments) if comments.end >= code.len() => {
+                self.source[..comments.start].trim_ascii_end()
+            }
+            _ => code,
+        }
+    }
+
+    /// Returns whether the line starting at the current position can't belong
+    /// to the ESM block above it. See [`Self::esm_end`].
+    fn at_non_esm_line(&self) -> bool {
+        let line = &self.source[self.position..];
+        if line.is_empty() || starts_with_word(line, b"import") || starts_with_word(line, b"export")
+        {
+            return false;
+        }
+        let code = self.preceding_code();
+        let complete = self.jsx_end == Some(code.len()) || !expects_continuation(code);
+        complete && !continues_code(line, code)
     }
 
     /// Returns whether the `<` at the current position opens a JSX element
@@ -637,10 +752,10 @@ const EXPRESSION_KEYWORDS: &[&[u8]] = &[
     b"yield",
 ];
 
-/// Returns whether `code` ends with one of the [`EXPRESSION_KEYWORDS`]. A word
-/// after `.` or `#` is a property name, like the operand in
-/// `pool.yield / 100`.
-fn ends_with_expression_keyword(code: &[u8]) -> bool {
+/// Returns the word at the end of `code`, which is empty when `code` doesn't
+/// end with a word byte, or `None` when a `.` or `#` before it makes it a
+/// property name, like `yield` in `pool.yield / 100`.
+fn trailing_keyword(code: &[u8]) -> Option<&[u8]> {
     let start = code
         .iter()
         .rposition(|byte| !is_js_word_byte(*byte))
@@ -649,14 +764,188 @@ fn ends_with_expression_keyword(code: &[u8]) -> bool {
         .iter()
         .rposition(|byte| !byte.is_ascii_whitespace());
     if before.is_some_and(|index| matches!(lookup_byte(code[index]), PRD | HAS)) {
-        return false;
+        return None;
     }
+    Some(&code[start..])
+}
 
-    EXPRESSION_KEYWORDS.binary_search(&&code[start..]).is_ok()
+/// Returns whether `code` ends with one of the [`EXPRESSION_KEYWORDS`].
+fn ends_with_expression_keyword(code: &[u8]) -> bool {
+    trailing_keyword(code).is_some_and(|word| EXPRESSION_KEYWORDS.binary_search(&word).is_ok())
 }
 
 fn is_js_word_byte(byte: u8) -> bool {
     matches!(lookup_byte(byte), IDT | DOL | DIG | ZER)
+}
+
+/// Returns whether `text` starts with `word` as a whole word.
+fn starts_with_word(text: &[u8], word: &[u8]) -> bool {
+    text.starts_with(word)
+        && text
+            .get(word.len())
+            .is_none_or(|byte| !is_js_word_byte(*byte) && byte.is_ascii())
+}
+
+/// Returns whether `code`, the code before a line break, ends with an
+/// operator, a separator, or a keyword that the next line must complete, as
+/// in `export const a =` or `import a from`.
+///
+/// A closing bracket, a quote, `;`, or a name or number ends code that may be
+/// complete. Any other byte, such as the `/` closing a regex or a non-ASCII
+/// letter, counts as incomplete, so that only lines that surely start
+/// something else end the block.
+fn expects_continuation(code: &[u8]) -> bool {
+    let Some(&last) = code.last() else {
+        return true;
+    };
+    if is_js_word_byte(last) {
+        return trailing_keyword(code).is_some_and(|word| {
+            matches!(
+                word,
+                b"as"
+                    | b"assert"
+                    | b"async"
+                    | b"await"
+                    | b"class"
+                    | b"const"
+                    | b"default"
+                    | b"delete"
+                    | b"export"
+                    | b"extends"
+                    | b"from"
+                    | b"function"
+                    | b"import"
+                    | b"in"
+                    | b"instanceof"
+                    | b"let"
+                    | b"new"
+                    | b"of"
+                    | b"return"
+                    | b"throw"
+                    | b"typeof"
+                    | b"var"
+                    | b"void"
+                    | b"with"
+                    | b"yield"
+            )
+        });
+    }
+    !matches!(last, b')' | b']' | b'}' | b'"' | b'\'' | b'`' | b';')
+}
+
+/// Returns whether `line`, which starts at column 1 after the complete-looking
+/// `code`, may continue that code instead of starting a new statement.
+///
+/// A line that starts with whitespace or a comment may always continue it.
+/// After a `;`, nothing else may. After the module specifier of
+/// `import a from "a"`, only `;` or import attributes may follow. Otherwise,
+/// a line that starts with an operator, a bracket, or a keyword such as
+/// `from` may continue an expression, and a `{` may open the body of a
+/// function or a class.
+fn continues_code(line: &[u8], code: &[u8]) -> bool {
+    if matches!(line[0], b' ' | b'\t' | b'\n' | b'\r')
+        || line.starts_with(b"//")
+        || line.starts_with(b"/*")
+    {
+        return true;
+    }
+    if code.last() == Some(&b';') {
+        return false;
+    }
+    if ends_with_module_specifier(code) {
+        return line[0] == b';'
+            || starts_with_word(line, b"with")
+            || starts_with_word(line, b"assert");
+    }
+    match line[0] {
+        b'.' | b',' | b';' | b':' | b'?' | b'=' | b'+' | b'-' | b'*' | b'/' | b'%' | b'&'
+        | b'|' | b'^' | b'>' | b'(' | b')' | b'[' | b']' | b'}' | b'`' => true,
+        b'!' => line.get(1) == Some(&b'='),
+        b'<' => !line
+            .get(1)
+            .is_some_and(|byte| *byte == b'/' || starts_tag_name(*byte)),
+        b'{' => match code.last() {
+            Some(b')') => ends_with_function_parameters(code) || ends_in_class_head(code),
+            Some(byte) if is_js_word_byte(*byte) => ends_in_class_head(code),
+            _ => false,
+        },
+        _ => [
+            b"as".as_slice(),
+            b"assert",
+            b"extends",
+            b"from",
+            b"in",
+            b"instanceof",
+            b"of",
+            b"with",
+        ]
+        .iter()
+        .any(|word| starts_with_word(line, word)),
+    }
+}
+
+/// Returns whether `code` ends with the module specifier of an `import` or
+/// `export` statement, as in `import a from "a"`, `export * from "a"`, or
+/// `import "a"`.
+fn ends_with_module_specifier(code: &[u8]) -> bool {
+    let Some((&quote, rest)) = code.split_last() else {
+        return false;
+    };
+    if !matches!(quote, b'"' | b'\'') {
+        return false;
+    }
+    let Some(start) = rest.iter().rposition(|byte| *byte == quote) else {
+        return false;
+    };
+    trailing_keyword(rest[..start].trim_ascii_end())
+        .is_some_and(|word| matches!(word, b"from" | b"import"))
+}
+
+/// Returns whether `code`, which ends with `)`, ends with the parameter list
+/// of a function, as in `export function f(a)` or `export default function ()`,
+/// so that a `{` on the next line opens the function body. A call such as
+/// `getMeta()` doesn't count.
+fn ends_with_function_parameters(code: &[u8]) -> bool {
+    let mut depth = 0usize;
+    let mut open = None;
+    for (index, byte) in code.iter().enumerate().rev() {
+        match byte {
+            b')' => depth += 1,
+            b'(' => {
+                depth -= 1;
+                if depth == 0 {
+                    open = Some(index);
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+    let Some(open) = open else {
+        return false;
+    };
+    // Skip the function name and the `*` of a generator.
+    let mut before = code[..open].trim_ascii_end();
+    if let Some(name) = trailing_keyword(before)
+        && name != b"function"
+    {
+        before = before[..before.len() - name.len()].trim_ascii_end();
+    }
+    let before = before.strip_suffix(b"*").unwrap_or(before).trim_ascii_end();
+    trailing_keyword(before) == Some(b"function")
+}
+
+/// Returns whether the last line of `code` holds the word `class` or
+/// `extends`, so that a `{` on the next line can open a class body, as in
+/// `export class A extends B` followed by `{`.
+fn ends_in_class_head(code: &[u8]) -> bool {
+    let line_start = code
+        .iter()
+        .rposition(|byte| matches!(byte, b'\n' | b'\r'))
+        .map_or(0, |index| index + 1);
+    code[line_start..]
+        .split(|byte| !is_js_word_byte(*byte))
+        .any(|word| matches!(word, b"class" | b"extends"))
 }
 
 #[cfg(test)]
