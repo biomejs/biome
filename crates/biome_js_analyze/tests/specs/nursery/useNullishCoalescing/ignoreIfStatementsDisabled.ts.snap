@@ -4,14 +4,15 @@ expression: ignoreIfStatementsDisabled.ts
 ---
 # Input
 ```ts
-// Tests for ignoreIfStatements: false (default detection on).
-// An if that only assigns to a nullish variable reports; the ??= fix is offered
-// only when the test catches exactly null/undefined.
+// Tests for `ignoreIfStatements: false`, the default, where `if` statements are checked.
+// The rule reports an `if` that only assigns to a nullish variable. It offers the `??=`
+// fix only when the test matches exactly the nullish values the type can hold. A single
+// strict check that misses one of them is not reported.
 
 declare let obj: { x: number } | null;
 declare function makeObj(): { x: number };
 
-// `!obj` on an object union: truthiness is equivalent to a null check, fix is safe.
+// `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
 if (!obj) {
 	obj = makeObj();
 }
@@ -37,7 +38,7 @@ if (!str) {
 	str = 'default';
 }
 
-// single strict check that misses undefined: report WITHOUT a fix.
+// single strict check that misses undefined: not reported.
 declare let maybe: string | null | undefined;
 if (maybe === null) {
 	maybe = 'default';
@@ -55,7 +56,7 @@ if (onlyUndef === undefined) {
 	onlyUndef = 'default';
 }
 
-// `=== undefined` on a union that also has null: report WITHOUT a fix.
+// `=== undefined` on a union that also has null: not reported.
 declare let undefCheck: string | null | undefined;
 if (undefCheck === undefined) {
 	undefCheck = 'default';
@@ -67,10 +68,16 @@ if (null == reversed) {
 	reversed = 'default';
 }
 
-// vacuous compound (same literal twice) still misses undefined: report WITHOUT a fix.
+// vacuous compound (same literal twice) still misses undefined: not reported.
 declare let vacuous: string | null | undefined;
 if (vacuous === null || vacuous === null) {
 	vacuous = 'default';
+}
+
+// optional property that also accepts null: `=== null` misses undefined, not reported.
+declare let input: { fruits?: string[] | null };
+if (input.fruits === null) {
+	input.fruits = [];
 }
 
 // static member subject: safe to fix.
@@ -151,18 +158,18 @@ declare function sideEffect(): void;
 
 # Diagnostics
 ```
-ignoreIfStatementsDisabled.ts:9:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:10:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-     8 │ // `!obj` on an object union: truthiness is equivalent to a null check, fix is safe.
-   > 9 │ if (!obj) {
+     9 │ // `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
+  > 10 │ if (!obj) {
        │ ^^^^^^^^^^^
-  > 10 │ 	obj = makeObj();
-  > 11 │ }
+  > 11 │ 	obj = makeObj();
+  > 12 │ }
        │ ^
-    12 │ 
-    13 │ // single-statement body without braces, also safe.
+    13 │ 
+    14 │ // single-statement body without braces, also safe.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -172,28 +179,28 @@ ignoreIfStatementsDisabled.ts:9:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-      7   7 │   
-      8   8 │   // `!obj` on an object union: truthiness is equivalent to a null check, fix is safe.
-      9     │ - if·(!obj)·{
-     10     │ - → obj·=·makeObj();
-     11     │ - }
-          9 │ + obj·??=·makeObj();
-     12  10 │   
-     13  11 │   // single-statement body without braces, also safe.
+      8   8 │   
+      9   9 │   // `!obj` on an object union: truthiness is equivalent to a null check, so the fix is safe.
+     10     │ - if·(!obj)·{
+     11     │ - → obj·=·makeObj();
+     12     │ - }
+         10 │ + obj·??=·makeObj();
+     13  11 │   
+     14  12 │   // single-statement body without braces, also safe.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:14:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:15:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    13 │ // single-statement body without braces, also safe.
-  > 14 │ if (!obj) obj = makeObj();
+    14 │ // single-statement body without braces, also safe.
+  > 15 │ if (!obj) obj = makeObj();
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ // loose null check: always safe to fix.
+    16 │ 
+    17 │ // loose null check: always safe to fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -203,30 +210,30 @@ ignoreIfStatementsDisabled.ts:14:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     12  12 │   
-     13  13 │   // single-statement body without braces, also safe.
-     14     │ - if·(!obj)·obj·=·makeObj();
-         14 │ + obj·??=·makeObj();
-     15  15 │   
-     16  16 │   // loose null check: always safe to fix.
+     13  13 │   
+     14  14 │   // single-statement body without braces, also safe.
+     15     │ - if·(!obj)·obj·=·makeObj();
+         15 │ + obj·??=·makeObj();
+     16  16 │   
+     17  17 │   // loose null check: always safe to fix.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:18:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:19:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    16 │ // loose null check: always safe to fix.
-    17 │ declare let loose: string | null;
-  > 18 │ if (loose == null) {
+    17 │ // loose null check: always safe to fix.
+    18 │ declare let loose: string | null;
+  > 19 │ if (loose == null) {
        │ ^^^^^^^^^^^^^^^^^^^^
-  > 19 │ 	loose = 'default';
-  > 20 │ }
+  > 20 │ 	loose = 'default';
+  > 21 │ }
        │ ^
-    21 │ 
-    22 │ // compound strict check: always safe to fix.
+    22 │ 
+    23 │ // compound strict check: always safe to fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -236,32 +243,32 @@ ignoreIfStatementsDisabled.ts:18:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     16  16 │   // loose null check: always safe to fix.
-     17  17 │   declare let loose: string | null;
-     18     │ - if·(loose·==·null)·{
-     19     │ - → loose·=·'default';
-     20     │ - }
-         18 │ + loose·??=·'default';
-     21  19 │   
-     22  20 │   // compound strict check: always safe to fix.
+     17  17 │   // loose null check: always safe to fix.
+     18  18 │   declare let loose: string | null;
+     19     │ - if·(loose·==·null)·{
+     20     │ - → loose·=·'default';
+     21     │ - }
+         19 │ + loose·??=·'default';
+     22  20 │   
+     23  21 │   // compound strict check: always safe to fix.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:24:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:25:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    22 │ // compound strict check: always safe to fix.
-    23 │ declare let compound: string | null;
-  > 24 │ if (compound === null || compound === undefined) {
+    23 │ // compound strict check: always safe to fix.
+    24 │ declare let compound: string | null;
+  > 25 │ if (compound === null || compound === undefined) {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 25 │ 	compound = 'default';
-  > 26 │ }
+  > 26 │ 	compound = 'default';
+  > 27 │ }
        │ ^
-    27 │ 
-    28 │ // `!str` on a string union: '' is falsy but not nullish, so report WITHOUT a fix.
+    28 │ 
+    29 │ // `!str` on a string union: '' is falsy but not nullish, so report WITHOUT a fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -271,32 +278,32 @@ ignoreIfStatementsDisabled.ts:24:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     22  22 │   // compound strict check: always safe to fix.
-     23  23 │   declare let compound: string | null;
-     24     │ - if·(compound·===·null·||·compound·===·undefined)·{
-     25     │ - → compound·=·'default';
-     26     │ - }
-         24 │ + compound·??=·'default';
-     27  25 │   
-     28  26 │   // `!str` on a string union: '' is falsy but not nullish, so report WITHOUT a fix.
+     23  23 │   // compound strict check: always safe to fix.
+     24  24 │   declare let compound: string | null;
+     25     │ - if·(compound·===·null·||·compound·===·undefined)·{
+     26     │ - → compound·=·'default';
+     27     │ - }
+         25 │ + compound·??=·'default';
+     28  26 │   
+     29  27 │   // `!str` on a string union: '' is falsy but not nullish, so report WITHOUT a fix.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:30:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:31:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    28 │ // `!str` on a string union: '' is falsy but not nullish, so report WITHOUT a fix.
-    29 │ declare let str: string | null;
-  > 30 │ if (!str) {
+    29 │ // `!str` on a string union: '' is falsy but not nullish, so report WITHOUT a fix.
+    30 │ declare let str: string | null;
+  > 31 │ if (!str) {
        │ ^^^^^^^^^^^
-  > 31 │ 	str = 'default';
-  > 32 │ }
+  > 32 │ 	str = 'default';
+  > 33 │ }
        │ ^
-    33 │ 
-    34 │ // single strict check that misses undefined: report WITHOUT a fix.
+    34 │ 
+    35 │ // single strict check that misses undefined: not reported.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -308,43 +315,19 @@ ignoreIfStatementsDisabled.ts:30:1 lint/nursery/useNullishCoalescing ━━━�
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:36:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:43:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    34 │ // single strict check that misses undefined: report WITHOUT a fix.
-    35 │ declare let maybe: string | null | undefined;
-  > 36 │ if (maybe === null) {
-       │ ^^^^^^^^^^^^^^^^^^^^^
-  > 37 │ 	maybe = 'default';
-  > 38 │ }
-       │ ^
-    39 │ 
-    40 │ // single strict `=== null` on a union without undefined: safe to fix.
-  
-  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-ignoreIfStatementsDisabled.ts:42:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of an if statement for nullish assignment.
-  
-    40 │ // single strict `=== null` on a union without undefined: safe to fix.
-    41 │ declare let onlyNull: string | null;
-  > 42 │ if (onlyNull === null) {
+    41 │ // single strict `=== null` on a union without undefined: safe to fix.
+    42 │ declare let onlyNull: string | null;
+  > 43 │ if (onlyNull === null) {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
-  > 43 │ 	onlyNull = 'default';
-  > 44 │ }
+  > 44 │ 	onlyNull = 'default';
+  > 45 │ }
        │ ^
-    45 │ 
-    46 │ // `=== undefined` on a union without null: safe to fix.
+    46 │ 
+    47 │ // `=== undefined` on a union without null: safe to fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -354,32 +337,32 @@ ignoreIfStatementsDisabled.ts:42:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     40  40 │   // single strict `=== null` on a union without undefined: safe to fix.
-     41  41 │   declare let onlyNull: string | null;
-     42     │ - if·(onlyNull·===·null)·{
-     43     │ - → onlyNull·=·'default';
-     44     │ - }
-         42 │ + onlyNull·??=·'default';
-     45  43 │   
-     46  44 │   // `=== undefined` on a union without null: safe to fix.
+     41  41 │   // single strict `=== null` on a union without undefined: safe to fix.
+     42  42 │   declare let onlyNull: string | null;
+     43     │ - if·(onlyNull·===·null)·{
+     44     │ - → onlyNull·=·'default';
+     45     │ - }
+         43 │ + onlyNull·??=·'default';
+     46  44 │   
+     47  45 │   // `=== undefined` on a union without null: safe to fix.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:48:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:49:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    46 │ // `=== undefined` on a union without null: safe to fix.
-    47 │ declare let onlyUndef: string | undefined;
-  > 48 │ if (onlyUndef === undefined) {
+    47 │ // `=== undefined` on a union without null: safe to fix.
+    48 │ declare let onlyUndef: string | undefined;
+  > 49 │ if (onlyUndef === undefined) {
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 49 │ 	onlyUndef = 'default';
-  > 50 │ }
+  > 50 │ 	onlyUndef = 'default';
+  > 51 │ }
        │ ^
-    51 │ 
-    52 │ // `=== undefined` on a union that also has null: report WITHOUT a fix.
+    52 │ 
+    53 │ // `=== undefined` on a union that also has null: not reported.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -389,56 +372,32 @@ ignoreIfStatementsDisabled.ts:48:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     46  46 │   // `=== undefined` on a union without null: safe to fix.
-     47  47 │   declare let onlyUndef: string | undefined;
-     48     │ - if·(onlyUndef·===·undefined)·{
-     49     │ - → onlyUndef·=·'default';
-     50     │ - }
-         48 │ + onlyUndef·??=·'default';
-     51  49 │   
-     52  50 │   // `=== undefined` on a union that also has null: report WITHOUT a fix.
+     47  47 │   // `=== undefined` on a union without null: safe to fix.
+     48  48 │   declare let onlyUndef: string | undefined;
+     49     │ - if·(onlyUndef·===·undefined)·{
+     50     │ - → onlyUndef·=·'default';
+     51     │ - }
+         49 │ + onlyUndef·??=·'default';
+     52  50 │   
+     53  51 │   // `=== undefined` on a union that also has null: not reported.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:54:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:61:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    52 │ // `=== undefined` on a union that also has null: report WITHOUT a fix.
-    53 │ declare let undefCheck: string | null | undefined;
-  > 54 │ if (undefCheck === undefined) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 55 │ 	undefCheck = 'default';
-  > 56 │ }
-       │ ^
-    57 │ 
-    58 │ // reversed operand order: safe to fix.
-  
-  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-ignoreIfStatementsDisabled.ts:60:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of an if statement for nullish assignment.
-  
-    58 │ // reversed operand order: safe to fix.
-    59 │ declare let reversed: string | null;
-  > 60 │ if (null == reversed) {
+    59 │ // reversed operand order: safe to fix.
+    60 │ declare let reversed: string | null;
+  > 61 │ if (null == reversed) {
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-  > 61 │ 	reversed = 'default';
-  > 62 │ }
+  > 62 │ 	reversed = 'default';
+  > 63 │ }
        │ ^
-    63 │ 
-    64 │ // vacuous compound (same literal twice) still misses undefined: report WITHOUT a fix.
+    64 │ 
+    65 │ // vacuous compound (same literal twice) still misses undefined: not reported.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -448,56 +407,32 @@ ignoreIfStatementsDisabled.ts:60:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     58  58 │   // reversed operand order: safe to fix.
-     59  59 │   declare let reversed: string | null;
-     60     │ - if·(null·==·reversed)·{
-     61     │ - → reversed·=·'default';
-     62     │ - }
-         60 │ + reversed·??=·'default';
-     63  61 │   
-     64  62 │   // vacuous compound (same literal twice) still misses undefined: report WITHOUT a fix.
+     59  59 │   // reversed operand order: safe to fix.
+     60  60 │   declare let reversed: string | null;
+     61     │ - if·(null·==·reversed)·{
+     62     │ - → reversed·=·'default';
+     63     │ - }
+         61 │ + reversed·??=·'default';
+     64  62 │   
+     65  63 │   // vacuous compound (same literal twice) still misses undefined: not reported.
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:66:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:79:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    64 │ // vacuous compound (same literal twice) still misses undefined: report WITHOUT a fix.
-    65 │ declare let vacuous: string | null | undefined;
-  > 66 │ if (vacuous === null || vacuous === null) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 67 │ 	vacuous = 'default';
-  > 68 │ }
-       │ ^
-    69 │ 
-    70 │ // static member subject: safe to fix.
-  
-  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-ignoreIfStatementsDisabled.ts:72:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of an if statement for nullish assignment.
-  
-    70 │ // static member subject: safe to fix.
-    71 │ declare let rec: { a: number | null };
-  > 72 │ if (rec.a == null) {
+    77 │ // static member subject: safe to fix.
+    78 │ declare let rec: { a: number | null };
+  > 79 │ if (rec.a == null) {
        │ ^^^^^^^^^^^^^^^^^^^^
-  > 73 │ 	rec.a = 1;
-  > 74 │ }
+  > 80 │ 	rec.a = 1;
+  > 81 │ }
        │ ^
-    75 │ 
-    76 │ // computed member subject: safe to fix.
+    82 │ 
+    83 │ // computed member subject: safe to fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -507,49 +442,14 @@ ignoreIfStatementsDisabled.ts:72:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     70  70 │   // static member subject: safe to fix.
-     71  71 │   declare let rec: { a: number | null };
-     72     │ - if·(rec.a·==·null)·{
-     73     │ - → rec.a·=·1;
-     74     │ - }
-         72 │ + rec.a·??=·1;
-     75  73 │   
-     76  74 │   // computed member subject: safe to fix.
-  
-
-```
-
-```
-ignoreIfStatementsDisabled.ts:78:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  i Use ??= instead of an if statement for nullish assignment.
-  
-    76 │ // computed member subject: safe to fix.
-    77 │ declare let rec2: { a: number | null };
-  > 78 │ if (rec2['a'] == null) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-  > 79 │ 	rec2['a'] = 1;
-  > 80 │ }
-       │ ^
-    81 │ 
-    82 │ // computed member subject with interior whitespace vs. the assignment: still the
-  
-  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Replace the if statement with ??=.
-  
-     76  76 │   // computed member subject: safe to fix.
-     77  77 │   declare let rec2: { a: number | null };
-     78     │ - if·(rec2['a']·==·null)·{
-     79     │ - → rec2['a']·=·1;
-     80     │ - }
-         78 │ + rec2['a']·??=·1;
-     81  79 │   
-     82  80 │   // computed member subject with interior whitespace vs. the assignment: still the
+     77  77 │   // static member subject: safe to fix.
+     78  78 │   declare let rec: { a: number | null };
+     79     │ - if·(rec.a·==·null)·{
+     80     │ - → rec.a·=·1;
+     81     │ - }
+         79 │ + rec.a·??=·1;
+     82  80 │   
+     83  81 │   // computed member subject: safe to fix.
   
 
 ```
@@ -559,15 +459,15 @@ ignoreIfStatementsDisabled.ts:85:1 lint/nursery/useNullishCoalescing  FIXABLE  �
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    83 │ // same reference, safe to fix.
-    84 │ declare let rec3: { a: number | null };
-  > 85 │ if (rec3[ 'a' ] == null) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 86 │ 	rec3['a'] = 1;
+    83 │ // computed member subject: safe to fix.
+    84 │ declare let rec2: { a: number | null };
+  > 85 │ if (rec2['a'] == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 86 │ 	rec2['a'] = 1;
   > 87 │ }
        │ ^
     88 │ 
-    89 │ // member subject with a side-effecting object: report WITHOUT a fix, since the
+    89 │ // computed member subject with interior whitespace vs. the assignment: still the
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -577,32 +477,32 @@ ignoreIfStatementsDisabled.ts:85:1 lint/nursery/useNullishCoalescing  FIXABLE  �
   
   i Safe fix: Replace the if statement with ??=.
   
-     83  83 │   // same reference, safe to fix.
-     84  84 │   declare let rec3: { a: number | null };
-     85     │ - if·(rec3[·'a'·]·==·null)·{
-     86     │ - → rec3['a']·=·1;
+     83  83 │   // computed member subject: safe to fix.
+     84  84 │   declare let rec2: { a: number | null };
+     85     │ - if·(rec2['a']·==·null)·{
+     86     │ - → rec2['a']·=·1;
      87     │ - }
-         85 │ + rec3['a']·??=·1;
+         85 │ + rec2['a']·??=·1;
      88  86 │   
-     89  87 │   // member subject with a side-effecting object: report WITHOUT a fix, since the
+     89  87 │   // computed member subject with interior whitespace vs. the assignment: still the
   
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:92:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:92:1 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    90 │ // original evaluates `getRec()` twice but `??=` would evaluate it once.
-    91 │ declare function getRec(): { a: number | null };
-  > 92 │ if (getRec().a == null) {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 93 │ 	getRec().a = 1;
+    90 │ // same reference, safe to fix.
+    91 │ declare let rec3: { a: number | null };
+  > 92 │ if (rec3[ 'a' ] == null) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 93 │ 	rec3['a'] = 1;
   > 94 │ }
        │ ^
     95 │ 
-    96 │ // computed member on a side-effecting object: report WITHOUT a fix.
+    96 │ // member subject with a side-effecting object: report WITHOUT a fix, since the
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -610,22 +510,34 @@ ignoreIfStatementsDisabled.ts:92:1 lint/nursery/useNullishCoalescing ━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Replace the if statement with ??=.
+  
+     90  90 │   // same reference, safe to fix.
+     91  91 │   declare let rec3: { a: number | null };
+     92     │ - if·(rec3[·'a'·]·==·null)·{
+     93     │ - → rec3['a']·=·1;
+     94     │ - }
+         92 │ + rec3['a']·??=·1;
+     95  93 │   
+     96  94 │   // member subject with a side-effecting object: report WITHOUT a fix, since the
+  
 
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:97:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:99:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-     96 │ // computed member on a side-effecting object: report WITHOUT a fix.
-   > 97 │ if (getRec()['a'] == null) {
-        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   > 98 │ 	getRec()['a'] = 1;
-   > 99 │ }
+     97 │ // original evaluates `getRec()` twice but `??=` would evaluate it once.
+     98 │ declare function getRec(): { a: number | null };
+   > 99 │ if (getRec().a == null) {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 100 │ 	getRec().a = 1;
+  > 101 │ }
         │ ^
-    100 │ 
-    101 │ // inner comment would be dropped by the rewrite: report WITHOUT a fix.
+    102 │ 
+    103 │ // computed member on a side-effecting object: report WITHOUT a fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -637,20 +549,18 @@ ignoreIfStatementsDisabled.ts:97:1 lint/nursery/useNullishCoalescing ━━━�
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:103:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:104:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of an if statement for nullish assignment.
   
-    101 │ // inner comment would be dropped by the rewrite: report WITHOUT a fix.
-    102 │ declare let commented: string | null;
-  > 103 │ if (commented == null) {
-        │ ^^^^^^^^^^^^^^^^^^^^^^^^
-  > 104 │ 	// keep me
-  > 105 │ 	commented = 'default';
+    103 │ // computed member on a side-effecting object: report WITHOUT a fix.
+  > 104 │ if (getRec()['a'] == null) {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 105 │ 	getRec()['a'] = 1;
   > 106 │ }
         │ ^
     107 │ 
-    108 │ // Negative: else branch present.
+    108 │ // inner comment would be dropped by the rewrite: report WITHOUT a fix.
   
   i This if statement only assigns when the variable is nullish, which ??= expresses directly.
   
@@ -662,16 +572,41 @@ ignoreIfStatementsDisabled.ts:103:1 lint/nursery/useNullishCoalescing ━━━�
 ```
 
 ```
-ignoreIfStatementsDisabled.ts:132:9 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+ignoreIfStatementsDisabled.ts:110:1 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ??= instead of an if statement for nullish assignment.
+  
+    108 │ // inner comment would be dropped by the rewrite: report WITHOUT a fix.
+    109 │ declare let commented: string | null;
+  > 110 │ if (commented == null) {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 111 │ 	// keep me
+  > 112 │ 	commented = 'default';
+  > 113 │ }
+        │ ^
+    114 │ 
+    115 │ // Negative: else branch present.
+  
+  i This if statement only assigns when the variable is nullish, which ??= expresses directly.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+ignoreIfStatementsDisabled.ts:139:9 lint/nursery/useNullishCoalescing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i Use ??= instead of ||=.
   
-    130 │ declare let assign: { x: number } | null;
-    131 │ if (!assign) {
-  > 132 │ 	assign ||= makeObj();
+    137 │ declare let assign: { x: number } | null;
+    138 │ if (!assign) {
+  > 139 │ 	assign ||= makeObj();
         │ 	       ^^^
-    133 │ }
-    134 │ 
+    140 │ }
+    141 │ 
   
   i The ||= operator assigns when the left side is falsy, while ??= only assigns when it is null or undefined.
   
@@ -681,12 +616,12 @@ ignoreIfStatementsDisabled.ts:132:9 lint/nursery/useNullishCoalescing  FIXABLE  
   
   i Safe fix: Replace ||= with ??=.
   
-    130 130 │   declare let assign: { x: number } | null;
-    131 131 │   if (!assign) {
-    132     │ - → assign·||=·makeObj();
-        132 │ + → assign·??=·makeObj();
-    133 133 │   }
-    134 134 │   
+    137 137 │   declare let assign: { x: number } | null;
+    138 138 │   if (!assign) {
+    139     │ - → assign·||=·makeObj();
+        139 │ + → assign·??=·makeObj();
+    140 140 │   }
+    141 141 │   
   
 
 ```
