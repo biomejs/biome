@@ -384,7 +384,8 @@ impl<'a> SnippetsIterator<'a> {
         Self::Workspace(snippets.into_iter())
     }
 
-    /// Excludes host-owned template comments from guest analysis, and every
+    /// Excludes host-owned template comments, such as Astro template comments
+    /// and comment-only MDX expressions, from guest analysis, and every
     /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
     /// host suppression extraction.
     pub(crate) fn for_analysis(
@@ -407,6 +408,12 @@ impl<'a> SnippetsIterator<'a> {
             }
             #[cfg(feature = "html_embeds")]
             if html::is_astro_template_comment(host, source, snippet, db) {
+                return false;
+            }
+            #[cfg(feature = "lang_mdx")]
+            if md::is_mdx_comment_snippet(snippet, db)
+                || md::is_quoted_multiline_mdx_snippet(host, snippet, db)
+            {
                 return false;
             }
             true

@@ -87,7 +87,7 @@ impl Rule for NoEmptySource {
             if block.is_newline() || block.is_continuation_indent() {
                 continue;
             }
-            if !block.is_html_comment() {
+            if !block.is_html_comment() && !block.is_mdx_comment() {
                 return None;
             }
             has_comments = true;

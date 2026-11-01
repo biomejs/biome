@@ -130,6 +130,16 @@ fn is_html_comment_block(block: &AnyMdBlock) -> bool {
     }
 }
 
+/// Returns whether `block` can precede the first heading: comments, blank
+/// lines, and MDX `import` and `export` statements, which MDX documents
+/// usually start with.
 fn is_ignorable_leading_block(block: &AnyMdBlock) -> bool {
-    is_html_comment_block(block) || block.is_newline() || block.is_continuation_indent()
+    is_html_comment_block(block)
+        || block.is_mdx_comment()
+        || matches!(
+            block,
+            AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdxEsmBlock(_))
+        )
+        || block.is_newline()
+        || block.is_continuation_indent()
 }
