@@ -2103,6 +2103,171 @@ impl Serialize for MdThematicBreakChar {
 pub struct MdThematicBreakCharFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxBlockExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxBlockExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxBlockExpressionFields {
+        MdxBlockExpressionFields {
+            indent: self.indent(),
+            l_curly_token: self.l_curly_token(),
+            content: self.content(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn indent(&self) -> MdIndentTokenList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn content(&self) -> Option<MdxExpressionContent> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for MdxBlockExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxBlockExpressionFields {
+    pub indent: MdIndentTokenList,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub content: Option<MdxExpressionContent>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxEsmBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxEsmBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxEsmBlockFields {
+        MdxEsmBlockFields {
+            content_token: self.content_token(),
+        }
+    }
+    pub fn content_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdxEsmBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxEsmBlockFields {
+    pub content_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxExpressionContent {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxExpressionContent {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxExpressionContentFields {
+        MdxExpressionContentFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MdxExpressionContent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxExpressionContentFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MdxInlineExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MdxInlineExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MdxInlineExpressionFields {
+        MdxInlineExpressionFields {
+            l_curly_token: self.l_curly_token(),
+            content: self.content(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn content(&self) -> Option<MdxExpressionContent> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MdxInlineExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MdxInlineExpressionFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub content: Option<MdxExpressionContent>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdBlock {
     AnyMdContainerBlock(AnyMdContainerBlock),
@@ -2201,6 +2366,7 @@ pub enum AnyMdInline {
     MdReferenceImage(MdReferenceImage),
     MdReferenceLink(MdReferenceLink),
     MdTextual(MdTextual),
+    MdxInlineExpression(MdxInlineExpression),
 }
 impl AnyMdInline {
     pub fn as_gfm_strikethrough(&self) -> Option<&GfmStrikethrough> {
@@ -2311,6 +2477,12 @@ impl AnyMdInline {
             _ => None,
         }
     }
+    pub fn as_mdx_inline_expression(&self) -> Option<&MdxInlineExpression> {
+        match &self {
+            Self::MdxInlineExpression(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMdLeafBlock {
@@ -2324,6 +2496,8 @@ pub enum AnyMdLeafBlock {
     MdParagraph(MdParagraph),
     MdSetextHeader(MdSetextHeader),
     MdThematicBreakBlock(MdThematicBreakBlock),
+    MdxBlockExpression(MdxBlockExpression),
+    MdxEsmBlock(MdxEsmBlock),
 }
 impl AnyMdLeafBlock {
     pub fn as_any_md_code_block(&self) -> Option<&AnyMdCodeBlock> {
@@ -2383,6 +2557,18 @@ impl AnyMdLeafBlock {
     pub fn as_md_thematic_break_block(&self) -> Option<&MdThematicBreakBlock> {
         match &self {
             Self::MdThematicBreakBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_mdx_block_expression(&self) -> Option<&MdxBlockExpression> {
+        match &self {
+            Self::MdxBlockExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_mdx_esm_block(&self) -> Option<&MdxEsmBlock> {
+        match &self {
+            Self::MdxEsmBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -4942,6 +5128,217 @@ impl From<MdThematicBreakChar> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MdxBlockExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_BLOCK_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_BLOCK_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxBlockExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxBlockExpression")
+                .field("indent", &self.indent())
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("content", &support::DebugOptionalElement(self.content()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxBlockExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxBlockExpression> for SyntaxNode {
+    fn from(n: MdxBlockExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxBlockExpression> for SyntaxElement {
+    fn from(n: MdxBlockExpression) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxEsmBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_ESM_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_ESM_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxEsmBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxEsmBlock")
+                .field(
+                    "content_token",
+                    &support::DebugSyntaxResult(self.content_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxEsmBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxEsmBlock> for SyntaxNode {
+    fn from(n: MdxEsmBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxEsmBlock> for SyntaxElement {
+    fn from(n: MdxEsmBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxExpressionContent {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_EXPRESSION_CONTENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_EXPRESSION_CONTENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxExpressionContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxExpressionContent")
+                .field(
+                    "value_token",
+                    &support::DebugSyntaxResult(self.value_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxExpressionContent").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxExpressionContent> for SyntaxNode {
+    fn from(n: MdxExpressionContent) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxExpressionContent> for SyntaxElement {
+    fn from(n: MdxExpressionContent) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for MdxInlineExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MDX_INLINE_EXPRESSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MDX_INLINE_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MdxInlineExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("MdxInlineExpression")
+                .field(
+                    "l_curly_token",
+                    &support::DebugSyntaxResult(self.l_curly_token()),
+                )
+                .field("content", &support::DebugOptionalElement(self.content()))
+                .field(
+                    "r_curly_token",
+                    &support::DebugSyntaxResult(self.r_curly_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("MdxInlineExpression").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<MdxInlineExpression> for SyntaxNode {
+    fn from(n: MdxInlineExpression) -> Self {
+        n.syntax
+    }
+}
+impl From<MdxInlineExpression> for SyntaxElement {
+    fn from(n: MdxInlineExpression) -> Self {
+        n.syntax.into()
+    }
+}
 impl From<MdBogusBlock> for AnyMdBlock {
     fn from(node: MdBogusBlock) -> Self {
         Self::MdBogusBlock(node)
@@ -5249,6 +5646,11 @@ impl From<MdTextual> for AnyMdInline {
         Self::MdTextual(node)
     }
 }
+impl From<MdxInlineExpression> for AnyMdInline {
+    fn from(node: MdxInlineExpression) -> Self {
+        Self::MdxInlineExpression(node)
+    }
+}
 impl AstNode for AnyMdInline {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = GfmStrikethrough::KIND_SET
@@ -5268,7 +5670,8 @@ impl AstNode for AnyMdInline {
         .union(MdQuotePrefix::KIND_SET)
         .union(MdReferenceImage::KIND_SET)
         .union(MdReferenceLink::KIND_SET)
-        .union(MdTextual::KIND_SET);
+        .union(MdTextual::KIND_SET)
+        .union(MdxInlineExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -5290,6 +5693,7 @@ impl AstNode for AnyMdInline {
                 | MD_REFERENCE_IMAGE
                 | MD_REFERENCE_LINK
                 | MD_TEXTUAL
+                | MDX_INLINE_EXPRESSION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -5312,6 +5716,7 @@ impl AstNode for AnyMdInline {
             MD_REFERENCE_IMAGE => Self::MdReferenceImage(MdReferenceImage { syntax }),
             MD_REFERENCE_LINK => Self::MdReferenceLink(MdReferenceLink { syntax }),
             MD_TEXTUAL => Self::MdTextual(MdTextual { syntax }),
+            MDX_INLINE_EXPRESSION => Self::MdxInlineExpression(MdxInlineExpression { syntax }),
             _ => return None,
         };
         Some(res)
@@ -5336,6 +5741,7 @@ impl AstNode for AnyMdInline {
             Self::MdReferenceImage(it) => it.syntax(),
             Self::MdReferenceLink(it) => it.syntax(),
             Self::MdTextual(it) => it.syntax(),
+            Self::MdxInlineExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -5358,6 +5764,7 @@ impl AstNode for AnyMdInline {
             Self::MdReferenceImage(it) => it.into_syntax(),
             Self::MdReferenceLink(it) => it.into_syntax(),
             Self::MdTextual(it) => it.into_syntax(),
+            Self::MdxInlineExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -5382,6 +5789,7 @@ impl std::fmt::Debug for AnyMdInline {
             Self::MdReferenceImage(it) => std::fmt::Debug::fmt(it, f),
             Self::MdReferenceLink(it) => std::fmt::Debug::fmt(it, f),
             Self::MdTextual(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxInlineExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -5406,6 +5814,7 @@ impl From<AnyMdInline> for SyntaxNode {
             AnyMdInline::MdReferenceImage(it) => it.into_syntax(),
             AnyMdInline::MdReferenceLink(it) => it.into_syntax(),
             AnyMdInline::MdTextual(it) => it.into_syntax(),
+            AnyMdInline::MdxInlineExpression(it) => it.into_syntax(),
         }
     }
 }
@@ -5460,6 +5869,16 @@ impl From<MdThematicBreakBlock> for AnyMdLeafBlock {
         Self::MdThematicBreakBlock(node)
     }
 }
+impl From<MdxBlockExpression> for AnyMdLeafBlock {
+    fn from(node: MdxBlockExpression) -> Self {
+        Self::MdxBlockExpression(node)
+    }
+}
+impl From<MdxEsmBlock> for AnyMdLeafBlock {
+    fn from(node: MdxEsmBlock) -> Self {
+        Self::MdxEsmBlock(node)
+    }
+}
 impl AstNode for AnyMdLeafBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyMdCodeBlock::KIND_SET
@@ -5471,7 +5890,9 @@ impl AstNode for AnyMdLeafBlock {
         .union(MdNewline::KIND_SET)
         .union(MdParagraph::KIND_SET)
         .union(MdSetextHeader::KIND_SET)
-        .union(MdThematicBreakBlock::KIND_SET);
+        .union(MdThematicBreakBlock::KIND_SET)
+        .union(MdxBlockExpression::KIND_SET)
+        .union(MdxEsmBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             GFM_TABLE
@@ -5482,7 +5903,9 @@ impl AstNode for AnyMdLeafBlock {
             | MD_NEWLINE
             | MD_PARAGRAPH
             | MD_SETEXT_HEADER
-            | MD_THEMATIC_BREAK_BLOCK => true,
+            | MD_THEMATIC_BREAK_BLOCK
+            | MDX_BLOCK_EXPRESSION
+            | MDX_ESM_BLOCK => true,
             k if AnyMdCodeBlock::can_cast(k) => true,
             _ => false,
         }
@@ -5500,6 +5923,8 @@ impl AstNode for AnyMdLeafBlock {
             MD_PARAGRAPH => Self::MdParagraph(MdParagraph { syntax }),
             MD_SETEXT_HEADER => Self::MdSetextHeader(MdSetextHeader { syntax }),
             MD_THEMATIC_BREAK_BLOCK => Self::MdThematicBreakBlock(MdThematicBreakBlock { syntax }),
+            MDX_BLOCK_EXPRESSION => Self::MdxBlockExpression(MdxBlockExpression { syntax }),
+            MDX_ESM_BLOCK => Self::MdxEsmBlock(MdxEsmBlock { syntax }),
             _ => {
                 if let Some(any_md_code_block) = AnyMdCodeBlock::cast(syntax) {
                     return Some(Self::AnyMdCodeBlock(any_md_code_block));
@@ -5520,6 +5945,8 @@ impl AstNode for AnyMdLeafBlock {
             Self::MdParagraph(it) => it.syntax(),
             Self::MdSetextHeader(it) => it.syntax(),
             Self::MdThematicBreakBlock(it) => it.syntax(),
+            Self::MdxBlockExpression(it) => it.syntax(),
+            Self::MdxEsmBlock(it) => it.syntax(),
             Self::AnyMdCodeBlock(it) => it.syntax(),
         }
     }
@@ -5534,6 +5961,8 @@ impl AstNode for AnyMdLeafBlock {
             Self::MdParagraph(it) => it.into_syntax(),
             Self::MdSetextHeader(it) => it.into_syntax(),
             Self::MdThematicBreakBlock(it) => it.into_syntax(),
+            Self::MdxBlockExpression(it) => it.into_syntax(),
+            Self::MdxEsmBlock(it) => it.into_syntax(),
             Self::AnyMdCodeBlock(it) => it.into_syntax(),
         }
     }
@@ -5551,6 +5980,8 @@ impl std::fmt::Debug for AnyMdLeafBlock {
             Self::MdParagraph(it) => std::fmt::Debug::fmt(it, f),
             Self::MdSetextHeader(it) => std::fmt::Debug::fmt(it, f),
             Self::MdThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxBlockExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::MdxEsmBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -5567,6 +5998,8 @@ impl From<AnyMdLeafBlock> for SyntaxNode {
             AnyMdLeafBlock::MdParagraph(it) => it.into_syntax(),
             AnyMdLeafBlock::MdSetextHeader(it) => it.into_syntax(),
             AnyMdLeafBlock::MdThematicBreakBlock(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdxBlockExpression(it) => it.into_syntax(),
+            AnyMdLeafBlock::MdxEsmBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -5907,6 +6340,26 @@ impl std::fmt::Display for MdThematicBreakBlock {
     }
 }
 impl std::fmt::Display for MdThematicBreakChar {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxBlockExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxEsmBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxExpressionContent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MdxInlineExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

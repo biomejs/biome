@@ -66,7 +66,7 @@ static INTERESTING_BYTES: [u8; 256] = {
         let mut mask = 0u8;
         if matches!(
             byte,
-            b'"' | b'\'' | b'`' | b'/' | b'{' | b'[' | b'}' | b']' | b'-' | b'<'
+            b'"' | b'\'' | b'`' | b'/' | b'{' | b'[' | b'}' | b']' | b'-' | b'<' | b'\n' | b'\r'
         ) {
             mask |= CODE_BYTES;
         }
@@ -143,6 +143,8 @@ enum JsScanStop {
     FrontmatterFence,
     /// The `]` closing a Vue dynamic directive argument.
     ArgumentEnd,
+    /// The blank line after an MDX ESM block.
+    BlankLine,
 }
 
 impl JsScanStop {
@@ -176,6 +178,18 @@ impl<'src> JsExtent<'src> {
     /// argument, or `source.len()` when the bracket is unbalanced.
     pub fn argument_length(source: &'src [u8]) -> usize {
         Self::scan(source, JsScanStop::ArgumentEnd, Jsx::Disabled)
+    }
+
+    /// Returns the offset where the content of an MDX ESM block ends: the
+    /// line ending before the first blank line, or `source.len()` when no
+    /// blank line follows. A blank line inside braces, a string, a comment,
+    /// a template literal, or JSX doesn't end the block, so
+    /// `export {\n\n  a\n\n} from "b"` is a single block.
+    pub fn esm_length(source: &'src [u8]) -> usize {
+        let jsx = Jsx::Enabled {
+            is_void_element: |_| false,
+        };
+        Self::scan(source, JsScanStop::BlankLine, jsx)
     }
 
     fn scan(source: &'src [u8], stop: JsScanStop, jsx: Jsx) -> usize {
@@ -275,6 +289,15 @@ impl<'src> JsExtent<'src> {
                             self.stack.pop();
                         } else if self.stack.is_empty() && stop.ends_at(byte) {
                             return self.position;
+                        }
+                        self.advance(1);
+                    }
+                    WHS if stop == JsScanStop::BlankLine
+                        && self.stack.is_empty()
+                        && matches!(byte, b'\n' | b'\r') =>
+                    {
+                        if let Some(end) = self.blank_line_end() {
+                            return end;
                         }
                         self.advance(1);
                     }
@@ -486,6 +509,37 @@ impl<'src> JsExtent<'src> {
             }
             self.advance(1);
         }
+    }
+
+    /// Returns where the content before a blank line ends, when the line
+    /// ending at the current position closes a line that holds only spaces
+    /// and tabs. The returned offset is the start of the line ending before
+    /// that blank line.
+    fn blank_line_end(&self) -> Option<usize> {
+        let scanned = self.scanned();
+        // The `\n` of a `\r\n` pair was already handled at its `\r`.
+        if self.current_byte() == Some(b'\n') && scanned.last() == Some(&b'\r') {
+            return None;
+        }
+        let line_start = scanned
+            .iter()
+            .rposition(|byte| matches!(byte, b'\n' | b'\r'))?
+            + 1;
+        if !scanned[line_start..]
+            .iter()
+            .all(|byte| matches!(byte, b' ' | b'\t'))
+        {
+            return None;
+        }
+        let previous_line_end = line_start - 1;
+        let crlf = scanned[previous_line_end] == b'\n'
+            && previous_line_end > 0
+            && scanned[previous_line_end - 1] == b'\r';
+        Some(if crlf {
+            previous_line_end - 1
+        } else {
+            previous_line_end
+        })
     }
 
     /// Returns whether the `<` at the current position opens a JSX element

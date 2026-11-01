@@ -835,6 +835,86 @@ pub fn md_thematic_break_char(value_token: SyntaxToken) -> MdThematicBreakChar {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn mdx_block_expression(
+    indent: MdIndentTokenList,
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> MdxBlockExpressionBuilder {
+    MdxBlockExpressionBuilder {
+        indent,
+        l_curly_token,
+        r_curly_token,
+        content: None,
+    }
+}
+pub struct MdxBlockExpressionBuilder {
+    indent: MdIndentTokenList,
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    content: Option<MdxExpressionContent>,
+}
+impl MdxBlockExpressionBuilder {
+    pub fn with_content(mut self, content: MdxExpressionContent) -> Self {
+        self.content = Some(content);
+        self
+    }
+    pub fn build(self) -> MdxBlockExpression {
+        MdxBlockExpression::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MDX_BLOCK_EXPRESSION,
+            [
+                Some(SyntaxElement::Node(self.indent.into_syntax())),
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.content
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
+pub fn mdx_esm_block(content_token: SyntaxToken) -> MdxEsmBlock {
+    MdxEsmBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_ESM_BLOCK,
+        [Some(SyntaxElement::Token(content_token))],
+    ))
+}
+pub fn mdx_expression_content(value_token: SyntaxToken) -> MdxExpressionContent {
+    MdxExpressionContent::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_EXPRESSION_CONTENT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn mdx_inline_expression(
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+) -> MdxInlineExpressionBuilder {
+    MdxInlineExpressionBuilder {
+        l_curly_token,
+        r_curly_token,
+        content: None,
+    }
+}
+pub struct MdxInlineExpressionBuilder {
+    l_curly_token: SyntaxToken,
+    r_curly_token: SyntaxToken,
+    content: Option<MdxExpressionContent>,
+}
+impl MdxInlineExpressionBuilder {
+    pub fn with_content(mut self, content: MdxExpressionContent) -> Self {
+        self.content = Some(content);
+        self
+    }
+    pub fn build(self) -> MdxInlineExpression {
+        MdxInlineExpression::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MDX_INLINE_EXPRESSION,
+            [
+                Some(SyntaxElement::Token(self.l_curly_token)),
+                self.content
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_curly_token)),
+            ],
+        ))
+    }
+}
 pub fn gfm_table_cell_list<I, S>(items: I, separators: S) -> GfmTableCellList
 where
     I: IntoIterator<Item = GfmTableCell>,

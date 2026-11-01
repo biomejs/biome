@@ -1,0 +1,80 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{props.title
+
+more text
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..23 "props.title\n\nmore text" [] [],
+            },
+            r_curly_token: missing (required),
+        },
+        MdNewline {
+            value_token: NEWLINE@23..24 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@24..24 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..24
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..24
+    0: MDX_BLOCK_EXPRESSION@0..23
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..23
+        0: MDX_EXPRESSION_LITERAL@1..23 "props.title\n\nmore text" [] []
+      3: (empty)
+    1: MD_NEWLINE@23..24
+      0: NEWLINE@23..24 "\n" [] []
+  3: EOF@24..24 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_block_expression.mdx:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+  > 1 │ {props.title
+      │ ^
+    2 │ 
+    3 │ more text
+  
+  i expression started here
+  
+  > 1 │ {props.title
+      │ ^
+    2 │ 
+    3 │ more text
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```

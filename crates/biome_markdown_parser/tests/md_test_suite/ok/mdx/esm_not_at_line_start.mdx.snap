@@ -1,0 +1,230 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdxjs-esm: lines that are not ESM */}
+ import a from "a"
+
+importa from "a"
+
+import("a")
+
+exporting
+
+> import a from "a"
+
+- export const a = 1
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..60 "/* micromark-extension-mdxjs-esm: lines that are not ESM */" [] [],
+            },
+            r_curly_token: R_CURLY@60..61 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@61..62 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@62..63 " " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@63..80 "import a from \"a\"" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@80..81 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@81..82 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@82..98 "importa from \"a\"" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@98..99 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@99..100 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@100..111 "import(\"a\")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@111..112 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@112..113 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..122 "exporting" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@122..123 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@123..124 "\n" [] [],
+        },
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@124..125 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@125..126 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@126..143 "import a from \"a\"" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@143..144 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@144..145 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@145..146 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@146..147 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@147..165 "export const a = 1" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@165..166 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@166..166 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..166
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..166
+    0: MDX_BLOCK_EXPRESSION@0..61
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..60
+        0: MDX_EXPRESSION_LITERAL@1..60 "/* micromark-extension-mdxjs-esm: lines that are not ESM */" [] []
+      3: R_CURLY@60..61 "}" [] []
+    1: MD_NEWLINE@61..62
+      0: NEWLINE@61..62 "\n" [] []
+    2: MD_PARAGRAPH@62..81
+      0: MD_INLINE_ITEM_LIST@62..81
+        0: MD_TEXTUAL@62..63
+          0: MD_TEXTUAL_LITERAL@62..63 " " [] []
+        1: MD_TEXTUAL@63..80
+          0: MD_TEXTUAL_LITERAL@63..80 "import a from \"a\"" [] []
+        2: MD_TEXTUAL@80..81
+          0: MD_TEXTUAL_LITERAL@80..81 "\n" [] []
+    3: MD_NEWLINE@81..82
+      0: NEWLINE@81..82 "\n" [] []
+    4: MD_PARAGRAPH@82..99
+      0: MD_INLINE_ITEM_LIST@82..99
+        0: MD_TEXTUAL@82..98
+          0: MD_TEXTUAL_LITERAL@82..98 "importa from \"a\"" [] []
+        1: MD_TEXTUAL@98..99
+          0: MD_TEXTUAL_LITERAL@98..99 "\n" [] []
+    5: MD_NEWLINE@99..100
+      0: NEWLINE@99..100 "\n" [] []
+    6: MD_PARAGRAPH@100..112
+      0: MD_INLINE_ITEM_LIST@100..112
+        0: MD_TEXTUAL@100..111
+          0: MD_TEXTUAL_LITERAL@100..111 "import(\"a\")" [] []
+        1: MD_TEXTUAL@111..112
+          0: MD_TEXTUAL_LITERAL@111..112 "\n" [] []
+    7: MD_NEWLINE@112..113
+      0: NEWLINE@112..113 "\n" [] []
+    8: MD_PARAGRAPH@113..123
+      0: MD_INLINE_ITEM_LIST@113..123
+        0: MD_TEXTUAL@113..122
+          0: MD_TEXTUAL_LITERAL@113..122 "exporting" [] []
+        1: MD_TEXTUAL@122..123
+          0: MD_TEXTUAL_LITERAL@122..123 "\n" [] []
+    9: MD_NEWLINE@123..124
+      0: NEWLINE@123..124 "\n" [] []
+    10: MD_QUOTE@124..144
+      0: MD_QUOTE_PREFIX@124..126
+        0: MD_QUOTE_INDENT_LIST@124..124
+        1: R_ANGLE@124..125 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@125..126 " " [] []
+      1: MD_BLOCK_LIST@126..144
+        0: MD_PARAGRAPH@126..144
+          0: MD_INLINE_ITEM_LIST@126..144
+            0: MD_TEXTUAL@126..143
+              0: MD_TEXTUAL_LITERAL@126..143 "import a from \"a\"" [] []
+            1: MD_TEXTUAL@143..144
+              0: MD_TEXTUAL_LITERAL@143..144 "\n" [] []
+    11: MD_NEWLINE@144..145
+      0: NEWLINE@144..145 "\n" [] []
+    12: MD_BULLET_LIST_ITEM@145..166
+      0: MD_BULLET_LIST@145..166
+        0: MD_BULLET@145..166
+          0: MD_LIST_MARKER_PREFIX@145..147
+            0: MD_INDENT_TOKEN_LIST@145..145
+            1: MINUS@145..146 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@146..147 " " [] []
+            3: MD_INDENT_TOKEN_LIST@147..147
+          1: MD_BLOCK_LIST@147..166
+            0: MD_PARAGRAPH@147..166
+              0: MD_INLINE_ITEM_LIST@147..166
+                0: MD_TEXTUAL@147..165
+                  0: MD_TEXTUAL_LITERAL@147..165 "export const a = 1" [] []
+                1: MD_TEXTUAL@165..166
+                  0: MD_TEXTUAL_LITERAL@165..166 "\n" [] []
+  3: EOF@166..166 "" [] []
+
+```

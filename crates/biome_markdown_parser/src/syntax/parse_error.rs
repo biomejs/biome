@@ -99,6 +99,25 @@ pub(crate) fn list_nesting_too_deep(
     .with_hint("Reduce nesting depth. Additional levels will be treated as content.")
 }
 
+/// MDX expression without its closing brace.
+///
+/// ```mdx
+/// {props.title
+/// ^ expected closing }
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unclosed_mdx_expression(
+    p: &MarkdownParser,
+    opening_range: TextRange,
+) -> ParseDiagnostic {
+    p.err_builder(
+        "Unclosed expression, expected a closing `}`.",
+        opening_range,
+    )
+    .with_detail(opening_range, "expression started here")
+    .with_hint("Add the closing `}`. To write a literal brace in MDX, escape it as `\\{`.")
+}
+
 /// Parser made no progress while parsing a block.
 pub(crate) fn parse_any_block_no_progress(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Parser made no progress while parsing a block.", range)

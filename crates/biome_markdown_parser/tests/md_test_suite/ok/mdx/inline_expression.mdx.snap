@@ -1,0 +1,413 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdx-expression: text expressions */}
+Hello, {props.name}!
+
+A {"}"} brace, a {`}`} template, and {a /* } */ + b} comment.
+
+An expression {a +
+b} across lines.
+
+# Title {props.title}
+
+Not an expression: `{code}` and [link](https://example.com/{id}).
+
+{a} {b}
+
+{a} trailing text
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..59 "/* micromark-extension-mdx-expression: text expressions */" [] [],
+            },
+            r_curly_token: R_CURLY@59..60 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@60..61 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@61..68 "Hello, " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@68..69 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@69..79 "props.name" [] [],
+                    },
+                    r_curly_token: R_CURLY@79..80 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@80..81 "!" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@81..82 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@82..83 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@83..85 "A " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@85..86 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@86..89 "\"}\"" [] [],
+                    },
+                    r_curly_token: R_CURLY@89..90 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@90..100 " brace, a " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@100..101 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@101..104 "`}`" [] [],
+                    },
+                    r_curly_token: R_CURLY@104..105 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@105..120 " template, and " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@120..121 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@121..134 "a /* } */ + b" [] [],
+                    },
+                    r_curly_token: R_CURLY@134..135 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@135..144 " comment." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@144..145 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@145..146 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@146..160 "An expression " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@160..161 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@161..166 "a +\nb" [] [],
+                    },
+                    r_curly_token: R_CURLY@166..167 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@167..181 " across lines." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@181..182 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@182..183 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@183..184 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@184..191 " Title " [] [],
+                    },
+                    MdxInlineExpression {
+                        l_curly_token: L_CURLY@191..192 "{" [] [],
+                        content: MdxExpressionContent {
+                            value_token: MDX_EXPRESSION_LITERAL@192..203 "props.title" [] [],
+                        },
+                        r_curly_token: R_CURLY@203..204 "}" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@204..205 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@205..206 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@206..225 "Not an expression: " [] [],
+                },
+                MdInlineCode {
+                    l_tick_token: BACKTICK@225..226 "`" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@226..232 "{code}" [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@232..233 "`" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@233..238 " and " [] [],
+                },
+                MdInlineLink {
+                    l_brack_token: L_BRACK@238..239 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@239..243 "link" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@243..244 "]" [] [],
+                    l_paren_token: L_PAREN@244..245 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@245..269 "https://example.com/{id}" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@269..270 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@270..271 "." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@271..272 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@272..273 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@273..274 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@274..275 "a" [] [],
+                    },
+                    r_curly_token: R_CURLY@275..276 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@276..277 " " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@277..278 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@278..279 "b" [] [],
+                    },
+                    r_curly_token: R_CURLY@279..280 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@280..281 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@281..282 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@282..283 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@283..284 "a" [] [],
+                    },
+                    r_curly_token: R_CURLY@284..285 "}" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@285..299 " trailing text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@299..300 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@300..300 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..300
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..300
+    0: MDX_BLOCK_EXPRESSION@0..60
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..59
+        0: MDX_EXPRESSION_LITERAL@1..59 "/* micromark-extension-mdx-expression: text expressions */" [] []
+      3: R_CURLY@59..60 "}" [] []
+    1: MD_NEWLINE@60..61
+      0: NEWLINE@60..61 "\n" [] []
+    2: MD_PARAGRAPH@61..82
+      0: MD_INLINE_ITEM_LIST@61..82
+        0: MD_TEXTUAL@61..68
+          0: MD_TEXTUAL_LITERAL@61..68 "Hello, " [] []
+        1: MDX_INLINE_EXPRESSION@68..80
+          0: L_CURLY@68..69 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@69..79
+            0: MDX_EXPRESSION_LITERAL@69..79 "props.name" [] []
+          2: R_CURLY@79..80 "}" [] []
+        2: MD_TEXTUAL@80..81
+          0: MD_TEXTUAL_LITERAL@80..81 "!" [] []
+        3: MD_TEXTUAL@81..82
+          0: MD_TEXTUAL_LITERAL@81..82 "\n" [] []
+    3: MD_NEWLINE@82..83
+      0: NEWLINE@82..83 "\n" [] []
+    4: MD_PARAGRAPH@83..145
+      0: MD_INLINE_ITEM_LIST@83..145
+        0: MD_TEXTUAL@83..85
+          0: MD_TEXTUAL_LITERAL@83..85 "A " [] []
+        1: MDX_INLINE_EXPRESSION@85..90
+          0: L_CURLY@85..86 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@86..89
+            0: MDX_EXPRESSION_LITERAL@86..89 "\"}\"" [] []
+          2: R_CURLY@89..90 "}" [] []
+        2: MD_TEXTUAL@90..100
+          0: MD_TEXTUAL_LITERAL@90..100 " brace, a " [] []
+        3: MDX_INLINE_EXPRESSION@100..105
+          0: L_CURLY@100..101 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@101..104
+            0: MDX_EXPRESSION_LITERAL@101..104 "`}`" [] []
+          2: R_CURLY@104..105 "}" [] []
+        4: MD_TEXTUAL@105..120
+          0: MD_TEXTUAL_LITERAL@105..120 " template, and " [] []
+        5: MDX_INLINE_EXPRESSION@120..135
+          0: L_CURLY@120..121 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@121..134
+            0: MDX_EXPRESSION_LITERAL@121..134 "a /* } */ + b" [] []
+          2: R_CURLY@134..135 "}" [] []
+        6: MD_TEXTUAL@135..144
+          0: MD_TEXTUAL_LITERAL@135..144 " comment." [] []
+        7: MD_TEXTUAL@144..145
+          0: MD_TEXTUAL_LITERAL@144..145 "\n" [] []
+    5: MD_NEWLINE@145..146
+      0: NEWLINE@145..146 "\n" [] []
+    6: MD_PARAGRAPH@146..182
+      0: MD_INLINE_ITEM_LIST@146..182
+        0: MD_TEXTUAL@146..160
+          0: MD_TEXTUAL_LITERAL@146..160 "An expression " [] []
+        1: MDX_INLINE_EXPRESSION@160..167
+          0: L_CURLY@160..161 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@161..166
+            0: MDX_EXPRESSION_LITERAL@161..166 "a +\nb" [] []
+          2: R_CURLY@166..167 "}" [] []
+        2: MD_TEXTUAL@167..181
+          0: MD_TEXTUAL_LITERAL@167..181 " across lines." [] []
+        3: MD_TEXTUAL@181..182
+          0: MD_TEXTUAL_LITERAL@181..182 "\n" [] []
+    7: MD_NEWLINE@182..183
+      0: NEWLINE@182..183 "\n" [] []
+    8: MD_HEADER@183..204
+      0: MD_INDENT_TOKEN_LIST@183..183
+      1: MD_HASH_LIST@183..184
+        0: MD_HASH@183..184
+          0: HASH@183..184 "#" [] []
+      2: MD_PARAGRAPH@184..204
+        0: MD_INLINE_ITEM_LIST@184..204
+          0: MD_TEXTUAL@184..191
+            0: MD_TEXTUAL_LITERAL@184..191 " Title " [] []
+          1: MDX_INLINE_EXPRESSION@191..204
+            0: L_CURLY@191..192 "{" [] []
+            1: MDX_EXPRESSION_CONTENT@192..203
+              0: MDX_EXPRESSION_LITERAL@192..203 "props.title" [] []
+            2: R_CURLY@203..204 "}" [] []
+      3: MD_HASH_LIST@204..204
+    9: MD_NEWLINE@204..205
+      0: NEWLINE@204..205 "\n" [] []
+    10: MD_NEWLINE@205..206
+      0: NEWLINE@205..206 "\n" [] []
+    11: MD_PARAGRAPH@206..272
+      0: MD_INLINE_ITEM_LIST@206..272
+        0: MD_TEXTUAL@206..225
+          0: MD_TEXTUAL_LITERAL@206..225 "Not an expression: " [] []
+        1: MD_INLINE_CODE@225..233
+          0: BACKTICK@225..226 "`" [] []
+          1: MD_INLINE_ITEM_LIST@226..232
+            0: MD_TEXTUAL@226..232
+              0: MD_TEXTUAL_LITERAL@226..232 "{code}" [] []
+          2: BACKTICK@232..233 "`" [] []
+        2: MD_TEXTUAL@233..238
+          0: MD_TEXTUAL_LITERAL@233..238 " and " [] []
+        3: MD_INLINE_LINK@238..270
+          0: L_BRACK@238..239 "[" [] []
+          1: MD_INLINE_ITEM_LIST@239..243
+            0: MD_TEXTUAL@239..243
+              0: MD_TEXTUAL_LITERAL@239..243 "link" [] []
+          2: R_BRACK@243..244 "]" [] []
+          3: L_PAREN@244..245 "(" [] []
+          4: MD_INLINE_ITEM_LIST@245..269
+            0: MD_TEXTUAL@245..269
+              0: MD_TEXTUAL_LITERAL@245..269 "https://example.com/{id}" [] []
+          5: (empty)
+          6: R_PAREN@269..270 ")" [] []
+        4: MD_TEXTUAL@270..271
+          0: MD_TEXTUAL_LITERAL@270..271 "." [] []
+        5: MD_TEXTUAL@271..272
+          0: MD_TEXTUAL_LITERAL@271..272 "\n" [] []
+    12: MD_NEWLINE@272..273
+      0: NEWLINE@272..273 "\n" [] []
+    13: MD_PARAGRAPH@273..281
+      0: MD_INLINE_ITEM_LIST@273..281
+        0: MDX_INLINE_EXPRESSION@273..276
+          0: L_CURLY@273..274 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@274..275
+            0: MDX_EXPRESSION_LITERAL@274..275 "a" [] []
+          2: R_CURLY@275..276 "}" [] []
+        1: MD_TEXTUAL@276..277
+          0: MD_TEXTUAL_LITERAL@276..277 " " [] []
+        2: MDX_INLINE_EXPRESSION@277..280
+          0: L_CURLY@277..278 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@278..279
+            0: MDX_EXPRESSION_LITERAL@278..279 "b" [] []
+          2: R_CURLY@279..280 "}" [] []
+        3: MD_TEXTUAL@280..281
+          0: MD_TEXTUAL_LITERAL@280..281 "\n" [] []
+    14: MD_NEWLINE@281..282
+      0: NEWLINE@281..282 "\n" [] []
+    15: MD_PARAGRAPH@282..300
+      0: MD_INLINE_ITEM_LIST@282..300
+        0: MDX_INLINE_EXPRESSION@282..285
+          0: L_CURLY@282..283 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@283..284
+            0: MDX_EXPRESSION_LITERAL@283..284 "a" [] []
+          2: R_CURLY@284..285 "}" [] []
+        1: MD_TEXTUAL@285..299
+          0: MD_TEXTUAL_LITERAL@285..299 " trailing text" [] []
+        2: MD_TEXTUAL@299..300
+          0: MD_TEXTUAL_LITERAL@299..300 "\n" [] []
+  3: EOF@300..300 "" [] []
+
+```

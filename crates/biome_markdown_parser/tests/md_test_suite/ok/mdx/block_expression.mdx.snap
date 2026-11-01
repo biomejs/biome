@@ -1,0 +1,265 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdx-expression: flow expressions */}
+{1 + 1}
+
+  {props.title}   
+
+{}
+
+{
+  multi
+  line
+
+  with a blank line
+}
+
+{"}"}
+
+{`a}b`}
+
+{a /* } */}
+
+{<Chart data={[1, 2]} />}
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..59 "/* micromark-extension-mdx-expression: flow expressions */" [] [],
+            },
+            r_curly_token: R_CURLY@59..60 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@60..61 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@61..62 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@62..67 "1 + 1" [] [],
+            },
+            r_curly_token: R_CURLY@67..68 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@68..69 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@69..70 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@70..72 "  " [] [],
+                },
+            ],
+            l_curly_token: L_CURLY@72..73 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@73..84 "props.title" [] [],
+            },
+            r_curly_token: R_CURLY@84..85 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@85..89 "\n" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@89..90 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@90..91 "{" [] [],
+            content: missing (optional),
+            r_curly_token: R_CURLY@91..92 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@92..93 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@93..94 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@94..95 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@95..132 "\n  multi\n  line\n\n  with a blank line\n" [] [],
+            },
+            r_curly_token: R_CURLY@132..133 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@133..134 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@134..135 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@135..136 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@136..139 "\"}\"" [] [],
+            },
+            r_curly_token: R_CURLY@139..140 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@140..141 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@141..142 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@142..143 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@143..148 "`a}b`" [] [],
+            },
+            r_curly_token: R_CURLY@148..149 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@149..150 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@150..151 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@151..152 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@152..161 "a /* } */" [] [],
+            },
+            r_curly_token: R_CURLY@161..162 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@162..163 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@163..164 "\n" [] [],
+        },
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@164..165 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@165..188 "<Chart data={[1, 2]} />" [] [],
+            },
+            r_curly_token: R_CURLY@188..189 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@189..190 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@190..190 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..190
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..190
+    0: MDX_BLOCK_EXPRESSION@0..60
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..59
+        0: MDX_EXPRESSION_LITERAL@1..59 "/* micromark-extension-mdx-expression: flow expressions */" [] []
+      3: R_CURLY@59..60 "}" [] []
+    1: MD_NEWLINE@60..61
+      0: NEWLINE@60..61 "\n" [] []
+    2: MDX_BLOCK_EXPRESSION@61..68
+      0: MD_INDENT_TOKEN_LIST@61..61
+      1: L_CURLY@61..62 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@62..67
+        0: MDX_EXPRESSION_LITERAL@62..67 "1 + 1" [] []
+      3: R_CURLY@67..68 "}" [] []
+    3: MD_NEWLINE@68..69
+      0: NEWLINE@68..69 "\n" [] []
+    4: MD_NEWLINE@69..70
+      0: NEWLINE@69..70 "\n" [] []
+    5: MDX_BLOCK_EXPRESSION@70..85
+      0: MD_INDENT_TOKEN_LIST@70..72
+        0: MD_INDENT_TOKEN@70..72
+          0: MD_INDENT_CHAR@70..72 "  " [] []
+      1: L_CURLY@72..73 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@73..84
+        0: MDX_EXPRESSION_LITERAL@73..84 "props.title" [] []
+      3: R_CURLY@84..85 "}" [] []
+    6: MD_NEWLINE@85..89
+      0: NEWLINE@85..89 "\n" [Whitespace(" "), Whitespace(" "), Whitespace(" ")] []
+    7: MD_NEWLINE@89..90
+      0: NEWLINE@89..90 "\n" [] []
+    8: MDX_BLOCK_EXPRESSION@90..92
+      0: MD_INDENT_TOKEN_LIST@90..90
+      1: L_CURLY@90..91 "{" [] []
+      2: (empty)
+      3: R_CURLY@91..92 "}" [] []
+    9: MD_NEWLINE@92..93
+      0: NEWLINE@92..93 "\n" [] []
+    10: MD_NEWLINE@93..94
+      0: NEWLINE@93..94 "\n" [] []
+    11: MDX_BLOCK_EXPRESSION@94..133
+      0: MD_INDENT_TOKEN_LIST@94..94
+      1: L_CURLY@94..95 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@95..132
+        0: MDX_EXPRESSION_LITERAL@95..132 "\n  multi\n  line\n\n  with a blank line\n" [] []
+      3: R_CURLY@132..133 "}" [] []
+    12: MD_NEWLINE@133..134
+      0: NEWLINE@133..134 "\n" [] []
+    13: MD_NEWLINE@134..135
+      0: NEWLINE@134..135 "\n" [] []
+    14: MDX_BLOCK_EXPRESSION@135..140
+      0: MD_INDENT_TOKEN_LIST@135..135
+      1: L_CURLY@135..136 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@136..139
+        0: MDX_EXPRESSION_LITERAL@136..139 "\"}\"" [] []
+      3: R_CURLY@139..140 "}" [] []
+    15: MD_NEWLINE@140..141
+      0: NEWLINE@140..141 "\n" [] []
+    16: MD_NEWLINE@141..142
+      0: NEWLINE@141..142 "\n" [] []
+    17: MDX_BLOCK_EXPRESSION@142..149
+      0: MD_INDENT_TOKEN_LIST@142..142
+      1: L_CURLY@142..143 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@143..148
+        0: MDX_EXPRESSION_LITERAL@143..148 "`a}b`" [] []
+      3: R_CURLY@148..149 "}" [] []
+    18: MD_NEWLINE@149..150
+      0: NEWLINE@149..150 "\n" [] []
+    19: MD_NEWLINE@150..151
+      0: NEWLINE@150..151 "\n" [] []
+    20: MDX_BLOCK_EXPRESSION@151..162
+      0: MD_INDENT_TOKEN_LIST@151..151
+      1: L_CURLY@151..152 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@152..161
+        0: MDX_EXPRESSION_LITERAL@152..161 "a /* } */" [] []
+      3: R_CURLY@161..162 "}" [] []
+    21: MD_NEWLINE@162..163
+      0: NEWLINE@162..163 "\n" [] []
+    22: MD_NEWLINE@163..164
+      0: NEWLINE@163..164 "\n" [] []
+    23: MDX_BLOCK_EXPRESSION@164..189
+      0: MD_INDENT_TOKEN_LIST@164..164
+      1: L_CURLY@164..165 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@165..188
+        0: MDX_EXPRESSION_LITERAL@165..188 "<Chart data={[1, 2]} />" [] []
+      3: R_CURLY@188..189 "}" [] []
+    24: MD_NEWLINE@189..190
+      0: NEWLINE@189..190 "\n" [] []
+  3: EOF@190..190 "" [] []
+
+```
