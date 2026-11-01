@@ -1925,15 +1925,47 @@ impl WorkspaceServerWithDb<'_> {
                 match scan_kind {
                     ScanKind::KnownFiles | ScanKind::TargetedKnownFiles { .. } => match ignore_kind
                     {
+                        // The files phase of the scan indexes the Tailwind
+                        // stylesheets as dependencies.
                         IgnoreKind::Path => !path.is_required_during_scan(),
-                        IgnoreKind::Ancestors => path.parent().is_none_or(|folder_path| {
-                            self.project_is_ignored_by_top_level_config(
-                                project_key,
-                                folder_path,
-                                true,
-                                ignore_kind,
-                            )
-                        }),
+                        // Updates only reach this branch for paths that aren't
+                        // indexed. The watched folders also hold files that
+                        // this scan kind doesn't index, such as the source
+                        // files next to a stylesheet.
+                        IgnoreKind::Ancestors => {
+                            let stylesheets = self.project_get_tailwind_stylesheets(project_key);
+                            if stylesheets
+                                .iter()
+                                .any(|stylesheet| stylesheet == path.as_path())
+                            {
+                                // A stylesheet that is removed and created
+                                // again is indexed again, even in an ignored
+                                // folder.
+                                false
+                            } else if path.is_required_during_scan() {
+                                path.parent().is_none_or(|folder_path| {
+                                    self.project_is_ignored_by_top_level_config(
+                                        project_key,
+                                        folder_path,
+                                        true,
+                                        ignore_kind,
+                                    )
+                                })
+                            } else if !stylesheets.is_empty() && path.extension() == Some("css") {
+                                // Once removed, a file that a stylesheet
+                                // imports isn't its dependency anymore, so
+                                // every CSS file that isn't ignored is
+                                // accepted.
+                                self.project_is_ignored_by_top_level_config(
+                                    project_key,
+                                    &path,
+                                    false,
+                                    ignore_kind,
+                                )
+                            } else {
+                                true
+                            }
+                        }
                     },
                     ScanKind::Project | ScanKind::TypeAware => {
                         if path.is_dependency() {
@@ -2511,6 +2543,12 @@ impl WorkspaceServerWithDb<'_> {
         let db = self.db_state.fork();
         let project_db: &dyn ProjectDb = db.deref();
         project_db.get_root_settings(project_key)
+    }
+
+    fn project_get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        let db = self.db_state.fork();
+        let project_db: &dyn ProjectDb = db.deref();
+        project_db.get_tailwind_stylesheets(project_key)
     }
 
     fn project_get_nested_settings(
@@ -4606,6 +4644,11 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     #[inline]
+    fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        self.project_get_tailwind_stylesheets(project_key)
+    }
+
+    #[inline]
     fn is_indexed(&self, path: &Utf8Path) -> bool {
         match path.file_name() {
             Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
@@ -4893,6 +4936,12 @@ impl WorkspaceScannerBridge for LocalWorkspace {
     ) -> Result<bool, WorkspaceError> {
         self.as_workspace()
             .is_ignored(project_key, scan_kind, path, request_kind, path_kind)
+    }
+
+    #[inline]
+    fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        self.as_workspace()
+            .project_get_tailwind_stylesheets(project_key)
     }
 
     #[inline]

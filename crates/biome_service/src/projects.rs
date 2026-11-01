@@ -147,6 +147,23 @@ pub trait ProjectDb: biome_db::Db {
             .map(|data| data.root_settings(self).clone_arc())
     }
 
+    /// Returns the Tailwind CSS stylesheets that the root and nested settings
+    /// of the project point to, without duplicates.
+    fn get_tailwind_stylesheets(&self, project_key: ProjectKey) -> Vec<Utf8PathBuf> {
+        let Some(project) = self.get_project(&project_key) else {
+            return Vec::new();
+        };
+        let root_settings = project.root_settings(self);
+        let mut stylesheets: Vec<_> = std::iter::once(&root_settings)
+            .chain(project.nested_settings(self).values())
+            .filter_map(|settings| settings.as_ref().tailwind.stylesheet())
+            .map(Utf8Path::to_path_buf)
+            .collect();
+        stylesheets.sort_unstable();
+        stylesheets.dedup();
+        stylesheets
+    }
+
     /// Returns whether a path is force-ignored using a forced negation (`!!`)
     /// as part of `files.includes`.
     fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {

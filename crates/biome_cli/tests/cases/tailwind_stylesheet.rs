@@ -72,6 +72,52 @@ export const breakpoint = <div className="3xl:flex 2xl:flex" />;
 }
 
 #[test]
+fn use_tailwind_sorted_classes_reads_stylesheet_outside_linted_paths() {
+    let mut console = BufferConsole::default();
+    let mut fs =
+        TemporaryFs::new("use_tailwind_sorted_classes_reads_stylesheet_outside_linted_paths");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "tailwind": { "stylesheet": "./styles/app.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "styles/app.css",
+        "@import \"tailwindcss\";\n@import \"./theme.css\";\n",
+    );
+    fs.create_file("styles/theme.css", "@theme { --color-brand: #00f; }\n");
+    fs.create_file(
+        "src/App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+    let src = fs.working_directory.join("src");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=nursery/useTailwindSortedClasses",
+                src.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_tailwind_sorted_classes_reads_stylesheet_outside_linted_paths",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn nested_configs_resolve_tailwind_stylesheet() {
     let mut console = BufferConsole::default();
     let mut fs = TemporaryFs::new("nested_configs_resolve_tailwind_stylesheet");

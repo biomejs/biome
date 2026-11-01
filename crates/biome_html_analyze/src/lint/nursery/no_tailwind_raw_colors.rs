@@ -30,9 +30,6 @@ declare_lint_rule! {
     /// `--color-brand: #00f`. It skips colors that refer to another value, such as
     /// `--color-brand: var(--brand)`.
     ///
-    /// When `tailwind.stylesheet` is set, Biome scans your project when this rule is
-    /// enabled, so that it can read the stylesheet and the files it imports.
-    ///
     /// ## Examples
     ///
     /// ### Invalid

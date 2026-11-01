@@ -1653,10 +1653,6 @@ impl Advices for ExtendsDepthSpecifier {
 pub struct ProjectScanComputer<'a> {
     requires_project_scan: bool,
     requires_types: bool,
-    /// Whether the configuration sets `tailwind.stylesheet`. The Tailwind
-    /// rules read that stylesheet from the module graph, so they need a
-    /// project scan only when it's set.
-    has_tailwind_stylesheet: bool,
     enabled_rules: FxHashSet<RuleFilter<'a>>,
     configuration: &'a Configuration,
     skip: &'a [AnalyzerSelector],
@@ -1681,10 +1677,6 @@ impl<'a> ProjectScanComputer<'a> {
             enabled_rules,
             requires_project_scan: false,
             requires_types: false,
-            has_tailwind_stylesheet: configuration
-                .tailwind
-                .as_ref()
-                .is_some_and(|tailwind| tailwind.stylesheet.is_some()),
             configuration,
             skip: &[],
             only: &[],
@@ -1707,7 +1699,7 @@ impl<'a> ProjectScanComputer<'a> {
 
         if let Some(domains) = domains {
             for (domain, value) in domains.iter() {
-                if self.requires_project_scan_for_domain(domain, value) {
+                if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
                     self.requires_project_scan = true;
                 }
                 if domain == &RuleDomain::Types && value != &RuleDomainValue::None {
@@ -1728,7 +1720,7 @@ impl<'a> ProjectScanComputer<'a> {
                     continue;
                 };
                 for (domain, value) in domains.iter() {
-                    if self.requires_project_scan_for_domain(domain, value) {
+                    if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
                         self.requires_project_scan = true;
                     }
                     if domain == &RuleDomain::Types && value != &RuleDomainValue::None {
@@ -1764,24 +1756,6 @@ impl<'a> ProjectScanComputer<'a> {
         }
     }
 
-    /// Whether enabling `domain` with `value` requires a project scan.
-    fn requires_project_scan_for_domain(
-        &self,
-        domain: &RuleDomain,
-        value: &RuleDomainValue,
-    ) -> bool {
-        value != &RuleDomainValue::None
-            && (domain == &RuleDomain::Project
-                || (domain == &RuleDomain::Tailwind && self.has_tailwind_stylesheet))
-    }
-
-    /// Records the scan that the enabled rule with `domains` requires.
-    fn record_rule_domains(&mut self, domains: &[RuleDomain]) {
-        self.requires_project_scan |= domains.contains(&RuleDomain::Project)
-            || (self.has_tailwind_stylesheet && domains.contains(&RuleDomain::Tailwind));
-        self.requires_types |= domains.contains(&RuleDomain::Types);
-    }
-
     #[inline]
     fn check_rule<R, L>(&mut self)
     where
@@ -1797,7 +1771,9 @@ impl<'a> ProjectScanComputer<'a> {
         if !self.only.is_empty() {
             for selector in self.only.iter() {
                 if selector.match_rule_name(group_name, metadata.name) {
-                    self.record_rule_domains(metadata.domains);
+                    let domains = metadata.domains;
+                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
             }
@@ -1807,7 +1783,9 @@ impl<'a> ProjectScanComputer<'a> {
             .any(|s| s.match_rule_name(group_name, metadata.name))
             && self.enabled_rules.contains(&filter)
         {
-            self.record_rule_domains(metadata.domains);
+            let domains = metadata.domains;
+            self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            self.requires_types |= domains.contains(&RuleDomain::Types);
         }
     }
 }
@@ -2119,7 +2097,7 @@ mod tests {
     }
 
     #[test]
-    fn should_not_scan_project_for_tailwind_rule_without_stylesheet() {
+    fn should_not_scan_project_for_tailwind_rule() {
         let configuration = configuration_from_json(
             r#"{ "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } } }"#,
         );
@@ -2131,24 +2109,13 @@ mod tests {
     }
 
     #[test]
-    fn should_scan_project_for_tailwind_rule_with_stylesheet() {
+    fn should_not_scan_project_for_tailwind_rule_with_stylesheet() {
         let configuration = configuration_from_json(
             r#"{
                 "tailwind": { "stylesheet": "./app.css" },
-                "linter": { "rules": { "nursery": { "noTailwindArbitraryValue": "error" } } }
+                "linter": { "rules": { "nursery": { "noTailwindRawColors": "error" } } }
             }"#,
         );
-
-        assert_eq!(
-            ProjectScanComputer::new(&configuration).compute(),
-            ScanKind::Project
-        );
-    }
-
-    #[test]
-    fn should_not_scan_project_for_stylesheet_without_tailwind_rules() {
-        let configuration =
-            configuration_from_json(r#"{ "tailwind": { "stylesheet": "./app.css" } }"#);
 
         assert_eq!(
             ProjectScanComputer::new(&configuration).compute(),
@@ -2157,7 +2124,7 @@ mod tests {
     }
 
     #[test]
-    fn should_scan_project_for_tailwind_domain_with_stylesheet() {
+    fn should_not_scan_project_for_tailwind_domain_with_stylesheet() {
         let configuration = configuration_from_json(
             r#"{
                 "tailwind": { "stylesheet": "./app.css" },
@@ -2166,32 +2133,10 @@ mod tests {
         );
 
         assert_eq!(
-            ProjectScanComputer::new(&configuration).compute(),
-            ScanKind::Project
-        );
-    }
-
-    #[test]
-    fn should_not_scan_project_for_tailwind_domain_without_stylesheet() {
-        let configuration =
-            configuration_from_json(r#"{ "linter": { "domains": { "tailwind": "all" } } }"#);
-
-        assert_eq!(
-            ProjectScanComputer::new(&configuration).compute(),
-            ScanKind::NoScanner
-        );
-    }
-
-    #[test]
-    fn should_scan_project_for_tailwind_domain_selector_with_stylesheet() {
-        let configuration =
-            configuration_from_json(r#"{ "tailwind": { "stylesheet": "./app.css" } }"#);
-
-        assert_eq!(
             ProjectScanComputer::new(&configuration)
                 .with_rule_selectors(&[], &[DomainSelector("tailwind").into()])
                 .compute(),
-            ScanKind::Project
+            ScanKind::NoScanner
         );
     }
 
