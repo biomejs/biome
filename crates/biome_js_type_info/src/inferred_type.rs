@@ -1531,6 +1531,10 @@ impl<'db> InferredType<'db> {
         matches!(self.data, TypeData::Undefined)
     }
 
+    pub const fn is_never(self) -> bool {
+        matches!(self.data, TypeData::NeverKeyword)
+    }
+
     fn try_all_variants_match(
         self,
         predicate: impl FnMut(TypeData<'db>) -> bool,
