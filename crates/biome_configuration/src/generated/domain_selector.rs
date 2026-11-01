@@ -128,6 +128,7 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noSvelteAddEventListener"),
+        RuleFilter::Rule("nursery", "noSvelteAsyncStore"),
         RuleFilter::Rule("nursery", "noSvelteAtDebugTags"),
         RuleFilter::Rule("nursery", "noSvelteAtHtmlTags"),
         RuleFilter::Rule("nursery", "noSvelteClassDirective"),

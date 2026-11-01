@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { writable } from "svelte/store";
+
+	const user = writable(null, async (set) => {
+		set(await fetchUser());
+	});
+</script>
+
+<p>{$user}</p>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:5:30 lint/nursery/noSvelteAsyncStore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This async function is passed to writable().
+  
+    3 │ 	import { writable } from "svelte/store";
+    4 │ 
+  > 5 │ 	const user = writable(null, async (set) => {
+      │ 	                            ^^^^^
+    6 │ 		set(await fetchUser());
+    7 │ 	});
+  
+  i Svelte calls the value this function returns when the store is no longer used. An async function returns a promise, and calling a promise throws an error.
+  
+  i Make the function synchronous, start the async work inside it, and call set() when the result is ready.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
