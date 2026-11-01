@@ -95,6 +95,7 @@ impl SemanticModelBuilder {
             | JS_SVELTE_SNIPPET_ROOT
             | JS_VUE_SLOT_PROPS_ROOT
             | JS_VUE_GENERIC_ROOT
+            | JSX_SINGLE_TAG_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
