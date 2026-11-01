@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+import { getEntry } from "astro:content";
+
+const entry = await getEntry("blog", "post-1");
+---
+<h1>{entry.data.title}</h1>
+
+```

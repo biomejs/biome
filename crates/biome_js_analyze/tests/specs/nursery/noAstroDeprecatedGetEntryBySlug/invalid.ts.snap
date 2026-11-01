@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { type getEntryBySlug as getEntry4 } from "astro:content";
+import type { getEntryBySlug as getEntry5 } from "astro:content";
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:10 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { type getEntryBySlug as getEntry4 } from "astro:content";
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import type { getEntryBySlug as getEntry5 } from "astro:content";
+    4 │ 
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:15 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { type getEntryBySlug as getEntry4 } from "astro:content";
+  > 3 │ import type { getEntryBySlug as getEntry5 } from "astro:content";
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
