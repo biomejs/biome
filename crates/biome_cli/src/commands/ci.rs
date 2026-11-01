@@ -40,6 +40,8 @@ pub(crate) struct CiCommandPayload {
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) only: Vec<AnalyzerSelector>,
     pub(crate) skip: Vec<AnalyzerSelector>,
+    /// The CI environment detected for the current process.
+    pub(crate) environment: Option<ExecutionEnvironment>,
 }
 
 struct CiExecution {
@@ -152,14 +154,8 @@ impl TraversalCommand for CiCommandPayload {
         _console: &mut dyn Console,
         _workspace: &dyn Workspace,
     ) -> Result<Box<dyn Execution>, CliDiagnostic> {
-        let is_github = super::is_github_actions();
-
         Ok(Box::new(CiExecution {
-            environment: if is_github {
-                Some(ExecutionEnvironment::GitHub)
-            } else {
-                None
-            },
+            environment: self.environment,
             vcs_targeted: (false, self.changed).into(),
             enforce_assist: self.enforce_assist,
             skip_parse_errors: cli_options.skip_parse_errors,
