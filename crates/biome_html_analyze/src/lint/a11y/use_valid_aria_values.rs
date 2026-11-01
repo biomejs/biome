@@ -71,7 +71,8 @@ impl Rule for UseValidAriaValues {
         let attr = ctx.query();
 
         let name = attr.name()?;
-        let is_html_file = ctx.source_type::<HtmlFileSource>().is_html();
+        let source_type = ctx.source_type::<HtmlFileSource>();
+        let is_html_file = source_type.is_html();
 
         // Case-insensitive matching only for .html files.
         // In Vue/Svelte/Astro, attribute names are case-sensitive.
@@ -82,6 +83,25 @@ impl Rule for UseValidAriaValues {
         };
 
         if let Ok(aria_property) = AriaAttribute::from_str(&name_ref) {
+            // Astro template literals share the string node used by static HTML attributes.
+            if source_type.is_astro()
+                && let Some(string) = attr.as_html_attribute().and_then(|attr| attr.html_string())
+            {
+                let token = string.value_token().ok()?;
+                let mut characters = token.text_trimmed().chars().peekable();
+                if characters.next() == Some('`') {
+                    while let Some(character) = characters.next() {
+                        match character {
+                            '\\' => {
+                                let _ = characters.next();
+                            }
+                            '$' if characters.peek() == Some(&'{') => return None,
+                            _ => {}
+                        }
+                    }
+                }
+            }
+
             let static_value = attr.as_static_value();
             let value_str = if let Some(ref v) = static_value {
                 v.text()
