@@ -635,6 +635,7 @@ pub mod use_tailwind_shorthand_classes;
 pub mod use_tailwind_sorted_classes;
 pub mod use_tailwind_static_class_strings;
 pub mod use_tailwind_variables_shorthand;
+pub mod use_tanstack_query_stable_query_client;
 pub mod use_template;
 pub mod use_test_hooks_in_order;
 pub mod use_test_hooks_on_top;
