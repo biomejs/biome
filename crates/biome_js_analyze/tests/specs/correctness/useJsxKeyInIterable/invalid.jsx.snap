@@ -152,6 +152,14 @@ xs.map((x) => {
     return x.ok ? identity(element) : null;
 });
 
+xs.map((x) => {
+    const item = <li />;
+    if (x.skip) {
+        return item;
+    }
+    return x.ok ? <li key={x.id} /> : null;
+});
+
 ```
 
 _Note: The parser emitted 1 diagnostics which are not shown here._
@@ -801,25 +809,6 @@ invalid.jsx:63:9 lint/correctness/useJsxKeyInIterable ━━━━━━━━�
 ```
 
 ```
-invalid.jsx:68:10 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    66 │ data.map((x) => {
-    67 │ 	if (x.type === 'string') {
-  > 68 │ 		return <div>{x.value}</div> // no key
-       │ 		       ^^^^^
-    69 │ 	}
-    70 │ 	return <div key={x.value}>{x.value}</div>
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalid.jsx:75:10 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
@@ -1084,24 +1073,6 @@ invalid.jsx:129:15 lint/correctness/useJsxKeyInIterable ━━━━━━━━
 ```
 
 ```
-invalid.jsx:133:19 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Missing key property for this element in iterable.
-  
-    132 │ xs.map((x) => {
-  > 133 │     const inner = <b>{x}</b>;
-        │                   ^^^
-    134 │     return f ? <li key={x}>{inner}</li> : <p>{inner}</p>;
-    135 │ });
-  
-  i The order of the items may change, and having a key can help React identify which item was moved.
-  
-  i Check the React documentation. 
-  
-
-```
-
-```
 invalid.jsx:134:43 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Missing key property for this element in iterable.
@@ -1149,6 +1120,24 @@ invalid.jsx:145:21 lint/correctness/useJsxKeyInIterable ━━━━━━━━
         │                     ^^^^^^
     146 │     return x.ok ? identity(element) : null;
     147 │ });
+  
+  i The order of the items may change, and having a key can help React identify which item was moved.
+  
+  i Check the React documentation. 
+  
+
+```
+
+```
+invalid.jsx:150:18 lint/correctness/useJsxKeyInIterable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing key property for this element in iterable.
+  
+    149 │ xs.map((x) => {
+  > 150 │     const item = <li />;
+        │                  ^^^^^^
+    151 │     if (x.skip) {
+    152 │         return item;
   
   i The order of the items may change, and having a key can help React identify which item was moved.
   

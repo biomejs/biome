@@ -6,11 +6,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsMemberExpression,
-    AnyJsObjectMember, AnyJsStatement, AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild,
-    JsArrayElementList, JsArrayExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsConditionalExpression, JsFunctionBody, JsNewExpression, JsObjectExpression, JsStatementList,
-    JsxAttributeList, JsxExpressionChild, JsxTagExpression,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
+    AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
+    JsObjectExpression, JsStatementList, JsVariableDeclarator, JsxAttributeList,
+    JsxExpressionChild, JsxTagExpression,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
@@ -252,54 +252,23 @@ fn handle_function_body(
         .find_map(|statement| statement.as_js_return_statement().cloned());
     let is_return_component = return_statement
         .as_ref()
-        .and_then(|ret| is_component_expression(ret.argument()?))
+        .and_then(|ret| {
+            let returned_value = ret.argument()?;
+            let returned_value = unwrap_parenthesis(returned_value)?;
+            Some(ReactComponentExpression::can_cast(
+                returned_value.syntax().kind(),
+            ))
+        })
         .unwrap_or_default();
     let ranges = return_statement.and_then(|ret| {
         let returned_value = ret.argument()?;
         handle_potential_react_component(returned_value, model, is_inside_jsx, options)
     });
     if ranges.is_none() && is_return_component {
-        // Variables are likely children of the returned component, but other
-        // statements (e.g. an early return inside an `if`) still need a check.
-        return node
-            .statements()
-            .iter()
-            .filter(|statement| !matches!(statement, AnyJsStatement::JsVariableStatement(_)))
-            .filter_map(|statement| handle_statement(&statement, model, is_inside_jsx, options))
-            .flatten()
-            .collect();
+        return vec![];
     }
 
     handle_statements(&node.statements(), model, is_inside_jsx, options)
-}
-
-/// Returns `true` if the expression is a component, or a conditional expression
-/// whose branches are all JSX elements or `null`, with at least one JSX element.
-fn is_component_expression(expr: AnyJsExpression) -> Option<bool> {
-    match unwrap_parenthesis(expr)? {
-        AnyJsExpression::JsConditionalExpression(expr) => is_jsx_conditional(&expr),
-        expr => Some(ReactComponentExpression::can_cast(expr.syntax().kind())),
-    }
-}
-
-fn is_jsx_conditional(expr: &JsConditionalExpression) -> Option<bool> {
-    let mut has_jsx = false;
-    for branch in [expr.consequent().ok()?, expr.alternate().ok()?] {
-        match unwrap_parenthesis(branch)? {
-            AnyJsExpression::JsxTagExpression(_) => has_jsx = true,
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsNullLiteralExpression(_),
-            ) => {}
-            AnyJsExpression::JsConditionalExpression(nested) => {
-                if !is_jsx_conditional(&nested)? {
-                    return Some(false);
-                }
-                has_jsx = true;
-            }
-            _ => return Some(false),
-        }
-    }
-    Some(has_jsx)
 }
 
 fn handle_statements(
@@ -330,6 +299,9 @@ fn handle_statement(
                     .iter()
                     .filter_map(|declarator| {
                         let decl = declarator.ok()?;
+                        if is_only_used_as_jsx_child(&decl, model) {
+                            return None;
+                        }
                         let init = decl.initializer()?.expression().ok()?;
                         handle_potential_react_component(init, model, is_inside_jsx, options)
                     })
@@ -378,6 +350,27 @@ fn handle_statement(
         }
         _ => None,
     }
+}
+
+/// Returns `true` if the variable is read, and every read is a JSX child like `{inner}`.
+/// Such an element is rendered inside another element, so it doesn't need a key.
+fn is_only_used_as_jsx_child(decl: &JsVariableDeclarator, model: &SemanticModel) -> bool {
+    let Some(id) = decl
+        .id()
+        .ok()
+        .and_then(|id| id.as_any_js_binding()?.as_js_identifier_binding().cloned())
+    else {
+        return false;
+    };
+    let mut reads = model.as_binding(&id).all_reads().peekable();
+    reads.peek().is_some()
+        && reads.all(|reference| {
+            reference
+                .syntax()
+                .parent()
+                .and_then(|expression| expression.parent())
+                .is_some_and(|parent| JsxExpressionChild::can_cast(parent.kind()))
+        })
 }
 
 fn handle_potential_react_component(

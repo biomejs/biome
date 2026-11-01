@@ -145,3 +145,11 @@ xs.map((x) => {
     const element = <li />;
     return x.ok ? identity(element) : null;
 });
+
+xs.map((x) => {
+    const item = <li />;
+    if (x.skip) {
+        return item;
+    }
+    return x.ok ? <li key={x.id} /> : null;
+});

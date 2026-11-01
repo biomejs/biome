@@ -165,3 +165,11 @@ xs.map((x) => {
     const inner = <b>{x}</b>;
     return f ? <li key={x}>{inner}</li> : g ? <p key={x}>{inner}</p> : null;
 });
+
+xs.map((x) => {
+    if (x.big) {
+        const inner = <b>{x}</b>;
+        return f ? <li key={x}>{inner}</li> : null;
+    }
+    return null;
+});
