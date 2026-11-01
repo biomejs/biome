@@ -407,3 +407,47 @@ export default () => <button className="btn btn-undefined">Click</button>;"#,
         result,
     ));
 }
+
+#[test]
+fn no_undeclared_classes_respects_css_at_imports() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_undeclared_classes_respects_css_at_imports");
+
+    fs.create_file(
+        "other.css",
+        ".other-class {\n    color: var(--primary);\n}\n",
+    );
+    fs.create_file(
+        "styles.css",
+        "@import \"./other.css\";\n\n.text-primary {\n    color: var(--primary);\n}\n",
+    );
+    fs.create_file(
+        "main.tsx",
+        "import './styles.css';\n\nexport const Component = () => {\n  return <div className=\"text-primary other-class\">Hello</div>\n}\n",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=nursery/noUndeclaredClasses", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "{result:?}");
+    let output = console
+        .out_buffer
+        .iter()
+        .map(|msg| format!("{:?}", msg.content))
+        .collect::<String>();
+    assert!(
+        !output.contains("other-class") || !output.contains("not defined"),
+        "other-class from @import must be considered declared: {output}"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_undeclared_classes_respects_css_at_imports",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

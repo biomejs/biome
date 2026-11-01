@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noUndeclaredClasses '<TEMP_DIR>/no_undeclared_classes_respects_css_at_imports'
+```
+
+## `main.tsx`
+
+```tsx
+import './styles.css';
+
+export const Component = () => {
+  return <div className="text-primary other-class">Hello</div>
+}
+
+```
+
+## `other.css`
+
+```css
+.other-class {
+  color: var(--primary);
+}
+```
+
+## `styles.css`
+
+```css
+@import "./other.css";
+
+.text-primary {
+  color: var(--primary);
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```

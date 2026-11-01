@@ -2,6 +2,7 @@ use super::SymbolFromModuleInfo;
 use crate::css_module_info::TailwindPosition;
 use crate::css_module_info::traverse::{
     CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
+    css_class_steps_following_imports,
 };
 use crate::traverse::UpwardTraversalVisitor;
 use crate::{
@@ -215,13 +216,8 @@ pub fn traverse_import_tree_for_classes(
                 .filter(|import| import.kind.is_static())
             {
                 let resolved = import_path.resolve_js(db, owner);
-                if let Some(path) = resolved.path().as_path()
-                    && let Some(css_info) = db.css_module_info_for_path(path)
-                {
-                    results.push(CssClassStep {
-                        css_path: path.to_path_buf(),
-                        css_classes: css_info.classes.clone(),
-                    });
+                if let Some(path) = resolved.path().as_path() {
+                    results.extend(css_class_steps_following_imports(db, path));
                 }
             }
         }
@@ -264,25 +260,15 @@ pub fn traverse_import_tree_for_html_classes(
 
             for stylesheet_path in &html_info.imported_stylesheets {
                 let resolved = stylesheet_path.resolve_css(db, owner);
-                if let Some(path) = resolved.path().as_path()
-                    && let Some(css_info) = db.css_module_info_for_path(path)
-                {
-                    linked_steps.push(CssClassStep {
-                        css_path: path.to_path_buf(),
-                        css_classes: css_info.classes.clone(),
-                    });
+                if let Some(path) = resolved.path().as_path() {
+                    linked_steps.extend(css_class_steps_following_imports(db, path));
                 }
             }
 
             for import_path in html_info.import_paths.iter() {
                 let resolved = import_path.resolve_html(db, owner);
-                if let Some(path) = resolved.path().as_path()
-                    && let Some(css_info) = db.css_module_info_for_path(path)
-                {
-                    linked_steps.push(CssClassStep {
-                        css_path: path.to_path_buf(),
-                        css_classes: css_info.classes.clone(),
-                    });
+                if let Some(path) = resolved.path().as_path() {
+                    linked_steps.extend(css_class_steps_following_imports(db, path));
                 }
             }
         }

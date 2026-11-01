@@ -216,6 +216,43 @@ fn test_collect_available_classes_for_js_file() {
 }
 
 #[test]
+fn traverse_follows_css_at_imports_from_js() {
+    let (_, db) = graph(
+        &[
+            ("/src/other.css", ".other-class { color: red; }"),
+            (
+                "/src/styles.css",
+                "@import \"./other.css\";\n.text-primary { color: blue; }\n",
+            ),
+        ],
+        &[(
+            "/src/main.tsx",
+            "import './styles.css';\nexport const C = () => <div className=\"text-primary other-class\" />;\n",
+        )],
+    );
+    let steps = traverse_import_tree_for_classes(
+        &db,
+        db.module_for_path(Utf8Path::new("/src/main.tsx")).unwrap(),
+    );
+    let classes: FxHashSet<_> = steps
+        .iter()
+        .flat_map(|step| step.css_classes.values())
+        .map(|class| class.text().to_string())
+        .collect();
+    assert!(
+        classes.contains("other-class"),
+        "expected @import target class, got {classes:?}"
+    );
+    assert!(classes.contains("text-primary"));
+    assert!(
+        steps
+            .iter()
+            .any(|step| step.css_path == Utf8Path::new("/src/other.css")),
+        "expected a step for the @imported stylesheet"
+    );
+}
+
+#[test]
 fn test_collect_available_classes_for_js_file_multiple_css() {
     let (len, classes) = available(&[
         ("/src/buttons.css", ".btn{} .btn-primary{}"),

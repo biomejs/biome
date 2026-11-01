@@ -117,23 +117,35 @@ impl UpwardTraversalVisitor for CssClassTraversal<'_> {
                 .import_paths
                 .iter()
                 .filter(|import| import.kind.is_static())
-                .filter_map(|import_path| {
+                .flat_map(|import_path| {
                     let resolved = import_path.resolve_js(db, importer);
-                    css_class_step(db, resolved.path().as_path()?)
+                    resolved
+                        .path()
+                        .as_path()
+                        .map(|path| css_class_steps_following_imports(db, path))
+                        .unwrap_or_default()
                 })
                 .collect(),
             ModuleInfoKind::Html(html_info) => {
                 let mut items = html_info
                     .imported_stylesheets
                     .iter()
-                    .filter_map(|import_path| {
+                    .flat_map(|import_path| {
                         let resolved = import_path.resolve_css(db, importer);
-                        css_class_step(db, resolved.path().as_path()?)
+                        resolved
+                            .path()
+                            .as_path()
+                            .map(|path| css_class_steps_following_imports(db, path))
+                            .unwrap_or_default()
                     })
                     .collect::<Vec<_>>();
-                items.extend(html_info.import_paths.iter().filter_map(|import_path| {
+                items.extend(html_info.import_paths.iter().flat_map(|import_path| {
                     let resolved = import_path.resolve_html(db, importer);
-                    css_class_step(db, resolved.path().as_path()?)
+                    resolved
+                        .path()
+                        .as_path()
+                        .map(|path| css_class_steps_following_imports(db, path))
+                        .unwrap_or_default()
                 }));
                 items.push(CssClassStep {
                     css_path: importer_path.to_path_buf(),
@@ -631,14 +643,42 @@ fn js_import_paths_in_source_order(
         .filter(|import| import.kind.is_dynamic() || import.phase != JsImportPhase::Type)
 }
 
-/// Returns the CSS classes defined by the module at `path`, or `None` when the
-/// path does not identify a CSS module.
-fn css_class_step(db: &dyn ModuleDb, path: &Utf8Path) -> Option<CssClassStep> {
-    let info = db.css_module_info_for_path(path)?;
-    Some(CssClassStep {
-        css_path: path.to_path_buf(),
-        css_classes: info.classes.clone(),
-    })
+/// Returns CSS class steps for `path` and every stylesheet reached through its
+/// `@import` graph. Cycles are skipped. Non-CSS paths yield an empty list.
+pub(crate) fn css_class_steps_following_imports(
+    db: &dyn ModuleDb,
+    path: &Utf8Path,
+) -> Vec<CssClassStep> {
+    use std::collections::VecDeque;
+
+    let mut results = Vec::new();
+    let mut queue = VecDeque::new();
+    let mut visited = FxHashSet::default();
+    queue.push_back(path.to_path_buf());
+
+    while let Some(current) = queue.pop_front() {
+        if !visited.insert(current.clone()) {
+            continue;
+        }
+        let Some(module) = db.module_for_path(&current) else {
+            continue;
+        };
+        let ModuleInfoKind::Css(css_info) = module.kind(db) else {
+            continue;
+        };
+        results.push(CssClassStep {
+            css_path: current,
+            css_classes: css_info.classes.clone(),
+        });
+        for import in css_info.imports.iter() {
+            let resolved = import.resolve_css(db, module);
+            if let Some(imported) = resolved.path().as_path() {
+                queue.push_back(imported.to_path_buf());
+            }
+        }
+    }
+
+    results
 }
 
 /// Newtype for displaying ImportTreeNode with working directory context
