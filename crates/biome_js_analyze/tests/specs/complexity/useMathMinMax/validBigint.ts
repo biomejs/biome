@@ -1,0 +1,23 @@
+/* should not generate diagnostics */
+// type assertions and annotations don't change the value
+interface Plain {}
+foo > -(1n as const) ? -(1n as const) : foo;
+foo > -(1n as any) ? -(1n as any) : foo;
+foo > -(1n as unknown) ? -(1n as unknown) : foo;
+foo > -(1n as Plain) ? -(1n as Plain) : foo;
+foo > -(<bigint>1n) ? -(<bigint>1n) : foo;
+foo > -(1n!) ? -(1n!) : foo;
+foo > (1n satisfies unknown) ? (1n satisfies unknown) : foo;
+
+const asConst = 2n as const;
+const asAny = 2n as any;
+const angleBracket = <bigint>2n;
+const nonNull = 2n!;
+const asNumber = 1n as number;
+const annotatedNumber: number = 1n;
+foo > asConst ? asConst : foo;
+foo > asAny ? asAny : foo;
+foo > angleBracket ? angleBracket : foo;
+foo > nonNull ? nonNull : foo;
+foo > asNumber ? asNumber : foo;
+foo < -annotatedNumber ? -annotatedNumber : foo;
