@@ -145,6 +145,8 @@ enum JsScanStop {
     ArgumentEnd,
     /// The blank line after an MDX ESM block.
     BlankLine,
+    /// The `>` closing the JSX tag the scan starts in.
+    TagEnd,
 }
 
 impl JsScanStop {
@@ -190,6 +192,26 @@ impl<'src> JsExtent<'src> {
             is_void_element: |_| false,
         };
         Self::scan(source, JsScanStop::BlankLine, jsx)
+    }
+
+    /// Returns the offset just past the `>` that closes the JSX tag at the
+    /// start of `source`, which starts with `<`, or `None` when no `>` closes
+    /// it. The tag can be an opening, closing, self-closing, or fragment tag,
+    /// and a `>` inside an attribute string or expression doesn't close it.
+    pub fn tag_length(source: &'src [u8]) -> Option<usize> {
+        let closing = source.get(1) == Some(&b'/');
+        let name_start = if closing { 2 } else { 1 };
+        let mut extent = Self {
+            source,
+            position: name_start,
+            stack: SmallVec::from_elem(JsContext::new_jsx_tag(closing, name_start), 1),
+            jsx: Jsx::Enabled {
+                is_void_element: |_| false,
+            },
+            entered_jsx: false,
+        };
+        let end = extent.run(JsScanStop::TagEnd);
+        extent.stack.is_empty().then_some(end)
     }
 
     fn scan(source: &'src [u8], stop: JsScanStop, jsx: Jsx) -> usize {
@@ -349,6 +371,9 @@ impl<'src> JsExtent<'src> {
                     }
                     MOR => {
                         self.stack.pop();
+                        if stop == JsScanStop::TagEnd && self.stack.is_empty() {
+                            return self.position + 1;
+                        }
                         let self_closing =
                             !in_unquoted_value && self.previous_non_whitespace() == Some(b'/');
                         if !closing && !self_closing && !self.is_void_tag(name_start) {
@@ -356,9 +381,13 @@ impl<'src> JsExtent<'src> {
                         }
                         self.advance(1);
                     }
-                    // A `,` cannot appear in a JSX tag, so this was a type parameter list.
+                    // A `,` cannot appear in a JSX tag, so this was a type parameter
+                    // list. The tag that `tag_length` measures is known to be a tag,
+                    // so a `,` there is invalid content rather than a list.
                     COM => {
-                        self.stack.pop();
+                        if stop != JsScanStop::TagEnd || self.stack.len() > 1 {
+                            self.stack.pop();
+                        }
                         self.advance(1);
                     }
                     LSS => {

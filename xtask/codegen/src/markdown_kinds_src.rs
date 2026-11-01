@@ -47,6 +47,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_LIST_POST_MARKER_SPACE",
         "MDX_ESM_LITERAL",
         "MDX_EXPRESSION_LITERAL",
+        "MDX_JSX_TAG_LITERAL",
     ],
     tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "TAB"],
     nodes: &[
@@ -122,5 +123,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MDX_BLOCK_EXPRESSION",
         "MDX_INLINE_EXPRESSION",
         "MDX_EXPRESSION_CONTENT",
+        "MDX_JSX_BLOCK_TAG",
+        "MDX_JSX_INLINE_TAG",
     ],
 };

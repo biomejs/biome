@@ -1,0 +1,289 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+{/* micromark-extension-mdx-jsx: text tags */}
+Some <Badge>new</Badge> text and a <Icon name="x" /> icon.
+
+1 < 2 and a <br /> break.
+
+A <Card
+title="multi">line</Card> tag.
+
+<Foo>**hi**</Foo>
+
+[a <B>link</B>](https://example.com)
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdxBlockExpression {
+            indent: MdIndentTokenList [],
+            l_curly_token: L_CURLY@0..1 "{" [] [],
+            content: MdxExpressionContent {
+                value_token: MDX_EXPRESSION_LITERAL@1..45 "/* micromark-extension-mdx-jsx: text tags */" [] [],
+            },
+            r_curly_token: R_CURLY@45..46 "}" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@46..47 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@47..52 "Some " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@52..59 "<Badge>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@59..62 "new" [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@62..70 "</Badge>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@70..82 " text and a " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@82..99 "<Icon name=\"x\" />" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@99..105 " icon." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@105..106 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@106..107 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@107..109 "1 " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@109..119 "< 2 and a " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@119..125 "<br />" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@125..132 " break." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@132..133 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@133..134 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@134..136 "A " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@136..156 "<Card\ntitle=\"multi\">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@156..160 "line" [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@160..167 "</Card>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@167..172 " tag." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@172..173 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@173..174 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@174..179 "<Foo>" [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@179..181 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@181..183 "hi" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@183..185 "**" [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@185..191 "</Foo>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@191..192 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@192..193 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineLink {
+                    l_brack_token: L_BRACK@193..194 "[" [] [],
+                    text: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@194..196 "a " [] [],
+                        },
+                        MdxJsxInlineTag {
+                            value_token: MDX_JSX_TAG_LITERAL@196..199 "<B>" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@199..203 "link" [] [],
+                        },
+                        MdxJsxInlineTag {
+                            value_token: MDX_JSX_TAG_LITERAL@203..207 "</B>" [] [],
+                        },
+                    ],
+                    r_brack_token: R_BRACK@207..208 "]" [] [],
+                    l_paren_token: L_PAREN@208..209 "(" [] [],
+                    destination: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@209..228 "https://example.com" [] [],
+                        },
+                    ],
+                    title: missing (optional),
+                    r_paren_token: R_PAREN@228..229 ")" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@229..230 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@230..230 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..230
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..230
+    0: MDX_BLOCK_EXPRESSION@0..46
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: L_CURLY@0..1 "{" [] []
+      2: MDX_EXPRESSION_CONTENT@1..45
+        0: MDX_EXPRESSION_LITERAL@1..45 "/* micromark-extension-mdx-jsx: text tags */" [] []
+      3: R_CURLY@45..46 "}" [] []
+    1: MD_NEWLINE@46..47
+      0: NEWLINE@46..47 "\n" [] []
+    2: MD_PARAGRAPH@47..106
+      0: MD_INLINE_ITEM_LIST@47..106
+        0: MD_TEXTUAL@47..52
+          0: MD_TEXTUAL_LITERAL@47..52 "Some " [] []
+        1: MDX_JSX_INLINE_TAG@52..59
+          0: MDX_JSX_TAG_LITERAL@52..59 "<Badge>" [] []
+        2: MD_TEXTUAL@59..62
+          0: MD_TEXTUAL_LITERAL@59..62 "new" [] []
+        3: MDX_JSX_INLINE_TAG@62..70
+          0: MDX_JSX_TAG_LITERAL@62..70 "</Badge>" [] []
+        4: MD_TEXTUAL@70..82
+          0: MD_TEXTUAL_LITERAL@70..82 " text and a " [] []
+        5: MDX_JSX_INLINE_TAG@82..99
+          0: MDX_JSX_TAG_LITERAL@82..99 "<Icon name=\"x\" />" [] []
+        6: MD_TEXTUAL@99..105
+          0: MD_TEXTUAL_LITERAL@99..105 " icon." [] []
+        7: MD_TEXTUAL@105..106
+          0: MD_TEXTUAL_LITERAL@105..106 "\n" [] []
+    3: MD_NEWLINE@106..107
+      0: NEWLINE@106..107 "\n" [] []
+    4: MD_PARAGRAPH@107..133
+      0: MD_INLINE_ITEM_LIST@107..133
+        0: MD_TEXTUAL@107..109
+          0: MD_TEXTUAL_LITERAL@107..109 "1 " [] []
+        1: MD_TEXTUAL@109..119
+          0: MD_TEXTUAL_LITERAL@109..119 "< 2 and a " [] []
+        2: MDX_JSX_INLINE_TAG@119..125
+          0: MDX_JSX_TAG_LITERAL@119..125 "<br />" [] []
+        3: MD_TEXTUAL@125..132
+          0: MD_TEXTUAL_LITERAL@125..132 " break." [] []
+        4: MD_TEXTUAL@132..133
+          0: MD_TEXTUAL_LITERAL@132..133 "\n" [] []
+    5: MD_NEWLINE@133..134
+      0: NEWLINE@133..134 "\n" [] []
+    6: MD_PARAGRAPH@134..173
+      0: MD_INLINE_ITEM_LIST@134..173
+        0: MD_TEXTUAL@134..136
+          0: MD_TEXTUAL_LITERAL@134..136 "A " [] []
+        1: MDX_JSX_INLINE_TAG@136..156
+          0: MDX_JSX_TAG_LITERAL@136..156 "<Card\ntitle=\"multi\">" [] []
+        2: MD_TEXTUAL@156..160
+          0: MD_TEXTUAL_LITERAL@156..160 "line" [] []
+        3: MDX_JSX_INLINE_TAG@160..167
+          0: MDX_JSX_TAG_LITERAL@160..167 "</Card>" [] []
+        4: MD_TEXTUAL@167..172
+          0: MD_TEXTUAL_LITERAL@167..172 " tag." [] []
+        5: MD_TEXTUAL@172..173
+          0: MD_TEXTUAL_LITERAL@172..173 "\n" [] []
+    7: MD_NEWLINE@173..174
+      0: NEWLINE@173..174 "\n" [] []
+    8: MD_PARAGRAPH@174..192
+      0: MD_INLINE_ITEM_LIST@174..192
+        0: MDX_JSX_INLINE_TAG@174..179
+          0: MDX_JSX_TAG_LITERAL@174..179 "<Foo>" [] []
+        1: MD_INLINE_EMPHASIS@179..185
+          0: DOUBLE_STAR@179..181 "**" [] []
+          1: MD_INLINE_ITEM_LIST@181..183
+            0: MD_TEXTUAL@181..183
+              0: MD_TEXTUAL_LITERAL@181..183 "hi" [] []
+          2: DOUBLE_STAR@183..185 "**" [] []
+        2: MDX_JSX_INLINE_TAG@185..191
+          0: MDX_JSX_TAG_LITERAL@185..191 "</Foo>" [] []
+        3: MD_TEXTUAL@191..192
+          0: MD_TEXTUAL_LITERAL@191..192 "\n" [] []
+    9: MD_NEWLINE@192..193
+      0: NEWLINE@192..193 "\n" [] []
+    10: MD_PARAGRAPH@193..230
+      0: MD_INLINE_ITEM_LIST@193..230
+        0: MD_INLINE_LINK@193..229
+          0: L_BRACK@193..194 "[" [] []
+          1: MD_INLINE_ITEM_LIST@194..207
+            0: MD_TEXTUAL@194..196
+              0: MD_TEXTUAL_LITERAL@194..196 "a " [] []
+            1: MDX_JSX_INLINE_TAG@196..199
+              0: MDX_JSX_TAG_LITERAL@196..199 "<B>" [] []
+            2: MD_TEXTUAL@199..203
+              0: MD_TEXTUAL_LITERAL@199..203 "link" [] []
+            3: MDX_JSX_INLINE_TAG@203..207
+              0: MDX_JSX_TAG_LITERAL@203..207 "</B>" [] []
+          2: R_BRACK@207..208 "]" [] []
+          3: L_PAREN@208..209 "(" [] []
+          4: MD_INLINE_ITEM_LIST@209..228
+            0: MD_TEXTUAL@209..228
+              0: MD_TEXTUAL_LITERAL@209..228 "https://example.com" [] []
+          5: (empty)
+          6: R_PAREN@228..229 ")" [] []
+        1: MD_TEXTUAL@229..230
+          0: MD_TEXTUAL_LITERAL@229..230 "\n" [] []
+  3: EOF@230..230 "" [] []
+
+```

@@ -1,0 +1,154 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+1<2
+
+<!-- comment -->
+
+a <3 b
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..1 "1" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@1..3 "<2" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@4..5 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@5..20 "<!-- comment --" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..21 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@22..23 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@23..25 "a " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..29 "<3 b" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@30..30 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..30
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..30
+    0: MD_PARAGRAPH@0..4
+      0: MD_INLINE_ITEM_LIST@0..4
+        0: MD_TEXTUAL@0..1
+          0: MD_TEXTUAL_LITERAL@0..1 "1" [] []
+        1: MD_TEXTUAL@1..3
+          0: MD_TEXTUAL_LITERAL@1..3 "<2" [] []
+        2: MD_TEXTUAL@3..4
+          0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
+    1: MD_NEWLINE@4..5
+      0: NEWLINE@4..5 "\n" [] []
+    2: MD_PARAGRAPH@5..22
+      0: MD_INLINE_ITEM_LIST@5..22
+        0: MD_TEXTUAL@5..20
+          0: MD_TEXTUAL_LITERAL@5..20 "<!-- comment --" [] []
+        1: MD_TEXTUAL@20..21
+          0: MD_TEXTUAL_LITERAL@20..21 ">" [] []
+        2: MD_TEXTUAL@21..22
+          0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
+    3: MD_NEWLINE@22..23
+      0: NEWLINE@22..23 "\n" [] []
+    4: MD_PARAGRAPH@23..30
+      0: MD_INLINE_ITEM_LIST@23..30
+        0: MD_TEXTUAL@23..25
+          0: MD_TEXTUAL_LITERAL@23..25 "a " [] []
+        1: MD_TEXTUAL@25..29
+          0: MD_TEXTUAL_LITERAL@25..29 "<3 b" [] []
+        2: MD_TEXTUAL@29..30
+          0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
+  3: EOF@30..30 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_invalid_start.mdx:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `2` after `<`, expected a tag name, `/`, or `>`.
+  
+  > 1 │ 1<2
+      │  ^
+    2 │ 
+    3 │ <!-- comment -->
+  
+  i To write a literal `<` in MDX, escape it as `\<` or put a space after it.
+  
+jsx_invalid_start.mdx:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `!` after `<`, expected a tag name, `/`, or `>`.
+  
+    1 │ 1<2
+    2 │ 
+  > 3 │ <!-- comment -->
+      │ ^
+    4 │ 
+    5 │ a <3 b
+  
+  i MDX doesn't support HTML comments. Write a comment as `{/* text */}` instead.
+  
+jsx_invalid_start.mdx:5:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `3` after `<`, expected a tag name, `/`, or `>`.
+  
+    3 │ <!-- comment -->
+    4 │ 
+  > 5 │ a <3 b
+      │   ^
+    6 │ 
+  
+  i To write a literal `<` in MDX, escape it as `\<` or put a space after it.
+  
+```

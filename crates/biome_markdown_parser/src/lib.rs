@@ -44,6 +44,27 @@ fn parse_common(source: &str, options: &MarkdownParserOptions) -> parser::Markdo
     output
 }
 
+/// Adds the diagnostics that need the whole tree, such as JSX tags that don't
+/// pair up, to the parse diagnostics of an MDX document.
+fn add_mdx_tree_diagnostics(
+    root: &MarkdownSyntaxNode,
+    options: &MarkdownParserOptions,
+    diagnostics: &mut Vec<ParseDiagnostic>,
+) {
+    #[cfg(feature = "lang_mdx")]
+    if options.is_mdx() {
+        let tree_diagnostics = syntax::jsx_tag_pairing_diagnostics(root);
+        if !tree_diagnostics.is_empty() {
+            *diagnostics = biome_parser::diagnostic::merge_diagnostics(
+                std::mem::take(diagnostics),
+                tree_diagnostics,
+            );
+        }
+    }
+    #[cfg(not(feature = "lang_mdx"))]
+    let _ = (root, options, diagnostics);
+}
+
 /// Parse markdown source code with the given options.
 pub fn parse_markdown(source: &str, options: MarkdownParserOptions) -> MarkdownParse {
     let mut cache = NodeCache::default();
@@ -60,7 +81,8 @@ pub fn parse_markdown_with_cache(
 
     let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &output.trivia, cache);
     biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);
-    let (green, diagnostics) = tree_sink.finish();
+    let (green, mut diagnostics) = tree_sink.finish();
+    add_mdx_tree_diagnostics(&green, &options, &mut diagnostics);
 
     MarkdownParse::new(
         green,
@@ -170,7 +192,8 @@ pub fn parse_markdown_with_offset_and_cache(
     let mut tree_sink =
         MarkdownOffsetLosslessTreeSink::with_cache(source, &output.trivia, cache, base_offset);
     biome_parser::event::process(&mut tree_sink, output.events, output.diagnostics);
-    let (root, diagnostics) = tree_sink.finish();
+    let (root, mut diagnostics) = tree_sink.finish();
+    add_mdx_tree_diagnostics(root.inner(), &options, &mut diagnostics);
 
     MarkdownOffsetParse::new(
         root,

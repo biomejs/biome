@@ -392,3 +392,51 @@ fn a_blank_line_inside_jsx_does_not_end_an_esm_block() {
 fn a_blank_line_after_crlf_ends_an_esm_block() {
     assert_eq!(esm("import a\r\n\r\nb"), 8);
 }
+
+/// The length of the JSX tag at the start of `source`.
+fn tag(source: &str) -> Option<usize> {
+    JsExtent::tag_length(source.as_bytes())
+}
+
+#[test]
+fn a_tag_ends_at_its_closing_angle_bracket() {
+    assert_eq!(tag("<Note>text</Note>"), Some(6));
+    assert_eq!(tag("</Note> text"), Some(7));
+    assert_eq!(tag("<Note /> text"), Some(8));
+}
+
+#[test]
+fn a_fragment_tag_ends_at_its_angle_bracket() {
+    assert_eq!(tag("<>a"), Some(2));
+    assert_eq!(tag("</>a"), Some(3));
+}
+
+#[test]
+fn an_angle_bracket_in_an_attribute_does_not_end_a_tag() {
+    let source = "<Chart title=\"a > b\" data={x > 1 ? \">\" : '>'} /> after";
+    assert_eq!(tag(source), Some(source.len() - 6));
+}
+
+#[test]
+fn an_element_in_an_attribute_expression_does_not_end_a_tag() {
+    let source = "<Card icon={<Icon name=\"x\" />}>children";
+    assert_eq!(tag(source), Some(source.len() - 8));
+}
+
+#[test]
+fn a_tag_may_span_lines() {
+    let source = "<Card\n  title=\"a\"\n>";
+    assert_eq!(tag(source), Some(source.len()));
+}
+
+#[test]
+fn an_unclosed_tag_has_no_length() {
+    assert_eq!(tag("<Note title=\"a\""), None);
+    assert_eq!(tag("<Note data={x"), None);
+}
+
+#[test]
+fn a_comma_does_not_end_the_measured_tag() {
+    assert_eq!(tag("<a, b> c"), Some(6));
+    assert_eq!(tag("<Hello, world"), None);
+}
