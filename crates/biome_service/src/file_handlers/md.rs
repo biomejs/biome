@@ -641,7 +641,9 @@ pub(crate) fn lint_with_inspector(
         }),
     };
 
-    let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+    #[cfg(feature = "lang_mdx")]
+    let mut diagnostics = diagnostics;
     // The syntax errors of MDX JavaScript belong to the document. Snippets
     // that aren't analyzed don't report them, so they're added here.
     #[cfg(feature = "lang_mdx")]
