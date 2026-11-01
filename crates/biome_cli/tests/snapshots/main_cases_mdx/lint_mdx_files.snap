@@ -1,0 +1,108 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.mdx
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "analyzeEmbeds": true
+  },
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "useTopLevelHeading": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.mdx`
+
+```mdx
+import {Chart} from './chart.js'
+import {Unused} from './unused.js'
+
+# Hello, {props.name}
+
+<Callout>
+
+<Chart data={values} />
+
+</Callout>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.mdx:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This import is unused.
+  
+    1 │ import {Chart} from './chart.js'
+  > 2 │ import {Unused} from './unused.js'
+      │        ^^^^^^^^
+    3 │ 
+    4 │ # Hello, {props.name}
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import {Chart} from './chart.js'
+    2   │ - import·{Unused}·from·'./unused.js'
+  
+
+```
+
+```block
+file.mdx:8:14 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The values variable is undeclared.
+  
+     6 │ <Callout>
+     7 │ 
+   > 8 │ <Chart data={values} />
+       │              ^^^^^^
+     9 │ 
+    10 │ </Callout>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

@@ -8,6 +8,7 @@ mod header_ext;
 pub mod html_comment_ext;
 pub mod inline_ext;
 pub mod list_ext;
+pub mod mdx_ext;
 mod syntax_node;
 pub mod text_ext;
 pub mod thematic_break_ext;
