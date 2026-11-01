@@ -9,7 +9,8 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
     AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
-    JsObjectExpression, JsStatementList, JsxAttributeList, JsxExpressionChild, JsxTagExpression,
+    JsObjectExpression, JsStatementList, JsVariableDeclarator, JsxAttributeList,
+    JsxExpressionChild, JsxTagExpression,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
@@ -298,6 +299,9 @@ fn handle_statement(
                     .iter()
                     .filter_map(|declarator| {
                         let decl = declarator.ok()?;
+                        if is_only_used_as_jsx_child(&decl, model) {
+                            return None;
+                        }
                         let init = decl.initializer()?.expression().ok()?;
                         handle_potential_react_component(init, model, is_inside_jsx, options)
                     })
@@ -346,6 +350,27 @@ fn handle_statement(
         }
         _ => None,
     }
+}
+
+/// Returns `true` if the variable is read, and every read is a JSX child like `{inner}`.
+/// Such an element is rendered inside another element, so it doesn't need a key.
+fn is_only_used_as_jsx_child(decl: &JsVariableDeclarator, model: &SemanticModel) -> bool {
+    let Some(id) = decl
+        .id()
+        .ok()
+        .and_then(|id| id.as_any_js_binding()?.as_js_identifier_binding().cloned())
+    else {
+        return false;
+    };
+    let mut reads = model.as_binding(&id).all_reads().peekable();
+    reads.peek().is_some()
+        && reads.all(|reference| {
+            reference
+                .syntax()
+                .parent()
+                .and_then(|expression| expression.parent())
+                .is_some_and(|parent| JsxExpressionChild::can_cast(parent.kind()))
+        })
 }
 
 fn handle_potential_react_component(
