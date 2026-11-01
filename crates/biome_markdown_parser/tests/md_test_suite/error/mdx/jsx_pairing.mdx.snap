@@ -139,18 +139,6 @@ jsx_pairing.mdx:3:1 parse ━━━━━━━━━━━━━━━━━━
     2 │ 
     3 │ </Card>
   
-jsx_pairing.mdx:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected closing tag `</Note>`, there is no open tag to close.
-  
-    5 │ Some <B>text
-    6 │ 
-  > 7 │ </Note>
-      │ ^^^^^^^
-    8 │ 
-  
-  i Remove the closing tag, or add its opening tag before it.
-  
 jsx_pairing.mdx:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a closing tag for `<B>` before the end of its paragraph.

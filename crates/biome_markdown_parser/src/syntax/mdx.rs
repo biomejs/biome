@@ -51,7 +51,11 @@ pub(crate) fn at_mdx_block(p: &mut MarkdownParser) -> bool {
 /// Returns whether the current line holds only JSX tags and expressions,
 /// separated by spaces and tabs. Such a line can interrupt a paragraph.
 pub(crate) fn at_mdx_flow_line(p: &MarkdownParser) -> bool {
-    p.is_at_line_start() && is_flow_line(p.source_after_current().trim_start_matches([' ', '\t']))
+    p.is_at_line_start()
+        && is_flow_line(
+            p.source_after_current().trim_start_matches([' ', '\t']),
+            p.state().block_quote_depth > 0,
+        )
 }
 
 /// Parses an ESM block, or every construct of a flow line.
@@ -69,7 +73,10 @@ pub(crate) fn parse_mdx_block(p: &mut MarkdownParser) -> ParsedSyntax {
     let mut last = None;
     let mut first = true;
     loop {
-        let item = flow_item(p.source_after_current().trim_start_matches([' ', '\t']));
+        let item = flow_item(
+            p.source_after_current().trim_start_matches([' ', '\t']),
+            p.state().block_quote_depth > 0,
+        );
         let block = match item {
             Some(FlowItem::Tag { length }) => parse_block_tag(p, length, first),
             Some(FlowItem::Expression { close }) => parse_block_expression(p, close, first),
@@ -138,7 +145,7 @@ enum FlowItem {
 ///
 /// An expression on a flow line may span blank lines, so its `}` is searched
 /// up to the end of the source. A tag must end before the next blank line.
-fn flow_item(text: &str) -> Option<FlowItem> {
+fn flow_item(text: &str, in_quote: bool) -> Option<FlowItem> {
     if let Some(body) = text.strip_prefix('{') {
         let length = JsExtent::expression_length(body.as_bytes(), JSX);
         let close = (length < body.len()).then_some(1 + length);
@@ -147,7 +154,7 @@ fn flow_item(text: &str) -> Option<FlowItem> {
     if !text.starts_with('<') || tag_start(text) != TagStart::Tag {
         return None;
     }
-    let limit = paragraph_end(text);
+    let limit = tag_scan_end(text, in_quote);
     let length = JsExtent::tag_length(&text.as_bytes()[..limit])?;
     Some(FlowItem::Tag { length })
 }
@@ -160,11 +167,11 @@ fn flow_item(text: &str) -> Option<FlowItem> {
 /// An expression can only be followed by a tag on the same line: `{a} {b}`
 /// is a paragraph with two inline expressions, while `<A>{b}</A>` is a flow
 /// line.
-fn is_flow_line(text: &str) -> bool {
+fn is_flow_line(text: &str, in_quote: bool) -> bool {
     let mut rest = text;
     let mut after_expression = false;
     loop {
-        let item = flow_item(rest);
+        let item = flow_item(rest, in_quote);
         if after_expression && !matches!(item, Some(FlowItem::Tag { .. })) {
             return false;
         }
@@ -239,7 +246,7 @@ pub(crate) fn parse_mdx_inline_expression(p: &mut MarkdownParser) -> ParsedSynta
     }
     let m = p.start();
     let rest = p.source_after_current();
-    let limit = paragraph_end(rest);
+    let limit = paragraph_end(rest, p.state().block_quote_depth > 0);
     let body = &rest[1..limit];
     let length = JsExtent::expression_length(body.as_bytes(), JSX);
     let close =
@@ -270,7 +277,7 @@ pub(crate) fn parse_mdx_inline_tag(p: &mut MarkdownParser) -> ParsedSyntax {
             Absent
         }
         TagStart::Tag => {
-            let limit = paragraph_end(rest);
+            let limit = tag_scan_end(rest, p.state().block_quote_depth > 0);
             let Some(length) = JsExtent::tag_length(&rest.as_bytes()[..limit]) else {
                 p.error(unclosed_mdx_tag(p, opening));
                 return Absent;
@@ -418,7 +425,9 @@ fn content_end(text: &str) -> usize {
 /// Returns the offset in `text` of the line ending that precedes the first
 /// blank line, or `text.len()` when no blank line follows. The first line is
 /// never blank, because it holds the construct that starts the scan.
-fn paragraph_end(text: &str) -> usize {
+///
+/// Inside a block quote, a line that holds only `>` markers is blank too.
+fn paragraph_end(text: &str, in_quote: bool) -> usize {
     let mut offset = 0;
     while let Some(line_end) = text[offset..].find(['\n', '\r']) {
         let line_end = offset + line_end;
@@ -429,12 +438,26 @@ fn paragraph_end(text: &str) -> usize {
         };
         let after = &text[next_line..];
         let line = after.split(['\n', '\r']).next().unwrap_or_default();
-        if line.bytes().all(|byte| matches!(byte, b' ' | b'\t')) {
+        let is_blank = line
+            .bytes()
+            .all(|byte| matches!(byte, b' ' | b'\t') || (in_quote && byte == b'>'));
+        if is_blank {
             return line_end;
         }
         offset = next_line;
     }
     text.len()
+}
+
+/// Returns where the scan for the end of the JSX tag at the start of `text`
+/// stops. Inside a block quote, the scan stays on the tag's line: the next
+/// line starts with a `>` marker, which would read as the end of the tag.
+fn tag_scan_end(text: &str, in_quote: bool) -> usize {
+    if in_quote {
+        text.find(['\n', '\r']).unwrap_or(text.len())
+    } else {
+        paragraph_end(text, false)
+    }
 }
 
 // #endregion
@@ -599,7 +622,7 @@ pub(crate) fn jsx_tag_pairing_diagnostics(root: &MarkdownSyntaxNode) -> Vec<Pars
             MD_INLINE_ITEM_LIST => MDX_JSX_INLINE_TAG,
             _ => continue,
         };
-        let mut open: Vec<(String, TextRange)> = Vec::new();
+        let mut open = Vec::new();
         for tag in list.children().filter(|child| child.kind() == tag_kind) {
             let text = tag.text_trimmed().to_string();
             let text = text.trim_start();
@@ -612,18 +635,29 @@ pub(crate) fn jsx_tag_pairing_diagnostics(root: &MarkdownSyntaxNode) -> Vec<Pars
                 open.push((tag.display(), range));
                 continue;
             }
-            match open.pop() {
-                Some((opening, _)) if opening == format!("<{}>", tag.name) => {}
-                Some((opening, opening_range)) => diagnostics.push(
-                    ParseDiagnostic::new(
-                        format!(
-                            "Unexpected closing tag `{}`, expected the closing tag of `{opening}`.",
-                            tag.display()
-                        ),
-                        range,
-                    )
-                    .with_detail(opening_range, "the open tag is here"),
-                ),
+            let expected = format!("<{}>", tag.name);
+            match open.last() {
+                Some((opening, _)) if *opening == expected => {
+                    open.pop();
+                }
+                Some((opening, opening_range)) => {
+                    diagnostics.push(
+                        ParseDiagnostic::new(
+                            format!(
+                                "Unexpected closing tag `{}`, expected the closing tag of `{opening}`.",
+                                tag.display()
+                            ),
+                            range,
+                        )
+                        .with_detail(*opening_range, "the open tag is here"),
+                    );
+                    // A closing tag that matches an outer open tag closes the
+                    // tags opened since then; any other one is ignored.
+                    if let Some(index) = open.iter().rposition(|(opening, _)| *opening == expected)
+                    {
+                        open.truncate(index);
+                    }
+                }
                 None => diagnostics.push(
                     ParseDiagnostic::new(
                         format!(
@@ -651,6 +685,7 @@ pub(crate) fn jsx_tag_pairing_diagnostics(root: &MarkdownSyntaxNode) -> Vec<Pars
             );
         }
     }
+    diagnostics.sort_by_key(|diagnostic| diagnostic.span().map(|span| span.start()));
     diagnostics
 }
 
