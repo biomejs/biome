@@ -39,7 +39,10 @@ declare_lint_rule! {
         version: "1.7.0",
         name: "noConstantMathMinMaxClamp",
         language: "js",
-        sources: &[RuleSource::Clippy("min_max").same()],
+        sources: &[
+            RuleSource::Clippy("min_max").same(),
+            RuleSource::Oxc("bad-min-max-func").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
