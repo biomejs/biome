@@ -7710,6 +7710,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedEventsApiConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedEventsApiOptions" }
+			]
+		},
+		"NoVueDeprecatedEventsApiOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedFunctionalTemplateConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8966,6 +8976,13 @@
 						{
 							"$ref": "#/$defs/NoVueDeprecatedDestroyedLifecycleConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedEventsApi": {
+					"description": "Disallow the Vue $on, $off, and $once instance methods.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-events-api",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedEventsApiConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14775,6 +14792,15 @@
 				"options": {
 					"$ref": "#/$defs/NoVueDeprecatedDestroyedLifecycleOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedEventsApiOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedEventsApiOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

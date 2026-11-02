@@ -3408,6 +3408,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedDestroyedLifecycle?: NoVueDeprecatedDestroyedLifecycleConfiguration;
 	/**
+	 * Disallow the Vue $on, $off, and $once instance methods.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-events-api
+	 */
+	noVueDeprecatedEventsApi?: NoVueDeprecatedEventsApiConfiguration;
+	/**
 	 * Disallow the deprecated functional attribute on the \<template> of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-functional-template
 	 */
@@ -6484,6 +6489,9 @@ export type NoVueDeprecatedDeleteSetConfiguration =
 export type NoVueDeprecatedDestroyedLifecycleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDestroyedLifecycleOptions;
+export type NoVueDeprecatedEventsApiConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedEventsApiOptions;
 export type NoVueDeprecatedFunctionalTemplateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedFunctionalTemplateOptions;
@@ -9417,6 +9425,10 @@ export interface RuleWithNoVueDeprecatedDestroyedLifecycleOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDestroyedLifecycleOptions;
 }
+export interface RuleWithNoVueDeprecatedEventsApiOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedEventsApiOptions;
+}
 export interface RuleWithNoVueDeprecatedFunctionalTemplateOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedFunctionalTemplateOptions;
@@ -12245,6 +12257,7 @@ export type NoVueComputedPropertiesInDataOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedDestroyedLifecycleOptions = {};
+export type NoVueDeprecatedEventsApiOptions = {};
 export type NoVueDeprecatedFunctionalTemplateOptions = {};
 export type NoVueDeprecatedHtmlElementIsOptions = {};
 export type NoVueDeprecatedInlineTemplateOptions = {};
@@ -14172,6 +14185,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
+	| "lint/nursery/noVueDeprecatedEventsApi"
 	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
