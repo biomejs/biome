@@ -36,6 +36,9 @@ export interface JsAstNode {
 	 * array does not change the syntax tree, and handles have no stable JavaScript identity.
 	 */
 	childrenWithTokens(): readonly JsAstElement[];
+	/** Describes the node for debugging as its kind, range, and source text,
+	 * such as `JS_CALL_EXPRESSION@0..8 "foo(bar)"`. */
+	toString(): string;
 }
 export interface JsAstToken {
 	readonly kind:
@@ -49,6 +52,9 @@ export interface JsAstToken {
 		| "UNICODE_BOM";
 	readonly text: string;
 	readonly parent: AnyJsAstNode | undefined;
+	/** Describes the token for debugging as its kind, range, and text,
+	 * such as `L_PAREN@3..4 "("`. */
+	toString(): string;
 }
 export type JsAstElement = AnyJsAstNode | JsAstToken;
 export type JsTokenKind =

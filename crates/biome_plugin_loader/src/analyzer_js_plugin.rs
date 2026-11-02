@@ -1417,10 +1417,29 @@ mod tests {
                 run(node) {
                     console.log("text:", node.text, 1, true, null, undefined, [1, "a"], { a: 1 });
                     console.info(node);
-                    console.warn(node.callee);
-                    console.error(node.arguments.token("lParenToken"));
+                    console.warn("callee:", node.callee);
+                    console.error(node.arguments.token("lParenToken"), "opens the arguments");
                     console.debug(node.children(), [[[["deep"]]]]);
+                    console.log("%s has %d argument", node, node.arguments.args.length);
+                    console.log(`${node.callee} is the callee`);
+                    console.log(`${node.arguments.token("lParenToken")} is the token`);
+                    console.group("group");
+                    console.log("inside the group");
+                    console.groupEnd();
+                    console.assert(false, node);
+                    console.dir(node);
+                    console.table(node);
+                    console.log(new Array(2 ** 32 - 1));
+                    console.log([node, ...Array(1000).fill(0)]);
+                    console.trace("tracing");
                     registerDiagnostic(node, "information", "Found a call.");
+                    console.group("left open");
+                },
+            });
+            export const reenterConsole = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.log({ toString() { console.group("nested"); return ""; } }, 1);
                 },
             });
             export const logThenThrow = defineRule({
@@ -1430,7 +1449,7 @@ mod tests {
                     throw new Error("boom");
                 },
             });"#;
-        let content = "foo(bar);";
+        let content = r#"foo("%s");"#;
         let parse = biome_js_parser::parse(
             content,
             JsFileSource::js_module(),
@@ -1449,7 +1468,7 @@ mod tests {
                     &services(JsFileSource::js_module()),
                 );
                 assert!(
-                    result.entries[..5]
+                    result.entries[..17]
                         .iter()
                         .all(|entry| entry.diagnostic.tags().is_verbose())
                 );
@@ -1459,6 +1478,84 @@ mod tests {
 
         snap_diagnostics(
             "reports_console_messages_as_verbose_diagnostics",
+            "/plugin.js",
+            source,
+            &[("/file.js", content)],
+            content_rendered,
+        );
+    }
+
+    /// Plugins can replace the global `console`, which is created on first access.
+    #[test]
+    fn plugins_can_replace_console() {
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            export const replaceConsole = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {
+                    globalThis.console = { log: (message) => registerDiagnostic(root, "information", message) };
+                    console.log("replaced");
+                },
+            });"#;
+        let parse = biome_js_parser::parse(
+            "a();",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
+
+        let [entry] = result.entries.as_slice() else {
+            panic!("expected one diagnostic, got {:?}", result.entries);
+        };
+        assert_eq!(PrintDescription(&entry.diagnostic).to_string(), "replaced");
+    }
+
+    /// Counters, timers, and groups started by one invocation don't affect the next one.
+    #[test]
+    fn resets_console_state_between_invocations() {
+        let source = r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            console.count("calls");
+            export const countCalls = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.count("calls");
+                    console.time("timer");
+                    console.log(node.text);
+                    console.group("left open");
+                },
+            });"#;
+        let content = "a(); b();";
+        let parse = biome_js_parser::parse(
+            content,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
+        let content_rendered: String = parse
+            .syntax()
+            .descendants()
+            .filter(|node| plugin.query().contains(&node.kind().to_raw()))
+            .map(|node| {
+                render_diagnostics(
+                    "/file.js",
+                    content,
+                    plugin.evaluate(
+                        node.into(),
+                        "/file.js".into(),
+                        &services(JsFileSource::js_module()),
+                    ),
+                )
+            })
+            .collect();
+
+        snap_diagnostics(
+            "resets_console_state_between_invocations",
             "/plugin.js",
             source,
             &[("/file.js", content)],

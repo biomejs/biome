@@ -53,7 +53,6 @@ impl JsExecContext {
     pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> JsResult<Self> {
         let module_loader = Rc::new(JsModuleLoader::new(fs.clone()));
         let api = JsPluginApi::new();
-        let console = JsConsole::new();
         let mut ctx = Context::builder()
             .clock(Rc::new(Clock::default()))
             .module_loader(Rc::clone(&module_loader))
@@ -65,7 +64,7 @@ impl JsExecContext {
         JsTokenKindSet::<JsLanguage>::register(&mut ctx)?;
         JsMutation::register(&mut ctx)?;
         register_semantic(&mut ctx)?;
-        console.register(&mut ctx)?;
+        let console = JsConsole::register(&mut ctx)?;
 
         module_loader.register_module(
             js_string!("@biomejs/runtime/plugin"),
@@ -85,10 +84,11 @@ impl JsExecContext {
         self.api.pull_diagnostics()
     }
 
-    /// Takes the messages the plugin printed with `console` since the last call.
+    /// Takes the messages the plugin printed with `console` since the last call,
+    /// and resets the console's groups, counters, and timers.
     #[inline]
     pub fn pull_console_messages(&mut self) -> Vec<String> {
-        self.console.pull_messages()
+        self.console.pull_messages(&mut self.ctx)
     }
 
     pub fn import_module(&mut self, path: impl AsRef<Utf8Path>) -> JsResult<Module> {

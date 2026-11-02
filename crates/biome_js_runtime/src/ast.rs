@@ -272,6 +272,19 @@ impl JsAstNode {
         Ok(JsString::from(node.text_trimmed().to_string()).into())
     }
 
+    /// Describes the node for debugging as its kind, range, and source text,
+    /// e.g. `JS_CALL_EXPRESSION@0..8 "foo(bar)"`.
+    pub(crate) fn describe(&self) -> String {
+        format!("{:?} {:?}", self.node, self.node.text_trimmed().to_string())
+    }
+
+    fn to_string(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
+        let node = Self::from_value(this).ok_or_else(|| {
+            JsNativeError::typ().with_message("node.toString() was called on a value that is not a node. Call it on the node passed to run() or a node obtained by traversing it.")
+        })?;
+        Ok(JsString::from(node.describe()).into())
+    }
+
     fn get_parent(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
         let Some(Self { node }) = Self::from_value(this) else {
             return Err(JsNativeError::typ()
@@ -613,6 +626,11 @@ impl Class for JsAstNode {
                 js_string!("childrenWithTokens"),
                 0,
                 NativeFunction::from_fn_ptr(Self::children_with_tokens),
+            )
+            .method(
+                js_string!("toString"),
+                0,
+                NativeFunction::from_fn_ptr(Self::to_string),
             );
 
         if !class.context().has_data::<JsAstPrototypeCache>() {

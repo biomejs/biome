@@ -16,10 +16,37 @@ export const logCalls = defineRule({
 			a: 1,
 		});
 		console.info(node);
-		console.warn(node.callee);
-		console.error(node.arguments.token("lParenToken"));
+		console.warn("callee:", node.callee);
+		console.error(node.arguments.token("lParenToken"), "opens the arguments");
 		console.debug(node.children(), [[[["deep"]]]]);
+		console.log("%s has %d argument", node, node.arguments.args.length);
+		console.log(`${node.callee} is the callee`);
+		console.log(`${node.arguments.token("lParenToken")} is the token`);
+		console.group("group");
+		console.log("inside the group");
+		console.groupEnd();
+		console.assert(false, node);
+		console.dir(node);
+		console.table(node);
+		console.log(new Array(2 ** 32 - 1));
+		console.log([node, ...Array(1000).fill(0)]);
+		console.trace("tracing");
 		registerDiagnostic(node, "information", "Found a call.");
+		console.group("left open");
+	},
+});
+export const reenterConsole = defineRule({
+	query: ast("JS_CALL_EXPRESSION"),
+	run(node) {
+		console.log(
+			{
+				toString() {
+					console.group("nested");
+					return "";
+				},
+			},
+			1,
+		);
 	},
 });
 export const logThenThrow = defineRule({
@@ -36,7 +63,7 @@ export const logThenThrow = defineRule({
 ## `/file.js`
 
 ```js
-foo(bar);
+foo("%s");
 ```
 
 # Diagnostics
@@ -44,64 +71,170 @@ foo(bar);
 ```block
 /file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i logCalls logged: text: foo(bar) 1 true null undefined [1, "a"] {
+  i logCalls logged: text: foo("%s") 1 true null undefined [ 1, "a" ] {
         a: 1
     }
   
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
   
 
 /file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i logCalls logged: JS_CALL_EXPRESSION@0..8 "foo(bar)"
+  i logCalls logged: JS_CALL_EXPRESSION@0..9 "foo(\"%s\")"
   
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
-  
-
-/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i logCalls logged: JS_IDENTIFIER_EXPRESSION@0..3 "foo"
-  
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
   
 
 /file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i logCalls logged: L_PAREN@3..4 "("
+  i logCalls logged: callee: JS_IDENTIFIER_EXPRESSION@0..3 "foo"
   
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
   
 
 /file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i logCalls logged: [JS_IDENTIFIER_EXPRESSION@0..3 "foo", JS_CALL_ARGUMENTS@3..8 "(bar)"] [[[[...]]]]
+  i logCalls logged: L_PAREN@3..4 "(" opens the arguments
   
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: [ JS_IDENTIFIER_EXPRESSION@0..3 "foo", JS_CALL_ARGUMENTS@3..9 "(\"%s\")" ] [ Array(1) ]
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: JS_CALL_EXPRESSION@0..9 "foo(\"%s\")" has 1 argument
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: JS_IDENTIFIER_EXPRESSION@0..3 "foo" is the callee
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: L_PAREN@3..4 "(" is the token
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: group: group
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged:   inside the group
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: Assertion failed: "JS_CALL_EXPRESSION@0..9 \"foo(\\\"%s\\\")\""
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: "JS_CALL_EXPRESSION@0..9 \"foo(\\\"%s\\\")\""
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: JS_CALL_EXPRESSION@0..9 "foo(\"%s\")"
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: [ <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, <empty>, ... 4294966295 more items ]
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: [ JS_CALL_EXPRESSION@0..9 "foo(\"%s\")", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ... 1 more items ]
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: tracing
+        at run
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: group: left open
+  
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
   
 
 /file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Found a call.
   
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
   
 
 /file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i logThenThrow logged: before throwing
   
-  > 1 │ foo(bar);
-      │ ^^^^^^^^
+  > 1 │ foo("%s");
+      │ ^^^^^^^^^
   
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule logThenThrow errored: Error: boom (/plugin.js:18:27)
-        at run (/plugin.js:18:27)
+  × Rule logThenThrow errored: Error: boom (/plugin.js:37:27)
+        at run (/plugin.js:37:27)
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Rule reenterConsole errored: TypeError: console was called while another console call was converting its arguments, for example from a toString() method. Call console outside of the code that converts logged values. (/plugin.js:30:32)
+        at toString (/plugin.js:30:61)
+        at log (native)
+        at log (native)
+        at run (/plugin.js:30:32)
 ```

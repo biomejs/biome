@@ -1243,6 +1243,7 @@ dependencies = [
  "biome_rowan",
  "biome_text_size",
  "boa_engine",
+ "boa_runtime",
  "camino",
  "rustc-hash 2.1.3",
 ]
@@ -2560,6 +2561,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "boa_runtime"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c4f64cd1483c17ad23f3c9792cc1f949618178b79b0b25d3fee8f07d3019edd5"
+dependencies = [
+ "boa_engine",
+ "boa_gc",
+ "boa_wintertc",
+ "bytemuck",
+ "futures",
+ "futures-lite",
+ "rustc-hash 2.1.3",
+]
+
+[[package]]
 name = "boa_string"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2571,6 +2587,19 @@ dependencies = [
  "rustc-hash 2.1.3",
  "ryu-js",
  "static_assertions",
+]
+
+[[package]]
+name = "boa_wintertc"
+version = "0.22.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c66d29a1e767039bfa1981bf149966d4a4d7453190abe13ffccd8aaf95031299"
+dependencies = [
+ "base64 0.23.1",
+ "boa_engine",
+ "boa_gc",
+ "comfy-table",
+ "rustc-hash 2.1.3",
 ]
 
 [[package]]
@@ -2915,6 +2944,16 @@ checksum = "4356eba6976435498d05a311ee9fc486da3bc81c200d3f0d7dd9703b41913f92"
 dependencies = [
  "bytes",
  "memchr",
+]
+
+[[package]]
+name = "comfy-table"
+version = "8.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b96a46ad395a5e00676eddaca4a45ed78b29c08be5a878d35e4b071c625637dd"
+dependencies = [
+ "unicode-segmentation",
+ "unicode-width",
 ]
 
 [[package]]

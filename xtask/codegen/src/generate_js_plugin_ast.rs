@@ -284,6 +284,14 @@ fn generate_typescript(ast: &AstSrc) -> String {
                     "/**\n * Returns a fresh array of immediate child nodes and tokens in source order.\n * Includes list containers without flattening them or descending into child nodes.\n * Call this method on a list node to obtain its elements and separator tokens.\n * Whitespace and comments remain token trivia, not separate array entries. Missing\n * slots are omitted; nodes without child nodes or tokens return an empty array.\n * The returned handles can be passed to element mutation methods. Changing the\n * array does not change the syntax tree, and handles have no stable JavaScript identity.\n */",
                 ),
             ),
+            method(
+                "toString",
+                [],
+                string_type(),
+                Some(
+                    "/** Describes the node for debugging as its kind, range, and source text,\n * such as `JS_CALL_EXPRESSION@0..8 \"foo(bar)\"`. */",
+                ),
+            ),
         ],
     )];
 
@@ -313,6 +321,14 @@ fn generate_typescript(ast: &AstSrc) -> String {
             property(
                 "parent",
                 union_type([reference_type("AnyJsAstNode").into(), undefined_type()]),
+            ),
+            method(
+                "toString",
+                [],
+                string_type(),
+                Some(
+                    "/** Describes the token for debugging as its kind, range, and text,\n * such as `L_PAREN@3..4 \"(\"`. */",
+                ),
             ),
         ],
     ));
@@ -702,6 +718,7 @@ const BASE_MEMBERS: &[&str] = &[
     "children",
     "token",
     "childrenWithTokens",
+    "toString",
 ];
 
 fn updater_name_for_field(field: &Field) -> String {

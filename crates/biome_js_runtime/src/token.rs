@@ -58,6 +58,24 @@ impl JsAstToken {
         Ok(JsString::from(token.token.text_trimmed()).into())
     }
 
+    /// Describes the token for debugging as its kind, range, and text,
+    /// e.g. `L_PAREN@3..4 "("`.
+    pub(crate) fn describe(&self) -> String {
+        format!(
+            "{:?}@{:?} {:?}",
+            self.token.kind(),
+            self.token.text_range(),
+            self.token.text_trimmed()
+        )
+    }
+
+    fn to_string(this: &JsValue, _args: &[JsValue], _context: &mut Context) -> JsResult<JsValue> {
+        let token = Self::from_value(this).ok_or_else(|| {
+            JsNativeError::typ().with_message("token.toString() was called on a value that is not a token. Call it on a token returned by node.token(field), node.childrenWithTokens(), or factory.token().")
+        })?;
+        Ok(JsString::from(token.describe()).into())
+    }
+
     fn get_parent(this: &JsValue, _args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
         let token = Self::from_value(this).ok_or_else(|| {
             JsNativeError::typ().with_message("Cannot read token.parent because this value is not a token. Use a token returned by node.token(field), node.childrenWithTokens(), or factory.token().")
@@ -84,7 +102,12 @@ impl Class for JsAstToken {
         class
             .accessor(js_string!("kind"), Some(kind), None, Attribute::ENUMERABLE)
             .accessor(js_string!("text"), Some(text), None, Attribute::ENUMERABLE)
-            .accessor(js_string!("parent"), Some(parent), None, Attribute::empty());
+            .accessor(js_string!("parent"), Some(parent), None, Attribute::empty())
+            .method(
+                js_string!("toString"),
+                0,
+                NativeFunction::from_fn_ptr(Self::to_string),
+            );
         Ok(())
     }
 
