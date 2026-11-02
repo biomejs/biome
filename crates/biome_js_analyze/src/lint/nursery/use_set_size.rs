@@ -29,7 +29,7 @@ declare_lint_rule! {
     /// - marked as a `Set` or a `ReadonlySet` with `as` or `satisfies`.
     ///
     /// :::caution
-    /// The fix is unsafe because the rule trusts type annotations and `as` expressions without checking them.
+    /// The fix is unsafe because the rule trusts type annotations and `as` expressions without inferring them.
     /// If the value isn't a `Set` when the code runs, for example an array that was cast with `as Set<string>`, the value has no `size` property, and the fixed code returns `undefined` instead of a number.
     /// :::
     ///
