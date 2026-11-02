@@ -44,7 +44,7 @@ use biome_fs::BiomePath;
 #[cfg(feature = "md_embeds")]
 use biome_markdown_analyze::analyze_with_snippets;
 use biome_markdown_analyze::{analyze, analyze_snippet};
-use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
+use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap, UnorderedListMarker};
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
@@ -65,6 +65,7 @@ pub struct MarkdownFormatterSettings {
     pub trailing_newline: Option<TrailingNewline>,
     pub enabled: Option<MarkdownFormatterEnabled>,
     pub prose_wrap: Option<ProseWrap>,
+    pub unordered_list_marker: Option<UnorderedListMarker>,
     pub format_embeds: Option<MarkdownFormatEmbeds>,
 }
 
@@ -78,6 +79,7 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
             prose_wrap: configuration.prose_wrap,
+            unordered_list_marker: configuration.unordered_list_marker,
             format_embeds: configuration.format_embeds,
         }
     }
@@ -177,6 +179,7 @@ impl ServiceLanguage for MarkdownLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
         let prose_wrap = language.prose_wrap.unwrap_or_default();
+        let unordered_list_marker = language.unordered_list_marker.unwrap_or_default();
         let mut options =
             MdFormatOptions::new(file_source.to_markdown_file_source().unwrap_or_default())
                 .with_indent_style(indent_style)
@@ -184,7 +187,8 @@ impl ServiceLanguage for MarkdownLanguage {
                 .with_line_width(line_width)
                 .with_line_ending(line_ending)
                 .with_trailing_newline(trailing_newline)
-                .with_prose_wrap(prose_wrap);
+                .with_prose_wrap(prose_wrap)
+                .with_unordered_list_marker(unordered_list_marker);
 
         overrides.apply_override_markdown_format_options_by_indices(override_indices, &mut options);
 

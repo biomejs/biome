@@ -3294,6 +3294,13 @@
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				},
+				"unorderedListMarker": {
+					"description": "The marker used for the items of unordered lists. Defaults to `dash`.\n\nWhen two unordered lists are next to each other, the second list uses another marker so\nthat Markdown doesn't merge them into one list.",
+					"anyOf": [
+						{ "$ref": "#/$defs/UnorderedListMarker" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -19415,6 +19422,26 @@
 					"description": "Disallow a Unicode byte order mark at the start of every file.",
 					"type": "string",
 					"const": "never"
+				}
+			]
+		},
+		"UnorderedListMarker": {
+			"description": "The marker that Biome prints for the items of unordered lists.\n\nBiome uses this marker for every unordered list, except when two lists are next to\neach other. Markdown would merge them into one list if they used the same marker, so\nthe second list uses a different marker.",
+			"oneOf": [
+				{
+					"description": "Use `-` for list items. This is the default.",
+					"type": "string",
+					"const": "dash"
+				},
+				{
+					"description": "Use `*` for list items.",
+					"type": "string",
+					"const": "asterisk"
+				},
+				{
+					"description": "Use `+` for list items.",
+					"type": "string",
+					"const": "plus"
 				}
 			]
 		},

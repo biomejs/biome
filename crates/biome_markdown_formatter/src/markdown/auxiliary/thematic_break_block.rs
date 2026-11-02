@@ -1,3 +1,5 @@
+use crate::bullet_list::unordered_marker_for_bullet;
+use crate::context::UnorderedListMarker;
 use crate::markdown::auxiliary::{
     indent_token::FormatMdIndentTokenOptions, thematic_break_char::FormatMdThematicBreakCharOptions,
 };
@@ -35,11 +37,7 @@ impl FormatNodeRule<MdThematicBreakBlock> for FormatMdThematicBreakBlock {
         ) {
             return node.parts().format().fmt(f);
         }
-        let replacement_marker = if is_first_block_in_dash_bullet(node)? {
-            MdThematicBreakMarker::Star
-        } else {
-            MdThematicBreakMarker::Hyphen
-        };
+        let replacement_marker = replacement_marker(node, f.options().unordered_list_marker());
 
         let mut emitted_markers = 0;
         for part in node.parts().iter() {
@@ -103,22 +101,35 @@ fn thematic_break_normalization(
     Ok(ThematicBreakNormalization::Normalize)
 }
 
-fn is_first_block_in_dash_bullet(node: &MdThematicBreakBlock) -> FormatResult<bool> {
-    let Some(block_list) = node.syntax().parent().and_then(MdBlockList::cast) else {
-        return Ok(false);
-    };
+/// Returns the character that the thematic break `node` is printed with.
+///
+/// Thematic breaks use `-`, except at the start of the content of a bullet that
+/// the formatter prints with `-`, where they use `*`. This way a break never
+/// uses the character of its bullet: a bullet followed by a break made of the
+/// same character, such as `- ---` or `* ***`, is parsed as a single thematic
+/// break instead of a list item.
+fn replacement_marker(
+    node: &MdThematicBreakBlock,
+    preferred_marker: UnorderedListMarker,
+) -> MdThematicBreakMarker {
+    let is_in_dash_bullet = bullet_starting_with(node)
+        .and_then(|bullet| unordered_marker_for_bullet(&bullet, preferred_marker))
+        .is_some_and(|marker| marker.is_minus());
 
-    let is_first_block = block_list
-        .iter()
-        .next()
-        .is_some_and(|block| block.syntax() == node.syntax());
-    if !is_first_block {
-        return Ok(false);
+    if is_in_dash_bullet {
+        MdThematicBreakMarker::Star
+    } else {
+        MdThematicBreakMarker::Hyphen
+    }
+}
+
+/// Returns the bullet whose content starts with `node`, if any.
+fn bullet_starting_with(node: &MdThematicBreakBlock) -> Option<MdBullet> {
+    let block_list = node.syntax().parent().and_then(MdBlockList::cast)?;
+    let first_block = block_list.iter().next()?;
+    if first_block.syntax() != node.syntax() {
+        return None;
     }
 
-    let Some(bullet) = block_list.syntax().parent().and_then(MdBullet::cast) else {
-        return Ok(false);
-    };
-
-    Ok(bullet.prefix()?.list_marker()?.is_minus())
+    block_list.syntax().parent().and_then(MdBullet::cast)
 }

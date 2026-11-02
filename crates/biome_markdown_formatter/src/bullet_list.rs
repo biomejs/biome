@@ -1,4 +1,4 @@
-use crate::context::MarkdownFormatContext;
+use crate::context::{MarkdownFormatContext, UnorderedListMarker};
 use crate::markdown::auxiliary::continuation_indent::FormatMdContinuationIndentOptions;
 use crate::markdown::auxiliary::fenced_code_block::FormatMdFencedCodeBlockOptions;
 use crate::markdown::auxiliary::indent_code_block::FormatMdIndentCodeBlockOptions;
@@ -15,7 +15,6 @@ use crate::{AsFormat, MarkdownFormatter, prelude::format_suppressed_node};
 use biome_formatter::rowan::prelude::*;
 use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
-use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdBlockList,
     MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
@@ -47,7 +46,8 @@ impl Format<MarkdownFormatContext> for FmtAnyList {
             return Ok(());
         }
         let list = self.node.list();
-        BulletListPrinter::new(&list, list_sibling_index(&self.node)).fmt(f)
+        let preferred_marker = f.options().unordered_list_marker();
+        BulletListPrinter::new(&list, list_sibling_index(&self.node), preferred_marker).fmt(f)
     }
 }
 
@@ -67,9 +67,16 @@ impl BulletListPrinter {
     /// The formatter uses this index to choose markers that keep adjacent parsed
     /// lists separate after formatting. Without this, two separate lists can be
     /// printed in a way that Markdown parses back as one list.
-    pub(crate) fn new(node: &MdBulletList, list_sibling_index: usize) -> Self {
+    ///
+    /// `preferred_marker` is the marker that unordered lists use unless they
+    /// need another one to stay separate from adjacent lists.
+    pub(crate) fn new(
+        node: &MdBulletList,
+        list_sibling_index: usize,
+        preferred_marker: UnorderedListMarker,
+    ) -> Self {
         let keep_pre_marker = should_keep_pre_marker(node);
-        let marker_plan = ListMarkerPlan::from_list(node, list_sibling_index);
+        let marker_plan = ListMarkerPlan::from_list(node, list_sibling_index, preferred_marker);
 
         Self {
             bullets: node
@@ -97,16 +104,13 @@ struct ListMarkerPlan {
 }
 
 impl ListMarkerPlan {
-    fn from_list(node: &MdBulletList, list_sibling_index: usize) -> Self {
-        let has_dash_thematic_break = node
-            .iter()
-            .any(|bullet| first_block_is_dash_thematic_break(&bullet.content()));
-
+    fn from_list(
+        node: &MdBulletList,
+        list_sibling_index: usize,
+        preferred_marker: UnorderedListMarker,
+    ) -> Self {
         Self {
-            unordered_marker: unordered_marker_for_list(
-                list_sibling_index,
-                has_dash_thematic_break,
-            ),
+            unordered_marker: unordered_marker_for_list(preferred_marker, list_sibling_index),
             ordered_marker: OrderedMarkerPlan::from_list(node, list_sibling_index),
         }
     }
@@ -405,45 +409,50 @@ fn first_indented_code_post_marker_len(
     Ok(Some(1))
 }
 
-/// Returns true if the first block in `content` is a thematic break using `-`.
-fn first_block_is_dash_thematic_break(content: &MdBlockList) -> bool {
-    let Some(AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdThematicBreakBlock(block))) =
-        content.iter().next()
-    else {
-        return false;
-    };
-    block
-        .parts()
-        .into_iter()
-        .find_map(|p| p.as_md_thematic_break_char().cloned())
-        .is_some_and(|c| {
-            c.marker()
-                .is_ok_and(|marker| marker == MdThematicBreakMarker::Hyphen)
-        })
+/// Returns the marker that the formatter prints for the bullets of an
+/// unordered list, or `None` when `bullet` belongs to an ordered list.
+///
+/// The thematic break formatter uses this to choose a break character that
+/// differs from the marker of the bullet that contains the break.
+pub(crate) fn unordered_marker_for_bullet(
+    bullet: &MdBullet,
+    preferred_marker: UnorderedListMarker,
+) -> Option<ListMarker> {
+    let list = bullet.syntax().parent().and_then(MdBulletList::cast)?;
+    let list_item = list.syntax().parent().and_then(AnyListItem::cast)?;
+    if list_item.is_ordered() {
+        return None;
+    }
+
+    Some(unordered_marker_for_list(
+        preferred_marker,
+        list_sibling_index(&list_item),
+    ))
 }
 
 /// Chooses the marker for a single unordered list node.
 ///
 /// Adjacent unordered list nodes cannot always be printed with the same marker.
-/// If two parsed sibling lists are both printed with `-`, Markdown can parse
-/// them back as one loose list. Alternating between `-` and `*` keeps the
-/// boundary visible in the formatted text.
+/// If two parsed sibling lists are both printed with the same marker, Markdown
+/// can parse them back as one loose list. Alternating between the preferred
+/// marker and a second marker keeps the boundary visible in the formatted text.
 ///
-/// There is one safety rule: do not use `-` when one of the items starts with a
-/// thematic break made from dashes. Printing `- ---` is parsed as a thematic
-/// break, not as a list item that contains a thematic break. In that case, use
-/// `+` for even sibling lists and `*` for odd sibling lists, so the chosen marker
-/// still differs from adjacent unordered lists.
+/// A list item that starts with a thematic break doesn't constrain the marker:
+/// the thematic break formatter picks a break character that differs from it.
 fn unordered_marker_for_list(
+    preferred_marker: UnorderedListMarker,
     list_sibling_index: usize,
-    has_dash_thematic_break: bool,
 ) -> ListMarker {
-    if has_dash_thematic_break && list_sibling_index.is_multiple_of(2) {
-        ListMarker::Plus
-    } else if !list_sibling_index.is_multiple_of(2) {
-        ListMarker::Star
+    let (preferred, alternate) = match preferred_marker {
+        UnorderedListMarker::Dash => (ListMarker::Minus, ListMarker::Star),
+        UnorderedListMarker::Asterisk => (ListMarker::Star, ListMarker::Minus),
+        UnorderedListMarker::Plus => (ListMarker::Plus, ListMarker::Minus),
+    };
+
+    if list_sibling_index.is_multiple_of(2) {
+        preferred
     } else {
-        ListMarker::Minus
+        alternate
     }
 }
 
