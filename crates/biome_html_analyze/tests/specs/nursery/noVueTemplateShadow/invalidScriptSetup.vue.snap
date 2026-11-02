@@ -1,0 +1,172 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidScriptSetup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="count in 5"></div>
+  <div v-for="helper in 5"></div>
+  <div v-for="size in 5"></div>
+  <div v-for="props in 5"></div>
+  <div v-for="modelValue in 5"></div>
+</template>
+
+<script setup>
+import { helper } from "./helper.js";
+
+let count = 42;
+const props = defineProps({ size: Number });
+const value = defineModel();
+</script>
+
+```
+
+# Diagnostics
+```
+invalidScriptSetup.vue:3:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable count hides a variable with the same name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="count in 5"></div>
+      │               ^^^^^
+    4 │   <div v-for="helper in 5"></div>
+    5 │   <div v-for="size in 5"></div>
+  
+  i The hidden count is declared here.
+  
+    11 │ import { helper } from "./helper.js";
+    12 │ 
+  > 13 │ let count = 42;
+       │     ^^^^^
+    14 │ const props = defineProps({ size: Number });
+    15 │ const value = defineModel();
+  
+  i Inside this element, count refers to the template variable, so the other count can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:4:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable helper hides a variable with the same name.
+  
+    2 │ <template>
+    3 │   <div v-for="count in 5"></div>
+  > 4 │   <div v-for="helper in 5"></div>
+      │               ^^^^^^
+    5 │   <div v-for="size in 5"></div>
+    6 │   <div v-for="props in 5"></div>
+  
+  i The hidden helper is declared here.
+  
+    10 │ <script setup>
+  > 11 │ import { helper } from "./helper.js";
+       │          ^^^^^^
+    12 │ 
+    13 │ let count = 42;
+  
+  i Inside this element, helper refers to the template variable, so the other helper can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:5:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable size hides a variable with the same name.
+  
+    3 │   <div v-for="count in 5"></div>
+    4 │   <div v-for="helper in 5"></div>
+  > 5 │   <div v-for="size in 5"></div>
+      │               ^^^^
+    6 │   <div v-for="props in 5"></div>
+    7 │   <div v-for="modelValue in 5"></div>
+  
+  i The hidden size is declared here.
+  
+    13 │ let count = 42;
+  > 14 │ const props = defineProps({ size: Number });
+       │                             ^^^^
+    15 │ const value = defineModel();
+    16 │ </script>
+  
+  i Inside this element, size refers to the template variable, so the other size can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:6:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable props hides a variable with the same name.
+  
+    4 │   <div v-for="helper in 5"></div>
+    5 │   <div v-for="size in 5"></div>
+  > 6 │   <div v-for="props in 5"></div>
+      │               ^^^^^
+    7 │   <div v-for="modelValue in 5"></div>
+    8 │ </template>
+  
+  i The hidden props is declared here.
+  
+    13 │ let count = 42;
+  > 14 │ const props = defineProps({ size: Number });
+       │       ^^^^^
+    15 │ const value = defineModel();
+    16 │ </script>
+  
+  i Inside this element, props refers to the template variable, so the other props can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:7:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable modelValue hides a variable with the same name.
+  
+    5 │   <div v-for="size in 5"></div>
+    6 │   <div v-for="props in 5"></div>
+  > 7 │   <div v-for="modelValue in 5"></div>
+      │               ^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i The hidden modelValue is declared here.
+  
+    13 │ let count = 42;
+    14 │ const props = defineProps({ size: Number });
+  > 15 │ const value = defineModel();
+       │               ^^^^^^^^^^^^^
+    16 │ </script>
+    17 │ 
+  
+  i Inside this element, modelValue refers to the template variable, so the other modelValue can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

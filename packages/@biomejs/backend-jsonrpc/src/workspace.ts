@@ -3558,6 +3558,11 @@ export interface Nursery {
 	 */
 	noVueTemplateKey?: NoVueTemplateKeyConfiguration;
 	/**
+	 * Disallow template variables that reuse the name of a variable from an outer scope.
+	 * See https://biomejs.dev/linter/rules/no-vue-template-shadow
+	 */
+	noVueTemplateShadow?: NoVueTemplateShadowConfiguration;
+	/**
 	 * Disallow this in the beforeRouteEnter navigation guard of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-this-in-before-route-enter
 	 */
@@ -6619,6 +6624,9 @@ export type NoVueSideEffectsInComputedConfiguration =
 export type NoVueTemplateKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueTemplateKeyOptions;
+export type NoVueTemplateShadowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueTemplateShadowOptions;
 export type NoVueThisInBeforeRouteEnterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueThisInBeforeRouteEnterOptions;
@@ -9629,6 +9637,10 @@ export interface RuleWithNoVueTemplateKeyOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueTemplateKeyOptions;
 }
+export interface RuleWithNoVueTemplateShadowOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueTemplateShadowOptions;
+}
 export interface RuleWithNoVueThisInBeforeRouteEnterOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueThisInBeforeRouteEnterOptions;
@@ -12439,6 +12451,12 @@ export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export type NoVueSideEffectsInComputedOptions = {};
 export type NoVueTemplateKeyOptions = {};
+export interface NoVueTemplateShadowOptions {
+	/**
+	 * Names that template variables may reuse from an outer scope.
+	 */
+	allow?: string[];
+}
 export type NoVueThisInBeforeRouteEnterOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
@@ -14375,6 +14393,7 @@ export type Category =
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueTemplateKey"
+	| "lint/nursery/noVueTemplateShadow"
 	| "lint/nursery/noVueThisInBeforeRouteEnter"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUndeclaredEmits"
