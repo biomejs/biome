@@ -1,0 +1,661 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: ["foo", "bar", "items"],
+  data() {
+    return { count: 0, xs: [], xs0AZ_foo: 1 };
+  },
+};
+</script>
+
+<template>
+  <div>{{ this.foo }}</div>
+  <div>{{ this.foo() }}</div>
+  <div>{{ this.foo.bar() }}</div>
+  <div :class="this.foo"></div>
+  <div :class="{ foo: this.foo }"></div>
+  <div :class="{ foo: this.foo() }"></div>
+  <div v-if="this.foo"></div>
+  <div v-for="foo in this.bar"></div>
+  <div>{{ this?.foo }}</div>
+  <div>{{ this?.foo.bar }}</div>
+  <div>{{ this['xs'] }}</div>
+  <div>{{ this["xs0AZ_foo"] }}</div>
+  <div>{{ (this).foo }}</div>
+  <div v-if="fn(this.$foo)"></div>
+  <div :class="{ foo: this.$foo }"></div>
+  <button @click="this.$emit('change')"></button>
+  <button @click="this.count++"></button>
+  <button @click="this.count = 1"></button>
+  <button @click="this['count'] += 1"></button>
+  <button @click="() => this.count++"></button>
+  <button @click="handle($event, this.count)"></button>
+  <div v-for="item in items">{{ this.count }} {{ item }}</div>
+  <List v-slot="{ row }">{{ this.count }} {{ row }}</List>
+  <List v-for="item in items" v-slot="{ row }" :row="this.row"></List>
+  <div v-for="item in items" v-if="this.item"></div>
+  <div>{{ /* before */ this.foo /* after */ }}</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:12:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    11 │ <template>
+  > 12 │   <div>{{ this.foo }}</div>
+       │           ^^^^^^^^
+    13 │   <div>{{ this.foo() }}</div>
+    14 │   <div>{{ this.foo.bar() }}</div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·this.foo·
+  + ·foo·
+  
+
+```
+
+```
+invalid.vue:13:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    11 │ <template>
+    12 │   <div>{{ this.foo }}</div>
+  > 13 │   <div>{{ this.foo() }}</div>
+       │           ^^^^^^^^
+    14 │   <div>{{ this.foo.bar() }}</div>
+    15 │   <div :class="this.foo"></div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·this.foo()·
+  + ·foo()·
+  
+
+```
+
+```
+invalid.vue:14:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    12 │   <div>{{ this.foo }}</div>
+    13 │   <div>{{ this.foo() }}</div>
+  > 14 │   <div>{{ this.foo.bar() }}</div>
+       │           ^^^^^^^^
+    15 │   <div :class="this.foo"></div>
+    16 │   <div :class="{ foo: this.foo }"></div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·this.foo.bar()·
+  + ·foo.bar()·
+  
+
+```
+
+```
+invalid.vue:20:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    18 │   <div v-if="this.foo"></div>
+    19 │   <div v-for="foo in this.bar"></div>
+  > 20 │   <div>{{ this?.foo }}</div>
+       │           ^^^^^^^^^
+    21 │   <div>{{ this?.foo.bar }}</div>
+    22 │   <div>{{ this['xs'] }}</div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ ·this?.foo·
+      │  ------    
+
+```
+
+```
+invalid.vue:21:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    19 │   <div v-for="foo in this.bar"></div>
+    20 │   <div>{{ this?.foo }}</div>
+  > 21 │   <div>{{ this?.foo.bar }}</div>
+       │           ^^^^^^^^^
+    22 │   <div>{{ this['xs'] }}</div>
+    23 │   <div>{{ this["xs0AZ_foo"] }}</div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ ·this?.foo.bar·
+      │  ------        
+
+```
+
+```
+invalid.vue:22:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    20 │   <div>{{ this?.foo }}</div>
+    21 │   <div>{{ this?.foo.bar }}</div>
+  > 22 │   <div>{{ this['xs'] }}</div>
+       │           ^^^^^^^^^^
+    23 │   <div>{{ this["xs0AZ_foo"] }}</div>
+    24 │   <div>{{ (this).foo }}</div>
+  
+  i Templates can read the properties of the component directly, so this.xs is the same as xs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ ·this['xs']·
+      │  ------  -- 
+
+```
+
+```
+invalid.vue:23:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    21 │   <div>{{ this?.foo.bar }}</div>
+    22 │   <div>{{ this['xs'] }}</div>
+  > 23 │   <div>{{ this["xs0AZ_foo"] }}</div>
+       │           ^^^^^^^^^^^^^^^^^
+    24 │   <div>{{ (this).foo }}</div>
+    25 │   <div v-if="fn(this.$foo)"></div>
+  
+  i Templates can read the properties of the component directly, so this.xs0AZ_foo is the same as xs0AZ_foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ ·this["xs0AZ_foo"]·
+      │  ------         -- 
+
+```
+
+```
+invalid.vue:24:11 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    22 │   <div>{{ this['xs'] }}</div>
+    23 │   <div>{{ this["xs0AZ_foo"] }}</div>
+  > 24 │   <div>{{ (this).foo }}</div>
+       │           ^^^^^^^^^^
+    25 │   <div v-if="fn(this.$foo)"></div>
+    26 │   <div :class="{ foo: this.$foo }"></div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ ·(this).foo·
+      │  -------    
+
+```
+
+```
+invalid.vue:33:33 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    31 │   <button @click="() => this.count++"></button>
+    32 │   <button @click="handle($event, this.count)"></button>
+  > 33 │   <div v-for="item in items">{{ this.count }} {{ item }}</div>
+       │                                 ^^^^^^^^^^
+    34 │   <List v-slot="{ row }">{{ this.count }} {{ row }}</List>
+    35 │   <List v-for="item in items" v-slot="{ row }" :row="this.row"></List>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·this.count·
+  + ·count·
+  
+
+```
+
+```
+invalid.vue:34:29 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    32 │   <button @click="handle($event, this.count)"></button>
+    33 │   <div v-for="item in items">{{ this.count }} {{ item }}</div>
+  > 34 │   <List v-slot="{ row }">{{ this.count }} {{ row }}</List>
+       │                             ^^^^^^^^^^
+    35 │   <List v-for="item in items" v-slot="{ row }" :row="this.row"></List>
+    36 │   <div v-for="item in items" v-if="this.item"></div>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·this.count·
+  + ·count·
+  
+
+```
+
+```
+invalid.vue:37:24 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    35 │   <List v-for="item in items" v-slot="{ row }" :row="this.row"></List>
+    36 │   <div v-for="item in items" v-if="this.item"></div>
+  > 37 │   <div>{{ /* before */ this.foo /* after */ }}</div>
+       │                        ^^^^^^^^
+    38 │ </template>
+    39 │ 
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·/*·before·*/·this.foo·/*·after·*/·
+  + ·/*·before·*/·foo·/*·after·*/·
+  
+
+```
+
+```
+invalid.vue:19:22 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    17 │   <div :class="{ foo: this.foo() }"></div>
+    18 │   <div v-if="this.foo"></div>
+  > 19 │   <div v-for="foo in this.bar"></div>
+       │                      ^^^^^^^^
+    20 │   <div>{{ this?.foo }}</div>
+    21 │   <div>{{ this?.foo.bar }}</div>
+  
+  i Templates can read the properties of the component directly, so this.bar is the same as bar.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ·this.bar
+  + ·bar
+  
+
+```
+
+```
+invalid.vue:15:16 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    13 │   <div>{{ this.foo() }}</div>
+    14 │   <div>{{ this.foo.bar() }}</div>
+  > 15 │   <div :class="this.foo"></div>
+       │                ^^^^^^^^
+    16 │   <div :class="{ foo: this.foo }"></div>
+    17 │   <div :class="{ foo: this.foo() }"></div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - this.foo
+  + foo
+  
+
+```
+
+```
+invalid.vue:16:23 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    14 │   <div>{{ this.foo.bar() }}</div>
+    15 │   <div :class="this.foo"></div>
+  > 16 │   <div :class="{ foo: this.foo }"></div>
+       │                       ^^^^^^^^
+    17 │   <div :class="{ foo: this.foo() }"></div>
+    18 │   <div v-if="this.foo"></div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - {·foo:·this.foo·}
+  + {·foo:·foo·}
+  
+
+```
+
+```
+invalid.vue:17:23 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    15 │   <div :class="this.foo"></div>
+    16 │   <div :class="{ foo: this.foo }"></div>
+  > 17 │   <div :class="{ foo: this.foo() }"></div>
+       │                       ^^^^^^^^
+    18 │   <div v-if="this.foo"></div>
+    19 │   <div v-for="foo in this.bar"></div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - {·foo:·this.foo()·}
+  + {·foo:·foo()·}
+  
+
+```
+
+```
+invalid.vue:18:14 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    16 │   <div :class="{ foo: this.foo }"></div>
+    17 │   <div :class="{ foo: this.foo() }"></div>
+  > 18 │   <div v-if="this.foo"></div>
+       │              ^^^^^^^^
+    19 │   <div v-for="foo in this.bar"></div>
+    20 │   <div>{{ this?.foo }}</div>
+  
+  i Templates can read the properties of the component directly, so this.foo is the same as foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - this.foo
+  + foo
+  
+
+```
+
+```
+invalid.vue:25:17 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    23 │   <div>{{ this["xs0AZ_foo"] }}</div>
+    24 │   <div>{{ (this).foo }}</div>
+  > 25 │   <div v-if="fn(this.$foo)"></div>
+       │                 ^^^^^^^^^
+    26 │   <div :class="{ foo: this.$foo }"></div>
+    27 │   <button @click="this.$emit('change')"></button>
+  
+  i Templates can read the properties of the component directly, so this.$foo is the same as $foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ fn(this.$foo)
+      │    -----     
+
+```
+
+```
+invalid.vue:26:23 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    24 │   <div>{{ (this).foo }}</div>
+    25 │   <div v-if="fn(this.$foo)"></div>
+  > 26 │   <div :class="{ foo: this.$foo }"></div>
+       │                       ^^^^^^^^^
+    27 │   <button @click="this.$emit('change')"></button>
+    28 │   <button @click="this.count++"></button>
+  
+  i Templates can read the properties of the component directly, so this.$foo is the same as $foo.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ {·foo:·this.$foo·}
+      │        -----      
+
+```
+
+```
+invalid.vue:27:19 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    25 │   <div v-if="fn(this.$foo)"></div>
+    26 │   <div :class="{ foo: this.$foo }"></div>
+  > 27 │   <button @click="this.$emit('change')"></button>
+       │                   ^^^^^^^^^^
+    28 │   <button @click="this.count++"></button>
+    29 │   <button @click="this.count = 1"></button>
+  
+  i Templates can read the properties of the component directly, so this.$emit is the same as $emit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ this.$emit('change')
+      │ -----               
+
+```
+
+```
+invalid.vue:28:19 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    26 │   <div :class="{ foo: this.$foo }"></div>
+    27 │   <button @click="this.$emit('change')"></button>
+  > 28 │   <button @click="this.count++"></button>
+       │                   ^^^^^^^^^^
+    29 │   <button @click="this.count = 1"></button>
+    30 │   <button @click="this['count'] += 1"></button>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - this.count++
+  + count++
+  
+
+```
+
+```
+invalid.vue:29:19 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    27 │   <button @click="this.$emit('change')"></button>
+    28 │   <button @click="this.count++"></button>
+  > 29 │   <button @click="this.count = 1"></button>
+       │                   ^^^^^^^^^^
+    30 │   <button @click="this['count'] += 1"></button>
+    31 │   <button @click="() => this.count++"></button>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - this.count·=·1
+  + count·=·1
+  
+
+```
+
+```
+invalid.vue:30:19 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    28 │   <button @click="this.count++"></button>
+    29 │   <button @click="this.count = 1"></button>
+  > 30 │   <button @click="this['count'] += 1"></button>
+       │                   ^^^^^^^^^^^^^
+    31 │   <button @click="() => this.count++"></button>
+    32 │   <button @click="handle($event, this.count)"></button>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+    1 │ this['count']·+=·1
+      │ ------     --     
+
+```
+
+```
+invalid.vue:31:25 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    29 │   <button @click="this.count = 1"></button>
+    30 │   <button @click="this['count'] += 1"></button>
+  > 31 │   <button @click="() => this.count++"></button>
+       │                         ^^^^^^^^^^
+    32 │   <button @click="handle($event, this.count)"></button>
+    33 │   <div v-for="item in items">{{ this.count }} {{ item }}</div>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - ()·=>·this.count++
+  + ()·=>·count++
+  
+
+```
+
+```
+invalid.vue:32:34 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    30 │   <button @click="this['count'] += 1"></button>
+    31 │   <button @click="() => this.count++"></button>
+  > 32 │   <button @click="handle($event, this.count)"></button>
+       │                                  ^^^^^^^^^^
+    33 │   <div v-for="item in items">{{ this.count }} {{ item }}</div>
+    34 │   <List v-slot="{ row }">{{ this.count }} {{ row }}</List>
+  
+  i Templates can read the properties of the component directly, so this.count is the same as count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - handle($event,·this.count)
+  + handle($event,·count)
+  
+
+```
+
+```
+invalid.vue:35:54 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    33 │   <div v-for="item in items">{{ this.count }} {{ item }}</div>
+    34 │   <List v-slot="{ row }">{{ this.count }} {{ row }}</List>
+  > 35 │   <List v-for="item in items" v-slot="{ row }" :row="this.row"></List>
+       │                                                      ^^^^^^^^
+    36 │   <div v-for="item in items" v-if="this.item"></div>
+    37 │   <div>{{ /* before */ this.foo /* after */ }}</div>
+  
+  i Templates can read the properties of the component directly, so this.row is the same as row.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - this.row
+  + row
+  
+
+```
+
+```
+invalid.vue:36:36 lint/nursery/noVueThisInTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unnecessary this in a Vue template.
+  
+    34 │   <List v-slot="{ row }">{{ this.count }} {{ row }}</List>
+    35 │   <List v-for="item in items" v-slot="{ row }" :row="this.row"></List>
+  > 36 │   <div v-for="item in items" v-if="this.item"></div>
+       │                                    ^^^^^^^^^
+    37 │   <div>{{ /* before */ this.foo /* after */ }}</div>
+    38 │ </template>
+  
+  i Templates can read the properties of the component directly, so this.item is the same as item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove this.
+  
+  - this.item
+  + item
+  
+
+```
