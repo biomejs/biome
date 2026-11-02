@@ -173,3 +173,8 @@ xs.map((x) => {
     }
     return null;
 });
+
+xs.map((x) => {
+    const inner = <b>{x}</b>;
+    return f ? <li key={x}>{(inner)}</li> : null;
+});

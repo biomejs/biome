@@ -9,8 +9,8 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsStatement,
     AnyJsSwitchClause, AnyJsxAttribute, AnyJsxChild, JsArrayElementList, JsArrayExpression,
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsFunctionBody, JsNewExpression,
-    JsObjectExpression, JsStatementList, JsVariableDeclarator, JsxAttributeList,
-    JsxExpressionChild, JsxTagExpression,
+    JsObjectExpression, JsParenthesizedExpression, JsStatementList, JsVariableDeclarator,
+    JsxAttributeList, JsxExpressionChild, JsxTagExpression,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, declare_node_union};
@@ -365,10 +365,12 @@ fn is_only_used_as_jsx_child(decl: &JsVariableDeclarator, model: &SemanticModel)
     let mut reads = model.as_binding(&id).all_reads().peekable();
     reads.peek().is_some()
         && reads.all(|reference| {
+            // skip the identifier expression and any parentheses around it, e.g. `{(inner)}`
             reference
                 .syntax()
-                .parent()
-                .and_then(|expression| expression.parent())
+                .ancestors()
+                .skip(2)
+                .find(|node| !JsParenthesizedExpression::can_cast(node.kind()))
                 .is_some_and(|parent| JsxExpressionChild::can_cast(parent.kind()))
         })
 }
