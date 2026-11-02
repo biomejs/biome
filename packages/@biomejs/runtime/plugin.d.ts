@@ -394,6 +394,81 @@ export function tokenKinds<K extends readonly JsAstToken["kind"][]>(
 	...kinds: K
 ): TokenKindSet<K[number]>;
 
+declare module "./js_ast" {
+	interface JsAstNode {
+		/**
+		 * Returns a fresh array of the nodes inside this node whose kind is in
+		 * `kinds`, in source order. This node itself is never included, even
+		 * when its kind is in `kinds`.
+		 *
+		 * Biome searches the tree natively and creates JavaScript objects only
+		 * for the matching nodes, which is much faster than visiting every node
+		 * with children(). Returned nodes do not have stable JavaScript object
+		 * identity.
+		 *
+		 * For example, report every `debugger` statement in a file:
+		 * ```ts
+		 * const DEBUGGER = nodeKinds("JS_DEBUGGER_STATEMENT");
+		 *
+		 * export const noDebugger = defineRule({
+		 *   query: ast("JS_MODULE"),
+		 *   run(root) {
+		 *     for (const statement of root.descendants(DEBUGGER)) {
+		 *       registerDiagnostic(statement, "warning", "Remove this debugger statement.");
+		 *     }
+		 *   },
+		 * });
+		 * ```
+		 *
+		 * @throws {TypeError} If `kinds` is not a set created with {@link nodeKinds}.
+		 */
+		descendants<K extends keyof JsNodeByKind>(
+			kinds: NodeKindSet<K>,
+		): readonly JsNodeByKind[K][];
+		/**
+		 * Visits the nodes inside this node whose kind is in `kinds`, in source
+		 * order. This node itself is never visited, even when its kind is in
+		 * `kinds`.
+		 *
+		 * `enter` is called with each matching node before the nodes inside it,
+		 * and `exit`, when provided, is called with the same object after them.
+		 * Use the pair to track nesting, such as a stack of enclosing elements.
+		 * Return `false` from `enter` to skip the nodes inside that node; `exit`
+		 * is then not called for it. Any other return value continues the walk.
+		 * An exception thrown by a callback stops the walk and is rethrown.
+		 *
+		 * Biome walks the tree natively and calls the functions only for the
+		 * matching nodes, which is much faster than visiting every node with
+		 * children().
+		 *
+		 * For example, report calls nested inside another call:
+		 * ```ts
+		 * const CALLS = nodeKinds("JS_CALL_EXPRESSION");
+		 *
+		 * let depth = 0;
+		 * root.walk(
+		 *   CALLS,
+		 *   (call) => {
+		 *     if (depth > 0) registerDiagnostic(call, "information", "Nested call.");
+		 *     depth++;
+		 *   },
+		 *   () => {
+		 *     depth--;
+		 *   },
+		 * );
+		 * ```
+		 *
+		 * @throws {TypeError} If `kinds` is not a set created with {@link nodeKinds},
+		 * or `enter` or `exit` is not a function.
+		 */
+		walk<K extends keyof JsNodeByKind>(
+			kinds: NodeKindSet<K>,
+			enter: (node: JsNodeByKind[K]) => unknown,
+			exit?: (node: JsNodeByKind[K]) => void,
+		): void;
+	}
+}
+
 /** A suggested source edit attached to a diagnostic. */
 export interface CodeFix {
 	readonly mutation: JsMutation;

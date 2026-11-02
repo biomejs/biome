@@ -613,6 +613,16 @@ impl Class for JsAstNode {
                 js_string!("childrenWithTokens"),
                 0,
                 NativeFunction::from_fn_ptr(Self::children_with_tokens),
+            )
+            .method(
+                js_string!("descendants"),
+                1,
+                NativeFunction::from_fn_ptr(Self::descendants),
+            )
+            .method(
+                js_string!("walk"),
+                2,
+                NativeFunction::from_fn_ptr(Self::walk),
             );
 
         if !class.context().has_data::<JsAstPrototypeCache>() {

@@ -2348,3 +2348,7 @@ mod semantic_tests;
 #[cfg(test)]
 #[path = "kind_sets.tests.rs"]
 mod kind_sets_tests;
+
+#[cfg(test)]
+#[path = "traversal.tests.rs"]
+mod traversal_tests;
