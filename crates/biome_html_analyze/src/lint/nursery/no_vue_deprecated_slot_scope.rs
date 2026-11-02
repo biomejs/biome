@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// - [Vue scoped slots](https://vuejs.org/guide/components/slots.html#scoped-slots)
     /// - [Vue `v-slot` directive](https://vuejs.org/api/built-in-directives.html#v-slot)
     pub NoVueDeprecatedSlotScope {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedSlotScope",
         language: "html",
         recommended: true,

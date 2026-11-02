@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueMultipleObjectsInClass {
-        version: "next",
+        version: "2.6.5",
         name: "noVueMultipleObjectsInClass",
         language: "js",
         recommended: false,

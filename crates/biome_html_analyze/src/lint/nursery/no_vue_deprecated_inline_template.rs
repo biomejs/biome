@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// - [Vue 3 migration guide: `inline-template` attribute](https://v3-migration.vuejs.org/breaking-changes/inline-template-attribute.html)
     /// - [Vue slots](https://vuejs.org/guide/components/slots.html)
     pub NoVueDeprecatedInlineTemplate {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedInlineTemplate",
         language: "html",
         recommended: true,

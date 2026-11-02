@@ -120,7 +120,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMissingScssInterpolation {
-        version: "next",
+        version: "2.6.5",
         name: "noMissingScssInterpolation",
         language: "css",
         recommended: false,
