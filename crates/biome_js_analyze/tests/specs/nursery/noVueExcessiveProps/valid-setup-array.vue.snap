@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup-array.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+defineProps(['prop1', 'prop2'])
+</script>
+
+```
