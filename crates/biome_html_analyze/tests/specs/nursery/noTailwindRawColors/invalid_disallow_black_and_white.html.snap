@@ -1,0 +1,122 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_disallow_black_and_white.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div class="bg-white text-black"></div>
+<div class="hover:border-white/50 dark:!ring-black mask-linear-from-black"></div>
+
+```
+
+# Diagnostics
+```
+invalid_disallow_black_and_white.html:2:13 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-white text-black"></div>
+      │             ^^^^^^^^
+    3 │ <div class="hover:border-white/50 dark:!ring-black mask-linear-from-black"></div>
+    4 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_disallow_black_and_white.html:2:22 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-white text-black"></div>
+      │                      ^^^^^^^^^^
+    3 │ <div class="hover:border-white/50 dark:!ring-black mask-linear-from-black"></div>
+    4 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_disallow_black_and_white.html:3:19 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-white text-black"></div>
+  > 3 │ <div class="hover:border-white/50 dark:!ring-black mask-linear-from-black"></div>
+      │                   ^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_disallow_black_and_white.html:3:41 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-white text-black"></div>
+  > 3 │ <div class="hover:border-white/50 dark:!ring-black mask-linear-from-black"></div>
+      │                                         ^^^^^^^^^^
+    4 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_disallow_black_and_white.html:3:52 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-white text-black"></div>
+  > 3 │ <div class="hover:border-white/50 dark:!ring-black mask-linear-from-black"></div>
+      │                                                    ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

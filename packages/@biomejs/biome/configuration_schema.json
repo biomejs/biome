@@ -6600,6 +6600,10 @@
 		"NoTailwindRawColorsOptions": {
 			"type": "object",
 			"properties": {
+				"allowBlackAndWhite": {
+					"description": "Whether to allow `black` and `white`, such as `bg-white` or `text-black`. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				},
 				"allowedColors": {
 					"description": "Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.",
 					"type": ["array", "null"],

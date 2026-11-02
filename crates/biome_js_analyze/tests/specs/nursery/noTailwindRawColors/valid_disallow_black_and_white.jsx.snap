@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_disallow_black_and_white.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+<div className="bg-white hover:text-white/80 bg-surface text-foreground" />;
+<div className="border-transparent fill-current stroke-inherit font-black" />;
+
+```

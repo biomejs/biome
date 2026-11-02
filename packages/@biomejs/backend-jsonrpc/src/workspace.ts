@@ -12138,6 +12138,10 @@ export interface NoTailwindArbitraryValueOptions {
 export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
+	 * Whether to allow `black` and `white`, such as `bg-white` or `text-black`. Defaults to `true`.
+	 */
+	allowBlackAndWhite?: boolean;
+	/**
 	 * Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.
 	 */
 	allowedColors?: string[];
