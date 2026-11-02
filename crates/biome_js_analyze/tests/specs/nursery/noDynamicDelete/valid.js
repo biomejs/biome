@@ -1,0 +1,22 @@
+/* should not generate diagnostics */
+const container = {};
+const value = 1;
+
+delete container.aaa;
+delete container.delete;
+delete container[7];
+delete container[-7];
+delete container[(7)];
+delete container[-(7)];
+delete container["-Infinity"];
+delete container["+Infinity"];
+delete container["aaa"];
+delete container["delete"];
+delete container["NaN"];
+delete container?.["aaa"];
+delete getValue();
+delete -value;
+container[value];
+void container[value];
+delete process.env.FOO;
+delete process.env["FOO"];

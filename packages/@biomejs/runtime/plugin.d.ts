@@ -15,6 +15,8 @@ export * from "./semantic";
 
 declare const queriedNode: unique symbol;
 declare const nativeMutation: unique symbol;
+declare const nodeKindSet: unique symbol;
+declare const tokenKindSet: unique symbol;
 
 /**
  * A query matching AST nodes by their syntax kinds, created with {@link ast}.
@@ -289,6 +291,108 @@ export const factory: {
 	 */
 	readonly token: (kind: JsTokenKind, text?: string) => JsAstToken;
 };
+
+/**
+ * A set of node kinds, created with {@link nodeKinds}.
+ *
+ * Testing membership with {@link NodeKindSet#has} reads the node's kind
+ * natively, which is cheaper than comparing `node.kind` strings. Build sets
+ * once at module scope and reuse them across `run()` calls.
+ *
+ * `K` is the exact union of kinds in the set, so a set of some kinds is not
+ * assignable to a set of other or more kinds. Functions that accept any node
+ * kind set should be generic, as in
+ * `function f<K extends keyof JsNodeByKind>(set: NodeKindSet<K>)`.
+ */
+export interface NodeKindSet<
+	in out K extends keyof JsNodeByKind = keyof JsNodeByKind,
+> {
+	readonly [nodeKindSet]: true;
+	/**
+	 * Returns whether `element` is a node whose kind is in this set.
+	 *
+	 * Returns `false` for tokens and for `undefined`, so optional fields and the
+	 * results of childrenWithTokens() can be passed directly.
+	 *
+	 * For example, report calls and constructor calls:
+	 * ```ts
+	 * const CALLS = nodeKinds("JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION");
+	 *
+	 * if (CALLS.has(statement.expression)) {
+	 *   registerDiagnostic(statement, "information", "This statement is a call.");
+	 * }
+	 * ```
+	 *
+	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
+	 */
+	has(element: JsAstElement | undefined): element is JsNodeByKind[K];
+}
+
+/**
+ * A set of token kinds, created with {@link tokenKinds}.
+ *
+ * Testing membership with {@link TokenKindSet#has} reads the token's kind
+ * natively, which is cheaper than comparing `token.kind` strings. Build sets
+ * once at module scope and reuse them across `run()` calls.
+ *
+ * `K` is the exact union of kinds in the set, so a set of some kinds is not
+ * assignable to a set of other or more kinds. Functions that accept any token
+ * kind set should be generic, as in
+ * `function f<K extends JsAstToken["kind"]>(set: TokenKindSet<K>)`.
+ */
+export interface TokenKindSet<
+	in out K extends JsAstToken["kind"] = JsAstToken["kind"],
+> {
+	readonly [tokenKindSet]: true;
+	/**
+	 * Returns whether `element` is a token whose kind is in this set.
+	 *
+	 * Returns `false` for nodes and for `undefined`, so the results of
+	 * childrenWithTokens() can be passed directly.
+	 *
+	 * For example, report loose equality operators:
+	 * ```ts
+	 * const LOOSE_EQUALITY = tokenKinds("EQ2", "NEQ");
+	 *
+	 * for (const element of binary.childrenWithTokens()) {
+	 *   if (LOOSE_EQUALITY.has(element)) {
+	 *     registerDiagnostic(binary, "warning", `Use strict equality instead of ${element.text}.`);
+	 *   }
+	 * }
+	 * ```
+	 *
+	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
+	 */
+	has(
+		element: JsAstElement | undefined,
+	): element is JsAstToken & { readonly kind: K };
+}
+
+/**
+ * Creates a set of node kinds. Pass names listed in {@link JsNodeByKind}.
+ *
+ * Node kinds and token kinds are separate: passing a token kind such as
+ * `"IDENT"` throws. Use {@link tokenKinds} to build a set of token kinds.
+ *
+ * @throws {TypeError} If a kind is not a string or does not name a node kind.
+ */
+export function nodeKinds<K extends readonly (keyof JsNodeByKind)[]>(
+	...kinds: K
+): NodeKindSet<K[number]>;
+
+/**
+ * Creates a set of token kinds. Pass any name that {@link JsAstToken#kind}
+ * can return, such as `"IDENT"` or `"LET_KW"`.
+ *
+ * Node kinds and token kinds are separate: passing a node kind such as
+ * `"JS_CALL_EXPRESSION"` throws. Use {@link nodeKinds} to build a set of node
+ * kinds.
+ *
+ * @throws {TypeError} If a kind is not a string or does not name a token kind.
+ */
+export function tokenKinds<K extends readonly JsAstToken["kind"][]>(
+	...kinds: K
+): TokenKindSet<K[number]>;
 
 /** A suggested source edit attached to a diagnostic. */
 export interface CodeFix {

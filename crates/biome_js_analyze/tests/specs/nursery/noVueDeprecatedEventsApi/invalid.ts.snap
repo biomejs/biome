@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+  mounted() {
+    this.$on("start", () => {});
+    this.$off!("start");
+  },
+});
+
+createApp({
+  mounted() {
+    this.$once("start", () => {});
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $on instance method was removed in Vue 3.
+  
+    4 │ defineComponent({
+    5 │   mounted() {
+  > 6 │     this.$on("start", () => {});
+      │          ^^^
+    7 │     this.$off!("start");
+    8 │   },
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $off instance method was removed in Vue 3.
+  
+    5 │   mounted() {
+    6 │     this.$on("start", () => {});
+  > 7 │     this.$off!("start");
+      │          ^^^^
+    8 │   },
+    9 │ });
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:10 lint/nursery/noVueDeprecatedEventsApi ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Vue $once instance method was removed in Vue 3.
+  
+    11 │ createApp({
+    12 │   mounted() {
+  > 13 │     this.$once("start", () => {});
+       │          ^^^^^
+    14 │   },
+    15 │ });
+  
+  i Component instances no longer have this method, so calling it throws an error.
+  
+  i Listen to a child component's events with v-on in the parent's template, or use an event library such as mitt. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

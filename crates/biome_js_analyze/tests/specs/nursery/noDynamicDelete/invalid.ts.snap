@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const container: { [i: string]: 0 } = {};
+declare const key: unknown;
+
+delete container[key as string];
+delete container[key!];
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    3 │ declare const key: unknown;
+    4 │ 
+  > 5 │ delete container[key as string];
+      │                  ^^^^^^^^^^^^^
+    6 │ delete container[key!];
+    7 │ 
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:18 lint/nursery/noDynamicDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid using delete with a property name that is computed at runtime.
+  
+    5 │ delete container[key as string];
+  > 6 │ delete container[key!];
+      │                  ^^^^
+    7 │ 
+  
+  i Removing properties by a changing name makes it hard to tell which property gets removed.
+  
+  i Use a Map or a Set and call its delete() method instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

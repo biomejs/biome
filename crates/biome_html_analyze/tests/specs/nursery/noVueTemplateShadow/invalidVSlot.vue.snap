@@ -1,0 +1,145 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidVSlot.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="item in items">
+    <MyList v-slot="{ item }">{{ item }}</MyList>
+    <MyTable>
+      <template #row="{ item }">{{ item }}</template>
+    </MyTable>
+  </div>
+  <MyList v-slot="{ selected }">
+    <span v-for="selected in options">{{ selected }}</span>
+  </MyList>
+  <MyList v-slot="{ entry: current }">{{ current }}</MyList>
+</template>
+
+<script setup>
+const current = 1;
+</script>
+
+```
+
+# Diagnostics
+```
+invalidVSlot.vue:4:23 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable item hides a variable with the same name.
+  
+    2 │ <template>
+    3 │   <div v-for="item in items">
+  > 4 │     <MyList v-slot="{ item }">{{ item }}</MyList>
+      │                       ^^^^
+    5 │     <MyTable>
+    6 │       <template #row="{ item }">{{ item }}</template>
+  
+  i The hidden item is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="item in items">
+      │               ^^^^
+    4 │     <MyList v-slot="{ item }">{{ item }}</MyList>
+    5 │     <MyTable>
+  
+  i Inside this element, item refers to the template variable, so the other item can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidVSlot.vue:6:25 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable item hides a variable with the same name.
+  
+    4 │     <MyList v-slot="{ item }">{{ item }}</MyList>
+    5 │     <MyTable>
+  > 6 │       <template #row="{ item }">{{ item }}</template>
+      │                         ^^^^
+    7 │     </MyTable>
+    8 │   </div>
+  
+  i The hidden item is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="item in items">
+      │               ^^^^
+    4 │     <MyList v-slot="{ item }">{{ item }}</MyList>
+    5 │     <MyTable>
+  
+  i Inside this element, item refers to the template variable, so the other item can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidVSlot.vue:10:18 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable selected hides a variable with the same name.
+  
+     8 │   </div>
+     9 │   <MyList v-slot="{ selected }">
+  > 10 │     <span v-for="selected in options">{{ selected }}</span>
+       │                  ^^^^^^^^
+    11 │   </MyList>
+    12 │   <MyList v-slot="{ entry: current }">{{ current }}</MyList>
+  
+  i The hidden selected is declared here.
+  
+     7 │     </MyTable>
+     8 │   </div>
+   > 9 │   <MyList v-slot="{ selected }">
+       │                     ^^^^^^^^
+    10 │     <span v-for="selected in options">{{ selected }}</span>
+    11 │   </MyList>
+  
+  i Inside this element, selected refers to the template variable, so the other selected can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidVSlot.vue:12:28 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable current hides a variable with the same name.
+  
+    10 │     <span v-for="selected in options">{{ selected }}</span>
+    11 │   </MyList>
+  > 12 │   <MyList v-slot="{ entry: current }">{{ current }}</MyList>
+       │                            ^^^^^^^
+    13 │ </template>
+    14 │ 
+  
+  i The hidden current is declared here.
+  
+    15 │ <script setup>
+  > 16 │ const current = 1;
+       │       ^^^^^^^
+    17 │ </script>
+    18 │ 
+  
+  i Inside this element, current refers to the template variable, so the other current can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

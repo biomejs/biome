@@ -338,6 +338,7 @@ fn main() {
 /// compiling the GritQL pattern, or evaluating the JS module in a new context.
 #[divan::bench(args = load_cases())]
 fn load(bencher: Bencher, case: &LoadCase) {
+    collect_js_garbage();
     bencher.bench_local(|| black_box(case.1.load(case.0)));
 }
 
@@ -349,7 +350,11 @@ fn load(bencher: Bencher, case: &LoadCase) {
 fn cold_eval(bencher: Bencher, case: &Case) {
     let root = parse_fixture(case.fixture);
     bencher
-        .with_inputs(|| plugins(case.engine.load(case.scenario)))
+        .with_inputs(|| {
+            let plugins = plugins(case.engine.load(case.scenario));
+            collect_js_garbage();
+            plugins
+        })
         .bench_local_values(|plugins| black_box(analyze(&root, &plugins)));
 }
 
@@ -360,5 +365,20 @@ fn steady_eval(bencher: Bencher, case: &Case) {
     let plugins = plugins(case.engine.load(case.scenario));
     // Warm up the thread-local state of JS plugins.
     analyze(&root, &plugins);
+    collect_js_garbage();
     bencher.bench_local(|| black_box(analyze(&root, &plugins)));
+}
+
+/// Collects the garbage that earlier benchmarks and setup code left in Boa's heap.
+///
+/// The heap is per thread and shared by every JS context, including the ones
+/// dropped by previous benchmarks. A collection runs in whichever allocation
+/// crosses the threshold, so without this a measurement can include the cost of
+/// collecting garbage that the benchmarked code didn't create.
+///
+/// The collection threshold itself is not reset. Boa only raises it when a
+/// collection leaves more than 70% of it live, so earlier benchmarks can still
+/// delay the next collection.
+fn collect_js_garbage() {
+    boa_engine::gc::force_collect();
 }

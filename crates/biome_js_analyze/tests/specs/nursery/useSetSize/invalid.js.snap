@@ -1,0 +1,625 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+[...new Set(array)].length;
+
+const foo = new Set([]);
+console.log([...foo].length);
+
+function isUnique(array) {
+	return[...new Set(array)].length === array.length
+}
+
+[...new Set(array),].length;
+[...(( new Set(array) ))].length;
+(( [...new Set(array)] )).length;
+[...new Set].length;
+[...new globalThis.Set(array)].length;
+
+bar
+;[...new Set(array)].length;
+
+// The fix would remove these comments.
+[/* comment */...new Set(array)].length;
+[...new Set(array)]/* comment */.length;
+
+// The comment is part of the `Set` expression and is kept.
+[...new /* comment */ Set(array)].length;
+
+Array.from(new Set(array)).length;
+console.log(Array.from(foo).length);
+Array.from((( new Set(array) ))).length;
+(( Array.from(new Set(array)) )).length;
+Array.from(/* comment */ new Set(array)).length;
+Array.from(new /* comment */ Set(array)).length;
+globalThis.Array.from(new Set(array)).length;
+
+function isUniqueFrom(array) {
+	return Array.from(new Set(array)).length === array.length
+}
+
+new [...foo].length.constructor("42");
+typeof[...foo].length;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ [...new Set(array)].length;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ const foo = new Set([]);
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - [...new·Set(array)].length;
+        2 │ + new·Set(array).size;
+     3  3 │   
+     4  4 │   const foo = new Set([]);
+  
+
+```
+
+```
+invalid.js:5:13 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    4 │ const foo = new Set([]);
+  > 5 │ console.log([...foo].length);
+      │             ^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ function isUnique(array) {
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     3  3 │   
+     4  4 │   const foo = new Set([]);
+     5    │ - console.log([...foo].length);
+        5 │ + console.log(foo.size);
+     6  6 │   
+     7  7 │   function isUnique(array) {
+  
+
+```
+
+```
+invalid.js:8:8 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+     7 │ function isUnique(array) {
+   > 8 │ 	return[...new Set(array)].length === array.length
+       │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     6  6 │   
+     7  7 │   function isUnique(array) {
+     8    │ - → return[...new·Set(array)].length·===·array.length
+        8 │ + → return·new·Set(array).size·===·array.length
+     9  9 │   }
+    10 10 │   
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+     9 │ }
+    10 │ 
+  > 11 │ [...new Set(array),].length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ [...(( new Set(array) ))].length;
+    13 │ (( [...new Set(array)] )).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+     9  9 │   }
+    10 10 │   
+    11    │ - [...new·Set(array),].length;
+       11 │ + new·Set(array).size;
+    12 12 │   [...(( new Set(array) ))].length;
+    13 13 │   (( [...new Set(array)] )).length;
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    11 │ [...new Set(array),].length;
+  > 12 │ [...(( new Set(array) ))].length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ (( [...new Set(array)] )).length;
+    14 │ [...new Set].length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    10 10 │   
+    11 11 │   [...new Set(array),].length;
+    12    │ - [...((·new·Set(array)·))].length;
+       12 │ + ((·new·Set(array)·)).size;
+    13 13 │   (( [...new Set(array)] )).length;
+    14 14 │   [...new Set].length;
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    11 │ [...new Set(array),].length;
+    12 │ [...(( new Set(array) ))].length;
+  > 13 │ (( [...new Set(array)] )).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ [...new Set].length;
+    15 │ [...new globalThis.Set(array)].length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    11 11 │   [...new Set(array),].length;
+    12 12 │   [...(( new Set(array) ))].length;
+    13    │ - ((·[...new·Set(array)]·)).length;
+       13 │ + new·Set(array).size;
+    14 14 │   [...new Set].length;
+    15 15 │   [...new globalThis.Set(array)].length;
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    12 │ [...(( new Set(array) ))].length;
+    13 │ (( [...new Set(array)] )).length;
+  > 14 │ [...new Set].length;
+       │ ^^^^^^^^^^^^^^^^^^^
+    15 │ [...new globalThis.Set(array)].length;
+    16 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    12 12 │   [...(( new Set(array) ))].length;
+    13 13 │   (( [...new Set(array)] )).length;
+    14    │ - [...new·Set].length;
+       14 │ + (new·Set).size;
+    15 15 │   [...new globalThis.Set(array)].length;
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    13 │ (( [...new Set(array)] )).length;
+    14 │ [...new Set].length;
+  > 15 │ [...new globalThis.Set(array)].length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ bar
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    13 13 │   (( [...new Set(array)] )).length;
+    14 14 │   [...new Set].length;
+    15    │ - [...new·globalThis.Set(array)].length;
+       15 │ + new·globalThis.Set(array).size;
+    16 16 │   
+    17 17 │   bar
+  
+
+```
+
+```
+invalid.js:18:2 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    17 │ bar
+  > 18 │ ;[...new Set(array)].length;
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // The fix would remove these comments.
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    16 16 │   
+    17 17 │   bar
+    18    │ - ;[...new·Set(array)].length;
+       18 │ + ;new·Set(array).size;
+    19 19 │   
+    20 20 │   // The fix would remove these comments.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useSetSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    20 │ // The fix would remove these comments.
+  > 21 │ [/* comment */...new Set(array)].length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ [...new Set(array)]/* comment */.length;
+    23 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useSetSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    20 │ // The fix would remove these comments.
+    21 │ [/* comment */...new Set(array)].length;
+  > 22 │ [...new Set(array)]/* comment */.length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ // The comment is part of the `Set` expression and is kept.
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    24 │ // The comment is part of the `Set` expression and is kept.
+  > 25 │ [...new /* comment */ Set(array)].length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ Array.from(new Set(array)).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    23 23 │   
+    24 24 │   // The comment is part of the `Set` expression and is kept.
+    25    │ - [...new·/*·comment·*/·Set(array)].length;
+       25 │ + new·/*·comment·*/·Set(array).size;
+    26 26 │   
+    27 27 │   Array.from(new Set(array)).length;
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    25 │ [...new /* comment */ Set(array)].length;
+    26 │ 
+  > 27 │ Array.from(new Set(array)).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ console.log(Array.from(foo).length);
+    29 │ Array.from((( new Set(array) ))).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    25 25 │   [...new /* comment */ Set(array)].length;
+    26 26 │   
+    27    │ - Array.from(new·Set(array)).length;
+       27 │ + new·Set(array).size;
+    28 28 │   console.log(Array.from(foo).length);
+    29 29 │   Array.from((( new Set(array) ))).length;
+  
+
+```
+
+```
+invalid.js:28:13 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    27 │ Array.from(new Set(array)).length;
+  > 28 │ console.log(Array.from(foo).length);
+       │             ^^^^^^^^^^^^^^^^^^^^^^
+    29 │ Array.from((( new Set(array) ))).length;
+    30 │ (( Array.from(new Set(array)) )).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    26 26 │   
+    27 27 │   Array.from(new Set(array)).length;
+    28    │ - console.log(Array.from(foo).length);
+       28 │ + console.log(foo.size);
+    29 29 │   Array.from((( new Set(array) ))).length;
+    30 30 │   (( Array.from(new Set(array)) )).length;
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    27 │ Array.from(new Set(array)).length;
+    28 │ console.log(Array.from(foo).length);
+  > 29 │ Array.from((( new Set(array) ))).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ (( Array.from(new Set(array)) )).length;
+    31 │ Array.from(/* comment */ new Set(array)).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    27 27 │   Array.from(new Set(array)).length;
+    28 28 │   console.log(Array.from(foo).length);
+    29    │ - Array.from(((·new·Set(array)·))).length;
+       29 │ + ((·new·Set(array)·)).size;
+    30 30 │   (( Array.from(new Set(array)) )).length;
+    31 31 │   Array.from(/* comment */ new Set(array)).length;
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    28 │ console.log(Array.from(foo).length);
+    29 │ Array.from((( new Set(array) ))).length;
+  > 30 │ (( Array.from(new Set(array)) )).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ Array.from(/* comment */ new Set(array)).length;
+    32 │ Array.from(new /* comment */ Set(array)).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    28 28 │   console.log(Array.from(foo).length);
+    29 29 │   Array.from((( new Set(array) ))).length;
+    30    │ - ((·Array.from(new·Set(array))·)).length;
+       30 │ + new·Set(array).size;
+    31 31 │   Array.from(/* comment */ new Set(array)).length;
+    32 32 │   Array.from(new /* comment */ Set(array)).length;
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/useSetSize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    29 │ Array.from((( new Set(array) ))).length;
+    30 │ (( Array.from(new Set(array)) )).length;
+  > 31 │ Array.from(/* comment */ new Set(array)).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ Array.from(new /* comment */ Set(array)).length;
+    33 │ globalThis.Array.from(new Set(array)).length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    30 │ (( Array.from(new Set(array)) )).length;
+    31 │ Array.from(/* comment */ new Set(array)).length;
+  > 32 │ Array.from(new /* comment */ Set(array)).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ globalThis.Array.from(new Set(array)).length;
+    34 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    30 30 │   (( Array.from(new Set(array)) )).length;
+    31 31 │   Array.from(/* comment */ new Set(array)).length;
+    32    │ - Array.from(new·/*·comment·*/·Set(array)).length;
+       32 │ + new·/*·comment·*/·Set(array).size;
+    33 33 │   globalThis.Array.from(new Set(array)).length;
+    34 34 │   
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    31 │ Array.from(/* comment */ new Set(array)).length;
+    32 │ Array.from(new /* comment */ Set(array)).length;
+  > 33 │ globalThis.Array.from(new Set(array)).length;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+    35 │ function isUniqueFrom(array) {
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    31 31 │   Array.from(/* comment */ new Set(array)).length;
+    32 32 │   Array.from(new /* comment */ Set(array)).length;
+    33    │ - globalThis.Array.from(new·Set(array)).length;
+       33 │ + new·Set(array).size;
+    34 34 │   
+    35 35 │   function isUniqueFrom(array) {
+  
+
+```
+
+```
+invalid.js:36:9 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    35 │ function isUniqueFrom(array) {
+  > 36 │ 	return Array.from(new Set(array)).length === array.length
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ }
+    38 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    34 34 │   
+    35 35 │   function isUniqueFrom(array) {
+    36    │ - → return·Array.from(new·Set(array)).length·===·array.length
+       36 │ + → return·new·Set(array).size·===·array.length
+    37 37 │   }
+    38 38 │   
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    37 │ }
+    38 │ 
+  > 39 │ new [...foo].length.constructor("42");
+       │     ^^^^^^^^^^^^^^^
+    40 │ typeof[...foo].length;
+    41 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    37 37 │   }
+    38 38 │   
+    39    │ - new·[...foo].length.constructor("42");
+       39 │ + new·foo.size.constructor("42");
+    40 40 │   typeof[...foo].length;
+    41 41 │   
+  
+
+```
+
+```
+invalid.js:40:7 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    39 │ new [...foo].length.constructor("42");
+  > 40 │ typeof[...foo].length;
+       │       ^^^^^^^^^^^^^^^
+    41 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    38 38 │   
+    39 39 │   new [...foo].length.constructor("42");
+    40    │ - typeof[...foo].length;
+       40 │ + typeof·foo.size;
+    41 41 │   
+  
+
+```

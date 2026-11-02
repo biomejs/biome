@@ -1238,6 +1238,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_js_transform",
  "biome_languages",
+ "biome_parser",
  "biome_resolver",
  "biome_rowan",
  "biome_text_size",

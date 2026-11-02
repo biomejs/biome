@@ -10,6 +10,7 @@ use biome_cli::{
 };
 use biome_console::{ConsoleExt, EnvConsole, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, set_bottom_frame};
+use biome_flags::OsEnvironment;
 use biome_fs::OsFileSystem;
 use biome_service::workspace;
 use std::mem::ManuallyDrop;
@@ -40,7 +41,7 @@ fn main() -> ExitCode {
     let mut console = EnvConsole::default();
     let command = biome_command().fallback_to_usage().run();
 
-    console.set_color(to_color_mode(command.get_color()));
+    console.set_color(to_color_mode(command.get_color(&OsEnvironment)));
 
     let is_verbose = command.is_verbose();
     let result = run_workspace(&mut console, command);

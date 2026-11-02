@@ -1,0 +1,15 @@
+<!-- should not generate diagnostics -->
+<template>
+  <template><div /></template>
+  <div key="foo"></div>
+  <div v-bind:key="foo"></div>
+  <div :key="foo"></div>
+  <template v-for="item in list" :key="item.id"><div /></template>
+  <template v-for="(item, i) in list" :key="i"><div /></template>
+  <template v-for="item in list" :key="foo + item.id"><div /></template>
+  <template v-for="item in list" v-bind:key="item.id"><div /></template>
+  <template v-for="item in list" key="foo"><div /></template>
+  <template :keys="foo"><div /></template>
+  <template v-bind:[key]="foo"><div /></template>
+  <Template key="foo"><div /></Template>
+</template>

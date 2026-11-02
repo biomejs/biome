@@ -4,7 +4,7 @@ pub use any_type_kind::AnyTypeKind;
 pub use boolean_coercion::BooleanCoercion;
 
 use crate::TypeDb;
-use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData};
+use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
     is_escape_hatch as relation_is_escape_hatch, promise_inner as relation_promise_inner,
@@ -112,6 +112,30 @@ impl<'db> InferredType<'db> {
     /// Types that inference couldn't resolve don't match.
     pub fn is_unknown_keyword(self) -> bool {
         matches!(self.data, TypeData::UnknownKeyword)
+    }
+
+    /// Returns whether `self` and `other` are the same type, and every variant
+    /// of that type is `string`, `number`, `bigint`, `boolean`, `symbol`,
+    /// `null`, or `undefined`.
+    ///
+    /// Literal types, such as `"a"` or `1`, don't match. Neither do types that
+    /// inference couldn't fully resolve.
+    pub fn is_same_primitive_type_as(self, other: Self) -> bool {
+        self.data == other.data
+            && self
+                .try_all_variants_match(|data| {
+                    matches!(
+                        data,
+                        TypeData::BigInt
+                            | TypeData::Boolean
+                            | TypeData::Null
+                            | TypeData::Number
+                            | TypeData::String
+                            | TypeData::Symbol
+                            | TypeData::Undefined
+                    )
+                })
+                .unwrap_or(false)
     }
 
     /// Returns whether every value of this type is a primitive: a string,
@@ -1072,6 +1096,14 @@ impl<'db> InferredType<'db> {
         None
     }
 
+    /// Returns whether this type has exactly one call signature, and that
+    /// signature doesn't declare type parameters.
+    pub fn is_non_generic_function(self) -> bool {
+        self.callable_type_with(|data| data)
+            .and_then(|data| data.callable_function(self.db))
+            .is_some_and(|function| function.type_parameters(self.db).is_empty())
+    }
+
     pub fn function_returns_conditional(self) -> bool {
         self.function_return_matches(|ty| matches!(ty, TypeData::Conditional))
     }
@@ -1183,6 +1215,78 @@ impl<'db> InferredType<'db> {
             _ => false,
         })
         .ok()
+    }
+
+    /// Returns `Some(true)` when any variant declares an index signature, as in
+    /// `{ [key: string]: number }` or `Record<string, number>`, and
+    /// `Some(false)` when no variant does.
+    ///
+    /// Classes, interfaces, and object types are checked together with the
+    /// types they extend. Strings return `Some(true)`, because their characters
+    /// can be read by index. Other primitive types return `Some(false)`.
+    ///
+    /// Returns `None` when a variant cannot be resolved, or when traversal
+    /// exceeds its limit.
+    pub fn has_index_signature(self) -> Option<bool> {
+        let has_index_signature = |members: &[TypeMember<'db>]| {
+            members
+                .iter()
+                .any(|member| member.kind.index_signature_type().is_some())
+        };
+        let mut seen = FxHashSet::default();
+        let mut pending = vec![self.data];
+
+        for _ in 0..MAX_TYPE_VARIANT_STEPS {
+            let Some(data) = pending.pop() else {
+                return Some(false);
+            };
+            if !seen.insert(data) {
+                continue;
+            }
+
+            match data.expand_canonical_global(self.db) {
+                TypeData::Class(class) => {
+                    if has_index_signature(class.members(self.db)) {
+                        return Some(true);
+                    }
+                    pending.extend(class.extends(self.db));
+                }
+                TypeData::Interface(interface) => {
+                    if has_index_signature(interface.members(self.db)) {
+                        return Some(true);
+                    }
+                    pending.extend(interface.extends(self.db).iter().copied());
+                }
+                TypeData::Literal(literal) => match literal.literal(self.db) {
+                    Literal::Object(members) if has_index_signature(members) => return Some(true),
+                    Literal::String(_) | Literal::Template(_) => return Some(true),
+                    _ => {}
+                },
+                TypeData::String => return Some(true),
+                TypeData::Object(object) => {
+                    if has_index_signature(object.members(self.db)) {
+                        return Some(true);
+                    }
+                    pending.extend(object.prototype(self.db));
+                }
+                TypeData::Generic(generic) => pending.push(generic.constraint(self.db)?),
+                TypeData::GlobalLocal(local) => pending.push(local.expand(self.db)),
+                TypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
+                TypeData::Intersection(intersection) => {
+                    pending.extend(intersection.types(self.db).iter().copied());
+                }
+                TypeData::MergedReference(reference) => pending.extend(reference.targets(self.db)),
+                TypeData::TypeofType(typeof_type) => pending.push(typeof_type.ty(self.db)),
+                TypeData::TypeofValue(typeof_value) => pending.push(typeof_value.ty(self.db)),
+                TypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().copied());
+                }
+                data if data.is_indeterminate() => return None,
+                _ => {}
+            }
+        }
+
+        None
     }
 
     /// Returns `Some(true)` when any variant is `null`, and `Some(false)` when
@@ -1425,6 +1529,10 @@ impl<'db> InferredType<'db> {
 
     pub const fn is_undefined(self) -> bool {
         matches!(self.data, TypeData::Undefined)
+    }
+
+    pub const fn is_never(self) -> bool {
+        matches!(self.data, TypeData::NeverKeyword)
     }
 
     fn try_all_variants_match(

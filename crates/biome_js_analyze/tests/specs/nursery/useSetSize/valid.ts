@@ -1,0 +1,22 @@
+/* should not generate diagnostics */
+function fromArray(values: string[]) {
+	return [...values].length;
+}
+
+function fromMap(values: Map<string, number>) {
+	return [...values].length;
+}
+
+function fromUnknown(values: unknown) {
+	return Array.from(values as Iterable<unknown>).length;
+}
+
+function fromQualifiedType(values: Collections.Set<string>) {
+	return [...values].length;
+}
+
+// `Set` is a local type, not the built-in one.
+interface Set<T> extends Array<T> {}
+function fromLocalSet(values: Set<string>) {
+	return [...values].length;
+}

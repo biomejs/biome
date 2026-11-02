@@ -1,0 +1,11 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_disallow_black_and_white.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div class="bg-white hover:text-white/80 bg-surface text-foreground"></div>
+<div class="border-transparent fill-current stroke-inherit font-black"></div>
+
+```

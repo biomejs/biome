@@ -2,6 +2,7 @@ use crate::cli_options::{CliOptions, CliReporter};
 use biome_configuration::analyzer::AnalyzerSelector;
 use biome_console::MarkupBuf;
 use biome_diagnostics::Category;
+use biome_flags::{CiProvider, Environment};
 use biome_fs::BiomePath;
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
@@ -219,4 +220,20 @@ impl From<(bool, bool)> for VcsTargeted {
 #[derive(Debug, Clone, Copy)]
 pub enum ExecutionEnvironment {
     GitHub,
+}
+
+impl ExecutionEnvironment {
+    /// Returns the CI environment whose reporter `biome ci` enables
+    /// automatically, or `None` when no such environment is detected.
+    pub(crate) fn from_environment(environment: &dyn Environment) -> Option<Self> {
+        match CiProvider::from_environment(environment)? {
+            CiProvider::GithubActions => Some(Self::GitHub),
+            CiProvider::Gitlab
+            | CiProvider::Circleci
+            | CiProvider::AzurePipelines
+            | CiProvider::Buildkite
+            | CiProvider::Jenkins
+            | CiProvider::Other => None,
+        }
+    }
 }
