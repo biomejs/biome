@@ -82,7 +82,10 @@ declare_lint_rule! {
         version: "2.6.0",
         name: "noDoubleComparison",
         language: "js",
-        sources: &[RuleSource::EslintUnicorn("no-double-comparison").same()],
+        sources: &[
+            RuleSource::EslintUnicorn("no-double-comparison").same(),
+            RuleSource::Oxc("double-comparisons").same(),
+        ],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
