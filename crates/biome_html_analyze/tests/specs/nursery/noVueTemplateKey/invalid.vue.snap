@@ -1,0 +1,169 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div><template key="foo"></template></div>
+  <div><template v-bind:key="foo"></template></div>
+  <div><template :key="foo"></template></div>
+  <template v-slot="item" :key="item.id"><div /></template>
+  <template #default="item" key="foo"><div /></template>
+  <template v-if="ok" :key="foo"><div /></template>
+  <template v-for="item in list">
+    <template :key="item.id"><div /></template>
+  </template>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:18 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div><template key="foo"></template></div>
+      │                  ^^^^^^^^^
+    4 │   <div><template v-bind:key="foo"></template></div>
+    5 │   <div><template :key="foo"></template></div>
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:18 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+    2 │ <template>
+    3 │   <div><template key="foo"></template></div>
+  > 4 │   <div><template v-bind:key="foo"></template></div>
+      │                  ^^^^^^^^^^^^^^^^
+    5 │   <div><template :key="foo"></template></div>
+    6 │   <template v-slot="item" :key="item.id"><div /></template>
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:18 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+    3 │   <div><template key="foo"></template></div>
+    4 │   <div><template v-bind:key="foo"></template></div>
+  > 5 │   <div><template :key="foo"></template></div>
+      │                  ^^^^^^^^^^
+    6 │   <template v-slot="item" :key="item.id"><div /></template>
+    7 │   <template #default="item" key="foo"><div /></template>
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:27 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+    4 │   <div><template v-bind:key="foo"></template></div>
+    5 │   <div><template :key="foo"></template></div>
+  > 6 │   <template v-slot="item" :key="item.id"><div /></template>
+      │                           ^^^^^^^^^^^^^^
+    7 │   <template #default="item" key="foo"><div /></template>
+    8 │   <template v-if="ok" :key="foo"><div /></template>
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:29 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+    5 │   <div><template :key="foo"></template></div>
+    6 │   <template v-slot="item" :key="item.id"><div /></template>
+  > 7 │   <template #default="item" key="foo"><div /></template>
+      │                             ^^^^^^^^^
+    8 │   <template v-if="ok" :key="foo"><div /></template>
+    9 │   <template v-for="item in list">
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:23 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+     6 │   <template v-slot="item" :key="item.id"><div /></template>
+     7 │   <template #default="item" key="foo"><div /></template>
+   > 8 │   <template v-if="ok" :key="foo"><div /></template>
+       │                       ^^^^^^^^^^
+     9 │   <template v-for="item in list">
+    10 │     <template :key="item.id"><div /></template>
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:15 lint/nursery/noVueTemplateKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key attribute isn't allowed on a <template> element.
+  
+     8 │   <template v-if="ok" :key="foo"><div /></template>
+     9 │   <template v-for="item in list">
+  > 10 │     <template :key="item.id"><div /></template>
+       │               ^^^^^^^^^^^^^^
+    11 │   </template>
+    12 │ </template>
+  
+  i A <template> isn't an element on the page, so Vue can't use its key to tell it apart from other elements.
+  
+  i Put the key on the elements inside the <template> instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
