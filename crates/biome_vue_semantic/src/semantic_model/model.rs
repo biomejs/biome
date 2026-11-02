@@ -548,9 +548,9 @@ pub enum PropForm {
     ArrayString,
     /// `props: { name: String }`
     Constructor,
-    /// `props: { name: { type: String } }`
+    /// `props: { name: { type: String } }` or `defineModel({ type: String })`
     Options,
-    /// `defineProps<{ name: string }>()`
+    /// `defineProps<{ name: string }>()` or `defineModel<string>()`
     TypeMember,
 }
 

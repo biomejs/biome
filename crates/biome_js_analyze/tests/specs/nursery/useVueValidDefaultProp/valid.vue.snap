@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  props: {
+    a: null,
+    b: Number,
+    c: [String, Number],
+    d: {},
+    e: { type: String },
+    f: { type: Number, default: VAR_BAR },
+    g: { type: Number, default: 100 },
+    h: { type: Number, default: Number.MAX_VALUE },
+    i: { type: Number, default: Foo.BAR },
+    j: { type: {}, default: "" },
+    k: { type: [String, Number], default: "" },
+    l: { type: [String, Number], default: 0 },
+    m: { type: String, default: "" },
+    n: { type: String, default: `` },
+    o: { type: Boolean, default: false },
+    p: { type: Object, default: () => {} },
+    q: { type: Array, default() {} },
+    r: { type: String, default() {} },
+    s: { type: Symbol, default: Symbol("a") },
+    t: { type: Foo, default: Foo("a") },
+    u: { type: BigInt, default: 1n },
+    v: { type: String, default: null },
+    w: { type: String, default() { return Foo; } },
+    x: { type: Object, default() { return Foo; } },
+    y: { type: Object, default: null },
+    z: { type: [Object, Number], default: 10 },
+    aa: { type: [Number], default() { return 10; } },
+    ab: { type: [Function, Number], default() { return "s"; } },
+    ac: { type: [Number], default: () => 10 },
+    ad: { type: [Function, Number], default: () => "s" },
+    ae: { type: [, Object, Number], default: 10 },
+    af: { type: Number, default: Number?.() },
+    ag: { type: Array, default: () => [] },
+    ah: { type: Object, default: () => ({ foo: "foo" }) },
+    ai: { type: Function, default: () => 10 },
+    aj: { type: Function, default: Function() },
+    ak: { type: Date, default: () => new Date() },
+    al: { type: Object, default: async () => "promise" },
+    am: { type: Object, default: shorthand },
+    an: { type: String, default: tagged`template` },
+    ao: { type: [String, Foo], default: 1 },
+    ap: { type: Object, default() { return { nested() { return 1; } }; } },
+    ...spread,
+  },
+};
+</script>
+
+```

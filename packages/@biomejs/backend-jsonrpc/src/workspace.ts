@@ -4053,6 +4053,11 @@ export interface Nursery {
 	 */
 	useVueValidAttributeName?: UseVueValidAttributeNameConfiguration;
 	/**
+	 * Require the default value of a Vue prop to match the type of the prop.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-default-prop
+	 */
+	useVueValidDefaultProp?: UseVueValidDefaultPropConfiguration;
+	/**
 	 * Enforce valid usage of Vue's defineEmits macro.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-emits
 	 */
@@ -6911,6 +6916,9 @@ export type UseVueVOnExactConfiguration =
 export type UseVueValidAttributeNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidAttributeNameOptions;
+export type UseVueValidDefaultPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidDefaultPropOptions;
 export type UseVueValidDefineEmitsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidDefineEmitsOptions;
@@ -10181,6 +10189,10 @@ export interface RuleWithUseVueValidAttributeNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidAttributeNameOptions;
 }
+export interface RuleWithUseVueValidDefaultPropOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidDefaultPropOptions;
+}
 export interface RuleWithUseVueValidDefineEmitsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidDefineEmitsOptions;
@@ -12758,6 +12770,7 @@ export type UseVueTypedRefOptions = {};
 export type UseVueVModelOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidAttributeNameOptions = {};
+export type UseVueValidDefaultPropOptions = {};
 export type UseVueValidDefineEmitsOptions = {};
 export type UseVueValidDefineOptionsOptions = {};
 export type UseVueValidDefinePropsOptions = {};
@@ -14480,6 +14493,7 @@ export type Category =
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidAttributeName"
+	| "lint/nursery/useVueValidDefaultProp"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineOptions"
 	| "lint/nursery/useVueValidDefineProps"
