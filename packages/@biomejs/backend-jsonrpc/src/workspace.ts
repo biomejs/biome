@@ -3573,6 +3573,11 @@ export interface Nursery {
 	 */
 	noVueUndeclaredEmits?: NoVueUndeclaredEmitsConfiguration;
 	/**
+	 * Disallow using properties that a Vue component doesn't declare.
+	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-properties
+	 */
+	noVueUndeclaredProperties?: NoVueUndeclaredPropertiesConfiguration;
+	/**
 	 * Disallow \<slot> elements whose slot isn't declared in the component's types.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-slots
 	 */
@@ -6623,6 +6628,9 @@ export type NoVueUndeclaredDirectivesConfiguration =
 export type NoVueUndeclaredEmitsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredEmitsOptions;
+export type NoVueUndeclaredPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUndeclaredPropertiesOptions;
 export type NoVueUndeclaredSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredSlotsOptions;
@@ -9633,6 +9641,10 @@ export interface RuleWithNoVueUndeclaredEmitsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredEmitsOptions;
 }
+export interface RuleWithNoVueUndeclaredPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUndeclaredPropertiesOptions;
+}
 export interface RuleWithNoVueUndeclaredSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredSlotsOptions;
@@ -12437,6 +12449,13 @@ export interface NoVueUndeclaredDirectivesOptions {
 	globals?: string[];
 }
 export type NoVueUndeclaredEmitsOptions = {};
+export interface NoVueUndeclaredPropertiesOptions {
+	/**
+	 * Property names that are never reported, for example properties that a plugin adds to
+	 * every component.
+	 */
+	ignore?: string[];
+}
 export type NoVueUndeclaredSlotsOptions = {};
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueUnusedRefsOptions = {};
@@ -14359,6 +14378,7 @@ export type Category =
 	| "lint/nursery/noVueThisInBeforeRouteEnter"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUndeclaredEmits"
+	| "lint/nursery/noVueUndeclaredProperties"
 	| "lint/nursery/noVueUndeclaredSlots"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"

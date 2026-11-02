@@ -7,7 +7,7 @@
 //! This pass reads each of those forms once, so that consumers of the model
 //! never have to.
 
-use super::builder::{ModelBuilder, NewSymbol, Role, synthetic_name, to_host};
+use super::builder::{ModelBuilder, NewSymbol, OptionName, Role, synthetic_name, to_host};
 use super::model::*;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
@@ -513,6 +513,7 @@ impl Collector<'_, '_> {
                 "computed" => self.collect_computed_option(&member, component),
                 "methods" => self.collect_methods_option(&member, component),
                 "watch" => self.collect_watch_option(&member, component),
+                "expose" => self.collect_expose_option(&member, component),
                 "inject" => self.collect_inject_option(&member, component),
                 "slots" => self.collect_slots_option(&member, component),
                 "components" => self.collect_registrations(
@@ -1233,8 +1234,36 @@ impl Collector<'_, '_> {
             self.builder
                 .open(component, Namespace::Binding, OpenReason::NonLiteral);
         }
+        let has_several_objects = objects.len() > 1;
         for object in objects {
             self.collect_object_members(&object, component, kind, None);
+        }
+        // The function returns one of the objects, so a property that more
+        // than one of them declares may have the members of any of them.
+        if has_several_objects {
+            let data = &self.builder.data;
+            let declared: Vec<_> = data.components[component.index()]
+                .symbols
+                .iter()
+                .copied()
+                .filter(|id| {
+                    let symbol = &data.symbols[id.index()];
+                    symbol.kind == kind && symbol.parent.is_none()
+                })
+                .collect();
+            let repeated: Vec<_> = declared
+                .iter()
+                .copied()
+                .filter(|id| {
+                    let name = data.symbols[id.index()].name.text();
+                    declared
+                        .iter()
+                        .any(|other| other != id && data.symbols[other.index()].name.text() == name)
+                })
+                .collect();
+            for id in repeated {
+                self.open_members(id);
+            }
         }
     }
 
@@ -1250,16 +1279,21 @@ impl Collector<'_, '_> {
     ) {
         for member in object.members().iter().flatten() {
             if matches!(member, AnyJsObjectMember::JsSpread(_)) {
-                if parent.is_none() {
-                    self.builder
-                        .open(component, Namespace::Binding, OpenReason::Spread);
+                match parent {
+                    Some(parent) => self.open_members(parent),
+                    None => self
+                        .builder
+                        .open(component, Namespace::Binding, OpenReason::Spread),
                 }
                 continue;
             }
             let Some(name) = member.name() else {
-                if parent.is_none() {
-                    self.builder
-                        .open(component, Namespace::Binding, OpenReason::NonLiteral);
+                match parent {
+                    Some(parent) => self.open_members(parent),
+                    None => {
+                        self.builder
+                            .open(component, Namespace::Binding, OpenReason::NonLiteral);
+                    }
                 }
                 continue;
             };
@@ -1280,12 +1314,23 @@ impl Collector<'_, '_> {
                     .retain(|symbol| *symbol != id);
                 self.builder.symbol_mut(id).parent = Some(parent);
             }
+            // Only an object written as is has a known shape: `{} as Form`
+            // stands for an object whose members the type describes.
             if kind == SymbolKind::Data
                 && let Some(AnyJsExpression::JsObjectExpression(nested)) =
-                    member_value(&member).and_then(|value| value.inner_expression())
+                    member_value(&member).map(AnyJsExpression::omit_parentheses)
             {
+                self.builder.symbol_mut(id).detail = Detail::Object { open: false };
                 self.collect_object_members(&nested, component, kind, Some(id));
             }
+        }
+    }
+
+    /// Records that the object literal value of `symbol` has members the
+    /// model cannot name.
+    fn open_members(&mut self, symbol: SymbolId) {
+        if let Detail::Object { open } = &mut self.builder.symbol_mut(symbol).detail {
+            *open = true;
         }
     }
 
@@ -1393,15 +1438,112 @@ impl Collector<'_, '_> {
             let Some(name) = member.name() else {
                 continue;
             };
+            let range = member_name_range(&member);
+            if let Some(range) = range {
+                // `'user.name'` watches the member `name` of `user`.
+                let mut segments = name.text().split('.').map(synthetic_name);
+                if let Some(first) = segments.next() {
+                    self.add_option_name(component, range, first, segments.collect(), Access::Read);
+                }
+            }
+            if let Some(value) = member_value(&member) {
+                self.collect_watch_handlers(&value, component);
+            }
             self.add_instance_symbol(
                 component,
                 name,
-                member_name_range(&member),
+                range,
                 member.syntax().text_trimmed_range(),
                 Namespace::Option,
                 SymbolKind::Watcher,
             );
         }
+    }
+
+    /// Reads the methods a watcher names as its handlers: `'onChange'`,
+    /// `{ handler: 'onChange' }`, or an array of those.
+    fn collect_watch_handlers(&mut self, value: &AnyJsExpression, component: ComponentId) {
+        match value.clone().omit_parentheses() {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(handler),
+            ) => {
+                if let Ok(name) = handler.inner_string_text() {
+                    self.add_option_name(
+                        component,
+                        handler.syntax().text_trimmed_range(),
+                        name,
+                        Box::default(),
+                        Access::Call,
+                    );
+                }
+            }
+            AnyJsExpression::JsArrayExpression(array) => {
+                for element in array.elements().iter().flatten() {
+                    if let AnyJsArrayElement::AnyJsExpression(element) = element {
+                        self.collect_watch_handlers(&element, component);
+                    }
+                }
+            }
+            AnyJsExpression::JsObjectExpression(object) => {
+                for member in object.members().iter().flatten() {
+                    if member.name().is_some_and(|name| name.text() == "handler")
+                        && let Some(handler) = member_value(&member)
+                        && !matches!(
+                            handler.clone().omit_parentheses(),
+                            AnyJsExpression::JsArrayExpression(_)
+                                | AnyJsExpression::JsObjectExpression(_)
+                        )
+                    {
+                        self.collect_watch_handlers(&handler, component);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    /// Reads the names listed in the `expose` option.
+    fn collect_expose_option(&mut self, member: &AnyJsObjectMember, component: ComponentId) {
+        let Some(AnyJsExpression::JsArrayExpression(array)) =
+            member_value(member).and_then(|value| value.inner_expression())
+        else {
+            return;
+        };
+        for element in array.elements().iter().flatten() {
+            if let AnyJsArrayElement::AnyJsExpression(AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+            )) = element
+                && let Ok(name) = literal.inner_string_text()
+            {
+                self.add_option_name(
+                    component,
+                    literal.syntax().text_trimmed_range(),
+                    name,
+                    Box::default(),
+                    Access::Read,
+                );
+            }
+        }
+    }
+
+    /// Records a name of the component instance written as a string, for the
+    /// reference pass to resolve. `range` is in the coordinates of the tree.
+    fn add_option_name(
+        &mut self,
+        component: ComponentId,
+        range: TextRange,
+        name: TokenText,
+        path: Box<[TokenText]>,
+        access: Access,
+    ) {
+        let range = self.host(range);
+        self.builder.option_names.push(OptionName {
+            component,
+            range,
+            name,
+            path,
+            access,
+        });
     }
 
     fn collect_inject_option(&mut self, member: &AnyJsObjectMember, component: ComponentId) {

@@ -674,6 +674,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::VueNoRestrictedHtmlElements(conf));
                             }
                         }
+                        "vue/no-undef-properties" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueNoUndefProperties(conf));
+                            }
+                        }
                         "unicorn/consistent-json-file-read" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornConsistentJsonFileRead(conf));
@@ -1228,6 +1233,7 @@ pub(crate) enum Rule {
     UnusedImportsNoUnusedVars(RuleConf<NoUnusedVarsOptions>),
     VueBlockLang(RuleConf<eslint_vue::BlockLangOptions>),
     VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
+    VueNoUndefProperties(RuleConf<eslint_vue::NoUndefPropertiesOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
@@ -1285,6 +1291,7 @@ impl Rule {
             Self::VueNoRestrictedHtmlElements(_) => {
                 Cow::Borrowed("vue/no-restricted-html-elements")
             }
+            Self::VueNoUndefProperties(_) => Cow::Borrowed("vue/no-undef-properties"),
         }
     }
 }

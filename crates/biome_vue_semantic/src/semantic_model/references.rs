@@ -17,12 +17,12 @@ use super::model::*;
 use super::snippets::SfcSnippet;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsRoot,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberAssignment,
-    JsComputedMemberExpression, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression, JsUnaryExpression, JsUnaryOperator, inner_string_text,
-    static_value::StaticValue,
+    AnyJsCallArgument, AnyJsExpression, AnyJsIdentifierReference, AnyJsLiteralExpression,
+    AnyJsMemberExpression, AnyJsRoot, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsIdentifierAssignment,
+    JsIdentifierBinding, JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextLen, TextRange, TextSize, TokenText};
 use biome_string_case::Case;
@@ -895,6 +895,14 @@ pub(crate) fn collect_template_references(
             let resolution = match found {
                 Some(symbol) => Resolution::Symbol(symbol),
                 None if TEMPLATE_GLOBALS.contains(&name.text()) => Resolution::Global,
+                // A type, as in `$event.target as HTMLInputElement`, can be
+                // declared by the TypeScript libraries, which the model does
+                // not read.
+                None if AnyJsIdentifierReference::cast_ref(&node)
+                    .is_some_and(|reference| reference.is_only_type()) =>
+                {
+                    Resolution::Unknowable
+                }
                 None if walker.builder.is_open(scopes.component, Namespace::Binding) => {
                     Resolution::Unknowable
                 }
@@ -1091,6 +1099,34 @@ pub(crate) fn collect_script_references(
         } else if let Some(call) = JsCallExpression::cast_ref(&node) {
             collect_use_template_ref(&mut walker, input, &call, components);
         }
+    }
+
+    // Names written as strings in the options, such as the keys of `watch`.
+    let (names, others): (Vec<_>, Vec<_>) = std::mem::take(&mut walker.builder.option_names)
+        .into_iter()
+        .partition(|name| components.contains(&name.component));
+    walker.builder.option_names = others;
+    for option_name in names {
+        let resolution = walker.resolve_in_component(
+            Some(option_name.component),
+            Namespace::Binding,
+            option_name.name.text(),
+            &[],
+        );
+        walker.builder.add_reference(ReferenceData {
+            range: option_name.range,
+            name: option_name.name,
+            snippet: input.snippet,
+            site: RefSite::OptionName,
+            namespace: Namespace::Binding,
+            scope: None,
+            base: RefBase::This,
+            path: option_name.path,
+            path_open: false,
+            access: option_name.access,
+            call_args: None,
+            resolution,
+        });
     }
 }
 
