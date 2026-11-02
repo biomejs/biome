@@ -81,15 +81,17 @@ impl Rule for UsePlaywrightValidDescribeCallback {
             return None;
         }
 
-        // The callback follows the title, except in an anonymous `describe(callback)`,
-        // which Playwright accepts without a title.
-        let args = call_expr.arguments().ok()?;
-        let [first_arg, second_arg] = args.get_arguments_by_index([0, 1]);
-        let callback_arg = match (first_arg, second_arg) {
-            (_, Some(arg)) => arg,
-            (Some(arg), None) if is_function_expression(&arg) => arg,
-            _ => return Some(InvalidReason::MissingCallback),
+        // The callback is the last argument: `describe(title, callback)`,
+        // `describe(title, details, callback)`, or an anonymous `describe(callback)`.
+        let args = call_expr.arguments().ok()?.args();
+        let Some(callback_arg) = args.last() else {
+            return Some(InvalidReason::MissingCallback);
         };
+        let callback_arg = callback_arg.ok()?;
+        // A lone non-function argument is a title without a callback.
+        if args.len() == 1 && !is_function_expression(&callback_arg) {
+            return Some(InvalidReason::MissingCallback);
+        }
 
         let Some(callback_expr) = callback_arg.as_any_js_expression() else {
             return Some(InvalidReason::NotFunction);

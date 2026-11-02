@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: details.js
+---
+# Input
+```js
+/* should generate diagnostics */
+test.describe('suite', { tag: '@smoke' }, async () => {});
+test.describe('suite', { tag: '@smoke' }, (done) => {});
+test.describe('suite', { tag: '@smoke' }, 'not a function');
+test.describe('suite', () => {}, { tag: '@smoke' });
+
+```
+
+# Diagnostics
+```
+details.js:2:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe callback should not be async.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ test.describe('suite', { tag: '@smoke' }, async () => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ test.describe('suite', { tag: '@smoke' }, (done) => {});
+    4 │ test.describe('suite', { tag: '@smoke' }, 'not a function');
+  
+  i Describe blocks are meant to organize tests, not contain asynchronous logic. Async operations should be placed within individual test callbacks.
+  
+  i Remove the async keyword from the describe callback.
+  
+
+```
+
+```
+details.js:3:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe callback should not have parameters.
+  
+    1 │ /* should generate diagnostics */
+    2 │ test.describe('suite', { tag: '@smoke' }, async () => {});
+  > 3 │ test.describe('suite', { tag: '@smoke' }, (done) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ test.describe('suite', { tag: '@smoke' }, 'not a function');
+    5 │ test.describe('suite', () => {}, { tag: '@smoke' });
+  
+  i Describe callbacks are invoked without arguments by the test framework.
+  
+  i Remove parameters from the describe callback.
+  
+
+```
+
+```
+details.js:4:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe callback must be a function.
+  
+    2 │ test.describe('suite', { tag: '@smoke' }, async () => {});
+    3 │ test.describe('suite', { tag: '@smoke' }, (done) => {});
+  > 4 │ test.describe('suite', { tag: '@smoke' }, 'not a function');
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ test.describe('suite', () => {}, { tag: '@smoke' });
+    6 │ 
+  
+  i The describe callback must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
+
+```
+details.js:5:1 lint/correctness/usePlaywrightValidDescribeCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Describe callback must be a function.
+  
+    3 │ test.describe('suite', { tag: '@smoke' }, (done) => {});
+    4 │ test.describe('suite', { tag: '@smoke' }, 'not a function');
+  > 5 │ test.describe('suite', () => {}, { tag: '@smoke' });
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i The describe callback must be a function, not a string, number, object, or other type.
+  
+  i Replace the callback with a function expression or arrow function.
+  
+
+```
