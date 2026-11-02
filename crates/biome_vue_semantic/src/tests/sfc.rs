@@ -80,6 +80,41 @@ defineProps(['lists', 'row'])
 }
 
 #[test]
+fn snippet_lookup_follows_template_scopes() {
+    let code = r#"<script setup>
+import List from './List.vue'
+defineProps(['lists', 'row'])
+</script>
+<template>
+  <List v-for="list in lists" v-slot="{ row }" :selected="row">{{ row }}</List>
+</template>
+"#;
+    let model = sfc(code);
+    // Resolves `name` in the snippet whose text is `text`, and returns the
+    // kind of the symbol found.
+    let lookup = |text: &str, name: &str| {
+        model
+            .snippets()
+            .find(|snippet| &code[snippet.host_range()] == text)?
+            .lookup(name)
+            .map(|symbol| symbol.kind())
+    };
+    // The iterable of `v-for` does not see its variables.
+    assert_eq!(lookup("lists", "list"), None);
+    // The other directives of the element see its `v-for` variables, but not
+    // its slot parameters.
+    assert_eq!(lookup("row", "list"), Some(SymbolKind::VForAlias));
+    assert_eq!(lookup("row", "row"), Some(SymbolKind::Prop));
+    // The slot content sees both.
+    assert_eq!(lookup(" row ", "row"), Some(SymbolKind::SlotParam));
+    assert_eq!(lookup(" row ", "list"), Some(SymbolKind::VForAlias));
+    assert_eq!(lookup(" row ", "unknown"), None);
+    // A script block resolves its own names.
+    let script = model.blocks().next().unwrap().snippet().unwrap();
+    assert_eq!(script.lookup("List"), None);
+}
+
+#[test]
 fn blocks_and_template_component() {
     let model = sfc(LIST);
     let kinds: Vec<_> = model.blocks().map(|block| block.kind()).collect();
