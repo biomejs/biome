@@ -24,6 +24,7 @@
 mod config_value;
 mod driver;
 mod loader;
+mod loaders;
 
 pub use config_value::{ConfigCall, ConfigObject, ConfigValue, package_name};
 pub use driver::{FrameworkContributions, MAX_INTEGRATION_DEPTH, load_frameworks};
@@ -31,6 +32,7 @@ pub use loader::{
     Activation, Contribution, Declaration, DeclarationKind, Facet, FrameworkLoader,
     InstalledPackage, LoaderContext, LoaderHost, Origin, ResolutionKind,
 };
+pub use loaders::{AstroLoader, StarlightLoader};
 
 /// The loaders that Biome runs for every package.
-pub static LOADERS: &[&dyn FrameworkLoader] = &[];
+pub static LOADERS: &[&dyn FrameworkLoader] = &[&AstroLoader, &StarlightLoader];
