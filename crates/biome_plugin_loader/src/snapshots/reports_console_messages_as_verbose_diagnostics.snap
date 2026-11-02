@@ -1,0 +1,107 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+console.log("loading");
+export const logCalls = defineRule({
+	query: ast("JS_CALL_EXPRESSION"),
+	run(node) {
+		console.log("text:", node.text, 1, true, null, undefined, [1, "a"], {
+			a: 1,
+		});
+		console.info(node);
+		console.warn(node.callee);
+		console.error(node.arguments.token("lParenToken"));
+		console.debug(node.children(), [[[["deep"]]]]);
+		registerDiagnostic(node, "information", "Found a call.");
+	},
+});
+export const logThenThrow = defineRule({
+	query: ast("JS_CALL_EXPRESSION"),
+	run(node) {
+		console.log("before throwing");
+		throw new Error("boom");
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+foo(bar);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: text: foo(bar) 1 true null undefined [1, "a"] {
+        a: 1
+    }
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: JS_CALL_EXPRESSION@0..8 "foo(bar)"
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: JS_IDENTIFIER_EXPRESSION@0..3 "foo"
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: L_PAREN@3..4 "("
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logCalls logged: [JS_IDENTIFIER_EXPRESSION@0..3 "foo", JS_CALL_ARGUMENTS@3..8 "(bar)"] [[[[...]]]]
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found a call.
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i logThenThrow logged: before throwing
+  
+  > 1 │ foo(bar);
+      │ ^^^^^^^^
+  
+
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule logThenThrow errored: Error: boom (/plugin.js:18:27)
+        at run (/plugin.js:18:27)
+```

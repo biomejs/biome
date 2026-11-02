@@ -33,6 +33,9 @@ fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<Lo
     let mut ctx = JsExecContext::new(fs)?;
     let module = ctx.import_module(path)?;
     let rules = ctx.load_rules(&module)?;
+    // Messages printed while evaluating the module aren't tied to an analyzed
+    // file, so they have nowhere to be reported.
+    ctx.pull_console_messages();
 
     if rules.is_empty() {
         return Err(JsNativeError::typ()
@@ -200,6 +203,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             // Drain the diagnostics even on errors, so a failed rule can't leak
             // its diagnostics into the next one.
             let mut diagnostics = ctx.pull_diagnostics();
+            let messages = ctx.pull_console_messages();
 
             if let Err(err) = result {
                 diagnostics.push(PluginDiagnosticEntry {
@@ -213,6 +217,18 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                 });
             }
 
+            entries.extend(messages.into_iter().map(|message| {
+                PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        node.text_trimmed_range(),
+                        markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{message}</Info>),
+                    )
+                    .verbose()
+                    .subcategory(name.to_string()),
+                    action: None,
+                }
+            }));
             entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
                 diagnostic: entry.diagnostic.subcategory(name.to_string()),
                 action: entry.action,
@@ -1387,6 +1403,66 @@ mod tests {
             source,
             &[("/file.js", content)],
             render_diagnostics("/file.js", content, result),
+        );
+    }
+
+    /// Messages printed with `console` are reported as verbose diagnostics on the queried node.
+    /// Messages printed while the module is evaluated are discarded.
+    #[test]
+    fn reports_console_messages_as_verbose_diagnostics() {
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            console.log("loading");
+            export const logCalls = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.log("text:", node.text, 1, true, null, undefined, [1, "a"], { a: 1 });
+                    console.info(node);
+                    console.warn(node.callee);
+                    console.error(node.arguments.token("lParenToken"));
+                    console.debug(node.children(), [[[["deep"]]]]);
+                    registerDiagnostic(node, "information", "Found a call.");
+                },
+            });
+            export const logThenThrow = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.log("before throwing");
+                    throw new Error("boom");
+                },
+            });"#;
+        let content = "foo(bar);";
+        let parse = biome_js_parser::parse(
+            content,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
+        let content_rendered: String = parse
+            .syntax()
+            .descendants()
+            .filter(|node| plugin.query().contains(&node.kind().to_raw()))
+            .map(|node| {
+                let result = plugin.evaluate(
+                    node.into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
+                assert!(
+                    result.entries[..5]
+                        .iter()
+                        .all(|entry| entry.diagnostic.tags().is_verbose())
+                );
+                render_diagnostics("/file.js", content, result)
+            })
+            .collect();
+
+        snap_diagnostics(
+            "reports_console_messages_as_verbose_diagnostics",
+            "/plugin.js",
+            source,
+            &[("/file.js", content)],
+            content_rendered,
         );
     }
 

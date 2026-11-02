@@ -1,5 +1,6 @@
 use crate::JsModuleLoader;
 use crate::ast::JsAstNode;
+use crate::console::JsConsole;
 use crate::kind_set::{JsNodeKindSet, JsTokenKindSet};
 use crate::mutation::JsMutation;
 use crate::plugin_api::JsPluginApi;
@@ -28,6 +29,7 @@ pub struct JsExecContext {
     ctx: Context,
     fs: Arc<dyn FsWithResolverProxy>,
     api: JsPluginApi,
+    console: JsConsole,
 }
 
 /// A lint rule declared by a plugin with `defineRule()` and collected from its module exports.
@@ -51,6 +53,7 @@ impl JsExecContext {
     pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> JsResult<Self> {
         let module_loader = Rc::new(JsModuleLoader::new(fs.clone()));
         let api = JsPluginApi::new();
+        let console = JsConsole::new();
         let mut ctx = Context::builder()
             .clock(Rc::new(Clock::default()))
             .module_loader(Rc::clone(&module_loader))
@@ -62,18 +65,30 @@ impl JsExecContext {
         JsTokenKindSet::<JsLanguage>::register(&mut ctx)?;
         JsMutation::register(&mut ctx)?;
         register_semantic(&mut ctx)?;
+        console.register(&mut ctx)?;
 
         module_loader.register_module(
             js_string!("@biomejs/runtime/plugin"),
             api.create_module(&mut ctx),
         );
 
-        Ok(Self { ctx, fs, api })
+        Ok(Self {
+            ctx,
+            fs,
+            api,
+            console,
+        })
     }
 
     #[inline]
     pub fn pull_diagnostics(&mut self) -> Vec<PluginDiagnosticEntry> {
         self.api.pull_diagnostics()
+    }
+
+    /// Takes the messages the plugin printed with `console` since the last call.
+    #[inline]
+    pub fn pull_console_messages(&mut self) -> Vec<String> {
+        self.console.pull_messages()
     }
 
     pub fn import_module(&mut self, path: impl AsRef<Utf8Path>) -> JsResult<Module> {
