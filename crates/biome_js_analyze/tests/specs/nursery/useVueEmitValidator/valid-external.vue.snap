@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-external.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+const externalEmits = ["foo"];
+export default {
+  emits: externalEmits,
+};
+</script>
+
+```

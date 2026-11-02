@@ -3171,6 +3171,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "useVueDefinePropsDestructuring", TypeId::of::<biome_rule_options::use_vue_define_props_destructuring::UseVueDefinePropsDestructuringOptions>()));
     result.push((
         "nursery",
+        "useVueEmitValidator",
+        TypeId::of::<biome_rule_options::use_vue_emit_validator::UseVueEmitValidatorOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueEmitsValidatorReturn",
         TypeId::of::<
             biome_rule_options::use_vue_emits_validator_return::UseVueEmitsValidatorReturnOptions,

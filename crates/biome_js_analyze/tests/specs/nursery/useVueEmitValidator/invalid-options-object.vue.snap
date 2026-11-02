@@ -1,0 +1,220 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-object.vue
+---
+# Input
+```vue
+<script lang="ts">
+/* should generate diagnostics */
+export default {
+  emits: {
+    skipped: null,
+    alsoSkipped: undefined,
+    parenthesized: (null),
+    withComment: /* no validation */ null,
+    objectValue: {
+      type: String,
+    },
+    asserted: {} as ((payload: string) => boolean),
+    "update:modelValue": null,
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-object.vue:5:5 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event skipped is declared with a value that turns off validation.
+  
+    3 │ export default {
+    4 │   emits: {
+  > 5 │     skipped: null,
+      │     ^^^^^^^^^^^^^
+    6 │     alsoSkipped: undefined,
+    7 │     parenthesized: (null),
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+     3  3 │   export default {
+     4  4 │     emits: {
+     5    │ - ····skipped:·null,
+        5 │ + ····skipped:·()·=>·true,
+     6  6 │       alsoSkipped: undefined,
+     7  7 │       parenthesized: (null),
+  
+
+```
+
+```
+invalid-options-object.vue:6:5 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event alsoSkipped is declared with a value that turns off validation.
+  
+    4 │   emits: {
+    5 │     skipped: null,
+  > 6 │     alsoSkipped: undefined,
+      │     ^^^^^^^^^^^^^^^^^^^^^^
+    7 │     parenthesized: (null),
+    8 │     withComment: /* no validation */ null,
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+     4  4 │     emits: {
+     5  5 │       skipped: null,
+     6    │ - ····alsoSkipped:·undefined,
+        6 │ + ····alsoSkipped:·()·=>·true,
+     7  7 │       parenthesized: (null),
+     8  8 │       withComment: /* no validation */ null,
+  
+
+```
+
+```
+invalid-options-object.vue:7:5 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event parenthesized is declared with a value that turns off validation.
+  
+    5 │     skipped: null,
+    6 │     alsoSkipped: undefined,
+  > 7 │     parenthesized: (null),
+      │     ^^^^^^^^^^^^^^^^^^^^^
+    8 │     withComment: /* no validation */ null,
+    9 │     objectValue: {
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+     5  5 │       skipped: null,
+     6  6 │       alsoSkipped: undefined,
+     7    │ - ····parenthesized:·(null),
+        7 │ + ····parenthesized:·()·=>·true,
+     8  8 │       withComment: /* no validation */ null,
+     9  9 │       objectValue: {
+  
+
+```
+
+```
+invalid-options-object.vue:8:5 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event withComment is declared with a value that turns off validation.
+  
+     6 │     alsoSkipped: undefined,
+     7 │     parenthesized: (null),
+   > 8 │     withComment: /* no validation */ null,
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │     objectValue: {
+    10 │       type: String,
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+     6  6 │       alsoSkipped: undefined,
+     7  7 │       parenthesized: (null),
+     8    │ - ····withComment:·/*·no·validation·*/·null,
+        8 │ + ····withComment:·/*·no·validation·*/·()·=>·true,
+     9  9 │       objectValue: {
+    10 10 │         type: String,
+  
+
+```
+
+```
+invalid-options-object.vue:9:5 lint/nursery/useVueEmitValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event objectValue is declared without a validator function.
+  
+     7 │     parenthesized: (null),
+     8 │     withComment: /* no validation */ null,
+   > 9 │     objectValue: {
+       │     ^^^^^^^^^^^^^^
+  > 10 │       type: String,
+  > 11 │     },
+       │     ^
+    12 │     asserted: {} as ((payload: string) => boolean),
+    13 │     "update:modelValue": null,
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-object.vue:12:5 lint/nursery/useVueEmitValidator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event asserted is declared without a validator function.
+  
+    10 │       type: String,
+    11 │     },
+  > 12 │     asserted: {} as ((payload: string) => boolean),
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     "update:modelValue": null,
+    14 │   },
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-object.vue:13:5 lint/nursery/useVueEmitValidator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update:modelValue is declared with a value that turns off validation.
+  
+    11 │     },
+    12 │     asserted: {} as ((payload: string) => boolean),
+  > 13 │     "update:modelValue": null,
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   },
+    15 │ };
+  
+  i A validator function checks the values passed with the event, and documents what the event sends. In TypeScript, its parameter types also become the types the emit function accepts for this event.
+  
+  i Replace the value with a function that receives the event's values and returns true when they are valid. If the event sends no values, use () => true.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace it with a validator function that accepts no values.
+  
+    11 11 │       },
+    12 12 │       asserted: {} as ((payload: string) => boolean),
+    13    │ - ····"update:modelValue":·null,
+       13 │ + ····"update:modelValue":·()·=>·true,
+    14 14 │     },
+    15 15 │   };
+  
+
+```

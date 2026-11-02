@@ -4008,6 +4008,11 @@ export interface Nursery {
 	 */
 	useVueDefinePropsDestructuring?: UseVueDefinePropsDestructuringConfiguration;
 	/**
+	 * Require a validator function for each event declared in the emits option or in defineEmits().
+	 * See https://biomejs.dev/linter/rules/use-vue-emit-validator
+	 */
+	useVueEmitValidator?: UseVueEmitValidatorConfiguration;
+	/**
 	 * Require the validator function of a Vue event to return a true value when the event is valid.
 	 * See https://biomejs.dev/linter/rules/use-vue-emits-validator-return
 	 */
@@ -6914,6 +6919,9 @@ export type UseVueDefineOptionsConfiguration =
 export type UseVueDefinePropsDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefinePropsDestructuringOptions;
+export type UseVueEmitValidatorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueEmitValidatorOptions;
 export type UseVueEmitsValidatorReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueEmitsValidatorReturnOptions;
@@ -10185,6 +10193,14 @@ export interface RuleWithUseVueDefinePropsDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefinePropsDestructuringOptions;
 }
+export interface RuleWithUseVueEmitValidatorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueEmitValidatorOptions;
+}
 export interface RuleWithUseVueEmitsValidatorReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueEmitsValidatorReturnOptions;
@@ -12833,6 +12849,7 @@ export interface UseVueConsistentVForDelimiterOptions {
 export type UseVueDefaultPropOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
+export type UseVueEmitValidatorOptions = {};
 export type UseVueEmitsValidatorReturnOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
@@ -14568,6 +14585,7 @@ export type Category =
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
+	| "lint/nursery/useVueEmitValidator"
 	| "lint/nursery/useVueEmitsValidatorReturn"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
