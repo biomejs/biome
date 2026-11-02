@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-dynamic-name.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  methods: {
+    onChange(eventName) {
+      this.$emit(eventName, value1, value2);
+    },
+  },
+};
+</script>
+
+```

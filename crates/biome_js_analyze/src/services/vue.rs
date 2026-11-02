@@ -19,14 +19,17 @@
 //!   [`Semantic`](crate::services::semantic::Semantic). Use it when the rule
 //!   judges syntax, such as a template expression, with the help of the
 //!   model.
+//! - [`VueEvent`] runs the rule once per event name written in an emit
+//!   declaration or an emit call. Use it when the rule judges how one event
+//!   is declared or emitted.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
 //!
 //! A query for another kind of declaration is one `define_vue_query!` call
-//! and one loop in [`VueSemanticVisitor`]. References have their own visitor,
-//! [`VueReferenceVisitor`], so that files analyzed without a rule that asks for
-//! them don't pay for matching every reference.
+//! and one loop in [`VueSemanticVisitor`]. References have their own visitors,
+//! [`VueReferenceVisitor`] and [`VueEventVisitor`], so that files analyzed
+//! without a rule that asks for them don't pay for matching every reference.
 
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
@@ -40,7 +43,7 @@ use biome_languages::{JsFileSource, LanguageDb};
 use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Emit, Prop, Reference, Snippet, SnippetId, Symbol, VueSemanticModel,
+    Component, Emit, Prop, RefSite, Reference, Snippet, SnippetId, Symbol, VueSemanticModel,
     component_model, vue_model_from_source,
 };
 use std::rc::Rc;
@@ -189,6 +192,42 @@ impl Visitor for VueReferenceVisitor {
     }
 }
 
+/// Builds the Vue semantic model and emits a query match for each event name
+/// written in the analyzed tree, in an emit declaration or an emit call.
+pub(crate) struct VueEventVisitor;
+
+impl Visitor for VueEventVisitor {
+    type Language = JsLanguage;
+
+    fn start(&mut self, mut ctx: VisitorStartContext<JsLanguage>) {
+        VueSemanticService::insert_into(&mut ctx);
+    }
+
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
+        let WalkEvent::Enter(node) = event else {
+            return;
+        };
+        if node.parent().is_some() {
+            return;
+        }
+        let Some(service) = ctx.services.get_service::<VueSemanticService>() else {
+            return;
+        };
+        for component in service.model.components() {
+            for emit in component.emits().filter(|emit| service.declares(emit)) {
+                ctx.match_query(VueEventMatch(VueEventSite::Declaration(emit)));
+            }
+        }
+        for reference in service
+            .model
+            .references_in(service.snippet)
+            .filter(|reference| reference.site() == RefSite::EventName)
+        {
+            ctx.match_query(VueEventMatch(VueEventSite::Call(reference)));
+        }
+    }
+}
+
 macro_rules! define_vue_query {
     ($(#[$meta:meta])* $query:ident, $input:ident, $output:ty) => {
         define_vue_query!($(#[$meta])* $query, $input, $output, VueSemanticVisitor);
@@ -332,5 +371,41 @@ where
 
     fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
         N::unwrap_cast(node.clone())
+    }
+}
+
+define_vue_query!(
+    /// Matches each event name written in an emit declaration or an emit call,
+    /// whatever syntax declares or emits the event.
+    VueEvent,
+    VueEventMatch,
+    VueEventSite,
+    VueEventVisitor
+);
+
+/// An event name written in the analyzed tree.
+#[derive(Clone, Debug)]
+pub enum VueEventSite {
+    /// An event a component declares, as in `defineEmits(['change'])`.
+    Declaration(Emit),
+    /// The event name passed to a call that emits the event, as in
+    /// `emit('change', value)`. Only names written as a string are matched.
+    Call(Reference),
+}
+
+impl VueEventSite {
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Declaration(emit) => emit.name(),
+            Self::Call(reference) => reference.name(),
+        }
+    }
+
+    /// The range of the event name, in the coordinates of the analyzed tree.
+    pub fn range(&self) -> TextRange {
+        match self {
+            Self::Declaration(emit) => emit.range(),
+            Self::Call(reference) => reference.range(),
+        }
     }
 }
