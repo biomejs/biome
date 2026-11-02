@@ -3388,6 +3388,11 @@ export interface Nursery {
 	 */
 	noVueBooleanDefault?: NoVueBooleanDefaultConfiguration;
 	/**
+	 * Disallow content inside elements whose content is replaced by v-html or v-text.
+	 * See https://biomejs.dev/linter/rules/no-vue-child-content
+	 */
+	noVueChildContent?: NoVueChildContentConfiguration;
+	/**
 	 * Disallow using computed properties inside the data function of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data
 	 */
@@ -6502,6 +6507,9 @@ export type NoUselessTypeConversionConfiguration =
 export type NoVueBooleanDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueBooleanDefaultOptions;
+export type NoVueChildContentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueChildContentOptions;
 export type NoVueComputedPropertiesInDataConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueComputedPropertiesInDataOptions;
@@ -9445,6 +9453,14 @@ export interface RuleWithNoVueBooleanDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueBooleanDefaultOptions;
 }
+export interface RuleWithNoVueChildContentOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueChildContentOptions;
+}
 export interface RuleWithNoVueComputedPropertiesInDataOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueComputedPropertiesInDataOptions;
@@ -12317,6 +12333,14 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessTypeAssertionOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
+export interface NoVueChildContentOptions {
+	/**
+	 * Names of other directives that replace the content of their element, written without
+	 * the `v-` prefix. For example, `"t"` checks the `v-t` directive. `v-html` and `v-text`
+	 * are always checked. Defaults to an empty list.
+	 */
+	additionalDirectives?: string[];
+}
 export type NoVueComputedPropertiesInDataOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
@@ -14283,6 +14307,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeAssertion"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
+	| "lint/nursery/noVueChildContent"
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
