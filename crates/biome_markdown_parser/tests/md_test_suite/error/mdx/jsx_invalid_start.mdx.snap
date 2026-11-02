@@ -13,6 +13,10 @@ expression: snapshot
 
 a <3 b
 
+A <☃ /> start
+
+A <a☃b /> name
+
 ```
 
 
@@ -68,18 +72,56 @@ MdRoot {
                 },
             ],
         },
+        MdNewline {
+            value_token: NEWLINE@30..31 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@31..33 "A " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@33..39 "<☃ /" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@39..46 "> start" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@47..48 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@48..50 "A " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@50..59 "<a☃b />" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@59..64 " name" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@64..65 "\n" [] [],
+                },
+            ],
+        },
     ],
-    eof_token: EOF@30..30 "" [] [],
+    eof_token: EOF@65..65 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_ROOT@0..30
+0: MD_ROOT@0..65
   0: (empty)
   1: (empty)
-  2: MD_BLOCK_LIST@0..30
+  2: MD_BLOCK_LIST@0..65
     0: MD_PARAGRAPH@0..4
       0: MD_INLINE_ITEM_LIST@0..4
         0: MD_TEXTUAL@0..1
@@ -108,7 +150,31 @@ MdRoot {
           0: MD_TEXTUAL_LITERAL@25..29 "<3 b" [] []
         2: MD_TEXTUAL@29..30
           0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
-  3: EOF@30..30 "" [] []
+    5: MD_NEWLINE@30..31
+      0: NEWLINE@30..31 "\n" [] []
+    6: MD_PARAGRAPH@31..47
+      0: MD_INLINE_ITEM_LIST@31..47
+        0: MD_TEXTUAL@31..33
+          0: MD_TEXTUAL_LITERAL@31..33 "A " [] []
+        1: MD_TEXTUAL@33..39
+          0: MD_TEXTUAL_LITERAL@33..39 "<☃ /" [] []
+        2: MD_TEXTUAL@39..46
+          0: MD_TEXTUAL_LITERAL@39..46 "> start" [] []
+        3: MD_TEXTUAL@46..47
+          0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
+    7: MD_NEWLINE@47..48
+      0: NEWLINE@47..48 "\n" [] []
+    8: MD_PARAGRAPH@48..65
+      0: MD_INLINE_ITEM_LIST@48..65
+        0: MD_TEXTUAL@48..50
+          0: MD_TEXTUAL_LITERAL@48..50 "A " [] []
+        1: MDX_JSX_INLINE_TAG@50..59
+          0: MDX_JSX_TAG_LITERAL@50..59 "<a☃b />" [] []
+        2: MD_TEXTUAL@59..64
+          0: MD_TEXTUAL_LITERAL@59..64 " name" [] []
+        3: MD_TEXTUAL@64..65
+          0: MD_TEXTUAL_LITERAL@64..65 "\n" [] []
+  3: EOF@65..65 "" [] []
 
 ```
 
@@ -148,7 +214,33 @@ jsx_invalid_start.mdx:5:3 parse ━━━━━━━━━━━━━━━━
   > 5 │ a <3 b
       │   ^
     6 │ 
+    7 │ A <☃ /> start
   
   i To write a literal `<` in MDX, escape it as `\<` or put a space after it.
+  
+jsx_invalid_start.mdx:7:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `☃` after `<`, expected a tag name, `/`, or `>`.
+  
+    5 │ a <3 b
+    6 │ 
+  > 7 │ A <☃ /> start
+      │   ^
+    8 │ 
+    9 │ A <a☃b /> name
+  
+  i To write a literal `<` in MDX, escape it as `\<` or put a space after it.
+  
+jsx_invalid_start.mdx:9:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `☃` in the tag name `a☃b`.
+  
+     7 │ A <☃ /> start
+     8 │ 
+   > 9 │ A <a☃b /> name
+       │   ^^^^^^^
+    10 │ 
+  
+  i A tag name is a JavaScript name, optionally joined with `.` or a single `:`. To write a literal `<` in MDX, escape it as `\<`.
   
 ```

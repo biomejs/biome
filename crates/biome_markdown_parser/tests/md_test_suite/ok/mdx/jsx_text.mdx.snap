@@ -19,6 +19,8 @@ title="multi">line</Card> tag.
 
 [a <B>link</B>](https://example.com)
 
+A <Café /> name and a <my-element>dash</my-element> element.
+
 ```
 
 
@@ -176,18 +178,49 @@ MdRoot {
                 },
             ],
         },
+        MdNewline {
+            value_token: NEWLINE@230..231 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@231..233 "A " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@233..242 "<Café />" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@242..254 " name and a " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@254..266 "<my-element>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@266..270 "dash" [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@270..283 "</my-element>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@283..292 " element." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@292..293 "\n" [] [],
+                },
+            ],
+        },
     ],
-    eof_token: EOF@230..230 "" [] [],
+    eof_token: EOF@293..293 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_ROOT@0..230
+0: MD_ROOT@0..293
   0: (empty)
   1: (empty)
-  2: MD_BLOCK_LIST@0..230
+  2: MD_BLOCK_LIST@0..293
     0: MDX_BLOCK_EXPRESSION@0..46
       0: MD_INDENT_TOKEN_LIST@0..0
       1: L_CURLY@0..1 "{" [] []
@@ -284,6 +317,26 @@ MdRoot {
           6: R_PAREN@228..229 ")" [] []
         1: MD_TEXTUAL@229..230
           0: MD_TEXTUAL_LITERAL@229..230 "\n" [] []
-  3: EOF@230..230 "" [] []
+    11: MD_NEWLINE@230..231
+      0: NEWLINE@230..231 "\n" [] []
+    12: MD_PARAGRAPH@231..293
+      0: MD_INLINE_ITEM_LIST@231..293
+        0: MD_TEXTUAL@231..233
+          0: MD_TEXTUAL_LITERAL@231..233 "A " [] []
+        1: MDX_JSX_INLINE_TAG@233..242
+          0: MDX_JSX_TAG_LITERAL@233..242 "<Café />" [] []
+        2: MD_TEXTUAL@242..254
+          0: MD_TEXTUAL_LITERAL@242..254 " name and a " [] []
+        3: MDX_JSX_INLINE_TAG@254..266
+          0: MDX_JSX_TAG_LITERAL@254..266 "<my-element>" [] []
+        4: MD_TEXTUAL@266..270
+          0: MD_TEXTUAL_LITERAL@266..270 "dash" [] []
+        5: MDX_JSX_INLINE_TAG@270..283
+          0: MDX_JSX_TAG_LITERAL@270..283 "</my-element>" [] []
+        6: MD_TEXTUAL@283..292
+          0: MD_TEXTUAL_LITERAL@283..292 " element." [] []
+        7: MD_TEXTUAL@292..293
+          0: MD_TEXTUAL_LITERAL@292..293 "\n" [] []
+  3: EOF@293..293 "" [] []
 
 ```

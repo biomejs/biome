@@ -31,6 +31,7 @@ use biome_parser::Parser;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::{TextRange, TextSize};
+use biome_unicode_table::{Dispatch, is_js_id_continue, is_js_id_start, lookup_byte};
 
 /// JSX in MDX follows React rather than HTML: an element without `/>` keeps
 /// its children open until its closing tag, even when it is named `br`.
@@ -513,8 +514,8 @@ impl TagStart {
         };
         match character {
             ' ' | '\t' | '\n' | '\r' => Self::Text,
-            '/' | '>' | '$' | '_' => Self::Tag,
-            _ if character.is_alphabetic() => Self::Tag,
+            '/' | '>' => Self::Tag,
+            _ if is_js_id_start(character) => Self::Tag,
             _ => Self::Invalid { character },
         }
     }
@@ -587,7 +588,7 @@ fn invalid_name_character(name: &str) -> Option<char> {
                     .chars()
                     .find(|character| matches!(character, '.' | ':'));
             }
-            Some(first) if !is_name_start(first) => return Some(first),
+            Some(first) if !is_js_id_start(first) => return Some(first),
             Some(_) => {}
         }
         if let Some(character) = characters.find(|character| !is_name_continue(*character)) {
@@ -604,12 +605,10 @@ fn invalid_name_character(name: &str) -> Option<char> {
     }
 }
 
-fn is_name_start(character: char) -> bool {
-    character.is_alphabetic() || matches!(character, '$' | '_')
-}
-
+/// Returns whether `character` continues a JSX name: a JavaScript identifier
+/// character, or `-` as in `<my-element>`.
 fn is_name_continue(character: char) -> bool {
-    character.is_alphanumeric() || matches!(character, '$' | '_' | '-' | '\u{200c}' | '\u{200d}')
+    character == '-' || is_js_id_continue(character)
 }
 
 /// Returns the offset of the `<` in an attribute value written as an
@@ -618,16 +617,16 @@ fn element_attribute_value(text: &str) -> Option<usize> {
     let bytes = text.as_bytes();
     let mut index = 1;
     while let Some(&byte) = bytes.get(index) {
-        match byte {
-            b'"' | b'\'' => {
+        match lookup_byte(byte) {
+            Dispatch::QOT => {
                 let close = text[index + 1..].find(byte as char)?;
                 index += close + 2;
             }
-            b'{' => {
+            Dispatch::BEO => {
                 let body = &bytes[index + 1..];
                 index += JsExtent::expression_length(body, JSX) + 2;
             }
-            b'=' => {
+            Dispatch::EQL => {
                 let value = text[index + 1..].trim_start();
                 if value.starts_with('<') {
                     return Some(text.len() - value.len());
