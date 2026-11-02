@@ -668,6 +668,14 @@ export interface CssFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
+	 * Controls whether SCSS maps, and lists used as map values, are expanded onto multiple lines.
+	 * `auto` and `always` expand them regardless of width, matching Prettier. `never` keeps them
+	 * on one line when they fit within the line width.
+	 *
+	 * If unset, inherits the global expansion setting.
+	 */
+	expand?: Expand;
+	/**
 	 * The indent style applied to CSS and languages that extend it. If unset, inherits the global
 	 * indentation style.
 	 */
