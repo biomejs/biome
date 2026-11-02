@@ -3408,6 +3408,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedDestroyedLifecycle?: NoVueDeprecatedDestroyedLifecycleConfiguration;
 	/**
+	 * Disallow the deprecated functional attribute on the \<template> of a Vue component.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-functional-template
+	 */
+	noVueDeprecatedFunctionalTemplate?: NoVueDeprecatedFunctionalTemplateConfiguration;
+	/**
 	 * Disallow the is attribute on HTML elements in Vue templates.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-html-element-is
 	 */
@@ -6474,6 +6479,9 @@ export type NoVueDeprecatedDeleteSetConfiguration =
 export type NoVueDeprecatedDestroyedLifecycleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDestroyedLifecycleOptions;
+export type NoVueDeprecatedFunctionalTemplateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedFunctionalTemplateOptions;
 export type NoVueDeprecatedHtmlElementIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedHtmlElementIsOptions;
@@ -9401,6 +9409,10 @@ export interface RuleWithNoVueDeprecatedDestroyedLifecycleOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDestroyedLifecycleOptions;
 }
+export interface RuleWithNoVueDeprecatedFunctionalTemplateOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedFunctionalTemplateOptions;
+}
 export interface RuleWithNoVueDeprecatedHtmlElementIsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedHtmlElementIsOptions;
@@ -12225,6 +12237,7 @@ export type NoVueComputedPropertiesInDataOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedDestroyedLifecycleOptions = {};
+export type NoVueDeprecatedFunctionalTemplateOptions = {};
 export type NoVueDeprecatedHtmlElementIsOptions = {};
 export type NoVueDeprecatedInlineTemplateOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
@@ -14138,6 +14151,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
+	| "lint/nursery/noVueDeprecatedFunctionalTemplate"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
 	| "lint/nursery/noVueDeprecatedListeners"
