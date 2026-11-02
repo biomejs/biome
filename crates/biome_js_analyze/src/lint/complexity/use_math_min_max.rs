@@ -41,6 +41,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
+    /// const width = 100;
+    /// const maxWidth = 200;
     /// Math.min(width, maxWidth) < height ? Math.min(width, maxWidth) : height;
     /// ```
     ///
@@ -522,7 +524,7 @@ fn operand_repeatability(
         }
 
         if JsCallExpression::cast_ref(&node)
-            .is_some_and(|call| math_min_max_method(&call, model).is_none())
+            .is_some_and(|call| !is_repeatable_math_call(&call, model))
             || JsImportCallExpression::can_cast(node.kind())
             || JsNewExpression::can_cast(node.kind())
             || JsSpread::can_cast(node.kind())
@@ -538,6 +540,72 @@ fn operand_repeatability(
     } else {
         OperandRepeatability::Idempotent
     })
+}
+
+fn is_repeatable_math_call(call: &JsCallExpression, model: &SemanticModel) -> bool {
+    math_min_max_method(call, model).is_some()
+        && call.arguments().is_ok_and(|arguments| {
+            arguments.args().iter().all(|argument| {
+                argument.is_ok_and(|argument| {
+                    argument.as_any_js_expression().is_some_and(|expression| {
+                        has_side_effect_free_numeric_conversion(expression, model).unwrap_or(false)
+                    })
+                })
+            })
+        })
+}
+
+fn has_side_effect_free_numeric_conversion(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let mut expression = expression.clone();
+    loop {
+        expression = expression.omit_type_wrappers()?;
+        let identifier = match &expression {
+            AnyJsExpression::AnyJsLiteralExpression(literal) => {
+                return Some(literal.as_static_value().is_some());
+            }
+            AnyJsExpression::JsUnaryExpression(unary) => {
+                return unary.is_signed_numeric_literal().ok();
+            }
+            AnyJsExpression::JsCallExpression(call) => {
+                // Descendant calls are checked separately by operand_repeatability.
+                return Some(math_min_max_method(call, model).is_some());
+            }
+            AnyJsExpression::JsIdentifierExpression(identifier) => identifier,
+            _ => return Some(false),
+        };
+        let reference = identifier.name().ok()?;
+        let Some(binding) = model.binding(&reference) else {
+            return Some(matches!(
+                reference.value_token().ok()?.text_trimmed(),
+                "undefined" | "NaN" | "Infinity"
+            ));
+        };
+        if binding.all_writes().next().is_some() {
+            return Some(false);
+        }
+        let AnyJsBindingDeclaration::JsVariableDeclarator(declarator) =
+            binding.tree().declaration()?
+        else {
+            return Some(false);
+        };
+        if !declarator.declaration()?.is_const()
+            || !matches!(
+                declarator.id().ok()?,
+                AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(_))
+            )
+        {
+            return Some(false);
+        }
+        let initializer = declarator.initializer()?.expression().ok()?;
+        // Earlier initializers make alias traversal terminate even for cyclic declarations.
+        if initializer.range().end() > expression.range().start() {
+            return Some(false);
+        }
+        expression = initializer;
+    }
 }
 
 fn math_min_max_method(
