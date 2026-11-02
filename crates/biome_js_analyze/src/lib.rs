@@ -7,7 +7,7 @@
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
-use crate::services::embedded::EmbeddedService;
+use crate::services::embedded::{EmbeddedService, ReportsFileDiagnostics};
 pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
 use crate::services::semantic::SemanticModelBuilderVisitor;
 use crate::services::typed::TypedModule;
@@ -73,6 +73,9 @@ pub struct JsAnalyzerServices {
     embedded_data: Option<Arc<EmbeddedData>>,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: Option<TextSize>,
+    /// Whether the analyzed source skips diagnostics about its whole file,
+    /// because another snippet of its host document reports them.
+    skips_file_diagnostics: bool,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
 }
@@ -102,6 +105,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             document: None,
             embedded_data: None,
             snippet_offset: None,
+            skips_file_diagnostics: false,
             project_layout,
             source_type,
         }
@@ -117,6 +121,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             document: None,
             embedded_data: None,
             snippet_offset: None,
+            skips_file_diagnostics: false,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
         }
@@ -158,6 +163,11 @@ impl JsAnalyzerServices {
 
     pub fn with_snippet_offset(mut self, snippet_offset: Option<TextSize>) -> Self {
         self.snippet_offset = snippet_offset;
+        self
+    }
+
+    pub fn with_skips_file_diagnostics(mut self, skips_file_diagnostics: bool) -> Self {
+        self.skips_file_diagnostics = skips_file_diagnostics;
         self
     }
 
@@ -231,6 +241,7 @@ where
         document,
         embedded_data,
         snippet_offset,
+        skips_file_diagnostics,
         project_layout,
         source_type,
     } = services;
@@ -302,6 +313,7 @@ where
         |module_db| TailwindDesignSystem::from_module_graph(module_db, options.tailwind()),
     ));
     services.insert_service(source_type);
+    services.insert_service(ReportsFileDiagnostics(!skips_file_diagnostics));
     if let Some(module_db) = module_db {
         services.insert_service(module_db);
     }

@@ -1124,7 +1124,7 @@ pub(super) fn lint_with_inspector(
     let mut snippets = {
         let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + '_>> =
             Vec::new();
-        for snippet in params
+        let analyzed: Vec<_> = params
             .parsed_source
             .snippets(&params.workspace_db)
             .for_analysis(
@@ -1134,12 +1134,17 @@ pub(super) fn lint_with_inspector(
                 params.path,
                 &params.workspace_db,
             )
-        {
-            let Some(language) = snippet.file_source(&params.workspace_db) else {
-                continue;
-            };
+            .filter_map(|snippet| {
+                let language = snippet.file_source(&params.workspace_db)?;
+                Some((snippet, language))
+            })
+            .collect();
+        let file_diagnostics_index = file_diagnostics_snippet_index(&analyzed);
+        for (index, (snippet, language)) in analyzed.into_iter().enumerate() {
             let offset = snippet.content_offset();
-            let snippet_params = params.for_snippet(&snippet, language);
+            let mut snippet_params = params.for_snippet(&snippet, language);
+            snippet_params.reports_file_diagnostics =
+                params.reports_file_diagnostics && file_diagnostics_index == Some(index);
             let analyzer = if language.to_js_file_source().is_some() {
                 LintSnippetAnalyzer::new(
                     snippet_params,
@@ -1241,6 +1246,31 @@ pub(super) fn lint_with_inspector(
         results.extend(snippet.into_output());
     }
     results
+}
+
+/// Returns the index of the JavaScript snippet that reports diagnostics about
+/// the whole file, such as its filename, so that they appear once per file.
+///
+/// The first script block is preferred, because only script blocks can
+/// export the bindings that the filename may match. A file without script blocks, such as a Vue
+/// component made of a template only, falls back to its first template
+/// snippet.
+#[cfg(feature = "html_embeds")]
+fn file_diagnostics_snippet_index(
+    snippets: &[(super::ParsedSnippetOrigin, DocumentFileSource)],
+) -> Option<usize> {
+    snippets
+        .iter()
+        .position(|(_, language)| {
+            language
+                .to_js_file_source()
+                .is_some_and(|source| !source.is_embedded() || source.is_embedded_source())
+        })
+        .or_else(|| {
+            snippets
+                .iter()
+                .position(|(_, language)| language.to_js_file_source().is_some())
+        })
 }
 
 pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {

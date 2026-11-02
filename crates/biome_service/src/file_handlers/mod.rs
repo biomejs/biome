@@ -544,6 +544,10 @@ pub(crate) struct LintParams<'a> {
     pub(crate) diagnostic_level: Severity,
     /// When true, promote assist diagnostics (`assist/*`) to error severity.
     pub(crate) enforce_assist: bool,
+    /// Whether the linted source reports diagnostics about its whole file,
+    /// such as its filename. A host linted once per snippet sets this on one
+    /// snippet only.
+    pub(crate) reports_file_diagnostics: bool,
 }
 
 impl<'a> LintParams<'a> {
@@ -575,6 +579,7 @@ impl<'a> LintParams<'a> {
             max_diagnostics: self.max_diagnostics,
             diagnostic_level: self.diagnostic_level,
             enforce_assist: self.enforce_assist,
+            reports_file_diagnostics: self.reports_file_diagnostics,
         }
     }
 }
