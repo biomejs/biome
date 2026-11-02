@@ -853,6 +853,60 @@ fn overrides_default_formatter_for_package_json() {
 }
 
 #[test]
+fn overrides_css_expand() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let file_path = Utf8Path::new("biome.json");
+
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": { "expand": "never" },
+            "overrides": [
+                {
+                    "includes": ["overrides.scss"],
+                    "css": { "formatter": { "expand": "always" } }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let file_contents = "$m: (\n  a: 1,\n  b: 2,\n);\n";
+
+    let base_file = Utf8Path::new("base.scss");
+    fs.insert(base_file.into(), file_contents);
+
+    let overrides_file = Utf8Path::new("overrides.scss");
+    fs.insert(overrides_file.into(), file_contents);
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                base_file.as_str(),
+                overrides_file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_file_contents(&fs, base_file, "$m: (a: 1, b: 2);\n");
+    assert_file_contents(&fs, overrides_file, "$m: (\n\ta: 1,\n\tb: 2,\n);\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "overrides_css_expand",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn overrides_grit_formatting_options() {
     let mut console = BufferConsole::default();
     let fs = MemoryFileSystem::default();
