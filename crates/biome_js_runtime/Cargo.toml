@@ -19,6 +19,7 @@ biome_js_semantic  = { workspace = true }
 biome_js_syntax    = { workspace = true }
 biome_js_transform = { workspace = true }
 biome_languages    = { workspace = true, features = ["lang_js"] }
+biome_parser       = { workspace = true }
 biome_resolver     = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_text_size    = { workspace = true }

@@ -1,0 +1,100 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	defineRule,
+	nodeKinds,
+	registerDiagnostic,
+	tokenKinds,
+} from "@biomejs/runtime/plugin";
+const CALLS = nodeKinds("JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION");
+const LOOSE_EQUALITY = tokenKinds("EQ2", "NEQ");
+export const kindSets = defineRule({
+	query: ast("JS_EXPRESSION_STATEMENT"),
+	run(statement) {
+		const expression = statement.expression;
+		if (CALLS.has(expression)) {
+			registerDiagnostic(
+				expression,
+				"information",
+				`${expression.kind} is in CALLS.`,
+			);
+		}
+		for (const element of expression.childrenWithTokens()) {
+			if (LOOSE_EQUALITY.has(element)) {
+				registerDiagnostic(
+					expression,
+					"warning",
+					`${element.text} is in LOOSE_EQUALITY.`,
+				);
+			}
+		}
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+foo();
+new Bar();
+a == b;
+c === d;
+e != f;
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JS_CALL_EXPRESSION is in CALLS.
+  
+  > 1 │ foo();
+      │ ^^^^^
+    2 │ new Bar();
+    3 │ a == b;
+  
+
+/file.js:2:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i JS_NEW_EXPRESSION is in CALLS.
+  
+    1 │ foo();
+  > 2 │ new Bar();
+      │ ^^^^^^^^^
+    3 │ a == b;
+    4 │ c === d;
+  
+
+/file.js:3:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! == is in LOOSE_EQUALITY.
+  
+    1 │ foo();
+    2 │ new Bar();
+  > 3 │ a == b;
+      │ ^^^^^^
+    4 │ c === d;
+    5 │ e != f;
+  
+
+/file.js:5:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! != is in LOOSE_EQUALITY.
+  
+    3 │ a == b;
+    4 │ c === d;
+  > 5 │ e != f;
+      │ ^^^^^^
+    6 │
+```
