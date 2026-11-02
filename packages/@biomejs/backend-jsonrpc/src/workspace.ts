@@ -3303,6 +3303,11 @@ export interface Nursery {
 	 */
 	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
+	 * Disallow ignoring the function returned by a store's subscribe() method.
+	 * See https://biomejs.dev/linter/rules/no-svelte-ignored-unsubscribe
+	 */
+	noSvelteIgnoredUnsubscribe?: NoSvelteIgnoredUnsubscribeConfiguration;
+	/**
 	 * Disallow the use of the $inspect rune.
 	 * See https://biomejs.dev/linter/rules/no-svelte-inspect
 	 */
@@ -6661,6 +6666,9 @@ export type NoSvelteClassDirectiveConfiguration =
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
+export type NoSvelteIgnoredUnsubscribeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteIgnoredUnsubscribeOptions;
 export type NoSvelteInspectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteInspectOptions;
@@ -9716,6 +9724,10 @@ export interface RuleWithNoSvelteClassDirectiveOptions {
 export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteExportLetOptions;
+}
+export interface RuleWithNoSvelteIgnoredUnsubscribeOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteIgnoredUnsubscribeOptions;
 }
 export interface RuleWithNoSvelteInspectOptions {
 	level: RulePlainConfiguration;
@@ -12880,6 +12892,7 @@ export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteBindValueOnCheckableInputsOptions = {};
 export type NoSvelteClassDirectiveOptions = {};
 export type NoSvelteExportLetOptions = {};
+export type NoSvelteIgnoredUnsubscribeOptions = {};
 export type NoSvelteInspectOptions = {};
 export type NoSvelteInternalOptions = {};
 export type NoSvelteLegacyConstOptions = {};
@@ -15043,6 +15056,7 @@ export type Category =
 	| "lint/nursery/noSvelteBindValueOnCheckableInputs"
 	| "lint/nursery/noSvelteClassDirective"
 	| "lint/nursery/noSvelteExportLet"
+	| "lint/nursery/noSvelteIgnoredUnsubscribe"
 	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteInternal"
 	| "lint/nursery/noSvelteLegacyConst"

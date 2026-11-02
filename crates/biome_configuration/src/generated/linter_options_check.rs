@@ -1424,6 +1424,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noSvelteIgnoredUnsubscribe",
+        TypeId::of::<
+            biome_rule_options::no_svelte_ignored_unsubscribe::NoSvelteIgnoredUnsubscribeOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noSvelteInspect",
         TypeId::of::<biome_rule_options::no_svelte_inspect::NoSvelteInspectOptions>(),
     ));
