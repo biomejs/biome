@@ -74,7 +74,7 @@ pub(crate) fn parse_mdx_block(p: &mut MarkdownParser) -> ParsedSyntax {
     let mut last = None;
     let mut first = true;
     loop {
-        let item = flow_item(
+        let item = FlowItem::new(
             p.source_after_current().trim_start_matches([' ', '\t']),
             p.state().block_quote_depth,
         );
@@ -170,22 +170,24 @@ enum FlowItem {
     Expression { close: Option<usize> },
 }
 
-/// Returns the construct at the start of `text`, when it is a complete JSX
-/// tag or an expression.
-///
-/// An expression on a flow line may span blank lines, so its `}` is searched
-/// up to the end of the source. A tag must end before the next blank line.
-fn flow_item(text: &str, quote_depth: usize) -> Option<FlowItem> {
-    if let Some(body) = text.strip_prefix('{') {
-        let length = JsExtent::expression_length(body.as_bytes(), JSX);
-        let close = (length < body.len()).then_some(1 + length);
-        return Some(FlowItem::Expression { close });
+impl FlowItem {
+    /// Returns the construct at the start of `text`, when it is a complete JSX
+    /// tag or an expression.
+    ///
+    /// An expression on a flow line may span blank lines, so its `}` is searched
+    /// up to the end of the source. A tag must end before the next blank line.
+    fn new(text: &str, quote_depth: usize) -> Option<Self> {
+        if let Some(body) = text.strip_prefix('{') {
+            let length = JsExtent::expression_length(body.as_bytes(), JSX);
+            let close = (length < body.len()).then_some(1 + length);
+            return Some(Self::Expression { close });
+        }
+        if !text.starts_with('<') || TagStart::new(text) != TagStart::Tag {
+            return None;
+        }
+        let length = tag_length(text, quote_depth)?;
+        Some(Self::Tag { length })
     }
-    if !text.starts_with('<') || tag_start(text) != TagStart::Tag {
-        return None;
-    }
-    let length = tag_length(text, quote_depth)?;
-    Some(FlowItem::Tag { length })
 }
 
 /// Returns whether `text`, which starts at the first construct of a line,
@@ -200,7 +202,7 @@ fn is_flow_line(text: &str, quote_depth: usize) -> bool {
     let mut rest = text;
     let mut after_expression = false;
     loop {
-        let item = flow_item(rest, quote_depth);
+        let item = FlowItem::new(rest, quote_depth);
         if after_expression && !matches!(item, Some(FlowItem::Tag { .. })) {
             return false;
         }
@@ -307,7 +309,7 @@ pub(crate) fn parse_mdx_inline_tag(p: &mut MarkdownParser) -> ParsedSyntax {
     }
     let rest = p.source_after_current();
     let opening = TextRange::at(p.cur_range().start(), TextSize::from(1));
-    match tag_start(rest) {
+    match TagStart::new(rest) {
         TagStart::Text => Absent,
         TagStart::Invalid { character } => {
             let comment = rest.starts_with("<!--");
@@ -503,16 +505,18 @@ enum TagStart {
     Invalid { character: char },
 }
 
-/// Classifies the `<` at the start of `text`, which starts with `<`.
-fn tag_start(text: &str) -> TagStart {
-    let Some(character) = text[1..].chars().next() else {
-        return TagStart::Text;
-    };
-    match character {
-        ' ' | '\t' | '\n' | '\r' => TagStart::Text,
-        '/' | '>' | '$' | '_' => TagStart::Tag,
-        _ if character.is_alphabetic() => TagStart::Tag,
-        _ => TagStart::Invalid { character },
+impl TagStart {
+    /// Classifies the `<` at the start of `text`, which starts with `<`.
+    fn new(text: &str) -> Self {
+        let Some(character) = text[1..].chars().next() else {
+            return Self::Text;
+        };
+        match character {
+            ' ' | '\t' | '\n' | '\r' => Self::Text,
+            '/' | '>' | '$' | '_' => Self::Tag,
+            _ if character.is_alphabetic() => Self::Tag,
+            _ => Self::Invalid { character },
+        }
     }
 }
 
