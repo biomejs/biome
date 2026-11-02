@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStatementStart.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function first() {}
+Array.from(new Set).length && run();
+
+if (condition) [...new Set].length;
+
+```
+
+# Diagnostics
+```
+invalidStatementStart.js:3:1 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function first() {}
+  > 3 │ Array.from(new Set).length && run();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ if (condition) [...new Set].length;
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   function first() {}
+    3   │ - Array.from(new·Set).length·&&·run();
+      3 │ + (new·Set).size·&&·run();
+    4 4 │   
+    5 5 │   if (condition) [...new Set].length;
+  
+
+```
+
+```
+invalidStatementStart.js:5:16 lint/nursery/useSetSize  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This code copies a Set into an array only to count its values.
+  
+    3 │ Array.from(new Set).length && run();
+    4 │ 
+  > 5 │ if (condition) [...new Set].length;
+      │                ^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Copying every value takes extra time and memory, while the size property of the Set already holds the count.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use size instead.
+  
+    3 3 │   Array.from(new Set).length && run();
+    4 4 │   
+    5   │ - if·(condition)·[...new·Set].length;
+      5 │ + if·(condition)·(new·Set).size;
+    6 6 │   
+  
+
+```

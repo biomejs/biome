@@ -610,6 +610,7 @@ pub mod use_required_scripts;
 pub mod use_scoped_styles;
 pub mod use_self_closing_elements;
 pub mod use_semantic_elements;
+pub mod use_set_size;
 pub mod use_shorthand_assign;
 pub mod use_shorthand_function_type;
 pub mod use_simple_number_keys;

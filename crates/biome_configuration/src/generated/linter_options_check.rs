@@ -2834,6 +2834,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_semantic_elements::UseSemanticElementsOptions>(),
     ));
     result.push((
+        "nursery",
+        "useSetSize",
+        TypeId::of::<biome_rule_options::use_set_size::UseSetSizeOptions>(),
+    ));
+    result.push((
         "style",
         "useShorthandAssign",
         TypeId::of::<biome_rule_options::use_shorthand_assign::UseShorthandAssignOptions>(),

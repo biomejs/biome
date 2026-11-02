@@ -3803,6 +3803,11 @@ export interface Nursery {
 	 */
 	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
+	 * Prefer reading the size property of a Set over converting the Set to an array to read its length.
+	 * See https://biomejs.dev/linter/rules/use-set-size
+	 */
+	useSetSize?: UseSetSizeConfiguration;
+	/**
 	 * Return conditions directly instead of using if statements that only return true or false.
 	 * See https://biomejs.dev/linter/rules/use-simplified-boolean-return
 	 */
@@ -6696,6 +6701,9 @@ export type UseReactNativeValidPlatformColorsConfiguration =
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
+export type UseSetSizeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSetSizeOptions;
 export type UseSimplifiedBooleanReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSimplifiedBooleanReturnOptions;
@@ -9797,6 +9805,14 @@ export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
 }
+export interface RuleWithUseSetSizeOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSetSizeOptions;
+}
 export interface RuleWithUseSimplifiedBooleanReturnOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12432,6 +12448,7 @@ export interface UseReactFunctionComponentDefinitionOptions {
 export type UseReactNamingConventionOptions = {};
 export type UseReactNativeValidPlatformColorsOptions = {};
 export type UseRegexpExecOptions = {};
+export type UseSetSizeOptions = {};
 export type UseSimplifiedBooleanReturnOptions = {};
 export interface UseSingleTopLevelHeadingOptions {
 	/**
@@ -14184,6 +14201,7 @@ export type Category =
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSetSize"
 	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useStrictBooleanExpressions"
