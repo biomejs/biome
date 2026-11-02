@@ -14,6 +14,15 @@ use biome_rowan::{TextRange, TextSize, TokenText};
 use std::rc::Rc;
 use std::sync::Arc;
 
+/// Whether the analyzed source reports diagnostics about its whole file, such
+/// as a diagnostic about its filename.
+///
+/// A host document such as a Vue component is analyzed once per JavaScript
+/// snippet. Only one snippet of each host reports file diagnostics, so they
+/// appear once per file. A source without this service reports them.
+#[derive(Debug, Clone, Copy)]
+pub struct ReportsFileDiagnostics(pub bool);
+
 #[derive(Clone)]
 pub struct EmbeddedService {
     source: EmbeddedSource,

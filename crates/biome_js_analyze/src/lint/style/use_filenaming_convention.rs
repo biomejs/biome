@@ -1,3 +1,4 @@
+use crate::services::embedded::ReportsFileDiagnostics;
 use crate::services::semantic::SemanticServices;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
@@ -154,6 +155,12 @@ impl Rule for UseFilenamingConvention {
     type Options = UseFilenamingConventionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx
+            .get_service::<ReportsFileDiagnostics>()
+            .is_some_and(|reports| !reports.0)
+        {
+            return None;
+        }
         let file_name = ctx.file_path().file_name()?;
         let options = ctx.options();
         if options.require_ascii() && !file_name.is_ascii() {

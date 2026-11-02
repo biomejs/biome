@@ -1737,6 +1737,7 @@ impl WorkspaceServerWithDb<'_> {
                 max_diagnostics,
                 diagnostic_level,
                 enforce_assist,
+                reports_file_diagnostics: true,
             });
             (diagnostics, errors, warnings, infos, skipped_diagnostics)
         } else {
