@@ -435,6 +435,7 @@ pub mod no_vue_undeclared_emits;
 pub mod no_vue_undeclared_slots;
 pub mod no_vue_unused_emit_declarations;
 pub mod no_vue_unused_refs;
+pub mod no_vue_useless_v_bind;
 pub mod no_vue_v_for_template_key_on_child;
 pub mod no_vue_v_html;
 pub mod no_vue_v_if_with_v_for;
