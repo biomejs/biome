@@ -1,0 +1,123 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/pre-comments.svelte
+---
+
+# Input
+
+```svelte
+<pre>
+  <!-- hello -->
+  <code>Hello</code>
+</pre>
+
+<pre>  <code>  Hello  </code>  </pre>
+
+<pre>
+  <!-- only comment -->
+</pre>
+
+<pre>  </pre>
+
+<pre></pre>
+
+<div>
+  <pre class = 'example'>
+    <!-- before -->
+    <code> Hello </code>
+    <!-- between -->
+    <code> World </code>
+    <!-- after -->
+  </pre>
+</div>
+
+<pre><!-- before --><code>Hello</code><!-- after --></pre>
+
+<pre>
+  first
+    second
+
+  third
+</pre>
+
+<textarea>
+  hello
+    world
+</textarea>
+
+<pre>
+  <!-- before -->
+  {#if enabled}
+    <code>{  value  }</code>
+  {/if}
+  <!-- after -->
+</pre>
+
+```
+
+
+# Formatted
+
+```svelte
+<pre>
+  <!-- hello -->
+  <code>Hello</code>
+</pre>
+
+<pre>  <code>  Hello  </code>  </pre>
+
+<pre>
+  <!-- only comment -->
+</pre>
+
+<pre>  </pre>
+
+<pre></pre>
+
+<div>
+	<pre class="example">
+    <!-- before -->
+    <code> Hello </code>
+    <!-- between -->
+    <code> World </code>
+    <!-- after -->
+  </pre>
+</div>
+
+<pre><!-- before --><code>Hello</code><!-- after --></pre>
+
+<pre>
+  first
+    second
+
+  third
+</pre>
+
+<textarea>
+  hello
+    world
+</textarea>
+
+<pre>
+  <!-- before -->
+  {#if enabled}
+    <code>{  value  }</code>
+  {/if}
+  <!-- after -->
+</pre>
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n  <!-- hello -->\n  <code>Hello</code>\n" => 5..44
+"  <code>  Hello  </code>  " => 57..83
+"\n  <!-- only comment -->\n" => 96..121
+"  " => 134..136
+"\n    <!-- before -->\n    <code> Hello </code>\n    <!-- between -->\n    <code> World </code>\n    <!-- after -->\n  " => 185..298
+"<!-- before --><code>Hello</code><!-- after -->" => 318..365
+"\n  first\n    second\n\n  third\n" => 378..407
+"\n  hello\n    world\n" => 425..444
+"\n  <!-- before -->\n  {#if enabled}\n    <code>{  value  }</code>\n  {/if}\n  <!-- after -->\n" => 462..551

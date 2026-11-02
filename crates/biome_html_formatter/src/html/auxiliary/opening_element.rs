@@ -29,6 +29,9 @@ pub(crate) struct FormatHtmlOpeningElement {
 
     /// Whether the tag is printed on a single line, whatever its width.
     is_single_line: bool,
+    /// Whether verbatim content owns the dangling and trailing comments after this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    verbatim_children: bool,
 }
 
 pub(crate) struct FormatHtmlOpeningElementOptions {
@@ -42,6 +45,9 @@ pub(crate) struct FormatHtmlOpeningElementOptions {
 
     /// Whether the tag is printed on a single line, whatever its width.
     pub is_single_line: bool,
+    /// Whether verbatim content owns the dangling and trailing comments after this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    pub verbatim_children: bool,
 }
 
 impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
@@ -52,6 +58,7 @@ impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
         self.attr_group_id = Some(options.attr_group_id);
         self.borrowed_sibling_r_angle = options.borrowed_sibling_r_angle;
         self.is_single_line = options.is_single_line;
+        self.verbatim_children = options.verbatim_children;
         self
     }
 }
@@ -62,7 +69,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         node: &HtmlOpeningElement,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        if !f.comments().has_dangling_comments(node.syntax()) {
+        if self.verbatim_children || !f.comments().has_dangling_comments(node.syntax()) {
             return Ok(());
         }
 
@@ -110,6 +117,17 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         } else {
             write!(f, [soft_block_indent(&format_comments)])
         }
+    }
+
+    fn fmt_trailing_comments(
+        &self,
+        node: &HtmlOpeningElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.verbatim_children {
+            return Ok(());
+        }
+        format_html_trailing_comments(node.syntax()).fmt(f)
     }
 
     fn fmt_fields(&self, node: &HtmlOpeningElement, f: &mut HtmlFormatter) -> FormatResult<()> {
@@ -171,6 +189,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
         if let Ok(r_angle_token) = &r_angle_token
             && is_whitespace_sensitive
+            && !self.verbatim_children
             && r_angle_token.has_trailing_whitespace()
         {
             // we can't get rid of the whitespace if the element is whitespace sensitive

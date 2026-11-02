@@ -49,13 +49,6 @@ info: formatting/pre-mustache.svelte
  
          should
  
-@@ -13,5 +12,4 @@
- 
-         as is
-       </code>
--			this line is intended using tabs which should be preserved
--</pre>
-+			this line is intended using tabs which should be preserved</pre>
 ```
 
 # Output
@@ -75,7 +68,8 @@ info: formatting/pre-mustache.svelte
 
         as is
       </code>
-			this line is intended using tabs which should be preserved</pre>
+			this line is intended using tabs which should be preserved
+</pre>
 ```
 
 # Lines exceeding max width of 80 characters
