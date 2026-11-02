@@ -4038,6 +4038,11 @@ export interface Nursery {
 	 */
 	useVueSlotNameCasing?: UseVueSlotNameCasingConfiguration;
 	/**
+	 * Require the slots in this.$slots to be called as functions.
+	 * See https://biomejs.dev/linter/rules/use-vue-slots-as-functions
+	 */
+	useVueSlotsAsFunctions?: UseVueSlotsAsFunctionsConfiguration;
+	/**
 	 * Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.
 	 * See https://biomejs.dev/linter/rules/use-vue-template-ref
 	 */
@@ -6932,6 +6937,9 @@ export type UseVueRenderReturnConfiguration =
 export type UseVueSlotNameCasingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueSlotNameCasingOptions;
+export type UseVueSlotsAsFunctionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueSlotsAsFunctionsOptions;
 export type UseVueTemplateRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTemplateRefOptions;
@@ -10221,6 +10229,10 @@ export interface RuleWithUseVueSlotNameCasingOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueSlotNameCasingOptions;
 }
+export interface RuleWithUseVueSlotsAsFunctionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueSlotsAsFunctionsOptions;
+}
 export interface RuleWithUseVueTemplateRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTemplateRefOptions;
@@ -12852,6 +12864,7 @@ export interface UseVueSlotNameCasingOptions {
 	 */
 	casing?: SlotNameCasing;
 }
+export type UseVueSlotsAsFunctionsOptions = {};
 export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedObjectPropsOptions = {};
@@ -14582,6 +14595,7 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVuePropTypeConstructor"
 	| "lint/nursery/useVueRenderReturn"
+	| "lint/nursery/useVueSlotsAsFunctions"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueToggleInsideTransition"
