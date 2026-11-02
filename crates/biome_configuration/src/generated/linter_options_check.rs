@@ -1879,6 +1879,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noUselessParameterPropertyAssignment", TypeId::of::<biome_rule_options::no_useless_parameter_property_assignment::NoUselessParameterPropertyAssignmentOptions>()));
     result.push((
         "nursery",
+        "noUselessQualifier",
+        TypeId::of::<biome_rule_options::no_useless_qualifier::NoUselessQualifierOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUselessRecursion",
         TypeId::of::<biome_rule_options::no_useless_recursion::NoUselessRecursionOptions>(),
     ));

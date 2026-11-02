@@ -3508,6 +3508,11 @@ export interface Nursery {
 	 */
 	noUselessParameterPropertyAssignment?: NoUselessParameterPropertyAssignmentConfiguration;
 	/**
+	 * Disallow unnecessary namespace and enum qualifiers.
+	 * See https://biomejs.dev/linter/rules/no-useless-qualifier
+	 */
+	noUselessQualifier?: NoUselessQualifierConfiguration;
+	/**
 	 * Disallow functions that return a call to themselves when a loop can do the same work.
 	 * See https://biomejs.dev/linter/rules/no-useless-recursion
 	 */
@@ -6849,6 +6854,9 @@ export type NoUselessLengthCheckConfiguration =
 export type NoUselessParameterPropertyAssignmentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessParameterPropertyAssignmentOptions;
+export type NoUselessQualifierConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessQualifierOptions;
 export type NoUselessRecursionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessRecursionOptions;
@@ -10017,6 +10025,14 @@ export interface RuleWithNoUselessParameterPropertyAssignmentOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessParameterPropertyAssignmentOptions;
 }
+export interface RuleWithNoUselessQualifierOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessQualifierOptions;
+}
 export interface RuleWithNoUselessRecursionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessRecursionOptions;
@@ -13128,6 +13144,7 @@ export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessLengthCheckOptions = {};
 export type NoUselessParameterPropertyAssignmentOptions = {};
+export type NoUselessQualifierOptions = {};
 export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeAssertionOptions = {};
@@ -15255,6 +15272,7 @@ export type Category =
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessParameterPropertyAssignment"
+	| "lint/nursery/noUselessQualifier"
 	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeAssertion"

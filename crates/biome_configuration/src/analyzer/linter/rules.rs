@@ -487,6 +487,7 @@ pub enum RuleName {
     NoUselessLengthCheck,
     NoUselessLoneBlockStatements,
     NoUselessParameterPropertyAssignment,
+    NoUselessQualifier,
     NoUselessRecursion,
     NoUselessRegexBackrefs,
     NoUselessRename,
@@ -1269,6 +1270,7 @@ impl RuleName {
             Self::NoUselessLengthCheck => "noUselessLengthCheck",
             Self::NoUselessLoneBlockStatements => "noUselessLoneBlockStatements",
             Self::NoUselessParameterPropertyAssignment => "noUselessParameterPropertyAssignment",
+            Self::NoUselessQualifier => "noUselessQualifier",
             Self::NoUselessRecursion => "noUselessRecursion",
             Self::NoUselessRegexBackrefs => "noUselessRegexBackrefs",
             Self::NoUselessRename => "noUselessRename",
@@ -2049,6 +2051,7 @@ impl RuleName {
             Self::NoUselessLengthCheck => RuleGroup::Nursery,
             Self::NoUselessLoneBlockStatements => RuleGroup::Complexity,
             Self::NoUselessParameterPropertyAssignment => RuleGroup::Nursery,
+            Self::NoUselessQualifier => RuleGroup::Nursery,
             Self::NoUselessRecursion => RuleGroup::Nursery,
             Self::NoUselessRegexBackrefs => RuleGroup::Suspicious,
             Self::NoUselessRename => RuleGroup::Complexity,
@@ -2838,6 +2841,7 @@ impl std::str::FromStr for RuleName {
             "noUselessParameterPropertyAssignment" => {
                 Ok(Self::NoUselessParameterPropertyAssignment)
             }
+            "noUselessQualifier" => Ok(Self::NoUselessQualifier),
             "noUselessRecursion" => Ok(Self::NoUselessRecursion),
             "noUselessRegexBackrefs" => Ok(Self::NoUselessRegexBackrefs),
             "noUselessRename" => Ok(Self::NoUselessRename),
