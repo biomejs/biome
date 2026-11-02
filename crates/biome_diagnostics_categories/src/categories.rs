@@ -484,6 +484,7 @@ define_categories! {
     "lint/nursery/useVueTypedObjectProps": "https://biomejs.dev/linter/rules/use-vue-typed-object-props",
     "lint/nursery/useVueTypedProps": "https://biomejs.dev/linter/rules/use-vue-typed-props",
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
+    "lint/nursery/useVueValidAttributeName": "https://biomejs.dev/linter/rules/use-vue-valid-attribute-name",
     "lint/nursery/useVueValidDefineEmits": "https://biomejs.dev/linter/rules/use-vue-valid-define-emits",
     "lint/nursery/useVueValidDefineOptions": "https://biomejs.dev/linter/rules/use-vue-valid-define-options",
     "lint/nursery/useVueValidDefineProps": "https://biomejs.dev/linter/rules/use-vue-valid-define-props",
