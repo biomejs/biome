@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::inline_emphasis::FormatEmphasisContent;
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
@@ -93,7 +94,14 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             .any(|a| MdReferenceImage::can_cast(a.kind()));
 
         if inside_ref_image || self.should_keep_fences {
-            return write!(f, [l_fence.format(), content.format(), r_fence.format()]);
+            return write!(
+                f,
+                [
+                    l_fence.format(),
+                    FormatEmphasisContent::new(&content),
+                    r_fence.format()
+                ]
+            );
         }
 
         // Swap the outer italic and inner strong fences in `***...***` to produce
@@ -116,6 +124,7 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         {
             let emphasis_l_fence = emphasis.l_fence()?;
             let emphasis_r_fence = emphasis.r_fence()?;
+            let emphasis_content = emphasis.content();
             f.context()
                 .comments()
                 .mark_suppression_checked(emphasis.syntax());
@@ -127,7 +136,7 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
                         &emphasis_l_fence,
                         &text("_", Some(emphasis_l_fence.text_range().start()))
                     ),
-                    emphasis.content().format(),
+                    FormatEmphasisContent::new(&emphasis_content),
                     format_replaced(
                         &emphasis_r_fence,
                         &text("_", Some(emphasis_r_fence.text_range().start()))
@@ -204,7 +213,7 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
         }
 
         write_fence(&l_fence, target_kind, f)?;
-        write!(f, [content.format()])?;
+        write!(f, [FormatEmphasisContent::new(&content)])?;
         write_fence(&r_fence, target_kind, f)
     }
 }

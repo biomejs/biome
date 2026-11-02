@@ -10,7 +10,9 @@ use biome_unicode_table::{
 };
 use smallvec::SmallVec;
 
+use crate::markdown::auxiliary::inline_emphasis::FormatEmphasisContent;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
+use crate::shared::TextContext;
 use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed, format_replaced};
 
 /// A word slice from a syntax token — stores the text and source position for source maps.
@@ -80,6 +82,7 @@ enum WordGroupEscape {
 pub(crate) struct WordGroup {
     atoms: SmallVec<[ProseAtom; 1]>,
     escape: WordGroupEscape,
+    text_context: TextContext,
 }
 
 /// Result of inspecting prose content for a character that controls soft-break handling.
@@ -247,13 +250,43 @@ impl WordGroup {
     }
 
     pub(crate) fn starts_with_block_marker(&self) -> bool {
-        let Some(ProseAtom::Word(word)) = self.atoms.first() else {
+        let Some(first) = self.atoms.first() else {
             return false;
         };
+        let ProseAtom::Word(word) = first else {
+            // Moving inline HTML to line start can open an HTML block.
+            return matches!(
+                first,
+                ProseAtom::InlineElement(AnyMdInline::MdInlineHtml(_))
+            );
+        };
         let text = word.text.text();
+        let mut prefix = self
+            .atoms
+            .iter()
+            .map_while(|atom| match atom {
+                ProseAtom::Word(word) => Some(word.text.text().bytes()),
+                ProseAtom::InlineElement(_) => None,
+            })
+            .flatten()
+            .fuse();
+        let block_marker_run = match (prefix.next(), prefix.next(), prefix.next()) {
+            (Some(first), Some(second), Some(third)) => {
+                first == second
+                    && second == third
+                    && matches!(first, b'~' | b'`' | b'_' | b'*' | b'-')
+            }
+            _ => false,
+        };
 
-        if text.starts_with('>')
-            || matches!(text, "*" | "+" | "-")
+        if block_marker_run
+            || text.starts_with('|')
+            || self.atoms.iter().all(|atom| {
+                matches!(atom, ProseAtom::Word(word) if word.text.text().bytes().all(|byte| matches!(byte, b':' | b'-' | b'|')))
+            })
+            || text.starts_with('>')
+            || matches!(text, "*" | "+" | "-" | "_")
+            || (!text.is_empty() && text.bytes().all(|byte| byte == b'='))
             || matches!(text, "#" | "##" | "###" | "####" | "#####" | "######")
         {
             return true;
@@ -354,6 +387,7 @@ impl ProseItemList {
     pub(crate) fn from_inline_item_list(
         node: &MdInlineItemList,
         f: &mut MarkdownFormatter,
+        text_context: TextContext,
     ) -> SyntaxResult<Self> {
         let mut items = Self(Vec::new());
         let mut current_word_group = WordGroup::default();
@@ -463,7 +497,7 @@ impl ProseItemList {
         }
 
         items.finish_word_group(&mut current_word_group);
-        items.mark_word_groups_for_escaping();
+        items.mark_word_groups_for_escaping(text_context);
         items.mark_outdented_setext_markers();
 
         Ok(items)
@@ -546,11 +580,12 @@ impl ProseItemList {
         }
     }
 
-    fn mark_word_groups_for_escaping(&mut self) {
+    fn mark_word_groups_for_escaping(&mut self, text_context: TextContext) {
         for index in 0..self.0.len() {
-            let escape = WordGroupEscape::from(self, index);
+            let escape = WordGroupEscape::from(self, index, text_context);
             if let ProseItem::WordGroup(group) = &mut self.0[index] {
                 group.escape = escape;
+                group.text_context = text_context;
             }
         }
     }
@@ -778,6 +813,7 @@ impl Format<MarkdownFormatContext> for UnmatchedUnderscoreLayout<'_> {
             Self::LeadingWithEmphasis { leading, emphasis } => {
                 let l_fence = emphasis.l_fence()?;
                 let r_fence = emphasis.r_fence()?;
+                let content = emphasis.content();
                 f.context().comments().is_suppressed(emphasis.syntax());
 
                 write!(
@@ -785,7 +821,7 @@ impl Format<MarkdownFormatContext> for UnmatchedUnderscoreLayout<'_> {
                     [
                         format_replaced(&l_fence, &text("**", Some(l_fence.text_range().start()))),
                         format_with(|f| leading.fmt_escaped(f)),
-                        emphasis.content().format(),
+                        FormatEmphasisContent::new(&content),
                         format_replaced(&r_fence, &text("**", Some(r_fence.text_range().start()))),
                     ]
                 )
@@ -793,13 +829,14 @@ impl Format<MarkdownFormatContext> for UnmatchedUnderscoreLayout<'_> {
             Self::EmphasisWithTrailing { emphasis, trailing } => {
                 let l_fence = emphasis.l_fence()?;
                 let r_fence = emphasis.r_fence()?;
+                let content = emphasis.content();
                 f.context().comments().is_suppressed(emphasis.syntax());
 
                 write!(
                     f,
                     [
                         format_replaced(&l_fence, &text("**", Some(l_fence.text_range().start()))),
-                        emphasis.content().format(),
+                        FormatEmphasisContent::new(&content),
                         format_with(|f| trailing.fmt_escaped(f)),
                         format_replaced(&r_fence, &text("**", Some(r_fence.text_range().start()))),
                     ]
@@ -815,6 +852,10 @@ impl WordGroup {
             WordGroupEscape::EscapeEachMarker => WordGroupLayout::EscapeEachMarker,
             WordGroupEscape::EscapeLeadingMarker => WordGroupLayout::EscapeLeadingMarker,
             WordGroupEscape::EmptyStrongWithEscapedMarker => self.empty_strong_sequence_layout(),
+            // Paragraph delimiter repair can flatten emphasis that is already nested in a span.
+            WordGroupEscape::None if self.text_context == TextContext::Inline => {
+                WordGroupLayout::Default
+            }
             WordGroupEscape::None => self
                 .literal_leading_underscore_layout()
                 .or(self
@@ -1080,7 +1121,7 @@ impl WordGroupEscape {
     ///
     /// Marker sequences containing two to five identical emphasis markers need
     /// escaping unless another group forms a matching boundary in the paragraph.
-    fn from(items: &ProseItemList, index: usize) -> Self {
+    fn from(items: &ProseItemList, index: usize, text_context: TextContext) -> Self {
         let Some(ProseItem::WordGroup(group)) = items.0.get(index) else {
             return Self::None;
         };
@@ -1095,6 +1136,7 @@ impl WordGroupEscape {
 
         match marker_sequence.len {
             2..=4 => Self::EscapeEachMarker,
+            5 if text_context == TextContext::Inline => Self::EscapeEachMarker,
             5 => Self::EmptyStrongWithEscapedMarker,
             _ => Self::None,
         }

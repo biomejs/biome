@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/proseAlways/emphasis_table_delimiter.md
+---
+
+# Input
+
+```md
+**alpha | beta gamma delta epsilon zeta :---|---:  
+closing**
+
+**alpha | beta gamma delta epsilon zeta |---|---|  
+closing**
+
+**alpha | beta gamma delta epsilon zeta -|-  
+closing**
+
+Before **alpha ~~beta
+gamma~~ delta** after.
+
+> **alpha ~~beta
+> gamma~~ delta**
+
+**alpha | beta  
+    :---|---: closing**
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "lineWidth": 40,
+      "proseWrap": "always"
+    },
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+**alpha | beta gamma delta epsilon zeta :---|---:  
+closing**
+
+**alpha | beta gamma delta epsilon zeta |---|---|  
+closing**
+
+**alpha | beta gamma delta epsilon zeta -|-  
+closing**
+
+Before **alpha ~~beta gamma~~ delta**
+after.
+
+> **alpha ~~beta gamma~~ delta**
+
+**alpha | beta  
+    :---|---: closing**
+
+```

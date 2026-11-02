@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::inline_emphasis::FormatEmphasisContent;
 use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
@@ -41,13 +42,15 @@ impl FormatNodeRule<MdInlineLink> for FormatMdInlineLink {
                     })
                     .fmt(f)
             } else {
-                text.format()
-                    .with_options(FormatMdFormatInlineItemListOptions {
+                FormatEmphasisContent::new_with_options(
+                    &text,
+                    FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::trim_all(),
                         keep_fences_in_italics: false,
                         text_context: TextContext::Neutral,
-                    })
-                    .fmt(f)
+                    },
+                )
+                .fmt(f)
             }
         });
 

@@ -1,3 +1,4 @@
+use crate::markdown::auxiliary::inline_emphasis::FormatEmphasisContent;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{GfmStrikethrough, GfmStrikethroughFields};
@@ -16,7 +17,7 @@ impl FormatNodeRule<GfmStrikethrough> for FormatGfmStrikethrough {
             f,
             [
                 l_fence_token.format(),
-                content.format(),
+                FormatEmphasisContent::new(&content),
                 r_fence_token.format()
             ]
         )

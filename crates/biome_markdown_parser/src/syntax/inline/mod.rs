@@ -56,6 +56,8 @@ use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::{Parser, SyntaxFeature};
 
+use crate::syntax::consume_partial_quote_prefix;
+use crate::syntax::quote::consume_quote_prefix;
 use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 mod code_span;
@@ -100,6 +102,10 @@ fn parse_inline_item_list_until_impl(
 
         if p.at(T![EOF]) {
             break;
+        }
+
+        if consume_inline_quote_prefix(p) {
+            continue;
         }
 
         // IMPORTANT: Parse constructs that can contain `]` BEFORE checking for stop token.
@@ -190,6 +196,13 @@ fn parse_inline_item_list_until_no_links(p: &mut MarkdownParser, stop: MarkdownS
 /// so their text content can be extracted for the alt attribute.
 fn parse_inline_item_list_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind) {
     let _ = parse_inline_item_list_until_impl(p, stop, InlineLinksPolicy::FullLinks);
+}
+
+fn consume_inline_quote_prefix(p: &mut MarkdownParser) -> bool {
+    let quote_depth = p.state().block_quote_depth;
+    quote_depth > 0
+        && p.is_at_line_start()
+        && (consume_quote_prefix(p, quote_depth) || consume_partial_quote_prefix(p, quote_depth))
 }
 
 fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
