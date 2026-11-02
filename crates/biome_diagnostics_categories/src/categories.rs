@@ -476,6 +476,7 @@ define_categories! {
     "lint/nursery/useVueConsistentDefineEmitsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-emits-declaration",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
     "lint/nursery/useVueConsistentEventHyphenation": "https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
+    "lint/nursery/useVueConsistentVForDelimiter": "https://biomejs.dev/linter/rules/use-vue-consistent-v-for-delimiter",
     "lint/nursery/useVueDefinePropsDestructuring": "https://biomejs.dev/linter/rules/use-vue-define-props-destructuring",
     "lint/nursery/useVueDefineOptions": "https://biomejs.dev/linter/rules/use-vue-define-options",
     "lint/nursery/useVueDefaultProp": "https://biomejs.dev/linter/rules/use-vue-default-prop",

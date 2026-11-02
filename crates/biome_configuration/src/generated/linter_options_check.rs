@@ -3149,6 +3149,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_vue_consistent_v_bind_style::UseVueConsistentVBindStyleOptions,
         >(),
     ));
+    result.push(("nursery", "useVueConsistentVForDelimiter", TypeId::of::<biome_rule_options::use_vue_consistent_v_for_delimiter::UseVueConsistentVForDelimiterOptions>()));
     result.push((
         "style",
         "useVueConsistentVOnStyle",

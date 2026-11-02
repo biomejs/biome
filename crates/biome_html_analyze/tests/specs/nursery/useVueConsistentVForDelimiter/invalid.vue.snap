@@ -1,0 +1,274 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="x of xs"></div>
+  <div v-for="(x, index) of xs"></div>
+  <div v-for="x    of xs"></div>
+  <div v-for="x of    xs"></div>
+  <div v-for="x    of    xs"></div>
+  <div v-for="{ x, y } of xs"></div>
+  <div v-for='x of xs'></div>
+  <MyItem v-for="item of items" :key="item.id" />
+  <template v-for="n of 10">{{ n }}</template>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:17 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="x of xs"></div>
+      │                 ^^
+    4 │   <div v-for="(x, index) of xs"></div>
+    5 │   <div v-for="x    of xs"></div>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template>
+     3    │ - ··<div·v-for="x·of·xs"></div>
+        3 │ + ··<div·v-for="x·in·xs"></div>
+     4  4 │     <div v-for="(x, index) of xs"></div>
+     5  5 │     <div v-for="x    of xs"></div>
+  
+
+```
+
+```
+invalid.vue:4:26 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+    2 │ <template>
+    3 │   <div v-for="x of xs"></div>
+  > 4 │   <div v-for="(x, index) of xs"></div>
+      │                          ^^
+    5 │   <div v-for="x    of xs"></div>
+    6 │   <div v-for="x of    xs"></div>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     2  2 │   <template>
+     3  3 │     <div v-for="x of xs"></div>
+     4    │ - ··<div·v-for="(x,·index)·of·xs"></div>
+        4 │ + ··<div·v-for="(x,·index)·in·xs"></div>
+     5  5 │     <div v-for="x    of xs"></div>
+     6  6 │     <div v-for="x of    xs"></div>
+  
+
+```
+
+```
+invalid.vue:5:20 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+    3 │   <div v-for="x of xs"></div>
+    4 │   <div v-for="(x, index) of xs"></div>
+  > 5 │   <div v-for="x    of xs"></div>
+      │                    ^^
+    6 │   <div v-for="x of    xs"></div>
+    7 │   <div v-for="x    of    xs"></div>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     3  3 │     <div v-for="x of xs"></div>
+     4  4 │     <div v-for="(x, index) of xs"></div>
+     5    │ - ··<div·v-for="x····of·xs"></div>
+        5 │ + ··<div·v-for="x····in·xs"></div>
+     6  6 │     <div v-for="x of    xs"></div>
+     7  7 │     <div v-for="x    of    xs"></div>
+  
+
+```
+
+```
+invalid.vue:6:17 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+    4 │   <div v-for="(x, index) of xs"></div>
+    5 │   <div v-for="x    of xs"></div>
+  > 6 │   <div v-for="x of    xs"></div>
+      │                 ^^
+    7 │   <div v-for="x    of    xs"></div>
+    8 │   <div v-for="{ x, y } of xs"></div>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     4  4 │     <div v-for="(x, index) of xs"></div>
+     5  5 │     <div v-for="x    of xs"></div>
+     6    │ - ··<div·v-for="x·of····xs"></div>
+        6 │ + ··<div·v-for="x·in····xs"></div>
+     7  7 │     <div v-for="x    of    xs"></div>
+     8  8 │     <div v-for="{ x, y } of xs"></div>
+  
+
+```
+
+```
+invalid.vue:7:20 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+    5 │   <div v-for="x    of xs"></div>
+    6 │   <div v-for="x of    xs"></div>
+  > 7 │   <div v-for="x    of    xs"></div>
+      │                    ^^
+    8 │   <div v-for="{ x, y } of xs"></div>
+    9 │   <div v-for='x of xs'></div>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     5  5 │     <div v-for="x    of xs"></div>
+     6  6 │     <div v-for="x of    xs"></div>
+     7    │ - ··<div·v-for="x····of····xs"></div>
+        7 │ + ··<div·v-for="x····in····xs"></div>
+     8  8 │     <div v-for="{ x, y } of xs"></div>
+     9  9 │     <div v-for='x of xs'></div>
+  
+
+```
+
+```
+invalid.vue:8:24 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+     6 │   <div v-for="x of    xs"></div>
+     7 │   <div v-for="x    of    xs"></div>
+   > 8 │   <div v-for="{ x, y } of xs"></div>
+       │                        ^^
+     9 │   <div v-for='x of xs'></div>
+    10 │   <MyItem v-for="item of items" :key="item.id" />
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     6  6 │     <div v-for="x of    xs"></div>
+     7  7 │     <div v-for="x    of    xs"></div>
+     8    │ - ··<div·v-for="{·x,·y·}·of·xs"></div>
+        8 │ + ··<div·v-for="{·x,·y·}·in·xs"></div>
+     9  9 │     <div v-for='x of xs'></div>
+    10 10 │     <MyItem v-for="item of items" :key="item.id" />
+  
+
+```
+
+```
+invalid.vue:9:17 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+     7 │   <div v-for="x    of    xs"></div>
+     8 │   <div v-for="{ x, y } of xs"></div>
+   > 9 │   <div v-for='x of xs'></div>
+       │                 ^^
+    10 │   <MyItem v-for="item of items" :key="item.id" />
+    11 │   <template v-for="n of 10">{{ n }}</template>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     7  7 │     <div v-for="x    of    xs"></div>
+     8  8 │     <div v-for="{ x, y } of xs"></div>
+     9    │ - ··<div·v-for='x·of·xs'></div>
+        9 │ + ··<div·v-for='x·in·xs'></div>
+    10 10 │     <MyItem v-for="item of items" :key="item.id" />
+    11 11 │     <template v-for="n of 10">{{ n }}</template>
+  
+
+```
+
+```
+invalid.vue:10:23 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+     8 │   <div v-for="{ x, y } of xs"></div>
+     9 │   <div v-for='x of xs'></div>
+  > 10 │   <MyItem v-for="item of items" :key="item.id" />
+       │                       ^^
+    11 │   <template v-for="n of 10">{{ n }}</template>
+    12 │ </template>
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     8  8 │     <div v-for="{ x, y } of xs"></div>
+     9  9 │     <div v-for='x of xs'></div>
+    10    │ - ··<MyItem·v-for="item·of·items"·:key="item.id"·/>
+       10 │ + ··<MyItem·v-for="item·in·items"·:key="item.id"·/>
+    11 11 │     <template v-for="n of 10">{{ n }}</template>
+    12 12 │   </template>
+  
+
+```
+
+```
+invalid.vue:11:22 lint/nursery/useVueConsistentVForDelimiter  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This v-for uses of instead of in.
+  
+     9 │   <div v-for='x of xs'></div>
+    10 │   <MyItem v-for="item of items" :key="item.id" />
+  > 11 │   <template v-for="n of 10">{{ n }}</template>
+       │                      ^^
+    12 │ </template>
+    13 │ 
+  
+  i Vue treats in and of the same way in v-for, so mixing them makes templates harder to read and search.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use in instead.
+  
+     9  9 │     <div v-for='x of xs'></div>
+    10 10 │     <MyItem v-for="item of items" :key="item.id" />
+    11    │ - ··<template·v-for="n·of·10">{{·n·}}</template>
+       11 │ + ··<template·v-for="n·in·10">{{·n·}}</template>
+    12 12 │   </template>
+    13 13 │   
+  
+
+```

@@ -3988,6 +3988,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Enforce a consistent delimiter between the item and the list in v-for directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-v-for-delimiter
+	 */
+	useVueConsistentVForDelimiter?: UseVueConsistentVForDelimiterConfiguration;
+	/**
 	 * Require a default value for optional props in Vue components.
 	 * See https://biomejs.dev/linter/rules/use-vue-default-prop
 	 */
@@ -6892,6 +6897,9 @@ export type UseVueConsistentDefineEmitsDeclarationConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueConsistentVForDelimiterConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentVForDelimiterOptions;
 export type UseVueDefaultPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefaultPropOptions;
@@ -10149,6 +10157,14 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueConsistentVForDelimiterOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentVForDelimiterOptions;
+}
 export interface RuleWithUseVueDefaultPropOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefaultPropOptions;
@@ -12795,6 +12811,13 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export interface UseVueConsistentVForDelimiterOptions {
+	/**
+	 * The word to use between the item and the list in `v-for` directives:
+	 * `"in"` or `"of"`. Defaults to `"in"`.
+	 */
+	delimiter?: VueVForDelimiter;
+}
 export type UseVueDefaultPropOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
@@ -13792,6 +13815,7 @@ export type ComponentDefinitionStyle =
 export type BlockOrderEntry = string | string[];
 export type DefineEmitsDeclarationStyle = "type" | "typeLiteral" | "runtime";
 export type EventHyphenation = "always" | "never";
+export type VueVForDelimiter = "in" | "of";
 export type SlotNameCasing = "camelCase" | "kebab-case" | "singleword";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -14527,6 +14551,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueConsistentVForDelimiter"
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
