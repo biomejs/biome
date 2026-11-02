@@ -6,9 +6,10 @@ use crate::configs::{
 use crate::snap_test::{SnapshotPayload, assert_file_contents};
 use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, PARSE_ERROR, UNFORMATTED, assert_cli_snapshot,
-    run_cli,
+    run_cli, run_cli_with_environment,
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf};
+use biome_flags::MemoryEnvironment;
 use biome_fs::MemoryFileSystem;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -1138,4 +1139,30 @@ fn ci_skip_assist_action_and_group() {
         error_count, 0,
         "expected assist action to be skipped when group and action are both provided, found {error_count:?}: {messages:?}"
     );
+}
+
+#[test]
+fn reports_github_annotations_in_github_actions() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.js");
+    fs.insert(file_path.into(), "debugger;\n".as_bytes());
+
+    let (fs, result) = run_cli_with_environment(
+        fs,
+        &mut console,
+        Args::from(["ci", file_path.as_str()].as_slice()),
+        MemoryEnvironment::default().with_var("GITHUB_ACTIONS", "true"),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_github_annotations_in_github_actions",
+        fs,
+        console,
+        result,
+    ));
 }
