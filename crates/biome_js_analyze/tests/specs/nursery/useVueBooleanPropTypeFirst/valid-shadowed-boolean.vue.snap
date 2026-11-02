@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-shadowed-boolean.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const Boolean = class {};
+
+export default {
+  props: {
+    a: [String, Boolean],
+  },
+};
+</script>
+
+```
