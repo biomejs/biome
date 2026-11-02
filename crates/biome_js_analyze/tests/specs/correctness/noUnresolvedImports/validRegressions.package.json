@@ -1,0 +1,6 @@
+{
+	"name": "no-unresolved-imports-regressions",
+	"dependencies": {
+		"ambient-module-package": "1.0.0"
+	}
+}

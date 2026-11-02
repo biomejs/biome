@@ -20,9 +20,9 @@ use rustc_hash::FxHashMap;
 
 use super::utils::MAX_NUM_TYPES;
 use super::{
-    Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
-    JsModuleInfoInner, JsOwnExport, JsReexport, NamespaceMember, binding::JsBindingData,
-    is_named_type_declaration,
+    Exports, ImportSymbol, Imports, JsAmbientModule, JsExport, JsImport, JsModuleInfo,
+    JsModuleInfoDiagnostic, JsModuleInfoInner, JsOwnExport, JsReexport, NamespaceMember,
+    binding::JsBindingData, is_named_type_declaration,
 };
 use crate::{ImportPathMap, JsImportKind, JsImportPath, JsImportPhase};
 
@@ -48,7 +48,9 @@ fn merge_import_paths(previous: &JsImportPath, current: &mut JsImportPath) {
 pub(super) struct JsModuleInfoCollector {
     semantic_model: Arc<SemanticModel>,
 
-    pub(super) bindings: Vec<JsBindingData>,
+    /// Bindings of the file, which the collectors of its ambient modules
+    /// share.
+    bindings: Arc<[JsBindingData]>,
 
     /// Function parameters, both formal parameters as well as rest parameters.
     function_parameters: FxHashMap<JsSyntaxNode, FunctionParameter>,
@@ -86,6 +88,13 @@ pub(super) struct JsModuleInfoCollector {
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
     pub(super) referenced_classes: Vec<CssClassReference>,
+
+    /// Scope that exported names resolve in: the global scope of a file, or
+    /// the scope of a `declare module "name"` block for an ambient module.
+    pub(super) export_scope: ScopeId,
+
+    /// Modules that the file declares with `declare module "name"`.
+    pub(super) ambient_modules: Box<[JsAmbientModule]>,
 }
 
 /// Intermediary representation for an exported symbol.
@@ -95,7 +104,7 @@ pub(super) enum JsCollectedExport {
         /// Name under which the symbol will be exported.
         export_name: Text,
 
-        /// Local name of the symbol in the global scope.
+        /// Local name of the symbol in [JsModuleInfoCollector::export_scope].
         local_name: TokenText,
     },
     ExportDefault {
@@ -103,7 +112,8 @@ pub(super) enum JsCollectedExport {
         ty: TypeReference,
     },
     ExportNamedDefault {
-        /// Local name of the symbol in the global scope.
+        /// Local name of the symbol in [JsModuleInfoCollector::export_scope]
+        /// or in one of its parent scopes.
         local_name: TokenText,
     },
     ExportDefaultAssignment {
@@ -141,6 +151,27 @@ impl JsModuleInfoCollector {
             });
         }
 
+        Self::new_with(semantic_model, bindings.into(), ScopeId::GLOBAL)
+    }
+
+    /// Creates a collector for an ambient module declared in the file of
+    /// `file`, whose exported names resolve in `export_scope`.
+    ///
+    /// The new collector shares the bindings of `file`. Create it before
+    /// `file` infers types, so the bindings don't hold types yet.
+    pub(super) fn new_for_ambient_module(file: &Self, export_scope: ScopeId) -> Self {
+        Self::new_with(
+            file.semantic_model.clone(),
+            file.bindings.clone(),
+            export_scope,
+        )
+    }
+
+    fn new_with(
+        semantic_model: Arc<SemanticModel>,
+        bindings: Arc<[JsBindingData]>,
+        export_scope: ScopeId,
+    ) -> Self {
         Self {
             semantic_model,
             bindings,
@@ -155,6 +186,8 @@ impl JsModuleInfoCollector {
             diagnostics: Vec::new(),
             inference_mode: TypeInferenceMode::Disabled,
             referenced_classes: Vec::new(),
+            export_scope,
+            ambient_modules: Box::default(),
         }
     }
 
@@ -331,8 +364,9 @@ impl JsModuleInfoCollector {
         &mut self,
         declaration: &AnyJsExportDefaultDeclaration,
     ) {
+        let scope_id = self.export_scope;
         let type_data =
-            TypeData::from_any_js_export_default_declaration(self, ScopeId::GLOBAL, declaration);
+            TypeData::from_any_js_export_default_declaration(self, scope_id, declaration);
         let ty = TypeReference::from(self.register_and_resolve(type_data));
         self.register_export(JsCollectedExport::ExportDefault { ty });
     }
@@ -414,7 +448,7 @@ impl JsModuleInfoCollector {
             {
                 let scope_id = semantic_model.scope_for_range(binding.range).id();
                 let ty = self.infer_type(&node, binding.clone(), scope_id, semantic_model);
-                self.bindings[index].ty = ty;
+                Arc::make_mut(&mut self.bindings)[index].ty = ty;
             }
         }
 
@@ -438,7 +472,7 @@ impl JsModuleInfoCollector {
             .collect();
         for (representative, signatures) in carriers {
             let ty = self.reference_to_owned_data(TypeData::object_with_members(signatures.into()));
-            self.bindings[representative].ty = ty;
+            Arc::make_mut(&mut self.bindings)[representative].ty = ty;
         }
     }
 
@@ -663,7 +697,7 @@ impl JsModuleInfoCollector {
 
         // Collect bindings from immediate child scopes of the namespace
         // binding's scope.
-        for child_binding in &self.bindings {
+        for child_binding in self.bindings.iter() {
             if child_binding.name.is_empty() {
                 continue;
             }
@@ -692,12 +726,23 @@ impl JsModuleInfoCollector {
                     export_name,
                     local_name,
                 } => {
-                    if let Some(export) = self.get_export_for_local_name(local_name) {
+                    if let Some(binding_ref) = self
+                        .semantic_model
+                        .scope_from_id(self.export_scope)
+                        .get_binding_reference(&local_name)
+                    {
+                        let export = self.export_for_binding_reference(binding_ref);
                         finalised_exports.insert(export_name, JsExport::Own(export));
                     }
                 }
                 JsCollectedExport::ExportNamedDefault { local_name } => {
-                    if let Some(export) = self.get_export_for_local_name(local_name) {
+                    // `export default name` evaluates `name` as an
+                    // expression, so an ambient module can export a
+                    // declaration of the enclosing file.
+                    if let Some(binding_ref) =
+                        self.find_binding_in_scope(&local_name, self.export_scope)
+                    {
+                        let export = self.export_for_binding_reference(binding_ref);
                         finalised_exports
                             .insert(Text::new_static("default"), JsExport::Own(export));
                     }
@@ -777,13 +822,8 @@ impl JsModuleInfoCollector {
         finalised_exports
     }
 
-    fn get_export_for_local_name(&mut self, local_name: TokenText) -> Option<JsOwnExport> {
-        let binding_ref = self
-            .semantic_model
-            .global_scope()
-            .get_binding_reference(&local_name)?;
-
-        let export = match binding_ref {
+    fn export_for_binding_reference(&mut self, binding_ref: TsBindingReference) -> JsOwnExport {
+        match binding_ref {
             TsBindingReference::Merged {
                 ty,
                 value_ty,
@@ -823,9 +863,7 @@ impl JsModuleInfoCollector {
                 let binding_range = self.bindings[binding_id.index()].range;
                 JsOwnExport::Binding(binding_range)
             }
-        };
-
-        Some(export)
+        }
     }
 
     fn raw_resolved_id(&mut self, ty: &TypeReference) -> TypeId {
@@ -1040,6 +1078,7 @@ impl JsModuleInfo {
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             referenced_classes: collector.referenced_classes,
+            ambient_modules: collector.ambient_modules,
         }))
     }
 }
@@ -1054,6 +1093,10 @@ fn collect_namespace_members(
     raw_binding_types: &FxHashMap<TextRange, TypeReference>,
 ) -> FxHashMap<TypeId, Box<[NamespaceMember]>> {
     let mut members = FxHashMap::<TypeId, Vec<NamespaceMember>>::default();
+    // Without binding types, no binding refers to a namespace type.
+    if raw_binding_types.is_empty() {
+        return FxHashMap::default();
+    }
     for binding in semantic_model.all_bindings() {
         let Some(TypeReference::Resolved(RawTypeId::Local(type_id))) =
             raw_binding_types.get(&binding.range())
