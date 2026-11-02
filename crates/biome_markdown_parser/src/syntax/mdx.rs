@@ -31,7 +31,7 @@ fn no_void_elements(_name: &[u8]) -> bool {
 /// Returns whether the current line starts an ESM block or a block
 /// expression.
 pub(crate) fn at_mdx_block(p: &mut MarkdownParser) -> bool {
-    at_esm_block(p) || block_expression_close(p).is_some()
+    at_esm_block(p) || ExpressionClose::new(p).is_some()
 }
 
 /// Parses an ESM block or a block expression at the current line.
@@ -39,7 +39,7 @@ pub(crate) fn parse_mdx_block(p: &mut MarkdownParser) -> ParsedSyntax {
     if at_esm_block(p) {
         return parse_esm_block(p);
     }
-    match block_expression_close(p) {
+    match ExpressionClose::new(p) {
         Some(close) => parse_block_expression(p, close),
         None => Absent,
     }
@@ -107,32 +107,34 @@ enum ExpressionClose {
     Missing,
 }
 
-/// Returns where the block expression starting on the current line ends, or
-/// `None` when the line doesn't hold a block expression.
-///
-/// A block expression is a `{` at the start of the line, after any amount of
-/// indentation, whose `}` is followed only by spaces and tabs up to the end
-/// of the line. Any other text after the `}` makes the line a paragraph that
-/// contains inline expressions.
-fn block_expression_close(p: &MarkdownParser) -> Option<ExpressionClose> {
-    if !p.is_at_line_start() {
-        return None;
+impl ExpressionClose {
+    /// Returns where the block expression starting on the current line ends, or
+    /// `None` when the line doesn't hold a block expression.
+    ///
+    /// A block expression is a `{` at the start of the line, after any amount of
+    /// indentation, whose `}` is followed only by spaces and tabs up to the end
+    /// of the line. Any other text after the `}` makes the line a paragraph that
+    /// contains inline expressions.
+    fn new(p: &MarkdownParser) -> Option<Self> {
+        if !p.is_at_line_start() {
+            return None;
+        }
+        let rest = p.source_after_current();
+        let indent = rest.len() - rest.trim_start_matches([' ', '\t']).len();
+        let body = rest[indent..].strip_prefix('{')?;
+        let length = JsExtent::expression_length(body.as_bytes(), JSX);
+        if length == body.len() {
+            return Some(Self::Missing);
+        }
+        let after = body[length + 1..].trim_start_matches([' ', '\t']);
+        if !(after.is_empty() || after.starts_with(['\n', '\r'])) {
+            return None;
+        }
+        let close = indent + 1 + length;
+        Some(Self::At(
+            p.cur_range().start() + TextSize::from(close as u32),
+        ))
     }
-    let rest = p.source_after_current();
-    let indent = rest.len() - rest.trim_start_matches([' ', '\t']).len();
-    let body = rest[indent..].strip_prefix('{')?;
-    let length = JsExtent::expression_length(body.as_bytes(), JSX);
-    if length == body.len() {
-        return Some(ExpressionClose::Missing);
-    }
-    let after = body[length + 1..].trim_start_matches([' ', '\t']);
-    if !(after.is_empty() || after.starts_with(['\n', '\r'])) {
-        return None;
-    }
-    let close = indent + 1 + length;
-    Some(ExpressionClose::At(
-        p.cur_range().start() + TextSize::from(close as u32),
-    ))
 }
 
 /// Parses an expression that is alone on its line.
