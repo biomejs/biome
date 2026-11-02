@@ -92,7 +92,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTanstackQueryStableQueryClient {
-        version: "next",
+        version: "2.6.5",
         name: "useTanstackQueryStableQueryClient",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("stable-query-client").same()],

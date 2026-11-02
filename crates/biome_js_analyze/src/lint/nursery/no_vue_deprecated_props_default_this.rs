@@ -72,7 +72,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDeprecatedPropsDefaultThis {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedPropsDefaultThis",
         language: "js",
         recommended: true,

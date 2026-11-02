@@ -55,7 +55,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDeprecatedDestroyedLifecycle {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedDestroyedLifecycle",
         language: "js",
         recommended: true,

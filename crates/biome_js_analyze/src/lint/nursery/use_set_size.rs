@@ -76,7 +76,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSetSize {
-        version: "next",
+        version: "2.6.5",
         name: "useSetSize",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-set-size").same()],

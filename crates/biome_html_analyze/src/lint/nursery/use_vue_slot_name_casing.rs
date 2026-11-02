@@ -109,7 +109,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueSlotNameCasing {
-        version: "next",
+        version: "2.6.5",
         name: "useVueSlotNameCasing",
         language: "html",
         recommended: false,
