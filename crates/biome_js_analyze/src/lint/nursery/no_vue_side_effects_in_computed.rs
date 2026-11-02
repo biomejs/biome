@@ -1,5 +1,5 @@
 use crate::frameworks::vue::vue_call::vue_api_name;
-use crate::services::vue::VueComponent;
+use crate::services::vue::{VueComponent, node_at_range};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -8,7 +8,7 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::assign_ext::AnyJsMemberAssignment;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsRoot,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember,
     AnyJsStatement, JsArrowFunctionExpression, JsCallArgumentList, JsCallExpression,
     JsClassDeclaration, JsClassExpression, JsFunctionDeclaration, JsFunctionExpression,
     JsGetterObjectMember, JsIdentifierExpression, JsLanguage, JsMethodObjectMember, JsModule,
@@ -16,7 +16,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, global_identifier,
 };
 use biome_rowan::{
-    AstNode, AstSeparatedList, NodeOrToken, SyntaxKindSet, TextRange, TokenText, WalkEvent,
+    AstNode, AstSeparatedList, SyntaxKindSet, TextRange, TokenText, WalkEvent,
     declare_node_union,
 };
 use biome_rule_options::no_vue_side_effects_in_computed::NoVueSideEffectsInComputedOptions;
@@ -247,24 +247,6 @@ fn assigned_variable_name(call: &JsCallExpression) -> Option<TokenText> {
     let binding = declarator.id().ok()?;
     let binding = binding.as_any_js_binding()?.as_js_identifier_binding()?;
     Some(binding.name_token().ok()?.token_text_trimmed())
-}
-
-/// Returns the node of type `N` whose range in `root` is exactly `range`.
-fn node_at_range<N: AstNode<Language = JsLanguage>>(
-    root: &AnyJsRoot,
-    range: TextRange,
-) -> Option<N> {
-    let root = root.syntax();
-    if !root.text_range_with_trivia().contains_range(range) {
-        return None;
-    }
-    let node = match root.covering_element(range) {
-        NodeOrToken::Node(node) => node,
-        NodeOrToken::Token(token) => token.parent()?,
-    };
-    node.ancestors()
-        .filter(|node| node.text_trimmed_range() == range)
-        .find_map(N::cast)
 }
 
 declare_node_union! {
