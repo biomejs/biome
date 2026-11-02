@@ -786,6 +786,49 @@ fn starts_with_word(text: &[u8], word: &[u8]) -> bool {
             .is_none_or(|byte| !is_js_word_byte(*byte) && byte.is_ascii())
 }
 
+/// Sorted keywords that can't end a statement, so the next line must complete
+/// it, as in `import a from` or `export const`.
+const UNFINISHED_KEYWORDS: &[&[u8]] = &[
+    b"as",
+    b"assert",
+    b"async",
+    b"await",
+    b"class",
+    b"const",
+    b"default",
+    b"delete",
+    b"export",
+    b"extends",
+    b"from",
+    b"function",
+    b"import",
+    b"in",
+    b"instanceof",
+    b"let",
+    b"new",
+    b"of",
+    b"return",
+    b"throw",
+    b"typeof",
+    b"var",
+    b"void",
+    b"with",
+    b"yield",
+];
+
+/// Sorted keywords that can start a line that continues the code before it,
+/// such as `from` in `import a` followed by `from "a"` on the next line.
+const CONTINUATION_KEYWORDS: &[&[u8]] = &[
+    b"as",
+    b"assert",
+    b"extends",
+    b"from",
+    b"in",
+    b"instanceof",
+    b"of",
+    b"with",
+];
+
 /// Returns whether `code`, the code before a line break, ends with an
 /// operator, a separator, or a keyword that the next line must complete, as
 /// in `export const a =` or `import a from`.
@@ -799,36 +842,8 @@ fn expects_continuation(code: &[u8]) -> bool {
         return true;
     };
     if is_js_word_byte(last) {
-        return trailing_keyword(code).is_some_and(|word| {
-            matches!(
-                word,
-                b"as"
-                    | b"assert"
-                    | b"async"
-                    | b"await"
-                    | b"class"
-                    | b"const"
-                    | b"default"
-                    | b"delete"
-                    | b"export"
-                    | b"extends"
-                    | b"from"
-                    | b"function"
-                    | b"import"
-                    | b"in"
-                    | b"instanceof"
-                    | b"let"
-                    | b"new"
-                    | b"of"
-                    | b"return"
-                    | b"throw"
-                    | b"typeof"
-                    | b"var"
-                    | b"void"
-                    | b"with"
-                    | b"yield"
-            )
-        });
+        return trailing_keyword(code)
+            .is_some_and(|word| UNFINISHED_KEYWORDS.binary_search(&word).is_ok());
     }
     !matches!(last, b')' | b']' | b'}' | b'"' | b'\'' | b'`' | b';')
 }
@@ -869,18 +884,16 @@ fn continues_code(line: &[u8], code: &[u8]) -> bool {
             Some(byte) if is_js_word_byte(*byte) => ends_in_class_head(code),
             _ => false,
         },
-        _ => [
-            b"as".as_slice(),
-            b"assert",
-            b"extends",
-            b"from",
-            b"in",
-            b"instanceof",
-            b"of",
-            b"with",
-        ]
-        .iter()
-        .any(|word| starts_with_word(line, word)),
+        _ => {
+            let length = line
+                .iter()
+                .position(|byte| !is_js_word_byte(*byte))
+                .unwrap_or(line.len());
+            line.get(length).is_none_or(u8::is_ascii)
+                && CONTINUATION_KEYWORDS
+                    .binary_search(&&line[..length])
+                    .is_ok()
+        }
     }
 }
 

@@ -1,4 +1,6 @@
-use crate::{EXPRESSION_KEYWORDS, EsmEnd, JsExtent, Jsx};
+use crate::{
+    CONTINUATION_KEYWORDS, EXPRESSION_KEYWORDS, EsmEnd, JsExtent, Jsx, UNFINISHED_KEYWORDS,
+};
 
 /// Two HTML void elements, matched case-sensitively as Astro matches them.
 fn is_void_element(name: &[u8]) -> bool {
@@ -342,6 +344,15 @@ fn a_bracket_in_a_string_does_not_end_an_argument() {
 fn expression_keywords_are_sorted() {
     for pair in EXPRESSION_KEYWORDS.windows(2) {
         assert!(pair[0] < pair[1], "{:?} < {:?}", pair[0], pair[1]);
+    }
+}
+
+#[test]
+fn esm_keywords_are_sorted() {
+    for keywords in [UNFINISHED_KEYWORDS, CONTINUATION_KEYWORDS] {
+        for pair in keywords.windows(2) {
+            assert!(pair[0] < pair[1], "{:?} < {:?}", pair[0], pair[1]);
+        }
     }
 }
 
