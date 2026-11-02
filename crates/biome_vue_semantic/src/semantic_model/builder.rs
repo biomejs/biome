@@ -26,6 +26,21 @@ pub(crate) struct ModelBuilder {
     /// Whether a `<script src>` block moves declarations of the file to
     /// another file while no component was found to record that on.
     pub(crate) has_unread_script: bool,
+    /// Names written as strings in component options. They are resolved by
+    /// the reference pass, once every declaration is known.
+    pub(crate) option_names: Vec<OptionName>,
+}
+
+/// A name of the component instance written as a string in an option, as in
+/// `watch: { 'user.name': 'onRename' }`.
+pub(crate) struct OptionName {
+    pub(crate) component: ComponentId,
+    /// The host range of the string.
+    pub(crate) range: TextRange,
+    pub(crate) name: TokenText,
+    /// The members a dotted watch key reads after the name.
+    pub(crate) path: Box<[TokenText]>,
+    pub(crate) access: Access,
 }
 
 /// Everything needed to describe a new symbol.

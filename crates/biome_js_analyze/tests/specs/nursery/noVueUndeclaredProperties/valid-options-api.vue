@@ -1,0 +1,37 @@
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  props: { title: String },
+  inject: ["theme"],
+  data() {
+    return { count: 0 };
+  },
+  asyncData() {
+    return { post: null };
+  },
+  computed: {
+    label() {
+      return `${this.title}: ${this.count}`;
+    },
+  },
+  setup() {
+    return { greeting: "hello" };
+  },
+  methods: {
+    increment() {
+      this.count++;
+      this.$emit("change", this.count);
+      this.$nextTick(() => {});
+      return this.theme + this.greeting + this.post;
+    },
+  },
+  mounted() {
+    const hash = this.$route.hash;
+    this.$on("click", this.increment);
+  },
+};
+</script>
+
+<template>
+  <button @click="increment">{{ label }} {{ greeting }} {{ $t("clicks") }}</button>
+</template>

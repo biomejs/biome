@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-nested-data.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  data() {
+    return {
+      user: { name: "", address: { city: "" } },
+    };
+  },
+  methods: {
+    read() {
+      return this.user.nmae + this.user.address.zip;
+    },
+  },
+};
+</script>
+
+<template>
+  <p>{{ user.age }} {{ user.address.city.length }} {{ user.address.country.code }}</p>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-nested-data.vue:11:19 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × user.nmae isn't declared by this component.
+  
+     9 │   methods: {
+    10 │     read() {
+  > 11 │       return this.user.nmae + this.user.address.zip;
+       │                   ^^^^^^^^^
+    12 │     },
+    13 │   },
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-nested-data.vue:11:36 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × user.address.zip isn't declared by this component.
+  
+     9 │   methods: {
+    10 │     read() {
+  > 11 │       return this.user.nmae + this.user.address.zip;
+       │                                    ^^^^^^^^^^^^^^^^
+    12 │     },
+    13 │   },
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-nested-data.vue:18:9 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × user.age isn't declared by this component.
+  
+    17 │ <template>
+  > 18 │   <p>{{ user.age }} {{ user.address.city.length }} {{ user.address.country.code }}</p>
+       │         ^^^^^^^^
+    19 │ </template>
+    20 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-nested-data.vue:18:55 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × user.address.country isn't declared by this component.
+  
+    17 │ <template>
+  > 18 │   <p>{{ user.age }} {{ user.address.city.length }} {{ user.address.country.code }}</p>
+       │                                                       ^^^^^^^^^^^^^^^^^^^^
+    19 │ </template>
+    20 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

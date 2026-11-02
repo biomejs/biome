@@ -117,8 +117,8 @@ impl VueSemanticService {
     }
 }
 
-/// Builds the Vue semantic model and emits a query match for each component
-/// and each declaration written in the analyzed tree.
+/// Builds the Vue semantic model and emits a query match for each component,
+/// each declaration and each reference written in the analyzed tree.
 pub(crate) struct VueSemanticVisitor;
 
 impl Visitor for VueSemanticVisitor {
