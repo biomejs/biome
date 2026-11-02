@@ -29,7 +29,7 @@ importMultiple.ts:2:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━�
   
     1   │ - import·{·test·}·from·"vitest";
     2   │ - test("first",·()·=>·{});
-      1 │ + import·{·test·,·test·as·it·}·from·"vitest";
+      1 │ + import·{·test,·test·as·it·}·from·"vitest";
       2 │ + it("first",·()·=>·{});
     3 3 │   test.skip("second", () => {});
     4 4 │   const reference = test;
@@ -54,7 +54,7 @@ importMultiple.ts:3:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━�
   i Safe fix: Use it instead.
   
     1   │ - import·{·test·}·from·"vitest";
-      1 │ + import·{·test·,·test·as·it·}·from·"vitest";
+      1 │ + import·{·test,·test·as·it·}·from·"vitest";
     2 2 │   test("first", () => {});
     3   │ - test.skip("second",·()·=>·{});
       3 │ + it.skip("second",·()·=>·{});
