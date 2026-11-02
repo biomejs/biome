@@ -8051,6 +8051,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueTemplateKeyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueTemplateKeyOptions" }
+			]
+		},
+		"NoVueTemplateKeyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueThisInBeforeRouteEnterConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9133,6 +9143,13 @@
 					"description": "Disallow changing state inside Vue computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueSideEffectsInComputedConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueTemplateKey": {
+					"description": "Disallow the key attribute on \\<template> elements in Vue.\nSee https://biomejs.dev/linter/rules/no-vue-template-key",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueTemplateKeyConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15064,6 +15081,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueSideEffectsInComputedOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueTemplateKeyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueTemplateKeyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
