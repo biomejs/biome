@@ -702,6 +702,7 @@ pub mod use_vue_next_tick_promise;
 pub mod use_vue_prop_type_constructor;
 pub mod use_vue_render_return;
 pub mod use_vue_slot_name_casing;
+pub mod use_vue_slots_as_functions;
 pub mod use_vue_template_ref;
 pub mod use_vue_toggle_inside_transition;
 pub mod use_vue_typed_object_props;

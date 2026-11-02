@@ -1,0 +1,49 @@
+<!-- should not generate diagnostics -->
+<script>
+import { h } from "vue";
+
+export default {
+  render() {
+    var children = this.$slots.default();
+    var children = this.$slots.default && this.$slots.default();
+    return h("div", this.$slots.default);
+  },
+  methods: {
+    calls() {
+      this.$slots.foo?.();
+      (this.$slots?.foo)?.();
+      (this?.$slots)?.foo?.();
+      const children = this.$slots.foo;
+      return children();
+    },
+    passedAround() {
+      const slot = this.$slots.foo;
+      register(slot);
+      return { slot, other: this.$slots.bar };
+    },
+    usedAsKey(map) {
+      return map[this.$slots.foo];
+    },
+    checks() {
+      if (this.$slots.foo) {
+        return typeof this.$slots.bar === "function";
+      }
+    },
+    wholeSlotsObject() {
+      return this.$slots.length;
+    },
+    reassignedVariable() {
+      let children = [];
+      children = children;
+      return children.length;
+    },
+    otherObjects() {
+      var children = unknown.$slots.default;
+      var filtered = unknown.$slots.default.filter(test);
+      let vm = this;
+      vm.$slots.foo.length;
+      return [...children, filtered];
+    },
+  },
+};
+</script>
