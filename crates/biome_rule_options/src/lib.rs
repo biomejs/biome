@@ -397,6 +397,7 @@ pub mod no_vue_data_object_declaration;
 pub mod no_vue_deprecated_config_key_codes;
 pub mod no_vue_deprecated_delete_set;
 pub mod no_vue_deprecated_destroyed_lifecycle;
+pub mod no_vue_deprecated_functional_template;
 pub mod no_vue_deprecated_html_element_is;
 pub mod no_vue_deprecated_inline_template;
 pub mod no_vue_deprecated_listeners;

@@ -1,0 +1,36 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidWithOtherAttributes.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template lang="html" functional>
+  <div />
+</template>
+<script>
+export default {};
+</script>
+
+```
+
+# Diagnostics
+```
+invalidWithOtherAttributes.vue:2:23 lint/nursery/noVueDeprecatedFunctionalTemplate ━━━━━━━━━━━━━━━━━
+
+  i The functional attribute on <template> is deprecated.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <template lang="html" functional>
+      │                       ^^^^^^^^^^
+    3 │   <div />
+    4 │ </template>
+  
+  i Vue 3 no longer supports functional templates, because functional components are no faster than regular components anymore.
+  
+  i Remove the functional attribute and use a regular <template>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
