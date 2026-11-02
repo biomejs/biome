@@ -4033,6 +4033,11 @@ export interface Nursery {
 	 */
 	useVueRenderReturn?: UseVueRenderReturnConfiguration;
 	/**
+	 * Require Vue component events to carry at most one value.
+	 * See https://biomejs.dev/linter/rules/use-vue-single-event-payload
+	 */
+	useVueSingleEventPayload?: UseVueSingleEventPayloadConfiguration;
+	/**
 	 * Enforce a consistent casing for the names of Vue slots.
 	 * See https://biomejs.dev/linter/rules/use-vue-slot-name-casing
 	 */
@@ -6934,6 +6939,9 @@ export type UseVuePropTypeConstructorConfiguration =
 export type UseVueRenderReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueRenderReturnOptions;
+export type UseVueSingleEventPayloadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueSingleEventPayloadOptions;
 export type UseVueSlotNameCasingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueSlotNameCasingOptions;
@@ -10225,6 +10233,10 @@ export interface RuleWithUseVueRenderReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueRenderReturnOptions;
 }
+export interface RuleWithUseVueSingleEventPayloadOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueSingleEventPayloadOptions;
+}
 export interface RuleWithUseVueSlotNameCasingOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueSlotNameCasingOptions;
@@ -12854,6 +12866,7 @@ export type UseVueEmitsValidatorReturnOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
 export type UseVueRenderReturnOptions = {};
+export type UseVueSingleEventPayloadOptions = {};
 export interface UseVueSlotNameCasingOptions {
 	/**
 	 * The casing that slot names must follow. If omitted, slot names must be in camelCase.
@@ -14591,6 +14604,7 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVuePropTypeConstructor"
 	| "lint/nursery/useVueRenderReturn"
+	| "lint/nursery/useVueSingleEventPayload"
 	| "lint/nursery/useVueSlotsAsFunctions"
 	| "lint/nursery/useVueTemplateRef"
 	| "lint/nursery/useVueSlotNameCasing"

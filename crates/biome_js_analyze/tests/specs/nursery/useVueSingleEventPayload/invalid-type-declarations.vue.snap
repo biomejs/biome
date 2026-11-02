@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-type-declarations.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineEmits<{
+  (e: "change", value1: string, value2: number): void;
+  update: [value1: string, value2: number];
+}>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-type-declarations.vue:4:33 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event change is declared with more than one value.
+  
+    2 │ <script setup lang="ts">
+    3 │ defineEmits<{
+  > 4 │   (e: "change", value1: string, value2: number): void;
+      │                                 ^^^^^^^^^^^^^^
+    5 │   update: [value1: string, value2: number];
+    6 │ }>();
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-type-declarations.vue:5:28 lint/nursery/useVueSingleEventPayload ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update is declared with more than one value.
+  
+    3 │ defineEmits<{
+    4 │   (e: "change", value1: string, value2: number): void;
+  > 5 │   update: [value1: string, value2: number];
+      │                            ^^^^^^^^^^^^^^
+    6 │ }>();
+    7 │ </script>
+  
+  i A listener written inline in a template, such as @change="onChange($event)", can only read the first value through $event. The other values are lost.
+  
+  i Put all the values in one object, and send that object instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

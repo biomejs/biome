@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-template.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="$emit('change')">Change</button>
+  <button @click="$emit('change', value)">Change</button>
+  <button @click="$emit('change', { a, b })">Change</button>
+  <button @click="emit('update', { a: 'foo', b: 'bar' })">Update</button>
+</template>
+
+<script setup lang="ts">
+const emit = defineEmits<{
+  (e: "update", payload: { a: string; b: string }): void;
+}>();
+</script>
+
+```
