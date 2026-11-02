@@ -7,6 +7,8 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueEmit`] runs the rule once per declared event. Use it when the rule
+//!   judges one event declaration on its own.
 //! - [`VueSnippet`] runs the rule once on an embedded snippet, such as a
 //!   directive value. Use it when the rule judges a template expression
 //!   by where it is written.
@@ -33,8 +35,8 @@ use biome_languages::{JsFileSource, LanguageDb};
 use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, Reference, Snippet, SnippetId, Symbol, VueSemanticModel, component_model,
-    vue_model_from_source,
+    Component, Emit, Prop, Reference, Snippet, SnippetId, Symbol, VueSemanticModel,
+    component_model, vue_model_from_source,
 };
 use std::rc::Rc;
 
@@ -145,6 +147,9 @@ impl Visitor for VueSemanticVisitor {
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
             }
+            for emit in component.emits().filter(|emit| service.declares(emit)) {
+                ctx.match_query(VueEmitMatch(emit));
+            }
         }
         if let Some(snippet) = service.snippet {
             ctx.match_query(VueSnippetMatch(service.model.snippet(snippet)));
@@ -224,6 +229,13 @@ define_vue_query!(
     VueProp,
     VuePropMatch,
     Prop
+);
+define_vue_query!(
+    /// Matches each event each Vue component declares, whatever syntax
+    /// declares it.
+    VueEmit,
+    VueEmitMatch,
+    Emit
 );
 define_vue_query!(
     /// Matches the analyzed tree when it is a snippet embedded in a `.vue`
