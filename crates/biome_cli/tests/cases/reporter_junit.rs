@@ -25,6 +25,10 @@ debugger
 let f;
 		let f;"#;
 
+const MAIN_3: &str = r#"a ==b
+
+debugger"#;
+
 #[test]
 fn reports_diagnostics_junit_check_command() {
     let fs = MemoryFileSystem::default();
@@ -200,6 +204,31 @@ fn reports_diagnostics_junit_check_command_file() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "reports_diagnostics_junit_check_command_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn reports_diagnostics_junit_same_file_in_one_test_suite() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("main.ts");
+    fs.insert(file_path.into(), MAIN_3.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--reporter=junit", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_diagnostics_junit_same_file_in_one_test_suite",
         fs,
         console,
         result,
