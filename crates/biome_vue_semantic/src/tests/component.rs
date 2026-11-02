@@ -426,6 +426,30 @@ const d = defineModel(Number);"#,
 }
 
 #[test]
+fn runtime_type_range_covers_the_type_as_written() {
+    let code = "defineProps({ a: Object as PropType<A>, b: { type: (Array), default: null }, c: { default: 1 }, d: String })";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    let types: Vec<_> = component
+        .props()
+        .map(|prop| prop.runtime_type_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        types,
+        [
+            Some("Object as PropType<A>"),
+            Some("(Array)"),
+            None,
+            Some("String")
+        ]
+    );
+
+    let model = js_model("defineProps<{ a: object }>()", setup_ts());
+    let prop = model.components().next().unwrap().props().next().unwrap();
+    assert_eq!(prop.runtime_type_range(), None);
+}
+
+#[test]
 fn types_the_model_cannot_list_open_the_namespace() {
     for code in [
         "interface Base { a: string } interface Props extends Base { b: string } defineProps<Props>()",

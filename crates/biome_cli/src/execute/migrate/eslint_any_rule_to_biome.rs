@@ -7947,6 +7947,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
+        "vue/require-typed-object-prop" => {
+            if !options.include_nursery {
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_vue_typed_object_props
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_severity.into()));
+        }
         "vue/require-typed-ref" => {
             if !options.include_nursery {
                 results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);

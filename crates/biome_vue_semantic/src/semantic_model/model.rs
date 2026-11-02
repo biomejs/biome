@@ -588,6 +588,9 @@ pub(crate) struct PropDetail {
     /// Whether `defaults` lists every default value written for the prop.
     pub(crate) defaults_complete: bool,
     pub(crate) validator: Option<TextRange>,
+    /// The expression written as the prop's runtime type, as in `String` or
+    /// `{ type: String }`.
+    pub(crate) runtime_type: Option<TextRange>,
     pub(crate) form: PropForm,
 }
 
@@ -1950,6 +1953,19 @@ impl Prop {
     /// tree that declares the prop.
     pub fn validator_range(&self) -> Option<TextRange> {
         let range = self.prop_detail()?.validator?;
+        Some(self.0.data.local(range, self.0.row().snippet))
+    }
+
+    /// The range of the expression that gives the prop's runtime type, in
+    /// the coordinates of the tree that declares the prop: `Object as
+    /// PropType<User>` in `user: Object as PropType<User>` or in
+    /// `user: { type: Object as PropType<User> }`.
+    ///
+    /// `None` when the declaration has no runtime type, as in
+    /// `props: ['user']`, `{ default: null }`, or a prop declared with a
+    /// TypeScript type.
+    pub fn runtime_type_range(&self) -> Option<TextRange> {
+        let range = self.prop_detail()?.runtime_type?;
         Some(self.0.data.local(range, self.0.row().snippet))
     }
 

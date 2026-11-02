@@ -480,6 +480,7 @@ define_categories! {
     "lint/nursery/useVueTemplateRef": "https://biomejs.dev/linter/rules/use-vue-template-ref",
     "lint/nursery/useVueSlotNameCasing": "https://biomejs.dev/linter/rules/use-vue-slot-name-casing",
     "lint/nursery/useVueToggleInsideTransition": "https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
+    "lint/nursery/useVueTypedObjectProps": "https://biomejs.dev/linter/rules/use-vue-typed-object-props",
     "lint/nursery/useVueTypedProps": "https://biomejs.dev/linter/rules/use-vue-typed-props",
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
     "lint/nursery/useVueValidDefineEmits": "https://biomejs.dev/linter/rules/use-vue-valid-define-emits",
