@@ -1,0 +1,302 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <LinkList>
+    <template slot><a /></template>
+  </LinkList>
+  <LinkList>
+    <template slot="name"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template slot="name" slot-scope="{ item }"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template slot="f o o"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template :slot="slotName"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template v-bind:slot="slotName"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template :slot><a /></template>
+  </LinkList>
+  <LinkList>
+    <a slot="name" />
+  </LinkList>
+  <LinkList>
+    <a :slot="name" />
+  </LinkList>
+  <my-component>
+    <div slot="header">Header</div>
+  </my-component>
+  <component :is="tag">
+    <div slot="named">Content</div>
+  </component>
+  <some-component>
+    <template v-if="condition">
+      <template slot="some-slot">Nested</template>
+    </template>
+  </some-component>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    2 │ <template>
+    3 │   <LinkList>
+  > 4 │     <template slot><a /></template>
+      │               ^^^^
+    5 │   </LinkList>
+    6 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    5 │   </LinkList>
+    6 │   <LinkList>
+  > 7 │     <template slot="name"><a /></template>
+      │               ^^^^^^^^^^^
+    8 │   </LinkList>
+    9 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+     8 │   </LinkList>
+     9 │   <LinkList>
+  > 10 │     <template slot="name" slot-scope="{ item }"><a /></template>
+       │               ^^^^^^^^^^^
+    11 │   </LinkList>
+    12 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    11 │   </LinkList>
+    12 │   <LinkList>
+  > 13 │     <template slot="f o o"><a /></template>
+       │               ^^^^^^^^^^^^
+    14 │   </LinkList>
+    15 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    14 │   </LinkList>
+    15 │   <LinkList>
+  > 16 │     <template :slot="slotName"><a /></template>
+       │               ^^^^^^^^^^^^^^^^
+    17 │   </LinkList>
+    18 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    17 │   </LinkList>
+    18 │   <LinkList>
+  > 19 │     <template v-bind:slot="slotName"><a /></template>
+       │               ^^^^^^^^^^^^^^^^^^^^^^
+    20 │   </LinkList>
+    21 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:15 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    20 │   </LinkList>
+    21 │   <LinkList>
+  > 22 │     <template :slot><a /></template>
+       │               ^^^^^
+    23 │   </LinkList>
+    24 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:8 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    23 │   </LinkList>
+    24 │   <LinkList>
+  > 25 │     <a slot="name" />
+       │        ^^^^^^^^^^^
+    26 │   </LinkList>
+    27 │   <LinkList>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:28:8 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    26 │   </LinkList>
+    27 │   <LinkList>
+  > 28 │     <a :slot="name" />
+       │        ^^^^^^^^^^^^
+    29 │   </LinkList>
+    30 │   <my-component>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:31:10 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    29 │   </LinkList>
+    30 │   <my-component>
+  > 31 │     <div slot="header">Header</div>
+       │          ^^^^^^^^^^^^^
+    32 │   </my-component>
+    33 │   <component :is="tag">
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:34:10 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    32 │   </my-component>
+    33 │   <component :is="tag">
+  > 34 │     <div slot="named">Content</div>
+       │          ^^^^^^^^^^^^
+    35 │   </component>
+    36 │   <some-component>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:38:17 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    36 │   <some-component>
+    37 │     <template v-if="condition">
+  > 38 │       <template slot="some-slot">Nested</template>
+       │                 ^^^^^^^^^^^^^^^^
+    39 │     </template>
+    40 │   </some-component>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

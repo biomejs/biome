@@ -407,6 +407,7 @@ pub mod no_vue_deprecated_props_default_this;
 pub mod no_vue_deprecated_router_link_tag_prop;
 pub mod no_vue_deprecated_scope_attribute;
 pub mod no_vue_deprecated_scoped_slots;
+pub mod no_vue_deprecated_slot_attribute;
 pub mod no_vue_deprecated_slot_scope;
 pub mod no_vue_deprecated_v_bind_sync;
 pub mod no_vue_deprecated_v_on_native_modifier;
