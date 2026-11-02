@@ -1,0 +1,49 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidSelfClosing.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<style src="./style.css" />
+<template></template>
+
+```
+
+# Diagnostics
+```
+invalidSelfClosing.vue:3:1 lint/nursery/useVueBlockOrder  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The <template> block should be above the <style> block.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <style src="./style.css" />
+  > 3 │ <template></template>
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This <style> block should come after it.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <style src="./style.css" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <template></template>
+    4 │ 
+  
+  i Putting the blocks of every component in the same order makes components easier to read.
+  
+  i This project puts top-level blocks in this order: <script> and <template> in any order, then <style>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Move the <template> block above the <style> block.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2   │ - <style·src="./style.css"·/>
+    3   │ - <template></template>
+      2 │ + <template></template>
+      3 │ + <style·src="./style.css"·/>
+    4 4 │   
+  
+
+```

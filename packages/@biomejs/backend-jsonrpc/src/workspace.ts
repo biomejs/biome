@@ -3943,6 +3943,11 @@ export interface Nursery {
 	 */
 	useVueBaseImport?: UseVueBaseImportConfiguration;
 	/**
+	 * Enforce the order of the top-level blocks in Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-block-order
+	 */
+	useVueBlockOrder?: UseVueBlockOrderConfiguration;
+	/**
 	 * Require \<component> elements to bind the is attribute.
 	 * See https://biomejs.dev/linter/rules/use-vue-component-is
 	 */
@@ -6830,6 +6835,9 @@ export type UseValidTestTitleConfiguration =
 export type UseVueBaseImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueBaseImportOptions;
+export type UseVueBlockOrderConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueBlockOrderOptions;
 export type UseVueComponentIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComponentIsOptions;
@@ -10041,6 +10049,14 @@ export interface RuleWithUseVueBaseImportOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueBaseImportOptions;
 }
+export interface RuleWithUseVueBlockOrderOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueBlockOrderOptions;
+}
 export interface RuleWithUseVueComponentIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComponentIsOptions;
@@ -12641,6 +12657,18 @@ export interface UseValidTestTitleOptions {
 	disallowedWords?: string[];
 }
 export type UseVueBaseImportOptions = {};
+export interface UseVueBlockOrderOptions {
+	/**
+	 * The order of the top-level blocks of a Vue component.
+	 *
+	 * Each entry is either the tag name of a block, such as `"style"`, or a
+	 * list of tag names whose blocks may appear in any order relative to each
+	 * other. Blocks whose tag name isn't listed can appear anywhere.
+	 *
+	 * Defaults to `[["script", "template"], "style"]`.
+	 */
+	order?: BlockOrderEntry[];
+}
 export type UseVueComponentIsOptions = {};
 export type UseVueComputedPropertyReturnOptions = {};
 export interface UseVueConsistentDefineEmitsDeclarationOptions {
@@ -13654,6 +13682,10 @@ export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
 	| "arrowFunction";
+/**
+ * One position in the configured block order.
+ */
+export type BlockOrderEntry = string | string[];
 export type DefineEmitsDeclarationStyle = "type" | "typeLiteral" | "runtime";
 export type EventHyphenation = "always" | "never";
 export type SlotNameCasing = "camelCase" | "kebab-case" | "singleword";
@@ -14381,6 +14413,7 @@ export type Category =
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
+	| "lint/nursery/useVueBlockOrder"
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueComputedPropertyReturn"
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
