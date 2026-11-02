@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWholeFileNamespace.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+namespace WholeFile {
+	export type T = number;
+	const x: WholeFile.T = 3;
+}
+
+```
+
+# Diagnostics
+```
+invalidWholeFileNamespace.ts:4:11 lint/nursery/noUselessQualifier  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The qualifier before T is unnecessary.
+  
+    2 │ namespace WholeFile {
+    3 │ 	export type T = number;
+  > 4 │ 	const x: WholeFile.T = 3;
+      │ 	         ^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Inside a namespace or an enum, its members can be used by their name alone, so the qualifier only repeats what is already known.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the qualifier.
+  
+    2 2 │   namespace WholeFile {
+    3 3 │     export type T = number;
+    4   │ - → const·x:·WholeFile.T·=·3;
+      4 │ + → const·x:·T·=·3;
+    5 5 │   }
+    6 6 │   
+  
+
+```

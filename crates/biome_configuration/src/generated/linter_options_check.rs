@@ -1757,6 +1757,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("complexity", "noUselessLoneBlockStatements", TypeId::of::<biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions>()));
     result.push((
         "nursery",
+        "noUselessQualifier",
+        TypeId::of::<biome_rule_options::no_useless_qualifier::NoUselessQualifierOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noUselessRecursion",
         TypeId::of::<biome_rule_options::no_useless_recursion::NoUselessRecursionOptions>(),
     ));
