@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_additional_directives.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div v-t="foo" />
+  <div v-t="foo"></div>
+  <div v-tt="foo">bar</div>
+</template>
+
+```
