@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-script-setup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const emit = defineEmits(["change"]);
+emit("change");
+emit("change", value);
+emit("change", { a, b });
+
+const other = { emit() {} };
+other.emit("change", a, b);
+
+function send(emit) {
+  emit("change", a, b);
+}
+</script>
+
+```

@@ -60,6 +60,7 @@ biome migrate eslint --include-inspired --include-nursery --write
       },
       "nursery": {
         "noSvelteLegacyConst": "error",
+        "noVueRestrictedVOn": "error",
         "useControlLabel": "error",
         "usePromiseRejectErrors": "error",
         "useTailwindShorthandClasses": "warn"
@@ -108,9 +109,9 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 133 ESLint rules found
     - 17 are obsolete because of Biome's formatter
-    - 72 have been migrated to Biome's rules
-    - 66% (89) of your ESLint rules are fully covered by Biome
-      - 54% (72) via direct migration to Biome rules
+    - 73 have been migrated to Biome's rules
+    - 67% (90) of your ESLint rules are fully covered by Biome
+      - 54% (73) via direct migration to Biome rules
   
   
   i Migrated rules:
@@ -185,10 +186,11 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - vue/no-console
   - vue/no-irregular-whitespace
   - vue/no-loss-of-precision
+  - vue/no-restricted-v-on
   - vue/no-unused-vars
   - vue/object-shorthand
   
-  i Unsupported rules (21 incompatible with formatter, 11 made obsolete by the formatter, 6 covered by a formatter option, 1 not yet implemented, 0 unknown source):
+  i Unsupported rules (21 incompatible with formatter, 11 made obsolete by the formatter, 6 covered by a formatter option, 0 not yet implemented, 0 unknown source):
   
   i These rules enforce code styles that are incompatible with the formatter in some way:
   
@@ -236,10 +238,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - unicorn/indent - Covered by Biome's indentStyle, indentWidth formatter option.
   - yml/indent - Covered by Biome's indentWidth formatter option.
   - yml/quotes - Covered by Biome's quoteStyle formatter option.
-  
-  i These rules have not yet been implemented:
-  
-  - vue/no-restricted-v-on
   
   i These rules are covered by another rule, but they require manual migration:
   

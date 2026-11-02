@@ -13,6 +13,7 @@
 
 use biome_rowan::{TextRange, TextSize, TokenText};
 use enumflags2::{BitFlags, bitflags};
+use std::borrow::Cow;
 use std::ops::Range;
 use std::sync::Arc;
 
@@ -344,7 +345,10 @@ pub enum RootShape {
     Identifier,
     MemberChain,
     Call,
-    /// A string literal, or a template literal without substitutions.
+    /// A string literal, or a template literal without substitutions. The
+    /// text is written as in the source, between the quotes, with its escapes
+    /// kept: `'it\'s'` holds `it\'s`. See [`Snippet::string_value`] for the
+    /// value with the escapes resolved.
     String(Box<str>),
     Bool(bool),
     Null,
@@ -410,6 +414,20 @@ pub(crate) struct SnippetData {
     pub(crate) assignability: Assignability,
     pub(crate) fingerprint: u64,
     pub(crate) operands: Range<u32>,
+    pub(crate) has_comments: bool,
+    /// Where the bare names of a template expression are looked up. `None`
+    /// for a script block.
+    pub(crate) name_scope: Option<NameScope>,
+}
+
+/// Where the bare names of a template expression are looked up.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct NameScope {
+    /// The innermost scope the expression sees.
+    pub(crate) scope: ScopeId,
+    /// The scope whose slot parameters the expression cannot see: the scope
+    /// of the element whose directive the expression is.
+    pub(crate) hidden_slot_params: Option<ScopeId>,
 }
 
 /// One operand of a logical condition. `a || (b && c)` has three operands in
@@ -543,22 +561,27 @@ pub enum PropForm {
     ArrayString,
     /// `props: { name: String }`
     Constructor,
-    /// `props: { name: { type: String } }`
+    /// `props: { name: { type: String } }` or `defineModel({ type: String })`
     Options,
-    /// `defineProps<{ name: string }>()`
+    /// `defineProps<{ name: string }>()` or `defineModel<string>()`
     TypeMember,
 }
 
 /// Where a prop's default value is written.
+#[bitflags]
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DefaultSource {
     /// `{ type: Boolean, default: true }`
-    Inline,
+    Inline = 1 << 0,
     /// `withDefaults(defineProps<Props>(), { name: true })`
-    WithDefaults,
+    WithDefaults = 1 << 1,
     /// `const { name = true } = defineProps<Props>()`
-    Destructure,
+    Destructure = 1 << 2,
 }
+
+/// A set of places where a prop's default value can be written.
+pub type DefaultSources = BitFlags<DefaultSource>;
 
 /// A default value of a prop.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -572,7 +595,15 @@ pub(crate) struct PropDetail {
     pub(crate) types: TypeSet,
     pub(crate) required: Tri,
     pub(crate) defaults: Box<[PropDefaultData]>,
+    /// The places outside the prop's own declaration where the component
+    /// lets a default value be written for it.
+    pub(crate) external_default_sources: DefaultSources,
+    /// Whether `defaults` lists every default value written for the prop.
+    pub(crate) defaults_complete: bool,
     pub(crate) validator: Option<TextRange>,
+    /// The expression written as the prop's runtime type, as in `String` or
+    /// `{ type: String }`.
+    pub(crate) runtime_type: Option<TextRange>,
     pub(crate) form: PropForm,
 }
 
@@ -607,6 +638,12 @@ pub(crate) enum Detail {
     Computed {
         getter: Option<TextRange>,
         setter: Option<TextRange>,
+    },
+    /// A data property whose value is an object literal.
+    Object {
+        /// Whether the object has members the model cannot name, such as a
+        /// spread or a computed key.
+        open: bool,
     },
 }
 
@@ -645,6 +682,9 @@ pub enum RefSite {
     EventName,
     /// The name passed to `useTemplateRef()`, or the member read from `$refs`.
     TemplateRefKey,
+    /// A name written as a string in a component option: a key of `watch`,
+    /// a method named as a watcher, or an entry of `expose`.
+    OptionName,
 }
 
 /// What a reference is reached through.
@@ -728,6 +768,8 @@ pub(crate) struct ComponentData {
     pub(crate) inherit_attrs: Tri,
     /// The range of the `render` option in the host document.
     pub(crate) render: Option<TextRange>,
+    /// The `model` option, when its value is an object.
+    pub(crate) model_option: Option<TextRange>,
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
     pub(crate) macro_options: MacroOptions,
@@ -1037,6 +1079,23 @@ impl VueSemanticModel {
             .iter()
             .rposition(|element| element.range.contains_range(host_range))
             .map(|index| self.element(ElementId::new(index)))
+    }
+
+    /// Returns the attribute or directive written at `host_range`.
+    ///
+    /// `host_range` must be the whole attribute without its surrounding
+    /// whitespace, such as the range of `:id="'foo'"`.
+    pub fn attr_at(&self, host_range: TextRange) -> Option<Attr> {
+        // Attributes are stored in source order and do not overlap.
+        let index = self
+            .data
+            .attrs
+            .partition_point(|attr| attr.range.start() < host_range.start());
+        let attr = self.data.attrs.get(index)?;
+        (attr.range == host_range).then(|| Attr {
+            data: self.data.clone(),
+            id: AttrId::new(index),
+        })
     }
 
     /// Returns the reference written at `host_range`.
@@ -1503,6 +1562,42 @@ impl Snippet {
         self.row().fingerprint
     }
 
+    /// Whether the snippet contains a comment.
+    pub fn has_comments(&self) -> bool {
+        self.row().has_comments
+    }
+
+    /// Returns the value of the string at the root of the snippet, with its
+    /// escapes resolved: `it's` for `'it\'s'`.
+    ///
+    /// Returns `None` when the root isn't a string, and when the string has an
+    /// escape that stands for another character, such as `\n`, `\x41` or
+    /// `\0`, or a backslash that continues the string on the next line. The
+    /// escapes that remain stand for the escaped character itself, such as
+    /// `\'` and `\\`.
+    pub fn string_value(&self) -> Option<Cow<'_, str>> {
+        let RootShape::String(text) = self.root() else {
+            return None;
+        };
+        let Some(first_escape) = text.find('\\') else {
+            return Some(Cow::Borrowed(text));
+        };
+        let mut value = String::with_capacity(text.len());
+        value.push_str(&text[..first_escape]);
+        let mut chars = text[first_escape..].chars();
+        while let Some(char) = chars.next() {
+            if char != '\\' {
+                value.push(char);
+                continue;
+            }
+            match chars.next() {
+                Some(escaped) if !is_special_escape(escaped) => value.push(escaped),
+                _ => return None,
+            }
+        }
+        Some(Cow::Owned(value))
+    }
+
     /// The operands of the snippet's root, when it is a `||` or `&&`
     /// expression.
     pub fn operands(&self) -> &[Operand] {
@@ -1522,7 +1617,41 @@ impl Snippet {
                 id: *id,
             })
     }
+
+    /// Finds the declaration that the bare name `name` refers to when it is
+    /// written in this snippet, such as a `v-for` variable, a slot parameter
+    /// or a prop.
+    ///
+    /// Returns `None` when nothing the model reads declares `name`, and for
+    /// a script block, which resolves its own names.
+    pub fn lookup(&self, name: &str) -> Option<Symbol> {
+        let name_scope = self.row().name_scope?;
+        let id = super::references::lookup(
+            &self.data,
+            name_scope.scope,
+            name,
+            name_scope.hidden_slot_params,
+        )?;
+        Some(Symbol {
+            data: self.data.clone(),
+            id,
+        })
+    }
 }
+
+/// Whether a backslash followed by `char` in a JavaScript string stands for
+/// something other than `char` itself: a control character, a character
+/// code, or nothing at all when the backslash continues the string on the
+/// next line.
+fn is_special_escape(char: char) -> bool {
+    char.is_ascii_digit() || SPECIAL_ESCAPES.binary_search(&char).is_ok()
+}
+
+/// The characters, other than digits, that make an escape special. Sorted, so
+/// [`is_special_escape`] can search it.
+const SPECIAL_ESCAPES: &[char] = &[
+    '\n', '\r', 'b', 'f', 'n', 'r', 't', 'u', 'v', 'x', '\u{2028}', '\u{2029}',
+];
 
 impl Scope {
     pub fn kind(&self) -> ScopeKind {
@@ -1627,6 +1756,30 @@ impl Symbol {
     /// Whether the symbol only exists in the type system.
     pub fn is_type_only(&self) -> bool {
         self.row().type_only
+    }
+
+    /// The symbols nested in this one: `name` for `user` in
+    /// `data() { return { user: { name: '' } } }`.
+    pub fn members(&self) -> impl Iterator<Item = Self> + '_ {
+        let siblings: &[SymbolId] = match self.row().component {
+            Some(component) => &self.data.components[component.index()].symbols,
+            None => &[],
+        };
+        siblings
+            .iter()
+            .filter(|id| self.data.symbols[id.index()].parent == Some(self.id))
+            .map(|id| Self {
+                data: self.data.clone(),
+                id: *id,
+            })
+    }
+
+    /// Whether [`Self::members`] lists every member of the symbol's value.
+    ///
+    /// That is only the case for a data property whose value is an object
+    /// literal with no spread and no computed key.
+    pub fn has_known_members(&self) -> bool {
+        matches!(self.row().detail, Detail::Object { open: false })
     }
 
     /// The references that resolve to this symbol.
@@ -1840,10 +1993,45 @@ impl Prop {
             })
     }
 
+    /// The places outside the prop's own declaration where the component
+    /// lets a default value be written for it:
+    /// [`DefaultSource::WithDefaults`] when the `defineProps()` call is passed
+    /// to `withDefaults()`, and [`DefaultSource::Destructure`] when the props
+    /// object is destructured.
+    pub fn external_default_sources(&self) -> DefaultSources {
+        self.prop_detail()
+            .map(|detail| detail.external_default_sources)
+            .unwrap_or_default()
+    }
+
+    /// Whether [`Self::defaults`] lists every default value of the prop.
+    ///
+    /// It does not when the prop's options object, or the object passed to
+    /// `withDefaults()`, holds members the model cannot read, such as a
+    /// spread, or when `withDefaults()` receives a variable or a function
+    /// call.
+    pub fn has_complete_defaults(&self) -> bool {
+        self.prop_detail()
+            .is_none_or(|detail| detail.defaults_complete)
+    }
+
     /// The range of the prop's validator function, in the coordinates of the
     /// tree that declares the prop.
     pub fn validator_range(&self) -> Option<TextRange> {
         let range = self.prop_detail()?.validator?;
+        Some(self.0.data.local(range, self.0.row().snippet))
+    }
+
+    /// The range of the expression that gives the prop's runtime type, in
+    /// the coordinates of the tree that declares the prop: `Object as
+    /// PropType<User>` in `user: Object as PropType<User>` or in
+    /// `user: { type: Object as PropType<User> }`.
+    ///
+    /// `None` when the declaration has no runtime type, as in
+    /// `props: ['user']`, `{ default: null }`, or a prop declared with a
+    /// TypeScript type.
+    pub fn runtime_type_range(&self) -> Option<TextRange> {
+        let range = self.prop_detail()?.runtime_type?;
         Some(self.0.data.local(range, self.0.row().snippet))
     }
 
@@ -1978,6 +2166,21 @@ impl Component {
     pub fn mixins_range(&self) -> Option<TextRange> {
         let range = self.row().mixins?;
         Some(self.data.local(range, self.row().snippet))
+    }
+
+    /// The range of the `model` option, in the coordinates of the tree that
+    /// holds it, when its value is an object such as
+    /// `model: { prop: "checked", event: "change" }`.
+    ///
+    /// Vue 3 ignores this option.
+    pub fn model_option_range(&self) -> Option<TextRange> {
+        let range = self.row().model_option?;
+        Some(self.data.local(range, self.row().snippet))
+    }
+
+    /// The range of the `model` option in the host document.
+    pub fn model_option_host_range(&self) -> Option<TextRange> {
+        self.row().model_option
     }
 
     /// Whether the plain `<script>` block declares props or emits that the
@@ -2135,5 +2338,22 @@ impl Component {
 
     pub fn registered_directives(&self) -> impl Iterator<Item = Symbol> + '_ {
         self.of_kind(SymbolKind::DirectiveRegistration)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SPECIAL_ESCAPES;
+
+    #[test]
+    fn special_escapes_are_sorted() {
+        for pair in SPECIAL_ESCAPES.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "{:?} must come after {:?}",
+                pair[0],
+                pair[1]
+            );
+        }
     }
 }

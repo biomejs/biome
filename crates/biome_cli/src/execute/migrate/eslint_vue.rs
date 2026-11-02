@@ -8,6 +8,7 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_rule_options::no_vue_undeclared_properties::NoVueUndeclaredPropertiesOptions;
 use biome_rule_options::use_consistent_block_lang::{
     BlockLangMap, BlockLangOptions as BlockLangBlockOptions, UseConsistentBlockLangOptions,
 };
@@ -150,4 +151,37 @@ impl BlockLangOptions {
             blocks: Some(blocks),
         })
     }
+}
+
+/// Options of the [vue/no-undef-properties](https://eslint.vuejs.org/rules/no-undef-properties) rule.
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct NoUndefPropertiesOptions {
+    /// Property names, or regular expressions written as `/pattern/flags`.
+    ignores: Box<[Box<str>]>,
+}
+impl NoUndefPropertiesOptions {
+    /// Returns the Biome options that keep the plain names of `ignores`.
+    ///
+    /// Biome doesn't support regular expressions, so they are dropped. The
+    /// plugin's default, `/^\$/`, needs no migration, because Biome never
+    /// reports names that start with `$`.
+    pub(crate) fn into_biome_options(self) -> Option<NoVueUndeclaredPropertiesOptions> {
+        let names: Box<[Box<str>]> = self
+            .ignores
+            .into_iter()
+            .filter(|name| !is_regex_pattern(name))
+            .collect();
+        (!names.is_empty()).then_some(NoVueUndeclaredPropertiesOptions {
+            ignore: Some(names),
+        })
+    }
+}
+
+/// Returns `true` when eslint-plugin-vue reads `pattern` as a regular
+/// expression: text between slashes, followed by optional flags.
+fn is_regex_pattern(pattern: &str) -> bool {
+    pattern
+        .strip_prefix('/')
+        .and_then(|rest| rest.rsplit_once('/'))
+        .is_some_and(|(_, flags)| flags.bytes().all(|flag| flag.is_ascii_alphabetic()))
 }

@@ -3,6 +3,7 @@ use crate::{
     Access, Assignability, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue,
     MacroOption, Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
+use biome_rowan::{TextRange, TextSize};
 
 const LIST: &str = r#"<script setup lang="ts">
 import Card from './Card.vue'
@@ -76,6 +77,41 @@ defineProps(['lists', 'row'])
 </template>
 "#
     ));
+}
+
+#[test]
+fn snippet_lookup_follows_template_scopes() {
+    let code = r#"<script setup>
+import List from './List.vue'
+defineProps(['lists', 'row'])
+</script>
+<template>
+  <List v-for="list in lists" v-slot="{ row }" :selected="row">{{ row }}</List>
+</template>
+"#;
+    let model = sfc(code);
+    // Resolves `name` in the snippet whose text is `text`, and returns the
+    // kind of the symbol found.
+    let lookup = |text: &str, name: &str| {
+        model
+            .snippets()
+            .find(|snippet| &code[snippet.host_range()] == text)?
+            .lookup(name)
+            .map(|symbol| symbol.kind())
+    };
+    // The iterable of `v-for` does not see its variables.
+    assert_eq!(lookup("lists", "list"), None);
+    // The other directives of the element see its `v-for` variables, but not
+    // its slot parameters.
+    assert_eq!(lookup("row", "list"), Some(SymbolKind::VForAlias));
+    assert_eq!(lookup("row", "row"), Some(SymbolKind::Prop));
+    // The slot content sees both.
+    assert_eq!(lookup(" row ", "row"), Some(SymbolKind::SlotParam));
+    assert_eq!(lookup(" row ", "list"), Some(SymbolKind::VForAlias));
+    assert_eq!(lookup(" row ", "unknown"), None);
+    // A script block resolves its own names.
+    let script = model.blocks().next().unwrap().snippet().unwrap();
+    assert_eq!(script.lookup("List"), None);
 }
 
 #[test]
@@ -917,4 +953,60 @@ fn template_refs_have_complete_uses_when_read_by_name() {
     {
         assert!(template_ref.has_complete_uses());
     }
+}
+
+#[test]
+fn string_values_and_comments() {
+    let code = r#"<template>
+  <div :a="'foo'" :b="`foo`" :c="'it\'s'" :d="'a\\b'" :e="'\n'" :f="'\x41'" :g="'\0'" :h="`${x}`" :i="'foo' /* note */" :j="x" />
+</template>
+"#;
+    let model = sfc(code);
+    let div = model
+        .elements()
+        .find(|element| element.tag() == "div")
+        .unwrap();
+    let values: Vec<_> = div
+        .attrs()
+        .map(|attr| {
+            let snippet = attr.value_snippet().unwrap();
+            (
+                attr.static_arg().unwrap().to_string(),
+                snippet.string_value().map(|value| value.into_owned()),
+                snippet.has_comments(),
+            )
+        })
+        .collect();
+    let expected: Vec<_> = [
+        ("a", Some("foo"), false),
+        ("b", Some("foo"), false),
+        ("c", Some("it's"), false),
+        ("d", Some("a\\b"), false),
+        ("e", None, false),
+        ("f", None, false),
+        ("g", None, false),
+        ("h", None, false),
+        ("i", Some("foo"), true),
+        ("j", None, false),
+    ]
+    .into_iter()
+    .map(|(arg, value, comments)| (arg.to_string(), value.map(str::to_string), comments))
+    .collect();
+    assert_eq!(values, expected);
+}
+
+#[test]
+fn attr_at_finds_the_attribute_with_the_exact_range() {
+    let code = "<template>\n  <div id=\"x\" :title=\"'y'\" />\n</template>\n";
+    let model = sfc(code);
+    let start = code.find(":title").unwrap();
+    let end = start + ":title=\"'y'\"".len();
+    let range = TextRange::new(TextSize::from(start as u32), TextSize::from(end as u32));
+    let attr = model.attr_at(range).unwrap();
+    assert_eq!(attr.static_arg(), Some("title"));
+    assert!(
+        model
+            .attr_at(TextRange::at(range.start(), 1.into()))
+            .is_none()
+    );
 }

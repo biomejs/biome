@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-component-forms.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+  beforeDestroy() {},
+});
+
+createApp({
+  destroyed() {},
+});
+
+```
+
+# Diagnostics
+```
+invalid-component-forms.js:5:3 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━
+
+  × The beforeDestroy hook was renamed to beforeUnmount in Vue 3.
+  
+    4 │ defineComponent({
+  > 5 │   beforeDestroy() {},
+      │   ^^^^^^^^^^^^^
+    6 │ });
+    7 │ 
+  
+  i Vue 3 doesn't call the beforeDestroy hook, so the code inside it never runs.
+  
+  i Rename the hook to beforeUnmount.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to beforeUnmount.
+  
+     3  3 │   
+     4  4 │   defineComponent({
+     5    │ - ··beforeDestroy()·{},
+        5 │ + ··beforeUnmount()·{},
+     6  6 │   });
+     7  7 │   
+  
+
+```
+
+```
+invalid-component-forms.js:9:3 lint/nursery/noVueDeprecatedDestroyedLifecycle  FIXABLE  ━━━━━━━━━━━━
+
+  × The destroyed hook was renamed to unmounted in Vue 3.
+  
+     8 │ createApp({
+   > 9 │   destroyed() {},
+       │   ^^^^^^^^^
+    10 │ });
+    11 │ 
+  
+  i Vue 3 doesn't call the destroyed hook, so the code inside it never runs.
+  
+  i Rename the hook to unmounted.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the hook to unmounted.
+  
+     7  7 │   
+     8  8 │   createApp({
+     9    │ - ··destroyed()·{},
+        9 │ + ··unmounted()·{},
+    10 10 │   });
+    11 11 │   
+  
+
+```

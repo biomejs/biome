@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div :class="[{ foo: isFoo }, { bar: isBar }]" />
+  <div v-bind:class="[{ foo: isFoo }, { bar: isBar }]" />
+  <div :class="['baz', { foo: isFoo }, cls, { bar: isBar }]" />
+  <div :class="[, { foo: isFoo }, { bar: isBar }]" />
+  <div :class="[{ foo: isFoo }, ({ bar: isBar })]" />
+  <div :class="([{ foo: isFoo }, { bar: isBar }])" />
+  <div :class="[{ foo: isFoo }, { bar: isBar }, { qux: isQux }]" />
+  <div :class.camel="[{}, {}]" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:16 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="[{ foo: isFoo }, { bar: isBar }]" />
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   <div v-bind:class="[{ foo: isFoo }, { bar: isBar }]" />
+    5 │   <div :class="['baz', { foo: isFoo }, cls, { bar: isBar }]" />
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:22 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+    2 │ <template>
+    3 │   <div :class="[{ foo: isFoo }, { bar: isBar }]" />
+  > 4 │   <div v-bind:class="[{ foo: isFoo }, { bar: isBar }]" />
+      │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <div :class="['baz', { foo: isFoo }, cls, { bar: isBar }]" />
+    6 │   <div :class="[, { foo: isFoo }, { bar: isBar }]" />
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:16 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+    3 │   <div :class="[{ foo: isFoo }, { bar: isBar }]" />
+    4 │   <div v-bind:class="[{ foo: isFoo }, { bar: isBar }]" />
+  > 5 │   <div :class="['baz', { foo: isFoo }, cls, { bar: isBar }]" />
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <div :class="[, { foo: isFoo }, { bar: isBar }]" />
+    7 │   <div :class="[{ foo: isFoo }, ({ bar: isBar })]" />
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:16 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+    4 │   <div v-bind:class="[{ foo: isFoo }, { bar: isBar }]" />
+    5 │   <div :class="['baz', { foo: isFoo }, cls, { bar: isBar }]" />
+  > 6 │   <div :class="[, { foo: isFoo }, { bar: isBar }]" />
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <div :class="[{ foo: isFoo }, ({ bar: isBar })]" />
+    8 │   <div :class="([{ foo: isFoo }, { bar: isBar }])" />
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:16 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+    5 │   <div :class="['baz', { foo: isFoo }, cls, { bar: isBar }]" />
+    6 │   <div :class="[, { foo: isFoo }, { bar: isBar }]" />
+  > 7 │   <div :class="[{ foo: isFoo }, ({ bar: isBar })]" />
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <div :class="([{ foo: isFoo }, { bar: isBar }])" />
+    9 │   <div :class="[{ foo: isFoo }, { bar: isBar }, { qux: isQux }]" />
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:17 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+     6 │   <div :class="[, { foo: isFoo }, { bar: isBar }]" />
+     7 │   <div :class="[{ foo: isFoo }, ({ bar: isBar })]" />
+   > 8 │   <div :class="([{ foo: isFoo }, { bar: isBar }])" />
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <div :class="[{ foo: isFoo }, { bar: isBar }, { qux: isQux }]" />
+    10 │   <div :class.camel="[{}, {}]" />
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:16 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+     7 │   <div :class="[{ foo: isFoo }, ({ bar: isBar })]" />
+     8 │   <div :class="([{ foo: isFoo }, { bar: isBar }])" />
+   > 9 │   <div :class="[{ foo: isFoo }, { bar: isBar }, { qux: isQux }]" />
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <div :class.camel="[{}, {}]" />
+    11 │ </template>
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:22 lint/nursery/noVueMultipleObjectsInClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class array contains more than one object.
+  
+     8 │   <div :class="([{ foo: isFoo }, { bar: isBar }])" />
+     9 │   <div :class="[{ foo: isFoo }, { bar: isBar }, { qux: isQux }]" />
+  > 10 │   <div :class.camel="[{}, {}]" />
+       │                      ^^^^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Spreading conditional classes over several objects makes it harder to see which classes are applied and when.
+  
+  i Merge the objects into a single object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

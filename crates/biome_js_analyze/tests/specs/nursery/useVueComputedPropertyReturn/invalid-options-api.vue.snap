@@ -1,0 +1,328 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  computed: {
+    empty() {},
+    functionExpression: function () {},
+    noElse() {
+      if (this.ready) {
+        return this.value;
+      }
+    },
+    emptyReturn() {
+      return;
+    },
+    emptyReturnInBranch() {
+      if (this.ready) {
+        return;
+      }
+      return this.value;
+    },
+    accessors: {
+      set(value) {
+        this.value = value;
+      },
+      get() {},
+    },
+    arrowAccessor: {
+      get: () => {},
+    },
+    innerFunctionReturns() {
+      function double(value) {
+        return value * 2;
+      }
+      double(this.value);
+    },
+    switchWithoutDefault() {
+      switch (this.kind) {
+        case "a":
+          return 1;
+        case "b":
+          return 2;
+      }
+    },
+    loopWithBreak() {
+      for (const item of this.items) {
+        if (item.ready) {
+          break;
+        }
+        return item;
+      }
+    },
+    catchWithoutReturn() {
+      try {
+        return JSON.parse(this.raw);
+      } catch {
+        console.error("invalid JSON");
+      }
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property empty doesn't always return a value.
+  
+    3 │ export default {
+    4 │   computed: {
+  > 5 │     empty() {},
+      │     ^^^^^^^^^^
+    6 │     functionExpression: function () {},
+    7 │     noElse() {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:6:25 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property functionExpression doesn't always return a value.
+  
+    4 │   computed: {
+    5 │     empty() {},
+  > 6 │     functionExpression: function () {},
+      │                         ^^^^^^^^^^^^^^
+    7 │     noElse() {
+    8 │       if (this.ready) {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property noElse doesn't always return a value.
+  
+     5 │     empty() {},
+     6 │     functionExpression: function () {},
+   > 7 │     noElse() {
+       │     ^^^^^^^^^^
+   > 8 │       if (this.ready) {
+   > 9 │         return this.value;
+  > 10 │       }
+  > 11 │     },
+       │     ^
+    12 │     emptyReturn() {
+    13 │       return;
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:13:7 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This return statement in the computed property emptyReturn doesn't return a value.
+  
+    11 │     },
+    12 │     emptyReturn() {
+  > 13 │       return;
+       │       ^^^^^^^
+    14 │     },
+    15 │     emptyReturnInBranch() {
+  
+  i A return statement without a value makes the computed property undefined.
+  
+  i Return the value of the computed property from this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:17:9 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This return statement in the computed property emptyReturnInBranch doesn't return a value.
+  
+    15 │     emptyReturnInBranch() {
+    16 │       if (this.ready) {
+  > 17 │         return;
+       │         ^^^^^^^
+    18 │       }
+    19 │       return this.value;
+  
+  i A return statement without a value makes the computed property undefined.
+  
+  i Return the value of the computed property from this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:25:7 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property accessors doesn't always return a value.
+  
+    23 │         this.value = value;
+    24 │       },
+  > 25 │       get() {},
+       │       ^^^^^^^^
+    26 │     },
+    27 │     arrowAccessor: {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:28:12 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property arrowAccessor doesn't always return a value.
+  
+    26 │     },
+    27 │     arrowAccessor: {
+  > 28 │       get: () => {},
+       │            ^^^^^^^^
+    29 │     },
+    30 │     innerFunctionReturns() {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:30:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property innerFunctionReturns doesn't always return a value.
+  
+    28 │       get: () => {},
+    29 │     },
+  > 30 │     innerFunctionReturns() {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 31 │       function double(value) {
+  > 32 │         return value * 2;
+  > 33 │       }
+  > 34 │       double(this.value);
+  > 35 │     },
+       │     ^
+    36 │     switchWithoutDefault() {
+    37 │       switch (this.kind) {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:36:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property switchWithoutDefault doesn't always return a value.
+  
+    34 │       double(this.value);
+    35 │     },
+  > 36 │     switchWithoutDefault() {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 37 │       switch (this.kind) {
+        ...
+  > 42 │       }
+  > 43 │     },
+       │     ^
+    44 │     loopWithBreak() {
+    45 │       for (const item of this.items) {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:44:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property loopWithBreak doesn't always return a value.
+  
+    42 │       }
+    43 │     },
+  > 44 │     loopWithBreak() {
+       │     ^^^^^^^^^^^^^^^^^
+  > 45 │       for (const item of this.items) {
+        ...
+  > 50 │       }
+  > 51 │     },
+       │     ^
+    52 │     catchWithoutReturn() {
+    53 │       try {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:52:5 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property catchWithoutReturn doesn't always return a value.
+  
+    50 │       }
+    51 │     },
+  > 52 │     catchWithoutReturn() {
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+  > 53 │       try {
+        ...
+  > 57 │       }
+  > 58 │     },
+       │     ^
+    59 │   },
+    60 │ };
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

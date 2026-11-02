@@ -17,12 +17,12 @@ use super::model::*;
 use super::snippets::SfcSnippet;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsRoot,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberAssignment,
-    JsComputedMemberExpression, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
-    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression, JsUnaryExpression, JsUnaryOperator, inner_string_text,
-    static_value::StaticValue,
+    AnyJsCallArgument, AnyJsExpression, AnyJsIdentifierReference, AnyJsLiteralExpression,
+    AnyJsMemberExpression, AnyJsRoot, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsIdentifierAssignment,
+    JsIdentifierBinding, JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextLen, TextRange, TextSize, TokenText};
 use biome_string_case::Case;
@@ -75,6 +75,13 @@ const TEMPLATE_GLOBALS: &[&str] = &[
     "parseInt",
     "undefined",
 ];
+
+/// Returns `true` when `name` is a JavaScript global that a template
+/// expression may use, such as `Math`. Vue reads such a name from the global
+/// scope instead of from the component instance.
+pub fn is_template_global(name: &str) -> bool {
+    TEMPLATE_GLOBALS.binary_search(&name).is_ok()
+}
 
 /// Tags Vue resolves itself.
 const BUILTIN_COMPONENTS: &[&str] = &[
@@ -867,6 +874,10 @@ pub(crate) fn collect_template_references(
             | SnippetHost::Interpolation(None)
             | SnippetHost::Unknown => scopes.head,
         };
+        builder.data.snippets[id.index()].name_scope = Some(NameScope {
+            scope,
+            hidden_slot_params: slot_owner,
+        });
 
         let root_expression = match snippet.root {
             AnyJsRoot::JsExpressionTemplateRoot(root) => root
@@ -894,7 +905,15 @@ pub(crate) fn collect_template_references(
             let found = lookup(&walker.builder.data, scope, name.text(), slot_owner);
             let resolution = match found {
                 Some(symbol) => Resolution::Symbol(symbol),
-                None if TEMPLATE_GLOBALS.contains(&name.text()) => Resolution::Global,
+                None if is_template_global(name.text()) => Resolution::Global,
+                // A type, as in `$event.target as HTMLInputElement`, can be
+                // declared by the TypeScript libraries, which the model does
+                // not read.
+                None if AnyJsIdentifierReference::cast_ref(&node)
+                    .is_some_and(|reference| reference.is_only_type()) =>
+                {
+                    Resolution::Unknowable
+                }
                 None if walker.builder.is_open(scopes.component, Namespace::Binding) => {
                     Resolution::Unknowable
                 }
@@ -954,7 +973,7 @@ pub(crate) fn collect_template_references(
 ///
 /// The slot parameters declared in `slot_owner` are skipped: they are not
 /// visible to the directives of the element that declares them.
-fn lookup(
+pub(crate) fn lookup(
     data: &SemanticModelData,
     scope: ScopeId,
     name: &str,
@@ -1091,6 +1110,34 @@ pub(crate) fn collect_script_references(
         } else if let Some(call) = JsCallExpression::cast_ref(&node) {
             collect_use_template_ref(&mut walker, input, &call, components);
         }
+    }
+
+    // Names written as strings in the options, such as the keys of `watch`.
+    let (names, others): (Vec<_>, Vec<_>) = std::mem::take(&mut walker.builder.option_names)
+        .into_iter()
+        .partition(|name| components.contains(&name.component));
+    walker.builder.option_names = others;
+    for option_name in names {
+        let resolution = walker.resolve_in_component(
+            Some(option_name.component),
+            Namespace::Binding,
+            option_name.name.text(),
+            &[],
+        );
+        walker.builder.add_reference(ReferenceData {
+            range: option_name.range,
+            name: option_name.name,
+            snippet: input.snippet,
+            site: RefSite::OptionName,
+            namespace: Namespace::Binding,
+            scope: None,
+            base: RefBase::This,
+            path: option_name.path,
+            path_open: false,
+            access: option_name.access,
+            call_args: None,
+            resolution,
+        });
     }
 }
 
@@ -1507,5 +1554,22 @@ fn resolve_directive(
         Resolution::Unknowable
     } else {
         Resolution::Unresolved
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TEMPLATE_GLOBALS;
+
+    #[test]
+    fn template_globals_are_sorted() {
+        for pair in TEMPLATE_GLOBALS.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "`{}` must come after `{}` in TEMPLATE_GLOBALS",
+                pair[0],
+                pair[1]
+            );
+        }
     }
 }

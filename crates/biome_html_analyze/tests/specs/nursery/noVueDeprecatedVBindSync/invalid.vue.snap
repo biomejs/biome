@@ -1,0 +1,200 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComponent v-bind:foo.sync="bar" />
+  <MyComponent :foo.sync="bar" />
+  <MyComponent v-bind:[dynamicArg].sync="bar" />
+  <MyComponent :[dynamicArg].sync="bar" />
+  <MyComponent v-bind:foo.sync="x.foo" class="a" />
+  <MyComponent
+    :foo.sync="foo[x - 1]"
+  />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:26 lint/nursery/noVueDeprecatedVBindSync  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .sync modifier on v-bind is deprecated.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComponent v-bind:foo.sync="bar" />
+      │                          ^^^^^
+    4 │   <MyComponent :foo.sync="bar" />
+    5 │   <MyComponent v-bind:[dynamicArg].sync="bar" />
+  
+  i Vue 3 removed this modifier, so changes made by the child component are no longer sent back to this value.
+  
+  i Use v-model with the same argument instead, e.g. v-model:title="pageTitle".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use v-model instead.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template>
+     3    │ - ··<MyComponent·v-bind:foo.sync="bar"·/>
+        3 │ + ··<MyComponent·v-model:foo="bar"·/>
+     4  4 │     <MyComponent :foo.sync="bar" />
+     5  5 │     <MyComponent v-bind:[dynamicArg].sync="bar" />
+  
+
+```
+
+```
+invalid.vue:4:20 lint/nursery/noVueDeprecatedVBindSync  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .sync modifier on v-bind is deprecated.
+  
+    2 │ <template>
+    3 │   <MyComponent v-bind:foo.sync="bar" />
+  > 4 │   <MyComponent :foo.sync="bar" />
+      │                    ^^^^^
+    5 │   <MyComponent v-bind:[dynamicArg].sync="bar" />
+    6 │   <MyComponent :[dynamicArg].sync="bar" />
+  
+  i Vue 3 removed this modifier, so changes made by the child component are no longer sent back to this value.
+  
+  i Use v-model with the same argument instead, e.g. v-model:title="pageTitle".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use v-model instead.
+  
+     2  2 │   <template>
+     3  3 │     <MyComponent v-bind:foo.sync="bar" />
+     4    │ - ··<MyComponent·:foo.sync="bar"·/>
+        4 │ + ··<MyComponent·v-model:foo="bar"·/>
+     5  5 │     <MyComponent v-bind:[dynamicArg].sync="bar" />
+     6  6 │     <MyComponent :[dynamicArg].sync="bar" />
+  
+
+```
+
+```
+invalid.vue:5:35 lint/nursery/noVueDeprecatedVBindSync  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .sync modifier on v-bind is deprecated.
+  
+    3 │   <MyComponent v-bind:foo.sync="bar" />
+    4 │   <MyComponent :foo.sync="bar" />
+  > 5 │   <MyComponent v-bind:[dynamicArg].sync="bar" />
+      │                                   ^^^^^
+    6 │   <MyComponent :[dynamicArg].sync="bar" />
+    7 │   <MyComponent v-bind:foo.sync="x.foo" class="a" />
+  
+  i Vue 3 removed this modifier, so changes made by the child component are no longer sent back to this value.
+  
+  i Use v-model with the same argument instead, e.g. v-model:title="pageTitle".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use v-model instead.
+  
+     3  3 │     <MyComponent v-bind:foo.sync="bar" />
+     4  4 │     <MyComponent :foo.sync="bar" />
+     5    │ - ··<MyComponent·v-bind:[dynamicArg].sync="bar"·/>
+        5 │ + ··<MyComponent·v-model:[dynamicArg]="bar"·/>
+     6  6 │     <MyComponent :[dynamicArg].sync="bar" />
+     7  7 │     <MyComponent v-bind:foo.sync="x.foo" class="a" />
+  
+
+```
+
+```
+invalid.vue:6:29 lint/nursery/noVueDeprecatedVBindSync  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .sync modifier on v-bind is deprecated.
+  
+    4 │   <MyComponent :foo.sync="bar" />
+    5 │   <MyComponent v-bind:[dynamicArg].sync="bar" />
+  > 6 │   <MyComponent :[dynamicArg].sync="bar" />
+      │                             ^^^^^
+    7 │   <MyComponent v-bind:foo.sync="x.foo" class="a" />
+    8 │   <MyComponent
+  
+  i Vue 3 removed this modifier, so changes made by the child component are no longer sent back to this value.
+  
+  i Use v-model with the same argument instead, e.g. v-model:title="pageTitle".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use v-model instead.
+  
+     4  4 │     <MyComponent :foo.sync="bar" />
+     5  5 │     <MyComponent v-bind:[dynamicArg].sync="bar" />
+     6    │ - ··<MyComponent·:[dynamicArg].sync="bar"·/>
+        6 │ + ··<MyComponent·v-model:[dynamicArg]="bar"·/>
+     7  7 │     <MyComponent v-bind:foo.sync="x.foo" class="a" />
+     8  8 │     <MyComponent
+  
+
+```
+
+```
+invalid.vue:7:26 lint/nursery/noVueDeprecatedVBindSync  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .sync modifier on v-bind is deprecated.
+  
+    5 │   <MyComponent v-bind:[dynamicArg].sync="bar" />
+    6 │   <MyComponent :[dynamicArg].sync="bar" />
+  > 7 │   <MyComponent v-bind:foo.sync="x.foo" class="a" />
+      │                          ^^^^^
+    8 │   <MyComponent
+    9 │     :foo.sync="foo[x - 1]"
+  
+  i Vue 3 removed this modifier, so changes made by the child component are no longer sent back to this value.
+  
+  i Use v-model with the same argument instead, e.g. v-model:title="pageTitle".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use v-model instead.
+  
+     5  5 │     <MyComponent v-bind:[dynamicArg].sync="bar" />
+     6  6 │     <MyComponent :[dynamicArg].sync="bar" />
+     7    │ - ··<MyComponent·v-bind:foo.sync="x.foo"·class="a"·/>
+        7 │ + ··<MyComponent·v-model:foo="x.foo"·class="a"·/>
+     8  8 │     <MyComponent
+     9  9 │       :foo.sync="foo[x - 1]"
+  
+
+```
+
+```
+invalid.vue:9:9 lint/nursery/noVueDeprecatedVBindSync  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .sync modifier on v-bind is deprecated.
+  
+     7 │   <MyComponent v-bind:foo.sync="x.foo" class="a" />
+     8 │   <MyComponent
+   > 9 │     :foo.sync="foo[x - 1]"
+       │         ^^^^^
+    10 │   />
+    11 │ </template>
+  
+  i Vue 3 removed this modifier, so changes made by the child component are no longer sent back to this value.
+  
+  i Use v-model with the same argument instead, e.g. v-model:title="pageTitle".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use v-model instead.
+  
+     7  7 │     <MyComponent v-bind:foo.sync="x.foo" class="a" />
+     8  8 │     <MyComponent
+     9    │ - ····:foo.sync="foo[x·-·1]"
+        9 │ + ····v-model:foo="foo[x·-·1]"
+    10 10 │     />
+    11 11 │   </template>
+  
+
+```

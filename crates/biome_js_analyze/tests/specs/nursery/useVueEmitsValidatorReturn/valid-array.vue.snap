@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-array.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  emits: ["foo", "bar"],
+};
+</script>
+
+```

@@ -1,5 +1,8 @@
 use super::js_model;
-use crate::{ComponentKind, DefaultSource, Namespace, OpenReason, PropForm, PropType, Tri};
+use crate::{
+    Access, ComponentKind, DefaultSource, DefaultSources, Namespace, OpenReason, PropForm,
+    PropType, RefSite, Resolution, Tri,
+};
 use biome_languages::JsFileSource;
 
 fn setup_ts() -> JsFileSource {
@@ -96,6 +99,136 @@ fn every_prop_form_has_the_same_shape() {
 }
 
 #[test]
+fn external_default_sources_follow_the_define_props_call() {
+    for (code, expected) in [
+        ("defineProps<{ a?: string }>()", DefaultSources::empty()),
+        (
+            "const props = defineProps<{ a?: string }>()",
+            DefaultSources::empty(),
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), {})",
+            DefaultSource::WithDefaults.into(),
+        ),
+        (
+            "const { a } = defineProps<{ a?: string }>()",
+            DefaultSource::Destructure.into(),
+        ),
+        (
+            "const { a } = withDefaults(defineProps<{ a?: string }>(), {})",
+            DefaultSource::WithDefaults | DefaultSource::Destructure,
+        ),
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.external_default_sources(), expected, "`{code}`");
+    }
+
+    let model = js_model(
+        "export default { props: { a: { type: String } } }",
+        JsFileSource::vue(),
+    );
+    let component = model.components().next().expect("a component");
+    let prop = component.props().next().expect("a prop");
+    assert!(prop.external_default_sources().is_empty());
+}
+
+#[test]
+fn unreadable_with_defaults_leaves_the_defaults_incomplete() {
+    for (code, complete) in [
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { a: '' })",
+            true,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { a: '' } as const)",
+            true,
+        ),
+        ("withDefaults(defineProps<{ a?: string }>())", true),
+        ("const { a = '' } = defineProps<{ a?: string }>()", true),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), defaults)",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), makeDefaults())",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { ...defaults })",
+            false,
+        ),
+        (
+            "withDefaults(defineProps<{ a?: string }>(), { [key]: '' })",
+            false,
+        ),
+    ] {
+        let model = js_model(code, setup_ts());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.has_complete_defaults(), complete, "`{code}`");
+    }
+}
+
+#[test]
+fn unreadable_prop_options_leave_the_defaults_incomplete() {
+    for (code, complete) in [
+        ("export default { props: { a: { type: String } } }", true),
+        ("export default { props: { a: { ...shared } } }", false),
+        ("export default { props: { a: { [key]: 1 } } }", false),
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        let prop = component.props().next().expect("a prop");
+        assert_eq!(prop.has_complete_defaults(), complete, "`{code}`");
+    }
+}
+
+#[test]
+fn define_model_declares_a_prop() {
+    let runtime = js_model(
+        r#"defineModel("count", { type: Number, default: 0 })"#,
+        setup_ts(),
+    );
+    let component = runtime.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert_eq!(model.name(), "count");
+    assert!(model.types() == PropType::Number);
+    assert_eq!(model.form(), Some(PropForm::Options));
+    let defaults: Vec<_> = model.defaults().collect();
+    assert_eq!(defaults.len(), 1);
+    assert_eq!(defaults[0].source(), DefaultSource::Inline);
+
+    let typed = js_model(r#"defineModel<string>({ default: "" })"#, setup_ts());
+    let component = typed.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert_eq!(model.name(), "modelValue");
+    assert!(model.types() == PropType::String);
+    assert_eq!(model.form(), Some(PropForm::TypeMember));
+    assert_eq!(model.defaults().count(), 1);
+
+    let both = js_model(r#"defineModel<string>({ type: Number })"#, setup_ts());
+    let component = both.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert!(model.types() == PropType::Number);
+    assert_eq!(model.form(), Some(PropForm::Options));
+}
+
+#[test]
+fn callable_type_literal_is_a_function() {
+    let model = js_model(
+        "defineProps<{ call?: { (): void }; make?: { new (): object }; both?: { (): void; size: number } }>()",
+        setup_ts(),
+    );
+    let component = model.components().next().expect("a component");
+    let types: Vec<_> = component.props().map(|prop| prop.types()).collect();
+    assert!(types[0] == PropType::Function);
+    assert!(types[1] == PropType::Function);
+    assert!(types[2] == PropType::Function | PropType::Object);
+}
+
+#[test]
 fn script_setup_macros() {
     let model = js_model(
         r#"import { ref, computed, onMounted, watch } from "vue";
@@ -181,6 +314,24 @@ defineComponent({
     assert_eq!(names, ["count", "reset", "label"]);
     assert_eq!(component.hooks().count(), 1);
     assert_eq!(component.props().next().unwrap().required(), Tri::No);
+}
+
+#[test]
+fn vue_2_lifecycle_option_names() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  beforeDestroy() {},
+  destroyed: () => {},
+});"#,
+        JsFileSource::js_module(),
+    );
+    let component = model.components().next().unwrap();
+    let names: Vec<_> = component
+        .hooks()
+        .map(|symbol| symbol.name().to_string())
+        .collect();
+    assert_eq!(names, ["beforeDestroy", "destroyed"]);
 }
 
 #[test]
@@ -319,6 +470,30 @@ const d = defineModel(Number);"#,
 }
 
 #[test]
+fn runtime_type_range_covers_the_type_as_written() {
+    let code = "defineProps({ a: Object as PropType<A>, b: { type: (Array), default: null }, c: { default: 1 }, d: String })";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    let types: Vec<_> = component
+        .props()
+        .map(|prop| prop.runtime_type_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        types,
+        [
+            Some("Object as PropType<A>"),
+            Some("(Array)"),
+            None,
+            Some("String")
+        ]
+    );
+
+    let model = js_model("defineProps<{ a: object }>()", setup_ts());
+    let prop = model.components().next().unwrap().props().next().unwrap();
+    assert_eq!(prop.runtime_type_range(), None);
+}
+
+#[test]
 fn types_the_model_cannot_list_open_the_namespace() {
     for code in [
         "interface Base { a: string } interface Props extends Base { b: string } defineProps<Props>()",
@@ -345,6 +520,41 @@ fn method_signature_in_props_type_is_a_function_prop() {
     assert_eq!(prop.name(), "onClose");
     assert!(prop.types() == PropType::Function);
     assert!(component.is_complete(Namespace::Binding));
+}
+
+#[test]
+fn slots_option_declares_the_members_of_its_slots_type() {
+    let plain_ts = JsFileSource::ts().with_embedding_kind(*JsFileSource::vue().as_embedding_kind());
+    let model = js_model(
+        r#"import { defineComponent, SlotsType } from "vue";
+type Slots = { default: { msg: string }; "item-row"(props: {}): any };
+export default defineComponent({ slots: Object as SlotsType<Slots> });"#,
+        plain_ts,
+    );
+    let component = model.components().next().expect("a component");
+    let slots: Vec<_> = component
+        .slots()
+        .map(|slot| slot.name().to_string())
+        .collect();
+    assert_eq!(slots, ["default", "item-row"]);
+    assert!(component.is_complete(Namespace::Slot));
+
+    for code in [
+        "export default { slots: Object }",
+        "export default { slots: Object as SlotsType<Imported> }",
+        "export default { slots: Object as Other<{ a: any }> }",
+        "export default { slots: Object as SlotsType<{ [name: string]: any }> }",
+        "export default { slots: Object as SlotsType<{ [SLOT_NAME]: any }> }",
+    ] {
+        let model = js_model(code, plain_ts);
+        let component = model.components().next().expect("a component");
+        assert!(
+            component
+                .open_reasons(Namespace::Slot)
+                .contains(OpenReason::UnresolvedType),
+            "`{code}` should leave the slots open"
+        );
+    }
 }
 
 /// Returns the name of each emit of each component, the number of its uses,
@@ -482,4 +692,125 @@ fn render_option_range_covers_the_member() {
     let model = js_model("export default { name: 'A' }", JsFileSource::vue());
     let component = model.components().next().expect("a component");
     assert_eq!(component.render_range(), None);
+}
+
+#[test]
+fn model_option_with_an_object_value_is_recorded() {
+    let code = r#"import { defineComponent, createApp } from "vue";
+defineComponent({ model: { prop: "checked", event: "change" } });
+createApp({ model: ({}) });
+defineComponent({ model() { return {}; } });
+const model = {};
+defineComponent({ model });
+"#;
+    let model = js_model(code, JsFileSource::js_module());
+    let ranges: Vec<_> = model
+        .components()
+        .map(|component| component.model_option_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        ranges,
+        [
+            Some(r#"model: { prop: "checked", event: "change" }"#),
+            Some("model: ({})"),
+            None,
+            None,
+        ]
+    );
+}
+
+#[test]
+fn model_option_in_define_options_is_recorded() {
+    let code = "defineOptions({ model: { prop: \"checked\" } });\n";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    assert_eq!(
+        component.model_option_range().map(|range| &code[range]),
+        Some("model: { prop: \"checked\" }")
+    );
+}
+
+#[test]
+fn object_literal_data_lists_its_members() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  data() {
+    return {
+      user: { name: "", address: { city: "" } },
+      settings: { ...defaults, theme: "dark" },
+      list: [],
+      empty: {},
+    };
+  },
+});"#,
+        JsFileSource::js_module(),
+    );
+    let component = model.components().next().unwrap();
+    let data: Vec<_> = component
+        .data()
+        .map(|symbol| {
+            (
+                symbol.name().to_string(),
+                symbol.has_known_members(),
+                symbol
+                    .members()
+                    .map(|member| member.name().to_string())
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        data,
+        [
+            ("user".into(), true, vec!["name".into(), "address".into()]),
+            ("settings".into(), false, vec!["theme".into()]),
+            ("list".into(), false, vec![]),
+            ("empty".into(), true, vec![]),
+        ]
+    );
+    let user = component.data().next().unwrap();
+    let address = user.members().nth(1).unwrap();
+    assert!(address.has_known_members());
+    assert_eq!(address.members().next().unwrap().name(), "city");
+}
+
+#[test]
+fn names_written_as_strings_in_options_are_references() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  data() {
+    return { count: 0, user: { name: "" } };
+  },
+  methods: { onCount() {} },
+  watch: { count: "onCount", "user.name": "missing", other() {} },
+  expose: ["count", "hidden"],
+});"#,
+        JsFileSource::js_module(),
+    );
+    let references: Vec<_> = model
+        .references()
+        .filter(|reference| reference.site() == RefSite::OptionName)
+        .map(|reference| {
+            (
+                reference.name().to_string(),
+                reference.path().map(str::to_string).collect::<Vec<_>>(),
+                reference.access(),
+                reference.resolution() == Resolution::Unresolved,
+            )
+        })
+        .collect();
+    assert_eq!(
+        references,
+        [
+            ("count".into(), vec![], Access::Read, false),
+            ("onCount".into(), vec![], Access::Call, false),
+            ("user".into(), vec!["name".into()], Access::Read, false),
+            ("missing".into(), vec![], Access::Call, true),
+            ("other".into(), vec![], Access::Read, true),
+            ("count".into(), vec![], Access::Read, false),
+            ("hidden".into(), vec![], Access::Read, true),
+        ]
+    );
 }

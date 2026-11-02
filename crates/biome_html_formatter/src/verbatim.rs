@@ -13,8 +13,8 @@ use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatRefWithRule, FormatResult,
     LINE_TERMINATORS, normalize_newlines,
 };
-use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
-use biome_rowan::{Direction, SyntaxElement, TextRange};
+use biome_html_syntax::{HtmlElement, HtmlLanguage, HtmlSyntaxNode};
+use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};
 use biome_suppression::SuppressionKind;
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
@@ -182,6 +182,70 @@ impl Format<HtmlFormatContext> for FormatHtmlVerbatimNode<'_> {
             )?;
         }
 
+        f.write_element(FormatElement::Tag(Tag::EndVerbatim))
+    }
+}
+
+/// Prints the source between an element's opening `>` and closing `<`, including
+/// comments and whitespace attached to either tag. Line endings follow the formatter options.
+/// The tag formatters must leave these comments and whitespace to this formatter
+/// by enabling their `verbatim_children` options.
+pub(crate) struct FormatHtmlVerbatimElementChildren<'a>(pub &'a HtmlElement);
+
+impl Format<HtmlFormatContext> for FormatHtmlVerbatimElementChildren<'_> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        let opening = self.0.opening_element()?.r_angle_token()?;
+        let closing = self.0.closing_element()?.l_angle_token()?;
+        let range = TextRange::new(
+            opening.text_trimmed_range().end(),
+            closing.text_trimmed_range().start(),
+        );
+        let node = self.0.syntax();
+        for element in node.descendants_with_tokens(Direction::Next) {
+            match element {
+                SyntaxElement::Token(token) => {
+                    if range.contains_range(token.text_trimmed_range()) {
+                        f.state_mut().track_token(&token);
+                    }
+                }
+                SyntaxElement::Node(node) => {
+                    let comments = f.context().comments();
+                    if range.contains_range(node.text_trimmed_range()) {
+                        comments.mark_suppression_checked(&node);
+                    }
+                    for comment in comments.leading_dangling_trailing_comments(&node) {
+                        if range.contains_range(comment.piece().text_range()) {
+                            comment.mark_formatted();
+                        }
+                    }
+                }
+            }
+        }
+        if range.is_empty() {
+            return Ok(());
+        }
+        let source_range = f
+            .context()
+            .source_map()
+            .map_or(range, |map| map.source_range(range));
+        let source = f.context().source_map().map_or_else(
+            || {
+                node.text_with_trivia()
+                    .slice(range - node.text_range_with_trivia().start())
+                    .to_string()
+            },
+            |map| map.source().text_slice(source_range).to_string(),
+        );
+        f.write_element(FormatElement::Tag(Tag::StartVerbatim(
+            VerbatimKind::Verbatim {
+                length: source_range.len(),
+            },
+        )))?;
+        text(
+            &normalize_newlines(&source, LINE_TERMINATORS),
+            Some(range.start()),
+        )
+        .fmt(f)?;
         f.write_element(FormatElement::Tag(Tag::EndVerbatim))
     }
 }

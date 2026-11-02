@@ -1,0 +1,78 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidScriptSetupTypes.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="title in 5"></div>
+  <div v-for="item in 5"></div>
+</template>
+
+<script setup lang="ts">
+defineProps<{ title: string }>();
+const item = "selected";
+</script>
+
+```
+
+# Diagnostics
+```
+invalidScriptSetupTypes.vue:3:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable title hides a variable with the same name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="title in 5"></div>
+      │               ^^^^^
+    4 │   <div v-for="item in 5"></div>
+    5 │ </template>
+  
+  i The hidden title is declared here.
+  
+     7 │ <script setup lang="ts">
+   > 8 │ defineProps<{ title: string }>();
+       │               ^^^^^
+     9 │ const item = "selected";
+    10 │ </script>
+  
+  i Inside this element, title refers to the template variable, so the other title can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetupTypes.vue:4:15 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable item hides a variable with the same name.
+  
+    2 │ <template>
+    3 │   <div v-for="title in 5"></div>
+  > 4 │   <div v-for="item in 5"></div>
+      │               ^^^^
+    5 │ </template>
+    6 │ 
+  
+  i The hidden item is declared here.
+  
+     7 │ <script setup lang="ts">
+     8 │ defineProps<{ title: string }>();
+   > 9 │ const item = "selected";
+       │       ^^^^
+    10 │ </script>
+    11 │ 
+  
+  i Inside this element, item refers to the template variable, so the other item can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
