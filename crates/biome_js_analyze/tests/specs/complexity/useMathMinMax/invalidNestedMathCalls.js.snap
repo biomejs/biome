@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNestedMathCalls.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+Math.min(a, b) < c ? Math.min(a, b) : c;
+Math.max(a, b) > c ? Math.max(a, b) : c;
+c < Math.min(a, b) ? c : Math.min(a, b);
+Math.max(a, b) <= c ? c : Math.max(a, b);
+Math.min(Math.max(a, b), c) > d ? d : Math.min(Math.max(a, b), c);
+
+```
+
+# Diagnostics
+```
+invalidNestedMathCalls.js:3:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ Math.min(a, b) < c ? Math.min(a, b) : c;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ Math.max(a, b) > c ? Math.max(a, b) : c;
+    5 │ c < Math.min(a, b) ? c : Math.min(a, b);
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   
+    3   │ - Math.min(a,·b)·<·c·?·Math.min(a,·b)·:·c;
+      3 │ + Math.min(Math.min(a,·b)·,·c);
+    4 4 │   Math.max(a, b) > c ? Math.max(a, b) : c;
+    5 5 │   c < Math.min(a, b) ? c : Math.min(a, b);
+  
+
+```
+
+```
+invalidNestedMathCalls.js:4:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    3 │ Math.min(a, b) < c ? Math.min(a, b) : c;
+  > 4 │ Math.max(a, b) > c ? Math.max(a, b) : c;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ c < Math.min(a, b) ? c : Math.min(a, b);
+    6 │ Math.max(a, b) <= c ? c : Math.max(a, b);
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    2 2 │   
+    3 3 │   Math.min(a, b) < c ? Math.min(a, b) : c;
+    4   │ - Math.max(a,·b)·>·c·?·Math.max(a,·b)·:·c;
+      4 │ + Math.max(Math.max(a,·b)·,·c);
+    5 5 │   c < Math.min(a, b) ? c : Math.min(a, b);
+    6 6 │   Math.max(a, b) <= c ? c : Math.max(a, b);
+  
+
+```
+
+```
+invalidNestedMathCalls.js:5:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    3 │ Math.min(a, b) < c ? Math.min(a, b) : c;
+    4 │ Math.max(a, b) > c ? Math.max(a, b) : c;
+  > 5 │ c < Math.min(a, b) ? c : Math.min(a, b);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ Math.max(a, b) <= c ? c : Math.max(a, b);
+    7 │ Math.min(Math.max(a, b), c) > d ? d : Math.min(Math.max(a, b), c);
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    3 3 │   Math.min(a, b) < c ? Math.min(a, b) : c;
+    4 4 │   Math.max(a, b) > c ? Math.max(a, b) : c;
+    5   │ - c·<·Math.min(a,·b)·?·c·:·Math.min(a,·b);
+      5 │ + Math.min(c·,·Math.min(a,·b));
+    6 6 │   Math.max(a, b) <= c ? c : Math.max(a, b);
+    7 7 │   Math.min(Math.max(a, b), c) > d ? d : Math.min(Math.max(a, b), c);
+  
+
+```
+
+```
+invalidNestedMathCalls.js:6:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the larger of the same two operands, which can be simplified.
+  
+    4 │ Math.max(a, b) > c ? Math.max(a, b) : c;
+    5 │ c < Math.min(a, b) ? c : Math.min(a, b);
+  > 6 │ Math.max(a, b) <= c ? c : Math.max(a, b);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ Math.min(Math.max(a, b), c) > d ? d : Math.min(Math.max(a, b), c);
+    8 │ 
+  
+  i Dedicated min/max functions like Math.max() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    4 4 │   Math.max(a, b) > c ? Math.max(a, b) : c;
+    5 5 │   c < Math.min(a, b) ? c : Math.min(a, b);
+    6   │ - Math.max(a,·b)·<=·c·?·c·:·Math.max(a,·b);
+      6 │ + Math.max(Math.max(a,·b)·,·c);
+    7 7 │   Math.min(Math.max(a, b), c) > d ? d : Math.min(Math.max(a, b), c);
+    8 8 │   
+  
+
+```
+
+```
+invalidNestedMathCalls.js:7:1 lint/complexity/useMathMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ternary is selecting the smaller of the same two operands, which can be simplified.
+  
+    5 │ c < Math.min(a, b) ? c : Math.min(a, b);
+    6 │ Math.max(a, b) <= c ? c : Math.max(a, b);
+  > 7 │ Math.min(Math.max(a, b), c) > d ? d : Math.min(Math.max(a, b), c);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Dedicated min/max functions like Math.min() are clearer and more concise for this purpose.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    5 5 │   c < Math.min(a, b) ? c : Math.min(a, b);
+    6 6 │   Math.max(a, b) <= c ? c : Math.max(a, b);
+    7   │ - Math.min(Math.max(a,·b),·c)·>·d·?·d·:·Math.min(Math.max(a,·b),·c);
+      7 │ + Math.min(Math.min(Math.max(a,·b),·c)·,·d);
+    8 8 │   
+  
+
+```
