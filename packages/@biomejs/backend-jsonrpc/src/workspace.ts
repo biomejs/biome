@@ -4038,6 +4038,11 @@ export interface Nursery {
 	 */
 	useVueVOnExact?: UseVueVOnExactConfiguration;
 	/**
+	 * Require valid attribute names in Vue templates.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-attribute-name
+	 */
+	useVueValidAttributeName?: UseVueValidAttributeNameConfiguration;
+	/**
 	 * Enforce valid usage of Vue's defineEmits macro.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-define-emits
 	 */
@@ -6887,6 +6892,9 @@ export type UseVueVModelConfiguration =
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
+export type UseVueValidAttributeNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidAttributeNameOptions;
 export type UseVueValidDefineEmitsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidDefineEmitsOptions;
@@ -10137,6 +10145,10 @@ export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
 }
+export interface RuleWithUseVueValidAttributeNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidAttributeNameOptions;
+}
 export interface RuleWithUseVueValidDefineEmitsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidDefineEmitsOptions;
@@ -12693,6 +12705,7 @@ export type UseVueTypedPropsOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVModelOptions = {};
 export type UseVueVOnExactOptions = {};
+export type UseVueValidAttributeNameOptions = {};
 export type UseVueValidDefineEmitsOptions = {};
 export type UseVueValidDefineOptionsOptions = {};
 export type UseVueValidDefinePropsOptions = {};
@@ -14408,6 +14421,7 @@ export type Category =
 	| "lint/nursery/useVueTypedObjectProps"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueValidAttributeName"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineOptions"
 	| "lint/nursery/useVueValidDefineProps"
