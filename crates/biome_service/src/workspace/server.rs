@@ -30,8 +30,8 @@ use crate::module_graph::resolve_js_module;
 use crate::module_graph::{ModuleDb, ModuleInfoKind, module_dependencies};
 use crate::projects::{GetFileFeaturesParams, ProjectDb, ProjectKey};
 use crate::scanner::{
-    IndexRequestKind, IndexTrigger, ProjectScan, ScanOptions, Scanner, ScannerWatcherBridge,
-    WatcherInstruction, WorkspaceScannerBridge,
+    IndexRequestKind, IndexTrigger, ProjectScan, ScanOptions, Scanner, WatcherInstruction,
+    WorkspaceScannerBridge,
 };
 use crate::settings::{
     EditorFeature, EditorFeatures, ModuleGraphResolutionKind, SettingsEditorState, SettingsHandle,
@@ -729,8 +729,8 @@ impl WorkspaceServerWithDb<'_> {
     /// Starts the watcher.
     ///
     /// This method will not return until the watcher stops.
-    pub fn start_watcher(&self, mut watcher: Watcher) {
-        watcher.run(&ScannerWatcherBridge::new((&self.scanner, self)));
+    pub fn start_watcher(&self, watcher: Watcher) {
+        self.scanner.run_watcher(watcher, self);
     }
 
     /// Attempts to find the root of a project by searching upwards from the
@@ -2799,6 +2799,73 @@ impl WorkspaceServerWithDb<'_> {
             },
         )
     }
+
+    /// Scans a project in a scan session, which ends before this returns.
+    fn run_project_scan(
+        &self,
+        params: ScanProjectParams,
+    ) -> Result<ScanProjectResult, WorkspaceError> {
+        let project_key = params.project_key;
+        let watch = params.watch;
+        let session = self.db_state.scan_session();
+        let setup = self
+            .with_db_state(session.view())
+            .set_up_project_scan(params);
+        let (session, deferred_setup_paths) = session.commit();
+        let workspace = self.with_db_state(session.view());
+        let scan = match setup? {
+            ScanSetupOutcome::Done(mut result) => {
+                // Without a files phase, the setup phase indexes only the root
+                // manifest, so it's indexed again here if it was deferred.
+                for path in deferred_setup_paths {
+                    let (_, diagnostics) =
+                        workspace.index_file(project_key, path, IndexTrigger::InitialScan)?;
+                    result.diagnostics.extend(
+                        diagnostics
+                            .into_iter()
+                            .map(biome_diagnostics::serde::Diagnostic::new),
+                    );
+                }
+                return Ok(result);
+            }
+            ScanSetupOutcome::Files(scan) => scan,
+        };
+
+        // The pnpm catalogs of a package depend on its nested settings, and
+        // the nested settings are readable only after the setup commit.
+        for configuration_file in scan.configuration_files() {
+            if let Some(directory) = configuration_file.parent() {
+                workspace.refresh_pnpm_workspace_catalogs_for_scope(project_key, directory);
+            }
+        }
+        let mut result = self
+            .scanner
+            .finish_project_scan(&workspace, scan, deferred_setup_paths);
+        let (session, deferred_paths) = session.commit();
+        if deferred_paths.is_empty() {
+            return Ok(result);
+        }
+
+        // Indexing the deferred files again updates the services that read
+        // them. If a deferred file changes again in the meantime, its next
+        // indexing updates its services.
+        let workspace = self.with_db_state(session.view());
+        let project_path = workspace
+            .project_get_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        let diagnostics = self.scanner.index_files(
+            &workspace,
+            project_key,
+            &project_path,
+            deferred_paths,
+            IndexTrigger::InitialScan,
+            watch,
+        )?;
+        session.finish();
+        result.diagnostics.extend(diagnostics);
+        let _ = self.notification_tx.send(ServiceNotification::IndexUpdated);
+        Ok(result)
+    }
 }
 
 impl WorkspaceServerWithDb<'_> {
@@ -2918,66 +2985,17 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         #[cfg(test)]
         self.scanner_test_state.enter_project_scan();
 
-        let project_key = params.project_key;
         let watch = params.watch;
-        let session = self.db_state.scan_session();
-        let setup = self
-            .with_db_state(session.view())
-            .set_up_project_scan(params);
-        let (session, deferred_setup_paths) = session.commit();
-        let workspace = self.with_db_state(session.view());
-        let scan = match setup? {
-            ScanSetupOutcome::Done(mut result) => {
-                // Without a files phase, the setup phase indexes only the root
-                // manifest, so it's indexed again here if it was deferred.
-                for path in deferred_setup_paths {
-                    let (_, diagnostics) =
-                        workspace.index_file(project_key, path, IndexTrigger::InitialScan)?;
-                    result.diagnostics.extend(
-                        diagnostics
-                            .into_iter()
-                            .map(biome_diagnostics::serde::Diagnostic::new),
-                    );
-                }
-                return Ok(result);
-            }
-            ScanSetupOutcome::Files(scan) => scan,
-        };
+        let result = self.run_project_scan(params);
 
-        // The pnpm catalogs of a package depend on its nested settings, and
-        // the nested settings are readable only after the setup commit.
-        for configuration_file in scan.configuration_files() {
-            if let Some(directory) = configuration_file.parent() {
-                workspace.refresh_pnpm_workspace_catalogs_for_scope(project_key, directory);
-            }
-        }
-        let mut result = self
-            .scanner
-            .finish_project_scan(&workspace, scan, deferred_setup_paths);
-        let (session, deferred_paths) = session.commit();
-        if deferred_paths.is_empty() {
-            return Ok(result);
+        // Changes made after this returns must be seen by the watcher, so wait
+        // until it watches the folders found by the scan. The scan session has
+        // ended, so the watcher can apply the events it received meanwhile.
+        if watch {
+            self.scanner.wait_for_watcher();
         }
 
-        // Indexing the deferred files again updates the services that read
-        // them. If a deferred file changes again in the meantime, its next
-        // indexing updates its services.
-        let workspace = self.with_db_state(session.view());
-        let project_path = workspace
-            .project_get_path(project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-        let diagnostics = self.scanner.index_files(
-            &workspace,
-            project_key,
-            &project_path,
-            deferred_paths,
-            IndexTrigger::InitialScan,
-            watch,
-        )?;
-        session.finish();
-        result.diagnostics.extend(diagnostics);
-        let _ = self.notification_tx.send(ServiceNotification::IndexUpdated);
-        Ok(result)
+        result
     }
 
     /// Updates the global settings for this workspace.
