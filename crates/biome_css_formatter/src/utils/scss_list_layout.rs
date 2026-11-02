@@ -357,8 +357,10 @@ fn is_declaration_value_list(node: &ScssListExpression) -> bool {
                 .is_some()
         })
         && property.name().is_ok_and(|name| {
-            let name = name.to_trimmed_text();
-            !name.starts_with("--") && css_grid_template_property(&name).is_none()
+            name.as_any_css_dashed_identifier().is_none()
+                && name
+                    .identifier_text()
+                    .is_none_or(|name| css_grid_template_property(&name).is_none())
         })
 }
 
