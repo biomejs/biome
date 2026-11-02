@@ -2,9 +2,9 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName,
     AnyJsTemplateElement, JsNumberLiteralExpression,
     numbers::{canonicalize_js_bigint_literal, parse_js_number_with_single_rounding},
-    unescape_js_string,
+    try_unescape_js_string,
 };
-use biome_rowan::{AstNode, Text, TokenText};
+use biome_rowan::{AstNode, Text};
 
 /// Returns whether `left` and `right` read the same value: the same variable, property,
 /// `this`, `super`, or literal.
@@ -116,7 +116,7 @@ fn static_property_name(expression: &AnyJsExpression) -> Option<Text> {
     match expression {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-        ) => string_value(literal.inner_string_text().ok()?),
+        ) => try_unescape_js_string(literal.inner_string_text().ok()?),
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
         ) => {
@@ -130,7 +130,7 @@ fn static_property_name(expression: &AnyJsExpression) -> Option<Text> {
             match (elements.next(), elements.next()) {
                 (None, _) => Some(Text::new_static("")),
                 (Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)), None) => {
-                    string_value(chunk.template_chunk_token().ok()?.token_text_trimmed())
+                    try_unescape_js_string(chunk.template_chunk_token().ok()?.token_text_trimmed())
                 }
                 _ => None,
             }
@@ -174,7 +174,10 @@ fn is_same_literal(left: &AnyJsLiteralExpression, right: &AnyJsLiteralExpression
         ) => {
             let left = left.inner_string_text().ok()?;
             let right = right.inner_string_text().ok()?;
-            match (string_value(left.clone()), string_value(right.clone())) {
+            match (
+                try_unescape_js_string(left.clone()),
+                try_unescape_js_string(right.clone()),
+            ) {
                 (Some(left), Some(right)) => left == right,
                 // The same source text always has the same value.
                 _ => left == right,
@@ -187,36 +190,4 @@ fn is_same_literal(left: &AnyJsLiteralExpression, right: &AnyJsLiteralExpression
 /// Returns `None` if the syntax tree is incomplete.
 fn number_value(literal: &JsNumberLiteralExpression) -> Option<f64> {
     parse_js_number_with_single_rounding(literal.value_token().ok()?.text_trimmed())
-}
-
-/// Returns the value of the string whose source text, without quotes, is `text`.
-///
-/// Returns `None` if `text` contains an escape sequence that [`unescape_js_string`] can't
-/// decode correctly: a legacy octal escape such as `\1` or `\01`, or an escape for half of a
-/// surrogate pair such as `\uD83D`.
-fn string_value(text: TokenText) -> Option<Text> {
-    let mut chars = text.chars().peekable();
-    while let Some(c) = chars.next() {
-        if c != '\\' {
-            continue;
-        }
-        match chars.next() {
-            Some('1'..='7') => return None,
-            Some('0') if chars.peek().is_some_and(char::is_ascii_digit) => return None,
-            Some('u') => {
-                let code_point = if chars.next_if_eq(&'{').is_some() {
-                    let digits: String = chars.by_ref().take_while(|c| *c != '}').collect();
-                    u32::from_str_radix(&digits, 16).ok()
-                } else {
-                    let digits: String = chars.by_ref().take(4).collect();
-                    u32::from_str_radix(&digits, 16).ok()
-                };
-                if code_point.is_none_or(|code_point| (0xD800..=0xDFFF).contains(&code_point)) {
-                    return None;
-                }
-            }
-            _ => {}
-        }
-    }
-    Some(unescape_js_string(text))
 }
