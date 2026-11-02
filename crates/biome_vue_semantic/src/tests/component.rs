@@ -185,6 +185,49 @@ fn unreadable_prop_options_leave_the_defaults_incomplete() {
 }
 
 #[test]
+fn define_model_declares_a_prop() {
+    let runtime = js_model(
+        r#"defineModel("count", { type: Number, default: 0 })"#,
+        setup_ts(),
+    );
+    let component = runtime.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert_eq!(model.name(), "count");
+    assert!(model.types() == PropType::Number);
+    assert_eq!(model.form(), Some(PropForm::Options));
+    let defaults: Vec<_> = model.defaults().collect();
+    assert_eq!(defaults.len(), 1);
+    assert_eq!(defaults[0].source(), DefaultSource::Inline);
+
+    let typed = js_model(r#"defineModel<string>({ default: "" })"#, setup_ts());
+    let component = typed.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert_eq!(model.name(), "modelValue");
+    assert!(model.types() == PropType::String);
+    assert_eq!(model.form(), Some(PropForm::TypeMember));
+    assert_eq!(model.defaults().count(), 1);
+
+    let both = js_model(r#"defineModel<string>({ type: Number })"#, setup_ts());
+    let component = both.components().next().expect("a component");
+    let model = component.models().next().expect("a model");
+    assert!(model.types() == PropType::Number);
+    assert_eq!(model.form(), Some(PropForm::Options));
+}
+
+#[test]
+fn callable_type_literal_is_a_function() {
+    let model = js_model(
+        "defineProps<{ call?: { (): void }; make?: { new (): object }; both?: { (): void; size: number } }>()",
+        setup_ts(),
+    );
+    let component = model.components().next().expect("a component");
+    let types: Vec<_> = component.props().map(|prop| prop.types()).collect();
+    assert!(types[0] == PropType::Function);
+    assert!(types[1] == PropType::Function);
+    assert!(types[2] == PropType::Function | PropType::Object);
+}
+
+#[test]
 fn script_setup_macros() {
     let model = js_model(
         r#"import { ref, computed, onMounted, watch } from "vue";

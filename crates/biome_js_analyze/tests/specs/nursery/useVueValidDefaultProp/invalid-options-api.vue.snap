@@ -1,0 +1,452 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: {
+    a: { type: [Number, String], default: {} },
+    b: { type: [Number, Object], default: {} },
+    c: { type: Number, default: "" },
+    d: { type: Number, default: false },
+    e: { type: Number, default: [] },
+    f: { type: String, default: 2 },
+    g: { type: String, default: 1n },
+    h: { type: Boolean, default: "" },
+    i: { type: Object, default: "" },
+    j: { type: Object, default: {} },
+    k: { type: Object, default: [] },
+    l: { type: Array, default: 55 },
+    m: { type: Array, default: [] },
+    n: { type: Function, default: 1 },
+    o: { type: String, default: Number?.() },
+    p: { type: String, default: /regex/ },
+    q: { type: Number, default: `template` },
+    "quoted": { type: Object, default: "" },
+    ["computed"]: { type: Object, default: "" },
+    r: { type: Date, default: "2020-01-01" },
+    s: { type: String, default: ("parenthesized", 1) },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:43 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop a doesn't match the type of the prop.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     a: { type: [Number, String], default: {} },
+      │                                           ^^
+    6 │     b: { type: [Number, Object], default: {} },
+    7 │     c: { type: Number, default: "" },
+  
+  i The prop accepts String or Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:6:43 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop b isn't returned from a function.
+  
+    4 │   props: {
+    5 │     a: { type: [Number, String], default: {} },
+  > 6 │     b: { type: [Number, Object], default: {} },
+      │                                           ^^
+    7 │     c: { type: Number, default: "" },
+    8 │     d: { type: Number, default: false },
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop c doesn't match the type of the prop.
+  
+    5 │     a: { type: [Number, String], default: {} },
+    6 │     b: { type: [Number, Object], default: {} },
+  > 7 │     c: { type: Number, default: "" },
+      │                                 ^^
+    8 │     d: { type: Number, default: false },
+    9 │     e: { type: Number, default: [] },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:8:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop d doesn't match the type of the prop.
+  
+     6 │     b: { type: [Number, Object], default: {} },
+     7 │     c: { type: Number, default: "" },
+   > 8 │     d: { type: Number, default: false },
+       │                                 ^^^^^
+     9 │     e: { type: Number, default: [] },
+    10 │     f: { type: String, default: 2 },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:9:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop e doesn't match the type of the prop.
+  
+     7 │     c: { type: Number, default: "" },
+     8 │     d: { type: Number, default: false },
+   > 9 │     e: { type: Number, default: [] },
+       │                                 ^^
+    10 │     f: { type: String, default: 2 },
+    11 │     g: { type: String, default: 1n },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:10:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop f doesn't match the type of the prop.
+  
+     8 │     d: { type: Number, default: false },
+     9 │     e: { type: Number, default: [] },
+  > 10 │     f: { type: String, default: 2 },
+       │                                 ^
+    11 │     g: { type: String, default: 1n },
+    12 │     h: { type: Boolean, default: "" },
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:11:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop g doesn't match the type of the prop.
+  
+     9 │     e: { type: Number, default: [] },
+    10 │     f: { type: String, default: 2 },
+  > 11 │     g: { type: String, default: 1n },
+       │                                 ^^
+    12 │     h: { type: Boolean, default: "" },
+    13 │     i: { type: Object, default: "" },
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:12:34 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop h doesn't match the type of the prop.
+  
+    10 │     f: { type: String, default: 2 },
+    11 │     g: { type: String, default: 1n },
+  > 12 │     h: { type: Boolean, default: "" },
+       │                                  ^^
+    13 │     i: { type: Object, default: "" },
+    14 │     j: { type: Object, default: {} },
+  
+  i The prop accepts Boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:13:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop i doesn't match the type of the prop.
+  
+    11 │     g: { type: String, default: 1n },
+    12 │     h: { type: Boolean, default: "" },
+  > 13 │     i: { type: Object, default: "" },
+       │                                 ^^
+    14 │     j: { type: Object, default: {} },
+    15 │     k: { type: Object, default: [] },
+  
+  i The prop accepts Object.
+  
+  i A default object or array must be returned from a function, such as () => [].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:14:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop j isn't returned from a function.
+  
+    12 │     h: { type: Boolean, default: "" },
+    13 │     i: { type: Object, default: "" },
+  > 14 │     j: { type: Object, default: {} },
+       │                                 ^^
+    15 │     k: { type: Object, default: [] },
+    16 │     l: { type: Array, default: 55 },
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:15:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop k doesn't match the type of the prop.
+  
+    13 │     i: { type: Object, default: "" },
+    14 │     j: { type: Object, default: {} },
+  > 15 │     k: { type: Object, default: [] },
+       │                                 ^^
+    16 │     l: { type: Array, default: 55 },
+    17 │     m: { type: Array, default: [] },
+  
+  i The prop accepts Object.
+  
+  i A default object or array must be returned from a function, such as () => [].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:16:32 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop l doesn't match the type of the prop.
+  
+    14 │     j: { type: Object, default: {} },
+    15 │     k: { type: Object, default: [] },
+  > 16 │     l: { type: Array, default: 55 },
+       │                                ^^
+    17 │     m: { type: Array, default: [] },
+    18 │     n: { type: Function, default: 1 },
+  
+  i The prop accepts Array.
+  
+  i A default object or array must be returned from a function, such as () => [].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:17:32 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop m isn't returned from a function.
+  
+    15 │     k: { type: Object, default: [] },
+    16 │     l: { type: Array, default: 55 },
+  > 17 │     m: { type: Array, default: [] },
+       │                                ^^
+    18 │     n: { type: Function, default: 1 },
+    19 │     o: { type: String, default: Number?.() },
+  
+  i An object or array written directly as a default value is shared by every instance of the component. Changing it in one instance changes it in all of them.
+  
+  i Return the value from a function instead, such as () => [] or () => ({}).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:18:35 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop n doesn't match the type of the prop.
+  
+    16 │     l: { type: Array, default: 55 },
+    17 │     m: { type: Array, default: [] },
+  > 18 │     n: { type: Function, default: 1 },
+       │                                   ^
+    19 │     o: { type: String, default: Number?.() },
+    20 │     p: { type: String, default: /regex/ },
+  
+  i The prop accepts Function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:19:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop o doesn't match the type of the prop.
+  
+    17 │     m: { type: Array, default: [] },
+    18 │     n: { type: Function, default: 1 },
+  > 19 │     o: { type: String, default: Number?.() },
+       │                                 ^^^^^^^^^^
+    20 │     p: { type: String, default: /regex/ },
+    21 │     q: { type: Number, default: `template` },
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:20:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop p doesn't match the type of the prop.
+  
+    18 │     n: { type: Function, default: 1 },
+    19 │     o: { type: String, default: Number?.() },
+  > 20 │     p: { type: String, default: /regex/ },
+       │                                 ^^^^^^^
+    21 │     q: { type: Number, default: `template` },
+    22 │     "quoted": { type: Object, default: "" },
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:21:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop q doesn't match the type of the prop.
+  
+    19 │     o: { type: String, default: Number?.() },
+    20 │     p: { type: String, default: /regex/ },
+  > 21 │     q: { type: Number, default: `template` },
+       │                                 ^^^^^^^^^^
+    22 │     "quoted": { type: Object, default: "" },
+    23 │     ["computed"]: { type: Object, default: "" },
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:22:40 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop quoted doesn't match the type of the prop.
+  
+    20 │     p: { type: String, default: /regex/ },
+    21 │     q: { type: Number, default: `template` },
+  > 22 │     "quoted": { type: Object, default: "" },
+       │                                        ^^
+    23 │     ["computed"]: { type: Object, default: "" },
+    24 │     r: { type: Date, default: "2020-01-01" },
+  
+  i The prop accepts Object.
+  
+  i A default object or array must be returned from a function, such as () => [].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:23:44 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop computed doesn't match the type of the prop.
+  
+    21 │     q: { type: Number, default: `template` },
+    22 │     "quoted": { type: Object, default: "" },
+  > 23 │     ["computed"]: { type: Object, default: "" },
+       │                                            ^^
+    24 │     r: { type: Date, default: "2020-01-01" },
+    25 │     s: { type: String, default: ("parenthesized", 1) },
+  
+  i The prop accepts Object.
+  
+  i A default object or array must be returned from a function, such as () => [].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:24:31 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop r doesn't match the type of the prop.
+  
+    22 │     "quoted": { type: Object, default: "" },
+    23 │     ["computed"]: { type: Object, default: "" },
+  > 24 │     r: { type: Date, default: "2020-01-01" },
+       │                               ^^^^^^^^^^^^
+    25 │     s: { type: String, default: ("parenthesized", 1) },
+    26 │   },
+  
+  i The prop accepts Date.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:25:33 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop s doesn't match the type of the prop.
+  
+    23 │     ["computed"]: { type: Object, default: "" },
+    24 │     r: { type: Date, default: "2020-01-01" },
+  > 25 │     s: { type: String, default: ("parenthesized", 1) },
+       │                                 ^^^^^^^^^^^^^^^^^^^^
+    26 │   },
+    27 │ };
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

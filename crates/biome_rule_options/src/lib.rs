@@ -706,6 +706,7 @@ pub mod use_vue_v_for_key;
 pub mod use_vue_v_model;
 pub mod use_vue_v_on_exact;
 pub mod use_vue_valid_attribute_name;
+pub mod use_vue_valid_default_prop;
 pub mod use_vue_valid_define_emits;
 pub mod use_vue_valid_define_options;
 pub mod use_vue_valid_define_props;

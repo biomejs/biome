@@ -1767,7 +1767,11 @@ impl Collector<'_, '_> {
             // nothing about it.
             if options.is_some() || ty.is_some() {
                 let mut detail = self.runtime_prop_detail(options);
-                if let Some(ty) = ty {
+                // A runtime `type` option takes precedence over the type
+                // argument.
+                if detail.types.is_empty()
+                    && let Some(ty) = ty
+                {
                     detail.types = type_set_of(&ty);
                     detail.form = PropForm::TypeMember;
                 }
@@ -2310,7 +2314,20 @@ fn type_set_of(ty: &AnyTsType) -> TypeSet {
         AnyTsType::TsSymbolType(_) => types.insert(PropType::Symbol),
         AnyTsType::TsArrayType(_) | AnyTsType::TsTupleType(_) => types.insert(PropType::Array),
         AnyTsType::TsFunctionType(_) => types.insert(PropType::Function),
-        AnyTsType::TsObjectType(_) => types.insert(PropType::Object),
+        // A call or construct signature makes the value callable, as in
+        // `{ (): void }`. Any other member describes a plain object.
+        AnyTsType::TsObjectType(object) => {
+            for member in object.members().iter() {
+                types.insert(match member {
+                    AnyTsTypeMember::TsCallSignatureTypeMember(_)
+                    | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => PropType::Function,
+                    _ => PropType::Object,
+                });
+            }
+            if types.is_empty() {
+                types.insert(PropType::Object);
+            }
+        }
         AnyTsType::TsParenthesizedType(parenthesized) => match parenthesized.ty() {
             Ok(ty) => types |= type_set_of(&ty),
             Err(_) => types.insert(PropType::Unknown),
