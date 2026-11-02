@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: {
+    prop1: String,
+    prop2: String
+  }
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:5 lint/nursery/noVueExcessiveProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This component declares too many props (2). The maximum allowed is 1.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     prop1: String,
+      │     ^^^^^^^^^^^^^^
+  > 6 │     prop2: String
+      │     ^^^^^^^^^^^^^
+    7 │   }
+    8 │ }
+  
+  i Each prop is another input that the component has to handle, which makes it harder to read, use, and test.
+  
+  i Split the component into smaller components that each need fewer props.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

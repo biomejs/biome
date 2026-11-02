@@ -1924,6 +1924,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_vue_duplicate_keys::NoVueDuplicateKeysOptions>(),
     ));
     result.push((
+        "nursery",
+        "noVueExcessiveProps",
+        TypeId::of::<biome_rule_options::no_vue_excessive_props::NoVueExcessivePropsOptions>(),
+    ));
+    result.push((
         "correctness",
         "noVueImportCompilerMacros",
         TypeId::of::<
