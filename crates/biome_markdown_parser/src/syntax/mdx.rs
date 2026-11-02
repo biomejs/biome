@@ -20,8 +20,9 @@
 use crate::MarkdownParser;
 use crate::syntax::parse_error::{
     invalid_mdx_tag_name, invalid_mdx_tag_start, mdx_closing_tag_with_attributes,
-    mdx_element_attribute_value, mdx_self_closing_closing_tag, missing_blank_line_after_mdx_esm,
-    unclosed_mdx_expression, unclosed_mdx_tag,
+    mdx_element_attribute_value, mdx_self_closing_closing_tag, mismatched_mdx_closing_tag,
+    missing_blank_line_after_mdx_esm, unclosed_mdx_element, unclosed_mdx_expression,
+    unclosed_mdx_tag, unexpected_mdx_closing_tag,
 };
 use biome_js_extent::{EsmEnd, JsExtent, Jsx};
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
@@ -672,16 +673,12 @@ pub(crate) fn jsx_tag_pairing_diagnostics(root: &MarkdownSyntaxNode) -> Vec<Pars
                     open.pop();
                 }
                 Some((opening, opening_range)) => {
-                    diagnostics.push(
-                        ParseDiagnostic::new(
-                            format!(
-                                "Unexpected closing tag `{}`, expected the closing tag of `{opening}`.",
-                                tag.display()
-                            ),
-                            range,
-                        )
-                        .with_detail(*opening_range, "the open tag is here"),
-                    );
+                    diagnostics.push(mismatched_mdx_closing_tag(
+                        &tag.display(),
+                        range,
+                        opening,
+                        *opening_range,
+                    ));
                     // A closing tag that matches an outer open tag closes the
                     // tags opened since then; any other one is ignored.
                     if let Some(index) = open.iter().rposition(|(opening, _)| *opening == expected)
@@ -689,31 +686,12 @@ pub(crate) fn jsx_tag_pairing_diagnostics(root: &MarkdownSyntaxNode) -> Vec<Pars
                         open.truncate(index);
                     }
                 }
-                None => diagnostics.push(
-                    ParseDiagnostic::new(
-                        format!(
-                            "Unexpected closing tag `{}`, there is no open tag to close.",
-                            tag.display()
-                        ),
-                        range,
-                    )
-                    .with_hint("Remove the closing tag, or add its opening tag before it."),
-                ),
+                None => diagnostics.push(unexpected_mdx_closing_tag(&tag.display(), range)),
             }
         }
+        let in_paragraph = tag_kind == MDX_JSX_INLINE_TAG;
         for (opening, range) in open {
-            let place = if tag_kind == MDX_JSX_BLOCK_TAG {
-                "its block"
-            } else {
-                "its paragraph"
-            };
-            diagnostics.push(
-                ParseDiagnostic::new(
-                    format!("Expected a closing tag for `{opening}` before the end of {place}."),
-                    range,
-                )
-                .with_hint("Add the closing tag, or make the tag self-closing with `/>`."),
-            );
+            diagnostics.push(unclosed_mdx_element(&opening, range, in_paragraph));
         }
     }
     diagnostics.sort_by_key(|diagnostic| diagnostic.span().map(|span| span.start()));

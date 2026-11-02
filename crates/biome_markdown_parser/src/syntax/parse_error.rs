@@ -224,6 +224,61 @@ pub(crate) fn mdx_element_attribute_value(p: &MarkdownParser, range: TextRange) 
         .with_hint("Wrap the element in braces, as in `icon={<Icon />}`.")
 }
 
+/// MDX closing tag that doesn't match the innermost open tag.
+///
+/// Tag pairing is checked on the finished tree, so this diagnostic and the
+/// two after it don't take the parser.
+///
+/// ```mdx
+/// <Note><Tip></Note>
+///      ^^^^^ the open tag is here
+///           ^^^^^^^ expected `</Tip>`
+/// ```
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn mismatched_mdx_closing_tag(
+    closing: &str,
+    range: TextRange,
+    opening: &str,
+    opening_range: TextRange,
+) -> ParseDiagnostic {
+    ParseDiagnostic::new(
+        format!("Unexpected closing tag `{closing}`, expected the closing tag of `{opening}`."),
+        range,
+    )
+    .with_detail(opening_range, "the open tag is here")
+}
+
+/// MDX closing tag without any open tag before it, such as `</Note>` at the
+/// start of a block.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unexpected_mdx_closing_tag(closing: &str, range: TextRange) -> ParseDiagnostic {
+    ParseDiagnostic::new(
+        format!("Unexpected closing tag `{closing}`, there is no open tag to close."),
+        range,
+    )
+    .with_hint("Remove the closing tag, or add its opening tag before it.")
+}
+
+/// MDX open tag that is still open at the end of its block or paragraph.
+/// `in_paragraph` tells which of the two the tag is in.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn unclosed_mdx_element(
+    opening: &str,
+    range: TextRange,
+    in_paragraph: bool,
+) -> ParseDiagnostic {
+    let place = if in_paragraph {
+        "its paragraph"
+    } else {
+        "its block"
+    };
+    ParseDiagnostic::new(
+        format!("Expected a closing tag for `{opening}` before the end of {place}."),
+        range,
+    )
+    .with_hint("Add the closing tag, or make the tag self-closing with `/>`.")
+}
+
 /// Parser made no progress while parsing a block.
 pub(crate) fn parse_any_block_no_progress(p: &MarkdownParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder("Parser made no progress while parsing a block.", range)
