@@ -410,6 +410,13 @@ impl Settings {
             }
         }
 
+        #[cfg(feature = "lang_grit")]
+        {
+            if let Some(grit) = configuration.grit {
+                self.languages.grit = grit.into();
+            }
+        }
+
         // plugin settings
         #[cfg(feature = "plugins")]
         {
