@@ -1,0 +1,210 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComponent v-on:click.native="onClick" />
+  <MyComponent @click.native="onClick" />
+  <input v-on:keyup.native="fire">
+  <input v-on:keyup.foo.native.bar="fire">
+  <input @keyup.enter.native="fire">
+  <MyComponent v-on:[event].native="onEvent" />
+  <MyComponent @[event].native="onEvent" />
+  <MyComponent @click.native />
+  <MyComponent v-on.native="handlers" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:26 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComponent v-on:click.native="onClick" />
+      │                          ^^^^^^^
+    4 │   <MyComponent @click.native="onClick" />
+    5 │   <input v-on:keyup.native="fire">
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:22 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+    2 │ <template>
+    3 │   <MyComponent v-on:click.native="onClick" />
+  > 4 │   <MyComponent @click.native="onClick" />
+      │                      ^^^^^^^
+    5 │   <input v-on:keyup.native="fire">
+    6 │   <input v-on:keyup.foo.native.bar="fire">
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:20 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+    3 │   <MyComponent v-on:click.native="onClick" />
+    4 │   <MyComponent @click.native="onClick" />
+  > 5 │   <input v-on:keyup.native="fire">
+      │                    ^^^^^^^
+    6 │   <input v-on:keyup.foo.native.bar="fire">
+    7 │   <input @keyup.enter.native="fire">
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:24 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+    4 │   <MyComponent @click.native="onClick" />
+    5 │   <input v-on:keyup.native="fire">
+  > 6 │   <input v-on:keyup.foo.native.bar="fire">
+      │                        ^^^^^^^
+    7 │   <input @keyup.enter.native="fire">
+    8 │   <MyComponent v-on:[event].native="onEvent" />
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:22 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+    5 │   <input v-on:keyup.native="fire">
+    6 │   <input v-on:keyup.foo.native.bar="fire">
+  > 7 │   <input @keyup.enter.native="fire">
+      │                      ^^^^^^^
+    8 │   <MyComponent v-on:[event].native="onEvent" />
+    9 │   <MyComponent @[event].native="onEvent" />
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:28 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+     6 │   <input v-on:keyup.foo.native.bar="fire">
+     7 │   <input @keyup.enter.native="fire">
+   > 8 │   <MyComponent v-on:[event].native="onEvent" />
+       │                            ^^^^^^^
+     9 │   <MyComponent @[event].native="onEvent" />
+    10 │   <MyComponent @click.native />
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:24 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+     7 │   <input @keyup.enter.native="fire">
+     8 │   <MyComponent v-on:[event].native="onEvent" />
+   > 9 │   <MyComponent @[event].native="onEvent" />
+       │                        ^^^^^^^
+    10 │   <MyComponent @click.native />
+    11 │   <MyComponent v-on.native="handlers" />
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:22 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+     8 │   <MyComponent v-on:[event].native="onEvent" />
+     9 │   <MyComponent @[event].native="onEvent" />
+  > 10 │   <MyComponent @click.native />
+       │                      ^^^^^^^
+    11 │   <MyComponent v-on.native="handlers" />
+    12 │ </template>
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:20 lint/nursery/noVueDeprecatedVOnNativeModifier ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The .native modifier on v-on is deprecated.
+  
+     9 │   <MyComponent @[event].native="onEvent" />
+    10 │   <MyComponent @click.native />
+  > 11 │   <MyComponent v-on.native="handlers" />
+       │                    ^^^^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Vue 3 removed this modifier. Listeners for events that a component does not declare in its emits option are added to its root element automatically.
+  
+  i Remove the .native modifier.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,14 @@
+<!-- should not generate diagnostics -->
+<template>
+  <input v-on:keyup.enter="fire">
+  <input @keyup.enter="fire">
+  <input v-native:foo.native.foo.bar="fire">
+  <input @native.enter="fire">
+  <input :keydown.native="fire">
+  <input v-bind:keydown.native="fire">
+  <MyComponent #default.native />
+  <MyComponent @click="onClick" />
+  <MyComponent v-on:native="onNative" />
+  <MyComponent @click.natives="onClick" />
+  <input onclick="native">
+</template>
