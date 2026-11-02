@@ -6,6 +6,7 @@ use crate::utils::component_value_list::{
 use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
+use crate::utils::scss_map_layout::allows_forced_scss_expansion;
 use biome_css_syntax::{
     ScssExpression, ScssExpressionItemList, ScssListExpression, ScssListExpressionElement,
     ScssListExpressionElementList, ScssListExpressionFields, ScssModuleConfiguration,
@@ -57,7 +58,7 @@ impl<'a> ScssListLayout<'a> {
                     elements.format(),
                     if_group_breaks(&trailing_comma)
                 ])
-                .should_expand(true)]
+                .should_expand(allows_forced_scss_expansion(self.node.syntax(), f))]
             );
         }
 
