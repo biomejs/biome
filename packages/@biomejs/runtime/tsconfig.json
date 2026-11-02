@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "preserve",
-    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "module": "node20",
+    "moduleResolution": "node16",
     "strict": true,
     "noEmit": true,
-    "types": []
+    "types": [
+      "node"
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": [
-    "type-tests/**/*.ts"
+    "src",
+    "type-tests",
+    "tests/**/*.ts"
   ]
 }

@@ -307,10 +307,16 @@ importers:
 
   packages/@biomejs/runtime:
     dependencies:
+      '@biomejs/backend-jsonrpc':
+        specifier: workspace:*
+        version: link:../backend-jsonrpc
       '@biomejs/biome':
         specifier: '*'
         version: link:../biome
     devDependencies:
+      '@types/node':
+        specifier: 24.13.6
+        version: 24.13.6
       typescript:
         specifier: 7.0.2
         version: 7.0.2
