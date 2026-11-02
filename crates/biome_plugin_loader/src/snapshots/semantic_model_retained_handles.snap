@@ -84,6 +84,6 @@ let second = 2; second;
 
 /file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Rule retained errored: TypeError: The node belongs to a different source than this semantic model. Use a node from the model's original source. (/plugin.js:16:34)
+  × Rule retained errored: TypeError: The node belongs to a different source than this semantic model. Use a node from the model's original source. (/plugin.js:16:34)
         at run (/plugin.js:16:34)
 ```
