@@ -3458,6 +3458,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
+	 * Disallow the deprecated slot attribute in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-slot-attribute
+	 */
+	noVueDeprecatedSlotAttribute?: NoVueDeprecatedSlotAttributeConfiguration;
+	/**
 	 * Disallow the deprecated slot-scope attribute in Vue templates.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-slot-scope
 	 */
@@ -6534,6 +6539,9 @@ export type NoVueDeprecatedScopeAttributeConfiguration =
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
+export type NoVueDeprecatedSlotAttributeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedSlotAttributeOptions;
 export type NoVueDeprecatedSlotScopeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedSlotScopeOptions;
@@ -9493,6 +9501,10 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedScopedSlotsOptions;
 }
+export interface RuleWithNoVueDeprecatedSlotAttributeOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedSlotAttributeOptions;
+}
 export interface RuleWithNoVueDeprecatedSlotScopeOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12316,6 +12328,20 @@ export interface NoVueDeprecatedRouterLinkTagPropOptions {
 }
 export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
+export interface NoVueDeprecatedSlotAttributeOptions {
+	/**
+	 * Names of elements that can use the `slot` attribute.
+	 *
+	 * Case and hyphens are ignored, so `my-component` also matches `MyComponent`.
+	 */
+	ignore?: string[];
+	/**
+	 * Names of elements whose direct children can use the `slot` attribute.
+	 *
+	 * Case and hyphens are ignored, so `my-web-component` also matches `MyWebComponent`.
+	 */
+	ignoreParents?: string[];
+}
 export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueDeprecatedVBindSyncOptions = {};
 export type NoVueDeprecatedVOnNativeModifierOptions = {};
@@ -14247,6 +14273,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueDeprecatedSlotAttribute"
 	| "lint/nursery/noVueDeprecatedSlotScope"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueExcessiveProps"
