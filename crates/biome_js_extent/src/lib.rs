@@ -564,10 +564,28 @@ fn at_expression_position(scanned: &[u8]) -> bool {
     !matches!(scanned[index], b')' | b']' | b'"' | b'\'' | b'`')
 }
 
-/// Returns whether `code` ends with a reserved word that an expression can
-/// directly follow, such as `return`. Contextual keywords such as `of` are left
-/// out because they are also plain names (`of / 2`), and a word after `.` or
-/// `#` is a property name, like the operand in `pool.yield / 100`.
+/// Sorted reserved words that an expression can directly follow, such as
+/// `return`. Contextual keywords such as `of` are left out because they are
+/// also plain names (`of / 2`).
+const EXPRESSION_KEYWORDS: &[&[u8]] = &[
+    b"await",
+    b"case",
+    b"delete",
+    b"do",
+    b"else",
+    b"in",
+    b"instanceof",
+    b"new",
+    b"return",
+    b"throw",
+    b"typeof",
+    b"void",
+    b"yield",
+];
+
+/// Returns whether `code` ends with one of the [`EXPRESSION_KEYWORDS`]. A word
+/// after `.` or `#` is a property name, like the operand in
+/// `pool.yield / 100`.
 fn ends_with_expression_keyword(code: &[u8]) -> bool {
     let start = code
         .iter()
@@ -580,26 +598,11 @@ fn ends_with_expression_keyword(code: &[u8]) -> bool {
         return false;
     }
 
-    matches!(
-        &code[start..],
-        b"await"
-            | b"case"
-            | b"delete"
-            | b"do"
-            | b"else"
-            | b"in"
-            | b"instanceof"
-            | b"new"
-            | b"return"
-            | b"throw"
-            | b"typeof"
-            | b"void"
-            | b"yield"
-    )
+    EXPRESSION_KEYWORDS.binary_search(&&code[start..]).is_ok()
 }
 
 fn is_js_word_byte(byte: u8) -> bool {
-    byte.is_ascii_alphanumeric() || byte == b'_' || byte == b'$'
+    matches!(lookup_byte(byte), IDT | DOL | DIG | ZER)
 }
 
 #[cfg(test)]
