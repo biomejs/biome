@@ -7,10 +7,11 @@ use crate::utils::scss_closing_comments::{
     ClosingCommentSpacing, owns_include_closing_comments, write_include_closing_comments,
 };
 use biome_css_syntax::{
-    ScssExpression, ScssExpressionItemList, ScssListExpression, ScssListExpressionElement,
+    CssDeclaration, CssDeclarationWithSemicolon, CssGenericProperty, ScssExpression,
+    ScssExpressionItemList, ScssListExpression, ScssListExpressionElement,
     ScssListExpressionElementList, ScssListExpressionFields, ScssModuleConfiguration,
-    ScssParenthesizedExpression, ScssVariableDeclaration, is_in_scss_include_arguments,
-    is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
+    ScssParenthesizedExpression, ScssVariableDeclaration, css_grid_template_property,
+    is_in_scss_include_arguments, is_scss_map_key, is_scss_map_outer_parenthesized_value_list,
     scss_include_keyword_argument_owner, single_expression_item, unwrap_single_expression_item,
 };
 use biome_formatter::separated::TrailingSeparator;
@@ -78,7 +79,7 @@ impl<'a> ScssListLayout<'a> {
             return write!(f, [group(&format_args![elements.format()])]);
         }
 
-        if is_compound_variable_list(self.node, &elements) {
+        if is_compound_declaration_list(self.node, &elements) {
             // Print `$buttonConfig:
             //   "save" 50px,
             //   "cancel" 50px;`.
@@ -319,20 +320,49 @@ fn is_include_keyword_list_value_expanded_by_comments(
     has_trailing_comment || has_keyword_closing_comments
 }
 
-/// Detects `$buttonConfig: "save" 50px, "cancel" 50px;`.
-fn is_compound_variable_list(
+/// Detects `$buttonConfig: "save" 50px, "cancel" 50px;` and
+/// `box-shadow: inset 1px red, 2px blue;`.
+fn is_compound_declaration_list(
     node: &ScssListExpression,
     elements: &ScssListExpressionElementList,
 ) -> bool {
-    is_scss_variable_value_list(node) && elements.len() > 1 && has_compound_list_element(elements)
+    elements.len() > 1 && has_compound_list_element(elements) && is_declaration_value_list(node)
 }
 
-/// Checks that the list is the value in `$buttonConfig: "save" 50px, "cancel" 50px;`.
-fn is_scss_variable_value_list(node: &ScssListExpression) -> bool {
-    node.parent::<ScssExpressionItemList>()
+/// Checks that the list is the whole value of a variable or of a block
+/// declaration, matching the CSS one-group-per-line layout. Custom properties
+/// and `@supports (transition: a 1s, b 2s)` conditions stay inline, and grid
+/// templates keep their source-preserving layout.
+fn is_declaration_value_list(node: &ScssListExpression) -> bool {
+    let Some(expression) = node
+        .parent::<ScssExpressionItemList>()
         .and_then(|items| items.parent::<ScssExpression>())
-        .and_then(|expression| expression.parent::<ScssVariableDeclaration>())
-        .is_some()
+    else {
+        return false;
+    };
+
+    if expression.parent::<ScssVariableDeclaration>().is_some() {
+        return true;
+    }
+
+    let Some(property) = expression.parent::<CssGenericProperty>() else {
+        return false;
+    };
+
+    property
+        .parent::<CssDeclaration>()
+        .is_some_and(|declaration| {
+            declaration
+                .parent::<CssDeclarationWithSemicolon>()
+                .is_some()
+        })
+        && property.name().is_ok_and(|name| {
+            name.as_any_css_dashed_identifier().is_none()
+                && name.as_tw_value_theme_reference().is_none()
+                && name
+                    .identifier_text()
+                    .is_none_or(|name| css_grid_template_property(&name).is_none())
+        })
 }
 
 /// Checks for list items like `"save" 50px`.
