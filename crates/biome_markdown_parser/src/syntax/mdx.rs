@@ -80,19 +80,30 @@ fn parse_esm_block(p: &mut MarkdownParser) -> ParsedSyntax {
     let last_line_start = source[..length]
         .rfind(['\n', '\r'])
         .map_or(0, |index| index + 1);
+    let next_line = matches!(esm_end, EsmEnd::NonEsmLine(_)).then(|| {
+        let line_ending = if source[length..].starts_with("\r\n") {
+            2
+        } else {
+            1
+        };
+        let next_start = length + line_ending;
+        let next_length = source[next_start..]
+            .find(['\n', '\r'])
+            .unwrap_or(source.len() - next_start);
+        TextRange::at(
+            start + TextSize::from(next_start as u32),
+            TextSize::from(next_length as u32),
+        )
+    });
     let end = start + TextSize::from(length as u32);
     p.re_lex_span(end, MDX_ESM_LITERAL);
     p.bump(MDX_ESM_LITERAL);
     let block = m.complete(p, MDX_ESM_BLOCK);
-    parse_line_ending(p).ok();
-    if matches!(esm_end, EsmEnd::NonEsmLine(_)) {
+    if let Some(next_line) = next_line {
         // The error is anchored on the last line of the block rather than on
         // the next line: the inline phase drops the diagnostics inside the
         // paragraphs and headings it parses again.
         let last_line = TextRange::new(start + TextSize::from(last_line_start as u32), end);
-        let line = p.source_after_current();
-        let line_length = line.find(['\n', '\r']).unwrap_or(line.len());
-        let next_line = TextRange::at(p.cur_range().start(), TextSize::from(line_length as u32));
         p.error(missing_blank_line_after_mdx_esm(p, last_line, next_line));
     }
     Present(block)
@@ -168,9 +179,7 @@ fn parse_block_expression(p: &mut MarkdownParser, close: ExpressionClose) -> Par
         }
         p.consume_as_whitespace_trivia();
     }
-    let block = m.complete(p, MDX_BLOCK_EXPRESSION);
-    parse_line_ending(p).ok();
-    Present(block)
+    Present(m.complete(p, MDX_BLOCK_EXPRESSION))
 }
 
 /// Parses an expression inside a paragraph or heading.
@@ -254,18 +263,6 @@ pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
     } else {
         bytes.len()
     }
-}
-
-/// Parses the line ending after a block as its own newline node.
-///
-/// Grammar: MdNewline = value: 'NEWLINE'
-fn parse_line_ending(p: &mut MarkdownParser) -> ParsedSyntax {
-    if !p.at(NEWLINE) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump(NEWLINE);
-    Present(m.complete(p, MD_NEWLINE))
 }
 
 /// Returns the length of `text` without its trailing blank lines. The last
