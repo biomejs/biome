@@ -3278,6 +3278,11 @@ export interface Nursery {
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
 	/**
+	 * Disallow bind:value on checkbox and radio inputs.
+	 * See https://biomejs.dev/linter/rules/no-svelte-bind-value-on-checkable-inputs
+	 */
+	noSvelteBindValueOnCheckableInputs?: NoSvelteBindValueOnCheckableInputsConfiguration;
+	/**
 	 * Disallow Svelte's class: directive.
 	 * See https://biomejs.dev/linter/rules/no-svelte-class-directive
 	 */
@@ -6631,6 +6636,9 @@ export type NoSvelteAtDebugTagsConfiguration =
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteBindValueOnCheckableInputsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteBindValueOnCheckableInputsOptions;
 export type NoSvelteClassDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteClassDirectiveOptions;
@@ -9660,6 +9668,14 @@ export interface RuleWithNoSvelteAtDebugTagsOptions {
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
+}
+export interface RuleWithNoSvelteBindValueOnCheckableInputsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteBindValueOnCheckableInputsOptions;
 }
 export interface RuleWithNoSvelteClassDirectiveOptions {
 	level: RulePlainConfiguration;
@@ -12827,6 +12843,7 @@ export type NoSinglePromiseInPromiseMethodsOptions = {};
 export type NoSvelteAddEventListenerOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteBindValueOnCheckableInputsOptions = {};
 export type NoSvelteClassDirectiveOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteInspectOptions = {};
@@ -14987,6 +15004,7 @@ export type Category =
 	| "lint/nursery/noSvelteAddEventListener"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteBindValueOnCheckableInputs"
 	| "lint/nursery/noSvelteClassDirective"
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteInspect"
