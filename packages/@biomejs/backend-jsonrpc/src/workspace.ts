@@ -4008,6 +4008,11 @@ export interface Nursery {
 	 */
 	useVueConsistentVForDelimiter?: UseVueConsistentVForDelimiterConfiguration;
 	/**
+	 * Enforce a consistent style for v-slot in Vue templates.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style
+	 */
+	useVueConsistentVSlotStyle?: UseVueConsistentVSlotStyleConfiguration;
+	/**
 	 * Require a default value for optional props in Vue components.
 	 * See https://biomejs.dev/linter/rules/use-vue-default-prop
 	 */
@@ -6939,6 +6944,9 @@ export type UseVueConsistentPropNameCasingConfiguration =
 export type UseVueConsistentVForDelimiterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentVForDelimiterOptions;
+export type UseVueConsistentVSlotStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentVSlotStyleOptions;
 export type UseVueDefaultPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefaultPropOptions;
@@ -10233,6 +10241,14 @@ export interface RuleWithUseVueConsistentVForDelimiterOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentVForDelimiterOptions;
 }
+export interface RuleWithUseVueConsistentVSlotStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentVSlotStyleOptions;
+}
 export interface RuleWithUseVueDefaultPropOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefaultPropOptions;
@@ -12918,6 +12934,25 @@ export interface UseVueConsistentVForDelimiterOptions {
 	 */
 	delimiter?: VueVForDelimiter;
 }
+export interface UseVueConsistentVSlotStyleOptions {
+	/**
+	 * Preferred style for the default slot when `v-slot` is placed directly on a component,
+	 * as in `<MyComponent v-slot="props">`.
+	 * If omitted, `"v-slot"` is preferred.
+	 */
+	atComponent?: VueSlotStyle;
+	/**
+	 * Preferred style for the default slot on a `<template>` element,
+	 * as in `<template #default>`.
+	 * If omitted, `"shorthand"` is preferred.
+	 */
+	default?: VueSlotStyle;
+	/**
+	 * Preferred style for named slots, as in `<template #header>`.
+	 * If omitted, `"shorthand"` is preferred.
+	 */
+	named?: VueNamedSlotStyle;
+}
 export type UseVueDefaultPropOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
@@ -13920,6 +13955,14 @@ export type DefineEmitsDeclarationStyle = "type" | "typeLiteral" | "runtime";
 export type EventHyphenation = "always" | "never";
 export type PropNameCasing = "camelCase" | "snake_case";
 export type VueVForDelimiter = "in" | "of";
+/**
+ * How a default slot is written.
+ */
+export type VueSlotStyle = "shorthand" | "longhand" | "v-slot";
+/**
+ * How a named slot is written.
+ */
+export type VueNamedSlotStyle = "shorthand" | "longhand";
 export type SlotNameCasing = "camelCase" | "kebab-case" | "singleword";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
@@ -14659,6 +14702,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueConsistentPropNameCasing"
 	| "lint/nursery/useVueConsistentVForDelimiter"
+	| "lint/nursery/useVueConsistentVSlotStyle"
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"

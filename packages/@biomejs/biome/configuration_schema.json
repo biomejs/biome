@@ -9951,6 +9951,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentVSlotStyle": {
+					"description": "Enforce a consistent style for v-slot in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentVSlotStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueDefaultProp": {
 					"description": "Require a default value for optional props in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-default-prop",
 					"anyOf": [
@@ -18128,6 +18135,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentVSlotStyleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentVSlotStyleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueDefaultPropOptions": {
 			"type": "object",
 			"properties": {
@@ -23893,6 +23913,30 @@
 			},
 			"additionalProperties": false
 		},
+		"UseVueConsistentVSlotStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentVSlotStyleOptions" }
+			]
+		},
+		"UseVueConsistentVSlotStyleOptions": {
+			"type": "object",
+			"properties": {
+				"atComponent": {
+					"description": "Preferred style for the default slot when `v-slot` is placed directly on a component,\nas in `<MyComponent v-slot=\"props\">`.\nIf omitted, `\"v-slot\"` is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueSlotStyle" }, { "type": "null" }]
+				},
+				"default": {
+					"description": "Preferred style for the default slot on a `<template>` element,\nas in `<template #default>`.\nIf omitted, `\"shorthand\"` is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueSlotStyle" }, { "type": "null" }]
+				},
+				"named": {
+					"description": "Preferred style for named slots, as in `<template #header>`.\nIf omitted, `\"shorthand\"` is preferred.",
+					"anyOf": [{ "$ref": "#/$defs/VueNamedSlotStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseVueDefaultPropConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -24469,6 +24513,33 @@
 		"VueDirectiveStyle2": {
 			"type": "string",
 			"enum": ["shorthand", "longhand"]
+		},
+		"VueNamedSlotStyle": {
+			"description": "How a named slot is written.",
+			"oneOf": [
+				{ "description": "`#name`", "type": "string", "const": "shorthand" },
+				{
+					"description": "`v-slot:name`",
+					"type": "string",
+					"const": "longhand"
+				}
+			]
+		},
+		"VueSlotStyle": {
+			"description": "How a default slot is written.",
+			"oneOf": [
+				{ "description": "`#default`", "type": "string", "const": "shorthand" },
+				{
+					"description": "`v-slot:default`",
+					"type": "string",
+					"const": "longhand"
+				},
+				{
+					"description": "`v-slot`, without a slot name.",
+					"type": "string",
+					"const": "v-slot"
+				}
+			]
 		},
 		"VueVForDelimiter": { "type": "string", "enum": ["in", "of"] },
 		"WhitespaceSensitivity": {

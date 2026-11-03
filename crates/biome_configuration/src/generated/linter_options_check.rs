@@ -3172,6 +3172,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueConsistentVSlotStyle",
+        TypeId::of::<
+            biome_rule_options::use_vue_consistent_v_slot_style::UseVueConsistentVSlotStyleOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useVueDefaultProp",
         TypeId::of::<biome_rule_options::use_vue_default_prop::UseVueDefaultPropOptions>(),
     ));
