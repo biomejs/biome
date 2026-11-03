@@ -1,0 +1,81 @@
+/* should not generate diagnostics */
+b.map((x) => x);
+b.map((x) => Object.assign(x, { foo: { ...x.foo, bar } }));
+b.map((x) => ({ a: x.a, b: x.b }));
+b.map((x) => [x, 1]);
+
+// The array is read again after the call
+let reread = [];
+reread.map((x) => ({ ...x }));
+console.log(reread);
+
+// Arrays read from `this`
+class Foo {
+	#arr = [];
+	id = 0;
+	get arr() {
+		return this.#arr.map((x) => ({ ...x, id: this.id }));
+	}
+}
+this.foo.map((x) => ({ ...x }));
+this.#foo.map((x) => ({ ...x }));
+
+// The spread isn't created in the callback
+let extras = { ...foo, ...bar };
+b.map((x) => extras);
+
+// Not a method call
+function map(f) {}
+map((x) => ({ ...x }));
+
+// Function parameters
+function fn(a) {
+	return a.map((x) => ({ ...(x ?? y) }));
+}
+const arrow = (a) => a.map((x) => ({ ...(x ?? y) }));
+function destructured({ items }) {
+	return items.map((x) => ({ ...x }));
+}
+
+// Spreads that the callback doesn't return
+b.map((x) => {
+	const copy = { ...x };
+	use(copy);
+	return x;
+});
+b.map((x) => {
+	const nested = () => ({ ...x });
+	return nested;
+});
+b.map((x) => {
+	function nested() {
+		return { ...x };
+	}
+	return nested();
+});
+b.map((x) => foo(...x));
+b.map((x) => ({ y: { ...x } }));
+b.map((x) => {
+	const { y } = { ...x };
+	return y;
+});
+b.map((x) => x || [x]);
+
+// Callbacks that aren't inline functions
+b.map(callback);
+
+// Other methods and argument counts
+b.filter((x) => ({ ...x }));
+b.forEach((x) => ({ ...x }));
+b.map((x) => ({ ...x }), thisArg);
+b.map();
+
+// Variables that refer to each other
+result.map((obj) => {
+	const { item: { id, alias = id } = {} } = obj;
+	return alias;
+});
+
+// Default values of callback parameters aren't copies of the items
+b.map(({ a = { ...x } }) => a);
+b.map((a = { ...x }) => a);

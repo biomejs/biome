@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+let reread = [];
+reread.map((x) => ({ ...x }));
+console.log(reread);
+
+```
+
+# Diagnostics
+```
+invalid.js:3:20 lint/nursery/noMapSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object spread copies an object for each item in the map() callback.
+  
+    1 │ /* should generate diagnostics */
+    2 │ let reread = [];
+  > 3 │ reread.map((x) => ({ ...x }));
+      │                    ^^^^^^^^
+    4 │ console.log(reread);
+    5 │ 
+  
+  i The callback runs once for each item in the array.
+  
+    1 │ /* should generate diagnostics */
+    2 │ let reread = [];
+  > 3 │ reread.map((x) => ({ ...x }));
+      │        ^^^
+    4 │ console.log(reread);
+    5 │ 
+  
+  i A spread creates a new object and copies every property into it. Doing this for each item is slow and uses extra memory for large arrays.
+  
+  i If it's fine to change the original items, add the properties with Object.assign() or assign them directly. Keep the spread if other code needs the original items to stay unchanged.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
