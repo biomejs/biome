@@ -3498,6 +3498,11 @@ export interface Nursery {
 	 */
 	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
 	/**
+	 * Disallow empty object fallbacks when spreading a value into an object.
+	 * See https://biomejs.dev/linter/rules/no-useless-fallback-in-spread
+	 */
+	noUselessFallbackInSpread?: NoUselessFallbackInSpreadConfiguration;
+	/**
 	 * Disallow checking the length of an array when the result doesn't depend on it.
 	 * See https://biomejs.dev/linter/rules/no-useless-length-check
 	 */
@@ -6853,6 +6858,9 @@ export type NoUselessCallConfiguration =
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
+export type NoUselessFallbackInSpreadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessFallbackInSpreadOptions;
 export type NoUselessLengthCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessLengthCheckOptions;
@@ -10021,6 +10029,14 @@ export interface RuleWithNoUselessDateGetTimeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessDateGetTimeOptions;
 }
+export interface RuleWithNoUselessFallbackInSpreadOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessFallbackInSpreadOptions;
+}
 export interface RuleWithNoUselessLengthCheckOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13154,6 +13170,7 @@ export type NoUselessAssignmentOptions = {};
 export type NoUselessAwaitOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
+export type NoUselessFallbackInSpreadOptions = {};
 export type NoUselessLengthCheckOptions = {};
 export type NoUselessParameterPropertyAssignmentOptions = {};
 export type NoUselessQualifierOptions = {};
@@ -15283,6 +15300,7 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
+	| "lint/nursery/noUselessFallbackInSpread"
 	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessParameterPropertyAssignment"
 	| "lint/nursery/noUselessQualifier"

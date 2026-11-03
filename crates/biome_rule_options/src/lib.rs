@@ -394,6 +394,7 @@ pub mod no_useless_else;
 pub mod no_useless_empty_export;
 pub mod no_useless_escape_in_regex;
 pub mod no_useless_escape_in_string;
+pub mod no_useless_fallback_in_spread;
 pub mod no_useless_fragments;
 pub mod no_useless_label;
 pub mod no_useless_length_check;

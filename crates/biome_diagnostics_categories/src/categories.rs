@@ -358,6 +358,7 @@ define_categories! {
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessCall": "https://biomejs.dev/linter/rules/no-useless-call",
     "lint/nursery/noUselessDateGetTime": "https://biomejs.dev/linter/rules/no-useless-date-get-time",
+    "lint/nursery/noUselessFallbackInSpread": "https://biomejs.dev/linter/rules/no-useless-fallback-in-spread",
     "lint/nursery/noUselessLengthCheck": "https://biomejs.dev/linter/rules/no-useless-length-check",
     "lint/nursery/noUselessParameterPropertyAssignment": "https://biomejs.dev/linter/rules/no-useless-parameter-property-assignment",
     "lint/nursery/noUselessQualifier": "https://biomejs.dev/linter/rules/no-useless-qualifier",
