@@ -1,0 +1,23 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.disallowed.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.foo + .bar {}
+.foo ~ p {}
+li:nth-child(2) {}
+a:not(.foo) {}
+input::placeholder {}
+a::after {}
+input[type="text"] {}
+img[src$=".png"] {}
+img[alt="foo"] {}
+img[CLASS="foo"] {}
+:has(+ img) {}
+.parent {
+	+ .child {}
+}
+
+```

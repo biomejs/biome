@@ -1,0 +1,2 @@
+/* should not generate diagnostics */
+#a #b #c > .d ~ ul li a:hover:focus::before[class*="x"][id^="y"] * * {}

@@ -1,0 +1,16 @@
+/* should generate diagnostics */
+#a #b {}
+#a > #b {}
+ul li a {}
+div.foo p a {}
+[name="foo"][type="text"] {}
+input:not([name="bar"][disabled]) {}
+button:hover + a:visited {}
+.foo:first-child:hover {}
+* * {}
+.a .b .c .d {}
+.a > .b + .c ~ .d {}
+:is(#a #b) {}
+.parent {
+	#a #b {}
+}
