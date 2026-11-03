@@ -207,8 +207,7 @@ fn members_misuse<'db>(
 ) -> Option<ObjectSpreadMisuse> {
     if has_iterator_member(db, members) {
         Some(ObjectSpreadMisuse::Iterable)
-    } else if !members.is_empty() && members.iter().all(|member| member.kind.is_call_signature())
-    {
+    } else if !members.is_empty() && members.iter().all(|member| member.kind.is_call_signature()) {
         Some(ObjectSpreadMisuse::Function)
     } else {
         None

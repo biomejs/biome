@@ -5518,6 +5518,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMisusedSpreadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMisusedSpreadOptions" }
+			]
+		},
+		"NoMisusedSpreadOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMultiAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8954,6 +8964,13 @@
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMisusedPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMisusedSpread": {
+					"description": "Disallow spreading values in ways that can cause unexpected results.\nSee https://biomejs.dev/linter/rules/no-misused-spread",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMisusedSpreadConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13378,6 +13395,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoMisusedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoMisusedSpreadOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMisusedSpreadOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
