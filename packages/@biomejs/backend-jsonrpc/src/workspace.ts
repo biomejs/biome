@@ -3688,6 +3688,11 @@ export interface Nursery {
 	 */
 	noVueUnusedRefs?: NoVueUnusedRefsConfiguration;
 	/**
+	 * Disallow attributes and directives that have no effect on \<template> elements.
+	 * See https://biomejs.dev/linter/rules/no-vue-useless-template-attributes
+	 */
+	noVueUselessTemplateAttributes?: NoVueUselessTemplateAttributesConfiguration;
+	/**
 	 * Disallow v-bind directives whose value is a fixed string.
 	 * See https://biomejs.dev/linter/rules/no-vue-useless-v-bind
 	 */
@@ -6867,6 +6872,9 @@ export type NoVueUnusedEmitDeclarationsConfiguration =
 export type NoVueUnusedRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedRefsOptions;
+export type NoVueUselessTemplateAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUselessTemplateAttributesOptions;
 export type NoVueUselessVBindConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUselessVBindOptions;
@@ -10041,6 +10049,10 @@ export interface RuleWithNoVueUnusedRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedRefsOptions;
 }
+export interface RuleWithNoVueUselessTemplateAttributesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUselessTemplateAttributesOptions;
+}
 export interface RuleWithNoVueUselessVBindOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13002,6 +13014,7 @@ export interface NoVueUndeclaredPropertiesOptions {
 export type NoVueUndeclaredSlotsOptions = {};
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueUnusedRefsOptions = {};
+export type NoVueUselessTemplateAttributesOptions = {};
 export interface NoVueUselessVBindOptions {
 	/**
 	 * Doesn't report a `v-bind` directive whose value contains a comment, such
@@ -15047,6 +15060,7 @@ export type Category =
 	| "lint/nursery/noVueUndeclaredSlots"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"
+	| "lint/nursery/noVueUselessTemplateAttributes"
 	| "lint/nursery/noVueUselessVBind"
 	| "lint/nursery/noVueVForTemplateKeyOnChild"
 	| "lint/nursery/noVueVHtml"
