@@ -12,6 +12,7 @@ expression: implicit.tsx
 <Foo bar /* keep */ ={true} />;
 <Foo key={true} __self={true} __source={true} />;
 <Foo enabled={false} checked={flag} text="true" />;
+<Foo enabled={(true)} />;
 
 ```
 
@@ -52,12 +53,12 @@ implicit.tsx:3:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
   
   i Safe fix: Remove the explicit true value.
   
-    1 1 │   // should generate diagnostics
-    2 2 │   <Foo first bar={true} last />;
-    3   │ - <Foo·a={true}b={true}c·/>;
-      3 │ + <Foo·a·b={true}c·/>;
-    4 4 │   <input disabled={  true  } /* keep */ />;
-    5 5 │   <Foo bar={/* keep */ true} />;
+     1  1 │   // should generate diagnostics
+     2  2 │   <Foo first bar={true} last />;
+     3    │ - <Foo·a={true}b={true}c·/>;
+        3 │ + <Foo·a·b={true}c·/>;
+     4  4 │   <input disabled={  true  } /* keep */ />;
+     5  5 │   <Foo bar={/* keep */ true} />;
   
 
 ```
@@ -78,12 +79,12 @@ implicit.tsx:3:14 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━�
   
   i Safe fix: Remove the explicit true value.
   
-    1 1 │   // should generate diagnostics
-    2 2 │   <Foo first bar={true} last />;
-    3   │ - <Foo·a={true}b={true}c·/>;
-      3 │ + <Foo·a={true}b·c·/>;
-    4 4 │   <input disabled={  true  } /* keep */ />;
-    5 5 │   <Foo bar={/* keep */ true} />;
+     1  1 │   // should generate diagnostics
+     2  2 │   <Foo first bar={true} last />;
+     3    │ - <Foo·a={true}b={true}c·/>;
+        3 │ + <Foo·a={true}b·c·/>;
+     4  4 │   <input disabled={  true  } /* keep */ />;
+     5  5 │   <Foo bar={/* keep */ true} />;
   
 
 ```
@@ -140,5 +141,25 @@ implicit.tsx:6:6 lint/nursery/useConsistentBooleanProps ━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+
+```
+
+```
+implicit.tsx:9:6 lint/nursery/useConsistentBooleanProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSX attribute already implies true when written without a value.
+  
+     7 │ <Foo key={true} __self={true} __source={true} />;
+     8 │ <Foo enabled={false} checked={flag} text="true" />;
+   > 9 │ <Foo enabled={(true)} />;
+       │      ^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the explicit true value.
+  
+    9 │ <Foo·enabled={(true)}·/>;
+      │             ---------    
 
 ```

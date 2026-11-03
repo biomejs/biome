@@ -2,7 +2,7 @@ use crate::JsRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, JsxAttribute, T, static_value::StaticValue};
+use biome_js_syntax::{AnyJsExpression, JsBooleanLiteralExpression, JsxAttribute, T};
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
 use biome_rule_options::use_consistent_boolean_props::{
     BooleanPropMode, UseConsistentBooleanPropsOptions,
@@ -64,11 +64,16 @@ impl Rule for UseConsistentBooleanProps {
         let mode = ctx.options().mode.unwrap_or_default();
         match mode {
             BooleanPropMode::Implicit => {
-                let Some(StaticValue::Boolean(token)) = attribute.as_static_value() else {
-                    return None;
-                };
+                let expression = attribute
+                    .initializer()?
+                    .value()
+                    .ok()?
+                    .as_jsx_expression_attribute_value()?
+                    .expression()
+                    .ok()?;
+                let literal = JsBooleanLiteralExpression::cast(expression.omit_parentheses().into_syntax())?;
                 // The React JSX transform requires explicit values for these reserved props.
-                token.kind() == T![true]
+                literal.value_token().ok()?.kind() == T![true]
                     && !attribute.name().ok()?.as_jsx_name().is_some_and(|name| {
                         name.value_token().is_ok_and(|token| {
                             matches!(token.text_trimmed(), "key" | "__self" | "__source")
