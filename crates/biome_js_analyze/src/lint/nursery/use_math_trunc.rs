@@ -7,7 +7,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsAssignment, AnyJsCallArgument, AnyJsExpression, AnyJsTemplateElement,
+    AnyJsArrayElement, AnyJsLiteralExpression, binding_ext::AnyJsBindingDeclaration, AnyTsType, AnyJsAssignment, AnyJsCallArgument, AnyJsExpression, AnyJsTemplateElement,
     JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
     JsCallArguments, JsCallExpression, JsLanguage, JsSyntaxKind, JsUnaryExpression,
     JsUnaryOperator, T, global_identifier,
@@ -109,6 +109,11 @@ impl Rule for UseMathTrunc {
     type Options = UseMathTruncOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let model = ctx.model();
+        // The fix calls `Math.trunc`, which a local `Math` would replace.
+        if is_math_shadowed(ctx.query(), model) {
+            return None;
+        }
         match ctx.query() {
             AnyJsTruncationCandidate::JsBinaryExpression(binary) => {
                 let operator = binary.operator().ok()?;
@@ -122,11 +127,21 @@ impl Rule for UseMathTrunc {
                 .then_some(TruncationPattern::BitwiseOperator)
             }
             AnyJsTruncationCandidate::JsUnaryExpression(unary) => {
-                double_bitwise_not_operand(unary).map(TruncationPattern::DoubleBitwiseNot)
+                // `~~x` also works on a BigInt, but `Math.trunc(x)` throws a `TypeError` for one.
+                let operand = double_bitwise_not_operand(unary)?;
+                (!is_bigint(&operand, model, MAX_BIGINT_DEPTH))
+                    .then_some(TruncationPattern::DoubleBitwiseNot(operand))
             }
             AnyJsTruncationCandidate::JsCallExpression(call) => {
                 let function = parse_int_function(call, ctx.model())?;
                 let arguments = string_call_arguments(call, ctx.model())?;
+                // `parseInt(String(10n), 10)` is `10`, but `Math.trunc(10n)` throws.
+                if let Some(Ok(AnyJsCallArgument::AnyJsExpression(value))) =
+                    arguments.args().first()
+                    && is_bigint(&value, model, MAX_BIGINT_DEPTH)
+                {
+                    return None;
+                }
                 Some(TruncationPattern::ParseInt(function, arguments))
             }
         }
@@ -407,6 +422,81 @@ fn is_global(expression: &AnyJsExpression, name: &str, model: &SemanticModel) ->
         .is_some_and(|(reference, global_name)| {
             global_name.text() == name && model.binding(&reference).is_none()
         })
+}
+
+/// Returns whether a declaration named `Math` is visible from `node`, which means that `Math`
+/// doesn't refer to the built-in object there.
+fn is_math_shadowed(node: &AnyJsTruncationCandidate, model: &SemanticModel) -> bool {
+    model
+        .scope(node.syntax())
+        .ancestors()
+        .any(|scope| scope.get_binding("Math").is_some())
+}
+
+/// How many variable declarations [`is_bigint`] follows, as in `const b = a; const a = 1n;`.
+const MAX_BIGINT_DEPTH: u8 = 4;
+
+/// Returns whether `expression` is known to be a BigInt: a BigInt literal such as `10n`, a call
+/// to the global `BigInt`, a negation or bitwise NOT of a BigInt, or a variable or parameter
+/// whose type annotation is `bigint` or whose initializer is a BigInt.
+fn is_bigint(expression: &AnyJsExpression, model: &SemanticModel, depth: u8) -> bool {
+    let Some(expression) = expression.clone().omit_type_wrappers() else {
+        return false;
+    };
+    match expression {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsBigintLiteralExpression(_),
+        ) => true,
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            matches!(
+                unary.operator(),
+                Ok(JsUnaryOperator::Minus | JsUnaryOperator::BitwiseNot)
+            ) && unary
+                .argument()
+                .is_ok_and(|argument| is_bigint(&argument, model, depth))
+        }
+        AnyJsExpression::JsCallExpression(call) => {
+            call.optional_chain_token().is_none()
+                && call
+                    .callee()
+                    .is_ok_and(|callee| is_global(&callee.omit_parentheses(), "BigInt", model))
+        }
+        AnyJsExpression::JsIdentifierExpression(identifier) => {
+            let Some(declaration) = identifier
+                .name()
+                .ok()
+                .and_then(|reference| model.binding(&reference))
+                .and_then(|binding| binding.tree().declaration())
+            else {
+                return false;
+            };
+            let (annotation, initializer) = match declaration {
+                AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => (
+                    declarator
+                        .variable_annotation()
+                        .and_then(|annotation| annotation.type_annotation().ok().flatten()),
+                    declarator.initializer(),
+                ),
+                AnyJsBindingDeclaration::JsFormalParameter(parameter) => {
+                    (parameter.type_annotation(), parameter.initializer())
+                }
+                _ => return false,
+            };
+            if let Some(annotation) = annotation {
+                return annotation.ty().is_ok_and(|ty| {
+                    matches!(
+                        ty,
+                        AnyTsType::TsBigintType(_) | AnyTsType::TsBigintLiteralType(_)
+                    )
+                });
+            }
+            depth > 0
+                && initializer
+                    .and_then(|initializer| initializer.expression().ok())
+                    .is_some_and(|initializer| is_bigint(&initializer, model, depth - 1))
+        }
+        _ => false,
+    }
 }
 
 /// Returns `target` as an expression when reading it has no side effects, such as

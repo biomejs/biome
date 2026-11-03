@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare const big: bigint;
+~~big;
+parseInt(String(big), 10);
+
+declare const ten: 10n;
+~~ten;
+
+function truncate(value: bigint) {
+	return ~~value;
+}
+
+```

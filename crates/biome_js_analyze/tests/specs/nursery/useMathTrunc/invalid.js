@@ -22,3 +22,10 @@ const t = a.b?.c | 0;
 const u = /* first comment */ 3.4 | 0; // A B C
 const v = bar | 0 | 0;
 function w() {return.1 | 0 | 4;}
+
+// A BigInt elsewhere in the program doesn't change the verdict for a number.
+const notBig = 10;
+~~notBig;
+// A `Math` declared in another function isn't visible here.
+function other(Math) {}
+~~value;
