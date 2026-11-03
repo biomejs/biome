@@ -1,0 +1,176 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Boolean values with a prefix
+const isCompleted = true;
+const hasCompleted = progress === 100;
+const areFilesValid = true;
+const haveItemsLoaded = true;
+const canEdit = true;
+const shouldShowProgress = false;
+const wasLoaded = true;
+const wereLoaded = true;
+const doesPassCheck = true;
+const didPassCheck = true;
+const willRetry = true;
+const requiresLogin = true;
+const is_ready = true;
+const IS_COMPLETED = true;
+const _isReady = true;
+const __IS_READY = true;
+const is2FAEnabled = true;
+
+// Non-boolean values without a prefix
+const completed = 1;
+const name = "Sindre";
+const island = 1;
+const wrapped = new Boolean(value);
+function requireLogin() {}
+
+// Values that the rule can't classify
+const maybe = maybeBoolean;
+const isMaybe = value;
+const partial = object && object.property;
+const fallback = value ?? true;
+const fromCall = getCompleted();
+const isFromCall = getCompleted();
+const nothing = null;
+const isNothing = null;
+const isUndefined = undefined;
+const member = object.enabled;
+const isMember = object.enabled;
+const voided = void 0;
+const unresolved = isReady && hasAccess;
+const mixed = condition ? true : "no";
+const mixedNested = a === 1 && (b === 2 || (c ? d === 3 : "no"));
+let declared;
+let isDeclared;
+
+// Variables that receive non-boolean values later
+let changed = true;
+changed = "yes";
+let counted = true;
+counted++;
+let added = true;
+added += 1;
+
+// Variables reassigned with unknown values
+let isUnknownLater = true;
+isUnknownLater = getValue();
+let unknownLater = true;
+unknownLater = getValue();
+let isLogical = true;
+isLogical ||= "fallback";
+
+// A reassigned variable isn't followed
+let changing = true;
+changing = getValue();
+const copy = changing;
+
+// Variables that receive functions later
+let predicate;
+predicate = (value) => value > 0;
+let compare;
+if (ascending) {
+	compare = (a, b) => a < b;
+} else {
+	compare = (a, b) => a > b;
+}
+let isCheck = () => true;
+isCheck = () => false;
+const handler2 = isCheck;
+
+// Shadowed globals
+function shadow(Boolean, Array) {
+	const converted = Boolean(value);
+	const list = Array.isArray(value);
+}
+
+// Functions
+function isCompletedFunction() {
+	return true;
+}
+function getTitle() {
+	return "Unicorn";
+}
+async function asyncBoolean() {
+	return true;
+}
+function* generator() {
+	return true;
+}
+function mixedReturns(value) {
+	if (value) {
+		return "yes";
+	}
+	return true;
+}
+function hasNestedBoolean() {
+	function isInner() {
+		return true;
+	}
+	return getValue();
+}
+const isTagged = tag`text`;
+function hasTaggedAccess() {
+	return check`admin`;
+}
+function unknownReturn() {
+	return getValue();
+}
+const isReadyArrow = () => true;
+const handler = () => {};
+const isAsyncArrow = async () => getValue();
+
+// Parameters without a known value
+function download(showProgress) {}
+function upload({ completed = true }) {}
+function save([completed = true]) {}
+function load(...completed) {}
+const single = (completed) => completed;
+const filtered = items.filter((item) => item.length > 0);
+const unparenthesized = items.filter(item => item.length > 0);
+const prefixedCallback = items.map(isValid => "x");
+class Settings {
+	set enabled(enabled = true) {}
+}
+
+// Names that the rule doesn't check
+const { done } = task;
+const [first = true] = list;
+import completedDefault from "completed";
+class completedClass {}
+try {
+} catch (completedError) {}
+const task = { completed: progress === 100 };
+class Task {
+	completed = true;
+	finished() {
+		return true;
+	}
+}
+
+export default function () {
+	return true;
+}
+
+// Hooks
+function useIsReady() {
+	return true;
+}
+function useIS_READY() {
+	return true;
+}
+function use2FA() {
+	return getValue();
+}
+function useData() {
+	return getData();
+}
+
+```

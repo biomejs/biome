@@ -1,0 +1,18 @@
+{
+	"$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useConsistentBooleanName": {
+					"level": "error",
+					"options": {
+						"prefixes": {
+							"needs": true,
+							"did": false
+						}
+					}
+				}
+			}
+		}
+	}
+}
