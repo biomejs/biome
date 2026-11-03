@@ -1,0 +1,1121 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// After `await`
+element.addEventListener("click", async (event) => {
+	await somePromise;
+	event.currentTarget.disabled = false;
+});
+
+// After `yield` in a generator handler
+element.onclick = function* (event) {
+	yield somePromise;
+	event.currentTarget.disabled = false;
+};
+
+// Short parameter name
+element.onclick = async (e) => {
+	await somePromise;
+	e.currentTarget.foo();
+};
+
+// `evt` parameter name
+element.onclick = async (evt) => {
+	await somePromise;
+	evt.currentTarget.foo();
+};
+
+// camelCase parameter name ending with `Event`
+element.onclick = async (mouseDownEvent) => {
+	await somePromise;
+	mouseDownEvent.currentTarget.foo();
+};
+
+// An earlier awaited argument pauses before a later argument in the same call
+element.onclick = async (event) => {
+	log(await ready(), event.currentTarget.value);
+};
+
+// Only the read after the `await` is reported
+element.onclick = async (event) => {
+	event.currentTarget.disabled = true;
+	await somePromise;
+	event.currentTarget.disabled = false;
+};
+
+// Nested function with an expression body
+element.onclick = (event) => setTimeout(() => event.currentTarget.click());
+
+// Nested function with a block body
+element.onclick = (event) => {
+	setTimeout(() => {
+		event.currentTarget.remove();
+	}, 1);
+};
+
+// Nested function in a `.then()` callback
+element.onclick = (event) => {
+	fetch(url).then(() => event.currentTarget.foo());
+};
+
+// Nested function expression
+element.onclick = (event) => {
+	setTimeout(function () {
+		event.currentTarget.foo();
+	});
+};
+
+// Optional chaining after `await`
+async (event) => {
+	await somePromise;
+	event?.currentTarget.foo();
+};
+
+// Parenthesized object after `await`
+async (event) => {
+	await somePromise;
+	(event).currentTarget.foo();
+};
+
+// Named function declaration
+async function handleClick(event) {
+	await somePromise;
+	event.currentTarget.disabled = false;
+}
+
+// Class method
+class Component {
+	async onClick(event) {
+		await this.save();
+		event.currentTarget.disabled = false;
+	}
+}
+
+// After a `for await` loop
+element.onclick = async (event) => {
+	for await (const chunk of stream) {
+		log(chunk);
+	}
+	event.currentTarget.disabled = false;
+};
+
+// Inside a `for await` loop body
+element.onclick = async (event) => {
+	for await (const chunk of stream) {
+		event.currentTarget.append(chunk);
+	}
+};
+
+// The iterated expression of a `for...of` loop is awaited, so the loop body runs after the pause
+element.onclick = async (event) => {
+	for (const item of await load()) {
+		event.currentTarget.append(item);
+	}
+};
+
+// Before an `await` in a `while` loop body
+element.onclick = async (event) => {
+	while (condition) {
+		event.currentTarget.click();
+		await promise;
+	}
+};
+
+// Before an `await` in a `do...while` loop body
+element.onclick = async (event) => {
+	do {
+		event.currentTarget.click();
+		await promise;
+	} while (condition);
+};
+
+// Before an `await` in a `for` loop body
+element.onclick = async (event) => {
+	for (let i = 0; i < 3; i++) {
+		event.currentTarget.click();
+		await promise;
+	}
+};
+
+// Before an `await` in a `for...in` loop body
+element.onclick = async (event) => {
+	for (const key in object) {
+		event.currentTarget.click();
+		await promise;
+	}
+};
+
+// Before a `yield` in a generator handler's loop body
+element.onclick = function* (event) {
+	while (condition) {
+		event.currentTarget.click();
+		yield promise;
+	}
+};
+
+// In a loop condition that runs again after an `await` in the body
+element.onclick = async (event) => {
+	while (event.currentTarget.isConnected) {
+		await promise;
+	}
+};
+
+// The assignment target is read after an earlier `await`
+element.onclick = async (event) => {
+	await step1;
+	event.currentTarget.href = await getUrl();
+};
+
+// After an `await` inside a `try` block
+element.onclick = async (event) => {
+	try {
+		await somePromise;
+	} catch {}
+	event.currentTarget.disabled = false;
+};
+
+// Deeply nested function
+element.onclick = (event) => {
+	setTimeout(() => {
+		requestAnimationFrame(() => {
+			event.currentTarget.focus();
+		});
+	});
+};
+
+// A nested async callback with its own `await` is reported as a nested function
+element.onclick = (event) => {
+	button.addEventListener("click", async () => {
+		await somePromise;
+		event.currentTarget.foo();
+	});
+};
+
+// Destructured parameter renamed to an event-like name
+element.onclick = async ({ detail: event }) => {
+	await somePromise;
+	event.currentTarget.foo();
+};
+
+// Parameter with a default value
+element.onclick = async (event = fallback) => {
+	await somePromise;
+	event.currentTarget.foo();
+};
+
+// Parameter without parentheses, after `await`
+element.onclick = async event => {
+	await somePromise;
+	event.currentTarget.foo();
+};
+
+// Parameter without parentheses, in a nested function
+element.onclick = event => setTimeout(() => event.currentTarget.foo());
+
+```
+
+# Diagnostics
+```
+invalid.js:6:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    4 │ element.addEventListener("click", async (event) => {
+    5 │ 	await somePromise;
+  > 6 │ 	event.currentTarget.disabled = false;
+      │ 	^^^^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i The event handler pauses here.
+  
+    3 │ // After `await`
+    4 │ element.addEventListener("click", async (event) => {
+  > 5 │ 	await somePromise;
+      │ 	^^^^^^^^^^^^^^^^^
+    6 │ 	event.currentTarget.disabled = false;
+    7 │ });
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    10 │ element.onclick = function* (event) {
+    11 │ 	yield somePromise;
+  > 12 │ 	event.currentTarget.disabled = false;
+       │ 	^^^^^^^^^^^^^^^^^^^
+    13 │ };
+    14 │ 
+  
+  i The event handler pauses here.
+  
+     9 │ // After `yield` in a generator handler
+    10 │ element.onclick = function* (event) {
+  > 11 │ 	yield somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    12 │ 	event.currentTarget.disabled = false;
+    13 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! e.currentTarget is read after the event handler pauses.
+  
+    16 │ element.onclick = async (e) => {
+    17 │ 	await somePromise;
+  > 18 │ 	e.currentTarget.foo();
+       │ 	^^^^^^^^^^^^^^^
+    19 │ };
+    20 │ 
+  
+  i The event handler pauses here.
+  
+    15 │ // Short parameter name
+    16 │ element.onclick = async (e) => {
+  > 17 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    18 │ 	e.currentTarget.foo();
+    19 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save e.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! evt.currentTarget is read after the event handler pauses.
+  
+    22 │ element.onclick = async (evt) => {
+    23 │ 	await somePromise;
+  > 24 │ 	evt.currentTarget.foo();
+       │ 	^^^^^^^^^^^^^^^^^
+    25 │ };
+    26 │ 
+  
+  i The event handler pauses here.
+  
+    21 │ // `evt` parameter name
+    22 │ element.onclick = async (evt) => {
+  > 23 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    24 │ 	evt.currentTarget.foo();
+    25 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save evt.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! mouseDownEvent.currentTarget is read after the event handler pauses.
+  
+    28 │ element.onclick = async (mouseDownEvent) => {
+    29 │ 	await somePromise;
+  > 30 │ 	mouseDownEvent.currentTarget.foo();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ };
+    32 │ 
+  
+  i The event handler pauses here.
+  
+    27 │ // camelCase parameter name ending with `Event`
+    28 │ element.onclick = async (mouseDownEvent) => {
+  > 29 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    30 │ 	mouseDownEvent.currentTarget.foo();
+    31 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save mouseDownEvent.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:21 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    33 │ // An earlier awaited argument pauses before a later argument in the same call
+    34 │ element.onclick = async (event) => {
+  > 35 │ 	log(await ready(), event.currentTarget.value);
+       │ 	                   ^^^^^^^^^^^^^^^^^^^
+    36 │ };
+    37 │ 
+  
+  i The event handler pauses here.
+  
+    33 │ // An earlier awaited argument pauses before a later argument in the same call
+    34 │ element.onclick = async (event) => {
+  > 35 │ 	log(await ready(), event.currentTarget.value);
+       │ 	    ^^^^^^^^^^^^^
+    36 │ };
+    37 │ 
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    40 │ 	event.currentTarget.disabled = true;
+    41 │ 	await somePromise;
+  > 42 │ 	event.currentTarget.disabled = false;
+       │ 	^^^^^^^^^^^^^^^^^^^
+    43 │ };
+    44 │ 
+  
+  i The event handler pauses here.
+  
+    39 │ element.onclick = async (event) => {
+    40 │ 	event.currentTarget.disabled = true;
+  > 41 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    42 │ 	event.currentTarget.disabled = false;
+    43 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:47 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    45 │ // Nested function with an expression body
+  > 46 │ element.onclick = (event) => setTimeout(() => event.currentTarget.click());
+       │                                               ^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ // Nested function with a block body
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    49 │ element.onclick = (event) => {
+    50 │ 	setTimeout(() => {
+  > 51 │ 		event.currentTarget.remove();
+       │ 		^^^^^^^^^^^^^^^^^^^
+    52 │ 	}, 1);
+    53 │ };
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:57:24 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    55 │ // Nested function in a `.then()` callback
+    56 │ element.onclick = (event) => {
+  > 57 │ 	fetch(url).then(() => event.currentTarget.foo());
+       │ 	                      ^^^^^^^^^^^^^^^^^^^
+    58 │ };
+    59 │ 
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    61 │ element.onclick = (event) => {
+    62 │ 	setTimeout(function () {
+  > 63 │ 		event.currentTarget.foo();
+       │ 		^^^^^^^^^^^^^^^^^^^
+    64 │ 	});
+    65 │ };
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:70:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    68 │ async (event) => {
+    69 │ 	await somePromise;
+  > 70 │ 	event?.currentTarget.foo();
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    71 │ };
+    72 │ 
+  
+  i The event handler pauses here.
+  
+    67 │ // Optional chaining after `await`
+    68 │ async (event) => {
+  > 69 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    70 │ 	event?.currentTarget.foo();
+    71 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:76:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    74 │ async (event) => {
+    75 │ 	await somePromise;
+  > 76 │ 	(event).currentTarget.foo();
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    77 │ };
+    78 │ 
+  
+  i The event handler pauses here.
+  
+    73 │ // Parenthesized object after `await`
+    74 │ async (event) => {
+  > 75 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    76 │ 	(event).currentTarget.foo();
+    77 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:82:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    80 │ async function handleClick(event) {
+    81 │ 	await somePromise;
+  > 82 │ 	event.currentTarget.disabled = false;
+       │ 	^^^^^^^^^^^^^^^^^^^
+    83 │ }
+    84 │ 
+  
+  i The event handler pauses here.
+  
+    79 │ // Named function declaration
+    80 │ async function handleClick(event) {
+  > 81 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    82 │ 	event.currentTarget.disabled = false;
+    83 │ }
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:89:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    87 │ 	async onClick(event) {
+    88 │ 		await this.save();
+  > 89 │ 		event.currentTarget.disabled = false;
+       │ 		^^^^^^^^^^^^^^^^^^^
+    90 │ 	}
+    91 │ }
+  
+  i The event handler pauses here.
+  
+    86 │ class Component {
+    87 │ 	async onClick(event) {
+  > 88 │ 		await this.save();
+       │ 		^^^^^^^^^^^^^^^^^
+    89 │ 		event.currentTarget.disabled = false;
+    90 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:98:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+     96 │ 		log(chunk);
+     97 │ 	}
+   > 98 │ 	event.currentTarget.disabled = false;
+        │ 	^^^^^^^^^^^^^^^^^^^
+     99 │ };
+    100 │ 
+  
+  i The event handler pauses here.
+  
+    93 │ // After a `for await` loop
+    94 │ element.onclick = async (event) => {
+  > 95 │ 	for await (const chunk of stream) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 96 │ 		log(chunk);
+  > 97 │ 	}
+       │ 	^
+    98 │ 	event.currentTarget.disabled = false;
+    99 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:104:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    102 │ element.onclick = async (event) => {
+    103 │ 	for await (const chunk of stream) {
+  > 104 │ 		event.currentTarget.append(chunk);
+        │ 		^^^^^^^^^^^^^^^^^^^
+    105 │ 	}
+    106 │ };
+  
+  i The event handler pauses here.
+  
+    101 │ // Inside a `for await` loop body
+    102 │ element.onclick = async (event) => {
+  > 103 │ 	for await (const chunk of stream) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 104 │ 		event.currentTarget.append(chunk);
+  > 105 │ 	}
+        │ 	^
+    106 │ };
+    107 │ 
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:111:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    109 │ element.onclick = async (event) => {
+    110 │ 	for (const item of await load()) {
+  > 111 │ 		event.currentTarget.append(item);
+        │ 		^^^^^^^^^^^^^^^^^^^
+    112 │ 	}
+    113 │ };
+  
+  i The event handler pauses here.
+  
+    108 │ // The iterated expression of a `for...of` loop is awaited, so the loop body runs after the pause
+    109 │ element.onclick = async (event) => {
+  > 110 │ 	for (const item of await load()) {
+        │ 	                   ^^^^^^^^^^^^
+    111 │ 		event.currentTarget.append(item);
+    112 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:118:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    116 │ element.onclick = async (event) => {
+    117 │ 	while (condition) {
+  > 118 │ 		event.currentTarget.click();
+        │ 		^^^^^^^^^^^^^^^^^^^
+    119 │ 		await promise;
+    120 │ 	}
+  
+  i The event handler pauses here.
+  
+    117 │ 	while (condition) {
+    118 │ 		event.currentTarget.click();
+  > 119 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    120 │ 	}
+    121 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:126:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    124 │ element.onclick = async (event) => {
+    125 │ 	do {
+  > 126 │ 		event.currentTarget.click();
+        │ 		^^^^^^^^^^^^^^^^^^^
+    127 │ 		await promise;
+    128 │ 	} while (condition);
+  
+  i The event handler pauses here.
+  
+    125 │ 	do {
+    126 │ 		event.currentTarget.click();
+  > 127 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    128 │ 	} while (condition);
+    129 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:134:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    132 │ element.onclick = async (event) => {
+    133 │ 	for (let i = 0; i < 3; i++) {
+  > 134 │ 		event.currentTarget.click();
+        │ 		^^^^^^^^^^^^^^^^^^^
+    135 │ 		await promise;
+    136 │ 	}
+  
+  i The event handler pauses here.
+  
+    133 │ 	for (let i = 0; i < 3; i++) {
+    134 │ 		event.currentTarget.click();
+  > 135 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    136 │ 	}
+    137 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:142:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    140 │ element.onclick = async (event) => {
+    141 │ 	for (const key in object) {
+  > 142 │ 		event.currentTarget.click();
+        │ 		^^^^^^^^^^^^^^^^^^^
+    143 │ 		await promise;
+    144 │ 	}
+  
+  i The event handler pauses here.
+  
+    141 │ 	for (const key in object) {
+    142 │ 		event.currentTarget.click();
+  > 143 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    144 │ 	}
+    145 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:150:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    148 │ element.onclick = function* (event) {
+    149 │ 	while (condition) {
+  > 150 │ 		event.currentTarget.click();
+        │ 		^^^^^^^^^^^^^^^^^^^
+    151 │ 		yield promise;
+    152 │ 	}
+  
+  i The event handler pauses here.
+  
+    149 │ 	while (condition) {
+    150 │ 		event.currentTarget.click();
+  > 151 │ 		yield promise;
+        │ 		^^^^^^^^^^^^^
+    152 │ 	}
+    153 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:157:9 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    155 │ // In a loop condition that runs again after an `await` in the body
+    156 │ element.onclick = async (event) => {
+  > 157 │ 	while (event.currentTarget.isConnected) {
+        │ 	       ^^^^^^^^^^^^^^^^^^^
+    158 │ 		await promise;
+    159 │ 	}
+  
+  i The event handler pauses here.
+  
+    156 │ element.onclick = async (event) => {
+    157 │ 	while (event.currentTarget.isConnected) {
+  > 158 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    159 │ 	}
+    160 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:165:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    163 │ element.onclick = async (event) => {
+    164 │ 	await step1;
+  > 165 │ 	event.currentTarget.href = await getUrl();
+        │ 	^^^^^^^^^^^^^^^^^^^
+    166 │ };
+    167 │ 
+  
+  i The event handler pauses here.
+  
+    162 │ // The assignment target is read after an earlier `await`
+    163 │ element.onclick = async (event) => {
+  > 164 │ 	await step1;
+        │ 	^^^^^^^^^^^
+    165 │ 	event.currentTarget.href = await getUrl();
+    166 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:173:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    171 │ 		await somePromise;
+    172 │ 	} catch {}
+  > 173 │ 	event.currentTarget.disabled = false;
+        │ 	^^^^^^^^^^^^^^^^^^^
+    174 │ };
+    175 │ 
+  
+  i The event handler pauses here.
+  
+    169 │ element.onclick = async (event) => {
+    170 │ 	try {
+  > 171 │ 		await somePromise;
+        │ 		^^^^^^^^^^^^^^^^^
+    172 │ 	} catch {}
+    173 │ 	event.currentTarget.disabled = false;
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:180:4 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    178 │ 	setTimeout(() => {
+    179 │ 		requestAnimationFrame(() => {
+  > 180 │ 			event.currentTarget.focus();
+        │ 			^^^^^^^^^^^^^^^^^^^
+    181 │ 		});
+    182 │ 	});
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:189:3 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    187 │ 	button.addEventListener("click", async () => {
+    188 │ 		await somePromise;
+  > 189 │ 		event.currentTarget.foo();
+        │ 		^^^^^^^^^^^^^^^^^^^
+    190 │ 	});
+    191 │ };
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:196:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    194 │ element.onclick = async ({ detail: event }) => {
+    195 │ 	await somePromise;
+  > 196 │ 	event.currentTarget.foo();
+        │ 	^^^^^^^^^^^^^^^^^^^
+    197 │ };
+    198 │ 
+  
+  i The event handler pauses here.
+  
+    193 │ // Destructured parameter renamed to an event-like name
+    194 │ element.onclick = async ({ detail: event }) => {
+  > 195 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    196 │ 	event.currentTarget.foo();
+    197 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:202:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    200 │ element.onclick = async (event = fallback) => {
+    201 │ 	await somePromise;
+  > 202 │ 	event.currentTarget.foo();
+        │ 	^^^^^^^^^^^^^^^^^^^
+    203 │ };
+    204 │ 
+  
+  i The event handler pauses here.
+  
+    199 │ // Parameter with a default value
+    200 │ element.onclick = async (event = fallback) => {
+  > 201 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    202 │ 	event.currentTarget.foo();
+    203 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:208:2 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read after the event handler pauses.
+  
+    206 │ element.onclick = async event => {
+    207 │ 	await somePromise;
+  > 208 │ 	event.currentTarget.foo();
+        │ 	^^^^^^^^^^^^^^^^^^^
+    209 │ };
+    210 │ 
+  
+  i The event handler pauses here.
+  
+    205 │ // Parameter without parentheses, after `await`
+    206 │ element.onclick = async event => {
+  > 207 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    208 │ 	event.currentTarget.foo();
+    209 │ };
+  
+  i When the handler pauses, the browser finishes handling the event and sets currentTarget to null.
+  
+  i Save event.currentTarget to a variable before the event handler pauses, and use that variable instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:212:45 lint/nursery/noLateCurrentTargetAccess ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.currentTarget is read inside a function nested in the event handler.
+  
+    211 │ // Parameter without parentheses, in a nested function
+  > 212 │ element.onclick = event => setTimeout(() => event.currentTarget.foo());
+        │                                             ^^^^^^^^^^^^^^^^^^^
+    213 │ 
+  
+  i The nested function may run after the browser finishes handling the event, when currentTarget is null.
+  
+  i Save event.currentTarget to a variable in the event handler, and use that variable in the nested function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

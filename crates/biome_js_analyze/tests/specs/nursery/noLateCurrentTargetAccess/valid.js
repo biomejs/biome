@@ -1,0 +1,129 @@
+/* should not generate diagnostics */
+
+// Read directly in the handler
+element.addEventListener("click", (event) => {
+	event.currentTarget.disabled = true;
+});
+
+// Read before the `await`
+element.addEventListener("click", async (event) => {
+	event.currentTarget.disabled = true;
+	await somePromise;
+});
+
+// Saved to a variable before the `await`
+element.addEventListener("click", async (event) => {
+	const currentTarget = event.currentTarget;
+	await somePromise;
+	currentTarget.disabled = false;
+});
+
+// The assignment target is read before the `await` on the right-hand side
+element.onclick = async (event) => {
+	event.currentTarget.href = await getUrl(location.href);
+};
+
+// The argument of an awaited call is read before the call pauses
+element.onclick = async (event) => {
+	await foo(event.currentTarget);
+};
+
+// An argument is read before a later awaited argument in the same call
+element.onclick = async (event) => {
+	log(event.currentTarget.value, await ready());
+};
+
+// The iterated expression is read before the `for await` loop pauses
+element.onclick = async (event) => {
+	for await (const chunk of event.currentTarget.stream()) {
+		log(chunk);
+	}
+};
+
+// Read before a `yield` in a generator handler
+element.onclick = function* (event) {
+	event.currentTarget.disabled = true;
+	yield somePromise;
+};
+
+// The iterated expression of a `for...of` loop is read once, before the loop body pauses
+element.onclick = async (event) => {
+	for (const child of event.currentTarget.children) {
+		await render(child);
+	}
+};
+
+// The object is not a parameter
+async function handler() {
+	const event = getEvent();
+	await somePromise;
+	event.currentTarget.foo();
+}
+
+// A different property
+async (event) => {
+	await somePromise;
+	event.target.foo();
+};
+
+// Computed member access
+async (event) => {
+	await somePromise;
+	event["currentTarget"].foo();
+};
+
+// A global `event` variable
+async () => {
+	await somePromise;
+	event.currentTarget.foo();
+};
+
+// The inner parameter shadows the outer one and is read directly in its own handler
+async function outer(event) {
+	await somePromise;
+	element.addEventListener("click", (event) => {
+		event.currentTarget.foo();
+	});
+}
+
+// An `await` inside a nested function does not pause the handler
+element.onclick = (event) => {
+	promise.then(async () => {
+		await somePromise;
+	});
+	event.currentTarget.foo();
+};
+
+// A destructured `currentTarget` parameter
+element.onclick = async ({ currentTarget }) => {
+	await somePromise;
+	currentTarget.disabled = false;
+};
+
+// A parameter whose name doesn't look like an event
+async function updateWidget(widget) {
+	await widget.load();
+	widget.currentTarget.render();
+}
+
+// A parameter whose name looks like an event only partially
+async function update(event_, myevent, Event, my_clickEvent) {
+	await somePromise;
+	event_.currentTarget;
+	myevent.currentTarget;
+	Event.currentTarget;
+	my_clickEvent.currentTarget;
+}
+
+// Another object's `currentTarget`
+element.onclick = async (event) => {
+	await somePromise;
+	other.currentTarget.focus();
+	event.detail.currentTarget.focus();
+};
+
+// Parameter without parentheses, read before the `await`
+element.onclick = async event => {
+	event.currentTarget.foo();
+	await somePromise;
+};
