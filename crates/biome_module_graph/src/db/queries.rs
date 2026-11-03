@@ -86,6 +86,8 @@ pub fn find_js_exported_symbol<'db>(
                     }
                 }
             }
+            // `export * from "..."` never re-exports the default export.
+            None if symbol.name(db) == "default" => {}
             None => {
                 for reexport in module.blanket_reexports.iter() {
                     match reexport

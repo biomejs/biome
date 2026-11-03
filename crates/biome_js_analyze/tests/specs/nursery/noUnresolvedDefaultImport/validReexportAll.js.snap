@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validReexportAll.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+// `export *` doesn't re-export the default export.
+export * from "./validDefaultExport.js";
+export const c = "foo";
+
+```

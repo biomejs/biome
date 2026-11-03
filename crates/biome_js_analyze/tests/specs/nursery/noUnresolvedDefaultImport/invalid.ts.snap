@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import type Foo from "./validNamedExports.js";
+import type Bar from "./validSideEffects.js";
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:13 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validNamedExports.js has no default export.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import type Foo from "./validNamedExports.js";
+      │             ^^^
+    3 │ import type Bar from "./validSideEffects.js";
+    4 │ 
+  
+  i TypeScript reports this import as an error.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:13 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validSideEffects.js has no default export.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import type Foo from "./validNamedExports.js";
+  > 3 │ import type Bar from "./validSideEffects.js";
+      │             ^^^
+    4 │ 
+  
+  i TypeScript reports this import as an error.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

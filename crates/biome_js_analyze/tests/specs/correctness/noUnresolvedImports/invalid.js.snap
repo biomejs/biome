@@ -8,6 +8,7 @@ expression: invalid.js
 import foo from "./foo.js";
 import { bar } from "./bar";
 import { other } from "./nonExisting";
+import starDefault from "./star-reexport-barrel.js";
 
 ```
 
@@ -38,7 +39,7 @@ invalid.js:3:10 lint/correctness/noUnresolvedImports ━━━━━━━━━
   > 3 │ import { bar } from "./bar";
       │          ^^^
     4 │ import { other } from "./nonExisting";
-    5 │ 
+    5 │ import starDefault from "./star-reexport-barrel.js";
   
   i Make sure that the path is correct and that you're importing the right symbol.
   
@@ -54,9 +55,26 @@ invalid.js:4:23 lint/correctness/noUnresolvedImports ━━━━━━━━━
     3 │ import { bar } from "./bar";
   > 4 │ import { other } from "./nonExisting";
       │                       ^^^^^^^^^^^^^^^
-    5 │ 
+    5 │ import starDefault from "./star-reexport-barrel.js";
+    6 │ 
   
   i Make sure that the path exists and is readable.
+  
+
+```
+
+```
+invalid.js:5:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The path ./star-reexport-barrel.js has no default export.
+  
+    3 │ import { bar } from "./bar";
+    4 │ import { other } from "./nonExisting";
+  > 5 │ import starDefault from "./star-reexport-barrel.js";
+      │        ^^^^^^^^^^^
+    6 │ 
+  
+  i Make sure that the path is correct and that you're importing the right symbol.
   
 
 ```
