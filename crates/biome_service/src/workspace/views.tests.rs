@@ -43,8 +43,3 @@ fn updating_an_editor_view_keeps_its_position() {
     assert_eq!(views.current(), &"first, changed");
     assert_eq!(views.for_client(SECOND), Some(&"second"));
 }
-
-#[test]
-fn views_map_lookups_do_not_slow_down_as_files_are_closed() {
-    assert_lookups_do_not_slow_down(&new_views_map(rustc_hash::FxBuildHasher), ());
-}

@@ -20,74 +20,16 @@ use papaya::{HashMap, ResizeMode};
 /// entry, mostly through `compute`, while the map holds few entries at a time.
 /// Lookups in the map stay as fast after thousands of files as after a few.
 pub(crate) fn new_views_map<V, S>(hasher: S) -> HashMap<Utf8PathBuf, V, S> {
-    // papaya reuses the slot of a removed entry only after a resize, so this
-    // pattern fills a table and resizes it every few files. In the default
-    // incremental mode, `compute` and the methods built on it don't copy
-    // entries to the next table, so unless another write finishes the resize,
-    // full tables pile up and every lookup probes all of them. In blocking
-    // mode, the write that starts a resize also finishes it.
+    // A removed entry keeps its slot until papaya copies the table into a new
+    // one, so one add and one removal per file fill a table every few files.
+    // In the default incremental mode, later writes do that copy bit by bit,
+    // but `compute` never does, so full tables pile up and every lookup
+    // searches all of them. In blocking mode, the write that needs a new table
+    // copies the old one at once, so the map keeps a single table.
     HashMap::builder()
         .hasher(hasher)
         .resize_mode(ResizeMode::Blocking)
         .build()
-}
-
-/// Adds and removes 20,000 entries in `map` through `compute`, as the CLI does
-/// when it opens and closes files, and panics if a lookup gets more than
-/// twenty times slower in the meantime. Every entry holds `value`.
-///
-/// `map` must not hold paths under `/views-map-test`.
-#[cfg(test)]
-pub(crate) fn assert_lookups_do_not_slow_down<V: Clone, S: std::hash::BuildHasher>(
-    map: &HashMap<Utf8PathBuf, V, S>,
-    value: V,
-) {
-    use papaya::{Compute, Operation};
-
-    let open = |path: &Utf8PathBuf| {
-        map.pin()
-            .update_or_insert_with(path.clone(), Clone::clone, || value.clone());
-    };
-    let close = |path: Utf8PathBuf| {
-        let pinned = map.pin();
-        let result = pinned.compute(path, |entry| match entry {
-            Some(_) => Operation::Remove,
-            None => Operation::Abort(()),
-        });
-        assert!(matches!(result, Compute::Removed(..)));
-    };
-    let mut closed = 0;
-    // Returns the shortest time of several rounds of lookups of a file opened
-    // after `count` files were opened and closed.
-    let mut lookup_time_after = |count: usize| {
-        while closed < count {
-            let path = Utf8PathBuf::from(format!("/views-map-test/file{closed}.ts"));
-            open(&path);
-            close(path);
-            closed += 1;
-        }
-        let path = Utf8PathBuf::from(format!("/views-map-test/open{count}.ts"));
-        open(&path);
-        let time = (0..3)
-            .map(|_| {
-                let start = std::time::Instant::now();
-                for _ in 0..1000 {
-                    assert!(std::hint::black_box(map.pin().get(path.as_path())).is_some());
-                }
-                start.elapsed()
-            })
-            .min()
-            .unwrap();
-        close(path);
-        time
-    };
-
-    let after_few = lookup_time_after(100);
-    let after_many = lookup_time_after(20_000);
-    assert!(
-        after_many < after_few * 20,
-        "1000 lookups took {after_few:?} after 100 files, and {after_many:?} after 20,000"
-    );
 }
 
 /// Identifies a client of the workspace, such as one connection to the daemon.

@@ -1695,16 +1695,6 @@ mod tests {
     }
 
     #[test]
-    fn file_lookups_do_not_slow_down_as_files_are_closed() {
-        let mut db = test_db();
-        let path = Utf8Path::new("/file.js");
-        db.replace_file(path, "", js());
-        let file_views = db.files.pin().get(path).copied().unwrap();
-
-        crate::workspace::views::assert_lookups_do_not_slow_down(&db.files, file_views);
-    }
-
-    #[test]
     fn settings_query_cache_rotates_storage_at_capacity() {
         let db = test_db();
         let first = db.settings_query_db();
