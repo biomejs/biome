@@ -3186,6 +3186,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueDefaultExport",
+        TypeId::of::<biome_rule_options::use_vue_default_export::UseVueDefaultExportOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueDefaultProp",
         TypeId::of::<biome_rule_options::use_vue_default_prop::UseVueDefaultPropOptions>(),
     ));

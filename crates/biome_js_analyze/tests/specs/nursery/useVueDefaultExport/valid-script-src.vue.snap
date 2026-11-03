@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-script-src.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script src="./component.js"></script>
+
+```

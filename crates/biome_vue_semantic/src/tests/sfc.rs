@@ -1038,3 +1038,10 @@ const attrs = useAttrs()
         ]
     );
 }
+
+#[test]
+fn script_blocks_with_only_comments_declare_nothing() {
+    let model = sfc("<script>\n// plain\n</script>\n<script setup>\n/* setup */\n</script>\n");
+    assert_eq!(model.blocks().count(), 2);
+    assert!(model.symbols().all(|symbol| symbol.snippet().is_none()));
+}

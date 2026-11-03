@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-empty-script.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+// Only a comment.
+</script>
+
+```
