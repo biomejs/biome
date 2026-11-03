@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type Callback = () => void;
+promise.finally((async () => {}) as Callback);
+
+const castCleanup = (async () => {}) as Callback;
+promise.finally(castCleanup);
+
+promise.finally((async () => {})!);
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:17 lint/nursery/noAsyncPromiseFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function is passed to .finally().
+  
+    1 │ /* should generate diagnostics */
+    2 │ type Callback = () => void;
+  > 3 │ promise.finally((async () => {}) as Callback);
+      │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ const castCleanup = (async () => {}) as Callback;
+  
+  i If this function fails, the promise returned by .finally() is rejected with its error, and the original result or error of the promise is lost.
+  
+  i Use a function that isn't async. If the cleanup has to be asynchronous, handle its errors inside the function, for example with .catch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:17 lint/nursery/noAsyncPromiseFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function is passed to .finally().
+  
+    5 │ const castCleanup = (async () => {}) as Callback;
+  > 6 │ promise.finally(castCleanup);
+      │                 ^^^^^^^^^^^
+    7 │ 
+    8 │ promise.finally((async () => {})!);
+  
+  i The function is declared async here.
+  
+    3 │ promise.finally((async () => {}) as Callback);
+    4 │ 
+  > 5 │ const castCleanup = (async () => {}) as Callback;
+      │                      ^^^^^
+    6 │ promise.finally(castCleanup);
+    7 │ 
+  
+  i If this function fails, the promise returned by .finally() is rejected with its error, and the original result or error of the promise is lost.
+  
+  i Use a function that isn't async. If the cleanup has to be asynchronous, handle its errors inside the function, for example with .catch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:17 lint/nursery/noAsyncPromiseFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function is passed to .finally().
+  
+    6 │ promise.finally(castCleanup);
+    7 │ 
+  > 8 │ promise.finally((async () => {})!);
+      │                 ^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i If this function fails, the promise returned by .finally() is rejected with its error, and the original result or error of the promise is lost.
+  
+  i Use a function that isn't async. If the cleanup has to be asynchronous, handle its errors inside the function, for example with .catch().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

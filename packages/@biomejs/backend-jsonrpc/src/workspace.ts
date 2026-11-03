@@ -2978,6 +2978,11 @@ export interface Nursery {
 	 */
 	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
 	/**
+	 * Disallow async functions as .finally() callbacks.
+	 * See https://biomejs.dev/linter/rules/no-async-promise-finally
+	 */
+	noAsyncPromiseFinally?: NoAsyncPromiseFinallyConfiguration;
+	/**
 	 * Disallow using await inside the array passed to Promise.all(), Promise.allSettled(), Promise.any(), or Promise.race().
 	 * See https://biomejs.dev/linter/rules/no-await-in-promise-methods
 	 */
@@ -6456,6 +6461,9 @@ export type NoAstroConflictingSetDirectivesConfiguration =
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
+export type NoAsyncPromiseFinallyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAsyncPromiseFinallyOptions;
 export type NoAwaitInPromiseMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAwaitInPromiseMethodsOptions;
@@ -9348,6 +9356,10 @@ export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
+}
+export interface RuleWithNoAsyncPromiseFinallyOptions {
+	level: RulePlainConfiguration;
+	options?: NoAsyncPromiseFinallyOptions;
 }
 export interface RuleWithNoAwaitInPromiseMethodsOptions {
 	/**
@@ -12718,6 +12730,7 @@ export type NoArrayForEachOptions = {};
 export type NoArraySortForMinMaxOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
+export type NoAsyncPromiseFinallyOptions = {};
 export type NoAwaitInPromiseMethodsOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -14918,21 +14931,22 @@ export type Category =
 	| "lint/nursery/noArraySortForMinMax"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
+	| "lint/nursery/noAsyncPromiseFinally"
 	| "lint/nursery/noAwaitInPromiseMethods"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noChainedComparison"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
@@ -15024,9 +15038,9 @@ export type Category =
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnmodifiedLoopCondition"
+	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"
-	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"
@@ -15062,22 +15076,22 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueDeprecatedSlotAttribute"
 	| "lint/nursery/noVueDeprecatedSlotScope"
+	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueExcessiveProps"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueLoneTemplate"
 	| "lint/nursery/noVueMixin"
 	| "lint/nursery/noVueMultipleObjectsInClass"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
-	| "lint/nursery/noVueRestrictedCallAfterAwait"
-	| "lint/nursery/noVueDeprecatedVBindSync"
-	| "lint/nursery/noVueRootVIf"
-	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRestrictedCallAfterAwait"
 	| "lint/nursery/noVueRestrictedVOn"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueTemplateKey"
@@ -15196,9 +15210,9 @@ export type Category =
 	| "lint/nursery/useVueConsistentVForDelimiter"
 	| "lint/nursery/useVueConsistentVSlotStyle"
 	| "lint/nursery/useVueDefaultExport"
-	| "lint/nursery/useVueDefinePropsDestructuring"
-	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
+	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueEmitValidator"
 	| "lint/nursery/useVueEmitsValidatorReturn"
 	| "lint/nursery/useVueMacroVariableName"
@@ -15209,28 +15223,28 @@ export type Category =
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueSeparateStaticClass"
 	| "lint/nursery/useVueSingleEventPayload"
+	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueSlotsAsFunctions"
 	| "lint/nursery/useVueTemplateRef"
-	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedObjectProps"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVModel"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidAttributeName"
 	| "lint/nursery/useVueValidDefaultProp"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineOptions"
 	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidNextTick"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVModel"
-	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
 	| "lint/nursery/useVueValidVSlot"
+	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
