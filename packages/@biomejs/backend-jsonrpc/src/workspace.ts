@@ -4038,6 +4038,11 @@ export interface Nursery {
 	 */
 	useVueEmitsValidatorReturn?: UseVueEmitsValidatorReturnConfiguration;
 	/**
+	 * Require specific variable names for the results of defineProps(), defineEmits(), defineSlots(), useSlots() and useAttrs().
+	 * See https://biomejs.dev/linter/rules/use-vue-macro-variable-name
+	 */
+	useVueMacroVariableName?: UseVueMacroVariableNameConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
@@ -6967,6 +6972,9 @@ export type UseVueEmitValidatorConfiguration =
 export type UseVueEmitsValidatorReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueEmitsValidatorReturnOptions;
+export type UseVueMacroVariableNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueMacroVariableNameOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
@@ -10281,6 +10289,14 @@ export interface RuleWithUseVueEmitsValidatorReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueEmitsValidatorReturnOptions;
 }
+export interface RuleWithUseVueMacroVariableNameOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueMacroVariableNameOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12970,6 +12986,33 @@ export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueEmitValidatorOptions = {};
 export type UseVueEmitsValidatorReturnOptions = {};
+export interface UseVueMacroVariableNameOptions {
+	/**
+	 * The required name of the variable that stores the result of `defineEmits()`.
+	 * Defaults to `emit`.
+	 */
+	defineEmits?: string;
+	/**
+	 * The required name of the variable that stores the result of `defineProps()`.
+	 * Defaults to `props`.
+	 */
+	defineProps?: string;
+	/**
+	 * The required name of the variable that stores the result of `defineSlots()`.
+	 * Defaults to `slots`.
+	 */
+	defineSlots?: string;
+	/**
+	 * The required name of the variable that stores the result of `useAttrs()`.
+	 * Defaults to `attrs`.
+	 */
+	useAttrs?: string;
+	/**
+	 * The required name of the variable that stores the result of `useSlots()`.
+	 * Defaults to `slots`.
+	 */
+	useSlots?: string;
+}
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
 export type UseVueRenderReturnOptions = {};
@@ -14721,6 +14764,7 @@ export type Category =
 	| "lint/nursery/useVueDefaultProp"
 	| "lint/nursery/useVueEmitValidator"
 	| "lint/nursery/useVueEmitsValidatorReturn"
+	| "lint/nursery/useVueMacroVariableName"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVuePropTypeConstructor"
