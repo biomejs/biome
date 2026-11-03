@@ -1616,6 +1616,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_top_level_literals::NoTopLevelLiteralsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noTripleSlashReference",
+        TypeId::of::<biome_rule_options::no_triple_slash_reference::NoTripleSlashReferenceOptions>(
+        ),
+    ));
+    result.push((
         "suspicious",
         "noTsIgnore",
         TypeId::of::<biome_rule_options::no_ts_ignore::NoTsIgnoreOptions>(),

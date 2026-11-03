@@ -7245,6 +7245,39 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTripleSlashReferenceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTripleSlashReferenceOptions" }
+			]
+		},
+		"NoTripleSlashReferenceOptions": {
+			"type": "object",
+			"properties": {
+				"lib": {
+					"description": "Whether `/// <reference lib=\"...\" />` comments are allowed.\nSet it to `\"never\"` to report all of them. Defaults to `\"always\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/TripleSlashReferenceUsage" },
+						{ "type": "null" }
+					]
+				},
+				"path": {
+					"description": "Whether `/// <reference path=\"...\" />` comments are allowed.\nSet it to `\"always\"` to allow all of them. Defaults to `\"never\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/TripleSlashReferenceUsage" },
+						{ "type": "null" }
+					]
+				},
+				"types": {
+					"description": "Whether `/// <reference types=\"...\" />` comments are allowed.\nWith `\"preferImport\"`, a comment is reported only when the file also imports the same\npackage. Defaults to `\"preferImport\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/TripleSlashTypesReferenceUsage" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoTsIgnoreConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9822,6 +9855,13 @@
 					"description": "Disallow this outside of classes.\nSee https://biomejs.dev/linter/rules/no-this-outside-of-class",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoThisOutsideOfClassConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTripleSlashReference": {
+					"description": "Disallow triple-slash reference comments that can be replaced by imports.\nSee https://biomejs.dev/linter/rules/no-triple-slash-reference",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTripleSlashReferenceConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15586,6 +15626,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTopLevelLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTripleSlashReferenceOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTripleSlashReferenceOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -22769,6 +22818,39 @@
 			]
 		},
 		"TrailingNewline": { "type": "boolean" },
+		"TripleSlashReferenceUsage": {
+			"oneOf": [
+				{
+					"description": "Allows the reference.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Reports the reference.",
+					"type": "string",
+					"const": "never"
+				}
+			]
+		},
+		"TripleSlashTypesReferenceUsage": {
+			"oneOf": [
+				{
+					"description": "Allows the reference.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Reports the reference.",
+					"type": "string",
+					"const": "never"
+				},
+				{
+					"description": "Reports the reference only when the file also imports the same package.",
+					"type": "string",
+					"const": "preferImport"
+				}
+			]
+		},
 		"UnicodeBom": {
 			"oneOf": [
 				{

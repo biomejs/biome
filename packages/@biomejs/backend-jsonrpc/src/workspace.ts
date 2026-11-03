@@ -3458,6 +3458,11 @@ export interface Nursery {
 	 */
 	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
 	/**
+	 * Disallow triple-slash reference comments that can be replaced by imports.
+	 * See https://biomejs.dev/linter/rules/no-triple-slash-reference
+	 */
+	noTripleSlashReference?: NoTripleSlashReferenceConfiguration;
+	/**
 	 * Reports CSS class names in HTML class attributes that are not defined in any \<style> block or linked stylesheet available to the file.
 	 * See https://biomejs.dev/linter/rules/no-undeclared-classes
 	 */
@@ -6934,6 +6939,9 @@ export type NoTanstackQueryVoidQueryFnConfiguration =
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
+export type NoTripleSlashReferenceConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTripleSlashReferenceOptions;
 export type NoUndeclaredClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredClassesOptions;
@@ -10156,6 +10164,10 @@ export interface RuleWithNoTanstackQueryVoidQueryFnOptions {
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
+}
+export interface RuleWithNoTripleSlashReferenceOptions {
+	level: RulePlainConfiguration;
+	options?: NoTripleSlashReferenceOptions;
 }
 export interface RuleWithNoUndeclaredClassesOptions {
 	level: RulePlainConfiguration;
@@ -13538,6 +13550,24 @@ export interface NoTailwindRestyledComponentsOptions {
 export type NoTanstackQueryRestDestructuringOptions = {};
 export type NoTanstackQueryVoidQueryFnOptions = {};
 export type NoThisOutsideOfClassOptions = {};
+export interface NoTripleSlashReferenceOptions {
+	/**
+	 * Whether `/// <reference lib="..." />` comments are allowed.
+	 * Set it to `"never"` to report all of them. Defaults to `"always"`.
+	 */
+	lib?: TripleSlashReferenceUsage;
+	/**
+	 * Whether `/// <reference path="..." />` comments are allowed.
+	 * Set it to `"always"` to allow all of them. Defaults to `"never"`.
+	 */
+	path?: TripleSlashReferenceUsage;
+	/**
+	 * Whether `/// <reference types="..." />` comments are allowed.
+	 * With `"preferImport"`, a comment is reported only when the file also imports the same
+	 * package. Defaults to `"preferImport"`.
+	 */
+	types?: TripleSlashTypesReferenceUsage;
+}
 /**
  * Options for the `noUndeclaredClasses` rule.
  */
@@ -15031,6 +15061,11 @@ export interface TailwindComponentAllowance {
 	 */
 	components: TailwindAllowedComponents;
 }
+export type TripleSlashReferenceUsage = "always" | "never";
+export type TripleSlashTypesReferenceUsage =
+	| "always"
+	| "never"
+	| "preferImport";
 export interface RestrictedFunction {
 	/**
 	 * The message to show in place of the default message.
@@ -15751,6 +15786,7 @@ export type Category =
 	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noTanstackQueryVoidQueryFn"
 	| "lint/nursery/noThisOutsideOfClass"
+	| "lint/nursery/noTripleSlashReference"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUninvokedArrayCallback"
