@@ -1,0 +1,126 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: issue_12882.jsx
+---
+# Input
+```jsx
+// Unknown dashed utilities with an arbitrary value or a CSS variable sort
+// first as unknown classes instead of causing a parse error.
+export const A = () => <div className="p-4 foo-bar-[1px]" />;
+export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+export const C = () => <div className="flex foo-[48%]" />;
+export const D = () => <div className="flex foo-bar-(--my-var)" />;
+
+```
+
+# Diagnostics
+```
+issue_12882.jsx:3:39 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    1 │ // Unknown dashed utilities with an arbitrary value or a CSS variable sort
+    2 │ // first as unknown classes instead of causing a parse error.
+  > 3 │ export const A = () => <div className="p-4 foo-bar-[1px]" />;
+      │                                       ^^^^^^^^^^^^^^^^^^^
+    4 │ export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+    5 │ export const C = () => <div className="flex foo-[48%]" />;
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   // Unknown dashed utilities with an arbitrary value or a CSS variable sort
+    2 2 │   // first as unknown classes instead of causing a parse error.
+    3   │ - export·const·A·=·()·=>·<div·className="p-4·foo-bar-[1px]"·/>;
+      3 │ + export·const·A·=·()·=>·<div·className="foo-bar-[1px]·p-4"·/>;
+    4 4 │   export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+    5 5 │   export const C = () => <div className="flex foo-[48%]" />;
+  
+
+```
+
+```
+issue_12882.jsx:4:39 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    2 │ // first as unknown classes instead of causing a parse error.
+    3 │ export const A = () => <div className="p-4 foo-bar-[1px]" />;
+  > 4 │ export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+      │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ export const C = () => <div className="flex foo-[48%]" />;
+    6 │ export const D = () => <div className="flex foo-bar-(--my-var)" />;
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    2 2 │   // first as unknown classes instead of causing a parse error.
+    3 3 │   export const A = () => <div className="p-4 foo-bar-[1px]" />;
+    4   │ - export·const·B·=·()·=>·<div·className="flex·slide-out-to-top-[48%]"·/>;
+      4 │ + export·const·B·=·()·=>·<div·className="slide-out-to-top-[48%]·flex"·/>;
+    5 5 │   export const C = () => <div className="flex foo-[48%]" />;
+    6 6 │   export const D = () => <div className="flex foo-bar-(--my-var)" />;
+  
+
+```
+
+```
+issue_12882.jsx:5:39 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    3 │ export const A = () => <div className="p-4 foo-bar-[1px]" />;
+    4 │ export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+  > 5 │ export const C = () => <div className="flex foo-[48%]" />;
+      │                                       ^^^^^^^^^^^^^^^^
+    6 │ export const D = () => <div className="flex foo-bar-(--my-var)" />;
+    7 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    3 3 │   export const A = () => <div className="p-4 foo-bar-[1px]" />;
+    4 4 │   export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+    5   │ - export·const·C·=·()·=>·<div·className="flex·foo-[48%]"·/>;
+      5 │ + export·const·C·=·()·=>·<div·className="foo-[48%]·flex"·/>;
+    6 6 │   export const D = () => <div className="flex foo-bar-(--my-var)" />;
+    7 7 │   
+  
+
+```
+
+```
+issue_12882.jsx:6:39 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    4 │ export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+    5 │ export const C = () => <div className="flex foo-[48%]" />;
+  > 6 │ export const D = () => <div className="flex foo-bar-(--my-var)" />;
+      │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    4 4 │   export const B = () => <div className="flex slide-out-to-top-[48%]" />;
+    5 5 │   export const C = () => <div className="flex foo-[48%]" />;
+    6   │ - export·const·D·=·()·=>·<div·className="flex·foo-bar-(--my-var)"·/>;
+      6 │ + export·const·D·=·()·=>·<div·className="foo-bar-(--my-var)·flex"·/>;
+    7 7 │   
+  
+
+```
