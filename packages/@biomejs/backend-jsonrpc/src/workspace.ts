@@ -3038,6 +3038,11 @@ export interface Nursery {
 	 */
 	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
+	 * Disallow duplicate types in union and intersection types.
+	 * See https://biomejs.dev/linter/rules/no-duplicate-type-constituents
+	 */
+	noDuplicateTypeConstituents?: NoDuplicateTypeConstituentsConfiguration;
+	/**
 	 * Disallow using the delete operator with a property name that is computed at runtime.
 	 * See https://biomejs.dev/linter/rules/no-dynamic-delete
 	 */
@@ -6657,6 +6662,9 @@ export type NoDoubleComparisonConfiguration =
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
+export type NoDuplicateTypeConstituentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateTypeConstituentsOptions;
 export type NoDynamicDeleteConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDynamicDeleteOptions;
@@ -9676,6 +9684,14 @@ export interface RuleWithNoDoubleComparisonOptions {
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
+}
+export interface RuleWithNoDuplicateTypeConstituentsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoDuplicateTypeConstituentsOptions;
 }
 export interface RuleWithNoDynamicDeleteOptions {
 	level: RulePlainConfiguration;
@@ -13160,6 +13176,17 @@ export type NoConstantComparisonsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
+export interface NoDuplicateTypeConstituentsOptions {
+	/**
+	 * Whether to skip checking intersection types (`A & B`).
+	 */
+	ignoreIntersections?: boolean;
+	/**
+	 * Whether to skip checking union types (`A | B`), including `undefined` in
+	 * the type of an optional parameter.
+	 */
+	ignoreUnions?: boolean;
+}
 export type NoDynamicDeleteOptions = {};
 export type NoEagerArrayMethodsInLoopsOptions = {};
 export type NoErasingOperationOptions = {};
@@ -15525,6 +15552,7 @@ export type Category =
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateSelectors"
+	| "lint/nursery/noDuplicateTypeConstituents"
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"

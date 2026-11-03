@@ -473,6 +473,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions>(),
     ));
     result.push((
+        "nursery",
+        "noDuplicateTypeConstituents",
+        TypeId::of::<
+            biome_rule_options::no_duplicate_type_constituents::NoDuplicateTypeConstituentsOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noDuplicateVariableNames",
         TypeId::of::<
