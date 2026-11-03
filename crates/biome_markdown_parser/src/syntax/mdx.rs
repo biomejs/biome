@@ -186,14 +186,17 @@ pub(crate) fn parse_mdx_inline_expression(p: &mut MarkdownParser) -> ParsedSynta
     }
     let m = p.start();
     let rest = p.source_after_current();
+    let start = p.cur_range().start();
     let limit = match p.state().atx_heading_content_end {
-        Some(end) => usize::from(end - p.cur_range().start()),
+        Some(end) if end > start => usize::from(end - start),
+        // An inline construct before the `{`, such as a code span, can run
+        // past the heading content. The line ending still ends the expression.
+        Some(_) => rest.find(['\n', '\r']).unwrap_or(rest.len()),
         None => paragraph_end(rest),
     };
     let body = &rest[1..limit];
     let length = JsExtent::expression_length(body.as_bytes(), JSX);
-    let close =
-        (length < body.len()).then(|| p.cur_range().start() + TextSize::from((1 + length) as u32));
+    let close = (length < body.len()).then(|| start + TextSize::from((1 + length) as u32));
     bump_expression_body(p, close, limit);
     Present(m.complete(p, MDX_INLINE_EXPRESSION))
 }

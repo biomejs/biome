@@ -29,3 +29,11 @@ fn an_expression_at_the_end_of_the_source_preserves_every_byte() {
         assert_eq!(parsed.syntax().to_string(), source);
     }
 }
+
+#[test]
+fn an_expression_after_a_heading_code_span_that_crosses_the_line_preserves_every_byte() {
+    for source in ["# `\n`{", "# `\r\n`{"] {
+        let parsed = parse_markdown(source, MarkdownParserOptions::default().with_mdx(true));
+        assert_eq!(parsed.syntax().to_string(), source);
+    }
+}
