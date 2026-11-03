@@ -1349,6 +1349,13 @@ export interface MarkdownFormatterConfiguration {
 	 * Defaults to true.
 	 */
 	trailingNewline?: TrailingNewline;
+	/**
+	 * The marker used for the items of unordered lists. Defaults to `dash`.
+	 *
+	 * When two unordered lists are next to each other, the second list uses another marker so
+	 * that Markdown doesn't merge them into one list.
+	 */
+	unorderedListMarker?: UnorderedListMarker;
 }
 /**
  * Options that change how the Markdown linter behaves
@@ -1679,6 +1686,14 @@ export type SeverityOrSuspicious = GroupPlainConfiguration | Suspicious;
  * line with two spaces or a backslash.
  */
 export type ProseWrap = "preserve" | "always" | "never";
+/**
+ * The marker that Biome prints for the items of unordered lists.
+ *
+ * Biome uses this marker for every unordered list, except when two lists are next to
+ * each other. Markdown would merge them into one list if they used the same marker, so
+ * the second list uses a different marker.
+ */
+export type UnorderedListMarker = "dash" | "asterisk" | "plus";
 export interface OverrideAssistConfiguration {
 	/**
 	 * The assist-action configuration for matched files.

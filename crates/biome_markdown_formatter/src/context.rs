@@ -31,6 +31,7 @@ pub struct MdFormatOptions {
     line_width: LineWidth,
     trailing_newline: TrailingNewline,
     prose_wrap: ProseWrap,
+    unordered_list_marker: UnorderedListMarker,
     file_source: MdFileSource,
 }
 
@@ -73,6 +74,51 @@ impl FromStr for ProseWrap {
             "preserve" => Ok(Self::Preserve),
             "always" => Ok(Self::Always),
             "never" => Ok(Self::Never),
+            _ => Err("Unsupported value for this option"),
+        }
+    }
+}
+
+/// The marker that Biome prints for the items of unordered lists.
+///
+/// Biome uses this marker for every unordered list, except when two lists are next to
+/// each other. Markdown would merge them into one list if they used the same marker, so
+/// the second list uses a different marker.
+#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum UnorderedListMarker {
+    /// Use `-` for list items. This is the default.
+    #[default]
+    Dash,
+    /// Use `*` for list items.
+    Asterisk,
+    /// Use `+` for list items.
+    Plus,
+}
+
+impl fmt::Display for UnorderedListMarker {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Dash => write!(f, "dash"),
+            Self::Asterisk => write!(f, "asterisk"),
+            Self::Plus => write!(f, "plus"),
+        }
+    }
+}
+
+impl FromStr for UnorderedListMarker {
+    type Err = &'static str;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "dash" => Ok(Self::Dash),
+            "asterisk" => Ok(Self::Asterisk),
+            "plus" => Ok(Self::Plus),
             _ => Err("Unsupported value for this option"),
         }
     }
@@ -124,6 +170,7 @@ impl MdFormatOptions {
             line_width: LineWidth::default(),
             trailing_newline: TrailingNewline::default(),
             prose_wrap: ProseWrap::default(),
+            unordered_list_marker: UnorderedListMarker::default(),
         }
     }
 
@@ -157,6 +204,14 @@ impl MdFormatOptions {
         self
     }
 
+    pub fn with_unordered_list_marker(
+        mut self,
+        unordered_list_marker: UnorderedListMarker,
+    ) -> Self {
+        self.unordered_list_marker = unordered_list_marker;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -183,6 +238,14 @@ impl MdFormatOptions {
 
     pub fn set_prose_wrap(&mut self, prose_wrap: ProseWrap) {
         self.prose_wrap = prose_wrap;
+    }
+
+    pub fn unordered_list_marker(&self) -> UnorderedListMarker {
+        self.unordered_list_marker
+    }
+
+    pub fn set_unordered_list_marker(&mut self, unordered_list_marker: UnorderedListMarker) {
+        self.unordered_list_marker = unordered_list_marker;
     }
 
     /// Returns the file source that the document was parsed with, including whether
@@ -260,6 +323,7 @@ impl fmt::Display for MdFormatOptions {
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
-        writeln!(f, "Prose wrap: {}", self.prose_wrap)
+        writeln!(f, "Prose wrap: {}", self.prose_wrap)?;
+        writeln!(f, "Unordered list marker: {}", self.unordered_list_marker)
     }
 }

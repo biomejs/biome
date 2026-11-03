@@ -270,6 +270,10 @@ The configuration contained in `biome.json` or `biome.jsonc`.
                               removes line breaks in Markdown paragraphs.
                               Manual line breaks are always kept. In Markdown, a manual line break
                               is created by ending a line with two spaces or a backslash.
+        --md-formatter-unordered-list-marker=<dash|asterisk|plus>  The marker used for the items of
+                              unordered lists. Defaults to `dash`.
+                              When two unordered lists are next to each other, the second list uses
+                              another marker so that Markdown doesn't merge them into one list.
         --md-formatter-format-embeds=<true|false>  Formats the code inside fenced code blocks,
                               frontmatter, and HTML blocks with the formatter of the code's
                               language. Defaults to `true`.

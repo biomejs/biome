@@ -10,6 +10,9 @@ const FORMATTED: &str = "# Heading\n\n## Section\n";
 const UNFORMATTED_PROSE: &str = "This is a long paragraph with enough words to exceed the configured line width and require wrapping.";
 const PROSE_WRAP_NEVER: &str = "This is a long paragraph with enough words to exceed the configured line width and require wrapping.\n";
 const PROSE_WRAP_ALWAYS: &str = "This is a long paragraph with enough\nwords to exceed the configured line\nwidth and require wrapping.\n";
+const UNFORMATTED_LIST: &str = "- one\n- two\n";
+const ASTERISK_LIST: &str = "* one\n* two\n";
+const PLUS_LIST: &str = "+ one\n+ two\n";
 
 #[test]
 fn format_markdown_files() {
@@ -319,6 +322,102 @@ fn format_markdown_files_with_prose_wrap_cli_option() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_markdown_files_with_prose_wrap_cli_option",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_markdown_files_with_unordered_list_marker_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        r#"{
+    "markdown": {
+        "formatter": {
+            "unorderedListMarker": "asterisk"
+        }
+    },
+    "overrides": [
+        {
+            "includes": ["special/**"],
+            "markdown": {
+                "formatter": {
+                    "unorderedListMarker": "plus"
+                }
+            }
+        }
+    ]
+}"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(file_path.into(), UNFORMATTED_LIST.as_bytes());
+
+    let overridden_file_path = Utf8Path::new("special/file.md");
+    fs.insert(overridden_file_path.into(), UNFORMATTED_LIST.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                file_path.as_str(),
+                overridden_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, ASTERISK_LIST);
+    assert_file_contents(&fs, overridden_file_path, PLUS_LIST);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_markdown_files_with_unordered_list_marker_override",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_markdown_files_with_unordered_list_marker_cli_option() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(file_path.into(), UNFORMATTED_LIST.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--md-formatter-unordered-list-marker",
+                "asterisk",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, ASTERISK_LIST);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_markdown_files_with_unordered_list_marker_cli_option",
         fs,
         console,
         result,

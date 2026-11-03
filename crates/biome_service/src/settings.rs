@@ -2369,6 +2369,9 @@ impl OverrideSettingPattern {
         if let Some(prose_wrap) = md_formatter.prose_wrap {
             options.set_prose_wrap(prose_wrap);
         }
+        if let Some(unordered_list_marker) = md_formatter.unordered_list_marker {
+            options.set_unordered_list_marker(unordered_list_marker);
+        }
     }
 
     #[cfg(feature = "lang_yaml")]
