@@ -703,6 +703,22 @@ fn change_published_after_the_close_of_its_client_is_closed() {
     );
 }
 
+#[test]
+fn document_lookups_do_not_slow_down_as_files_are_closed() {
+    let (workspace, _) = setup_workspace_and_open_project(MemoryFileSystem::default(), "/");
+    let document = Document::new(
+        ViewId::Disk,
+        DocumentView {
+            content: Arc::from(""),
+            version: None,
+            file_source_index: 0,
+            syntax: None,
+        },
+    );
+
+    crate::workspace::views::assert_lookups_do_not_slow_down(&workspace.server.documents, document);
+}
+
 /// Closing a dependency, which the workspace keeps in the database only,
 /// keeps the views of the other clients that have it open.
 #[cfg(feature = "module_graph")]
