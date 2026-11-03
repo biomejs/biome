@@ -7102,6 +7102,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoUninvokedArrayCallbackConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUninvokedArrayCallbackOptions" }
+			]
+		},
+		"NoUninvokedArrayCallbackOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnknownAtRulesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9423,6 +9433,13 @@
 					"description": "Disallow undeclared CSS custom properties in inline styles.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUninvokedArrayCallback": {
+					"description": "Disallow array methods with callbacks on arrays that only have empty slots.\nSee https://biomejs.dev/linter/rules/no-uninvoked-array-callback",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUninvokedArrayCallbackConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14997,6 +15014,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredVariablesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUninvokedArrayCallbackOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUninvokedArrayCallbackOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
