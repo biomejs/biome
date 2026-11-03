@@ -58,6 +58,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noArrayForEach",
+        TypeId::of::<biome_rule_options::no_array_for_each::NoArrayForEachOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noArrayIndexKey",
         TypeId::of::<biome_rule_options::no_array_index_key::NoArrayIndexKeyOptions>(),
