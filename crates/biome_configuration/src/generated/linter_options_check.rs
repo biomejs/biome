@@ -917,6 +917,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_misused_promises::NoMisusedPromisesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noMisusedSpread",
+        TypeId::of::<biome_rule_options::no_misused_spread::NoMisusedSpreadOptions>(),
+    ));
+    result.push((
         "style",
         "noMultiAssign",
         TypeId::of::<biome_rule_options::no_multi_assign::NoMultiAssignOptions>(),
