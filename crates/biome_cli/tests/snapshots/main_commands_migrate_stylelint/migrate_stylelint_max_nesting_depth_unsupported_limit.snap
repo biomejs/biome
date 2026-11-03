@@ -1,0 +1,77 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate stylelint --include-nursery
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "rules": {
+            "max-nesting-depth": [300, { "ignoreAtRules": ["media"] }]
+        }
+    }
+```
+
+# Emitted Messages
+
+```block
+.stylelintrc.json:3:35 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The number should be an integer between 0 and 255.
+  
+    1 │ {
+    2 │         "rules": {
+  > 3 │             "max-nesting-depth": [300, { "ignoreAtRules": ["media"] }]
+      │                                   ^^^
+    4 │         }
+    5 │     }
+  
+
+```
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1   │ - {·"linter":·{·"enabled":·true·}·}
+      1 │ + {·"linter":·{·"enabled":·true,·"rules":·{·"preset":·"none"·}·}·}
+      2 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No rules to migrate.
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

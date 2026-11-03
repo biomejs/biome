@@ -1,0 +1,41 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalidMissingKeyframeSelector.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+    @keyframes fade {
+        {
+            opacity: 0;
+        }
+    }
+}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalidMissingKeyframeSelector.css:4:9 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    2 │ .a {
+    3 │     @keyframes fade {
+  > 4 │         {
+      │         ^
+    5 │             opacity: 0;
+    6 │         }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

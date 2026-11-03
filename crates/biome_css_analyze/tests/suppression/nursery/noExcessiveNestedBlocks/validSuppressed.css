@@ -1,0 +1,17 @@
+/* should not generate diagnostics */
+.a {
+    .b {
+        .c {
+            .d {
+                .e {
+                    /* biome-ignore lint/nursery/noExcessiveNestedBlocks: The nesting mirrors the markup. */
+                    .f {
+                        .g {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
