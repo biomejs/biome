@@ -1,0 +1,811 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import ReactDefault from "react";
+import type * as React from "react";
+import type {
+	BaseSyntheticEvent,
+	ChangeEvent,
+	InputEvent as Input,
+	SyntheticEvent,
+	SyntheticEvent as SE,
+	ToggleEvent,
+} from "react";
+
+// Global event types
+async function handleClick(event: Event) {
+	await load();
+	event.preventDefault();
+}
+async function handleClick(value: MouseEvent) {
+	await load();
+	value.stopPropagation();
+}
+async function handleClick(value: Event | MouseEvent) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(change: PictureInPictureEvent) {
+	await load();
+	change.stopPropagation();
+}
+async function handleClick(request: FetchEvent) {
+	await load();
+	request.preventDefault();
+}
+
+// Type wrappers around the event
+async function handleClick(value: Event) {
+	await load();
+	value!.preventDefault();
+}
+async function handleClick(value: Event) {
+	await load();
+	(value as Event).stopPropagation();
+}
+async function handleClick(value: Event) {
+	await load();
+	(<Event>value).stopImmediatePropagation();
+}
+
+// The name looks like an event and the type is unknown
+async function handleClick(mouseDownEvent: unknown) {
+	await load();
+	mouseDownEvent.preventDefault();
+}
+
+// React event types
+async function handleClick(value: ReactDefault.SyntheticEvent) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(event: React.SyntheticEvent) {
+	await load();
+	event.stopImmediatePropagation();
+}
+async function handleClick(value: React.AnimationEvent) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(value: SyntheticEvent) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(value: BaseSyntheticEvent) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(value: SE) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(value: Input) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(value: ChangeEvent<HTMLInputElement>) {
+	await load();
+	value.preventDefault();
+}
+async function handleClick(value: ToggleEvent) {
+	await load();
+	value.preventDefault();
+}
+
+// Local types that extend an event type
+function localTypes() {
+	type ClickEvent = MouseEvent;
+	interface DragPayload extends DragEvent {}
+	class CustomClick extends MouseEvent {}
+
+	async function handleClick(value: ClickEvent) {
+		await load();
+		value.preventDefault();
+	}
+	async function handleDrag(value: DragPayload) {
+		await load();
+		value.preventDefault();
+	}
+	async function handleCustom(value: CustomClick) {
+		await load();
+		value.preventDefault();
+	}
+	async function handleGeneric<T extends Event>(value: T) {
+		await load();
+		value.preventDefault();
+	}
+}
+
+// A parameter property in a constructor
+class Handler {
+	constructor(private value: Event) {
+		setTimeout(() => value.preventDefault());
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:16:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    14 │ async function handleClick(event: Event) {
+    15 │ 	await load();
+  > 16 │ 	event.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ async function handleClick(value: MouseEvent) {
+  
+  i The event handler pauses here.
+  
+    13 │ // Global event types
+    14 │ async function handleClick(event: Event) {
+  > 15 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    16 │ 	event.preventDefault();
+    17 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.stopPropagation() is called after the event handler pauses.
+  
+    18 │ async function handleClick(value: MouseEvent) {
+    19 │ 	await load();
+  > 20 │ 	value.stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ }
+    22 │ async function handleClick(value: Event | MouseEvent) {
+  
+  i The event handler pauses here.
+  
+    17 │ }
+    18 │ async function handleClick(value: MouseEvent) {
+  > 19 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    20 │ 	value.stopPropagation();
+    21 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    22 │ async function handleClick(value: Event | MouseEvent) {
+    23 │ 	await load();
+  > 24 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ async function handleClick(change: PictureInPictureEvent) {
+  
+  i The event handler pauses here.
+  
+    21 │ }
+    22 │ async function handleClick(value: Event | MouseEvent) {
+  > 23 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    24 │ 	value.preventDefault();
+    25 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! change.stopPropagation() is called after the event handler pauses.
+  
+    26 │ async function handleClick(change: PictureInPictureEvent) {
+    27 │ 	await load();
+  > 28 │ 	change.stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ }
+    30 │ async function handleClick(request: FetchEvent) {
+  
+  i The event handler pauses here.
+  
+    25 │ }
+    26 │ async function handleClick(change: PictureInPictureEvent) {
+  > 27 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    28 │ 	change.stopPropagation();
+    29 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call change.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! request.preventDefault() is called after the event handler pauses.
+  
+    30 │ async function handleClick(request: FetchEvent) {
+    31 │ 	await load();
+  > 32 │ 	request.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i The event handler pauses here.
+  
+    29 │ }
+    30 │ async function handleClick(request: FetchEvent) {
+  > 31 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    32 │ 	request.preventDefault();
+    33 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call request.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:38:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    36 │ async function handleClick(value: Event) {
+    37 │ 	await load();
+  > 38 │ 	value!.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ }
+    40 │ async function handleClick(value: Event) {
+  
+  i The event handler pauses here.
+  
+    35 │ // Type wrappers around the event
+    36 │ async function handleClick(value: Event) {
+  > 37 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    38 │ 	value!.preventDefault();
+    39 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:42:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.stopPropagation() is called after the event handler pauses.
+  
+    40 │ async function handleClick(value: Event) {
+    41 │ 	await load();
+  > 42 │ 	(value as Event).stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ async function handleClick(value: Event) {
+  
+  i The event handler pauses here.
+  
+    39 │ }
+    40 │ async function handleClick(value: Event) {
+  > 41 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    42 │ 	(value as Event).stopPropagation();
+    43 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:46:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.stopImmediatePropagation() is called after the event handler pauses.
+  
+    44 │ async function handleClick(value: Event) {
+    45 │ 	await load();
+  > 46 │ 	(<Event>value).stopImmediatePropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i The event handler pauses here.
+  
+    43 │ }
+    44 │ async function handleClick(value: Event) {
+  > 45 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    46 │ 	(<Event>value).stopImmediatePropagation();
+    47 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.stopImmediatePropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:52:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! mouseDownEvent.preventDefault() is called after the event handler pauses.
+  
+    50 │ async function handleClick(mouseDownEvent: unknown) {
+    51 │ 	await load();
+  > 52 │ 	mouseDownEvent.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ }
+    54 │ 
+  
+  i The event handler pauses here.
+  
+    49 │ // The name looks like an event and the type is unknown
+    50 │ async function handleClick(mouseDownEvent: unknown) {
+  > 51 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    52 │ 	mouseDownEvent.preventDefault();
+    53 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call mouseDownEvent.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:58:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    56 │ async function handleClick(value: ReactDefault.SyntheticEvent) {
+    57 │ 	await load();
+  > 58 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    59 │ }
+    60 │ async function handleClick(event: React.SyntheticEvent) {
+  
+  i The event handler pauses here.
+  
+    55 │ // React event types
+    56 │ async function handleClick(value: ReactDefault.SyntheticEvent) {
+  > 57 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    58 │ 	value.preventDefault();
+    59 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:62:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopImmediatePropagation() is called after the event handler pauses.
+  
+    60 │ async function handleClick(event: React.SyntheticEvent) {
+    61 │ 	await load();
+  > 62 │ 	event.stopImmediatePropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ }
+    64 │ async function handleClick(value: React.AnimationEvent) {
+  
+  i The event handler pauses here.
+  
+    59 │ }
+    60 │ async function handleClick(event: React.SyntheticEvent) {
+  > 61 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    62 │ 	event.stopImmediatePropagation();
+    63 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.stopImmediatePropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:66:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    64 │ async function handleClick(value: React.AnimationEvent) {
+    65 │ 	await load();
+  > 66 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    67 │ }
+    68 │ async function handleClick(value: SyntheticEvent) {
+  
+  i The event handler pauses here.
+  
+    63 │ }
+    64 │ async function handleClick(value: React.AnimationEvent) {
+  > 65 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    66 │ 	value.preventDefault();
+    67 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:70:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    68 │ async function handleClick(value: SyntheticEvent) {
+    69 │ 	await load();
+  > 70 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    71 │ }
+    72 │ async function handleClick(value: BaseSyntheticEvent) {
+  
+  i The event handler pauses here.
+  
+    67 │ }
+    68 │ async function handleClick(value: SyntheticEvent) {
+  > 69 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    70 │ 	value.preventDefault();
+    71 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:74:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    72 │ async function handleClick(value: BaseSyntheticEvent) {
+    73 │ 	await load();
+  > 74 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    75 │ }
+    76 │ async function handleClick(value: SE) {
+  
+  i The event handler pauses here.
+  
+    71 │ }
+    72 │ async function handleClick(value: BaseSyntheticEvent) {
+  > 73 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    74 │ 	value.preventDefault();
+    75 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:78:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    76 │ async function handleClick(value: SE) {
+    77 │ 	await load();
+  > 78 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    79 │ }
+    80 │ async function handleClick(value: Input) {
+  
+  i The event handler pauses here.
+  
+    75 │ }
+    76 │ async function handleClick(value: SE) {
+  > 77 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    78 │ 	value.preventDefault();
+    79 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:82:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    80 │ async function handleClick(value: Input) {
+    81 │ 	await load();
+  > 82 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    83 │ }
+    84 │ async function handleClick(value: ChangeEvent<HTMLInputElement>) {
+  
+  i The event handler pauses here.
+  
+    79 │ }
+    80 │ async function handleClick(value: Input) {
+  > 81 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    82 │ 	value.preventDefault();
+    83 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:86:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    84 │ async function handleClick(value: ChangeEvent<HTMLInputElement>) {
+    85 │ 	await load();
+  > 86 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    87 │ }
+    88 │ async function handleClick(value: ToggleEvent) {
+  
+  i The event handler pauses here.
+  
+    83 │ }
+    84 │ async function handleClick(value: ChangeEvent<HTMLInputElement>) {
+  > 85 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    86 │ 	value.preventDefault();
+    87 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:90:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    88 │ async function handleClick(value: ToggleEvent) {
+    89 │ 	await load();
+  > 90 │ 	value.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    91 │ }
+    92 │ 
+  
+  i The event handler pauses here.
+  
+    87 │ }
+    88 │ async function handleClick(value: ToggleEvent) {
+  > 89 │ 	await load();
+       │ 	^^^^^^^^^^^^
+    90 │ 	value.preventDefault();
+    91 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:101:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+     99 │ 	async function handleClick(value: ClickEvent) {
+    100 │ 		await load();
+  > 101 │ 		value.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    102 │ 	}
+    103 │ 	async function handleDrag(value: DragPayload) {
+  
+  i The event handler pauses here.
+  
+     99 │ 	async function handleClick(value: ClickEvent) {
+  > 100 │ 		await load();
+        │ 		^^^^^^^^^^^^
+    101 │ 		value.preventDefault();
+    102 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:105:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    103 │ 	async function handleDrag(value: DragPayload) {
+    104 │ 		await load();
+  > 105 │ 		value.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    106 │ 	}
+    107 │ 	async function handleCustom(value: CustomClick) {
+  
+  i The event handler pauses here.
+  
+    102 │ 	}
+    103 │ 	async function handleDrag(value: DragPayload) {
+  > 104 │ 		await load();
+        │ 		^^^^^^^^^^^^
+    105 │ 		value.preventDefault();
+    106 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:109:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    107 │ 	async function handleCustom(value: CustomClick) {
+    108 │ 		await load();
+  > 109 │ 		value.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    110 │ 	}
+    111 │ 	async function handleGeneric<T extends Event>(value: T) {
+  
+  i The event handler pauses here.
+  
+    106 │ 	}
+    107 │ 	async function handleCustom(value: CustomClick) {
+  > 108 │ 		await load();
+        │ 		^^^^^^^^^^^^
+    109 │ 		value.preventDefault();
+    110 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:113:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called after the event handler pauses.
+  
+    111 │ 	async function handleGeneric<T extends Event>(value: T) {
+    112 │ 		await load();
+  > 113 │ 		value.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    114 │ 	}
+    115 │ }
+  
+  i The event handler pauses here.
+  
+    110 │ 	}
+    111 │ 	async function handleGeneric<T extends Event>(value: T) {
+  > 112 │ 		await load();
+        │ 		^^^^^^^^^^^^
+    113 │ 		value.preventDefault();
+    114 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call value.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:120:20 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! value.preventDefault() is called inside a function nested in the event handler.
+  
+    118 │ class Handler {
+    119 │ 	constructor(private value: Event) {
+  > 120 │ 		setTimeout(() => value.preventDefault());
+        │ 		                 ^^^^^^^^^^^^^^^^^^^^^^
+    121 │ 	}
+    122 │ }
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call value.preventDefault() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
