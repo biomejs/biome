@@ -1,0 +1,170 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const value: string;
+value[0] === "ab";
+value.at(0) === "ab";
+{
+	let text: string = getText();
+	text[1] === "ab";
+}
+{
+	let text!: string;
+	text.at(1) !== "ab";
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    1 │ /* should generate diagnostics */
+    2 │ declare const value: string;
+  > 3 │ value[0] === "ab";
+      │ ^^^^^^^^^^^^^^^^^
+    4 │ value.at(0) === "ab";
+    5 │ {
+  
+  i This expression returns one character at most.
+  
+    1 │ /* should generate diagnostics */
+    2 │ declare const value: string;
+  > 3 │ value[0] === "ab";
+      │ ^^^^^^^^
+    4 │ value.at(0) === "ab";
+    5 │ {
+  
+  i But this string has more than one character.
+  
+    1 │ /* should generate diagnostics */
+    2 │ declare const value: string;
+  > 3 │ value[0] === "ab";
+      │              ^^^^
+    4 │ value.at(0) === "ab";
+    5 │ {
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    2 │ declare const value: string;
+    3 │ value[0] === "ab";
+  > 4 │ value.at(0) === "ab";
+      │ ^^^^^^^^^^^^^^^^^^^^
+    5 │ {
+    6 │ 	let text: string = getText();
+  
+  i This expression returns one character at most.
+  
+    2 │ declare const value: string;
+    3 │ value[0] === "ab";
+  > 4 │ value.at(0) === "ab";
+      │ ^^^^^^^^^^^
+    5 │ {
+    6 │ 	let text: string = getText();
+  
+  i But this string has more than one character.
+  
+    2 │ declare const value: string;
+    3 │ value[0] === "ab";
+  > 4 │ value.at(0) === "ab";
+      │                 ^^^^
+    5 │ {
+    6 │ 	let text: string = getText();
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:2 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always false.
+  
+    5 │ {
+    6 │ 	let text: string = getText();
+  > 7 │ 	text[1] === "ab";
+      │ 	^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ {
+  
+  i This expression returns one character at most.
+  
+    5 │ {
+    6 │ 	let text: string = getText();
+  > 7 │ 	text[1] === "ab";
+      │ 	^^^^^^^
+    8 │ }
+    9 │ {
+  
+  i But this string has more than one character.
+  
+    5 │ {
+    6 │ 	let text: string = getText();
+  > 7 │ 	text[1] === "ab";
+      │ 	            ^^^^
+    8 │ }
+    9 │ {
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:2 lint/nursery/useValidCharacterComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This comparison is always true.
+  
+     9 │ {
+    10 │ 	let text!: string;
+  > 11 │ 	text.at(1) !== "ab";
+       │ 	^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i This expression returns one character at most.
+  
+     9 │ {
+    10 │ 	let text!: string;
+  > 11 │ 	text.at(1) !== "ab";
+       │ 	^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i But this string has more than one character.
+  
+     9 │ {
+    10 │ 	let text!: string;
+  > 11 │ 	text.at(1) !== "ab";
+       │ 	               ^^^^
+    12 │ }
+    13 │ 
+  
+  i Compare the character with a string of one character, or use a method such as startsWith() to check for longer text.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
