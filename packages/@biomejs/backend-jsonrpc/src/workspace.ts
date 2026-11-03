@@ -3573,6 +3573,11 @@ export interface Nursery {
 	 */
 	noVueTemplateShadow?: NoVueTemplateShadowConfiguration;
 	/**
+	 * Disallow {{ }} text interpolation inside a Vue \<textarea>.
+	 * See https://biomejs.dev/linter/rules/no-vue-textarea-mustache
+	 */
+	noVueTextareaMustache?: NoVueTextareaMustacheConfiguration;
+	/**
 	 * Disallow this in the beforeRouteEnter navigation guard of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-this-in-before-route-enter
 	 */
@@ -6713,6 +6718,9 @@ export type NoVueTemplateKeyConfiguration =
 export type NoVueTemplateShadowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueTemplateShadowOptions;
+export type NoVueTextareaMustacheConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueTextareaMustacheOptions;
 export type NoVueThisInBeforeRouteEnterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueThisInBeforeRouteEnterOptions;
@@ -9785,6 +9793,10 @@ export interface RuleWithNoVueTemplateShadowOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueTemplateShadowOptions;
 }
+export interface RuleWithNoVueTextareaMustacheOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueTextareaMustacheOptions;
+}
 export interface RuleWithNoVueThisInBeforeRouteEnterOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueThisInBeforeRouteEnterOptions;
@@ -12695,6 +12707,7 @@ export interface NoVueTemplateShadowOptions {
 	 */
 	allow?: string[];
 }
+export type NoVueTextareaMustacheOptions = {};
 export type NoVueThisInBeforeRouteEnterOptions = {};
 export type NoVueThisInTemplateOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
@@ -14730,6 +14743,7 @@ export type Category =
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueTemplateKey"
 	| "lint/nursery/noVueTemplateShadow"
+	| "lint/nursery/noVueTextareaMustache"
 	| "lint/nursery/noVueThisInBeforeRouteEnter"
 	| "lint/nursery/noVueThisInTemplate"
 	| "lint/nursery/noVueUndeclaredDirectives"

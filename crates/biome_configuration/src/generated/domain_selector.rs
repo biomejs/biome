@@ -275,6 +275,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueSideEffectsInComputed"),
         RuleFilter::Rule("nursery", "noVueTemplateKey"),
         RuleFilter::Rule("nursery", "noVueTemplateShadow"),
+        RuleFilter::Rule("nursery", "noVueTextareaMustache"),
         RuleFilter::Rule("nursery", "noVueThisInBeforeRouteEnter"),
         RuleFilter::Rule("nursery", "noVueThisInTemplate"),
         RuleFilter::Rule("nursery", "noVueUndeclaredDirectives"),

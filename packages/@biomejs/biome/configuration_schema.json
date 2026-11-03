@@ -8198,6 +8198,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueTextareaMustacheConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueTextareaMustacheOptions" }
+			]
+		},
+		"NoVueTextareaMustacheOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueThisInBeforeRouteEnterConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9363,6 +9373,13 @@
 					"description": "Disallow template variables that reuse the name of a variable from an outer scope.\nSee https://biomejs.dev/linter/rules/no-vue-template-shadow",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueTemplateShadowConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueTextareaMustache": {
+					"description": "Disallow {{ }} text interpolation inside a Vue \\<textarea>.\nSee https://biomejs.dev/linter/rules/no-vue-textarea-mustache",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueTextareaMustacheConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15525,6 +15542,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueTemplateShadowOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueTextareaMustacheOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueTextareaMustacheOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

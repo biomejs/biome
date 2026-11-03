@@ -375,6 +375,7 @@ define_categories! {
     "lint/nursery/noVueSideEffectsInComputed": "https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed",
     "lint/nursery/noVueTemplateKey": "https://biomejs.dev/linter/rules/no-vue-template-key",
     "lint/nursery/noVueTemplateShadow": "https://biomejs.dev/linter/rules/no-vue-template-shadow",
+    "lint/nursery/noVueTextareaMustache": "https://biomejs.dev/linter/rules/no-vue-textarea-mustache",
     "lint/nursery/noVueThisInBeforeRouteEnter": "https://biomejs.dev/linter/rules/no-vue-this-in-before-route-enter",
     "lint/nursery/noVueThisInTemplate": "https://biomejs.dev/linter/rules/no-vue-this-in-template",
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
