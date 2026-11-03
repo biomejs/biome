@@ -24,11 +24,6 @@ harness           = false
 name              = "format_embedded"
 required-features = ["js_embeds"]
 
-[[bench]]
-harness           = false
-name              = "open_close_files"
-required-features = ["lang_js"]
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

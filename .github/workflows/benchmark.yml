@@ -332,9 +332,6 @@ jobs:
           if [ -f crates/biome_service/benches/format_embedded.rs ]; then
             benches+=(--bench format_embedded)
           fi
-          if [ -f crates/biome_service/benches/open_close_files.rs ]; then
-            benches+=(--bench open_close_files)
-          fi
           cargo codspeed build -p biome_service "${benches[@]}" --features type_inference,js_embeds
         env:
           CARGO_BUILD_JOBS: 3
