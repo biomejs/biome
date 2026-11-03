@@ -2372,9 +2372,6 @@ impl OverrideSettingPattern {
         if let Some(unordered_list_marker) = md_formatter.unordered_list_marker {
             options.set_unordered_list_marker(unordered_list_marker);
         }
-        if let Some(quote_style) = md_formatter.quote_style {
-            options.set_quote_style(quote_style);
-        }
     }
 
     #[cfg(feature = "lang_yaml")]

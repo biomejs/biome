@@ -274,9 +274,6 @@ The configuration contained in `biome.json` or `biome.jsonc`.
                               unordered lists. Defaults to `dash`.
                               When two unordered lists are next to each other, the second list uses
                               another marker so that Markdown doesn't merge them into one list.
-        --md-formatter-quote-style=<double|single>  Selects the preferred quote style for link and
-                              image titles. Biome uses the other quote, or parentheses, when that
-                              avoids additional escaping. Defaults to `double`.
         --md-formatter-format-embeds=<true|false>  Formats the code inside fenced code blocks,
                               frontmatter, and HTML blocks with the formatter of the code's
                               language. Defaults to `true`.

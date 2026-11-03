@@ -2,7 +2,7 @@ use crate::markdown::auxiliary::textual::FormatMdTextualOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
-use biome_formatter::{FormatRuleWithOptions, QuoteStyle, write};
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{
     AnyMdInline, MarkdownLanguage, MarkdownSyntaxToken, MdLinkTitle, MdLinkTitleFields, MdTextual,
 };
@@ -25,9 +25,7 @@ impl FormatNodeRule<MdLinkTitle> for FormatMdLinkTitle {
     fn fmt_fields(&self, node: &MdLinkTitle, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdLinkTitleFields { content } = node.as_fields();
 
-        let Some(normalization) =
-            LinkTitleNormalization::from_node(node, f.options().quote_style())
-        else {
+        let Some(normalization) = LinkTitleNormalization::from_node(node) else {
             let content = content
                 .format()
                 .with_options(FormatMdFormatInlineItemListOptions {
@@ -70,13 +68,12 @@ impl FormatRuleWithOptions<MdLinkTitle> for FormatMdLinkTitle {
 ///
 /// CommonMark removes one layer of backslash escaping from ASCII punctuation in title content. The
 /// normalization uses those unescaped characters to select double quotes, single quotes, or
-/// parentheses based on how many characters that delimiter form must escape. Ties prefer the
-/// configured quote style, followed by the other quote and parentheses. Literal backslashes and the
-/// selected delimiters are escaped when the title is serialized. Escapes of `&`, `#`, and `;` are
-/// retained because removing them can form an entity or numeric character reference.
-/// Non-delimiter escapes are also retained in multiline titles because unescaping a marker at the
-/// start of a physical line can turn title content into block syntax when the formatted document
-/// is parsed again.
+/// parentheses based on how many characters that delimiter form must escape. Ties prefer double
+/// quotes, followed by single quotes and parentheses. Literal backslashes and the selected
+/// delimiters are escaped when the title is serialized. Escapes of `&`, `#`, and `;` are retained
+/// because removing them can form an entity or numeric character reference. Non-delimiter escapes
+/// are also retained in multiline titles because unescaping a marker at the start of a physical
+/// line can turn title content into block syntax when the formatted document is parsed again.
 ///
 /// See <https://spec.commonmark.org/0.30/#link-title>.
 struct LinkTitleNormalization<'a> {
@@ -124,7 +121,7 @@ impl Iterator for LinkTitleTextualsIterator {
 }
 
 impl<'a> LinkTitleNormalization<'a> {
-    fn from_node(node: &'a MdLinkTitle, quote_style: QuoteStyle) -> Option<Self> {
+    fn from_node(node: &'a MdLinkTitle) -> Option<Self> {
         if !node
             .content()
             .iter()
@@ -151,7 +148,7 @@ impl<'a> LinkTitleNormalization<'a> {
 
         Some(Self {
             node,
-            analysis: analysis.finish(quote_style)?,
+            analysis: analysis.finish()?,
         })
     }
 
@@ -161,9 +158,7 @@ impl<'a> LinkTitleNormalization<'a> {
 }
 
 pub(crate) fn is_empty_link_title(title: &MdLinkTitle) -> bool {
-    // Emptiness doesn't depend on the selected delimiter.
-    LinkTitleNormalization::from_node(title, QuoteStyle::default())
-        .is_some_and(|normalization| normalization.is_empty())
+    LinkTitleNormalization::from_node(title).is_some_and(|normalization| normalization.is_empty())
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -256,7 +251,7 @@ impl LinkTitleAnalysis {
         }
     }
 
-    fn finish(mut self, quote_style: QuoteStyle) -> Option<LinkTitleAnalysisResult> {
+    fn finish(mut self) -> Option<LinkTitleAnalysisResult> {
         let opening = self.opening?;
         let closing = self.pending?;
         if !LinkTitleDelimiter::matches(opening.value, closing.value) {
@@ -264,7 +259,7 @@ impl LinkTitleAnalysis {
         }
 
         self.decoded.finish_pending_backslash();
-        let delimiter = self.decoded.preferred_delimiter(quote_style);
+        let delimiter = self.decoded.preferred_delimiter();
         Some(LinkTitleAnalysisResult {
             delimiter,
             content_range: TextRange::new(opening.end, closing.start),
@@ -346,26 +341,11 @@ impl LinkTitleDecodedAnalysis {
         }
     }
 
-    fn preferred_delimiter(&self, quote_style: QuoteStyle) -> LinkTitleDelimiter {
-        let (preferred, preferred_count, alternate, alternate_count) = match quote_style {
-            QuoteStyle::Double => (
-                LinkTitleDelimiter::DoubleQuote,
-                self.double_quotes,
-                LinkTitleDelimiter::SingleQuote,
-                self.single_quotes,
-            ),
-            QuoteStyle::Single => (
-                LinkTitleDelimiter::SingleQuote,
-                self.single_quotes,
-                LinkTitleDelimiter::DoubleQuote,
-                self.double_quotes,
-            ),
-        };
-
-        if preferred_count <= alternate_count && preferred_count <= self.parentheses {
-            preferred
-        } else if alternate_count <= self.parentheses {
-            alternate
+    fn preferred_delimiter(&self) -> LinkTitleDelimiter {
+        if self.double_quotes <= self.single_quotes && self.double_quotes <= self.parentheses {
+            LinkTitleDelimiter::DoubleQuote
+        } else if self.single_quotes <= self.parentheses {
+            LinkTitleDelimiter::SingleQuote
         } else {
             LinkTitleDelimiter::Parentheses
         }

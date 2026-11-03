@@ -3291,10 +3291,6 @@
 					"description": "Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.\n\nManual line breaks are always kept. In Markdown, a manual line break is created by ending a\nline with two spaces or a backslash.",
 					"anyOf": [{ "$ref": "#/$defs/ProseWrap" }, { "type": "null" }]
 				},
-				"quoteStyle": {
-					"description": "Selects the preferred quote style for link and image titles. Biome uses the other quote,\nor parentheses, when that avoids additional escaping. Defaults to `double`.",
-					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }]
-				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]

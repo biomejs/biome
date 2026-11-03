@@ -1078,7 +1078,6 @@ mod tests {
             trailing_newline: global_formatter.trailing_newline,
             prose_wrap: Some(ProseWrap::Always),
             unordered_list_marker: None,
-            quote_style: None,
             format_embeds: None,
         };
         assert_eq!(
