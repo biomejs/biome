@@ -3458,6 +3458,11 @@ export interface Nursery {
 	 */
 	noUnreadableIife?: NoUnreadableIifeConfiguration;
 	/**
+	 * Disallow default imports from modules that have no default export.
+	 * See https://biomejs.dev/linter/rules/no-unresolved-default-import
+	 */
+	noUnresolvedDefaultImport?: NoUnresolvedDefaultImportConfiguration;
+	/**
 	 * Disallow allow-scripts together with allow-same-origin in an iframe sandbox.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox
 	 */
@@ -6854,6 +6859,9 @@ export type NoUnreadableForOfExpressionConfiguration =
 export type NoUnreadableIifeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnreadableIifeOptions;
+export type NoUnresolvedDefaultImportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnresolvedDefaultImportOptions;
 export type NoUnsafeIframeSandboxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeIframeSandboxOptions;
@@ -10020,6 +10028,10 @@ export interface RuleWithNoUnreadableIifeOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUnreadableIifeOptions;
+}
+export interface RuleWithNoUnresolvedDefaultImportOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnresolvedDefaultImportOptions;
 }
 export interface RuleWithNoUnsafeIframeSandboxOptions {
 	level: RulePlainConfiguration;
@@ -13290,6 +13302,7 @@ export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnnecessaryStringTrimOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
 export type NoUnreadableIifeOptions = {};
+export type NoUnresolvedDefaultImportOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeReturnOptions = {};
@@ -15430,6 +15443,7 @@ export type Category =
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"
 	| "lint/nursery/noUnnecessaryStringTrim"
+	| "lint/nursery/noUnresolvedDefaultImport"
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"
