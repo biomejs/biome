@@ -5768,6 +5768,16 @@
 			]
 		},
 		"NoNullOptions": { "type": "object", "additionalProperties": false },
+		"NoNumberArgumentOutOfRangeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNumberArgumentOutOfRangeOptions" }
+			]
+		},
+		"NoNumberArgumentOutOfRangeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoObjectConstructorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9084,6 +9094,13 @@
 					"description": "Disallow the use of the null literal.\nSee https://biomejs.dev/linter/rules/no-null",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNullConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNumberArgumentOutOfRange": {
+					"description": "Disallow number method arguments that are outside the range the method accepts.\nSee https://biomejs.dev/linter/rules/no-number-argument-out-of-range",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNumberArgumentOutOfRangeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13757,6 +13774,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNullOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNumberArgumentOutOfRangeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNumberArgumentOutOfRangeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

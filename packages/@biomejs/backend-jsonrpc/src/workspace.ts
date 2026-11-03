@@ -3188,6 +3188,11 @@ export interface Nursery {
 	 */
 	noNull?: NoNullConfiguration;
 	/**
+	 * Disallow number method arguments that are outside the range the method accepts.
+	 * See https://biomejs.dev/linter/rules/no-number-argument-out-of-range
+	 */
+	noNumberArgumentOutOfRange?: NoNumberArgumentOutOfRangeConfiguration;
+	/**
 	 * Disallow calling Object without arguments to create an empty object.
 	 * See https://biomejs.dev/linter/rules/no-object-constructor
 	 */
@@ -6617,6 +6622,9 @@ export type NoNonScalableViewportConfiguration =
 export type NoNullConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNullOptions;
+export type NoNumberArgumentOutOfRangeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNumberArgumentOutOfRangeOptions;
 export type NoObjectConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObjectConstructorOptions;
@@ -9628,6 +9636,10 @@ export interface RuleWithNoNullOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoNullOptions;
+}
+export interface RuleWithNoNumberArgumentOutOfRangeOptions {
+	level: RulePlainConfiguration;
+	options?: NoNumberArgumentOutOfRangeOptions;
 }
 export interface RuleWithNoObjectConstructorOptions {
 	/**
@@ -12910,6 +12922,7 @@ export type NoNestedTemplateLiteralsOptions = {};
 export type NoNewRequireOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoNullOptions = {};
+export type NoNumberArgumentOutOfRangeOptions = {};
 export type NoObjectConstructorOptions = {};
 export type NoObjectLiteralComparisonOptions = {};
 export type NoObsoleteAttributesOptions = {};
@@ -15072,6 +15085,7 @@ export type Category =
 	| "lint/nursery/noNewRequire"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noNull"
+	| "lint/nursery/noNumberArgumentOutOfRange"
 	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObjectLiteralComparison"
 	| "lint/nursery/noObsoleteAttributes"
