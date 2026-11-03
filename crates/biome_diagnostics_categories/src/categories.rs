@@ -472,6 +472,7 @@ define_categories! {
     "lint/nursery/useSvelteReactiveClasses": "https://biomejs.dev/linter/rules/use-svelte-reactive-classes",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
     "lint/nursery/useSvelteShorthandDirective": "https://biomejs.dev/linter/rules/use-svelte-shorthand-directive",
+    "lint/nursery/useSvelteStoreInitialValue": "https://biomejs.dev/linter/rules/use-svelte-store-initial-value",
     "lint/nursery/useTailwindShorthandClasses": "https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
     "lint/nursery/useTailwindSortedClasses": "https://biomejs.dev/linter/rules/use-tailwind-sorted-classes",
     "lint/nursery/useTailwindStaticClassStrings": "https://biomejs.dev/linter/rules/use-tailwind-static-class-strings",
