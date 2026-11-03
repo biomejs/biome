@@ -83,7 +83,7 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwBogusCandidate {
                 items: [
-                    TW_BASE@27..32 "hover" [] [],
+                    TW_VARIANT_SEGMENT@27..32 "hover" [] [],
                     COLON@32..33 ":" [] [],
                     TW_BASE@33..37 "flex" [] [],
                 ],
@@ -168,7 +168,7 @@ TwRoot {
       1: BANG@26..27 "!" [] []
       2: (empty)
       3: TW_BOGUS_CANDIDATE@27..37
-        0: TW_BASE@27..32 "hover" [] []
+        0: TW_VARIANT_SEGMENT@27..32 "hover" [] []
         1: COLON@32..33 ":" [] []
         2: TW_BASE@33..37 "flex" [] []
       4: (empty)

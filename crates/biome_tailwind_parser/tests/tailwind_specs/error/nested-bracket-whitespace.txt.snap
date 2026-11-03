@@ -28,7 +28,9 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_BRACKET@3..4 "[" [] [],
-                        TW_SELECTOR@4..11 "foo[bar" [] [],
+                        IDENT@4..7 "foo" [] [],
+                        L_BRACKET@7..8 "[" [] [],
+                        IDENT@8..11 "bar" [] [],
                     ],
                 },
                 modifier: missing (optional),
@@ -79,7 +81,9 @@ TwRoot {
         1: DASH@2..3 "-" [] []
         2: TW_BOGUS_VALUE@3..11
           0: L_BRACKET@3..4 "[" [] []
-          1: TW_SELECTOR@4..11 "foo[bar" [] []
+          1: IDENT@4..7 "foo" [] []
+          2: L_BRACKET@7..8 "[" [] []
+          3: IDENT@8..11 "bar" [] []
         3: (empty)
       4: (empty)
     1: WHITESPACE@11..12 " " [] []

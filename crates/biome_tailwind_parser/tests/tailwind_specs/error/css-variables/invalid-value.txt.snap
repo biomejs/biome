@@ -66,7 +66,27 @@ TwRoot {
                 value: TwBogusValue {
                     items: [
                         L_PAREN@21..22 "(" [] [],
-                        TW_VALUE@22..27 "--a:b" [] [],
+                        TwBogus {
+                            items: [
+                                TwBogus {
+                                    items: [
+                                        TwBogus {
+                                            items: [
+                                                CssDashedIdentifier {
+                                                    ident_token: IDENT@22..25 "--a" [] [],
+                                                },
+                                                CssBogusPropertyValue {
+                                                    items: [
+                                                        COLON@25..26 ":" [] [],
+                                                        IDENT@26..27 "b" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
                         R_PAREN@27..28 ")" [] [],
                     ],
                 },
@@ -127,7 +147,14 @@ TwRoot {
         1: DASH@20..21 "-" [] []
         2: TW_BOGUS_VALUE@21..28
           0: L_PAREN@21..22 "(" [] []
-          1: TW_VALUE@22..27 "--a:b" [] []
+          1: TW_BOGUS@22..27
+            0: TW_BOGUS@22..27
+              0: TW_BOGUS@22..27
+                0: CSS_DASHED_IDENTIFIER@22..25
+                  0: IDENT@22..25 "--a" [] []
+                1: CSS_BOGUS_PROPERTY_VALUE@25..27
+                  0: COLON@25..26 ":" [] []
+                  1: IDENT@26..27 "b" [] []
           2: R_PAREN@27..28 ")" [] []
         3: (empty)
       4: (empty)
@@ -162,16 +189,16 @@ invalid-value.txt:1:17 parse ━━━━━━━━━━━━━━━━━
   > 1 │ bg-() bg-(color:) bg-(--a:b)
       │                 ^
   
-invalid-value.txt:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-value.txt:1:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a value but instead found '(--a:b)'.
+  × Expected a value but instead found ':b'.
   
   > 1 │ bg-() bg-(color:) bg-(--a:b)
-      │                      ^^^^^^^
+      │                          ^^
   
   i Expected a value here.
   
   > 1 │ bg-() bg-(color:) bg-(--a:b)
-      │                      ^^^^^^^
+      │                          ^^
   
 ```

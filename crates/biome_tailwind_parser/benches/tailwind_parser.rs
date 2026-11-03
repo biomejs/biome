@@ -73,5 +73,62 @@ fn bench_tailwind(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(tailwind_parser, bench_tailwind);
+/// Load the fixtures in `benches/fixtures/short`, where each line is a separate class string,
+/// returning (file_name, lines).
+fn load_short_fixtures() -> Vec<(String, Vec<String>)> {
+    let fixtures_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("benches/fixtures/short");
+    let mut fixtures = Vec::new();
+
+    if let Ok(entries) = fs::read_dir(&fixtures_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
+                let content = fs::read_to_string(&path).expect("Failed to read fixture file");
+                let lines = content.lines().map(str::to_string).collect();
+                fixtures.push((file_name.to_string(), lines));
+            }
+        }
+    }
+
+    fixtures
+}
+
+/// Parses each class string of a fixture separately, as the analyzer parses one class attribute
+/// at a time.
+fn bench_tailwind_short(c: &mut Criterion) {
+    let fixtures = load_short_fixtures();
+
+    let mut group = c.benchmark_group("tailwind_parser_short");
+
+    for (name, lines) in &fixtures {
+        let len = lines.iter().map(String::len).sum::<usize>() as u64;
+
+        group.throughput(Throughput::Bytes(len));
+        group.bench_with_input(BenchmarkId::new("uncached", name), lines, |b, lines| {
+            b.iter(|| {
+                for line in lines {
+                    black_box(parse_tailwind(black_box(line)));
+                }
+            });
+        });
+
+        group.throughput(Throughput::Bytes(len));
+        group.bench_with_input(BenchmarkId::new("cached", name), lines, |b, lines| {
+            let mut cache = NodeCache::default();
+            for line in lines {
+                let _ = parse_tailwind_with_cache(line, &mut cache);
+            }
+
+            b.iter(|| {
+                for line in lines {
+                    black_box(parse_tailwind_with_cache(black_box(line), &mut cache));
+                }
+            });
+        });
+    }
+
+    group.finish();
+}
+
+criterion_group!(tailwind_parser, bench_tailwind, bench_tailwind_short);
 criterion_main!(tailwind_parser);
