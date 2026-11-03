@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIgnoreIntersections.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+type V1 = A & A;
+type V2 = (A & B) & (A & B);
+
+```
