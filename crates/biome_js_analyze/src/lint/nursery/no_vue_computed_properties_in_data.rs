@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsMemberExpression, AnyJsRoot, JsComputedMemberAssignment,
+    AnyFunctionLike, AnyJsMemberExpression, JsComputedMemberAssignment,
     JsGetterClassMember, JsGetterObjectMember, JsLanguage, JsSetterClassMember,
     JsSetterObjectMember, JsStaticMemberAssignment, TextRange,
 };
@@ -91,8 +91,9 @@ impl Rule for NoVueComputedPropertiesInData {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let component = ctx.query();
         let Some(data) = component
-            .data_function_range()
-            .and_then(|range| find_function(&ctx.root(), range))
+            .data_function_node()
+            .and_then(|data| ctx.vue_model().node(&data))
+            .and_then(AnyFunctionLike::cast)
         else {
             return Box::default();
         };
@@ -159,15 +160,6 @@ const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyFunctionLike::KIND_SET
     .union(JsSetterObjectMember::KIND_SET)
     .union(JsGetterClassMember::KIND_SET)
     .union(JsSetterClassMember::KIND_SET);
-
-/// Returns the function in `root` whose range is exactly `range`.
-fn find_function(root: &AnyJsRoot, range: TextRange) -> Option<AnyFunctionLike> {
-    root.syntax()
-        .covering_element(range)
-        .ancestors()
-        .find_map(AnyFunctionLike::cast)
-        .filter(|function| function.syntax().text_trimmed_range() == range)
-}
 
 /// Returns `true` when the code at `range` runs as part of `function` itself,
 /// and not inside a function nested in it.

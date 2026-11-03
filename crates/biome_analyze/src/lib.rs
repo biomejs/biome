@@ -66,7 +66,7 @@ use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::unsupported_rules::{UNSUPPORTED_RULES, UnsupportedRule, UnsupportedRuleReason};
 pub use crate::visitor::{
-    NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
+    AnalyzedTree, NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
@@ -209,10 +209,7 @@ where
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
             for visitor in &mut visitors {
-                visitor.start(VisitorStartContext {
-                    root: &ctx.root,
-                    services: &mut ctx.services,
-                });
+                visitor.start(VisitorStartContext::new(&ctx.root, &mut ctx.services));
             }
             let runner = PhaseRunner {
                 phase,

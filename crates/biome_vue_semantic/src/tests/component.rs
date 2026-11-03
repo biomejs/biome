@@ -1,8 +1,11 @@
 use super::js_model;
 use crate::{
-    Access, ComponentKind, DefaultSource, DefaultSources, Namespace, OpenReason, PropForm,
-    PropType, RefSite, Resolution, Tri,
+    Access, ComponentKind, DefaultSource, DefaultSources, JsNodeId, Namespace, OpenReason,
+    PropForm, PropType, RefSite, Resolution, Tri, component_model,
 };
+use biome_js_parser::JsParserOptions;
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
+use biome_js_syntax::JsSyntaxKind;
 use biome_languages::JsFileSource;
 
 fn setup_ts() -> JsFileSource {
@@ -871,5 +874,119 @@ defineComponent({
             ("count".into(), vec![], Access::Read, false),
             ("hidden".into(), vec![], Access::Read, true),
         ]
+    );
+}
+
+#[test]
+fn declarations_and_components_point_to_their_nodes() {
+    let source = setup_ts();
+    let code = r#"const props = withDefaults(defineProps<{ title: string; onPick(): void }>(), { title: "a" });
+const emit = defineEmits(["change"]);
+const label = computed(() => props.title);
+watch(label, () => {});"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+
+    let nodes = model.resolve_js_nodes(&root, None);
+    let node_of = |id: JsNodeId| nodes.get(id).cloned().expect("a resolved node");
+
+    let component = model.components().next().expect("a component");
+    assert_eq!(
+        node_of(component.js_node()).text_trimmed_range(),
+        component.range()
+    );
+    let declarations: Vec<_> = component
+        .declarations()
+        .map(|symbol| {
+            let node = node_of(symbol.js_node().expect("a node"));
+            assert_eq!(node.text_trimmed_range(), symbol.declaration_range());
+            (symbol.name().to_string(), node.kind())
+        })
+        .collect();
+    assert_eq!(
+        declarations,
+        [
+            ("props".into(), JsSyntaxKind::JS_VARIABLE_STATEMENT),
+            ("emit".into(), JsSyntaxKind::JS_VARIABLE_STATEMENT),
+            ("label".into(), JsSyntaxKind::JS_VARIABLE_STATEMENT),
+            (
+                "title".into(),
+                JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER
+            ),
+            (
+                "onPick".into(),
+                JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER
+            ),
+            ("change".into(), JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION),
+            ("watch".into(), JsSyntaxKind::JS_CALL_EXPRESSION),
+        ]
+    );
+
+    let title = component.props().next().expect("a prop");
+    let default = title.defaults().next().expect("a default");
+    let default = node_of(default.js_node());
+    assert_eq!(
+        default.text_trimmed_range(),
+        title.defaults().next().unwrap().range()
+    );
+    assert_eq!(default.text_trimmed().to_string(), "\"a\"");
+}
+
+#[test]
+fn interface_that_extends_lists_its_own_members() {
+    let model = js_model(
+        "interface Base { size?: number }
+interface Props extends Base { title: string }
+defineProps<Props>()",
+        setup_ts(),
+    );
+    let component = model.components().next().expect("a component");
+    let props: Vec<_> = component
+        .props()
+        .map(|prop| prop.name().to_string())
+        .collect();
+    assert_eq!(props, ["title"]);
+    assert_eq!(
+        component.open_reasons(Namespace::Binding),
+        OpenReason::UnresolvedType
+    );
+}
+
+#[test]
+fn option_functions_and_runtime_types_point_to_their_nodes() {
+    let source = JsFileSource::vue();
+    let code = r#"export default {
+  props: { size: { type: [Number, String] } },
+  emits: { change: (value) => true },
+  data() { return {}; },
+  computed: { double: { get() { return 2; } } },
+  render() { return null; },
+};"#;
+    let parsed = biome_js_parser::parse(code, source, JsParserOptions::default());
+    let root = parsed.tree();
+    let js = semantic_model(&root, SemanticModelOptions::from(&source));
+    let model = component_model(&root, &js, source);
+    let nodes = model.resolve_js_nodes(&root, None);
+    let text_of = |id: Option<JsNodeId>| {
+        let node = nodes.get(id.expect("a node")).expect("a resolved node");
+        node.text_trimmed().to_string()
+    };
+
+    let component = model.components().next().expect("a component");
+    let size = component.props().next().expect("a prop");
+    assert_eq!(text_of(size.runtime_type_node()), "[Number, String]");
+    let change = component.emits().next().expect("an emit");
+    assert_eq!(text_of(change.validator_node()), "(value) => true");
+    let double = component.computed().next().expect("a computed property");
+    assert_eq!(text_of(double.getter_node()), "get() { return 2; }");
+    assert_eq!(
+        text_of(component.data_function_node()),
+        "data() { return {}; }"
+    );
+    assert_eq!(
+        text_of(component.render_node()),
+        "render() { return null; }"
     );
 }

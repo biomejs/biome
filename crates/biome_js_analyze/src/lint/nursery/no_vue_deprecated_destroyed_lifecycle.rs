@@ -73,26 +73,16 @@ impl Rule for NoVueDeprecatedDestroyedLifecycle {
     type Options = NoVueDeprecatedDestroyedLifecycleOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let component = ctx.query();
-        let snippet = component.snippet().map(|snippet| snippet.id());
-        let root = ctx.root();
-        component
+        ctx.query()
             .hooks()
-            // Ranges are local to the tree that declares the hook, so only
-            // hooks declared in the analyzed tree can be mapped to its syntax.
-            .filter(|hook| hook.snippet().map(|snippet| snippet.id()) == snippet)
             .filter_map(|hook| {
                 let kind = match hook.name() {
                     "beforeDestroy" => DeprecatedHook::BeforeDestroy,
                     "destroyed" => DeprecatedHook::Destroyed,
                     _ => return None,
                 };
-                let range = hook.range();
-                let member = root
-                    .syntax()
-                    .covering_element(range)
-                    .ancestors()
-                    .find_map(AnyJsObjectMember::cast)?;
+                // Hooks declared in another tree have no node here.
+                let member = AnyJsObjectMember::cast(ctx.vue_model().node(&hook)?)?;
                 let replacement = kind.replacement();
                 let has_replacement = member
                     .parent::<JsObjectMemberList>()
@@ -103,7 +93,7 @@ impl Rule for NoVueDeprecatedDestroyedLifecycle {
                     });
                 Some(DeprecatedHookUsage {
                     kind,
-                    range,
+                    range: hook.range(),
                     member,
                     has_replacement,
                 })

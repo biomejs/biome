@@ -138,6 +138,7 @@ pub(crate) fn add_builtins_scope(builder: &mut ModelBuilder) -> ScopeId {
             namespace: Namespace::Binding,
             kind: SymbolKind::Builtin,
             component: None,
+            node: None,
         });
     }
     scope
@@ -164,6 +165,7 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::VForAlias,
                 component: None,
+                node: None,
             });
         }
     }
@@ -186,6 +188,7 @@ pub(crate) fn collect_template_symbols(
                 continue;
             };
             let range = token.text_trimmed_range() + snippet.content_offset;
+            let node = builder.add_js_node(Some(*id), binding.syntax());
             builder.add_symbol(NewSymbol {
                 name: token.token_text_trimmed(),
                 range,
@@ -195,6 +198,7 @@ pub(crate) fn collect_template_symbols(
                 namespace: Namespace::Binding,
                 kind: SymbolKind::SlotParam,
                 component: None,
+                node: Some(node),
             });
         }
     }
@@ -209,6 +213,7 @@ pub(crate) fn collect_template_symbols(
             namespace: Namespace::TemplateRef,
             kind: SymbolKind::TemplateRef,
             component: scopes.component,
+            node: None,
         });
     }
 }

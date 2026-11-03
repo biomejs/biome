@@ -5,12 +5,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsFunction, AnyTsType, JsCallArguments, JsMethodObjectMember, JsParameters, JsSyntaxNode,
+    AnyJsFunction, AnyTsType, JsCallArguments, JsLanguage, JsMethodObjectMember, JsParameters,
     TsCallSignatureTypeMember, TsPropertySignatureTypeMember,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, declare_node_union};
 use biome_rule_options::use_vue_single_event_payload::UseVueSingleEventPayloadOptions;
-use biome_vue_semantic::{Emit, EmitForm};
+use biome_vue_semantic::{AnalyzedVueModel, Emit, EmitForm};
 
 declare_lint_rule! {
     /// Require Vue component events to carry at most one value.
@@ -114,7 +114,7 @@ impl Rule for UseVueSingleEventPayload {
                 if emit.payload_params()? < 2 {
                     return None;
                 }
-                extra_declared_payloads(root.syntax(), emit)
+                extra_declared_payloads(ctx.vue_model(), emit)
             }
             VueEventSite::Call(reference) => {
                 if reference.call_args()? < 2 {
@@ -174,23 +174,17 @@ impl AnyVueEmitValidator {
 }
 
 /// Returns the range of the values after the first one in the declaration of
-/// `emit`, found in the tree rooted at `root`.
-fn extra_declared_payloads(root: &JsSyntaxNode, emit: &Emit) -> Option<TextRange> {
+/// `emit`.
+fn extra_declared_payloads(vue_model: &AnalyzedVueModel<JsLanguage>, emit: &Emit) -> Option<TextRange> {
     match emit.form()? {
         // `change: (value, extra) => true`
         EmitForm::Object => {
-            let validator = root
-                .covering_element(emit.validator_range()?)
-                .ancestors()
-                .find_map(AnyVueEmitValidator::cast)?;
+            let validator = AnyVueEmitValidator::cast(vue_model.node(&emit.validator_node()?)?)?;
             range_from(&validator.parameters()?.items(), 1)
         }
         // `change: [value: string, extra: number]`
         EmitForm::TypeMember => {
-            let property = root
-                .covering_element(emit.declaration_range())
-                .ancestors()
-                .find_map(TsPropertySignatureTypeMember::cast)?;
+            let property = TsPropertySignatureTypeMember::cast(vue_model.node(emit)?)?;
             let AnyTsType::TsTupleType(tuple) = property.type_annotation()?.ty().ok()? else {
                 return None;
             };
@@ -198,10 +192,7 @@ fn extra_declared_payloads(root: &JsSyntaxNode, emit: &Emit) -> Option<TextRange
         }
         // `(e: 'change', value: string, extra: number): void`
         EmitForm::CallSignature => {
-            let signature = root
-                .covering_element(emit.declaration_range())
-                .ancestors()
-                .find_map(TsCallSignatureTypeMember::cast)?;
+            let signature = TsCallSignatureTypeMember::cast(vue_model.node(emit)?)?;
             range_from(&signature.parameters().ok()?.items(), 2)
         }
         EmitForm::ArrayString => None,

@@ -2274,6 +2274,7 @@ version = "0.7.0"
 name = "biome_vue_semantic"
 version = "0.1.0"
 dependencies = [
+ "biome_analyze",
  "biome_db",
  "biome_html_parser",
  "biome_html_syntax",

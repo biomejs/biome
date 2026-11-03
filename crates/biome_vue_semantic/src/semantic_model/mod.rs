@@ -3,11 +3,15 @@ mod component;
 mod db;
 mod layout;
 mod model;
+mod nodes;
 mod references;
 mod snippets;
 
 pub use db::vue_model_from_source;
 pub use model::*;
+pub use nodes::{
+    AnalyzedVueModel, AnyVueElementNode, AnyVuePropNode, HtmlNodeId, JsNodeId, NodeId, VueRow,
+};
 pub use references::is_template_global;
 pub use snippets::SfcSnippet;
 

@@ -5,13 +5,21 @@
 //! the analyzers of different languages. Rows refer to each other with small
 //! integer ids.
 //!
+//! A row that stands for a syntax node also holds its id: a [`JsNodeId`] for
+//! a JavaScript node, an [`HtmlNodeId`] for a node of the host document. The
+//! id names a pointer to the node, which only the analyzer of the tree holding
+//! the node can resolve. See [`AnalyzedVueModel`](super::nodes::AnalyzedVueModel).
+//!
 //! Every row belongs to one syntax tree: the host document, or one embedded
 //! JavaScript snippet. A handle's `range()` is expressed in the coordinates of
 //! the tree the row belongs to, which is what a lint rule analyzing that tree
 //! needs for a diagnostic. `host_range()` is expressed in the coordinates of
 //! the host document and is comparable across trees.
 
-use biome_rowan::{TextRange, TextSize, TokenText};
+use super::nodes::{HtmlNodeId, JsNodeId};
+use biome_html_syntax::HtmlLanguage;
+use biome_js_syntax::JsLanguage;
+use biome_rowan::{SyntaxNodePtr, TextRange, TextSize, TokenText};
 use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
 use std::ops::Range;
@@ -192,6 +200,7 @@ pub(crate) struct ElementData {
     pub(crate) chain: Option<(ChainId, u8)>,
     pub(crate) self_closing: bool,
     pub(crate) class_open: bool,
+    pub(crate) node: HtmlNodeId,
 }
 
 /// The built-in directives, and `Custom` for everything else.
@@ -281,6 +290,7 @@ pub(crate) struct AttrData {
     pub(crate) name: AttrName,
     pub(crate) value: AttrValueData,
     pub(crate) value_range: Option<TextRange>,
+    pub(crate) node: HtmlNodeId,
 }
 
 /// The role of an element in a conditional chain.
@@ -589,6 +599,9 @@ pub type DefaultSources = BitFlags<DefaultSource>;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct PropDefaultData {
     pub(crate) range: TextRange,
+    /// The node of the value, or of the object member that holds it when the
+    /// value is written as a method or a shorthand property.
+    pub(crate) node: JsNodeId,
     pub(crate) source: DefaultSource,
 }
 
@@ -605,7 +618,7 @@ pub(crate) struct PropDetail {
     pub(crate) validator: Option<TextRange>,
     /// The expression written as the prop's runtime type, as in `String` or
     /// `{ type: String }`.
-    pub(crate) runtime_type: Option<TextRange>,
+    pub(crate) runtime_type: Option<JsNodeRef>,
     pub(crate) form: PropForm,
 }
 
@@ -630,7 +643,7 @@ pub(crate) enum Detail {
     Emit {
         /// The number of payload arguments, when the declaration says.
         payload_params: Option<u8>,
-        validator: Option<TextRange>,
+        validator: Option<JsNodeRef>,
         form: EmitForm,
     },
     Method {
@@ -638,7 +651,7 @@ pub(crate) enum Detail {
         rest: bool,
     },
     Computed {
-        getter: Option<TextRange>,
+        getter: Option<JsNodeRef>,
         setter: Option<TextRange>,
     },
     /// A data property whose value is an object literal.
@@ -665,6 +678,9 @@ pub(crate) struct SymbolData {
     pub(crate) component: Option<ComponentId>,
     pub(crate) detail: Detail,
     pub(crate) type_only: bool,
+    /// The node of the whole declaration, for a declaration written in
+    /// JavaScript.
+    pub(crate) node: Option<JsNodeId>,
 }
 
 /// Where a reference is written.
@@ -763,20 +779,21 @@ pub enum ComponentKind {
 pub(crate) struct ComponentData {
     pub(crate) kind: ComponentKind,
     pub(crate) definition: TextRange,
+    pub(crate) node: JsNodeId,
     pub(crate) snippet: Option<SnippetId>,
     pub(crate) has_template: bool,
     pub(crate) instance: ScopeId,
     pub(crate) name: Option<(TokenText, TextRange)>,
     pub(crate) inherit_attrs: Tri,
-    /// The range of the `render` option in the host document.
-    pub(crate) render: Option<TextRange>,
+    /// The `render` option.
+    pub(crate) render: Option<JsNodeRef>,
     /// The `model` option, when its value is an object.
     pub(crate) model_option: Option<TextRange>,
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
     pub(crate) macro_options: MacroOptions,
     /// The function the `data` option is written as.
-    pub(crate) data_function: Option<TextRange>,
+    pub(crate) data_function: Option<JsNodeRef>,
     /// The range of the `mixins` option.
     pub(crate) mixins: Option<TextRange>,
     /// Whether the definition is written in place rather than reused from a
@@ -816,6 +833,27 @@ pub(crate) struct SemanticModelData {
     /// while no component renders the template: by `$refs[key]` in the
     /// template, or by a `<script src>` block.
     pub(crate) template_ref_uses_open: bool,
+    pub(crate) js_nodes: Vec<JsNodeData>,
+    /// The nodes of the host document that rows of the model point to, in
+    /// the coordinates of the host document.
+    pub(crate) html_nodes: Vec<SyntaxNodePtr<HtmlLanguage>>,
+}
+
+/// A JavaScript syntax node a row of the model stands for, by its range in the
+/// host document and its id.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct JsNodeRef {
+    pub(crate) range: TextRange,
+    pub(crate) node: JsNodeId,
+}
+
+/// A JavaScript syntax node that rows of the model point to.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct JsNodeData {
+    /// The snippet whose tree holds the node. `None` for a JavaScript file.
+    pub(crate) snippet: Option<SnippetId>,
+    /// The node, in the coordinates of its tree.
+    pub(crate) ptr: SyntaxNodePtr<JsLanguage>,
 }
 
 impl SemanticModelData {
@@ -1195,6 +1233,11 @@ impl Element {
         self.row().start_tag
     }
 
+    /// The node of the element, the one [`Self::range`] covers.
+    pub fn html_node(&self) -> HtmlNodeId {
+        self.row().node
+    }
+
     pub fn parent(&self) -> Option<Self> {
         self.row().parent.map(|id| Self {
             data: self.data.clone(),
@@ -1367,6 +1410,12 @@ impl Attr {
     /// The range of the value, without its quotes, in the host document.
     pub fn value_range(&self) -> Option<TextRange> {
         self.row().value_range
+    }
+
+    /// The node of the attribute or directive, the one [`Self::range`]
+    /// covers.
+    pub fn html_node(&self) -> HtmlNodeId {
+        self.row().node
     }
 
     pub fn element(&self) -> Element {
@@ -1790,6 +1839,14 @@ impl Symbol {
         matches!(self.row().detail, Detail::Object { open: false })
     }
 
+    /// The node of the whole declaration, the one [`Self::declaration_range`]
+    /// covers, for a declaration written in JavaScript.
+    ///
+    /// The node is in the tree [`Self::snippet`] names.
+    pub fn js_node(&self) -> Option<JsNodeId> {
+        self.row().node
+    }
+
     /// The references that resolve to this symbol.
     pub fn uses(&self) -> impl Iterator<Item = Reference> + '_ {
         self.data.uses[self.id.index()].iter().map(|id| Reference {
@@ -1943,6 +2000,7 @@ define_declaration!(
 pub struct PropDefault {
     range: TextRange,
     host_range: TextRange,
+    node: JsNodeId,
     source: DefaultSource,
 }
 
@@ -1960,6 +2018,15 @@ impl PropDefault {
 
     pub fn source(&self) -> DefaultSource {
         self.source
+    }
+
+    /// The node of the default value, the one [`Self::range`] covers: the
+    /// expression, or the object member that holds it when the value is
+    /// written as a method or a shorthand property.
+    ///
+    /// The node is in the tree that declares the prop.
+    pub fn js_node(&self) -> JsNodeId {
+        self.node
     }
 }
 
@@ -1997,6 +2064,7 @@ impl Prop {
             .map(move |default| PropDefault {
                 range: self.0.data.local(default.range, snippet),
                 host_range: default.range,
+                node: default.node,
                 source: default.source,
             })
     }
@@ -2039,8 +2107,14 @@ impl Prop {
     /// `props: ['user']`, `{ default: null }`, or a prop declared with a
     /// TypeScript type.
     pub fn runtime_type_range(&self) -> Option<TextRange> {
-        let range = self.prop_detail()?.runtime_type?;
-        Some(self.0.data.local(range, self.0.row().snippet))
+        let runtime_type = self.prop_detail()?.runtime_type?;
+        Some(self.0.data.local(runtime_type.range, self.0.row().snippet))
+    }
+
+    /// The node of the expression that gives the prop's runtime type, the
+    /// one [`Self::runtime_type_range`] covers.
+    pub fn runtime_type_node(&self) -> Option<JsNodeId> {
+        Some(self.prop_detail()?.runtime_type?.node)
     }
 
     pub fn form(&self) -> Option<PropForm> {
@@ -2060,11 +2134,19 @@ impl Emit {
     /// The range of the validator function, in the coordinates of the tree
     /// that declares the emit.
     pub fn validator_range(&self) -> Option<TextRange> {
+        let validator = self.validator()?;
+        Some(self.0.data.local(validator.range, self.0.row().snippet))
+    }
+
+    /// The node of the validator function, the one [`Self::validator_range`]
+    /// covers.
+    pub fn validator_node(&self) -> Option<JsNodeId> {
+        Some(self.validator()?.node)
+    }
+
+    fn validator(&self) -> Option<JsNodeRef> {
         match self.0.detail() {
-            Detail::Emit {
-                validator: Some(range),
-                ..
-            } => Some(self.0.data.local(*range, self.0.row().snippet)),
+            Detail::Emit { validator, .. } => *validator,
             _ => None,
         }
     }
@@ -2095,11 +2177,19 @@ impl Computed {
     /// The range of the getter function, in the coordinates of the tree that
     /// declares the computed property.
     pub fn getter_range(&self) -> Option<TextRange> {
+        let getter = self.getter()?;
+        Some(self.0.data.local(getter.range, self.0.row().snippet))
+    }
+
+    /// The node of the getter function, the one [`Self::getter_range`]
+    /// covers.
+    pub fn getter_node(&self) -> Option<JsNodeId> {
+        Some(self.getter()?.node)
+    }
+
+    fn getter(&self) -> Option<JsNodeRef> {
         match self.0.detail() {
-            Detail::Computed {
-                getter: Some(range),
-                ..
-            } => Some(self.0.data.local(*range, self.0.row().snippet)),
+            Detail::Computed { getter, .. } => *getter,
             _ => None,
         }
     }
@@ -2129,6 +2219,13 @@ impl Component {
     /// The range of the definition in the host document.
     pub fn host_range(&self) -> TextRange {
         self.row().definition
+    }
+
+    /// The node of the definition, the one [`Self::range`] covers.
+    ///
+    /// The node is in the tree [`Self::snippet`] names.
+    pub fn js_node(&self) -> JsNodeId {
+        self.row().node
     }
 
     /// The snippet that defines the component, in a single-file component.
@@ -2165,8 +2262,14 @@ impl Component {
     /// holds it. The range covers the whole object member, such as
     /// `render() {}` or `render: h`, whatever its value is.
     pub fn render_range(&self) -> Option<TextRange> {
-        let range = self.row().render?;
-        Some(self.data.local(range, self.row().snippet))
+        let render = self.row().render?;
+        Some(self.data.local(render.range, self.row().snippet))
+    }
+
+    /// The node of the `render` option, the one [`Self::render_range`]
+    /// covers.
+    pub fn render_node(&self) -> Option<JsNodeId> {
+        Some(self.row().render?.node)
     }
 
     /// The range of the `mixins` option, in the coordinates of the tree that
@@ -2212,8 +2315,14 @@ impl Component {
     /// not a function written in place, as in `data: { ... }` or
     /// `data: createData`.
     pub fn data_function_range(&self) -> Option<TextRange> {
-        let range = self.row().data_function?;
-        Some(self.data.local(range, self.row().snippet))
+        let data_function = self.row().data_function?;
+        Some(self.data.local(data_function.range, self.row().snippet))
+    }
+
+    /// The node of the function the `data` option is written as, the one
+    /// [`Self::data_function_range`] covers.
+    pub fn data_function_node(&self) -> Option<JsNodeId> {
+        Some(self.row().data_function?.node)
     }
 
     /// Whether the definition is written where the component is created: a

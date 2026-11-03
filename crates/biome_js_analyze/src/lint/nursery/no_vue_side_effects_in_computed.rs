@@ -1,5 +1,5 @@
 use crate::frameworks::vue::vue_call::vue_api_name;
-use crate::services::vue::{VueComponent, node_at_range};
+use crate::services::vue::VueComponent;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -111,7 +111,7 @@ impl Rule for NoVueSideEffectsInComputed {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let component = ctx.query();
         let model = ctx.model();
-        let root = ctx.root();
+        let vue_model = ctx.vue_model();
         let mut effects = Vec::new();
 
         // Computed properties of the `computed` option, which reach the
@@ -121,8 +121,9 @@ impl Rule for NoVueSideEffectsInComputed {
             .filter(|computed| computed.kind() == SymbolKind::Computed)
         {
             let Some(body) = computed
-                .getter_range()
-                .and_then(|range| node_at_range::<AnyVueComputedGetter>(&root, range))
+                .getter_node()
+                .and_then(|getter| vue_model.node(&getter))
+                .and_then(AnyVueComputedGetter::cast)
                 .and_then(|getter| options_getter_body(&getter))
             else {
                 continue;
@@ -140,7 +141,9 @@ impl Rule for NoVueSideEffectsInComputed {
         // `computed()` calls, which reach the component's state through the
         // variables `setup()` or `<script setup>` declares.
         let definition_range = component.range();
-        let Some(definition) = node_at_range::<AnyVueComponentDefinition>(&root, definition_range)
+        let Some(definition) = vue_model
+            .node(component)
+            .and_then(AnyVueComponentDefinition::cast)
         else {
             return effects.into_boxed_slice();
         };
