@@ -9,6 +9,7 @@ mod rule_context;
 mod semantic;
 mod source;
 mod token;
+mod traversal;
 
 pub use context::{JsExecContext, JsPluginRule};
 pub use module_loader::JsModuleLoader;

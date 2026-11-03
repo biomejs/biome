@@ -1,0 +1,232 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	defineRule,
+	nodeKinds,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+const CALLS = nodeKinds("JS_CALL_EXPRESSION");
+const FUNCTIONS_AND_CALLS = nodeKinds(
+	"JS_FUNCTION_DECLARATION",
+	"JS_ARROW_FUNCTION_EXPRESSION",
+	"JS_CALL_EXPRESSION",
+);
+export const calls = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		for (const call of root.descendants(CALLS)) {
+			registerDiagnostic(
+				call,
+				"information",
+				`descendants() found ${call.callee.text}().`,
+			);
+		}
+	},
+});
+export const enclosingFunctions = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const functions = [];
+		root.walk(
+			FUNCTIONS_AND_CALLS,
+			(node) => {
+				if (node.kind === "JS_CALL_EXPRESSION") {
+					const enclosing = functions.at(-1) ?? "the module";
+					registerDiagnostic(
+						node,
+						"information",
+						`walk() found ${node.callee.text}() in ${enclosing}.`,
+					);
+				} else if (node.id?.text === "skipped") {
+					return false;
+				} else {
+					functions.push(node.id?.text ?? "an arrow function");
+				}
+			},
+			(node) => {
+				if (node.kind !== "JS_CALL_EXPRESSION") {
+					functions.pop();
+				}
+			},
+		);
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+setup();
+function outer() {
+    first();
+    const inner = () => second(third());
+    fourth();
+}
+function skipped() {
+    hidden();
+}
+last();
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found setup().
+  
+  > 1 │ setup();
+      │ ^^^^^^^
+    2 │ function outer() {
+    3 │     first();
+  
+
+/file.js:3:5 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found first().
+  
+    1 │ setup();
+    2 │ function outer() {
+  > 3 │     first();
+      │     ^^^^^^^
+    4 │     const inner = () => second(third());
+    5 │     fourth();
+  
+
+/file.js:4:25 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found second().
+  
+    2 │ function outer() {
+    3 │     first();
+  > 4 │     const inner = () => second(third());
+      │                         ^^^^^^^^^^^^^^^
+    5 │     fourth();
+    6 │ }
+  
+
+/file.js:4:32 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found third().
+  
+    2 │ function outer() {
+    3 │     first();
+  > 4 │     const inner = () => second(third());
+      │                                ^^^^^^^
+    5 │     fourth();
+    6 │ }
+  
+
+/file.js:5:5 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found fourth().
+  
+    3 │     first();
+    4 │     const inner = () => second(third());
+  > 5 │     fourth();
+      │     ^^^^^^^^
+    6 │ }
+    7 │ function skipped() {
+  
+
+/file.js:8:5 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found hidden().
+  
+     6 │ }
+     7 │ function skipped() {
+   > 8 │     hidden();
+       │     ^^^^^^^^
+     9 │ }
+    10 │ last();
+  
+
+/file.js:10:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i descendants() found last().
+  
+     8 │     hidden();
+     9 │ }
+  > 10 │ last();
+       │ ^^^^^^
+    11 │ 
+  
+
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i walk() found setup() in the module.
+  
+  > 1 │ setup();
+      │ ^^^^^^^
+    2 │ function outer() {
+    3 │     first();
+  
+
+/file.js:3:5 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i walk() found first() in outer.
+  
+    1 │ setup();
+    2 │ function outer() {
+  > 3 │     first();
+      │     ^^^^^^^
+    4 │     const inner = () => second(third());
+    5 │     fourth();
+  
+
+/file.js:4:25 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i walk() found second() in an arrow function.
+  
+    2 │ function outer() {
+    3 │     first();
+  > 4 │     const inner = () => second(third());
+      │                         ^^^^^^^^^^^^^^^
+    5 │     fourth();
+    6 │ }
+  
+
+/file.js:4:32 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i walk() found third() in an arrow function.
+  
+    2 │ function outer() {
+    3 │     first();
+  > 4 │     const inner = () => second(third());
+      │                                ^^^^^^^
+    5 │     fourth();
+    6 │ }
+  
+
+/file.js:5:5 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i walk() found fourth() in outer.
+  
+    3 │     first();
+    4 │     const inner = () => second(third());
+  > 5 │     fourth();
+      │     ^^^^^^^^
+    6 │ }
+    7 │ function skipped() {
+  
+
+/file.js:10:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i walk() found last() in the module.
+  
+     8 │     hidden();
+     9 │ }
+  > 10 │ last();
+       │ ^^^^^^
+    11 │
+```
