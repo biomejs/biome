@@ -981,7 +981,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     last_content_needs_blank_before_fenced_code_block =
                         content_needs_blank_before_fenced_code_block(&content);
                     last_content_has_trailing_newline = false;
-                    at_line_terminator = content.is_html_block() || content.is_fenced_block();
+                    at_line_terminator = content.is_html_block()
+                        || content.is_fenced_block()
+                        || content.is_mdx_block();
                     pending_quote_continuation |= has_following_quote_prefix;
                 }
 
@@ -1031,14 +1033,17 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             })]
                         )?;
                     } else {
-                        Self::emit_pending_breaks(
-                            pending_breaks,
-                            &mut pending_quote_continuation,
-                            last_content_was_fenced_code_block,
-                            last_content_needs_blank_before_fenced_code_block,
-                            &content,
-                            f,
-                        )?;
+                        // The constructs of an MDX flow line stay on one line.
+                        if !content.continues_mdx_flow_line() {
+                            Self::emit_pending_breaks(
+                                pending_breaks,
+                                &mut pending_quote_continuation,
+                                last_content_was_fenced_code_block,
+                                last_content_needs_blank_before_fenced_code_block,
+                                &content,
+                                f,
+                            )?;
+                        }
                         Self::fmt_list_content(&content, f)?;
                         pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                         pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
@@ -1047,7 +1052,9 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         last_content_needs_blank_before_fenced_code_block =
                             content_needs_blank_before_fenced_code_block(&content);
                         last_content_has_trailing_newline = false;
-                        at_line_terminator = content.is_html_block() || content.is_fenced_block();
+                        at_line_terminator = content.is_html_block()
+                            || content.is_fenced_block()
+                            || content.is_mdx_block();
                     }
                 }
             }

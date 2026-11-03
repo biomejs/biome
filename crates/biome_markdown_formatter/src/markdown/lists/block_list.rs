@@ -367,18 +367,12 @@ impl PreviousBlock {
                 AnyMdBlock::AnyMdLeafBlock(
                     AnyMdLeafBlock::MdParagraph(_) | AnyMdLeafBlock::GfmTable(_)
                 )
-            ) || matches!(
-                block,
-                // MDX requires a blank line after an ESM block. Block tags and
-                // expressions keep theirs like HTML blocks.
-                AnyMdBlock::AnyMdLeafBlock(
-                    AnyMdLeafBlock::MdxEsmBlock(_)
-                        | AnyMdLeafBlock::MdxBlockExpression(_)
-                        | AnyMdLeafBlock::MdxJsxBlockTag(_)
-                )
             ) || block
                 .as_any_md_container_block()
                 .is_some_and(|container| container.as_md_quote().is_some())
+                // MDX requires a blank line after an ESM block. Block tags and
+                // expressions keep theirs like HTML blocks.
+                || block.is_mdx_block()
         })
     }
 }

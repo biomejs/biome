@@ -80,6 +80,37 @@ impl AnyMdBlock {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_)))
     }
 
+    /// Returns whether the block is an MDX ESM block, block tag, or block
+    /// expression. Like a fenced code block, none of them holds the line
+    /// ending of its last line.
+    pub const fn is_mdx_block(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(
+                AnyMdLeafBlock::MdxEsmBlock(_)
+                    | AnyMdLeafBlock::MdxBlockExpression(_)
+                    | AnyMdLeafBlock::MdxJsxBlockTag(_)
+            )
+        )
+    }
+
+    /// Returns whether the block is an MDX block tag or block expression that
+    /// continues the line of the construct before it, as `{a}` does in
+    /// `<Tip /> {a}`. The constructs of one line are consecutive siblings.
+    pub fn continues_mdx_flow_line(&self) -> bool {
+        matches!(
+            self,
+            Self::AnyMdLeafBlock(
+                AnyMdLeafBlock::MdxBlockExpression(_) | AnyMdLeafBlock::MdxJsxBlockTag(_)
+            )
+        ) && self.syntax().prev_sibling().is_some_and(|sibling| {
+            matches!(
+                sibling.kind(),
+                MarkdownSyntaxKind::MDX_BLOCK_EXPRESSION | MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG
+            )
+        })
+    }
+
     pub fn is_html_comment(&self) -> bool {
         match self {
             Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(block)) => block.is_html_comment(),
