@@ -1355,6 +1355,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("suspicious", "noShadowRestrictedNames", TypeId::of::<biome_rule_options::no_shadow_restricted_names::NoShadowRestrictedNamesOptions>()));
     result.push((
         "nursery",
+        "noSharedBranchCode",
+        TypeId::of::<biome_rule_options::no_shared_branch_code::NoSharedBranchCodeOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noShortTimeValues",
         TypeId::of::<biome_rule_options::no_short_time_values::NoShortTimeValuesOptions>(),
     ));

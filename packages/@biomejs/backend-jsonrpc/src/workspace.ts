@@ -3278,6 +3278,11 @@ export interface Nursery {
 	 */
 	noSelfNestedLayer?: NoSelfNestedLayerConfiguration;
 	/**
+	 * Disallow the same code at the start or end of every branch of an if statement.
+	 * See https://biomejs.dev/linter/rules/no-shared-branch-code
+	 */
+	noSharedBranchCode?: NoSharedBranchCodeConfiguration;
+	/**
 	 * Disallow animation and transition times that are shorter than a configured minimum.
 	 * See https://biomejs.dev/linter/rules/no-short-time-values
 	 */
@@ -6676,6 +6681,9 @@ export type NoSelfImportConfiguration =
 export type NoSelfNestedLayerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSelfNestedLayerOptions;
+export type NoSharedBranchCodeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSharedBranchCodeOptions;
 export type NoShortTimeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShortTimeValuesOptions;
@@ -9724,6 +9732,10 @@ export interface RuleWithNoSelfImportOptions {
 export interface RuleWithNoSelfNestedLayerOptions {
 	level: RulePlainConfiguration;
 	options?: NoSelfNestedLayerOptions;
+}
+export interface RuleWithNoSharedBranchCodeOptions {
+	level: RulePlainConfiguration;
+	options?: NoSharedBranchCodeOptions;
 }
 export interface RuleWithNoShortTimeValuesOptions {
 	level: RulePlainConfiguration;
@@ -12940,6 +12952,7 @@ export type NoReturnArrayPushOptions = {};
 export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSelfNestedLayerOptions = {};
+export type NoSharedBranchCodeOptions = {};
 export interface NoShortTimeValuesOptions {
 	/**
 	 * The shortest time allowed for animations and transitions, as a whole number of milliseconds.
@@ -15116,6 +15129,7 @@ export type Category =
 	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSelfNestedLayer"
+	| "lint/nursery/noSharedBranchCode"
 	| "lint/nursery/noShortTimeValues"
 	| "lint/nursery/noSubtractionComparison"
 	| "lint/nursery/noSinglePromiseInPromiseMethods"

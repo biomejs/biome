@@ -6511,6 +6511,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSharedBranchCodeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSharedBranchCodeOptions" }
+			]
+		},
+		"NoSharedBranchCodeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoShortTimeValuesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9222,6 +9232,13 @@
 					"description": "Disallow nesting a cascade layer inside a layer with the same name.\nSee https://biomejs.dev/linter/rules/no-self-nested-layer",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfNestedLayerConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSharedBranchCode": {
+					"description": "Disallow the same code at the start or end of every branch of an if statement.\nSee https://biomejs.dev/linter/rules/no-shared-branch-code",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSharedBranchCodeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14464,6 +14481,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoShadowRestrictedNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSharedBranchCodeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSharedBranchCodeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
