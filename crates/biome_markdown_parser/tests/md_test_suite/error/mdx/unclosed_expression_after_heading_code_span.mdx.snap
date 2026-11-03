@@ -1,0 +1,115 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+# `
+`{
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..2 " " [] [],
+                    },
+                    MdInlineCode {
+                        l_tick_token: BACKTICK@2..3 "`" [] [],
+                        content: MdInlineItemList [
+                            MdTextual {
+                                value_token: MD_TEXTUAL_LITERAL@3..4 "\n" [] [],
+                            },
+                        ],
+                        r_tick_token: BACKTICK@4..5 "`" [] [],
+                    },
+                    MdxInlineExpression {
+                        l_curly_token: L_CURLY@5..6 "{" [] [],
+                        content: missing (optional),
+                        r_curly_token: missing (required),
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@6..7 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@7..7 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..7
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..7
+    0: MD_HEADER@0..6
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      2: MD_PARAGRAPH@1..6
+        0: MD_INLINE_ITEM_LIST@1..6
+          0: MD_TEXTUAL@1..2
+            0: MD_TEXTUAL_LITERAL@1..2 " " [] []
+          1: MD_INLINE_CODE@2..5
+            0: BACKTICK@2..3 "`" [] []
+            1: MD_INLINE_ITEM_LIST@3..4
+              0: MD_TEXTUAL@3..4
+                0: MD_TEXTUAL_LITERAL@3..4 "\n" [] []
+            2: BACKTICK@4..5 "`" [] []
+          2: MDX_INLINE_EXPRESSION@5..6
+            0: L_CURLY@5..6 "{" [] []
+            1: (empty)
+            2: (empty)
+      3: MD_HASH_LIST@6..6
+    1: MD_NEWLINE@6..7
+      0: NEWLINE@6..7 "\n" [] []
+  3: EOF@7..7 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_expression_after_heading_code_span.mdx:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+    1 │ # `
+  > 2 │ `{
+      │  ^
+    3 │ 
+  
+  i expression started here
+  
+    1 │ # `
+  > 2 │ `{
+      │  ^
+    3 │ 
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```
