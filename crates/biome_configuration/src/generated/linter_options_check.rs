@@ -524,6 +524,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_equals_to_null::NoEqualsToNullOptions>(),
     ));
     result.push((
+        "nursery",
+        "noErasingOperation",
+        TypeId::of::<biome_rule_options::no_erasing_operation::NoErasingOperationOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noEvolvingTypes",
         TypeId::of::<biome_rule_options::no_evolving_types::NoEvolvingTypesOptions>(),
