@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+withSpaces.replaceAll(/\s+/g as RegExp, ",");
+
+const typed: RegExp = /\s+/g;
+withSpaces.replaceAll(typed, ",");
+
+withSpaces.replaceAll(new RegExp("\\s+", "g" as const), ",");
+
+```
