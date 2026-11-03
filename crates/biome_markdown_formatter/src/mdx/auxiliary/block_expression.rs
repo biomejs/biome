@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::shared::follows_construct_with_space;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdxBlockExpression, MdxBlockExpressionFields};
 
@@ -11,7 +12,11 @@ impl FormatNodeRule<MdxBlockExpression> for FormatMdxBlockExpression {
             content,
             r_curly_token,
         } = node.as_fields();
+        let l_curly_token = l_curly_token?;
 
+        if follows_construct_with_space(node.syntax(), &l_curly_token) {
+            write!(f, [space()])?;
+        }
         write!(
             f,
             [

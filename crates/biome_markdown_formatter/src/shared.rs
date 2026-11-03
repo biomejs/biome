@@ -2,7 +2,7 @@ use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxToken};
+use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxNode, MarkdownSyntaxToken};
 use biome_rowan::TextSize;
 use std::borrow::Cow;
 
@@ -214,6 +214,24 @@ impl Format<MarkdownFormatContext> for FormatLiteralLines<'_> {
 
         Ok(())
     }
+}
+
+/// Returns whether the MDX block construct `node`, whose first token is
+/// `token`, follows another construct of its line with spaces in between.
+///
+/// The constructs of an MDX flow line, such as `<Note> {props.x} </Note>`,
+/// are consecutive siblings and keep a single space where the author
+/// separated them. The spaces before the first construct of a line are its
+/// indentation, which MDX gives no meaning, so they aren't printed.
+pub(crate) fn follows_construct_with_space(
+    node: &MarkdownSyntaxNode,
+    token: &MarkdownSyntaxToken,
+) -> bool {
+    AnyMdBlock::cast_ref(node).is_some_and(|block| block.continues_mdx_flow_line())
+        && token
+            .leading_trivia()
+            .pieces()
+            .any(|piece| piece.is_whitespace())
 }
 
 /// Formats the literal that holds the JavaScript of an MDX construct.
