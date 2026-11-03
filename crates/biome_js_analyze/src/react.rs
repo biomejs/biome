@@ -299,6 +299,12 @@ fn is_react_export(binding: &Binding, lib: ReactLibrary) -> bool {
 }
 
 fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Option<bool> {
+    // Only the binding of a named import specifier can match. The model
+    // records it as an import whenever it has a name a reference can resolve
+    // to, so other bindings are rejected without locating their node.
+    if !binding.is_imported() {
+        return None;
+    }
     let ident = JsIdentifierBinding::cast_ref(&binding.syntax())?;
     let import_specifier = ident.parent::<AnyJsNamedImportSpecifier>()?;
     let name_token = match &import_specifier {
