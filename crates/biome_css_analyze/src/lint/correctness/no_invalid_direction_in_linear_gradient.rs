@@ -7,7 +7,10 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssExpression, CssFunction};
+use biome_css_syntax::{
+    AnyCssExpression, AnyCssFunction, CssFunction, ScssInterpolation, ScssModuleMemberAccess,
+    ScssVariable,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
@@ -24,6 +27,9 @@ declare_lint_rule! {
     /// A gradient direction must be either an angle with a unit, such as `45deg`, or a side or
     /// corner preceded by `to`, such as `to top` or `to bottom right`. Writing only `top` or a
     /// unitless number uses invalid or outdated syntax.
+    ///
+    /// A direction that contains a function call, such as `var(--direction)`, or a Sass variable or
+    /// interpolation isn't checked, because its value isn't known until it is computed.
     ///
     /// ## Examples
     ///
@@ -94,6 +100,9 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         }
         let arguments = node.items();
         let first_expression = arguments.first()?.ok()?;
+        if has_dynamic_value(&first_expression) {
+            return None;
+        }
         let first_expression_text = first_expression.to_trimmed_text();
         if IN_KEYWORD.is_match(&first_expression_text) {
             return None;
@@ -151,6 +160,18 @@ impl Rule for NoInvalidDirectionInLinearGradient {
             }),
         )
     }
+}
+
+/// Whether the expression contains a value that is only known when Sass compiles the file or the
+/// browser computes the style, such as `$side`, `#{$dir}`, `var(--dir)` or a function call.
+fn has_dynamic_value(expression: &AnyCssExpression) -> bool {
+    expression.syntax().descendants().any(|node| {
+        let kind = node.kind();
+        AnyCssFunction::can_cast(kind)
+            || ScssVariable::can_cast(kind)
+            || ScssInterpolation::can_cast(kind)
+            || ScssModuleMemberAccess::can_cast(kind)
+    })
 }
 
 fn is_standdard_direction(direction: &str, has_prefix: bool) -> bool {

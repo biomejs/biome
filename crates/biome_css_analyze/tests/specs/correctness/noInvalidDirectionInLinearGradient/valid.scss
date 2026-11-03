@@ -1,0 +1,9 @@
+/* should not generate diagnostics */
+@use "sass:math";
+$dir-top: to top;
+$side: left;
+.a { background: linear-gradient($dir-top, red, blue); }
+.b { background: linear-gradient(to $side, red, blue); }
+.c { background: linear-gradient(#{$dir-top}, red, blue); }
+.d { background: linear-gradient(get-direction(top), red, blue); }
+.e { background: linear-gradient(math.div(90deg, 2), red, blue); }
