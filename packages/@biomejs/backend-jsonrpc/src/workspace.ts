@@ -3118,6 +3118,11 @@ export interface Nursery {
 	 */
 	noMissingScssInterpolation?: NoMissingScssInterpolationConfiguration;
 	/**
+	 * Disallow creating an error with new without throwing it.
+	 * See https://biomejs.dev/linter/rules/no-missing-throw
+	 */
+	noMissingThrow?: NoMissingThrowConfiguration;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 * See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
@@ -6490,6 +6495,9 @@ export type NoMisplacedListElementsConfiguration =
 export type NoMissingScssInterpolationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMissingScssInterpolationOptions;
+export type NoMissingThrowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMissingThrowOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -9412,6 +9420,14 @@ export interface RuleWithNoMissingScssInterpolationOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMissingScssInterpolationOptions;
+}
+export interface RuleWithNoMissingThrowOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoMissingThrowOptions;
 }
 export interface RuleWithNoMisusedPromisesOptions {
 	/**
@@ -12651,6 +12667,7 @@ export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
 export type NoMissingScssInterpolationOptions = {};
+export type NoMissingThrowOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
@@ -14796,6 +14813,7 @@ export type Category =
 	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingScssInterpolation"
+	| "lint/nursery/noMissingThrow"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"

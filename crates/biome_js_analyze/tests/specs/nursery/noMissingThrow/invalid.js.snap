@@ -1,0 +1,258 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function foo() {
+	new Error();
+}
+
+const bar = () => {
+	new Error("message");
+};
+
+new TypeError("message")
+
+new RangeError;
+
+(new Error("parenthesized"));
+
+new lib.CustomError();
+
+new (Error)();
+
+if (condition) new Error("in if");
+
+function withComment() {
+	// leading comment
+	new ValidationError("message"); // trailing comment
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:2 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function foo() {
+  > 3 │ 	new Error();
+      │ 	^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    3 │ → throw·new·Error();
+      │   ++++++            
+
+```
+
+```
+invalid.js:7:2 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    6 │ const bar = () => {
+  > 7 │ 	new Error("message");
+      │ 	^^^^^^^^^^^^^^^^^^^^
+    8 │ };
+    9 │ 
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    7 │ → throw·new·Error("message");
+      │   ++++++                     
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+     8 │ };
+     9 │ 
+  > 10 │ new TypeError("message")
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ new RangeError;
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    10 │ throw·new·TypeError("message")
+       │ ++++++                        
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    10 │ new TypeError("message")
+    11 │ 
+  > 12 │ new RangeError;
+       │ ^^^^^^^^^^^^^^
+    13 │ 
+    14 │ (new Error("parenthesized"));
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    12 │ throw·new·RangeError;
+       │ ++++++               
+
+```
+
+```
+invalid.js:14:2 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    12 │ new RangeError;
+    13 │ 
+  > 14 │ (new Error("parenthesized"));
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ new lib.CustomError();
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    14 │ throw·(new·Error("parenthesized"));
+       │ ++++++                             
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    14 │ (new Error("parenthesized"));
+    15 │ 
+  > 16 │ new lib.CustomError();
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ new (Error)();
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    16 │ throw·new·lib.CustomError();
+       │ ++++++                      
+
+```
+
+```
+invalid.js:18:1 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    16 │ new lib.CustomError();
+    17 │ 
+  > 18 │ new (Error)();
+       │ ^^^^^^^^^^^^^
+    19 │ 
+    20 │ if (condition) new Error("in if");
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    18 │ throw·new·(Error)();
+       │ ++++++              
+
+```
+
+```
+invalid.js:20:16 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    18 │ new (Error)();
+    19 │ 
+  > 20 │ if (condition) new Error("in if");
+       │                ^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ function withComment() {
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    20 │ if·(condition)·throw·new·Error("in·if");
+       │                ++++++                   
+
+```
+
+```
+invalid.js:24:2 lint/nursery/noMissingThrow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This error is created but never thrown.
+  
+    22 │ function withComment() {
+    23 │ 	// leading comment
+  > 24 │ 	new ValidationError("message"); // trailing comment
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i Creating an error does nothing by itself, so the code keeps running as if nothing went wrong.
+  
+  i Add the throw keyword to throw the error, or remove the expression if it isn't needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add the throw keyword.
+  
+    24 │ → throw·new·ValidationError("message");·//·trailing·comment
+       │   ++++++                                                   
+
+```
