@@ -7,7 +7,6 @@ pub(crate) struct FormatMdxBlockExpression;
 impl FormatNodeRule<MdxBlockExpression> for FormatMdxBlockExpression {
     fn fmt_fields(&self, node: &MdxBlockExpression, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdxBlockExpressionFields {
-            indent,
             l_curly_token,
             content,
             r_curly_token,
@@ -16,7 +15,6 @@ impl FormatNodeRule<MdxBlockExpression> for FormatMdxBlockExpression {
         write!(
             f,
             [
-                indent.format(),
                 l_curly_token.format(),
                 content.format(),
                 r_curly_token.format()
