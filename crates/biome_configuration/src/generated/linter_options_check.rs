@@ -3274,6 +3274,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_valid_autocomplete::UseValidAutocompleteOptions>(),
     ));
     result.push((
+        "nursery",
+        "useValidCharacterComparison",
+        TypeId::of::<
+            biome_rule_options::use_valid_character_comparison::UseValidCharacterComparisonOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "useValidForDirection",
         TypeId::of::<biome_rule_options::use_valid_for_direction::UseValidForDirectionOptions>(),
