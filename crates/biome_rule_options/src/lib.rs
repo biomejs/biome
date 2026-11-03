@@ -21,6 +21,7 @@ pub mod no_assign_in_expressions;
 pub mod no_astro_conflicting_set_directives;
 pub mod no_astro_set_html_directive;
 pub mod no_async_promise_executor;
+pub mod no_async_promise_finally;
 pub mod no_autofocus;
 pub mod no_await_in_loops;
 pub mod no_await_in_promise_methods;
