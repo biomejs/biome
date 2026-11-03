@@ -3,7 +3,8 @@ use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
+    LineWidth, QuoteStyle, TrailingNewline, TransformSourceMap, comments::Comments,
+    printer::PrinterOptions,
 };
 use biome_languages::MdFileSource;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
@@ -32,6 +33,7 @@ pub struct MdFormatOptions {
     trailing_newline: TrailingNewline,
     prose_wrap: ProseWrap,
     unordered_list_marker: UnorderedListMarker,
+    quote_style: QuoteStyle,
     file_source: MdFileSource,
 }
 
@@ -171,6 +173,7 @@ impl MdFormatOptions {
             trailing_newline: TrailingNewline::default(),
             prose_wrap: ProseWrap::default(),
             unordered_list_marker: UnorderedListMarker::default(),
+            quote_style: QuoteStyle::default(),
         }
     }
 
@@ -212,6 +215,11 @@ impl MdFormatOptions {
         self
     }
 
+    pub fn with_quote_style(mut self, quote_style: QuoteStyle) -> Self {
+        self.quote_style = quote_style;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -246,6 +254,14 @@ impl MdFormatOptions {
 
     pub fn set_unordered_list_marker(&mut self, unordered_list_marker: UnorderedListMarker) {
         self.unordered_list_marker = unordered_list_marker;
+    }
+
+    pub fn quote_style(&self) -> QuoteStyle {
+        self.quote_style
+    }
+
+    pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
+        self.quote_style = quote_style;
     }
 
     /// Returns the file source that the document was parsed with, including whether
@@ -324,6 +340,7 @@ impl fmt::Display for MdFormatOptions {
         writeln!(f, "Line width: {}", self.line_width.value())?;
         writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
         writeln!(f, "Prose wrap: {}", self.prose_wrap)?;
-        writeln!(f, "Unordered list marker: {}", self.unordered_list_marker)
+        writeln!(f, "Unordered list marker: {}", self.unordered_list_marker)?;
+        writeln!(f, "Quote style: {}", self.quote_style)
     }
 }

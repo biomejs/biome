@@ -13,6 +13,9 @@ const PROSE_WRAP_ALWAYS: &str = "This is a long paragraph with enough\nwords to 
 const UNFORMATTED_LIST: &str = "- one\n- two\n";
 const ASTERISK_LIST: &str = "* one\n* two\n";
 const PLUS_LIST: &str = "+ one\n+ two\n";
+const UNFORMATTED_LINK_TITLE: &str = "[Biome](https://biomejs.dev \"title\")\n";
+const LINK_TITLE_DOUBLE: &str = "[Biome](https://biomejs.dev \"title\")\n";
+const LINK_TITLE_SINGLE: &str = "[Biome](https://biomejs.dev 'title')\n";
 
 #[test]
 fn format_markdown_files() {
@@ -418,6 +421,100 @@ fn format_markdown_files_with_unordered_list_marker_cli_option() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "format_markdown_files_with_unordered_list_marker_cli_option",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_markdown_files_with_quote_style_override() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(
+        config_path.into(),
+        r#"{
+    "overrides": [
+        {
+            "includes": ["special/**"],
+            "markdown": {
+                "formatter": {
+                    "quoteStyle": "single"
+                }
+            }
+        }
+    ]
+}"#
+        .as_bytes(),
+    );
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(file_path.into(), UNFORMATTED_LINK_TITLE.as_bytes());
+
+    let overridden_file_path = Utf8Path::new("special/file.md");
+    fs.insert(
+        overridden_file_path.into(),
+        UNFORMATTED_LINK_TITLE.as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                file_path.as_str(),
+                overridden_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, LINK_TITLE_DOUBLE);
+    assert_file_contents(&fs, overridden_file_path, LINK_TITLE_SINGLE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_markdown_files_with_quote_style_override",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_markdown_files_with_quote_style_cli_option() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.md");
+    fs.insert(file_path.into(), UNFORMATTED_LINK_TITLE.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "format",
+                "--write",
+                "--md-formatter-quote-style",
+                "single",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, file_path, LINK_TITLE_SINGLE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_markdown_files_with_quote_style_cli_option",
         fs,
         console,
         result,
