@@ -4158,6 +4158,11 @@ export interface Nursery {
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 	/**
+	 * Enforce that each file defines at most one Vue component.
+	 * See https://biomejs.dev/linter/rules/use-vue-one-component-per-file
+	 */
+	useVueOneComponentPerFile?: UseVueOneComponentPerFileConfiguration;
+	/**
 	 * Require the type of a Vue prop to be a constructor.
 	 * See https://biomejs.dev/linter/rules/use-vue-prop-type-constructor
 	 */
@@ -7154,6 +7159,9 @@ export type UseVueMacroVariableNameConfiguration =
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVueOneComponentPerFileConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueOneComponentPerFileOptions;
 export type UseVuePropTypeConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVuePropTypeConstructorOptions;
@@ -10609,6 +10617,10 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVueOneComponentPerFileOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueOneComponentPerFileOptions;
+}
 export interface RuleWithUseVuePropTypeConstructorOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13397,6 +13409,7 @@ export interface UseVueMacroVariableNameOptions {
 	useSlots?: string;
 }
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVueOneComponentPerFileOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
 export type UseVueRenderReturnOptions = {};
 export type UseVueSeparateStaticClassOptions = {};
@@ -15173,6 +15186,7 @@ export type Category =
 	| "lint/nursery/useVueMacroVariableName"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueOneComponentPerFile"
 	| "lint/nursery/useVuePropTypeConstructor"
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueSeparateStaticClass"

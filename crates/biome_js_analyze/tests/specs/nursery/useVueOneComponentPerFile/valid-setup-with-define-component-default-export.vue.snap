@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid-setup-with-define-component-default-export.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({ inheritAttrs: false });
+</script>
+
+<script setup lang="ts">
+const props = defineProps<{ title: string }>();
+</script>
+
+```
