@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/mdx/constructs.mdx
+---
+
+# Input
+
+```mdx
+import {Chart} from './chart.js'
+
+# Hello, {props.name}
+
+<Note type="tip">
+
+Some text.
+
+</Note>
+
+<Card>{ props.children }</Card>
+
+A <Badge>new</Badge> tag and {  value  } in text.
+
+```
+
+
+# Formatted
+
+```mdx
+import {Chart} from './chart.js'
+
+# Hello, {props.name}
+
+<Note type="tip">
+
+Some text.
+
+</Note>
+
+<Card>{ props.children }</Card>
+
+A <Badge>new</Badge> tag and {  value  } in text.
+
+```
