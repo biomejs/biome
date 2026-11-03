@@ -1,0 +1,804 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a1 = { ...(foo || {}) };
+const a2 = { ...(foo ?? {}) };
+const a3 = { ...(foo ?? (( {} ))) };
+const a4 = { ...((( foo )) ?? (( {} ))) };
+const a5 = { ...(( (( foo )) ?? (( {} )) )) };
+const a6 = { ...foo || {} };
+const a7 = { ...(foo || {}), };
+const a8 = { bar, ...(foo || {}), baz: 1 };
+async () => ({ ...((await foo) || {}) });
+const b1 = { ...(0 || {}) };
+const b2 = { ...(null || {}) };
+const b3 = { ...(undefined || {}) };
+const b4 = { ...("" || {}) };
+const b5 = { ...((a && b) || {}) };
+const b6 = { ...(a && b || {}) };
+const b7 = { ...({} || {}) };
+const b8 = { ...(foo.bar?.baz || {}) };
+const c1 = { ...((foo ?? {}) || {}) };
+const c2 = { ...({ ...(foo || {}) }) };
+const c3 = { ...({ ...((0, foo) || {}) }) };
+function d1(a = { ...(bar || {}) }) {}
+// Comments that the fix keeps
+const e1 = { ...(getObject(/* keep */) || {}) };
+const e2 = { ...((/* keep */ foo) ?? {}) };
+const e3 = { ...({ /* keep */ value: 1 } || {}) };
+const e4 = { ...(getObject(// keep
+) ?? {}) };
+const e5 = { /* keep */ ...(foo || {}) /* keep */ };
+// Comments that would be removed, so there is no fix
+const f1 = { ...(foo || { /* keep */ }) };
+const f2 = { ...((foo) /* keep */ ?? {}) };
+const f3 = { ...(foo /* keep */ || {}) };
+const f4 = { ...(foo || /* keep */ {}) };
+const f5 = { ...(/* keep */ foo || {}) };
+
+```
+
+# Diagnostics
+```
+invalid.js:2:22 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a1 = { ...(foo || {}) };
+      │                      ^^^^^
+    3 │ const a2 = { ...(foo ?? {}) };
+    4 │ const a3 = { ...(foo ?? (( {} ))) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    2 │ const·a1·=·{·...(foo·||·{})·};
+      │                 -   -------   
+
+```
+
+```
+invalid.js:3:22 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a1 = { ...(foo || {}) };
+  > 3 │ const a2 = { ...(foo ?? {}) };
+      │                      ^^^^^
+    4 │ const a3 = { ...(foo ?? (( {} ))) };
+    5 │ const a4 = { ...((( foo )) ?? (( {} ))) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    3 │ const·a2·=·{·...(foo·??·{})·};
+      │                 -   -------   
+
+```
+
+```
+invalid.js:4:22 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    2 │ const a1 = { ...(foo || {}) };
+    3 │ const a2 = { ...(foo ?? {}) };
+  > 4 │ const a3 = { ...(foo ?? (( {} ))) };
+      │                      ^^^^^^^^^^^
+    5 │ const a4 = { ...((( foo )) ?? (( {} ))) };
+    6 │ const a5 = { ...(( (( foo )) ?? (( {} )) )) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    4 │ const·a3·=·{·...(foo·??·((·{}·)))·};
+      │                 -   -------------   
+
+```
+
+```
+invalid.js:5:28 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    3 │ const a2 = { ...(foo ?? {}) };
+    4 │ const a3 = { ...(foo ?? (( {} ))) };
+  > 5 │ const a4 = { ...((( foo )) ?? (( {} ))) };
+      │                            ^^^^^^^^^^^
+    6 │ const a5 = { ...(( (( foo )) ?? (( {} )) )) };
+    7 │ const a6 = { ...foo || {} };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    5 │ const·a4·=·{·...(((·foo·))·??·((·{}·)))·};
+      │                   -    ------ -------     
+
+```
+
+```
+invalid.js:6:30 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    4 │ const a3 = { ...(foo ?? (( {} ))) };
+    5 │ const a4 = { ...((( foo )) ?? (( {} ))) };
+  > 6 │ const a5 = { ...(( (( foo )) ?? (( {} )) )) };
+      │                              ^^^^^^^^^^^
+    7 │ const a6 = { ...foo || {} };
+    8 │ const a7 = { ...(foo || {}), };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    6 │ const·a5·=·{·...((·((·foo·))·??·((·{}·))·))·};
+      │                    ---   ---------------      
+
+```
+
+```
+invalid.js:7:21 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    5 │ const a4 = { ...((( foo )) ?? (( {} ))) };
+    6 │ const a5 = { ...(( (( foo )) ?? (( {} )) )) };
+  > 7 │ const a6 = { ...foo || {} };
+      │                     ^^^^^
+    8 │ const a7 = { ...(foo || {}), };
+    9 │ const a8 = { bar, ...(foo || {}), baz: 1 };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    7 │ const·a6·=·{·...foo·||·{}·};
+      │                     ------  
+
+```
+
+```
+invalid.js:8:22 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+     6 │ const a5 = { ...(( (( foo )) ?? (( {} )) )) };
+     7 │ const a6 = { ...foo || {} };
+   > 8 │ const a7 = { ...(foo || {}), };
+       │                      ^^^^^
+     9 │ const a8 = { bar, ...(foo || {}), baz: 1 };
+    10 │ async () => ({ ...((await foo) || {}) });
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    8 │ const·a7·=·{·...(foo·||·{}),·};
+      │                 -   -------    
+
+```
+
+```
+invalid.js:9:27 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+     7 │ const a6 = { ...foo || {} };
+     8 │ const a7 = { ...(foo || {}), };
+   > 9 │ const a8 = { bar, ...(foo || {}), baz: 1 };
+       │                           ^^^^^
+    10 │ async () => ({ ...((await foo) || {}) });
+    11 │ const b1 = { ...(0 || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    9 │ const·a8·=·{·bar,·...(foo·||·{}),·baz:·1·};
+      │                      -   -------           
+
+```
+
+```
+invalid.js:10:32 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+     8 │ const a7 = { ...(foo || {}), };
+     9 │ const a8 = { bar, ...(foo || {}), baz: 1 };
+  > 10 │ async () => ({ ...((await foo) || {}) });
+       │                                ^^^^^
+    11 │ const b1 = { ...(0 || {}) };
+    12 │ const b2 = { ...(null || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    10 │ async·()·=>·({·...((await·foo)·||·{})·});
+       │                    -         -------     
+
+```
+
+```
+invalid.js:11:20 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+     9 │ const a8 = { bar, ...(foo || {}), baz: 1 };
+    10 │ async () => ({ ...((await foo) || {}) });
+  > 11 │ const b1 = { ...(0 || {}) };
+       │                    ^^^^^
+    12 │ const b2 = { ...(null || {}) };
+    13 │ const b3 = { ...(undefined || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    11 │ const·b1·=·{·...(0·||·{})·};
+       │                 - -------   
+
+```
+
+```
+invalid.js:12:23 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    10 │ async () => ({ ...((await foo) || {}) });
+    11 │ const b1 = { ...(0 || {}) };
+  > 12 │ const b2 = { ...(null || {}) };
+       │                       ^^^^^
+    13 │ const b3 = { ...(undefined || {}) };
+    14 │ const b4 = { ...("" || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    12 │ const·b2·=·{·...(null·||·{})·};
+       │                 -    -------   
+
+```
+
+```
+invalid.js:13:28 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    11 │ const b1 = { ...(0 || {}) };
+    12 │ const b2 = { ...(null || {}) };
+  > 13 │ const b3 = { ...(undefined || {}) };
+       │                            ^^^^^
+    14 │ const b4 = { ...("" || {}) };
+    15 │ const b5 = { ...((a && b) || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    13 │ const·b3·=·{·...(undefined·||·{})·};
+       │                 -         -------   
+
+```
+
+```
+invalid.js:14:21 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    12 │ const b2 = { ...(null || {}) };
+    13 │ const b3 = { ...(undefined || {}) };
+  > 14 │ const b4 = { ...("" || {}) };
+       │                     ^^^^^
+    15 │ const b5 = { ...((a && b) || {}) };
+    16 │ const b6 = { ...(a && b || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    14 │ const·b4·=·{·...(""·||·{})·};
+       │                 -  -------   
+
+```
+
+```
+invalid.js:15:27 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    13 │ const b3 = { ...(undefined || {}) };
+    14 │ const b4 = { ...("" || {}) };
+  > 15 │ const b5 = { ...((a && b) || {}) };
+       │                           ^^^^^
+    16 │ const b6 = { ...(a && b || {}) };
+    17 │ const b7 = { ...({} || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    15 │ const·b5·=·{·...((a·&&·b)·||·{})·};
+       │                  -      -------    
+
+```
+
+```
+invalid.js:16:25 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    14 │ const b4 = { ...("" || {}) };
+    15 │ const b5 = { ...((a && b) || {}) };
+  > 16 │ const b6 = { ...(a && b || {}) };
+       │                         ^^^^^
+    17 │ const b7 = { ...({} || {}) };
+    18 │ const b8 = { ...(foo.bar?.baz || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    16 │ const·b6·=·{·...(a·&&·b·||·{})·};
+       │                 -      -------   
+
+```
+
+```
+invalid.js:17:21 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    15 │ const b5 = { ...((a && b) || {}) };
+    16 │ const b6 = { ...(a && b || {}) };
+  > 17 │ const b7 = { ...({} || {}) };
+       │                     ^^^^^
+    18 │ const b8 = { ...(foo.bar?.baz || {}) };
+    19 │ const c1 = { ...((foo ?? {}) || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    17 │ const·b7·=·{·...({}·||·{})·};
+       │                 -------  -   
+
+```
+
+```
+invalid.js:18:31 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    16 │ const b6 = { ...(a && b || {}) };
+    17 │ const b7 = { ...({} || {}) };
+  > 18 │ const b8 = { ...(foo.bar?.baz || {}) };
+       │                               ^^^^^
+    19 │ const c1 = { ...((foo ?? {}) || {}) };
+    20 │ const c2 = { ...({ ...(foo || {}) }) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    18 │ const·b8·=·{·...(foo.bar?.baz·||·{})·};
+       │                 -            -------   
+
+```
+
+```
+invalid.js:19:30 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    17 │ const b7 = { ...({} || {}) };
+    18 │ const b8 = { ...(foo.bar?.baz || {}) };
+  > 19 │ const c1 = { ...((foo ?? {}) || {}) };
+       │                              ^^^^^
+    20 │ const c2 = { ...({ ...(foo || {}) }) };
+    21 │ const c3 = { ...({ ...((0, foo) || {}) }) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    19 │ const·c1·=·{·...((foo·??·{})·||·{})·};
+       │                  -      -------       
+
+```
+
+```
+invalid.js:20:28 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    18 │ const b8 = { ...(foo.bar?.baz || {}) };
+    19 │ const c1 = { ...((foo ?? {}) || {}) };
+  > 20 │ const c2 = { ...({ ...(foo || {}) }) };
+       │                            ^^^^^
+    21 │ const c3 = { ...({ ...((0, foo) || {}) }) };
+    22 │ function d1(a = { ...(bar || {}) }) {}
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    20 │ const·c2·=·{·...({·...(foo·||·{})·})·};
+       │                       -   -------      
+
+```
+
+```
+invalid.js:21:33 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    19 │ const c1 = { ...((foo ?? {}) || {}) };
+    20 │ const c2 = { ...({ ...(foo || {}) }) };
+  > 21 │ const c3 = { ...({ ...((0, foo) || {}) }) };
+       │                                 ^^^^^
+    22 │ function d1(a = { ...(bar || {}) }) {}
+    23 │ // Comments that the fix keeps
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    21 │ const·c3·=·{·...({·...((0,·foo)·||·{})·})·};
+       │                        -      -------       
+
+```
+
+```
+invalid.js:22:27 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    20 │ const c2 = { ...({ ...(foo || {}) }) };
+    21 │ const c3 = { ...({ ...((0, foo) || {}) }) };
+  > 22 │ function d1(a = { ...(bar || {}) }) {}
+       │                           ^^^^^
+    23 │ // Comments that the fix keeps
+    24 │ const e1 = { ...(getObject(/* keep */) || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    22 │ function·d1(a·=·{·...(bar·||·{})·})·{}
+       │                      -   -------      
+
+```
+
+```
+invalid.js:24:40 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    22 │ function d1(a = { ...(bar || {}) }) {}
+    23 │ // Comments that the fix keeps
+  > 24 │ const e1 = { ...(getObject(/* keep */) || {}) };
+       │                                        ^^^^^
+    25 │ const e2 = { ...((/* keep */ foo) ?? {}) };
+    26 │ const e3 = { ...({ /* keep */ value: 1 } || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    24 │ const·e1·=·{·...(getObject(/*·keep·*/)·||·{})·};
+       │                 -                    -------    
+
+```
+
+```
+invalid.js:25:35 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    23 │ // Comments that the fix keeps
+    24 │ const e1 = { ...(getObject(/* keep */) || {}) };
+  > 25 │ const e2 = { ...((/* keep */ foo) ?? {}) };
+       │                                   ^^^^^
+    26 │ const e3 = { ...({ /* keep */ value: 1 } || {}) };
+    27 │ const e4 = { ...(getObject(// keep
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    25 │ const·e2·=·{·...((/*·keep·*/·foo)·??·{})·};
+       │                  -              -------    
+
+```
+
+```
+invalid.js:26:42 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    24 │ const e1 = { ...(getObject(/* keep */) || {}) };
+    25 │ const e2 = { ...((/* keep */ foo) ?? {}) };
+  > 26 │ const e3 = { ...({ /* keep */ value: 1 } || {}) };
+       │                                          ^^^^^
+    27 │ const e4 = { ...(getObject(// keep
+    28 │ ) ?? {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    26 │ const·e3·=·{·...({·/*·keep·*/·value:·1·}·||·{})·};
+       │                 -                     ----- - -   
+
+```
+
+```
+invalid.js:28:3 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    26 │ const e3 = { ...({ /* keep */ value: 1 } || {}) };
+    27 │ const e4 = { ...(getObject(// keep
+  > 28 │ ) ?? {}) };
+       │   ^^^^^
+    29 │ const e5 = { /* keep */ ...(foo || {}) /* keep */ };
+    30 │ // Comments that would be removed, so there is no fix
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    25 25 │   const e2 = { ...((/* keep */ foo) ?? {}) };
+    26 26 │   const e3 = { ...({ /* keep */ value: 1 } || {}) };
+    27    │ - const·e4·=·{·...(getObject(//·keep
+    28    │ - )·??·{})·};
+       27 │ + const·e4·=·{·...getObject(//·keep
+       28 │ + )·};
+    29 29 │   const e5 = { /* keep */ ...(foo || {}) /* keep */ };
+    30 30 │   // Comments that would be removed, so there is no fix
+  
+
+```
+
+```
+invalid.js:29:33 lint/nursery/noUselessFallbackInSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    27 │ const e4 = { ...(getObject(// keep
+    28 │ ) ?? {}) };
+  > 29 │ const e5 = { /* keep */ ...(foo || {}) /* keep */ };
+       │                                 ^^^^^
+    30 │ // Comments that would be removed, so there is no fix
+    31 │ const f1 = { ...(foo || { /* keep */ }) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the empty object fallback.
+  
+    29 │ const·e5·=·{·/*·keep·*/·...(foo·||·{})·/*·keep·*/·};
+       │                            -   -------              
+
+```
+
+```
+invalid.js:31:22 lint/nursery/noUselessFallbackInSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    29 │ const e5 = { /* keep */ ...(foo || {}) /* keep */ };
+    30 │ // Comments that would be removed, so there is no fix
+  > 31 │ const f1 = { ...(foo || { /* keep */ }) };
+       │                      ^^^^^^^^^^^^^^^^^
+    32 │ const f2 = { ...((foo) /* keep */ ?? {}) };
+    33 │ const f3 = { ...(foo /* keep */ || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:35 lint/nursery/noUselessFallbackInSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    30 │ // Comments that would be removed, so there is no fix
+    31 │ const f1 = { ...(foo || { /* keep */ }) };
+  > 32 │ const f2 = { ...((foo) /* keep */ ?? {}) };
+       │                                   ^^^^^
+    33 │ const f3 = { ...(foo /* keep */ || {}) };
+    34 │ const f4 = { ...(foo || /* keep */ {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:33 lint/nursery/noUselessFallbackInSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    31 │ const f1 = { ...(foo || { /* keep */ }) };
+    32 │ const f2 = { ...((foo) /* keep */ ?? {}) };
+  > 33 │ const f3 = { ...(foo /* keep */ || {}) };
+       │                                 ^^^^^
+    34 │ const f4 = { ...(foo || /* keep */ {}) };
+    35 │ const f5 = { ...(/* keep */ foo || {}) };
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:22 lint/nursery/noUselessFallbackInSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    32 │ const f2 = { ...((foo) /* keep */ ?? {}) };
+    33 │ const f3 = { ...(foo /* keep */ || {}) };
+  > 34 │ const f4 = { ...(foo || /* keep */ {}) };
+       │                      ^^^^^^^^^^^^^^^^
+    35 │ const f5 = { ...(/* keep */ foo || {}) };
+    36 │ 
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:33 lint/nursery/noUselessFallbackInSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This empty object fallback is unnecessary.
+  
+    33 │ const f3 = { ...(foo /* keep */ || {}) };
+    34 │ const f4 = { ...(foo || /* keep */ {}) };
+  > 35 │ const f5 = { ...(/* keep */ foo || {}) };
+       │                                 ^^^^^
+    36 │ 
+  
+  i Spreading null, undefined, or another falsy value such as false, 0, or "" into an object adds no properties, so the fallback has no effect.
+  
+  i Remove the fallback and spread the value directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
