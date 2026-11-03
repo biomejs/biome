@@ -315,9 +315,10 @@ struct RunningRuleTimer {
     start: Instant,
 }
 
+// Both functions are out of line so that the clock reads and the thread-local
+// recording stay out of `start_rule`, `start_plugin_rule`, and `Drop`, which are
+// inlined into every rule invocation.
 impl RunningRuleTimer {
-    // Kept out of line so that the disabled path inlined into every rule
-    // invocation is only a check of `running`.
     #[cold]
     #[inline(never)]
     fn new(label: RuleLabel) -> Self {
