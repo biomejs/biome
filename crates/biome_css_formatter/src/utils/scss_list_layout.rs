@@ -358,6 +358,7 @@ fn is_declaration_value_list(node: &ScssListExpression) -> bool {
         })
         && property.name().is_ok_and(|name| {
             name.as_any_css_dashed_identifier().is_none()
+                && name.as_tw_value_theme_reference().is_none()
                 && name
                     .identifier_text()
                     .is_none_or(|name| css_grid_template_property(&name).is_none())
