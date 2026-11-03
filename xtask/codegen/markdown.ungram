@@ -486,9 +486,9 @@ MdxEsmBlock = content: 'mdx_esm_literal'
 
 // {props.title}
 // ^^^^^^^^^^^^^
-// An expression that is alone on its line.
+// An expression that is alone on its line. Spaces and tabs before it are
+// whitespace trivia, because MDX gives them no meaning.
 MdxBlockExpression =
-	indent: MdIndentTokenList
 	l_curly: '{'
 	content: MdxExpressionContent?
 	r_curly: '}'

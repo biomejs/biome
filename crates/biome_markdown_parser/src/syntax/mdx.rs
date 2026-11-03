@@ -137,12 +137,13 @@ impl ExpressionClose {
     }
 }
 
-/// Parses an expression that is alone on its line.
+/// Parses an expression that is alone on its line. The indentation before
+/// it becomes whitespace trivia.
 ///
-/// Grammar: MdxBlockExpression = indent: MdIndentTokenList '{' content: MdxExpressionContent? '}'
+/// Grammar: MdxBlockExpression = '{' content: MdxExpressionContent? '}'
 fn parse_block_expression(p: &mut MarkdownParser, close: ExpressionClose) -> ParsedSyntax {
+    p.consume_line_indent_as_whitespace_trivia(usize::MAX);
     let m = p.start();
-    p.emit_line_indent(usize::MAX);
     if !p.at(T!['{']) {
         m.abandon(p);
         return Absent;

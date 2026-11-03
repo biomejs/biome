@@ -2119,23 +2119,19 @@ impl MdxBlockExpression {
     }
     pub fn as_fields(&self) -> MdxBlockExpressionFields {
         MdxBlockExpressionFields {
-            indent: self.indent(),
             l_curly_token: self.l_curly_token(),
             content: self.content(),
             r_curly_token: self.r_curly_token(),
         }
     }
-    pub fn indent(&self) -> MdIndentTokenList {
-        support::list(&self.syntax, 0usize)
-    }
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn content(&self) -> Option<MdxExpressionContent> {
-        support::node(&self.syntax, 2usize)
+        support::node(&self.syntax, 1usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for MdxBlockExpression {
@@ -2148,7 +2144,6 @@ impl Serialize for MdxBlockExpression {
 }
 #[derive(Serialize)]
 pub struct MdxBlockExpressionFields {
-    pub indent: MdIndentTokenList,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub content: Option<MdxExpressionContent>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
@@ -5156,7 +5151,6 @@ impl std::fmt::Debug for MdxBlockExpression {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdxBlockExpression")
-                .field("indent", &self.indent())
                 .field(
                     "l_curly_token",
                     &support::DebugSyntaxResult(self.l_curly_token()),

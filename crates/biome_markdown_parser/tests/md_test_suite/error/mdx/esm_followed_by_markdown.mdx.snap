@@ -106,7 +106,6 @@ MdRoot {
             value_token: NEWLINE@116..117 "\n" [] [],
         },
         MdxBlockExpression {
-            indent: MdIndentTokenList [],
             l_curly_token: L_CURLY@117..118 "{" [] [],
             content: MdxExpressionContent {
                 value_token: MDX_EXPRESSION_LITERAL@118..128 "meta.title" [] [],
@@ -192,7 +191,6 @@ MdRoot {
             value_token: NEWLINE@228..229 "\n" [] [],
         },
         MdxBlockExpression {
-            indent: MdIndentTokenList [],
             l_curly_token: L_CURLY@229..230 "{" [] [],
             content: MdxExpressionContent {
                 value_token: MDX_EXPRESSION_LITERAL@230..234 "year" [] [],
@@ -212,7 +210,6 @@ MdRoot {
             value_token: NEWLINE@266..267 "\n" [] [],
         },
         MdxBlockExpression {
-            indent: MdIndentTokenList [],
             l_curly_token: L_CURLY@267..268 "{" [] [],
             content: MdxExpressionContent {
                 value_token: MDX_EXPRESSION_LITERAL@268..278 "data.title" [] [],
@@ -400,11 +397,10 @@ MdRoot {
     10: MD_NEWLINE@116..117
       0: NEWLINE@116..117 "\n" [] []
     11: MDX_BLOCK_EXPRESSION@117..129
-      0: MD_INDENT_TOKEN_LIST@117..117
-      1: L_CURLY@117..118 "{" [] []
-      2: MDX_EXPRESSION_CONTENT@118..128
+      0: L_CURLY@117..118 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@118..128
         0: MDX_EXPRESSION_LITERAL@118..128 "meta.title" [] []
-      3: R_CURLY@128..129 "}" [] []
+      2: R_CURLY@128..129 "}" [] []
     12: MD_NEWLINE@129..130
       0: NEWLINE@129..130 "\n" [] []
     13: MD_NEWLINE@130..131
@@ -456,11 +452,10 @@ MdRoot {
     23: MD_NEWLINE@228..229
       0: NEWLINE@228..229 "\n" [] []
     24: MDX_BLOCK_EXPRESSION@229..235
-      0: MD_INDENT_TOKEN_LIST@229..229
-      1: L_CURLY@229..230 "{" [] []
-      2: MDX_EXPRESSION_CONTENT@230..234
+      0: L_CURLY@229..230 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@230..234
         0: MDX_EXPRESSION_LITERAL@230..234 "year" [] []
-      3: R_CURLY@234..235 "}" [] []
+      2: R_CURLY@234..235 "}" [] []
     25: MD_NEWLINE@235..236
       0: NEWLINE@235..236 "\n" [] []
     26: MD_NEWLINE@236..237
@@ -470,11 +465,10 @@ MdRoot {
     28: MD_NEWLINE@266..267
       0: NEWLINE@266..267 "\n" [] []
     29: MDX_BLOCK_EXPRESSION@267..279
-      0: MD_INDENT_TOKEN_LIST@267..267
-      1: L_CURLY@267..268 "{" [] []
-      2: MDX_EXPRESSION_CONTENT@268..278
+      0: L_CURLY@267..268 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@268..278
         0: MDX_EXPRESSION_LITERAL@268..278 "data.title" [] []
-      3: R_CURLY@278..279 "}" [] []
+      2: R_CURLY@278..279 "}" [] []
     30: MD_NEWLINE@279..280
       0: NEWLINE@279..280 "\n" [] []
     31: MD_NEWLINE@280..281

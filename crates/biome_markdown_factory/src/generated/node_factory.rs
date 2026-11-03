@@ -836,19 +836,16 @@ pub fn md_thematic_break_char(value_token: SyntaxToken) -> MdThematicBreakChar {
     ))
 }
 pub fn mdx_block_expression(
-    indent: MdIndentTokenList,
     l_curly_token: SyntaxToken,
     r_curly_token: SyntaxToken,
 ) -> MdxBlockExpressionBuilder {
     MdxBlockExpressionBuilder {
-        indent,
         l_curly_token,
         r_curly_token,
         content: None,
     }
 }
 pub struct MdxBlockExpressionBuilder {
-    indent: MdIndentTokenList,
     l_curly_token: SyntaxToken,
     r_curly_token: SyntaxToken,
     content: Option<MdxExpressionContent>,
@@ -862,7 +859,6 @@ impl MdxBlockExpressionBuilder {
         MdxBlockExpression::unwrap_cast(SyntaxNode::new_detached(
             MarkdownSyntaxKind::MDX_BLOCK_EXPRESSION,
             [
-                Some(SyntaxElement::Node(self.indent.into_syntax())),
                 Some(SyntaxElement::Token(self.l_curly_token)),
                 self.content
                     .map(|token| SyntaxElement::Node(token.into_syntax())),

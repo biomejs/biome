@@ -31,7 +31,6 @@ MdRoot {
     frontmatter: missing (optional),
     value: MdBlockList [
         MdxBlockExpression {
-            indent: MdIndentTokenList [],
             l_curly_token: L_CURLY@0..1 "{" [] [],
             content: MdxExpressionContent {
                 value_token: MDX_EXPRESSION_LITERAL@1..66 "/* micromark-extension-mdxjs-esm: import and export statements */" [] [],
@@ -100,11 +99,10 @@ MdRoot {
   1: (empty)
   2: MD_BLOCK_LIST@0..182
     0: MDX_BLOCK_EXPRESSION@0..67
-      0: MD_INDENT_TOKEN_LIST@0..0
-      1: L_CURLY@0..1 "{" [] []
-      2: MDX_EXPRESSION_CONTENT@1..66
+      0: L_CURLY@0..1 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@1..66
         0: MDX_EXPRESSION_LITERAL@1..66 "/* micromark-extension-mdxjs-esm: import and export statements */" [] []
-      3: R_CURLY@66..67 "}" [] []
+      2: R_CURLY@66..67 "}" [] []
     1: MD_NEWLINE@67..68
       0: NEWLINE@67..68 "\n" [] []
     2: MDX_ESM_BLOCK@68..108

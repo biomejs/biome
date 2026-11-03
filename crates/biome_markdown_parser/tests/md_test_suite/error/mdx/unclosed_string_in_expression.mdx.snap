@@ -1,5 +1,6 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
 expression: snapshot
 ---
 
@@ -21,7 +22,6 @@ MdRoot {
     frontmatter: missing (optional),
     value: MdBlockList [
         MdxBlockExpression {
-            indent: MdIndentTokenList [],
             l_curly_token: L_CURLY@0..1 "{" [] [],
             content: MdxExpressionContent {
                 value_token: MDX_EXPRESSION_LITERAL@1..27 "\"unclosed}\n\nNext paragraph" [] [],
@@ -44,11 +44,10 @@ MdRoot {
   1: (empty)
   2: MD_BLOCK_LIST@0..28
     0: MDX_BLOCK_EXPRESSION@0..27
-      0: MD_INDENT_TOKEN_LIST@0..0
-      1: L_CURLY@0..1 "{" [] []
-      2: MDX_EXPRESSION_CONTENT@1..27
+      0: L_CURLY@0..1 "{" [] []
+      1: MDX_EXPRESSION_CONTENT@1..27
         0: MDX_EXPRESSION_LITERAL@1..27 "\"unclosed}\n\nNext paragraph" [] []
-      3: (empty)
+      2: (empty)
     1: MD_NEWLINE@27..28
       0: NEWLINE@27..28 "\n" [] []
   3: EOF@28..28 "" [] []
