@@ -3,3 +3,11 @@ $color: red;
 unknown {
   color: $color;
 }
+.card { from { color: red; } }
+@mixin nested-in-rule { .card { from { color: red; } } }
+@mixin combined { div from {} from > a {} from.active {} & from {} }
+@mixin other-unknown { unknown {} }
+@include content-block { .card { to {} } }
+@mixin in-media { @media print { from {} } }
+@mixin in-supports { @supports (opacity: 0) { to {} } }
+@mixin namespaced { svg|from {} |to {} }
