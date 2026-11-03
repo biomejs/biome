@@ -139,14 +139,16 @@ impl ServiceLanguage for MarkdownLanguage {
         _path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
-        MarkdownParserOptions::default()
+        let markdown_source = file_source.to_markdown_file_source();
+        let options = MarkdownParserOptions::default()
             .with_frontmatter(language.frontmatter.unwrap_or_default().into())
             .with_gfm(language.gfm.unwrap_or_default().into())
             .with_cjk_friendly_emphasis(
-                file_source
-                    .to_markdown_file_source()
-                    .is_some_and(|source| source.cjk_friendly_emphasis()),
-            )
+                markdown_source.is_some_and(|source| source.cjk_friendly_emphasis()),
+            );
+        #[cfg(feature = "lang_mdx")]
+        let options = options.with_mdx(markdown_source.is_some_and(|source| source.is_mdx()));
+        options
     }
 
     fn resolve_format_options(
