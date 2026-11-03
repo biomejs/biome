@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWholeFile.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+function count() {
+    var arguments;
+    return arguments.filter(Boolean).length;
+}
+
+```
+
+# Diagnostics
+```
+invalidWholeFile.cjs:4:12 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a filter() method.
+  
+    2 │ function count() {
+    3 │     var arguments;
+  > 4 │     return arguments.filter(Boolean).length;
+      │            ^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function asAny() { (arguments as any).map(() => {}); }
+function nonNull() { arguments!.map(() => {}); }
+function typeAssertion() { (<any>arguments).map(() => {}); }
+function satisfies() { (arguments satisfies IArguments as any).map(() => {}); }
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:20 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function asAny() { (arguments as any).map(() => {}); }
+      │                    ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ function nonNull() { arguments!.map(() => {}); }
+    4 │ function typeAssertion() { (<any>arguments).map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:22 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function asAny() { (arguments as any).map(() => {}); }
+  > 3 │ function nonNull() { arguments!.map(() => {}); }
+      │                      ^^^^^^^^^^^^^^
+    4 │ function typeAssertion() { (<any>arguments).map(() => {}); }
+    5 │ function satisfies() { (arguments satisfies IArguments as any).map(() => {}); }
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:28 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    2 │ function asAny() { (arguments as any).map(() => {}); }
+    3 │ function nonNull() { arguments!.map(() => {}); }
+  > 4 │ function typeAssertion() { (<any>arguments).map(() => {}); }
+      │                            ^^^^^^^^^^^^^^^^^^^^
+    5 │ function satisfies() { (arguments satisfies IArguments as any).map(() => {}); }
+    6 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:24 lint/nursery/noArrayMethodsOnArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The arguments object doesn't have a map() method.
+  
+    3 │ function nonNull() { arguments!.map(() => {}); }
+    4 │ function typeAssertion() { (<any>arguments).map(() => {}); }
+  > 5 │ function satisfies() { (arguments satisfies IArguments as any).map(() => {}); }
+      │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i arguments looks like an array, but it isn't one, so this call throws a TypeError when the code runs.
+  
+  i Declare a rest parameter, such as ...args, and use it instead, or convert arguments to an array with Array.from(arguments).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
