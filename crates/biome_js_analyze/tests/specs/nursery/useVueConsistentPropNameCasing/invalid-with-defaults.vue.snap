@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+const { greeting_text = 'hello' } = withDefaults(defineProps<{ greeting_text?: string }>(), {
+  greeting_text: 'hello',
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults.vue:3:64 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    1 │ <script setup lang="ts">
+    2 │ /* should generate diagnostics */
+  > 3 │ const { greeting_text = 'hello' } = withDefaults(defineProps<{ greeting_text?: string }>(), {
+      │                                                                ^^^^^^^^^^^^^
+    4 │   greeting_text: 'hello',
+    5 │ });
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

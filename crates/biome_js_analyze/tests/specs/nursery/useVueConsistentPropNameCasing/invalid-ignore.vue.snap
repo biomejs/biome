@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-ignore.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: ['notIgnored_prop', 'ignored_prop_2']
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-ignore.vue:4:11 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The prop name notIgnored_prop isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   props: ['notIgnored_prop', 'ignored_prop_2']
+      │           ^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ </script>
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ignore.vue:4:30 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The prop name ignored_prop_2 isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   props: ['notIgnored_prop', 'ignored_prop_2']
+      │                              ^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ </script>
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

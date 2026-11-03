@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  props: {
+    greeting_text: String,
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:6:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    4 │ export default defineComponent({
+    5 │   props: {
+  > 6 │     greeting_text: String,
+      │     ^^^^^^^^^^^^^
+    7 │   },
+    8 │ });
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
