@@ -1,4 +1,5 @@
 mod ast;
+mod console;
 mod context;
 mod generated;
 mod kind_set;

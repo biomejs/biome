@@ -1,0 +1,80 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule } from "@biomejs/runtime/plugin";
+console.count("calls");
+export const countCalls = defineRule({
+	query: ast("JS_CALL_EXPRESSION"),
+	run(node) {
+		console.count("calls");
+		console.time("timer");
+		console.log(node.text);
+		console.group("left open");
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+a(); b();
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i countCalls logged: count calls: 1
+  
+  > 1 │ a(); b();
+      │ ^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i countCalls logged: a()
+  
+  > 1 │ a(); b();
+      │ ^^^
+  
+
+/file.js:1:1 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i countCalls logged: group: left open
+  
+  > 1 │ a(); b();
+      │ ^^^
+  
+
+/file.js:1:6 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i countCalls logged: count calls: 1
+  
+  > 1 │ a(); b();
+      │      ^^^
+  
+
+/file.js:1:6 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i countCalls logged: b()
+  
+  > 1 │ a(); b();
+      │      ^^^
+  
+
+/file.js:1:6 plugin  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i countCalls logged: group: left open
+  
+  > 1 │ a(); b();
+      │      ^^^
+```

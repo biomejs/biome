@@ -33,6 +33,9 @@ fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<Lo
     let mut ctx = JsExecContext::new(fs)?;
     let module = ctx.import_module(path)?;
     let rules = ctx.load_rules(&module)?;
+    // Messages printed while evaluating the module aren't tied to an analyzed
+    // file, so they have nowhere to be reported.
+    ctx.pull_console_messages();
 
     if rules.is_empty() {
         return Err(JsNativeError::typ()
@@ -200,6 +203,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
             // Drain the diagnostics even on errors, so a failed rule can't leak
             // its diagnostics into the next one.
             let mut diagnostics = ctx.pull_diagnostics();
+            let messages = ctx.pull_console_messages();
 
             if let Err(err) = result {
                 diagnostics.push(PluginDiagnosticEntry {
@@ -213,6 +217,18 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                 });
             }
 
+            entries.extend(messages.into_iter().map(|message| {
+                PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        node.text_trimmed_range(),
+                        markup!(<Emphasis>{name}</Emphasis>" logged: "<Info>{message}</Info>),
+                    )
+                    .verbose()
+                    .subcategory(name.to_string()),
+                    action: None,
+                }
+            }));
             entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
                 diagnostic: entry.diagnostic.subcategory(name.to_string()),
                 action: entry.action,
@@ -1387,6 +1403,163 @@ mod tests {
             source,
             &[("/file.js", content)],
             render_diagnostics("/file.js", content, result),
+        );
+    }
+
+    /// Messages printed with `console` are reported as verbose diagnostics on the queried node.
+    /// Messages printed while the module is evaluated are discarded.
+    #[test]
+    fn reports_console_messages_as_verbose_diagnostics() {
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            console.log("loading");
+            export const logCalls = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.log("text:", node.text, 1, true, null, undefined, [1, "a"], { a: 1 });
+                    console.info(node);
+                    console.warn("callee:", node.callee);
+                    console.error(node.arguments.token("lParenToken"), "opens the arguments");
+                    console.debug(node.children(), [[[["deep"]]]]);
+                    console.log("%s has %d argument", node, node.arguments.args.length);
+                    console.log(`${node.callee} is the callee`);
+                    console.log(`${node.arguments.token("lParenToken")} is the token`);
+                    console.group("group");
+                    console.log("inside the group");
+                    console.groupEnd();
+                    console.assert(false, node);
+                    console.dir(node);
+                    console.table(node);
+                    console.log(new Array(2 ** 32 - 1));
+                    console.log([node, ...Array(1000).fill(0)]);
+                    console.trace("tracing");
+                    registerDiagnostic(node, "information", "Found a call.");
+                    console.group("left open");
+                },
+            });
+            export const reenterConsole = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.log({ toString() { console.group("nested"); return ""; } }, 1);
+                },
+            });
+            export const logThenThrow = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.log("before throwing");
+                    throw new Error("boom");
+                },
+            });"#;
+        let content = r#"foo("%s");"#;
+        let parse = biome_js_parser::parse(
+            content,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
+        let content_rendered: String = parse
+            .syntax()
+            .descendants()
+            .filter(|node| plugin.query().contains(&node.kind().to_raw()))
+            .map(|node| {
+                let result = plugin.evaluate(
+                    node.into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
+                assert!(
+                    result.entries[..17]
+                        .iter()
+                        .all(|entry| entry.diagnostic.tags().is_verbose())
+                );
+                render_diagnostics("/file.js", content, result)
+            })
+            .collect();
+
+        snap_diagnostics(
+            "reports_console_messages_as_verbose_diagnostics",
+            "/plugin.js",
+            source,
+            &[("/file.js", content)],
+            content_rendered,
+        );
+    }
+
+    /// Plugins can replace the global `console`, which is created on first access.
+    #[test]
+    fn plugins_can_replace_console() {
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            export const replaceConsole = defineRule({
+                query: ast("JS_MODULE"),
+                run(root) {
+                    globalThis.console = { log: (message) => registerDiagnostic(root, "information", message) };
+                    console.log("replaced");
+                },
+            });"#;
+        let parse = biome_js_parser::parse(
+            "a();",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
+
+        let [entry] = result.entries.as_slice() else {
+            panic!("expected one diagnostic, got {:?}", result.entries);
+        };
+        assert_eq!(PrintDescription(&entry.diagnostic).to_string(), "replaced");
+    }
+
+    /// Counters, timers, and groups started by one invocation don't affect the next one.
+    #[test]
+    fn resets_console_state_between_invocations() {
+        let source = r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            console.count("calls");
+            export const countCalls = defineRule({
+                query: ast("JS_CALL_EXPRESSION"),
+                run(node) {
+                    console.count("calls");
+                    console.time("timer");
+                    console.log(node.text);
+                    console.group("left open");
+                },
+            });"#;
+        let content = "a(); b();";
+        let parse = biome_js_parser::parse(
+            content,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let plugin = load_test_plugin_from_source("/plugin.js", source, None);
+        let content_rendered: String = parse
+            .syntax()
+            .descendants()
+            .filter(|node| plugin.query().contains(&node.kind().to_raw()))
+            .map(|node| {
+                render_diagnostics(
+                    "/file.js",
+                    content,
+                    plugin.evaluate(
+                        node.into(),
+                        "/file.js".into(),
+                        &services(JsFileSource::js_module()),
+                    ),
+                )
+            })
+            .collect();
+
+        snap_diagnostics(
+            "resets_console_state_between_invocations",
+            "/plugin.js",
+            source,
+            &[("/file.js", content)],
+            content_rendered,
         );
     }
 

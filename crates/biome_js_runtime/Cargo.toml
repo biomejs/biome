@@ -24,6 +24,7 @@ biome_resolver     = { workspace = true }
 biome_rowan        = { workspace = true }
 biome_text_size    = { workspace = true }
 boa_engine         = { workspace = true }
+boa_runtime        = { workspace = true }
 camino             = { workspace = true }
 rustc-hash         = { workspace = true }
 
