@@ -6,3 +6,4 @@
 <Foo bar /* keep */ ={true} />;
 <Foo key={true} __self={true} __source={true} />;
 <Foo enabled={false} checked={flag} text="true" />;
+<Foo enabled={(true)} />;
