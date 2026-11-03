@@ -339,6 +339,7 @@ define_categories! {
     "lint/nursery/noUnusedClasses": "https://biomejs.dev/linter/rules/no-unused-classes",
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessAssignment": "https://biomejs.dev/linter/rules/no-useless-assignment",
+    "lint/nursery/noUselessAwait": "https://biomejs.dev/linter/rules/no-useless-await",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessCall": "https://biomejs.dev/linter/rules/no-useless-call",
     "lint/nursery/noUselessDateGetTime": "https://biomejs.dev/linter/rules/no-useless-date-get-time",

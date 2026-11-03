@@ -3408,6 +3408,11 @@ export interface Nursery {
 	 */
 	noUselessAssignment?: NoUselessAssignmentConfiguration;
 	/**
+	 * Disallow await on values that are never promises.
+	 * See https://biomejs.dev/linter/rules/no-useless-await
+	 */
+	noUselessAwait?: NoUselessAwaitConfiguration;
+	/**
 	 * Disallow unnecessary .call() and .apply().
 	 * See https://biomejs.dev/linter/rules/no-useless-call
 	 */
@@ -6674,6 +6679,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessAssignmentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessAssignmentOptions;
+export type NoUselessAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessAwaitOptions;
 export type NoUselessCallConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessCallOptions;
@@ -9724,6 +9732,14 @@ export interface RuleWithNoUnusedClassesOptions {
 export interface RuleWithNoUselessAssignmentOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessAssignmentOptions;
+}
+export interface RuleWithNoUselessAwaitOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessAwaitOptions;
 }
 export interface RuleWithNoUselessCallOptions {
 	level: RulePlainConfiguration;
@@ -12799,6 +12815,7 @@ export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
+export type NoUselessAwaitOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessLengthCheckOptions = {};
@@ -14902,6 +14919,7 @@ export type Category =
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessAssignment"
+	| "lint/nursery/noUselessAwait"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
