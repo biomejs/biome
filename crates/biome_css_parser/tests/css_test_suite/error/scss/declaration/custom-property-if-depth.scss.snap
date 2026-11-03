@@ -1,0 +1,1087 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.a { --x: if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): if(media(print): 1; }
+.after { width: 1px; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..3 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@3..5 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@5..8 "--x" [] [],
+                                },
+                                colon_token: COLON@8..10 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@10..12 "if" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@12..13 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomPropertyFunction {
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@13..18 "media" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@18..19 "(" [] [],
+                                                    components: CssCustomPropertyComponentList [
+                                                        CssCustomIdentifier {
+                                                            value_token: IDENT@19..24 "print" [] [],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@24..25 ")" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: COLON@25..27 ":" [] [Whitespace(" ")],
+                                                },
+                                                CssCustomPropertyFunction {
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@27..29 "if" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@29..30 "(" [] [],
+                                                    components: CssCustomPropertyComponentList [
+                                                        CssCustomPropertyFunction {
+                                                            name: CssCustomIdentifier {
+                                                                value_token: IDENT@30..35 "media" [] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@35..36 "(" [] [],
+                                                            components: CssCustomPropertyComponentList [
+                                                                CssCustomIdentifier {
+                                                                    value_token: IDENT@36..41 "print" [] [],
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@41..42 ")" [] [],
+                                                        },
+                                                        CssCustomPropertyDelimiter {
+                                                            value: COLON@42..44 ":" [] [Whitespace(" ")],
+                                                        },
+                                                        CssCustomPropertyFunction {
+                                                            name: CssCustomIdentifier {
+                                                                value_token: IDENT@44..46 "if" [] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@46..47 "(" [] [],
+                                                            components: CssCustomPropertyComponentList [
+                                                                CssCustomPropertyFunction {
+                                                                    name: CssCustomIdentifier {
+                                                                        value_token: IDENT@47..52 "media" [] [],
+                                                                    },
+                                                                    l_paren_token: L_PAREN@52..53 "(" [] [],
+                                                                    components: CssCustomPropertyComponentList [
+                                                                        CssCustomIdentifier {
+                                                                            value_token: IDENT@53..58 "print" [] [],
+                                                                        },
+                                                                    ],
+                                                                    r_paren_token: R_PAREN@58..59 ")" [] [],
+                                                                },
+                                                                CssCustomPropertyDelimiter {
+                                                                    value: COLON@59..61 ":" [] [Whitespace(" ")],
+                                                                },
+                                                                CssCustomPropertyFunction {
+                                                                    name: CssCustomIdentifier {
+                                                                        value_token: IDENT@61..63 "if" [] [],
+                                                                    },
+                                                                    l_paren_token: L_PAREN@63..64 "(" [] [],
+                                                                    components: CssCustomPropertyComponentList [
+                                                                        CssCustomPropertyFunction {
+                                                                            name: CssCustomIdentifier {
+                                                                                value_token: IDENT@64..69 "media" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@69..70 "(" [] [],
+                                                                            components: CssCustomPropertyComponentList [
+                                                                                CssCustomIdentifier {
+                                                                                    value_token: IDENT@70..75 "print" [] [],
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@75..76 ")" [] [],
+                                                                        },
+                                                                        CssCustomPropertyDelimiter {
+                                                                            value: COLON@76..78 ":" [] [Whitespace(" ")],
+                                                                        },
+                                                                        CssCustomPropertyFunction {
+                                                                            name: CssCustomIdentifier {
+                                                                                value_token: IDENT@78..80 "if" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@80..81 "(" [] [],
+                                                                            components: CssCustomPropertyComponentList [
+                                                                                CssCustomPropertyFunction {
+                                                                                    name: CssCustomIdentifier {
+                                                                                        value_token: IDENT@81..86 "media" [] [],
+                                                                                    },
+                                                                                    l_paren_token: L_PAREN@86..87 "(" [] [],
+                                                                                    components: CssCustomPropertyComponentList [
+                                                                                        CssCustomIdentifier {
+                                                                                            value_token: IDENT@87..92 "print" [] [],
+                                                                                        },
+                                                                                    ],
+                                                                                    r_paren_token: R_PAREN@92..93 ")" [] [],
+                                                                                },
+                                                                                CssCustomPropertyDelimiter {
+                                                                                    value: COLON@93..95 ":" [] [Whitespace(" ")],
+                                                                                },
+                                                                                CssCustomPropertyFunction {
+                                                                                    name: CssCustomIdentifier {
+                                                                                        value_token: IDENT@95..97 "if" [] [],
+                                                                                    },
+                                                                                    l_paren_token: L_PAREN@97..98 "(" [] [],
+                                                                                    components: CssCustomPropertyComponentList [
+                                                                                        CssCustomPropertyFunction {
+                                                                                            name: CssCustomIdentifier {
+                                                                                                value_token: IDENT@98..103 "media" [] [],
+                                                                                            },
+                                                                                            l_paren_token: L_PAREN@103..104 "(" [] [],
+                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                CssCustomIdentifier {
+                                                                                                    value_token: IDENT@104..109 "print" [] [],
+                                                                                                },
+                                                                                            ],
+                                                                                            r_paren_token: R_PAREN@109..110 ")" [] [],
+                                                                                        },
+                                                                                        CssCustomPropertyDelimiter {
+                                                                                            value: COLON@110..112 ":" [] [Whitespace(" ")],
+                                                                                        },
+                                                                                        CssCustomPropertyFunction {
+                                                                                            name: CssCustomIdentifier {
+                                                                                                value_token: IDENT@112..114 "if" [] [],
+                                                                                            },
+                                                                                            l_paren_token: L_PAREN@114..115 "(" [] [],
+                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                CssCustomPropertyFunction {
+                                                                                                    name: CssCustomIdentifier {
+                                                                                                        value_token: IDENT@115..120 "media" [] [],
+                                                                                                    },
+                                                                                                    l_paren_token: L_PAREN@120..121 "(" [] [],
+                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                        CssCustomIdentifier {
+                                                                                                            value_token: IDENT@121..126 "print" [] [],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                    r_paren_token: R_PAREN@126..127 ")" [] [],
+                                                                                                },
+                                                                                                CssCustomPropertyDelimiter {
+                                                                                                    value: COLON@127..129 ":" [] [Whitespace(" ")],
+                                                                                                },
+                                                                                                CssCustomPropertyFunction {
+                                                                                                    name: CssCustomIdentifier {
+                                                                                                        value_token: IDENT@129..131 "if" [] [],
+                                                                                                    },
+                                                                                                    l_paren_token: L_PAREN@131..132 "(" [] [],
+                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                        CssCustomPropertyFunction {
+                                                                                                            name: CssCustomIdentifier {
+                                                                                                                value_token: IDENT@132..137 "media" [] [],
+                                                                                                            },
+                                                                                                            l_paren_token: L_PAREN@137..138 "(" [] [],
+                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                CssCustomIdentifier {
+                                                                                                                    value_token: IDENT@138..143 "print" [] [],
+                                                                                                                },
+                                                                                                            ],
+                                                                                                            r_paren_token: R_PAREN@143..144 ")" [] [],
+                                                                                                        },
+                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                            value: COLON@144..146 ":" [] [Whitespace(" ")],
+                                                                                                        },
+                                                                                                        CssCustomPropertyFunction {
+                                                                                                            name: CssCustomIdentifier {
+                                                                                                                value_token: IDENT@146..148 "if" [] [],
+                                                                                                            },
+                                                                                                            l_paren_token: L_PAREN@148..149 "(" [] [],
+                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                CssCustomPropertyFunction {
+                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                        value_token: IDENT@149..154 "media" [] [],
+                                                                                                                    },
+                                                                                                                    l_paren_token: L_PAREN@154..155 "(" [] [],
+                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                        CssCustomIdentifier {
+                                                                                                                            value_token: IDENT@155..160 "print" [] [],
+                                                                                                                        },
+                                                                                                                    ],
+                                                                                                                    r_paren_token: R_PAREN@160..161 ")" [] [],
+                                                                                                                },
+                                                                                                                CssCustomPropertyDelimiter {
+                                                                                                                    value: COLON@161..163 ":" [] [Whitespace(" ")],
+                                                                                                                },
+                                                                                                                CssCustomPropertyFunction {
+                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                        value_token: IDENT@163..165 "if" [] [],
+                                                                                                                    },
+                                                                                                                    l_paren_token: L_PAREN@165..166 "(" [] [],
+                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                        CssCustomPropertyFunction {
+                                                                                                                            name: CssCustomIdentifier {
+                                                                                                                                value_token: IDENT@166..171 "media" [] [],
+                                                                                                                            },
+                                                                                                                            l_paren_token: L_PAREN@171..172 "(" [] [],
+                                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                                CssCustomIdentifier {
+                                                                                                                                    value_token: IDENT@172..177 "print" [] [],
+                                                                                                                                },
+                                                                                                                            ],
+                                                                                                                            r_paren_token: R_PAREN@177..178 ")" [] [],
+                                                                                                                        },
+                                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                                            value: COLON@178..180 ":" [] [Whitespace(" ")],
+                                                                                                                        },
+                                                                                                                        CssCustomPropertyFunction {
+                                                                                                                            name: CssCustomIdentifier {
+                                                                                                                                value_token: IDENT@180..182 "if" [] [],
+                                                                                                                            },
+                                                                                                                            l_paren_token: L_PAREN@182..183 "(" [] [],
+                                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                                CssCustomPropertyFunction {
+                                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                                        value_token: IDENT@183..188 "media" [] [],
+                                                                                                                                    },
+                                                                                                                                    l_paren_token: L_PAREN@188..189 "(" [] [],
+                                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                                        CssCustomIdentifier {
+                                                                                                                                            value_token: IDENT@189..194 "print" [] [],
+                                                                                                                                        },
+                                                                                                                                    ],
+                                                                                                                                    r_paren_token: R_PAREN@194..195 ")" [] [],
+                                                                                                                                },
+                                                                                                                                CssCustomPropertyDelimiter {
+                                                                                                                                    value: COLON@195..197 ":" [] [Whitespace(" ")],
+                                                                                                                                },
+                                                                                                                                CssCustomPropertyFunction {
+                                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                                        value_token: IDENT@197..199 "if" [] [],
+                                                                                                                                    },
+                                                                                                                                    l_paren_token: L_PAREN@199..200 "(" [] [],
+                                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                                        CssCustomPropertyFunction {
+                                                                                                                                            name: CssCustomIdentifier {
+                                                                                                                                                value_token: IDENT@200..205 "media" [] [],
+                                                                                                                                            },
+                                                                                                                                            l_paren_token: L_PAREN@205..206 "(" [] [],
+                                                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                                                CssCustomIdentifier {
+                                                                                                                                                    value_token: IDENT@206..211 "print" [] [],
+                                                                                                                                                },
+                                                                                                                                            ],
+                                                                                                                                            r_paren_token: R_PAREN@211..212 ")" [] [],
+                                                                                                                                        },
+                                                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                                                            value: COLON@212..214 ":" [] [Whitespace(" ")],
+                                                                                                                                        },
+                                                                                                                                        CssCustomPropertyFunction {
+                                                                                                                                            name: CssCustomIdentifier {
+                                                                                                                                                value_token: IDENT@214..216 "if" [] [],
+                                                                                                                                            },
+                                                                                                                                            l_paren_token: L_PAREN@216..217 "(" [] [],
+                                                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                                                CssCustomPropertyFunction {
+                                                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                                                        value_token: IDENT@217..222 "media" [] [],
+                                                                                                                                                    },
+                                                                                                                                                    l_paren_token: L_PAREN@222..223 "(" [] [],
+                                                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                                                        CssCustomIdentifier {
+                                                                                                                                                            value_token: IDENT@223..228 "print" [] [],
+                                                                                                                                                        },
+                                                                                                                                                    ],
+                                                                                                                                                    r_paren_token: R_PAREN@228..229 ")" [] [],
+                                                                                                                                                },
+                                                                                                                                                CssCustomPropertyDelimiter {
+                                                                                                                                                    value: COLON@229..231 ":" [] [Whitespace(" ")],
+                                                                                                                                                },
+                                                                                                                                                CssCustomPropertyFunction {
+                                                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                                                        value_token: IDENT@231..233 "if" [] [],
+                                                                                                                                                    },
+                                                                                                                                                    l_paren_token: L_PAREN@233..234 "(" [] [],
+                                                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                                                        CssCustomPropertyFunction {
+                                                                                                                                                            name: CssCustomIdentifier {
+                                                                                                                                                                value_token: IDENT@234..239 "media" [] [],
+                                                                                                                                                            },
+                                                                                                                                                            l_paren_token: L_PAREN@239..240 "(" [] [],
+                                                                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                                                                CssCustomIdentifier {
+                                                                                                                                                                    value_token: IDENT@240..245 "print" [] [],
+                                                                                                                                                                },
+                                                                                                                                                            ],
+                                                                                                                                                            r_paren_token: R_PAREN@245..246 ")" [] [],
+                                                                                                                                                        },
+                                                                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                                                                            value: COLON@246..248 ":" [] [Whitespace(" ")],
+                                                                                                                                                        },
+                                                                                                                                                        CssCustomPropertyFunction {
+                                                                                                                                                            name: CssCustomIdentifier {
+                                                                                                                                                                value_token: IDENT@248..250 "if" [] [],
+                                                                                                                                                            },
+                                                                                                                                                            l_paren_token: L_PAREN@250..251 "(" [] [],
+                                                                                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                                                                                CssCustomPropertyFunction {
+                                                                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                                                                        value_token: IDENT@251..256 "media" [] [],
+                                                                                                                                                                    },
+                                                                                                                                                                    l_paren_token: L_PAREN@256..257 "(" [] [],
+                                                                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                                                                        CssCustomIdentifier {
+                                                                                                                                                                            value_token: IDENT@257..262 "print" [] [],
+                                                                                                                                                                        },
+                                                                                                                                                                    ],
+                                                                                                                                                                    r_paren_token: R_PAREN@262..263 ")" [] [],
+                                                                                                                                                                },
+                                                                                                                                                                CssCustomPropertyDelimiter {
+                                                                                                                                                                    value: COLON@263..265 ":" [] [Whitespace(" ")],
+                                                                                                                                                                },
+                                                                                                                                                                CssCustomPropertyFunction {
+                                                                                                                                                                    name: CssCustomIdentifier {
+                                                                                                                                                                        value_token: IDENT@265..267 "if" [] [],
+                                                                                                                                                                    },
+                                                                                                                                                                    l_paren_token: L_PAREN@267..268 "(" [] [],
+                                                                                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                                                                                        CssCustomPropertyFunction,
+                                                                                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                                                                                            value: COLON@280..282 ":" [] [Whitespace(" ")],
+                                                                                                                                                                        },
+                                                                                                                                                                        CssCustomPropertyFunction,
+                                                                                                                                                                    ],
+                                                                                                                                                                    r_paren_token: missing (required),
+                                                                                                                                                                },
+                                                                                                                                                            ],
+                                                                                                                                                            r_paren_token: missing (required),
+                                                                                                                                                        },
+                                                                                                                                                    ],
+                                                                                                                                                    r_paren_token: missing (required),
+                                                                                                                                                },
+                                                                                                                                            ],
+                                                                                                                                            r_paren_token: missing (required),
+                                                                                                                                        },
+                                                                                                                                    ],
+                                                                                                                                    r_paren_token: missing (required),
+                                                                                                                                },
+                                                                                                                            ],
+                                                                                                                            r_paren_token: missing (required),
+                                                                                                                        },
+                                                                                                                    ],
+                                                                                                                    r_paren_token: missing (required),
+                                                                                                                },
+                                                                                                            ],
+                                                                                                            r_paren_token: missing (required),
+                                                                                                        },
+                                                                                                    ],
+                                                                                                    r_paren_token: missing (required),
+                                                                                                },
+                                                                                            ],
+                                                                                            r_paren_token: missing (required),
+                                                                                        },
+                                                                                    ],
+                                                                                    r_paren_token: missing (required),
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: missing (required),
+                                                                        },
+                                                                    ],
+                                                                    r_paren_token: missing (required),
+                                                                },
+                                                            ],
+                                                            r_paren_token: missing (required),
+                                                        },
+                                                    ],
+                                                    r_paren_token: missing (required),
+                                                },
+                                            ],
+                                            r_paren_token: missing (required),
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@574..575 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@575..577 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@577..583 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@583..585 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@585..590 "width" [] [],
+                                },
+                                colon_token: COLON@590..592 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@592..593 "1" [] [],
+                                            unit_token: IDENT@593..595 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@595..597 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@597..598 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@598..599 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..599
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..598
+    0: CSS_QUALIFIED_RULE@0..575
+      0: CSS_SELECTOR_LIST@0..3
+        0: CSS_COMPOUND_SELECTOR@0..3
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..3
+            0: CSS_CLASS_SELECTOR@0..3
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..3
+                0: IDENT@1..3 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@3..575
+        0: L_CURLY@3..5 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@5..574
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..574
+            0: CSS_DECLARATION@5..574
+              0: CSS_GENERIC_PROPERTY@5..574
+                0: CSS_DASHED_IDENTIFIER@5..8
+                  0: IDENT@5..8 "--x" [] []
+                1: COLON@8..10 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@10..574
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@10..574
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@10..574
+                      0: CSS_CUSTOM_IDENTIFIER@10..12
+                        0: IDENT@10..12 "if" [] []
+                      1: L_PAREN@12..13 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@13..574
+                        0: CSS_CUSTOM_PROPERTY_FUNCTION@13..25
+                          0: CSS_CUSTOM_IDENTIFIER@13..18
+                            0: IDENT@13..18 "media" [] []
+                          1: L_PAREN@18..19 "(" [] []
+                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@19..24
+                            0: CSS_CUSTOM_IDENTIFIER@19..24
+                              0: IDENT@19..24 "print" [] []
+                          3: R_PAREN@24..25 ")" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@25..27
+                          0: COLON@25..27 ":" [] [Whitespace(" ")]
+                        2: CSS_CUSTOM_PROPERTY_FUNCTION@27..574
+                          0: CSS_CUSTOM_IDENTIFIER@27..29
+                            0: IDENT@27..29 "if" [] []
+                          1: L_PAREN@29..30 "(" [] []
+                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@30..574
+                            0: CSS_CUSTOM_PROPERTY_FUNCTION@30..42
+                              0: CSS_CUSTOM_IDENTIFIER@30..35
+                                0: IDENT@30..35 "media" [] []
+                              1: L_PAREN@35..36 "(" [] []
+                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@36..41
+                                0: CSS_CUSTOM_IDENTIFIER@36..41
+                                  0: IDENT@36..41 "print" [] []
+                              3: R_PAREN@41..42 ")" [] []
+                            1: CSS_CUSTOM_PROPERTY_DELIMITER@42..44
+                              0: COLON@42..44 ":" [] [Whitespace(" ")]
+                            2: CSS_CUSTOM_PROPERTY_FUNCTION@44..574
+                              0: CSS_CUSTOM_IDENTIFIER@44..46
+                                0: IDENT@44..46 "if" [] []
+                              1: L_PAREN@46..47 "(" [] []
+                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@47..574
+                                0: CSS_CUSTOM_PROPERTY_FUNCTION@47..59
+                                  0: CSS_CUSTOM_IDENTIFIER@47..52
+                                    0: IDENT@47..52 "media" [] []
+                                  1: L_PAREN@52..53 "(" [] []
+                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@53..58
+                                    0: CSS_CUSTOM_IDENTIFIER@53..58
+                                      0: IDENT@53..58 "print" [] []
+                                  3: R_PAREN@58..59 ")" [] []
+                                1: CSS_CUSTOM_PROPERTY_DELIMITER@59..61
+                                  0: COLON@59..61 ":" [] [Whitespace(" ")]
+                                2: CSS_CUSTOM_PROPERTY_FUNCTION@61..574
+                                  0: CSS_CUSTOM_IDENTIFIER@61..63
+                                    0: IDENT@61..63 "if" [] []
+                                  1: L_PAREN@63..64 "(" [] []
+                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@64..574
+                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@64..76
+                                      0: CSS_CUSTOM_IDENTIFIER@64..69
+                                        0: IDENT@64..69 "media" [] []
+                                      1: L_PAREN@69..70 "(" [] []
+                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@70..75
+                                        0: CSS_CUSTOM_IDENTIFIER@70..75
+                                          0: IDENT@70..75 "print" [] []
+                                      3: R_PAREN@75..76 ")" [] []
+                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@76..78
+                                      0: COLON@76..78 ":" [] [Whitespace(" ")]
+                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@78..574
+                                      0: CSS_CUSTOM_IDENTIFIER@78..80
+                                        0: IDENT@78..80 "if" [] []
+                                      1: L_PAREN@80..81 "(" [] []
+                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@81..574
+                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@81..93
+                                          0: CSS_CUSTOM_IDENTIFIER@81..86
+                                            0: IDENT@81..86 "media" [] []
+                                          1: L_PAREN@86..87 "(" [] []
+                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@87..92
+                                            0: CSS_CUSTOM_IDENTIFIER@87..92
+                                              0: IDENT@87..92 "print" [] []
+                                          3: R_PAREN@92..93 ")" [] []
+                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@93..95
+                                          0: COLON@93..95 ":" [] [Whitespace(" ")]
+                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@95..574
+                                          0: CSS_CUSTOM_IDENTIFIER@95..97
+                                            0: IDENT@95..97 "if" [] []
+                                          1: L_PAREN@97..98 "(" [] []
+                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@98..574
+                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@98..110
+                                              0: CSS_CUSTOM_IDENTIFIER@98..103
+                                                0: IDENT@98..103 "media" [] []
+                                              1: L_PAREN@103..104 "(" [] []
+                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@104..109
+                                                0: CSS_CUSTOM_IDENTIFIER@104..109
+                                                  0: IDENT@104..109 "print" [] []
+                                              3: R_PAREN@109..110 ")" [] []
+                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@110..112
+                                              0: COLON@110..112 ":" [] [Whitespace(" ")]
+                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@112..574
+                                              0: CSS_CUSTOM_IDENTIFIER@112..114
+                                                0: IDENT@112..114 "if" [] []
+                                              1: L_PAREN@114..115 "(" [] []
+                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@115..574
+                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@115..127
+                                                  0: CSS_CUSTOM_IDENTIFIER@115..120
+                                                    0: IDENT@115..120 "media" [] []
+                                                  1: L_PAREN@120..121 "(" [] []
+                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@121..126
+                                                    0: CSS_CUSTOM_IDENTIFIER@121..126
+                                                      0: IDENT@121..126 "print" [] []
+                                                  3: R_PAREN@126..127 ")" [] []
+                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@127..129
+                                                  0: COLON@127..129 ":" [] [Whitespace(" ")]
+                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@129..574
+                                                  0: CSS_CUSTOM_IDENTIFIER@129..131
+                                                    0: IDENT@129..131 "if" [] []
+                                                  1: L_PAREN@131..132 "(" [] []
+                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@132..574
+                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@132..144
+                                                      0: CSS_CUSTOM_IDENTIFIER@132..137
+                                                        0: IDENT@132..137 "media" [] []
+                                                      1: L_PAREN@137..138 "(" [] []
+                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@138..143
+                                                        0: CSS_CUSTOM_IDENTIFIER@138..143
+                                                          0: IDENT@138..143 "print" [] []
+                                                      3: R_PAREN@143..144 ")" [] []
+                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@144..146
+                                                      0: COLON@144..146 ":" [] [Whitespace(" ")]
+                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@146..574
+                                                      0: CSS_CUSTOM_IDENTIFIER@146..148
+                                                        0: IDENT@146..148 "if" [] []
+                                                      1: L_PAREN@148..149 "(" [] []
+                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@149..574
+                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@149..161
+                                                          0: CSS_CUSTOM_IDENTIFIER@149..154
+                                                            0: IDENT@149..154 "media" [] []
+                                                          1: L_PAREN@154..155 "(" [] []
+                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@155..160
+                                                            0: CSS_CUSTOM_IDENTIFIER@155..160
+                                                              0: IDENT@155..160 "print" [] []
+                                                          3: R_PAREN@160..161 ")" [] []
+                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@161..163
+                                                          0: COLON@161..163 ":" [] [Whitespace(" ")]
+                                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@163..574
+                                                          0: CSS_CUSTOM_IDENTIFIER@163..165
+                                                            0: IDENT@163..165 "if" [] []
+                                                          1: L_PAREN@165..166 "(" [] []
+                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@166..574
+                                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@166..178
+                                                              0: CSS_CUSTOM_IDENTIFIER@166..171
+                                                                0: IDENT@166..171 "media" [] []
+                                                              1: L_PAREN@171..172 "(" [] []
+                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@172..177
+                                                                0: CSS_CUSTOM_IDENTIFIER@172..177
+                                                                  0: IDENT@172..177 "print" [] []
+                                                              3: R_PAREN@177..178 ")" [] []
+                                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@178..180
+                                                              0: COLON@178..180 ":" [] [Whitespace(" ")]
+                                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@180..574
+                                                              0: CSS_CUSTOM_IDENTIFIER@180..182
+                                                                0: IDENT@180..182 "if" [] []
+                                                              1: L_PAREN@182..183 "(" [] []
+                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@183..574
+                                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@183..195
+                                                                  0: CSS_CUSTOM_IDENTIFIER@183..188
+                                                                    0: IDENT@183..188 "media" [] []
+                                                                  1: L_PAREN@188..189 "(" [] []
+                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@189..194
+                                                                    0: CSS_CUSTOM_IDENTIFIER@189..194
+                                                                      0: IDENT@189..194 "print" [] []
+                                                                  3: R_PAREN@194..195 ")" [] []
+                                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@195..197
+                                                                  0: COLON@195..197 ":" [] [Whitespace(" ")]
+                                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@197..574
+                                                                  0: CSS_CUSTOM_IDENTIFIER@197..199
+                                                                    0: IDENT@197..199 "if" [] []
+                                                                  1: L_PAREN@199..200 "(" [] []
+                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@200..574
+                                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@200..212
+                                                                      0: CSS_CUSTOM_IDENTIFIER@200..205
+                                                                        0: IDENT@200..205 "media" [] []
+                                                                      1: L_PAREN@205..206 "(" [] []
+                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@206..211
+                                                                        0: CSS_CUSTOM_IDENTIFIER@206..211
+                                                                          0: IDENT@206..211 "print" [] []
+                                                                      3: R_PAREN@211..212 ")" [] []
+                                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@212..214
+                                                                      0: COLON@212..214 ":" [] [Whitespace(" ")]
+                                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@214..574
+                                                                      0: CSS_CUSTOM_IDENTIFIER@214..216
+                                                                        0: IDENT@214..216 "if" [] []
+                                                                      1: L_PAREN@216..217 "(" [] []
+                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@217..574
+                                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@217..229
+                                                                          0: CSS_CUSTOM_IDENTIFIER@217..222
+                                                                            0: IDENT@217..222 "media" [] []
+                                                                          1: L_PAREN@222..223 "(" [] []
+                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@223..228
+                                                                            0: CSS_CUSTOM_IDENTIFIER@223..228
+                                                                              0: IDENT@223..228 "print" [] []
+                                                                          3: R_PAREN@228..229 ")" [] []
+                                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@229..231
+                                                                          0: COLON@229..231 ":" [] [Whitespace(" ")]
+                                                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@231..574
+                                                                          0: CSS_CUSTOM_IDENTIFIER@231..233
+                                                                            0: IDENT@231..233 "if" [] []
+                                                                          1: L_PAREN@233..234 "(" [] []
+                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@234..574
+                                                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@234..246
+                                                                              0: CSS_CUSTOM_IDENTIFIER@234..239
+                                                                                0: IDENT@234..239 "media" [] []
+                                                                              1: L_PAREN@239..240 "(" [] []
+                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@240..245
+                                                                                0: CSS_CUSTOM_IDENTIFIER@240..245
+                                                                                  0: IDENT@240..245 "print" [] []
+                                                                              3: R_PAREN@245..246 ")" [] []
+                                                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@246..248
+                                                                              0: COLON@246..248 ":" [] [Whitespace(" ")]
+                                                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@248..574
+                                                                              0: CSS_CUSTOM_IDENTIFIER@248..250
+                                                                                0: IDENT@248..250 "if" [] []
+                                                                              1: L_PAREN@250..251 "(" [] []
+                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@251..574
+                                                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@251..263
+                                                                                  0: CSS_CUSTOM_IDENTIFIER@251..256
+                                                                                    0: IDENT@251..256 "media" [] []
+                                                                                  1: L_PAREN@256..257 "(" [] []
+                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@257..262
+                                                                                    0: CSS_CUSTOM_IDENTIFIER@257..262
+                                                                                      0: IDENT@257..262 "print" [] []
+                                                                                  3: R_PAREN@262..263 ")" [] []
+                                                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@263..265
+                                                                                  0: COLON@263..265 ":" [] [Whitespace(" ")]
+                                                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@265..574
+                                                                                  0: CSS_CUSTOM_IDENTIFIER@265..267
+                                                                                    0: IDENT@265..267 "if" [] []
+                                                                                  1: L_PAREN@267..268 "(" [] []
+                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@268..574
+                                                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@268..280
+                                                                                      0: CSS_CUSTOM_IDENTIFIER@268..273
+                                                                                        0: IDENT@268..273 "media" [] []
+                                                                                      1: L_PAREN@273..274 "(" [] []
+                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@274..279
+                                                                                        0: CSS_CUSTOM_IDENTIFIER@274..279
+                                                                                          0: IDENT@274..279 "print" [] []
+                                                                                      3: R_PAREN@279..280 ")" [] []
+                                                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@280..282
+                                                                                      0: COLON@280..282 ":" [] [Whitespace(" ")]
+                                                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@282..574
+                                                                                      0: CSS_CUSTOM_IDENTIFIER@282..284
+                                                                                        0: IDENT@282..284 "if" [] []
+                                                                                      1: L_PAREN@284..285 "(" [] []
+                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@285..574
+                                                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@285..297
+                                                                                          0: CSS_CUSTOM_IDENTIFIER@285..290
+                                                                                            0: IDENT@285..290 "media" [] []
+                                                                                          1: L_PAREN@290..291 "(" [] []
+                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@291..296
+                                                                                            0: CSS_CUSTOM_IDENTIFIER@291..296
+                                                                                              0: IDENT@291..296 "print" [] []
+                                                                                          3: R_PAREN@296..297 ")" [] []
+                                                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@297..299
+                                                                                          0: COLON@297..299 ":" [] [Whitespace(" ")]
+                                                                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@299..574
+                                                                                          0: CSS_CUSTOM_IDENTIFIER@299..301
+                                                                                            0: IDENT@299..301 "if" [] []
+                                                                                          1: L_PAREN@301..302 "(" [] []
+                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@302..574
+                                                                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@302..314
+                                                                                              0: CSS_CUSTOM_IDENTIFIER@302..307
+                                                                                                0: IDENT@302..307 "media" [] []
+                                                                                              1: L_PAREN@307..308 "(" [] []
+                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@308..313
+                                                                                                0: CSS_CUSTOM_IDENTIFIER@308..313
+                                                                                                  0: IDENT@308..313 "print" [] []
+                                                                                              3: R_PAREN@313..314 ")" [] []
+                                                                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@314..316
+                                                                                              0: COLON@314..316 ":" [] [Whitespace(" ")]
+                                                                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@316..574
+                                                                                              0: CSS_CUSTOM_IDENTIFIER@316..318
+                                                                                                0: IDENT@316..318 "if" [] []
+                                                                                              1: L_PAREN@318..319 "(" [] []
+                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@319..574
+                                                                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@319..331
+                                                                                                  0: CSS_CUSTOM_IDENTIFIER@319..324
+                                                                                                    0: IDENT@319..324 "media" [] []
+                                                                                                  1: L_PAREN@324..325 "(" [] []
+                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@325..330
+                                                                                                    0: CSS_CUSTOM_IDENTIFIER@325..330
+                                                                                                      0: IDENT@325..330 "print" [] []
+                                                                                                  3: R_PAREN@330..331 ")" [] []
+                                                                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@331..333
+                                                                                                  0: COLON@331..333 ":" [] [Whitespace(" ")]
+                                                                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@333..574
+                                                                                                  0: CSS_CUSTOM_IDENTIFIER@333..335
+                                                                                                    0: IDENT@333..335 "if" [] []
+                                                                                                  1: L_PAREN@335..336 "(" [] []
+                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@336..574
+                                                                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@336..348
+                                                                                                      0: CSS_CUSTOM_IDENTIFIER@336..341
+                                                                                                        0: IDENT@336..341 "media" [] []
+                                                                                                      1: L_PAREN@341..342 "(" [] []
+                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@342..347
+                                                                                                        0: CSS_CUSTOM_IDENTIFIER@342..347
+                                                                                                          0: IDENT@342..347 "print" [] []
+                                                                                                      3: R_PAREN@347..348 ")" [] []
+                                                                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@348..350
+                                                                                                      0: COLON@348..350 ":" [] [Whitespace(" ")]
+                                                                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@350..574
+                                                                                                      0: CSS_CUSTOM_IDENTIFIER@350..352
+                                                                                                        0: IDENT@350..352 "if" [] []
+                                                                                                      1: L_PAREN@352..353 "(" [] []
+                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@353..574
+                                                                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@353..365
+                                                                                                          0: CSS_CUSTOM_IDENTIFIER@353..358
+                                                                                                            0: IDENT@353..358 "media" [] []
+                                                                                                          1: L_PAREN@358..359 "(" [] []
+                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@359..364
+                                                                                                            0: CSS_CUSTOM_IDENTIFIER@359..364
+                                                                                                              0: IDENT@359..364 "print" [] []
+                                                                                                          3: R_PAREN@364..365 ")" [] []
+                                                                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@365..367
+                                                                                                          0: COLON@365..367 ":" [] [Whitespace(" ")]
+                                                                                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@367..574
+                                                                                                          0: CSS_CUSTOM_IDENTIFIER@367..369
+                                                                                                            0: IDENT@367..369 "if" [] []
+                                                                                                          1: L_PAREN@369..370 "(" [] []
+                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@370..574
+                                                                                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@370..382
+                                                                                                              0: CSS_CUSTOM_IDENTIFIER@370..375
+                                                                                                                0: IDENT@370..375 "media" [] []
+                                                                                                              1: L_PAREN@375..376 "(" [] []
+                                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@376..381
+                                                                                                                0: CSS_CUSTOM_IDENTIFIER@376..381
+                                                                                                                  0: IDENT@376..381 "print" [] []
+                                                                                                              3: R_PAREN@381..382 ")" [] []
+                                                                                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@382..384
+                                                                                                              0: COLON@382..384 ":" [] [Whitespace(" ")]
+                                                                                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@384..574
+                                                                                                              0: CSS_CUSTOM_IDENTIFIER@384..386
+                                                                                                                0: IDENT@384..386 "if" [] []
+                                                                                                              1: L_PAREN@386..387 "(" [] []
+                                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@387..574
+                                                                                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@387..399
+                                                                                                                  0: CSS_CUSTOM_IDENTIFIER@387..392
+                                                                                                                    0: IDENT@387..392 "media" [] []
+                                                                                                                  1: L_PAREN@392..393 "(" [] []
+                                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@393..398
+                                                                                                                    0: CSS_CUSTOM_IDENTIFIER@393..398
+                                                                                                                      0: IDENT@393..398 "print" [] []
+                                                                                                                  3: R_PAREN@398..399 ")" [] []
+                                                                                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@399..401
+                                                                                                                  0: COLON@399..401 ":" [] [Whitespace(" ")]
+                                                                                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@401..574
+                                                                                                                  0: CSS_CUSTOM_IDENTIFIER@401..403
+                                                                                                                    0: IDENT@401..403 "if" [] []
+                                                                                                                  1: L_PAREN@403..404 "(" [] []
+                                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@404..574
+                                                                                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@404..416
+                                                                                                                      0: CSS_CUSTOM_IDENTIFIER@404..409
+                                                                                                                        0: IDENT@404..409 "media" [] []
+                                                                                                                      1: L_PAREN@409..410 "(" [] []
+                                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@410..415
+                                                                                                                        0: CSS_CUSTOM_IDENTIFIER@410..415
+                                                                                                                          0: IDENT@410..415 "print" [] []
+                                                                                                                      3: R_PAREN@415..416 ")" [] []
+                                                                                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@416..418
+                                                                                                                      0: COLON@416..418 ":" [] [Whitespace(" ")]
+                                                                                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@418..574
+                                                                                                                      0: CSS_CUSTOM_IDENTIFIER@418..420
+                                                                                                                        0: IDENT@418..420 "if" [] []
+                                                                                                                      1: L_PAREN@420..421 "(" [] []
+                                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@421..574
+                                                                                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@421..433
+                                                                                                                          0: CSS_CUSTOM_IDENTIFIER@421..426
+                                                                                                                            0: IDENT@421..426 "media" [] []
+                                                                                                                          1: L_PAREN@426..427 "(" [] []
+                                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@427..432
+                                                                                                                            0: CSS_CUSTOM_IDENTIFIER@427..432
+                                                                                                                              0: IDENT@427..432 "print" [] []
+                                                                                                                          3: R_PAREN@432..433 ")" [] []
+                                                                                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@433..435
+                                                                                                                          0: COLON@433..435 ":" [] [Whitespace(" ")]
+                                                                                                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@435..574
+                                                                                                                          0: CSS_CUSTOM_IDENTIFIER@435..437
+                                                                                                                            0: IDENT@435..437 "if" [] []
+                                                                                                                          1: L_PAREN@437..438 "(" [] []
+                                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@438..574
+                                                                                                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@438..450
+                                                                                                                              0: CSS_CUSTOM_IDENTIFIER@438..443
+                                                                                                                                0: IDENT@438..443 "media" [] []
+                                                                                                                              1: L_PAREN@443..444 "(" [] []
+                                                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@444..449
+                                                                                                                                0: CSS_CUSTOM_IDENTIFIER@444..449
+                                                                                                                                  0: IDENT@444..449 "print" [] []
+                                                                                                                              3: R_PAREN@449..450 ")" [] []
+                                                                                                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@450..452
+                                                                                                                              0: COLON@450..452 ":" [] [Whitespace(" ")]
+                                                                                                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@452..574
+                                                                                                                              0: CSS_CUSTOM_IDENTIFIER@452..454
+                                                                                                                                0: IDENT@452..454 "if" [] []
+                                                                                                                              1: L_PAREN@454..455 "(" [] []
+                                                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@455..574
+                                                                                                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@455..467
+                                                                                                                                  0: CSS_CUSTOM_IDENTIFIER@455..460
+                                                                                                                                    0: IDENT@455..460 "media" [] []
+                                                                                                                                  1: L_PAREN@460..461 "(" [] []
+                                                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@461..466
+                                                                                                                                    0: CSS_CUSTOM_IDENTIFIER@461..466
+                                                                                                                                      0: IDENT@461..466 "print" [] []
+                                                                                                                                  3: R_PAREN@466..467 ")" [] []
+                                                                                                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@467..469
+                                                                                                                                  0: COLON@467..469 ":" [] [Whitespace(" ")]
+                                                                                                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@469..574
+                                                                                                                                  0: CSS_CUSTOM_IDENTIFIER@469..471
+                                                                                                                                    0: IDENT@469..471 "if" [] []
+                                                                                                                                  1: L_PAREN@471..472 "(" [] []
+                                                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@472..574
+                                                                                                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@472..484
+                                                                                                                                      0: CSS_CUSTOM_IDENTIFIER@472..477
+                                                                                                                                        0: IDENT@472..477 "media" [] []
+                                                                                                                                      1: L_PAREN@477..478 "(" [] []
+                                                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@478..483
+                                                                                                                                        0: CSS_CUSTOM_IDENTIFIER@478..483
+                                                                                                                                          0: IDENT@478..483 "print" [] []
+                                                                                                                                      3: R_PAREN@483..484 ")" [] []
+                                                                                                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@484..486
+                                                                                                                                      0: COLON@484..486 ":" [] [Whitespace(" ")]
+                                                                                                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@486..574
+                                                                                                                                      0: CSS_CUSTOM_IDENTIFIER@486..488
+                                                                                                                                        0: IDENT@486..488 "if" [] []
+                                                                                                                                      1: L_PAREN@488..489 "(" [] []
+                                                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@489..574
+                                                                                                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@489..501
+                                                                                                                                          0: CSS_CUSTOM_IDENTIFIER@489..494
+                                                                                                                                            0: IDENT@489..494 "media" [] []
+                                                                                                                                          1: L_PAREN@494..495 "(" [] []
+                                                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@495..500
+                                                                                                                                            0: CSS_CUSTOM_IDENTIFIER@495..500
+                                                                                                                                              0: IDENT@495..500 "print" [] []
+                                                                                                                                          3: R_PAREN@500..501 ")" [] []
+                                                                                                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@501..503
+                                                                                                                                          0: COLON@501..503 ":" [] [Whitespace(" ")]
+                                                                                                                                        2: CSS_CUSTOM_PROPERTY_FUNCTION@503..574
+                                                                                                                                          0: CSS_CUSTOM_IDENTIFIER@503..505
+                                                                                                                                            0: IDENT@503..505 "if" [] []
+                                                                                                                                          1: L_PAREN@505..506 "(" [] []
+                                                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@506..574
+                                                                                                                                            0: CSS_CUSTOM_PROPERTY_FUNCTION@506..518
+                                                                                                                                              0: CSS_CUSTOM_IDENTIFIER@506..511
+                                                                                                                                                0: IDENT@506..511 "media" [] []
+                                                                                                                                              1: L_PAREN@511..512 "(" [] []
+                                                                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@512..517
+                                                                                                                                                0: CSS_CUSTOM_IDENTIFIER@512..517
+                                                                                                                                                  0: IDENT@512..517 "print" [] []
+                                                                                                                                              3: R_PAREN@517..518 ")" [] []
+                                                                                                                                            1: CSS_CUSTOM_PROPERTY_DELIMITER@518..520
+                                                                                                                                              0: COLON@518..520 ":" [] [Whitespace(" ")]
+                                                                                                                                            2: CSS_CUSTOM_PROPERTY_FUNCTION@520..574
+                                                                                                                                              0: CSS_CUSTOM_IDENTIFIER@520..522
+                                                                                                                                                0: IDENT@520..522 "if" [] []
+                                                                                                                                              1: L_PAREN@522..523 "(" [] []
+                                                                                                                                              2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@523..574
+                                                                                                                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@523..535
+                                                                                                                                                  0: CSS_CUSTOM_IDENTIFIER@523..528
+                                                                                                                                                    0: IDENT@523..528 "media" [] []
+                                                                                                                                                  1: L_PAREN@528..529 "(" [] []
+                                                                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@529..534
+                                                                                                                                                    0: CSS_CUSTOM_IDENTIFIER@529..534
+                                                                                                                                                      0: IDENT@529..534 "print" [] []
+                                                                                                                                                  3: R_PAREN@534..535 ")" [] []
+                                                                                                                                                1: CSS_CUSTOM_PROPERTY_DELIMITER@535..537
+                                                                                                                                                  0: COLON@535..537 ":" [] [Whitespace(" ")]
+                                                                                                                                                2: CSS_CUSTOM_PROPERTY_FUNCTION@537..574
+                                                                                                                                                  0: CSS_CUSTOM_IDENTIFIER@537..539
+                                                                                                                                                    0: IDENT@537..539 "if" [] []
+                                                                                                                                                  1: L_PAREN@539..540 "(" [] []
+                                                                                                                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@540..574
+                                                                                                                                                    0: CSS_CUSTOM_PROPERTY_FUNCTION@540..552
+                                                                                                                                                      0: CSS_CUSTOM_IDENTIFIER@540..545
+                                                                                                                                                        0: IDENT@540..545 "media" [] []
+                                                                                                                                                      1: L_PAREN@545..546 "(" [] []
+                                                                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@546..551
+                                                                                                                                                        0: CSS_CUSTOM_IDENTIFIER@546..551
+                                                                                                                                                          0: IDENT@546..551 "print" [] []
+                                                                                                                                                      3: R_PAREN@551..552 ")" [] []
+                                                                                                                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@552..554
+                                                                                                                                                      0: COLON@552..554 ":" [] [Whitespace(" ")]
+                                                                                                                                                    2: CSS_CUSTOM_PROPERTY_FUNCTION@554..574
+                                                                                                                                                      0: CSS_CUSTOM_IDENTIFIER@554..556
+                                                                                                                                                        0: IDENT@554..556 "if" [] []
+                                                                                                                                                      1: L_PAREN@556..557 "(" [] []
+                                                                                                                                                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@557..574
+                                                                                                                                                        0: CSS_CUSTOM_PROPERTY_FUNCTION@557..569
+                                                                                                                                                          0: CSS_CUSTOM_IDENTIFIER@557..562
+                                                                                                                                                            0: IDENT@557..562 "media" [] []
+                                                                                                                                                          1: L_PAREN@562..563 "(" [] []
+                                                                                                                                                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@563..568
+                                                                                                                                                            0: CSS_CUSTOM_IDENTIFIER@563..568
+                                                                                                                                                              0: IDENT@563..568 "print" [] []
+                                                                                                                                                          3: R_PAREN@568..569 ")" [] []
+                                                                                                                                                        1: CSS_CUSTOM_PROPERTY_DELIMITER@569..571
+                                                                                                                                                          0: COLON@569..571 ":" [] [Whitespace(" ")]
+                                                                                                                                                        2: CSS_NUMBER@571..572
+                                                                                                                                                          0: CSS_NUMBER_LITERAL@571..572 "1" [] []
+                                                                                                                                                        3: CSS_CUSTOM_PROPERTY_DELIMITER@572..574
+                                                                                                                                                          0: SEMICOLON@572..574 ";" [] [Whitespace(" ")]
+                                                                                                                                                      3: (empty)
+                                                                                                                                                  3: (empty)
+                                                                                                                                              3: (empty)
+                                                                                                                                          3: (empty)
+                                                                                                                                      3: (empty)
+                                                                                                                                  3: (empty)
+                                                                                                                              3: (empty)
+                                                                                                                          3: (empty)
+                                                                                                                      3: (empty)
+                                                                                                                  3: (empty)
+                                                                                                              3: (empty)
+                                                                                                          3: (empty)
+                                                                                                      3: (empty)
+                                                                                                  3: (empty)
+                                                                                              3: (empty)
+                                                                                          3: (empty)
+                                                                                      3: (empty)
+                                                                                  3: (empty)
+                                                                              3: (empty)
+                                                                          3: (empty)
+                                                                      3: (empty)
+                                                                  3: (empty)
+                                                              3: (empty)
+                                                          3: (empty)
+                                                      3: (empty)
+                                                  3: (empty)
+                                              3: (empty)
+                                          3: (empty)
+                                      3: (empty)
+                                  3: (empty)
+                              3: (empty)
+                          3: (empty)
+                      3: (empty)
+              1: (empty)
+            1: (empty)
+        2: R_CURLY@574..575 "}" [] []
+    1: CSS_QUALIFIED_RULE@575..598
+      0: CSS_SELECTOR_LIST@575..583
+        0: CSS_COMPOUND_SELECTOR@575..583
+          0: CSS_NESTED_SELECTOR_LIST@575..575
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@575..583
+            0: CSS_CLASS_SELECTOR@575..583
+              0: DOT@575..577 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@577..583
+                0: IDENT@577..583 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@583..598
+        0: L_CURLY@583..585 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@585..597
+          0: CSS_DECLARATION_WITH_SEMICOLON@585..597
+            0: CSS_DECLARATION@585..595
+              0: CSS_GENERIC_PROPERTY@585..595
+                0: CSS_IDENTIFIER@585..590
+                  0: IDENT@585..590 "width" [] []
+                1: COLON@590..592 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@592..595
+                  0: SCSS_EXPRESSION_ITEM_LIST@592..595
+                    0: CSS_REGULAR_DIMENSION@592..595
+                      0: CSS_NUMBER_LITERAL@592..593 "1" [] []
+                      1: IDENT@593..595 "px" [] []
+              1: (empty)
+            1: SEMICOLON@595..597 ";" [] [Whitespace(" ")]
+        2: R_CURLY@597..598 "}" [] []
+  2: EOF@598..599 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+custom-property-if-depth.scss:1:575 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `}`
+  
+  > 1 │ ...edia(print): if(media(print): if(media(print): 1; }
+      │                                                      ^
+    2 │ .after { width: 1px; }
+    3 │ 
+  
+  i Remove }
+  
+```

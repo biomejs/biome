@@ -13,6 +13,7 @@ npm i @biomejs/wasm-<dist>
 ```
 
 You need to install one of the `@biomejs/wasm-*` package as a **peer dependency** for this package to work correctly, out of the following distributions:
+
 - `@biomejs/wasm-bundler`: Install this package if you're using a bundler that supports importing `*.wasm` files directly
 - `@biomejs/wasm-nodejs`: Install this package if you're using Node.js to load the WebAssembly bundle use the `fs` API
 - `@biomejs/wasm-web`: Install this package if you're targeting the web platform to load the WASM bundle using the `fetch` API

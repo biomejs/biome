@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write --use-editorconfig=true '{a,b}}.json'
+```
+
+## `.editorconfig`
+
+```editorconfig
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[{a,b}}.json]
+indent_size = 2
+
+```
+
+## `{a,b}}.json`
+
+```json
+{
+  "test": 1
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

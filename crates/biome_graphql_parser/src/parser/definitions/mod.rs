@@ -75,10 +75,11 @@ impl ParseNodeList for DefinitionList {
 
 #[inline]
 fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
-    let keyword = if is_at_string(p) { p.nth(1) } else { p.cur() };
+    let has_description = is_at_string(p);
+    let keyword = if has_description { p.nth(1) } else { p.cur() };
     match keyword {
         T![query] | T![mutation] | T![subscription] => parse_operation_definition(p),
-        T!['{'] => parse_selection_set(p),
+        T!['{'] if !has_description => parse_selection_set(p),
         T![fragment] => parse_fragment_definition(p),
         T![schema] => parse_schema_definition(p),
         T![scalar] => parse_scalar_type_definition(p),
@@ -88,7 +89,7 @@ fn parse_definition(p: &mut GraphqlParser) -> ParsedSyntax {
         T![enum] => parse_enum_type_definition(p),
         T![input] => parse_input_object_type_definition(p),
         T![directive] => parse_directive_definition(p),
-        T![extend] => parse_extension(p),
+        T![extend] if !has_description => parse_extension(p),
         _ => Absent,
     }
 }
@@ -109,13 +110,13 @@ fn parse_extension(p: &mut GraphqlParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
-    let keyword = if is_at_string(p) { p.nth(1) } else { p.cur() };
+    let has_description = is_at_string(p);
+    let keyword = if has_description { p.nth(1) } else { p.cur() };
     matches!(
         keyword,
         T![query]
             | T![mutation]
             | T![subscription]
-            | T!['{']
             | T![fragment]
             | T![schema]
             | T![scalar]
@@ -125,6 +126,5 @@ fn is_at_definition(p: &mut GraphqlParser<'_>) -> bool {
             | T![enum]
             | T![input]
             | T![directive]
-            | T![extend]
-    )
+    ) || (!has_description && matches!(keyword, T!['{'] | T![extend]))
 }

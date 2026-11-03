@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: validAllowAtRootLevel.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+class A {
+	constructor(@Inject(tokenSync()) x) {}
+	method(@decorator(readFileSync("x")) y) {}
+}
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._

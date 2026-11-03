@@ -1,0 +1,274 @@
+.border-block-start-color-before-border-block-color {
+  border-block-start-color: initial;
+  border-block-color: initial;
+}
+
+.border-block-end-color-before-border-block-color {
+  border-block-end-color: initial;
+  border-block-color: initial;
+}
+
+.border-block-start-style-before-border-block-style {
+  border-block-start-style: initial;
+  border-block-style: initial;
+}
+
+.border-block-end-style-before-border-block-style {
+  border-block-end-style: initial;
+  border-block-style: initial;
+}
+
+.border-block-start-width-before-border-block-width {
+  border-block-start-width: initial;
+  border-block-width: initial;
+}
+
+.border-block-end-width-before-border-block-width {
+  border-block-end-width: initial;
+  border-block-width: initial;
+}
+
+.border-inline-start-color-before-border-inline-color {
+  border-inline-start-color: initial;
+  border-inline-color: initial;
+}
+
+.border-inline-end-color-before-border-inline-color {
+  border-inline-end-color: initial;
+  border-inline-color: initial;
+}
+
+.border-inline-start-style-before-border-inline-style {
+  border-inline-start-style: initial;
+  border-inline-style: initial;
+}
+
+.border-inline-end-style-before-border-inline-style {
+  border-inline-end-style: initial;
+  border-inline-style: initial;
+}
+
+.border-inline-start-width-before-border-inline-width {
+  border-inline-start-width: initial;
+  border-inline-width: initial;
+}
+
+.border-inline-end-width-before-border-inline-width {
+  border-inline-end-width: initial;
+  border-inline-width: initial;
+}
+
+.corner-end-start-shape-before-corner-block-end-shape {
+  corner-end-start-shape: bevel;
+  corner-block-end-shape: round;
+}
+
+.corner-end-end-shape-before-corner-block-end-shape {
+  corner-end-end-shape: bevel;
+  corner-block-end-shape: round;
+}
+
+.corner-start-start-shape-before-corner-block-start-shape {
+  corner-start-start-shape: bevel;
+  corner-block-start-shape: round;
+}
+
+.corner-start-end-shape-before-corner-block-start-shape {
+  corner-start-end-shape: bevel;
+  corner-block-start-shape: round;
+}
+
+.corner-bottom-left-shape-before-corner-bottom-shape {
+  corner-bottom-left-shape: bevel;
+  corner-bottom-shape: round;
+}
+
+.corner-bottom-right-shape-before-corner-bottom-shape {
+  corner-bottom-right-shape: bevel;
+  corner-bottom-shape: round;
+}
+
+.corner-start-end-shape-before-corner-inline-end-shape {
+  corner-start-end-shape: bevel;
+  corner-inline-end-shape: round;
+}
+
+.corner-end-end-shape-before-corner-inline-end-shape {
+  corner-end-end-shape: bevel;
+  corner-inline-end-shape: round;
+}
+
+.corner-start-start-shape-before-corner-inline-start-shape {
+  corner-start-start-shape: bevel;
+  corner-inline-start-shape: round;
+}
+
+.corner-end-start-shape-before-corner-inline-start-shape {
+  corner-end-start-shape: bevel;
+  corner-inline-start-shape: round;
+}
+
+.corner-top-left-shape-before-corner-left-shape {
+  corner-top-left-shape: bevel;
+  corner-left-shape: round;
+}
+
+.corner-bottom-left-shape-before-corner-left-shape {
+  corner-bottom-left-shape: bevel;
+  corner-left-shape: round;
+}
+
+.corner-top-right-shape-before-corner-right-shape {
+  corner-top-right-shape: bevel;
+  corner-right-shape: round;
+}
+
+.corner-bottom-right-shape-before-corner-right-shape {
+  corner-bottom-right-shape: bevel;
+  corner-right-shape: round;
+}
+
+.corner-top-left-shape-before-corner-top-shape {
+  corner-top-left-shape: bevel;
+  corner-top-shape: round;
+}
+
+.corner-top-right-shape-before-corner-top-shape {
+  corner-top-right-shape: bevel;
+  corner-top-shape: round;
+}
+
+.corner-top-left-shape-before-corner-shape {
+  corner-top-left-shape: bevel;
+  corner-shape: round;
+}
+
+.corner-top-right-shape-before-corner-shape {
+  corner-top-right-shape: bevel;
+  corner-shape: round;
+}
+
+.corner-bottom-left-shape-before-corner-shape {
+  corner-bottom-left-shape: bevel;
+  corner-shape: round;
+}
+
+.corner-bottom-right-shape-before-corner-shape {
+  corner-bottom-right-shape: bevel;
+  corner-shape: round;
+}
+
+.position-try-fallbacks-before-position-try {
+  position-try-fallbacks: flip-block;
+  position-try: none;
+}
+
+.position-try-order-before-position-try {
+  position-try-order: initial;
+  position-try: initial;
+}
+
+.transition-behavior-before-transition {
+  transition-behavior: allow-discrete;
+  transition: display 1s;
+}
+
+.text-box-trim-before-text-box {
+  text-box-trim: trim-both;
+  text-box: normal;
+}
+
+.text-box-edge-before-text-box {
+  text-box-edge: initial;
+  text-box: initial;
+}
+
+.border-block-start-color-before-border-block {
+  border-block-start-color: initial;
+  border-block: initial;
+}
+
+.border-block-start-style-before-border-block {
+  border-block-start-style: initial;
+  border-block: initial;
+}
+
+.border-block-start-width-before-border-block {
+  border-block-start-width: initial;
+  border-block: initial;
+}
+
+.border-block-end-color-before-border-block {
+  border-block-end-color: initial;
+  border-block: initial;
+}
+
+.border-block-end-style-before-border-block {
+  border-block-end-style: initial;
+  border-block: initial;
+}
+
+.border-block-end-width-before-border-block {
+  border-block-end-width: initial;
+  border-block: initial;
+}
+
+.border-inline-start-color-before-border-inline {
+  border-inline-start-color: initial;
+  border-inline: initial;
+}
+
+.border-inline-start-style-before-border-inline {
+  border-inline-start-style: initial;
+  border-inline: initial;
+}
+
+.border-inline-start-width-before-border-inline {
+  border-inline-start-width: initial;
+  border-inline: initial;
+}
+
+.border-inline-end-color-before-border-inline {
+  border-inline-end-color: initial;
+  border-inline: initial;
+}
+
+.border-inline-end-style-before-border-inline {
+  border-inline-end-style: initial;
+  border-inline: initial;
+}
+
+.border-inline-end-width-before-border-inline {
+  border-inline-end-width: initial;
+  border-inline: initial;
+}
+
+.overlapping-logical-borders {
+  border-block-start: 1px solid red;
+  border-block-color: blue;
+}
+
+.overlapping-corner-sides {
+  corner-left-shape: bevel;
+  corner-top-shape: round;
+}
+
+.physical-before-logical-corner {
+  corner-top-left-shape: bevel;
+  corner-start-start-shape: round;
+}
+
+.physical-before-logical-border {
+  border-top: 1px solid red;
+  border-block-color: blue;
+}
+
+.property-before-all {
+  transition-behavior: allow-discrete;
+  all: initial;
+}
+
+.prefixed-property-before-all {
+  -webkit-line-clamp: 3;
+  all: initial;
+}

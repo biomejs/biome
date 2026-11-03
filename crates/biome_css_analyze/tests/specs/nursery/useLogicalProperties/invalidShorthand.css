@@ -1,0 +1,54 @@
+/* should generate diagnostics */
+.margin {
+	margin: 1px 2px;
+	margin: 1px 2px 1px;
+	margin: 1px 2px 1px 2px;
+	margin: 1px 2px 3px 4px;
+}
+
+.padding {
+	padding: 1px 2px;
+	padding: 1px 2px 1px;
+	padding: 1px 2px 1px 2px;
+}
+
+.inset {
+	inset: 1px 2px;
+	inset: 1px 2px 1px;
+	inset: 1px 2px 1px 2px;
+}
+
+.scroll-margin {
+	scroll-margin: 1px 2px;
+	scroll-margin: 1px 2px 1px;
+	scroll-margin: 1px 2px 1px 2px;
+}
+
+.scroll-padding {
+	scroll-padding: 1px 2px;
+	scroll-padding: 1px 2px 1px;
+	scroll-padding: 1px 2px 1px 2px;
+}
+
+.border-width {
+	border-width: 1px 2px;
+	border-width: 1px 2px 1px;
+	border-width: 1px 2px 1px 2px;
+}
+
+.border-style {
+	border-style: solid dashed;
+	border-style: solid dashed solid;
+	border-style: solid dashed solid dashed;
+}
+
+.border-color {
+	border-color: red blue;
+	border-color: red blue red;
+	border-color: red blue red blue;
+}
+
+.functions-and-trivia {
+	margin: calc(2px + 1px) 2px !important; /* trailing comment */
+	/* leading comment */ padding: 1px 2px;
+}

@@ -11,14 +11,15 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
-use biome_formatter::{Printed, SourceMapGeneration};
+use biome_formatter::SourceMapGeneration;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
@@ -199,7 +200,7 @@ fn format(
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
@@ -217,7 +218,7 @@ pub(crate) fn format_range(
 pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,

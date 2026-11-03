@@ -1,0 +1,97 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+obj.readSync!();
+(fs.readFileSync as Reader)(path);
+fs.fooSync!.call(null);
+(fooSync satisfies Reader)();
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function readSync.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ obj.readSync!();
+      │ ^^^^^^^^^^^^^^^
+    3 │ (fs.readFileSync as Reader)(path);
+    4 │ fs.fooSync!.call(null);
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function readFileSync.
+  
+    1 │ /* should generate diagnostics */
+    2 │ obj.readSync!();
+  > 3 │ (fs.readFileSync as Reader)(path);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ fs.fooSync!.call(null);
+    5 │ (fooSync satisfies Reader)();
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    2 │ obj.readSync!();
+    3 │ (fs.readFileSync as Reader)(path);
+  > 4 │ fs.fooSync!.call(null);
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ (fooSync satisfies Reader)();
+    6 │ 
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noSyncMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected call to the synchronous function fooSync.
+  
+    3 │ (fs.readFileSync as Reader)(path);
+    4 │ fs.fooSync!.call(null);
+  > 5 │ (fooSync satisfies Reader)();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Synchronous functions block the program until they finish, so nothing else can run in the meantime.
+  
+  i Use the asynchronous version of this function instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

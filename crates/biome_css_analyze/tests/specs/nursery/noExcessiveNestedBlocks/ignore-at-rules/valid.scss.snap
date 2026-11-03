@@ -1,0 +1,37 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.a {
+    @if $theme == dark {
+        color: white;
+    } @else {
+        .b {
+            color: black;
+        }
+    }
+}
+
+.a {
+    @if $theme == dark {
+        color: white;
+    } @else if $theme == light {
+        .b {
+            color: black;
+        }
+    }
+}
+
+.a {
+    @include breakpoint(md) {
+        .b {
+            color: red;
+        }
+    }
+}
+
+```

@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { nextTick as nt } from "vue";
+import * as Vue from "vue";
+
+export default {
+	async mounted() {
+		await nt();
+		await Vue.nextTick();
+		await this.$nextTick();
+
+		nt().then(callback);
+		Vue.nextTick().then(callback);
+		this.$nextTick().then(callback);
+
+		nt(callback);
+		Vue.nextTick(callback);
+		this.$nextTick(callback);
+	},
+	beforeMount() {
+		foo.then(nt);
+		foo.then(Vue.nextTick);
+		foo.then(this.$nextTick);
+
+		foo.then(nt, catchHandler);
+		foo.then(Vue.nextTick, catchHandler);
+		foo.then(this.$nextTick, catchHandler);
+	},
+	beforeUpdate() {
+		let foo = nt;
+		foo = Vue.nextTick;
+		foo = this.$nextTick;
+
+		foo = bar ? nt : undefined;
+		foo = bar ? Vue.nextTick : undefined;
+		foo = bar ? this.$nextTick : undefined;
+		(bar ? nt : Vue.nextTick)(callback);
+	},
+	activated() {
+		Promise.all([nt(), someOtherPromise]);
+		Promise.all([Vue.nextTick(), someOtherPromise]);
+		Promise.race([this.$nextTick(), someOtherPromise]);
+	},
+	created() {
+		let queue = nt();
+		queue = queue.then(nt);
+		return nt();
+	},
+	updated() {
+		const queue = this.$nextTick();
+		return this.$nextTick().then(() => this.$nextTick());
+	},
+	methods: {
+		tick: () => nt(),
+	},
+};
+</script>
+
+```

@@ -106,6 +106,8 @@
 /crates/biome_markdown_formatter/src/gfm/**/mod.rs linguist-generated=true text=auto eol=lf
 /crates/biome_markdown_formatter/src/markdown/**/mod.rs linguist-generated=true text=auto eol=lf
 /crates/biome_markdown_formatter/src/markdown/any/*.rs linguist-generated=true text=auto eol=lf
+/crates/biome_markdown_formatter/tests/specs/markdown/multiple_blank_lines_crlf.md -text
+/crates/biome_markdown_formatter/tests/specs/markdown/multiple_blank_lines_crlf.md.snap -text
 # YAML
 /crates/biome_yaml_formatter/src/generated.rs linguist-generated=true text=auto eol=lf
 /crates/biome_yaml_formatter/src/yaml/**/mod.rs linguist-generated=true text=auto eol=lf

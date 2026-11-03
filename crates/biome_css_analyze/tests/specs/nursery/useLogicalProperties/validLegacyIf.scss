@@ -1,0 +1,5 @@
+/* should not generate diagnostics */
+.legacy-if {
+  margin-block-start: if(true, null, 1px);
+  margin-block-end: 2px;
+}

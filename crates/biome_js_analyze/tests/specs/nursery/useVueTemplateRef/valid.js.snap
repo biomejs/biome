@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { ref } from "vue";
+
+const counter = ref(0);
+const names = ref(new Set());
+
+function incrementCounter() {
+  counter.value++;
+  return counter.value;
+}
+
+```

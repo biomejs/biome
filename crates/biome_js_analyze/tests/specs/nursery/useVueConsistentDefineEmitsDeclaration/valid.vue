@@ -1,0 +1,27 @@
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+type Emits = { change: [id: number] };
+
+const a = defineEmits<{
+	(e: "change", id: number): void;
+	(e: "update", value: string): void;
+}>();
+
+const b = defineEmits<{
+	change: [id: number];
+	update: [value: string];
+}>();
+
+const c = defineEmits<(e: "change", id: number) => void>();
+
+const d = defineEmits<Emits>();
+
+const e = defineEmits();
+
+const props = defineProps({
+	kind: { type: String },
+});
+
+foo(["change"]);
+emitter.defineEmits(["change"]);
+</script>

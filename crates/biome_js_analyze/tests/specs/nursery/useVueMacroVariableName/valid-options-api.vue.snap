@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+import { useAttrs } from "vue";
+
+export default {
+  setup() {
+    const attributes = useAttrs();
+    return { attributes };
+  },
+};
+</script>
+
+```

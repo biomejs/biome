@@ -1,0 +1,18 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-setup-with-external-script.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script src="./options.js"></script>
+
+<script setup>
+const count = 0;
+</script>
+
+<template>
+  <input ref="x" />
+</template>
+
+```

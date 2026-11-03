@@ -1,0 +1,18 @@
+<!-- should not generate diagnostics -->
+<template>
+  <template v-if="foo">...</template>
+  <template v-else-if="bar">...</template>
+  <template v-else>...</template>
+  <template v-for="e in list">...</template>
+  <template v-slot>...</template>
+  <MyList>
+    <template v-slot:item="{ item }">{{ item }}</template>
+    <template #header>...</template>
+    <template #[dynamicSlot]>...</template>
+  </MyList>
+  <template v-if="foo" class="b"/>
+</template>
+
+<script setup>
+const template = document.createElement("template");
+</script>

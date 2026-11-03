@@ -9,7 +9,8 @@ use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
-use biome_formatter::{VecBuffer, format_args, format_element::BestFittingVariants, write};
+use biome_formatter::rowan::BestFittingVariants;
+use biome_formatter::{VecBuffer, format_args, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,

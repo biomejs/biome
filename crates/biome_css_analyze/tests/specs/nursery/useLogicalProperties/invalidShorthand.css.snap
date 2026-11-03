@@ -1,0 +1,815 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidShorthand.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.margin {
+	margin: 1px 2px;
+	margin: 1px 2px 1px;
+	margin: 1px 2px 1px 2px;
+	margin: 1px 2px 3px 4px;
+}
+
+.padding {
+	padding: 1px 2px;
+	padding: 1px 2px 1px;
+	padding: 1px 2px 1px 2px;
+}
+
+.inset {
+	inset: 1px 2px;
+	inset: 1px 2px 1px;
+	inset: 1px 2px 1px 2px;
+}
+
+.scroll-margin {
+	scroll-margin: 1px 2px;
+	scroll-margin: 1px 2px 1px;
+	scroll-margin: 1px 2px 1px 2px;
+}
+
+.scroll-padding {
+	scroll-padding: 1px 2px;
+	scroll-padding: 1px 2px 1px;
+	scroll-padding: 1px 2px 1px 2px;
+}
+
+.border-width {
+	border-width: 1px 2px;
+	border-width: 1px 2px 1px;
+	border-width: 1px 2px 1px 2px;
+}
+
+.border-style {
+	border-style: solid dashed;
+	border-style: solid dashed solid;
+	border-style: solid dashed solid dashed;
+}
+
+.border-color {
+	border-color: red blue;
+	border-color: red blue red;
+	border-color: red blue red blue;
+}
+
+.functions-and-trivia {
+	margin: calc(2px + 1px) 2px !important; /* trailing comment */
+	/* leading comment */ padding: 1px 2px;
+}
+
+```
+
+# Diagnostics
+```
+invalidShorthand.css:3:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .margin {
+  > 3 │ 	margin: 1px 2px;
+      │ 	^^^^^^
+    4 │ 	margin: 1px 2px 1px;
+    5 │ 	margin: 1px 2px 1px 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+    3 │ → margin-block:·1px;·margin-inline:·2px;
+      │         ++++++     ++++++++++++++++     
+
+```
+
+```
+invalidShorthand.css:4:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    2 │ .margin {
+    3 │ 	margin: 1px 2px;
+  > 4 │ 	margin: 1px 2px 1px;
+      │ 	^^^^^^
+    5 │ 	margin: 1px 2px 1px 2px;
+    6 │ 	margin: 1px 2px 3px 4px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+     2  2 │   .margin {
+     3  3 │     margin: 1px 2px;
+     4    │ - → margin:·1px·2px·1px;
+        4 │ + → margin-block:·1px;·margin-inline:·2px;
+     5  5 │     margin: 1px 2px 1px 2px;
+     6  6 │     margin: 1px 2px 3px 4px;
+  
+
+```
+
+```
+invalidShorthand.css:5:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    3 │ 	margin: 1px 2px;
+    4 │ 	margin: 1px 2px 1px;
+  > 5 │ 	margin: 1px 2px 1px 2px;
+      │ 	^^^^^^
+    6 │ 	margin: 1px 2px 3px 4px;
+    7 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+     3  3 │     margin: 1px 2px;
+     4  4 │     margin: 1px 2px 1px;
+     5    │ - → margin:·1px·2px·1px·2px;
+        5 │ + → margin-block:·1px;·margin-inline:·2px;
+     6  6 │     margin: 1px 2px 3px 4px;
+     7  7 │   }
+  
+
+```
+
+```
+invalidShorthand.css:6:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    4 │ 	margin: 1px 2px 1px;
+    5 │ 	margin: 1px 2px 1px 2px;
+  > 6 │ 	margin: 1px 2px 3px 4px;
+      │ 	^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+     4  4 │     margin: 1px 2px 1px;
+     5  5 │     margin: 1px 2px 1px 2px;
+     6    │ - → margin:·1px·2px·3px·4px;
+        6 │ + → margin-block:·1px·3px;·margin-inline:·4px·2px;
+     7  7 │   }
+     8  8 │   
+  
+
+```
+
+```
+invalidShorthand.css:10:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+     9 │ .padding {
+  > 10 │ 	padding: 1px 2px;
+       │ 	^^^^^^^
+    11 │ 	padding: 1px 2px 1px;
+    12 │ 	padding: 1px 2px 1px 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with padding-block and padding-inline.
+  
+    10 │ → padding-block:·1px;·padding-inline:·2px;
+       │          ++++++     +++++++++++++++++     
+
+```
+
+```
+invalidShorthand.css:11:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+     9 │ .padding {
+    10 │ 	padding: 1px 2px;
+  > 11 │ 	padding: 1px 2px 1px;
+       │ 	^^^^^^^
+    12 │ 	padding: 1px 2px 1px 2px;
+    13 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with padding-block and padding-inline.
+  
+     9  9 │   .padding {
+    10 10 │     padding: 1px 2px;
+    11    │ - → padding:·1px·2px·1px;
+       11 │ + → padding-block:·1px;·padding-inline:·2px;
+    12 12 │     padding: 1px 2px 1px 2px;
+    13 13 │   }
+  
+
+```
+
+```
+invalidShorthand.css:12:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    10 │ 	padding: 1px 2px;
+    11 │ 	padding: 1px 2px 1px;
+  > 12 │ 	padding: 1px 2px 1px 2px;
+       │ 	^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with padding-block and padding-inline.
+  
+    10 10 │     padding: 1px 2px;
+    11 11 │     padding: 1px 2px 1px;
+    12    │ - → padding:·1px·2px·1px·2px;
+       12 │ + → padding-block:·1px;·padding-inline:·2px;
+    13 13 │   }
+    14 14 │   
+  
+
+```
+
+```
+invalidShorthand.css:16:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    15 │ .inset {
+  > 16 │ 	inset: 1px 2px;
+       │ 	^^^^^
+    17 │ 	inset: 1px 2px 1px;
+    18 │ 	inset: 1px 2px 1px 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with inset-block and inset-inline.
+  
+    16 │ → inset-block:·1px;·inset-inline:·2px;
+       │        ++++++     +++++++++++++++     
+
+```
+
+```
+invalidShorthand.css:17:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    15 │ .inset {
+    16 │ 	inset: 1px 2px;
+  > 17 │ 	inset: 1px 2px 1px;
+       │ 	^^^^^
+    18 │ 	inset: 1px 2px 1px 2px;
+    19 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with inset-block and inset-inline.
+  
+    15 15 │   .inset {
+    16 16 │     inset: 1px 2px;
+    17    │ - → inset:·1px·2px·1px;
+       17 │ + → inset-block:·1px;·inset-inline:·2px;
+    18 18 │     inset: 1px 2px 1px 2px;
+    19 19 │   }
+  
+
+```
+
+```
+invalidShorthand.css:18:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    16 │ 	inset: 1px 2px;
+    17 │ 	inset: 1px 2px 1px;
+  > 18 │ 	inset: 1px 2px 1px 2px;
+       │ 	^^^^^
+    19 │ }
+    20 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with inset-block and inset-inline.
+  
+    16 16 │     inset: 1px 2px;
+    17 17 │     inset: 1px 2px 1px;
+    18    │ - → inset:·1px·2px·1px·2px;
+       18 │ + → inset-block:·1px;·inset-inline:·2px;
+    19 19 │   }
+    20 20 │   
+  
+
+```
+
+```
+invalidShorthand.css:22:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    21 │ .scroll-margin {
+  > 22 │ 	scroll-margin: 1px 2px;
+       │ 	^^^^^^^^^^^^^
+    23 │ 	scroll-margin: 1px 2px 1px;
+    24 │ 	scroll-margin: 1px 2px 1px 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with scroll-margin-block and scroll-margin-inline.
+  
+    22 │ → scroll-margin-block:·1px;·scroll-margin-inline:·2px;
+       │                ++++++     +++++++++++++++++++++++     
+
+```
+
+```
+invalidShorthand.css:23:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    21 │ .scroll-margin {
+    22 │ 	scroll-margin: 1px 2px;
+  > 23 │ 	scroll-margin: 1px 2px 1px;
+       │ 	^^^^^^^^^^^^^
+    24 │ 	scroll-margin: 1px 2px 1px 2px;
+    25 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with scroll-margin-block and scroll-margin-inline.
+  
+    21 21 │   .scroll-margin {
+    22 22 │     scroll-margin: 1px 2px;
+    23    │ - → scroll-margin:·1px·2px·1px;
+       23 │ + → scroll-margin-block:·1px;·scroll-margin-inline:·2px;
+    24 24 │     scroll-margin: 1px 2px 1px 2px;
+    25 25 │   }
+  
+
+```
+
+```
+invalidShorthand.css:24:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    22 │ 	scroll-margin: 1px 2px;
+    23 │ 	scroll-margin: 1px 2px 1px;
+  > 24 │ 	scroll-margin: 1px 2px 1px 2px;
+       │ 	^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with scroll-margin-block and scroll-margin-inline.
+  
+    22 22 │     scroll-margin: 1px 2px;
+    23 23 │     scroll-margin: 1px 2px 1px;
+    24    │ - → scroll-margin:·1px·2px·1px·2px;
+       24 │ + → scroll-margin-block:·1px;·scroll-margin-inline:·2px;
+    25 25 │   }
+    26 26 │   
+  
+
+```
+
+```
+invalidShorthand.css:28:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    27 │ .scroll-padding {
+  > 28 │ 	scroll-padding: 1px 2px;
+       │ 	^^^^^^^^^^^^^^
+    29 │ 	scroll-padding: 1px 2px 1px;
+    30 │ 	scroll-padding: 1px 2px 1px 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with scroll-padding-block and scroll-padding-inline.
+  
+    28 │ → scroll-padding-block:·1px;·scroll-padding-inline:·2px;
+       │                 ++++++     ++++++++++++++++++++++++     
+
+```
+
+```
+invalidShorthand.css:29:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    27 │ .scroll-padding {
+    28 │ 	scroll-padding: 1px 2px;
+  > 29 │ 	scroll-padding: 1px 2px 1px;
+       │ 	^^^^^^^^^^^^^^
+    30 │ 	scroll-padding: 1px 2px 1px 2px;
+    31 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with scroll-padding-block and scroll-padding-inline.
+  
+    27 27 │   .scroll-padding {
+    28 28 │     scroll-padding: 1px 2px;
+    29    │ - → scroll-padding:·1px·2px·1px;
+       29 │ + → scroll-padding-block:·1px;·scroll-padding-inline:·2px;
+    30 30 │     scroll-padding: 1px 2px 1px 2px;
+    31 31 │   }
+  
+
+```
+
+```
+invalidShorthand.css:30:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    28 │ 	scroll-padding: 1px 2px;
+    29 │ 	scroll-padding: 1px 2px 1px;
+  > 30 │ 	scroll-padding: 1px 2px 1px 2px;
+       │ 	^^^^^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with scroll-padding-block and scroll-padding-inline.
+  
+    28 28 │     scroll-padding: 1px 2px;
+    29 29 │     scroll-padding: 1px 2px 1px;
+    30    │ - → scroll-padding:·1px·2px·1px·2px;
+       30 │ + → scroll-padding-block:·1px;·scroll-padding-inline:·2px;
+    31 31 │   }
+    32 32 │   
+  
+
+```
+
+```
+invalidShorthand.css:34:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    33 │ .border-width {
+  > 34 │ 	border-width: 1px 2px;
+       │ 	^^^^^^^^^^^^
+    35 │ 	border-width: 1px 2px 1px;
+    36 │ 	border-width: 1px 2px 1px 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-width and border-inline-width.
+  
+    34 │ → border-block-width:·1px;·border-inline-width:·2px;
+       │          ++++++          ++++++++++++++++++++++     
+
+```
+
+```
+invalidShorthand.css:35:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    33 │ .border-width {
+    34 │ 	border-width: 1px 2px;
+  > 35 │ 	border-width: 1px 2px 1px;
+       │ 	^^^^^^^^^^^^
+    36 │ 	border-width: 1px 2px 1px 2px;
+    37 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-width and border-inline-width.
+  
+    33 33 │   .border-width {
+    34 34 │     border-width: 1px 2px;
+    35    │ - → border-width:·1px·2px·1px;
+       35 │ + → border-block-width:·1px;·border-inline-width:·2px;
+    36 36 │     border-width: 1px 2px 1px 2px;
+    37 37 │   }
+  
+
+```
+
+```
+invalidShorthand.css:36:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    34 │ 	border-width: 1px 2px;
+    35 │ 	border-width: 1px 2px 1px;
+  > 36 │ 	border-width: 1px 2px 1px 2px;
+       │ 	^^^^^^^^^^^^
+    37 │ }
+    38 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-width and border-inline-width.
+  
+    34 34 │     border-width: 1px 2px;
+    35 35 │     border-width: 1px 2px 1px;
+    36    │ - → border-width:·1px·2px·1px·2px;
+       36 │ + → border-block-width:·1px;·border-inline-width:·2px;
+    37 37 │   }
+    38 38 │   
+  
+
+```
+
+```
+invalidShorthand.css:40:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    39 │ .border-style {
+  > 40 │ 	border-style: solid dashed;
+       │ 	^^^^^^^^^^^^
+    41 │ 	border-style: solid dashed solid;
+    42 │ 	border-style: solid dashed solid dashed;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-style and border-inline-style.
+  
+    40 │ → border-block-style:·solid;·border-inline-style:·dashed;
+       │          ++++++            ++++++++++++++++++++++        
+
+```
+
+```
+invalidShorthand.css:41:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    39 │ .border-style {
+    40 │ 	border-style: solid dashed;
+  > 41 │ 	border-style: solid dashed solid;
+       │ 	^^^^^^^^^^^^
+    42 │ 	border-style: solid dashed solid dashed;
+    43 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-style and border-inline-style.
+  
+    39 39 │   .border-style {
+    40 40 │     border-style: solid dashed;
+    41    │ - → border-style:·solid·dashed·solid;
+       41 │ + → border-block-style:·solid;·border-inline-style:·dashed;
+    42 42 │     border-style: solid dashed solid dashed;
+    43 43 │   }
+  
+
+```
+
+```
+invalidShorthand.css:42:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    40 │ 	border-style: solid dashed;
+    41 │ 	border-style: solid dashed solid;
+  > 42 │ 	border-style: solid dashed solid dashed;
+       │ 	^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-style and border-inline-style.
+  
+    40 40 │     border-style: solid dashed;
+    41 41 │     border-style: solid dashed solid;
+    42    │ - → border-style:·solid·dashed·solid·dashed;
+       42 │ + → border-block-style:·solid;·border-inline-style:·dashed;
+    43 43 │   }
+    44 44 │   
+  
+
+```
+
+```
+invalidShorthand.css:46:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    45 │ .border-color {
+  > 46 │ 	border-color: red blue;
+       │ 	^^^^^^^^^^^^
+    47 │ 	border-color: red blue red;
+    48 │ 	border-color: red blue red blue;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-color and border-inline-color.
+  
+    46 │ → border-block-color:·red;·border-inline-color:·blue;
+       │          ++++++          ++++++++++++++++++++++      
+
+```
+
+```
+invalidShorthand.css:47:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    45 │ .border-color {
+    46 │ 	border-color: red blue;
+  > 47 │ 	border-color: red blue red;
+       │ 	^^^^^^^^^^^^
+    48 │ 	border-color: red blue red blue;
+    49 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-color and border-inline-color.
+  
+    45 45 │   .border-color {
+    46 46 │     border-color: red blue;
+    47    │ - → border-color:·red·blue·red;
+       47 │ + → border-block-color:·red;·border-inline-color:·blue;
+    48 48 │     border-color: red blue red blue;
+    49 49 │   }
+  
+
+```
+
+```
+invalidShorthand.css:48:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    46 │ 	border-color: red blue;
+    47 │ 	border-color: red blue red;
+  > 48 │ 	border-color: red blue red blue;
+       │ 	^^^^^^^^^^^^
+    49 │ }
+    50 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with border-block-color and border-inline-color.
+  
+    46 46 │     border-color: red blue;
+    47 47 │     border-color: red blue red;
+    48    │ - → border-color:·red·blue·red·blue;
+       48 │ + → border-block-color:·red;·border-inline-color:·blue;
+    49 49 │   }
+    50 50 │   
+  
+
+```
+
+```
+invalidShorthand.css:52:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    51 │ .functions-and-trivia {
+  > 52 │ 	margin: calc(2px + 1px) 2px !important; /* trailing comment */
+       │ 	^^^^^^
+    53 │ 	/* leading comment */ padding: 1px 2px;
+    54 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+    52 │ → margin-block:·calc(2px·+·1px)·!important;·margin-inline:·2px·!important;·/*·trailing·comment·*/
+       │         ++++++                  +++++++++++++++++++++++++++                                      
+
+```
+
+```
+invalidShorthand.css:53:24 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    51 │ .functions-and-trivia {
+    52 │ 	margin: calc(2px + 1px) 2px !important; /* trailing comment */
+  > 53 │ 	/* leading comment */ padding: 1px 2px;
+       │ 	                      ^^^^^^^
+    54 │ }
+    55 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with padding-block and padding-inline.
+  
+    53 │ → /*·leading·comment·*/·padding-block:·1px;·padding-inline:·2px;
+       │                                ++++++     +++++++++++++++++     
+
+```

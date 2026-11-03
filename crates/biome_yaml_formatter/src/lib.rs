@@ -17,13 +17,14 @@ pub(crate) use crate::trivia::*;
 use biome_deserialize::TextRange;
 use biome_formatter::comments::Comments;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{
+use biome_formatter::rowan::Printed;
+use biome_formatter::rowan::prelude::{
     format_dangling_comments, format_leading_comments, format_trailing_comments,
 };
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatLanguage, FormatOwnedWithRule,
-    FormatRefWithRule, FormatResult, FormatRule, Formatted, Printed, TransformSourceMap,
+    FormatRefWithRule, FormatResult, FormatRule, Formatted, TransformSourceMap,
 };
 use biome_rowan::{AstNode, SyntaxNode};
 use biome_yaml_syntax::{YamlLanguage, YamlSyntaxNode, YamlSyntaxToken};

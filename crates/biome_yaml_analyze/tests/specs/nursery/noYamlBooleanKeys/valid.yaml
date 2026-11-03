@@ -1,0 +1,63 @@
+# should not generate diagnostics
+- name: 1
+- "true": 2
+- 'false': 3
+- !!str true: 4
+- ! false: 5
+- !local TRUE: 6
+
+# only booleans in YAML 1.1
+- y: 7
+  yes: 8
+  no: 9
+  on: 10
+  off: 11
+  NO: 12
+
+# other spellings and types
+- tRue: 13
+  truthy: 14
+  123: 15
+  ~: 16
+  1.5: 17
+
+# booleans that are not keys
+- value: true
+  list: [true, false]
+  items:
+    - true
+    - false
+
+- flow: { "true": 18, yes: 19 }
+
+# a key that spans two lines is text
+- ? true
+    false
+  : 20
+
+- ? |
+    true
+  : 21
+
+# aliases to values that are not booleans
+- quoted: &quoted "true"
+  text: &text !!str true
+  mapping: &mapping
+    true_key: 22
+  ? *quoted
+  : 23
+  ? *text
+  : 24
+  ? *mapping
+  : 25
+
+# the alias refers to the closest anchor before it
+- first: &again true
+  second: &again text
+  ? *again
+  : 26
+
+# an alias cannot refer to an anchor that comes after it
+- ? *later
+  : 27
+  later: &later true

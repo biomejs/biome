@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-without-define-emits.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <button @click="$emit('close')">Close</button>
+</template>
+
+<script setup>
+const label = "Close";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-without-define-emits.vue:3:25 lint/nursery/noVueUndeclaredEmits ━━━━━━━━━━━━━━━
+
+  ! The event close is emitted, but the component doesn't declare it.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <button @click="$emit('close')">Close</button>
+      │                         ^^^^^^^
+    4 │ </template>
+    5 │ 
+  
+  i Vue also adds a listener for an undeclared event to the root element of the component. If that element sends a native event with the same name, such as click, the listener runs twice.
+  
+  i Add close to the emits option or to the defineEmits() call of the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

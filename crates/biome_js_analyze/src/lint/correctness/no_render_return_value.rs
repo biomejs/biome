@@ -1,7 +1,7 @@
 use crate::react::{ReactLibrary, is_react_call_api};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsCallExpression, JsExpressionStatement};
@@ -36,6 +36,7 @@ declare_lint_rule! {
         name: "noRenderReturnValue",
         language: "jsx",
         recommended: true,
+        sources: &[RuleSource::EslintReact("no-render-return-value").same(), RuleSource::EslintReactDom("no-render-return-value").same(), RuleSource::EslintReactXyz("dom-no-render-return-value").same()],
         domains: &[RuleDomain::React],
         severity: Severity::Error,
     }

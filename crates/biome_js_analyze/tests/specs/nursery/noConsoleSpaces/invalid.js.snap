@@ -1,0 +1,592 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+console.log("abc ", "def");
+console.log("abc", " def");
+console.log(" abc ", "def");
+console.debug("abc ", "def");
+console.info("abc ", "def");
+console.warn("abc ", "def");
+console.error("abc ", "def");
+console.log("abc", " def ", "ghi");
+console.log("abc ", "def ", "ghi");
+console.log('abc ', "def");
+console.log(`abc `, "def");
+console.log(`abc ${1 + 2} `, "def");
+console.log("abc", ` ${foo} def`);
+console.log("abc", ` ${foo}`);
+console.log("abc", `${foo} `, "def");
+console.log(
+	'abc',
+	'def ',
+	'ghi'
+);
+console.error(
+	theme.error('✗'),
+	'Verifying "packaging" fixture\\n ',
+	theme.error(errorMessage)
+);
+// The space follows an escaped backslash
+console.log("a\\ ", "def");
+console.log(("abc "), "def");
+console.log("é ", "def");
+(console).log("abc ", "def");
+(console.log)("abc ", "def");
+
+```
+
+# Diagnostics
+```
+invalid.js:2:17 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ console.log("abc ", "def");
+      │                 ^
+    3 │ console.log("abc", " def");
+    4 │ console.log(" abc ", "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    2 │ console.log("abc·",·"def");
+      │                 -          
+
+```
+
+```
+invalid.js:3:21 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument starts with a space.
+  
+    1 │ /* should generate diagnostics */
+    2 │ console.log("abc ", "def");
+  > 3 │ console.log("abc", " def");
+      │                     ^
+    4 │ console.log(" abc ", "def");
+    5 │ console.debug("abc ", "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the leading space.
+  
+    3 │ console.log("abc",·"·def");
+      │                     -      
+
+```
+
+```
+invalid.js:4:18 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    2 │ console.log("abc ", "def");
+    3 │ console.log("abc", " def");
+  > 4 │ console.log(" abc ", "def");
+      │                  ^
+    5 │ console.debug("abc ", "def");
+    6 │ console.info("abc ", "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    4 │ console.log("·abc·",·"def");
+      │                  -          
+
+```
+
+```
+invalid.js:5:19 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    3 │ console.log("abc", " def");
+    4 │ console.log(" abc ", "def");
+  > 5 │ console.debug("abc ", "def");
+      │                   ^
+    6 │ console.info("abc ", "def");
+    7 │ console.warn("abc ", "def");
+  
+  i console.debug() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    5 │ console.debug("abc·",·"def");
+      │                   -          
+
+```
+
+```
+invalid.js:6:18 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    4 │ console.log(" abc ", "def");
+    5 │ console.debug("abc ", "def");
+  > 6 │ console.info("abc ", "def");
+      │                  ^
+    7 │ console.warn("abc ", "def");
+    8 │ console.error("abc ", "def");
+  
+  i console.info() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    6 │ console.info("abc·",·"def");
+      │                  -          
+
+```
+
+```
+invalid.js:7:18 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    5 │ console.debug("abc ", "def");
+    6 │ console.info("abc ", "def");
+  > 7 │ console.warn("abc ", "def");
+      │                  ^
+    8 │ console.error("abc ", "def");
+    9 │ console.log("abc", " def ", "ghi");
+  
+  i console.warn() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    7 │ console.warn("abc·",·"def");
+      │                  -          
+
+```
+
+```
+invalid.js:8:19 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+     6 │ console.info("abc ", "def");
+     7 │ console.warn("abc ", "def");
+   > 8 │ console.error("abc ", "def");
+       │                   ^
+     9 │ console.log("abc", " def ", "ghi");
+    10 │ console.log("abc ", "def ", "ghi");
+  
+  i console.error() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    8 │ console.error("abc·",·"def");
+      │                   -          
+
+```
+
+```
+invalid.js:9:21 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument starts with a space.
+  
+     7 │ console.warn("abc ", "def");
+     8 │ console.error("abc ", "def");
+   > 9 │ console.log("abc", " def ", "ghi");
+       │                     ^
+    10 │ console.log("abc ", "def ", "ghi");
+    11 │ console.log('abc ', "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the leading space.
+  
+    9 │ console.log("abc",·"·def·",·"ghi");
+      │                     -              
+
+```
+
+```
+invalid.js:9:25 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+     7 │ console.warn("abc ", "def");
+     8 │ console.error("abc ", "def");
+   > 9 │ console.log("abc", " def ", "ghi");
+       │                         ^
+    10 │ console.log("abc ", "def ", "ghi");
+    11 │ console.log('abc ', "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    9 │ console.log("abc",·"·def·",·"ghi");
+      │                         -          
+
+```
+
+```
+invalid.js:10:17 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+     8 │ console.error("abc ", "def");
+     9 │ console.log("abc", " def ", "ghi");
+  > 10 │ console.log("abc ", "def ", "ghi");
+       │                 ^
+    11 │ console.log('abc ', "def");
+    12 │ console.log(`abc `, "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    10 │ console.log("abc·",·"def·",·"ghi");
+       │                 -                  
+
+```
+
+```
+invalid.js:10:25 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+     8 │ console.error("abc ", "def");
+     9 │ console.log("abc", " def ", "ghi");
+  > 10 │ console.log("abc ", "def ", "ghi");
+       │                         ^
+    11 │ console.log('abc ', "def");
+    12 │ console.log(`abc `, "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    10 │ console.log("abc·",·"def·",·"ghi");
+       │                         -          
+
+```
+
+```
+invalid.js:11:17 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+     9 │ console.log("abc", " def ", "ghi");
+    10 │ console.log("abc ", "def ", "ghi");
+  > 11 │ console.log('abc ', "def");
+       │                 ^
+    12 │ console.log(`abc `, "def");
+    13 │ console.log(`abc ${1 + 2} `, "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    11 │ console.log('abc·',·"def");
+       │                 -          
+
+```
+
+```
+invalid.js:12:17 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    10 │ console.log("abc ", "def ", "ghi");
+    11 │ console.log('abc ', "def");
+  > 12 │ console.log(`abc `, "def");
+       │                 ^
+    13 │ console.log(`abc ${1 + 2} `, "def");
+    14 │ console.log("abc", ` ${foo} def`);
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    12 │ console.log(`abc·`,·"def");
+       │                 -          
+
+```
+
+```
+invalid.js:13:26 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    11 │ console.log('abc ', "def");
+    12 │ console.log(`abc `, "def");
+  > 13 │ console.log(`abc ${1 + 2} `, "def");
+       │                          ^
+    14 │ console.log("abc", ` ${foo} def`);
+    15 │ console.log("abc", ` ${foo}`);
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    13 │ console.log(`abc·${1·+·2}·`,·"def");
+       │                          -          
+
+```
+
+```
+invalid.js:14:21 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument starts with a space.
+  
+    12 │ console.log(`abc `, "def");
+    13 │ console.log(`abc ${1 + 2} `, "def");
+  > 14 │ console.log("abc", ` ${foo} def`);
+       │                     ^
+    15 │ console.log("abc", ` ${foo}`);
+    16 │ console.log("abc", `${foo} `, "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the leading space.
+  
+    14 │ console.log("abc",·`·${foo}·def`);
+       │                     -             
+
+```
+
+```
+invalid.js:15:21 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument starts with a space.
+  
+    13 │ console.log(`abc ${1 + 2} `, "def");
+    14 │ console.log("abc", ` ${foo} def`);
+  > 15 │ console.log("abc", ` ${foo}`);
+       │                     ^
+    16 │ console.log("abc", `${foo} `, "def");
+    17 │ console.log(
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the leading space.
+  
+    15 │ console.log("abc",·`·${foo}`);
+       │                     -         
+
+```
+
+```
+invalid.js:16:27 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    14 │ console.log("abc", ` ${foo} def`);
+    15 │ console.log("abc", ` ${foo}`);
+  > 16 │ console.log("abc", `${foo} `, "def");
+       │                           ^
+    17 │ console.log(
+    18 │ 	'abc',
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    16 │ console.log("abc",·`${foo}·`,·"def");
+       │                           -          
+
+```
+
+```
+invalid.js:19:6 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    17 │ console.log(
+    18 │ 	'abc',
+  > 19 │ 	'def ',
+       │ 	    ^
+    20 │ 	'ghi'
+    21 │ );
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    19 │ → 'def·',
+       │       -  
+
+```
+
+```
+invalid.js:24:35 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    22 │ console.error(
+    23 │ 	theme.error('✗'),
+  > 24 │ 	'Verifying "packaging" fixture\\n ',
+       │ 	                                 ^
+    25 │ 	theme.error(errorMessage)
+    26 │ );
+  
+  i console.error() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    24 │ → 'Verifying·"packaging"·fixture\\n·',
+       │                                    -  
+
+```
+
+```
+invalid.js:28:17 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    26 │ );
+    27 │ // The space follows an escaped backslash
+  > 28 │ console.log("a\\ ", "def");
+       │                 ^
+    29 │ console.log(("abc "), "def");
+    30 │ console.log("é ", "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    28 │ console.log("a\\·",·"def");
+       │                 -          
+
+```
+
+```
+invalid.js:29:18 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    27 │ // The space follows an escaped backslash
+    28 │ console.log("a\\ ", "def");
+  > 29 │ console.log(("abc "), "def");
+       │                  ^
+    30 │ console.log("é ", "def");
+    31 │ (console).log("abc ", "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    29 │ console.log(("abc·"),·"def");
+       │                  -           
+
+```
+
+```
+invalid.js:30:15 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    28 │ console.log("a\\ ", "def");
+    29 │ console.log(("abc "), "def");
+  > 30 │ console.log("é ", "def");
+       │               ^
+    31 │ (console).log("abc ", "def");
+    32 │ (console.log)("abc ", "def");
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    30 │ console.log("é·",·"def");
+       │               -          
+
+```
+
+```
+invalid.js:31:19 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    29 │ console.log(("abc "), "def");
+    30 │ console.log("é ", "def");
+  > 31 │ (console).log("abc ", "def");
+       │                   ^
+    32 │ (console.log)("abc ", "def");
+    33 │ 
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    31 │ (console).log("abc·",·"def");
+       │                   -          
+
+```
+
+```
+invalid.js:32:19 lint/nursery/noConsoleSpaces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This argument ends with a space.
+  
+    30 │ console.log("é ", "def");
+    31 │ (console).log("abc ", "def");
+  > 32 │ (console.log)("abc ", "def");
+       │                   ^
+    33 │ 
+  
+  i console.log() already prints a space between its arguments, so this space adds a second one.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the trailing space.
+  
+    32 │ (console.log)("abc·",·"def");
+       │                   -          
+
+```

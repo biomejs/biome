@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ruleSlug.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export type RuleSlug = string;
+
+const create = (text: string): RuleSlug => text;
+
+export const RuleSlug = { create } as const;
+
+```

@@ -1,0 +1,11 @@
+/* should generate diagnostics */
+.a:is(::before, ::after) {}
+.a:where(.b::before) {}
+.a:not(::marker) {}
+.a:has(> ::before) {}
+.a:matches(::selection) {}
+.a:is(:before, :AFTER, :first-line, :first-letter) {}
+.a:IS(::part(label)) {}
+.a:is(.b:not(::before)) {}
+.a:is(.b, .c::-webkit-scrollbar) {}
+.a:is(::slotted(::before)) {}

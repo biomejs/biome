@@ -9,6 +9,7 @@ impl FormatRule<AnyVueVForBinding> for FormatAnyVueVForBinding {
     fn fmt(&self, node: &AnyVueVForBinding, f: &mut HtmlFormatter) -> FormatResult<()> {
         match node {
             AnyVueVForBinding::AnyVueVForDestructuredBinding(node) => node.format().fmt(f),
+            AnyVueVForBinding::VueVForDefaultBinding(node) => node.format().fmt(f),
             AnyVueVForBinding::VueVForIdentifierBinding(node) => node.format().fmt(f),
             AnyVueVForBinding::VueVForTupleBinding(node) => node.format().fmt(f),
         }

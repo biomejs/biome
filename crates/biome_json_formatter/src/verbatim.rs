@@ -1,13 +1,14 @@
 use crate::context::JsonFormatContext;
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, text};
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::prelude::{Tag, text};
 use biome_formatter::trivia::{
     format_leading_comments_from_slice, format_trailing_comments_from_slice,
 };
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatError, FormatResult, FormatWithRule,
+    LINE_TERMINATORS, normalize_newlines,
 };
 use biome_json_syntax::{JsonLanguage, JsonSyntaxNode};
 use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange};

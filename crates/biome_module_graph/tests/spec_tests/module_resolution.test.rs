@@ -635,6 +635,53 @@ fn test_infer_module_types_resolves_imported_exported_type() {
 }
 
 #[test]
+fn test_infer_module_types_resolves_imported_type_merged_with_value() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/types.ts".into(),
+        r#"
+            export type Foo = string;
+            export const Foo = { name: "foo" } as const;
+
+            export interface Bar {
+                label: string;
+            }
+            export namespace Bar {
+                export const kind = "bar";
+            }
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { Bar, Foo } from "./types.ts";
+
+            export const value: Foo = "value";
+            export const name = Foo.name;
+
+            export const bar: Bar = { label: "bar" };
+            export const label = bar.label;
+            export const kind = Bar.kind;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/types.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for name in ["value", "name", "label", "kind"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        assert!(
+            is_inferred_string(&db, ty),
+            "{name} must be a string, got {ty:?}"
+        );
+    }
+}
+
+#[test]
 fn test_infer_module_types_resolves_anonymous_default_class_export() {
     let fs = MemoryFileSystem::default();
     fs.insert(

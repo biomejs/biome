@@ -12,17 +12,17 @@ pub trait DeserializableValidator {
     ///
     /// Returns `true` if the instance passes validation and `false` when it
     /// should be rejected.
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         name: &str,
         range: TextRange,
     ) -> bool;
 }
 
 /// Validates whether the given value is non-empty.
-pub fn non_empty<T: IsEmpty>(
-    ctx: &mut dyn DeserializationContext,
+pub fn non_empty<T: IsEmpty, S>(
+    ctx: &mut dyn DeserializationContext<State = S>,
     value: &T,
     name: &str,
     range: TextRange,

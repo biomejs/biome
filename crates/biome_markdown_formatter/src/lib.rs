@@ -17,11 +17,9 @@ pub(crate) use crate::context::MarkdownFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
 use crate::{context::MdFormatOptions, cst::FormatMdSyntaxToken};
-use biome_formatter::VecBuffer;
-use biome_formatter::format_element::Interned;
-use biome_formatter::format_element::tag::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::{
-    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
+    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, rowan::prelude::*,
+    write,
 };
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use biome_rowan::{AstNode, TextRange};
@@ -287,44 +285,4 @@ pub fn format_node(
         MdFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
         delegate_fmt_embedded_nodes,
     )
-}
-
-/// The code of a snippet that is formatted by the formatter of another
-/// language, such as the code inside a fenced code block.
-///
-/// It's printed as `content`, the snippet's own formatting, unless the caller
-/// of [format_node] replaces it with [Formatted::format_embedded]. The
-/// replacement doesn't end with a line break when the formatter of the
-/// snippet's language doesn't add a trailing newline, so the node that writes
-/// this element must end the snippet's last line itself.
-pub(crate) struct FormatEmbedded {
-    range: TextRange,
-    content: Interned,
-}
-
-impl FormatEmbedded {
-    /// Formats `content` into an embedded element for the snippet whose content
-    /// spans `range`.
-    pub(crate) fn new(
-        range: TextRange,
-        content: &dyn Format<MarkdownFormatContext>,
-        f: &mut MarkdownFormatter,
-    ) -> FormatResult<Self> {
-        let mut buffer = VecBuffer::new(f.state_mut());
-        write!(buffer, [content])?;
-        Ok(Self {
-            range,
-            content: Interned::new(buffer.into_vec()),
-        })
-    }
-}
-
-impl Format<MarkdownFormatContext> for FormatEmbedded {
-    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        f.write_elements([
-            FormatElement::Tag(StartEmbedded(self.range)),
-            FormatElement::Interned(self.content.clone()),
-            FormatElement::Tag(EndEmbedded),
-        ])
-    }
 }

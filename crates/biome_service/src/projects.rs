@@ -330,7 +330,10 @@ pub trait ProjectDb: biome_db::Db {
         // If necessary, check all the ancestors too.
         if ignore_kind == IgnoreKind::Ancestors {
             for ancestor in path.ancestors().skip(1) {
-                if !is_included || ancestor == project_data.path(self) {
+                if !is_included
+                    || ancestor == project_data.path(self)
+                    || !ancestor.starts_with(project_data.path(self))
+                {
                     break;
                 }
 

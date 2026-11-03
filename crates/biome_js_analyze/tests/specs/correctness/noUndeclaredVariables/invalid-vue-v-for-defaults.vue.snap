@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-vue-v-for-defaults.vue
+---
+# Input
+```vue
+<script setup>
+const rows = [{ id: 1 }];
+</script>
+
+<template>
+  <p v-for="{ id, label = missingLabel } in rows" :key="id">{{ label }}</p>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-v-for-defaults.vue:6:27 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missingLabel variable is undeclared.
+  
+    5 │ <template>
+  > 6 │   <p v-for="{ id, label = missingLabel } in rows" :key="id">{{ label }}</p>
+      │                           ^^^^^^^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

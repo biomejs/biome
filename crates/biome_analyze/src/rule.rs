@@ -225,6 +225,10 @@ pub enum RuleSource<'a> {
     MarkdownLint(&'a str, &'a str),
     /// Rules from [TanStack Query ESLint Plugin](https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query)
     EslintTanstackQuery(&'a str),
+    /// Rules from [stylelint-scss](https://github.com/stylelint-scss/stylelint-scss)
+    StylelintScss(&'a str),
+    /// Rules from the `oxc` plugin of [Oxlint](https://oxc.rs/docs/guide/usage/linter)
+    Oxc(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -297,6 +301,8 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
             Self::MarkdownLint(_, _) => write!(f, "markdownlint"),
             Self::EslintTanstackQuery(_) => write!(f, "@tanstack/eslint-plugin-query"),
+            Self::StylelintScss(_) => write!(f, "stylelint-scss"),
+            Self::Oxc(_) => write!(f, "Oxlint"),
         }
     }
 }
@@ -388,6 +394,8 @@ impl<'a> RuleSource<'a> {
             | Self::EslintDrizzle(rule_name)
             | Self::EslintTypescriptSortKeys(rule_name)
             | Self::EslintTanstackQuery(rule_name)
+            | Self::StylelintScss(rule_name)
+            | Self::Oxc(rule_name)
             | Self::MarkdownLint(_, rule_name)
             | Self::Sherif(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
@@ -457,6 +465,8 @@ impl<'a> RuleSource<'a> {
             Self::EslintDrizzle(_) => "drizzle",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
             Self::EslintTanstackQuery(_) => "@tanstack/query",
+            Self::StylelintScss(_) => "scss",
+            Self::Oxc(_) => "oxc",
         }
     }
 
@@ -531,6 +541,8 @@ impl<'a> RuleSource<'a> {
             Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintTanstackQuery(rule_name) => format!("https://tanstack.com/query/latest/docs/eslint/{rule_name}"),
+            Self::StylelintScss(rule_name) => format!("https://github.com/stylelint-scss/stylelint-scss/blob/master/src/rules/{rule_name}/README.md"),
+            Self::Oxc(rule_name) => format!("https://oxc.rs/docs/guide/usage/linter/rules/oxc/{rule_name}"),
         }
     }
 
@@ -567,14 +579,16 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::StylelintScss(_)
                 | Self::SortPackageJson
                 | Self::Sherif(_)
                 | Self::MarkdownLint(_, _)
+                | Self::Oxc(_)
         )
     }
 
     pub const fn is_stylelint(&self) -> bool {
-        matches!(self, Self::Stylelint(_))
+        matches!(self, Self::Stylelint(_) | Self::StylelintScss(_))
     }
 }
 
@@ -1205,7 +1219,7 @@ macro_rules! declare_lint_group {
         $vis enum $id {}
 
         impl $crate::RuleGroup for $id {
-            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Language = <super::Category as $crate::GroupCategory>::Language;
             type Category = super::Category;
 
             const NAME: &'static str = $name;
@@ -1242,7 +1256,7 @@ macro_rules! declare_assist_group {
         $vis enum $id {}
 
         impl $crate::RuleGroup for $id {
-            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Language = <super::Category as $crate::GroupCategory>::Language;
             type Category = super::Category;
 
             const NAME: &'static str = $name;
@@ -1279,7 +1293,7 @@ macro_rules! declare_syntax_group {
         $vis enum $id {}
 
         impl $crate::RuleGroup for $id {
-            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Language = <super::Category as $crate::GroupCategory>::Language;
             type Category = super::Category;
 
             const NAME: &'static str = $name;
@@ -1322,11 +1336,11 @@ pub trait GroupCategory {
 
 #[macro_export]
 macro_rules! declare_category {
-    ( $vis:vis $id:ident { kind: $kind:ident, groups: [ $( $( $group:ident )::* , )* ] } ) => {
+    ( $vis:vis $id:ident { kind: $kind:ident, language: $language:ty, groups: [ $( $( $group:ident )::* , )* ] } ) => {
         $vis enum $id {}
 
         impl $crate::GroupCategory for $id {
-            type Language = <( $( $( $group )::* , )* ) as $crate::CategoryLanguage>::Language;
+            type Language = $language;
 
             const CATEGORY: $crate::RuleCategory = $crate::RuleCategory::$kind;
 
@@ -1338,57 +1352,6 @@ macro_rules! declare_category {
         pub(self) use $id as Category;
     };
 }
-
-/// This trait is implemented for tuples of [Rule] types of size 1 to 29 if the
-/// query type of all the rules in the tuple share the same associated
-/// [Language] (which is then aliased as the `Language` associated type on
-/// [GroupLanguage] itself). It is used to ensure all the rules in a given
-/// group are all querying the same underlying language
-pub trait GroupLanguage {
-    type Language: Language;
-}
-
-/// This trait is implemented for tuples of [Rule] types of size 1 to 29 if the
-/// language of all the groups in the tuple share the same associated
-/// [Language] (which is then aliased as the `Language` associated type on
-/// [CategoryLanguage] itself). It is used to ensure all the groups in a given
-/// category are all querying the same underlying language
-pub trait CategoryLanguage {
-    type Language: Language;
-}
-
-/// Helper macro for implementing [GroupLanguage] on a large number of tuple types at once
-macro_rules! impl_group_language {
-    ( $head:ident $( , $rest:ident )* ) => {
-        impl<$head $( , $rest )*> GroupLanguage for ($head, $( $rest ),*)
-        where
-            $head: Rule $( , $rest: Rule, <$rest as Rule>::Query: Queryable<Language = RuleLanguage<$head>> )*
-        {
-            type Language = RuleLanguage<$head>;
-        }
-
-        impl<$head $( , $rest )*> CategoryLanguage for ($head, $( $rest ),*)
-        where
-            $head: RuleGroup $( , $rest: RuleGroup<Language = <$head as RuleGroup>::Language> )*
-        {
-            type Language = <$head as RuleGroup>::Language;
-        }
-
-        impl_group_language!( $( $rest ),* );
-    };
-
-    () => {};
-}
-
-impl_group_language!(
-    T00, T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18,
-    T19, T20, T21, T22, T23, T24, T25, T26, T27, T28, T29, T30, T31, T32, T33, T34, T35, T36, T37,
-    T38, T39, T40, T41, T42, T43, T44, T45, T46, T47, T48, T49, T50, T51, T52, T53, T54, T55, T56,
-    T57, T58, T59, T60, T61, T62, T63, T64, T65, T66, T67, T68, T69, T70, T71, T72, T73, T74, T75,
-    T76, T77, T78, T79, T80, T81, T82, T83, T84, T85, T86, T87, T88, T89, T90, T91, T92, T93, T94,
-    T95, T96, T97, T98, T99, T100, T101, T102, T103, T104, T105, T106, T107, T108, T109, T110,
-    T111, T112, T113, T114, T115
-);
 
 /// Trait implemented by all analysis rules: declares interest to a certain AstNode type,
 /// and a callback function to be executed on all nodes matching the query to possibly

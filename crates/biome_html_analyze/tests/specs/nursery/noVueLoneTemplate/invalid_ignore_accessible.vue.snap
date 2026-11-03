@@ -1,0 +1,166 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_ignore_accessible.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <template class="b">...</template>
+  <template v-on:id="a">...</template>
+  <template v-bind="id">...</template>
+  <template v-bind:[foo]="id">...</template>
+  <template :class="b">...</template>
+  <template REF="b">...</template>
+  <template :REF="b">...</template>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid_ignore_accessible.vue:3:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <template class="b">...</template>
+      │   ^^^^^^^^^^^^^^^^^^^^
+    4 │   <template v-on:id="a">...</template>
+    5 │   <template v-bind="id">...</template>
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_ignore_accessible.vue:4:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+    2 │ <template>
+    3 │   <template class="b">...</template>
+  > 4 │   <template v-on:id="a">...</template>
+      │   ^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <template v-bind="id">...</template>
+    6 │   <template v-bind:[foo]="id">...</template>
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_ignore_accessible.vue:5:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+    3 │   <template class="b">...</template>
+    4 │   <template v-on:id="a">...</template>
+  > 5 │   <template v-bind="id">...</template>
+      │   ^^^^^^^^^^^^^^^^^^^^^^
+    6 │   <template v-bind:[foo]="id">...</template>
+    7 │   <template :class="b">...</template>
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_ignore_accessible.vue:6:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+    4 │   <template v-on:id="a">...</template>
+    5 │   <template v-bind="id">...</template>
+  > 6 │   <template v-bind:[foo]="id">...</template>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <template :class="b">...</template>
+    8 │   <template REF="b">...</template>
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_ignore_accessible.vue:7:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+    5 │   <template v-bind="id">...</template>
+    6 │   <template v-bind:[foo]="id">...</template>
+  > 7 │   <template :class="b">...</template>
+      │   ^^^^^^^^^^^^^^^^^^^^^
+    8 │   <template REF="b">...</template>
+    9 │   <template :REF="b">...</template>
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_ignore_accessible.vue:8:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+     6 │   <template v-bind:[foo]="id">...</template>
+     7 │   <template :class="b">...</template>
+   > 8 │   <template REF="b">...</template>
+       │   ^^^^^^^^^^^^^^^^^^
+     9 │   <template :REF="b">...</template>
+    10 │ </template>
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_ignore_accessible.vue:9:3 lint/nursery/noVueLoneTemplate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> has no v-if, v-else-if, v-else, v-for, or v-slot directive.
+  
+     7 │   <template :class="b">...</template>
+     8 │   <template REF="b">...</template>
+   > 9 │   <template :REF="b">...</template>
+       │   ^^^^^^^^^^^^^^^^^^^
+    10 │ </template>
+    11 │ 
+  
+  i Without one of these directives, Vue renders a regular HTML <template> element, and the browser doesn't show its content.
+  
+  i Add the directive you meant to use, or remove the <template> tags and keep their content.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

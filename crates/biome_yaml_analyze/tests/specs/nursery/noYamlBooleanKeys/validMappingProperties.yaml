@@ -1,0 +1,9 @@
+# should not generate diagnostics
+# the tag belongs to the mapping, not to its first key
+!!bool
+name: 1
+---
+# the anchor belongs to the mapping, not to its first key
+&root
+!!str true: 2
+other: { *root : 3 }

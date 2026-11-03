@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-array.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+defineProps(['greeting_text']);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props-array.vue:3:14 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ defineProps(['greeting_text']);
+      │              ^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

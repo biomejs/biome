@@ -1,0 +1,188 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_components.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <RouterLink tag="div" to="/">Home</RouterLink>
+  <router-link :tag="someVariable" to="/">Home</router-link>
+  <NuxtLink tag="div" to="/">Home</NuxtLink>
+  <nuxt-link tag="div" to="/">Home</nuxt-link>
+  <NuxtLink :tag="someVariable" to="/">Home</NuxtLink>
+  <nuxt-link :tag="someVariable" to="/">Home</nuxt-link>
+  <UILink tag="li" to="/">Home</UILink>
+  <u-i-link tag="li" to="/">Home</u-i-link>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid_components.vue:3:15 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on RouterLink.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <RouterLink tag="div" to="/">Home</RouterLink>
+      │               ^^^^^^^^^
+    4 │   <router-link :tag="someVariable" to="/">Home</router-link>
+    5 │   <NuxtLink tag="div" to="/">Home</NuxtLink>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:4:16 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on router-link.
+  
+    2 │ <template>
+    3 │   <RouterLink tag="div" to="/">Home</RouterLink>
+  > 4 │   <router-link :tag="someVariable" to="/">Home</router-link>
+      │                ^^^^^^^^^^^^^^^^^^^
+    5 │   <NuxtLink tag="div" to="/">Home</NuxtLink>
+    6 │   <nuxt-link tag="div" to="/">Home</nuxt-link>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:5:13 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on NuxtLink.
+  
+    3 │   <RouterLink tag="div" to="/">Home</RouterLink>
+    4 │   <router-link :tag="someVariable" to="/">Home</router-link>
+  > 5 │   <NuxtLink tag="div" to="/">Home</NuxtLink>
+      │             ^^^^^^^^^
+    6 │   <nuxt-link tag="div" to="/">Home</nuxt-link>
+    7 │   <NuxtLink :tag="someVariable" to="/">Home</NuxtLink>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:6:14 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on nuxt-link.
+  
+    4 │   <router-link :tag="someVariable" to="/">Home</router-link>
+    5 │   <NuxtLink tag="div" to="/">Home</NuxtLink>
+  > 6 │   <nuxt-link tag="div" to="/">Home</nuxt-link>
+      │              ^^^^^^^^^
+    7 │   <NuxtLink :tag="someVariable" to="/">Home</NuxtLink>
+    8 │   <nuxt-link :tag="someVariable" to="/">Home</nuxt-link>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:7:13 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on NuxtLink.
+  
+    5 │   <NuxtLink tag="div" to="/">Home</NuxtLink>
+    6 │   <nuxt-link tag="div" to="/">Home</nuxt-link>
+  > 7 │   <NuxtLink :tag="someVariable" to="/">Home</NuxtLink>
+      │             ^^^^^^^^^^^^^^^^^^^
+    8 │   <nuxt-link :tag="someVariable" to="/">Home</nuxt-link>
+    9 │   <UILink tag="li" to="/">Home</UILink>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:8:14 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on nuxt-link.
+  
+     6 │   <nuxt-link tag="div" to="/">Home</nuxt-link>
+     7 │   <NuxtLink :tag="someVariable" to="/">Home</NuxtLink>
+   > 8 │   <nuxt-link :tag="someVariable" to="/">Home</nuxt-link>
+       │              ^^^^^^^^^^^^^^^^^^^
+     9 │   <UILink tag="li" to="/">Home</UILink>
+    10 │   <u-i-link tag="li" to="/">Home</u-i-link>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:9:11 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on UILink.
+  
+     7 │   <NuxtLink :tag="someVariable" to="/">Home</NuxtLink>
+     8 │   <nuxt-link :tag="someVariable" to="/">Home</nuxt-link>
+   > 9 │   <UILink tag="li" to="/">Home</UILink>
+       │           ^^^^^^^^
+    10 │   <u-i-link tag="li" to="/">Home</u-i-link>
+    11 │ </template>
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.vue:10:13 lint/nursery/noVueDeprecatedRouterLinkTagProp ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The tag prop is used on u-i-link.
+  
+     8 │   <nuxt-link :tag="someVariable" to="/">Home</nuxt-link>
+     9 │   <UILink tag="li" to="/">Home</UILink>
+  > 10 │   <u-i-link tag="li" to="/">Home</u-i-link>
+       │             ^^^^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Vue Router 4 doesn't support this prop, so it's ignored and the link still renders as an <a> element.
+  
+  i To render a different element, add the custom prop and put the element in the link's default slot.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

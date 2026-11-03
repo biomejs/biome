@@ -12,8 +12,8 @@ use biome_html_syntax::{
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
     HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression,
     HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression,
-    SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue,
-    VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective,
+    VueVForDefaultBinding, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
@@ -232,10 +232,20 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 }
             }
 
+            // The iterable of each `v-for`, and the default values of its
+            // bindings, as in `{ item = fallback } in items`.
             for value in v_for_values {
-                if let Ok(expression) = value.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                {
+                let iterable = value
+                    .expression()
+                    .ok()
+                    .and_then(|expression| build_text_expression_candidate(&expression));
+                let defaults = value
+                    .syntax()
+                    .descendants()
+                    .filter_map(VueVForDefaultBinding::cast)
+                    .filter_map(|binding| binding.default().ok())
+                    .filter_map(|expression| build_vue_v_for_default_candidate(&expression));
+                for candidate in iterable.into_iter().chain(defaults) {
                     ctx.parse_and_push(
                         &candidate,
                         &doc_file_source,
@@ -869,6 +879,25 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
             content_range: content_token.text_range(),
             content_offset: content_token.text_range().start(),
             text: content_token.token_text(),
+        },
+        block_kind: EmbedBlockKind::Neutral,
+    })
+}
+
+/// Build an `EmbedCandidate::TextExpression` from the default value of a Vue
+/// `v-for` binding, such as `fallback` in `{ item = fallback } in items`.
+///
+/// The whitespace after the value is trivia of its token, which the candidate
+/// leaves out.
+fn build_vue_v_for_default_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
+    let content_token = expression.html_literal_token().ok()?;
+    let content_range = content_token.text_trimmed_range();
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: expression.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: content_token.token_text_trimmed(),
         },
         block_kind: EmbedBlockKind::Neutral,
     })

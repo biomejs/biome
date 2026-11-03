@@ -1,0 +1,90 @@
+/* should not generate diagnostics */
+
+// A parameter type that is not an event
+async function updateControl(event: { preventDefault(): void }) {
+	await load();
+	event.preventDefault();
+}
+async function updateControl(event: string) {
+	await load();
+	event.preventDefault();
+}
+async function updateControl(event: string | null) {
+	await load();
+	event.preventDefault();
+}
+async function updateControl(event: readonly string[]) {
+	await load();
+	event.preventDefault();
+}
+
+// A locally declared type that reuses the name of an event type
+function localTypeAlias() {
+	type Event = string;
+	async function updateControl(event: Event) {
+		await load();
+		event.preventDefault();
+	}
+}
+function localInterface() {
+	interface Event {
+		preventDefault(): void;
+	}
+	async function updateControl(event: Event) {
+		await load();
+		event.preventDefault();
+	}
+}
+function localClass() {
+	class Event {
+		preventDefault() {}
+	}
+	async function updateControl(event: Event) {
+		await load();
+		event.preventDefault();
+	}
+}
+
+// A local namespace named `React`
+function localNamespace() {
+	namespace React {
+		export type SyntheticEvent = string;
+	}
+	async function updateControl(value: React.SyntheticEvent) {
+		await load();
+		value.preventDefault();
+	}
+}
+
+// The parameter name doesn't look like an event and the type is unknown
+async function updateControl(value: Payload) {
+	await load();
+	value.preventDefault();
+}
+
+// Types that refer to themselves
+function cycles() {
+	interface SelfInterface extends SelfInterface {}
+	interface First extends Second {}
+	interface Second extends First {}
+	class SelfClass extends SelfClass {}
+	type AliasA = AliasB;
+	type AliasB = AliasA;
+
+	async function updateControl(value: SelfInterface) {
+		await load();
+		value.preventDefault();
+	}
+	async function updateControl(value: First) {
+		await load();
+		value.preventDefault();
+	}
+	async function updateControl(value: SelfClass) {
+		await load();
+		value.preventDefault();
+	}
+	async function updateControl(value: AliasA) {
+		await load();
+		value.preventDefault();
+	}
+}

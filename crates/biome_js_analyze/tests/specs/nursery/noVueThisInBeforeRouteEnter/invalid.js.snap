@@ -1,0 +1,119 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+export const A = defineComponent({
+  beforeRouteEnter() {
+    this.a();
+  },
+});
+
+export const B = defineComponent(() => {}, {
+  "beforeRouteEnter": function () {
+    this.b();
+  },
+});
+
+export const C = defineComponent(({
+  ["beforeRouteEnter"]() {
+    this.c();
+  },
+}));
+
+createApp({
+  beforeRouteEnter() {
+    this.d();
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:6:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    4 │ export const A = defineComponent({
+    5 │   beforeRouteEnter() {
+  > 6 │     this.a();
+      │     ^^^^
+    7 │   },
+    8 │ });
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    10 │ export const B = defineComponent(() => {}, {
+    11 │   "beforeRouteEnter": function () {
+  > 12 │     this.b();
+       │     ^^^^
+    13 │   },
+    14 │ });
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    16 │ export const C = defineComponent(({
+    17 │   ["beforeRouteEnter"]() {
+  > 18 │     this.c();
+       │     ^^^^
+    19 │   },
+    20 │ }));
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    22 │ createApp({
+    23 │   beforeRouteEnter() {
+  > 24 │     this.d();
+       │     ^^^^
+    25 │   },
+    26 │ });
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

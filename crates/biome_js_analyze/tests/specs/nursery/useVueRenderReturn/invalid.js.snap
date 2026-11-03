@@ -1,0 +1,373 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent, h } from "vue";
+
+defineComponent({
+	render() {},
+});
+
+defineComponent({
+	render: function () {
+		if (foo) {
+			return h("div", "hello");
+		}
+	},
+});
+
+defineComponent({
+	render: function () {
+		if (a) {
+			return;
+		}
+		return h("div");
+	},
+});
+
+defineComponent({
+	render: function () {
+		if (a) {
+		} else {
+			return h("div", "hello");
+		}
+	},
+});
+
+defineComponent({
+	render: () => {
+		h("div");
+	},
+});
+
+defineComponent({
+	render() {
+		switch (this.type) {
+			case "a":
+				return h("div");
+			case "b":
+				return h("span");
+		}
+	},
+});
+
+defineComponent({
+	render() {
+		switch (this.type) {
+			case "a":
+				return h("div");
+			case "b":
+				break;
+		}
+	},
+});
+
+defineComponent({
+	render() {
+		switch (this.type) {
+		}
+	},
+});
+
+defineComponent({
+	render() {
+		switch (this.type) {
+			case "a":
+			case "b":
+		}
+	},
+});
+
+defineComponent({
+	render() {
+		try {
+			return h("div");
+		} catch (error) {
+			console.error(error);
+		}
+	},
+});
+
+defineComponent({
+	render() {
+		for (const item of this.items) {
+			return h("div", item);
+		}
+	},
+});
+
+defineComponent({
+	render: (function () {}),
+});
+
+createApp({
+	render() {
+		h("div");
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:5:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    4 │ defineComponent({
+  > 5 │ 	render() {},
+      │ 	^^^^^^
+    6 │ });
+    7 │ 
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+     8 │ defineComponent({
+   > 9 │ 	render: function () {
+       │ 	^^^^^^
+    10 │ 		if (foo) {
+    11 │ 			return h("div", "hello");
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    16 │ defineComponent({
+  > 17 │ 	render: function () {
+       │ 	^^^^^^
+    18 │ 		if (a) {
+    19 │ 			return;
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    25 │ defineComponent({
+  > 26 │ 	render: function () {
+       │ 	^^^^^^
+    27 │ 		if (a) {
+    28 │ 		} else {
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    34 │ defineComponent({
+  > 35 │ 	render: () => {
+       │ 	^^^^^^
+    36 │ 		h("div");
+    37 │ 	},
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    40 │ defineComponent({
+  > 41 │ 	render() {
+       │ 	^^^^^^
+    42 │ 		switch (this.type) {
+    43 │ 			case "a":
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    51 │ defineComponent({
+  > 52 │ 	render() {
+       │ 	^^^^^^
+    53 │ 		switch (this.type) {
+    54 │ 			case "a":
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    62 │ defineComponent({
+  > 63 │ 	render() {
+       │ 	^^^^^^
+    64 │ 		switch (this.type) {
+    65 │ 		}
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:70:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    69 │ defineComponent({
+  > 70 │ 	render() {
+       │ 	^^^^^^
+    71 │ 		switch (this.type) {
+    72 │ 			case "a":
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:79:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    78 │ defineComponent({
+  > 79 │ 	render() {
+       │ 	^^^^^^
+    80 │ 		try {
+    81 │ 			return h("div");
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:89:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    88 │ defineComponent({
+  > 89 │ 	render() {
+       │ 	^^^^^^
+    90 │ 		for (const item of this.items) {
+    91 │ 			return h("div", item);
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:97:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    96 │ defineComponent({
+  > 97 │ 	render: (function () {}),
+       │ 	^^^^^^
+    98 │ });
+    99 │ 
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:101:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    100 │ createApp({
+  > 101 │ 	render() {
+        │ 	^^^^^^
+    102 │ 		h("div");
+    103 │ 	},
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

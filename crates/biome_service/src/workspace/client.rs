@@ -15,7 +15,7 @@ use crate::workspace::{
     OpenProjectResult, PathIsIgnoredParams, RageParams, RageResult, ServerInfo,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_resolver::FsWithResolverProxy;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::json;

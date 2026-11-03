@@ -3,7 +3,856 @@
 use crate::ast::{JsAstField, JsAstFieldValue, JsAstNode, JsAstNodeFields};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_rowan::AstNode;
+use boa_engine::{JsString, js_string};
 impl JsAstNode {
+    /// Returns the variant name of `kind`, which plugins read as the `kind` of
+    /// nodes and tokens. The string is static, so returning it never allocates.
+    pub(crate) fn kind_name(kind: JsSyntaxKind) -> JsString {
+        match kind {
+            JsSyntaxKind::TOMBSTONE => js_string!("TOMBSTONE"),
+            JsSyntaxKind::EOF => js_string!("EOF"),
+            JsSyntaxKind::UNICODE_BOM => js_string!("UNICODE_BOM"),
+            JsSyntaxKind::SEMICOLON => js_string!("SEMICOLON"),
+            JsSyntaxKind::COMMA => js_string!("COMMA"),
+            JsSyntaxKind::L_PAREN => js_string!("L_PAREN"),
+            JsSyntaxKind::R_PAREN => js_string!("R_PAREN"),
+            JsSyntaxKind::L_CURLY => js_string!("L_CURLY"),
+            JsSyntaxKind::R_CURLY => js_string!("R_CURLY"),
+            JsSyntaxKind::L_BRACK => js_string!("L_BRACK"),
+            JsSyntaxKind::R_BRACK => js_string!("R_BRACK"),
+            JsSyntaxKind::L_ANGLE => js_string!("L_ANGLE"),
+            JsSyntaxKind::R_ANGLE => js_string!("R_ANGLE"),
+            JsSyntaxKind::TILDE => js_string!("TILDE"),
+            JsSyntaxKind::QUESTION => js_string!("QUESTION"),
+            JsSyntaxKind::QUESTION2 => js_string!("QUESTION2"),
+            JsSyntaxKind::QUESTIONDOT => js_string!("QUESTIONDOT"),
+            JsSyntaxKind::AMP => js_string!("AMP"),
+            JsSyntaxKind::PIPE => js_string!("PIPE"),
+            JsSyntaxKind::PLUS => js_string!("PLUS"),
+            JsSyntaxKind::PLUS2 => js_string!("PLUS2"),
+            JsSyntaxKind::STAR => js_string!("STAR"),
+            JsSyntaxKind::STAR2 => js_string!("STAR2"),
+            JsSyntaxKind::SLASH => js_string!("SLASH"),
+            JsSyntaxKind::CARET => js_string!("CARET"),
+            JsSyntaxKind::PERCENT => js_string!("PERCENT"),
+            JsSyntaxKind::DOT => js_string!("DOT"),
+            JsSyntaxKind::DOT3 => js_string!("DOT3"),
+            JsSyntaxKind::COLON => js_string!("COLON"),
+            JsSyntaxKind::EQ => js_string!("EQ"),
+            JsSyntaxKind::EQ2 => js_string!("EQ2"),
+            JsSyntaxKind::EQ3 => js_string!("EQ3"),
+            JsSyntaxKind::FAT_ARROW => js_string!("FAT_ARROW"),
+            JsSyntaxKind::BANG => js_string!("BANG"),
+            JsSyntaxKind::NEQ => js_string!("NEQ"),
+            JsSyntaxKind::NEQ2 => js_string!("NEQ2"),
+            JsSyntaxKind::MINUS => js_string!("MINUS"),
+            JsSyntaxKind::MINUS2 => js_string!("MINUS2"),
+            JsSyntaxKind::LTEQ => js_string!("LTEQ"),
+            JsSyntaxKind::GTEQ => js_string!("GTEQ"),
+            JsSyntaxKind::PLUSEQ => js_string!("PLUSEQ"),
+            JsSyntaxKind::MINUSEQ => js_string!("MINUSEQ"),
+            JsSyntaxKind::PIPEEQ => js_string!("PIPEEQ"),
+            JsSyntaxKind::AMPEQ => js_string!("AMPEQ"),
+            JsSyntaxKind::CARETEQ => js_string!("CARETEQ"),
+            JsSyntaxKind::SLASHEQ => js_string!("SLASHEQ"),
+            JsSyntaxKind::STAREQ => js_string!("STAREQ"),
+            JsSyntaxKind::PERCENTEQ => js_string!("PERCENTEQ"),
+            JsSyntaxKind::AMP2 => js_string!("AMP2"),
+            JsSyntaxKind::PIPE2 => js_string!("PIPE2"),
+            JsSyntaxKind::SHL => js_string!("SHL"),
+            JsSyntaxKind::SHR => js_string!("SHR"),
+            JsSyntaxKind::USHR => js_string!("USHR"),
+            JsSyntaxKind::SHLEQ => js_string!("SHLEQ"),
+            JsSyntaxKind::SHREQ => js_string!("SHREQ"),
+            JsSyntaxKind::USHREQ => js_string!("USHREQ"),
+            JsSyntaxKind::AMP2EQ => js_string!("AMP2EQ"),
+            JsSyntaxKind::PIPE2EQ => js_string!("PIPE2EQ"),
+            JsSyntaxKind::STAR2EQ => js_string!("STAR2EQ"),
+            JsSyntaxKind::QUESTION2EQ => js_string!("QUESTION2EQ"),
+            JsSyntaxKind::AT => js_string!("AT"),
+            JsSyntaxKind::BACKTICK => js_string!("BACKTICK"),
+            JsSyntaxKind::BREAK_KW => js_string!("BREAK_KW"),
+            JsSyntaxKind::CASE_KW => js_string!("CASE_KW"),
+            JsSyntaxKind::CATCH_KW => js_string!("CATCH_KW"),
+            JsSyntaxKind::CLASS_KW => js_string!("CLASS_KW"),
+            JsSyntaxKind::CONST_KW => js_string!("CONST_KW"),
+            JsSyntaxKind::CONTINUE_KW => js_string!("CONTINUE_KW"),
+            JsSyntaxKind::DEBUGGER_KW => js_string!("DEBUGGER_KW"),
+            JsSyntaxKind::DEFAULT_KW => js_string!("DEFAULT_KW"),
+            JsSyntaxKind::DELETE_KW => js_string!("DELETE_KW"),
+            JsSyntaxKind::DO_KW => js_string!("DO_KW"),
+            JsSyntaxKind::ELSE_KW => js_string!("ELSE_KW"),
+            JsSyntaxKind::ENUM_KW => js_string!("ENUM_KW"),
+            JsSyntaxKind::EXPORT_KW => js_string!("EXPORT_KW"),
+            JsSyntaxKind::EXTENDS_KW => js_string!("EXTENDS_KW"),
+            JsSyntaxKind::FALSE_KW => js_string!("FALSE_KW"),
+            JsSyntaxKind::FINALLY_KW => js_string!("FINALLY_KW"),
+            JsSyntaxKind::FOR_KW => js_string!("FOR_KW"),
+            JsSyntaxKind::FUNCTION_KW => js_string!("FUNCTION_KW"),
+            JsSyntaxKind::IF_KW => js_string!("IF_KW"),
+            JsSyntaxKind::IN_KW => js_string!("IN_KW"),
+            JsSyntaxKind::INSTANCEOF_KW => js_string!("INSTANCEOF_KW"),
+            JsSyntaxKind::IMPORT_KW => js_string!("IMPORT_KW"),
+            JsSyntaxKind::NEW_KW => js_string!("NEW_KW"),
+            JsSyntaxKind::NULL_KW => js_string!("NULL_KW"),
+            JsSyntaxKind::RETURN_KW => js_string!("RETURN_KW"),
+            JsSyntaxKind::SUPER_KW => js_string!("SUPER_KW"),
+            JsSyntaxKind::SWITCH_KW => js_string!("SWITCH_KW"),
+            JsSyntaxKind::THIS_KW => js_string!("THIS_KW"),
+            JsSyntaxKind::THROW_KW => js_string!("THROW_KW"),
+            JsSyntaxKind::TRY_KW => js_string!("TRY_KW"),
+            JsSyntaxKind::TRUE_KW => js_string!("TRUE_KW"),
+            JsSyntaxKind::TYPEOF_KW => js_string!("TYPEOF_KW"),
+            JsSyntaxKind::VAR_KW => js_string!("VAR_KW"),
+            JsSyntaxKind::VOID_KW => js_string!("VOID_KW"),
+            JsSyntaxKind::WHILE_KW => js_string!("WHILE_KW"),
+            JsSyntaxKind::WITH_KW => js_string!("WITH_KW"),
+            JsSyntaxKind::IMPLEMENTS_KW => js_string!("IMPLEMENTS_KW"),
+            JsSyntaxKind::INTERFACE_KW => js_string!("INTERFACE_KW"),
+            JsSyntaxKind::LET_KW => js_string!("LET_KW"),
+            JsSyntaxKind::PACKAGE_KW => js_string!("PACKAGE_KW"),
+            JsSyntaxKind::PRIVATE_KW => js_string!("PRIVATE_KW"),
+            JsSyntaxKind::PROTECTED_KW => js_string!("PROTECTED_KW"),
+            JsSyntaxKind::PUBLIC_KW => js_string!("PUBLIC_KW"),
+            JsSyntaxKind::STATIC_KW => js_string!("STATIC_KW"),
+            JsSyntaxKind::YIELD_KW => js_string!("YIELD_KW"),
+            JsSyntaxKind::ABSTRACT_KW => js_string!("ABSTRACT_KW"),
+            JsSyntaxKind::ACCESSOR_KW => js_string!("ACCESSOR_KW"),
+            JsSyntaxKind::AS_KW => js_string!("AS_KW"),
+            JsSyntaxKind::SATISFIES_KW => js_string!("SATISFIES_KW"),
+            JsSyntaxKind::ASSERTS_KW => js_string!("ASSERTS_KW"),
+            JsSyntaxKind::ASSERT_KW => js_string!("ASSERT_KW"),
+            JsSyntaxKind::ANY_KW => js_string!("ANY_KW"),
+            JsSyntaxKind::ASYNC_KW => js_string!("ASYNC_KW"),
+            JsSyntaxKind::AWAIT_KW => js_string!("AWAIT_KW"),
+            JsSyntaxKind::BOOLEAN_KW => js_string!("BOOLEAN_KW"),
+            JsSyntaxKind::CONSTRUCTOR_KW => js_string!("CONSTRUCTOR_KW"),
+            JsSyntaxKind::DECLARE_KW => js_string!("DECLARE_KW"),
+            JsSyntaxKind::DEFER_KW => js_string!("DEFER_KW"),
+            JsSyntaxKind::GET_KW => js_string!("GET_KW"),
+            JsSyntaxKind::INFER_KW => js_string!("INFER_KW"),
+            JsSyntaxKind::IS_KW => js_string!("IS_KW"),
+            JsSyntaxKind::KEYOF_KW => js_string!("KEYOF_KW"),
+            JsSyntaxKind::MODULE_KW => js_string!("MODULE_KW"),
+            JsSyntaxKind::NAMESPACE_KW => js_string!("NAMESPACE_KW"),
+            JsSyntaxKind::NEVER_KW => js_string!("NEVER_KW"),
+            JsSyntaxKind::READONLY_KW => js_string!("READONLY_KW"),
+            JsSyntaxKind::REQUIRE_KW => js_string!("REQUIRE_KW"),
+            JsSyntaxKind::NUMBER_KW => js_string!("NUMBER_KW"),
+            JsSyntaxKind::OBJECT_KW => js_string!("OBJECT_KW"),
+            JsSyntaxKind::SET_KW => js_string!("SET_KW"),
+            JsSyntaxKind::STRING_KW => js_string!("STRING_KW"),
+            JsSyntaxKind::SOURCE_KW => js_string!("SOURCE_KW"),
+            JsSyntaxKind::SYMBOL_KW => js_string!("SYMBOL_KW"),
+            JsSyntaxKind::TYPE_KW => js_string!("TYPE_KW"),
+            JsSyntaxKind::UNDEFINED_KW => js_string!("UNDEFINED_KW"),
+            JsSyntaxKind::UNIQUE_KW => js_string!("UNIQUE_KW"),
+            JsSyntaxKind::UNKNOWN_KW => js_string!("UNKNOWN_KW"),
+            JsSyntaxKind::FROM_KW => js_string!("FROM_KW"),
+            JsSyntaxKind::GLOBAL_KW => js_string!("GLOBAL_KW"),
+            JsSyntaxKind::BIGINT_KW => js_string!("BIGINT_KW"),
+            JsSyntaxKind::OVERRIDE_KW => js_string!("OVERRIDE_KW"),
+            JsSyntaxKind::OF_KW => js_string!("OF_KW"),
+            JsSyntaxKind::OUT_KW => js_string!("OUT_KW"),
+            JsSyntaxKind::USING_KW => js_string!("USING_KW"),
+            JsSyntaxKind::META_KW => js_string!("META_KW"),
+            JsSyntaxKind::JS_NUMBER_LITERAL => js_string!("JS_NUMBER_LITERAL"),
+            JsSyntaxKind::JS_BIGINT_LITERAL => js_string!("JS_BIGINT_LITERAL"),
+            JsSyntaxKind::JS_STRING_LITERAL => js_string!("JS_STRING_LITERAL"),
+            JsSyntaxKind::JS_REGEX_LITERAL => js_string!("JS_REGEX_LITERAL"),
+            JsSyntaxKind::JSX_TEXT_LITERAL => js_string!("JSX_TEXT_LITERAL"),
+            JsSyntaxKind::JSX_STRING_LITERAL => js_string!("JSX_STRING_LITERAL"),
+            JsSyntaxKind::TARGET => js_string!("TARGET"),
+            JsSyntaxKind::META => js_string!("META"),
+            JsSyntaxKind::HASH => js_string!("HASH"),
+            JsSyntaxKind::TEMPLATE_CHUNK => js_string!("TEMPLATE_CHUNK"),
+            JsSyntaxKind::DOLLAR_CURLY => js_string!("DOLLAR_CURLY"),
+            JsSyntaxKind::ERROR_TOKEN => js_string!("ERROR_TOKEN"),
+            JsSyntaxKind::IDENT => js_string!("IDENT"),
+            JsSyntaxKind::JSX_IDENT => js_string!("JSX_IDENT"),
+            JsSyntaxKind::NEWLINE => js_string!("NEWLINE"),
+            JsSyntaxKind::WHITESPACE => js_string!("WHITESPACE"),
+            JsSyntaxKind::COMMENT => js_string!("COMMENT"),
+            JsSyntaxKind::MULTILINE_COMMENT => js_string!("MULTILINE_COMMENT"),
+            JsSyntaxKind::JS_SHEBANG => js_string!("JS_SHEBANG"),
+            JsSyntaxKind::GRIT_METAVARIABLE => js_string!("GRIT_METAVARIABLE"),
+            JsSyntaxKind::JS_MODULE => js_string!("JS_MODULE"),
+            JsSyntaxKind::JS_MODULE_ITEM_LIST => js_string!("JS_MODULE_ITEM_LIST"),
+            JsSyntaxKind::JS_SCRIPT => js_string!("JS_SCRIPT"),
+            JsSyntaxKind::TS_DECLARATION_MODULE => js_string!("TS_DECLARATION_MODULE"),
+            JsSyntaxKind::JS_EXPRESSION_SNIPPET => js_string!("JS_EXPRESSION_SNIPPET"),
+            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => {
+                js_string!("JS_EXPRESSION_TEMPLATE_ROOT")
+            }
+            JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => js_string!("JS_SVELTE_SNIPPET_ROOT"),
+            JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => {
+                js_string!("JS_SVELTE_DECLARATION_ROOT")
+            }
+            JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => js_string!("JS_VUE_SLOT_PROPS_ROOT"),
+            JsSyntaxKind::JS_VUE_GENERIC_ROOT => js_string!("JS_VUE_GENERIC_ROOT"),
+            JsSyntaxKind::JS_DIRECTIVE => js_string!("JS_DIRECTIVE"),
+            JsSyntaxKind::JS_DIRECTIVE_LIST => js_string!("JS_DIRECTIVE_LIST"),
+            JsSyntaxKind::JS_STATEMENT_LIST => js_string!("JS_STATEMENT_LIST"),
+            JsSyntaxKind::JS_BLOCK_STATEMENT => js_string!("JS_BLOCK_STATEMENT"),
+            JsSyntaxKind::JS_FUNCTION_BODY => js_string!("JS_FUNCTION_BODY"),
+            JsSyntaxKind::JS_VARIABLE_STATEMENT => js_string!("JS_VARIABLE_STATEMENT"),
+            JsSyntaxKind::JS_VARIABLE_DECLARATION => {
+                js_string!("JS_VARIABLE_DECLARATION")
+            }
+            JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST => {
+                js_string!("JS_VARIABLE_DECLARATOR_LIST")
+            }
+            JsSyntaxKind::JS_VARIABLE_DECLARATOR => js_string!("JS_VARIABLE_DECLARATOR"),
+            JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => {
+                js_string!("JS_VARIABLE_DECLARATION_CLAUSE")
+            }
+            JsSyntaxKind::TS_DEFINITE_VARIABLE_ANNOTATION => {
+                js_string!("TS_DEFINITE_VARIABLE_ANNOTATION")
+            }
+            JsSyntaxKind::JS_INITIALIZER_CLAUSE => js_string!("JS_INITIALIZER_CLAUSE"),
+            JsSyntaxKind::JS_EMPTY_STATEMENT => js_string!("JS_EMPTY_STATEMENT"),
+            JsSyntaxKind::JS_EXPRESSION_STATEMENT => {
+                js_string!("JS_EXPRESSION_STATEMENT")
+            }
+            JsSyntaxKind::JS_IF_STATEMENT => js_string!("JS_IF_STATEMENT"),
+            JsSyntaxKind::JS_ELSE_CLAUSE => js_string!("JS_ELSE_CLAUSE"),
+            JsSyntaxKind::JS_DO_WHILE_STATEMENT => js_string!("JS_DO_WHILE_STATEMENT"),
+            JsSyntaxKind::JS_WHILE_STATEMENT => js_string!("JS_WHILE_STATEMENT"),
+            JsSyntaxKind::JS_FOR_STATEMENT => js_string!("JS_FOR_STATEMENT"),
+            JsSyntaxKind::JS_FOR_IN_STATEMENT => js_string!("JS_FOR_IN_STATEMENT"),
+            JsSyntaxKind::JS_FOR_OF_STATEMENT => js_string!("JS_FOR_OF_STATEMENT"),
+            JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION => {
+                js_string!("JS_FOR_VARIABLE_DECLARATION")
+            }
+            JsSyntaxKind::JS_CONTINUE_STATEMENT => js_string!("JS_CONTINUE_STATEMENT"),
+            JsSyntaxKind::JS_BREAK_STATEMENT => js_string!("JS_BREAK_STATEMENT"),
+            JsSyntaxKind::JS_RETURN_STATEMENT => js_string!("JS_RETURN_STATEMENT"),
+            JsSyntaxKind::JS_WITH_STATEMENT => js_string!("JS_WITH_STATEMENT"),
+            JsSyntaxKind::JS_SWITCH_STATEMENT => js_string!("JS_SWITCH_STATEMENT"),
+            JsSyntaxKind::JS_SWITCH_CASE_LIST => js_string!("JS_SWITCH_CASE_LIST"),
+            JsSyntaxKind::JS_CASE_CLAUSE => js_string!("JS_CASE_CLAUSE"),
+            JsSyntaxKind::JS_DEFAULT_CLAUSE => js_string!("JS_DEFAULT_CLAUSE"),
+            JsSyntaxKind::JS_LABELED_STATEMENT => js_string!("JS_LABELED_STATEMENT"),
+            JsSyntaxKind::JS_THROW_STATEMENT => js_string!("JS_THROW_STATEMENT"),
+            JsSyntaxKind::JS_TRY_STATEMENT => js_string!("JS_TRY_STATEMENT"),
+            JsSyntaxKind::JS_TRY_FINALLY_STATEMENT => {
+                js_string!("JS_TRY_FINALLY_STATEMENT")
+            }
+            JsSyntaxKind::JS_CATCH_CLAUSE => js_string!("JS_CATCH_CLAUSE"),
+            JsSyntaxKind::JS_CATCH_DECLARATION => js_string!("JS_CATCH_DECLARATION"),
+            JsSyntaxKind::JS_FINALLY_CLAUSE => js_string!("JS_FINALLY_CLAUSE"),
+            JsSyntaxKind::JS_DEBUGGER_STATEMENT => js_string!("JS_DEBUGGER_STATEMENT"),
+            JsSyntaxKind::JS_FUNCTION_DECLARATION => {
+                js_string!("JS_FUNCTION_DECLARATION")
+            }
+            JsSyntaxKind::JS_PARAMETERS => js_string!("JS_PARAMETERS"),
+            JsSyntaxKind::JS_PARAMETER_LIST => js_string!("JS_PARAMETER_LIST"),
+            JsSyntaxKind::JS_FORMAL_PARAMETER => js_string!("JS_FORMAL_PARAMETER"),
+            JsSyntaxKind::JS_REST_PARAMETER => js_string!("JS_REST_PARAMETER"),
+            JsSyntaxKind::TS_THIS_PARAMETER => js_string!("TS_THIS_PARAMETER"),
+            JsSyntaxKind::TS_PROPERTY_PARAMETER => js_string!("TS_PROPERTY_PARAMETER"),
+            JsSyntaxKind::TS_PROPERTY_PARAMETER_MODIFIER_LIST => {
+                js_string!("TS_PROPERTY_PARAMETER_MODIFIER_LIST")
+            }
+            JsSyntaxKind::TS_TYPE_ANNOTATION => js_string!("TS_TYPE_ANNOTATION"),
+            JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION => {
+                js_string!("TS_RETURN_TYPE_ANNOTATION")
+            }
+            JsSyntaxKind::JS_IDENTIFIER_BINDING => js_string!("JS_IDENTIFIER_BINDING"),
+            JsSyntaxKind::JS_IDENTIFIER_EXPRESSION => {
+                js_string!("JS_IDENTIFIER_EXPRESSION")
+            }
+            JsSyntaxKind::JS_REFERENCE_IDENTIFIER => {
+                js_string!("JS_REFERENCE_IDENTIFIER")
+            }
+            JsSyntaxKind::JS_NAME => js_string!("JS_NAME"),
+            JsSyntaxKind::JS_PRIVATE_NAME => js_string!("JS_PRIVATE_NAME"),
+            JsSyntaxKind::JS_THIS_EXPRESSION => js_string!("JS_THIS_EXPRESSION"),
+            JsSyntaxKind::JS_ARRAY_EXPRESSION => js_string!("JS_ARRAY_EXPRESSION"),
+            JsSyntaxKind::JS_ARRAY_ELEMENT_LIST => js_string!("JS_ARRAY_ELEMENT_LIST"),
+            JsSyntaxKind::JS_ARRAY_HOLE => js_string!("JS_ARRAY_HOLE"),
+            JsSyntaxKind::JS_COMPUTED_MEMBER_NAME => {
+                js_string!("JS_COMPUTED_MEMBER_NAME")
+            }
+            JsSyntaxKind::JS_LITERAL_MEMBER_NAME => js_string!("JS_LITERAL_MEMBER_NAME"),
+            JsSyntaxKind::JS_OBJECT_EXPRESSION => js_string!("JS_OBJECT_EXPRESSION"),
+            JsSyntaxKind::JS_OBJECT_MEMBER_LIST => js_string!("JS_OBJECT_MEMBER_LIST"),
+            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
+                js_string!("JS_PROPERTY_OBJECT_MEMBER")
+            }
+            JsSyntaxKind::JS_GETTER_OBJECT_MEMBER => {
+                js_string!("JS_GETTER_OBJECT_MEMBER")
+            }
+            JsSyntaxKind::JS_SETTER_OBJECT_MEMBER => {
+                js_string!("JS_SETTER_OBJECT_MEMBER")
+            }
+            JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => {
+                js_string!("JS_METHOD_OBJECT_MEMBER")
+            }
+            JsSyntaxKind::JS_SUPER_EXPRESSION => js_string!("JS_SUPER_EXPRESSION"),
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
+                js_string!("JS_PARENTHESIZED_EXPRESSION")
+            }
+            JsSyntaxKind::JS_NEW_EXPRESSION => js_string!("JS_NEW_EXPRESSION"),
+            JsSyntaxKind::JS_FUNCTION_EXPRESSION => js_string!("JS_FUNCTION_EXPRESSION"),
+            JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => {
+                js_string!("JS_STATIC_MEMBER_EXPRESSION")
+            }
+            JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
+                js_string!("JS_COMPUTED_MEMBER_EXPRESSION")
+            }
+            JsSyntaxKind::JS_CALL_EXPRESSION => js_string!("JS_CALL_EXPRESSION"),
+            JsSyntaxKind::JS_UNARY_EXPRESSION => js_string!("JS_UNARY_EXPRESSION"),
+            JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION => {
+                js_string!("JS_PRE_UPDATE_EXPRESSION")
+            }
+            JsSyntaxKind::JS_POST_UPDATE_EXPRESSION => {
+                js_string!("JS_POST_UPDATE_EXPRESSION")
+            }
+            JsSyntaxKind::JS_BINARY_EXPRESSION => js_string!("JS_BINARY_EXPRESSION"),
+            JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => {
+                js_string!("JS_INSTANCEOF_EXPRESSION")
+            }
+            JsSyntaxKind::JS_IN_EXPRESSION => js_string!("JS_IN_EXPRESSION"),
+            JsSyntaxKind::JS_LOGICAL_EXPRESSION => js_string!("JS_LOGICAL_EXPRESSION"),
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+                js_string!("JS_CONDITIONAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+                js_string!("JS_ASSIGNMENT_EXPRESSION")
+            }
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => js_string!("JS_SEQUENCE_EXPRESSION"),
+            JsSyntaxKind::JS_CALL_ARGUMENTS => js_string!("JS_CALL_ARGUMENTS"),
+            JsSyntaxKind::JS_CALL_ARGUMENT_LIST => js_string!("JS_CALL_ARGUMENT_LIST"),
+            JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION => {
+                js_string!("JS_STRING_LITERAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION => {
+                js_string!("JS_NUMBER_LITERAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION => {
+                js_string!("JS_BIGINT_LITERAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION => {
+                js_string!("JS_BOOLEAN_LITERAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION => {
+                js_string!("JS_NULL_LITERAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION => {
+                js_string!("JS_REGEX_LITERAL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_TEMPLATE_EXPRESSION => js_string!("JS_TEMPLATE_EXPRESSION"),
+            JsSyntaxKind::JS_TEMPLATE_ELEMENT => js_string!("JS_TEMPLATE_ELEMENT"),
+            JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT => {
+                js_string!("JS_TEMPLATE_CHUNK_ELEMENT")
+            }
+            JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST => {
+                js_string!("JS_TEMPLATE_ELEMENT_LIST")
+            }
+            JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION => {
+                js_string!("JS_IMPORT_CALL_EXPRESSION")
+            }
+            JsSyntaxKind::JS_NEW_TARGET_EXPRESSION => {
+                js_string!("JS_NEW_TARGET_EXPRESSION")
+            }
+            JsSyntaxKind::JS_IMPORT_META_EXPRESSION => {
+                js_string!("JS_IMPORT_META_EXPRESSION")
+            }
+            JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER => {
+                js_string!("JS_SHORTHAND_PROPERTY_OBJECT_MEMBER")
+            }
+            JsSyntaxKind::JS_SPREAD => js_string!("JS_SPREAD"),
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN => {
+                js_string!("JS_OBJECT_BINDING_PATTERN")
+            }
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN => {
+                js_string!("JS_ARRAY_BINDING_PATTERN")
+            }
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT => {
+                js_string!("JS_ARRAY_BINDING_PATTERN_ELEMENT")
+            }
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST => {
+                js_string!("JS_ARRAY_BINDING_PATTERN_ELEMENT_LIST")
+            }
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
+                js_string!("JS_ARRAY_BINDING_PATTERN_REST_ELEMENT")
+            }
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST => {
+                js_string!("JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST")
+            }
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST => {
+                js_string!("JS_OBJECT_BINDING_PATTERN_REST")
+            }
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY => {
+                js_string!("JS_OBJECT_BINDING_PATTERN_PROPERTY")
+            }
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => {
+                js_string!("JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY")
+            }
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
+                js_string!("JS_ARROW_FUNCTION_EXPRESSION")
+            }
+            JsSyntaxKind::JS_YIELD_EXPRESSION => js_string!("JS_YIELD_EXPRESSION"),
+            JsSyntaxKind::JS_YIELD_ARGUMENT => js_string!("JS_YIELD_ARGUMENT"),
+            JsSyntaxKind::JS_CLASS_DECLARATION => js_string!("JS_CLASS_DECLARATION"),
+            JsSyntaxKind::JS_CLASS_EXPRESSION => js_string!("JS_CLASS_EXPRESSION"),
+            JsSyntaxKind::JS_CLASS_MEMBER_LIST => js_string!("JS_CLASS_MEMBER_LIST"),
+            JsSyntaxKind::JS_STATIC_MODIFIER => js_string!("JS_STATIC_MODIFIER"),
+            JsSyntaxKind::JS_ACCESSOR_MODIFIER => js_string!("JS_ACCESSOR_MODIFIER"),
+            JsSyntaxKind::TS_DECLARE_MODIFIER => js_string!("TS_DECLARE_MODIFIER"),
+            JsSyntaxKind::TS_READONLY_MODIFIER => js_string!("TS_READONLY_MODIFIER"),
+            JsSyntaxKind::TS_ABSTRACT_MODIFIER => js_string!("TS_ABSTRACT_MODIFIER"),
+            JsSyntaxKind::TS_OVERRIDE_MODIFIER => js_string!("TS_OVERRIDE_MODIFIER"),
+            JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER => {
+                js_string!("TS_ACCESSIBILITY_MODIFIER")
+            }
+            JsSyntaxKind::TS_CONST_MODIFIER => js_string!("TS_CONST_MODIFIER"),
+            JsSyntaxKind::TS_IN_MODIFIER => js_string!("TS_IN_MODIFIER"),
+            JsSyntaxKind::TS_OUT_MODIFIER => js_string!("TS_OUT_MODIFIER"),
+            JsSyntaxKind::JS_EXTENDS_CLAUSE => js_string!("JS_EXTENDS_CLAUSE"),
+            JsSyntaxKind::TS_IMPLEMENTS_CLAUSE => js_string!("TS_IMPLEMENTS_CLAUSE"),
+            JsSyntaxKind::JS_PRIVATE_CLASS_MEMBER_NAME => {
+                js_string!("JS_PRIVATE_CLASS_MEMBER_NAME")
+            }
+            JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER => {
+                js_string!("JS_CONSTRUCTOR_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::JS_CONSTRUCTOR_MODIFIER_LIST => {
+                js_string!("JS_CONSTRUCTOR_MODIFIER_LIST")
+            }
+            JsSyntaxKind::JS_CONSTRUCTOR_PARAMETER_LIST => {
+                js_string!("JS_CONSTRUCTOR_PARAMETER_LIST")
+            }
+            JsSyntaxKind::JS_CONSTRUCTOR_PARAMETERS => {
+                js_string!("JS_CONSTRUCTOR_PARAMETERS")
+            }
+            JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER => {
+                js_string!("JS_PROPERTY_CLASS_MEMBER")
+            }
+            JsSyntaxKind::JS_PROPERTY_MODIFIER_LIST => {
+                js_string!("JS_PROPERTY_MODIFIER_LIST")
+            }
+            JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION => {
+                js_string!("TS_OPTIONAL_PROPERTY_ANNOTATION")
+            }
+            JsSyntaxKind::TS_DEFINITE_PROPERTY_ANNOTATION => {
+                js_string!("TS_DEFINITE_PROPERTY_ANNOTATION")
+            }
+            JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER => {
+                js_string!("JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER")
+            }
+            JsSyntaxKind::JS_METHOD_CLASS_MEMBER => js_string!("JS_METHOD_CLASS_MEMBER"),
+            JsSyntaxKind::JS_METHOD_MODIFIER_LIST => {
+                js_string!("JS_METHOD_MODIFIER_LIST")
+            }
+            JsSyntaxKind::JS_GETTER_CLASS_MEMBER => js_string!("JS_GETTER_CLASS_MEMBER"),
+            JsSyntaxKind::JS_SETTER_CLASS_MEMBER => js_string!("JS_SETTER_CLASS_MEMBER"),
+            JsSyntaxKind::JS_EMPTY_CLASS_MEMBER => js_string!("JS_EMPTY_CLASS_MEMBER"),
+            JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT => {
+                js_string!("JS_PARENTHESIZED_ASSIGNMENT")
+            }
+            JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT => {
+                js_string!("JS_IDENTIFIER_ASSIGNMENT")
+            }
+            JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
+                js_string!("JS_STATIC_MEMBER_ASSIGNMENT")
+            }
+            JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
+                js_string!("JS_COMPUTED_MEMBER_ASSIGNMENT")
+            }
+            JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT => {
+                js_string!("TS_NON_NULL_ASSERTION_ASSIGNMENT")
+            }
+            JsSyntaxKind::TS_AS_ASSIGNMENT => js_string!("TS_AS_ASSIGNMENT"),
+            JsSyntaxKind::TS_SATISFIES_ASSIGNMENT => {
+                js_string!("TS_SATISFIES_ASSIGNMENT")
+            }
+            JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT => {
+                js_string!("TS_TYPE_ASSERTION_ASSIGNMENT")
+            }
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN => {
+                js_string!("JS_ARRAY_ASSIGNMENT_PATTERN")
+            }
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
+                js_string!("JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT")
+            }
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST => {
+                js_string!("JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_LIST")
+            }
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
+                js_string!("JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT")
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN => {
+                js_string!("JS_OBJECT_ASSIGNMENT_PATTERN")
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST => {
+                js_string!("JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_LIST")
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY => {
+                js_string!("JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY")
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY => {
+                js_string!("JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY")
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_REST => {
+                js_string!("JS_OBJECT_ASSIGNMENT_PATTERN_REST")
+            }
+            JsSyntaxKind::JS_IMPORT => js_string!("JS_IMPORT"),
+            JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => js_string!("JS_IMPORT_BARE_CLAUSE"),
+            JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => {
+                js_string!("JS_IMPORT_DEFAULT_CLAUSE")
+            }
+            JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE => {
+                js_string!("JS_IMPORT_NAMESPACE_CLAUSE")
+            }
+            JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => js_string!("JS_IMPORT_NAMED_CLAUSE"),
+            JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => {
+                js_string!("JS_IMPORT_COMBINED_CLAUSE")
+            }
+            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS => {
+                js_string!("JS_NAMED_IMPORT_SPECIFIERS")
+            }
+            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER_LIST => {
+                js_string!("JS_NAMED_IMPORT_SPECIFIER_LIST")
+            }
+            JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER => {
+                js_string!("JS_NAMESPACE_IMPORT_SPECIFIER")
+            }
+            JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER => {
+                js_string!("JS_DEFAULT_IMPORT_SPECIFIER")
+            }
+            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => {
+                js_string!("JS_NAMED_IMPORT_SPECIFIER")
+            }
+            JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => {
+                js_string!("JS_SHORTHAND_NAMED_IMPORT_SPECIFIER")
+            }
+            JsSyntaxKind::JS_IMPORT_ASSERTION => js_string!("JS_IMPORT_ASSERTION"),
+            JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY_LIST => {
+                js_string!("JS_IMPORT_ASSERTION_ENTRY_LIST")
+            }
+            JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY => {
+                js_string!("JS_IMPORT_ASSERTION_ENTRY")
+            }
+            JsSyntaxKind::JS_MODULE_SOURCE => js_string!("JS_MODULE_SOURCE"),
+            JsSyntaxKind::JS_EXPORT => js_string!("JS_EXPORT"),
+            JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE => js_string!("JS_EXPORT_NAMED_CLAUSE"),
+            JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER_LIST => {
+                js_string!("JS_EXPORT_NAMED_SPECIFIER_LIST")
+            }
+            JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER => {
+                js_string!("JS_EXPORT_NAMED_SHORTHAND_SPECIFIER")
+            }
+            JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER => {
+                js_string!("JS_EXPORT_NAMED_SPECIFIER")
+            }
+            JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE => {
+                js_string!("JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE")
+            }
+            JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE => {
+                js_string!("JS_EXPORT_DEFAULT_DECLARATION_CLAUSE")
+            }
+            JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION => {
+                js_string!("JS_CLASS_EXPORT_DEFAULT_DECLARATION")
+            }
+            JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+                js_string!("JS_FUNCTION_EXPORT_DEFAULT_DECLARATION")
+            }
+            JsSyntaxKind::JS_EXPORT_FROM_CLAUSE => js_string!("JS_EXPORT_FROM_CLAUSE"),
+            JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => {
+                js_string!("JS_EXPORT_NAMED_FROM_CLAUSE")
+            }
+            JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER_LIST => {
+                js_string!("JS_EXPORT_NAMED_FROM_SPECIFIER_LIST")
+            }
+            JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => {
+                js_string!("JS_EXPORT_NAMED_FROM_SPECIFIER")
+            }
+            JsSyntaxKind::JS_EXPORT_AS_CLAUSE => js_string!("JS_EXPORT_AS_CLAUSE"),
+            JsSyntaxKind::TS_EXPORT_AS_NAMESPACE_CLAUSE => {
+                js_string!("TS_EXPORT_AS_NAMESPACE_CLAUSE")
+            }
+            JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE => {
+                js_string!("TS_EXPORT_ASSIGNMENT_CLAUSE")
+            }
+            JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE => {
+                js_string!("TS_EXPORT_DECLARE_CLAUSE")
+            }
+            JsSyntaxKind::JS_LITERAL_EXPORT_NAME => js_string!("JS_LITERAL_EXPORT_NAME"),
+            JsSyntaxKind::JS_AWAIT_EXPRESSION => js_string!("JS_AWAIT_EXPRESSION"),
+            JsSyntaxKind::JS_DECORATOR => js_string!("JS_DECORATOR"),
+            JsSyntaxKind::JS_DECORATOR_LIST => js_string!("JS_DECORATOR_LIST"),
+            JsSyntaxKind::JS_LABEL => js_string!("JS_LABEL"),
+            JsSyntaxKind::TS_IDENTIFIER_BINDING => js_string!("TS_IDENTIFIER_BINDING"),
+            JsSyntaxKind::TS_ANY_TYPE => js_string!("TS_ANY_TYPE"),
+            JsSyntaxKind::TS_UNKNOWN_TYPE => js_string!("TS_UNKNOWN_TYPE"),
+            JsSyntaxKind::TS_NUMBER_TYPE => js_string!("TS_NUMBER_TYPE"),
+            JsSyntaxKind::TS_NON_PRIMITIVE_TYPE => js_string!("TS_NON_PRIMITIVE_TYPE"),
+            JsSyntaxKind::TS_BOOLEAN_TYPE => js_string!("TS_BOOLEAN_TYPE"),
+            JsSyntaxKind::TS_BIGINT_TYPE => js_string!("TS_BIGINT_TYPE"),
+            JsSyntaxKind::TS_STRING_TYPE => js_string!("TS_STRING_TYPE"),
+            JsSyntaxKind::TS_SYMBOL_TYPE => js_string!("TS_SYMBOL_TYPE"),
+            JsSyntaxKind::TS_VOID_TYPE => js_string!("TS_VOID_TYPE"),
+            JsSyntaxKind::TS_UNDEFINED_TYPE => js_string!("TS_UNDEFINED_TYPE"),
+            JsSyntaxKind::TS_NEVER_TYPE => js_string!("TS_NEVER_TYPE"),
+            JsSyntaxKind::TS_THIS_TYPE => js_string!("TS_THIS_TYPE"),
+            JsSyntaxKind::TS_TYPEOF_TYPE => js_string!("TS_TYPEOF_TYPE"),
+            JsSyntaxKind::TS_PARENTHESIZED_TYPE => js_string!("TS_PARENTHESIZED_TYPE"),
+            JsSyntaxKind::TS_MAPPED_TYPE => js_string!("TS_MAPPED_TYPE"),
+            JsSyntaxKind::TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE => {
+                js_string!("TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE")
+            }
+            JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE => {
+                js_string!("TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE")
+            }
+            JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE => {
+                js_string!("TS_MAPPED_TYPE_AS_CLAUSE")
+            }
+            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
+                js_string!("TS_TYPE_ALIAS_DECLARATION")
+            }
+            JsSyntaxKind::TS_MODULE_DECLARATION => js_string!("TS_MODULE_DECLARATION"),
+            JsSyntaxKind::TS_GLOBAL_DECLARATION => js_string!("TS_GLOBAL_DECLARATION"),
+            JsSyntaxKind::TS_QUALIFIED_MODULE_NAME => {
+                js_string!("TS_QUALIFIED_MODULE_NAME")
+            }
+            JsSyntaxKind::TS_MODULE_BLOCK => js_string!("TS_MODULE_BLOCK"),
+            JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => {
+                js_string!("TS_EXTERNAL_MODULE_DECLARATION")
+            }
+            JsSyntaxKind::TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY => {
+                js_string!("TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY")
+            }
+            JsSyntaxKind::TS_QUALIFIED_NAME => js_string!("TS_QUALIFIED_NAME"),
+            JsSyntaxKind::TS_REFERENCE_TYPE => js_string!("TS_REFERENCE_TYPE"),
+            JsSyntaxKind::TS_UNION_TYPE => js_string!("TS_UNION_TYPE"),
+            JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
+                js_string!("TS_UNION_TYPE_VARIANT_LIST")
+            }
+            JsSyntaxKind::TS_INTERSECTION_TYPE => js_string!("TS_INTERSECTION_TYPE"),
+            JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST => {
+                js_string!("TS_INTERSECTION_TYPE_ELEMENT_LIST")
+            }
+            JsSyntaxKind::TS_OBJECT_TYPE => js_string!("TS_OBJECT_TYPE"),
+            JsSyntaxKind::TS_TYPE_MEMBER_LIST => js_string!("TS_TYPE_MEMBER_LIST"),
+            JsSyntaxKind::TS_INTERFACE_DECLARATION => {
+                js_string!("TS_INTERFACE_DECLARATION")
+            }
+            JsSyntaxKind::TS_EXTENDS_CLAUSE => js_string!("TS_EXTENDS_CLAUSE"),
+            JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_PROPERTY_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_METHOD_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_CALL_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_CALL_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_GETTER_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_SETTER_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_INDEX_SIGNATURE_TYPE_MEMBER => {
+                js_string!("TS_INDEX_SIGNATURE_TYPE_MEMBER")
+            }
+            JsSyntaxKind::TS_IMPORT_TYPE => js_string!("TS_IMPORT_TYPE"),
+            JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS => {
+                js_string!("TS_IMPORT_TYPE_ARGUMENTS")
+            }
+            JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION => {
+                js_string!("TS_IMPORT_TYPE_ASSERTION")
+            }
+            JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK => {
+                js_string!("TS_IMPORT_TYPE_ASSERTION_BLOCK")
+            }
+            JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER => {
+                js_string!("TS_IMPORT_TYPE_QUALIFIER")
+            }
+            JsSyntaxKind::TS_ARRAY_TYPE => js_string!("TS_ARRAY_TYPE"),
+            JsSyntaxKind::TS_INDEXED_ACCESS_TYPE => js_string!("TS_INDEXED_ACCESS_TYPE"),
+            JsSyntaxKind::TS_TUPLE_TYPE => js_string!("TS_TUPLE_TYPE"),
+            JsSyntaxKind::TS_TUPLE_TYPE_ELEMENT_LIST => {
+                js_string!("TS_TUPLE_TYPE_ELEMENT_LIST")
+            }
+            JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT => {
+                js_string!("TS_REST_TUPLE_TYPE_ELEMENT")
+            }
+            JsSyntaxKind::TS_OPTIONAL_TUPLE_TYPE_ELEMENT => {
+                js_string!("TS_OPTIONAL_TUPLE_TYPE_ELEMENT")
+            }
+            JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT => {
+                js_string!("TS_NAMED_TUPLE_TYPE_ELEMENT")
+            }
+            JsSyntaxKind::TS_TYPE_OPERATOR_TYPE => js_string!("TS_TYPE_OPERATOR_TYPE"),
+            JsSyntaxKind::TS_INFER_TYPE => js_string!("TS_INFER_TYPE"),
+            JsSyntaxKind::TS_CONSTRUCTOR_TYPE => js_string!("TS_CONSTRUCTOR_TYPE"),
+            JsSyntaxKind::TS_FUNCTION_TYPE => js_string!("TS_FUNCTION_TYPE"),
+            JsSyntaxKind::TS_PREDICATE_RETURN_TYPE => {
+                js_string!("TS_PREDICATE_RETURN_TYPE")
+            }
+            JsSyntaxKind::TS_ASSERTS_RETURN_TYPE => js_string!("TS_ASSERTS_RETURN_TYPE"),
+            JsSyntaxKind::TS_ASSERTS_CONDITION => js_string!("TS_ASSERTS_CONDITION"),
+            JsSyntaxKind::TS_TYPE_PARAMETERS => js_string!("TS_TYPE_PARAMETERS"),
+            JsSyntaxKind::TS_TYPE_PARAMETER_LIST => js_string!("TS_TYPE_PARAMETER_LIST"),
+            JsSyntaxKind::TS_TYPE_PARAMETER => js_string!("TS_TYPE_PARAMETER"),
+            JsSyntaxKind::TS_TYPE_PARAMETER_MODIFIER_LIST => {
+                js_string!("TS_TYPE_PARAMETER_MODIFIER_LIST")
+            }
+            JsSyntaxKind::TS_TYPE_PARAMETER_NAME => js_string!("TS_TYPE_PARAMETER_NAME"),
+            JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => {
+                js_string!("TS_TYPE_CONSTRAINT_CLAUSE")
+            }
+            JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => js_string!("TS_DEFAULT_TYPE_CLAUSE"),
+            JsSyntaxKind::TS_STRING_LITERAL_TYPE => js_string!("TS_STRING_LITERAL_TYPE"),
+            JsSyntaxKind::TS_NUMBER_LITERAL_TYPE => js_string!("TS_NUMBER_LITERAL_TYPE"),
+            JsSyntaxKind::TS_BIGINT_LITERAL_TYPE => js_string!("TS_BIGINT_LITERAL_TYPE"),
+            JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE => {
+                js_string!("TS_BOOLEAN_LITERAL_TYPE")
+            }
+            JsSyntaxKind::TS_NULL_LITERAL_TYPE => js_string!("TS_NULL_LITERAL_TYPE"),
+            JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE => {
+                js_string!("TS_TEMPLATE_LITERAL_TYPE")
+            }
+            JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST => {
+                js_string!("TS_TEMPLATE_ELEMENT_LIST")
+            }
+            JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT => {
+                js_string!("TS_TEMPLATE_CHUNK_ELEMENT")
+            }
+            JsSyntaxKind::TS_TEMPLATE_ELEMENT => js_string!("TS_TEMPLATE_ELEMENT"),
+            JsSyntaxKind::TS_TYPE_ARGUMENTS => js_string!("TS_TYPE_ARGUMENTS"),
+            JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => js_string!("TS_TYPE_ARGUMENT_LIST"),
+            JsSyntaxKind::TS_TYPE_LIST => js_string!("TS_TYPE_LIST"),
+            JsSyntaxKind::TS_EXTENDS => js_string!("TS_EXTENDS"),
+            JsSyntaxKind::TS_CONDITIONAL_TYPE => js_string!("TS_CONDITIONAL_TYPE"),
+            JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => {
+                js_string!("TS_NON_NULL_ASSERTION_EXPRESSION")
+            }
+            JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION => {
+                js_string!("TS_TYPE_ASSERTION_EXPRESSION")
+            }
+            JsSyntaxKind::TS_AS_EXPRESSION => js_string!("TS_AS_EXPRESSION"),
+            JsSyntaxKind::TS_SATISFIES_EXPRESSION => {
+                js_string!("TS_SATISFIES_EXPRESSION")
+            }
+            JsSyntaxKind::TS_INSTANTIATION_EXPRESSION => {
+                js_string!("TS_INSTANTIATION_EXPRESSION")
+            }
+            JsSyntaxKind::TS_ENUM_DECLARATION => js_string!("TS_ENUM_DECLARATION"),
+            JsSyntaxKind::TS_ENUM_MEMBER_LIST => js_string!("TS_ENUM_MEMBER_LIST"),
+            JsSyntaxKind::TS_ENUM_MEMBER => js_string!("TS_ENUM_MEMBER"),
+            JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME => {
+                js_string!("TS_LITERAL_ENUM_MEMBER_NAME")
+            }
+            JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION => {
+                js_string!("TS_IMPORT_EQUALS_DECLARATION")
+            }
+            JsSyntaxKind::TS_EXTERNAL_MODULE_REFERENCE => {
+                js_string!("TS_EXTERNAL_MODULE_REFERENCE")
+            }
+            JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
+                js_string!("TS_DECLARE_FUNCTION_DECLARATION")
+            }
+            JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+                js_string!("TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION")
+            }
+            JsSyntaxKind::TS_DECLARE_STATEMENT => js_string!("TS_DECLARE_STATEMENT"),
+            JsSyntaxKind::TS_INDEX_SIGNATURE_PARAMETER => {
+                js_string!("TS_INDEX_SIGNATURE_PARAMETER")
+            }
+            JsSyntaxKind::TS_PROPERTY_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_PROPERTY_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_PROPERTY_SIGNATURE_MODIFIER_LIST => {
+                js_string!("TS_PROPERTY_SIGNATURE_MODIFIER_LIST")
+            }
+            JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_METHOD_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_METHOD_SIGNATURE_MODIFIER_LIST => {
+                js_string!("TS_METHOD_SIGNATURE_MODIFIER_LIST")
+            }
+            JsSyntaxKind::TS_GETTER_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_GETTER_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_SETTER_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_SETTER_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_INDEX_SIGNATURE_CLASS_MEMBER => {
+                js_string!("TS_INDEX_SIGNATURE_CLASS_MEMBER")
+            }
+            JsSyntaxKind::TS_INDEX_SIGNATURE_MODIFIER_LIST => {
+                js_string!("TS_INDEX_SIGNATURE_MODIFIER_LIST")
+            }
+            JsSyntaxKind::JSX_NAME => js_string!("JSX_NAME"),
+            JsSyntaxKind::JSX_NAMESPACE_NAME => js_string!("JSX_NAMESPACE_NAME"),
+            JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => {
+                js_string!("JSX_REFERENCE_IDENTIFIER")
+            }
+            JsSyntaxKind::JSX_TAG_EXPRESSION => js_string!("JSX_TAG_EXPRESSION"),
+            JsSyntaxKind::JSX_ELEMENT => js_string!("JSX_ELEMENT"),
+            JsSyntaxKind::JSX_FRAGMENT => js_string!("JSX_FRAGMENT"),
+            JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT => {
+                js_string!("ASTRO_IMPLICIT_FRAGMENT")
+            }
+            JsSyntaxKind::JSX_OPENING_FRAGMENT => js_string!("JSX_OPENING_FRAGMENT"),
+            JsSyntaxKind::JSX_CLOSING_FRAGMENT => js_string!("JSX_CLOSING_FRAGMENT"),
+            JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {
+                js_string!("JSX_SELF_CLOSING_ELEMENT")
+            }
+            JsSyntaxKind::JSX_OPENING_ELEMENT => js_string!("JSX_OPENING_ELEMENT"),
+            JsSyntaxKind::JSX_CLOSING_ELEMENT => js_string!("JSX_CLOSING_ELEMENT"),
+            JsSyntaxKind::JSX_MEMBER_NAME => js_string!("JSX_MEMBER_NAME"),
+            JsSyntaxKind::JSX_TEXT => js_string!("JSX_TEXT"),
+            JsSyntaxKind::JSX_ATTRIBUTE_LIST => js_string!("JSX_ATTRIBUTE_LIST"),
+            JsSyntaxKind::JSX_ATTRIBUTE => js_string!("JSX_ATTRIBUTE"),
+            JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => js_string!("JSX_SPREAD_ATTRIBUTE"),
+            JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => {
+                js_string!("JSX_SHORTHAND_ATTRIBUTE")
+            }
+            JsSyntaxKind::JSX_ATTRIBUTE_INITIALIZER_CLAUSE => {
+                js_string!("JSX_ATTRIBUTE_INITIALIZER_CLAUSE")
+            }
+            JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE => {
+                js_string!("JSX_EXPRESSION_ATTRIBUTE_VALUE")
+            }
+            JsSyntaxKind::JSX_CHILD_LIST => js_string!("JSX_CHILD_LIST"),
+            JsSyntaxKind::JSX_EXPRESSION_CHILD => js_string!("JSX_EXPRESSION_CHILD"),
+            JsSyntaxKind::JSX_SPREAD_CHILD => js_string!("JSX_SPREAD_CHILD"),
+            JsSyntaxKind::JSX_STRING => js_string!("JSX_STRING"),
+            JsSyntaxKind::JS_METAVARIABLE => js_string!("JS_METAVARIABLE"),
+            JsSyntaxKind::JS_BOGUS => js_string!("JS_BOGUS"),
+            JsSyntaxKind::JS_BOGUS_EXPRESSION => js_string!("JS_BOGUS_EXPRESSION"),
+            JsSyntaxKind::JS_BOGUS_STATEMENT => js_string!("JS_BOGUS_STATEMENT"),
+            JsSyntaxKind::JS_BOGUS_MEMBER => js_string!("JS_BOGUS_MEMBER"),
+            JsSyntaxKind::JS_BOGUS_BINDING => js_string!("JS_BOGUS_BINDING"),
+            JsSyntaxKind::JS_BOGUS_PARAMETER => js_string!("JS_BOGUS_PARAMETER"),
+            JsSyntaxKind::JS_BOGUS_IMPORT_ASSERTION_ENTRY => {
+                js_string!("JS_BOGUS_IMPORT_ASSERTION_ENTRY")
+            }
+            JsSyntaxKind::JS_BOGUS_NAMED_IMPORT_SPECIFIER => {
+                js_string!("JS_BOGUS_NAMED_IMPORT_SPECIFIER")
+            }
+            JsSyntaxKind::JS_BOGUS_ASSIGNMENT => js_string!("JS_BOGUS_ASSIGNMENT"),
+            JsSyntaxKind::JS_BOGUS_VARIABLE_DECLARATION => {
+                js_string!("JS_BOGUS_VARIABLE_DECLARATION")
+            }
+            JsSyntaxKind::TS_BOGUS_TYPE => js_string!("TS_BOGUS_TYPE"),
+            JsSyntaxKind::__LAST => js_string!("__LAST"),
+        }
+    }
     /// Resolves a constructible token kind by its exact native enum name.
     pub(crate) fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
         Some(match name {

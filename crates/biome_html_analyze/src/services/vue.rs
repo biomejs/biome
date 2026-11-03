@@ -15,11 +15,12 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext, VisitorStartContext,
 };
+use biome_db::Source;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_languages::{HtmlFileSource, LanguageDb};
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use biome_vue_semantic::{VueSemanticModel, vue_model_from_source};
-use camino::Utf8PathBuf;
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
@@ -106,7 +107,10 @@ impl Visitor for VueSemanticModelBuilderVisitor {
     }
 }
 
-/// Returns the model of the `.vue` file stored at the analyzed path.
+/// Returns the model of the analyzed `.vue` document.
+///
+/// The document comes from the services rather than from its path, because
+/// each client of the workspace can have its own document for a path.
 ///
 /// Returns `None` when the stored tree isn't `root`, because the ranges of the
 /// model would not match the analyzed tree.
@@ -115,7 +119,7 @@ fn model_from_services(root: &HtmlRoot, services: &ServiceBag) -> Option<VueSema
         return None;
     }
     let db = services.get_service::<Rc<dyn LanguageDb>>()?.as_ref();
-    let file = db.parsed_source_for_path(services.get_service::<Utf8PathBuf>()?)?;
+    let file = *services.get_service::<Source>()?;
     let stored: HtmlRoot = file.parsed(db).tree();
     if stored.syntax().as_send() != root.syntax().as_send() {
         return None;
@@ -127,10 +131,11 @@ fn model_from_services(root: &HtmlRoot, services: &ServiceBag) -> Option<VueSema
 mod tests {
     use super::model_from_services;
     use biome_analyze::ServiceBag;
-    use biome_db::ParsedSource;
+    use biome_db::Source;
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_html_syntax::HtmlRoot;
     use biome_languages::{DocumentFileSource, HtmlFileSource, LanguageDb};
+    use biome_parser::db::{ParseDb, SourceExt, SourceOutput};
     use camino::{Utf8Path, Utf8PathBuf};
     use std::rc::Rc;
     use std::sync::OnceLock;
@@ -140,7 +145,7 @@ mod tests {
     #[salsa::db]
     #[derive(Default)]
     struct TestDb {
-        file: OnceLock<ParsedSource>,
+        file: OnceLock<Source>,
         storage: salsa::Storage<Self>,
     }
 
@@ -149,11 +154,20 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+        fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source> {
             self.file
                 .get()
                 .copied()
                 .filter(|file| file.path(self) == path)
+        }
+    }
+
+    /// Parses every text as a Vue file.
+    #[salsa::db]
+    impl ParseDb for TestDb {
+        fn parse_source(&self, source: Source) -> SourceOutput {
+            let parsed = parse_html(source.text(self), HtmlParserOptions::default().with_vue());
+            SourceOutput::new(parsed.into(), 0)
         }
     }
 
@@ -165,17 +179,15 @@ mod tests {
     }
 
     /// Stores `SOURCE` at `App.vue` and returns the service bag the analyzer
-    /// would build for that path, with the stored tree.
+    /// would build for that document, with the stored tree.
     fn services(source_type: HtmlFileSource) -> (ServiceBag, HtmlRoot) {
         let db = TestDb::default();
-        let path = Utf8PathBuf::from("App.vue");
-        let parsed = parse_html(SOURCE, HtmlParserOptions::default().with_vue());
-        let file = ParsedSource::new(&db, path.clone(), parsed.into(), 0, vec![]);
+        let file = Source::new(&db, Utf8PathBuf::from("App.vue"), SOURCE.into(), 0);
         db.file.set(file).unwrap();
         let root: HtmlRoot = file.parsed(&db).tree();
         let mut services = ServiceBag::default();
         services.insert_service(Rc::new(db) as Rc<dyn LanguageDb>);
-        services.insert_service(path);
+        services.insert_service(file);
         services.insert_service(source_type);
         (services, root)
     }

@@ -47,7 +47,10 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noApproximativeNumericConstant",
         language: "js",
-        sources: &[RuleSource::Clippy("approx_constant").same()],
+        sources: &[
+            RuleSource::Clippy("approx_constant").same(),
+            RuleSource::EslintUnicorn("prefer-math-constants").same(),
+        ],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

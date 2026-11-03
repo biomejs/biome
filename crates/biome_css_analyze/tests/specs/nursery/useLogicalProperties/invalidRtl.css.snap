@@ -60,6 +60,10 @@ expression: invalidRtl.css
 	left: anchor(right);
 }
 
+.shorthand {
+	margin: 1px 2px 3px 4px;
+}
+
 ```
 
 # Diagnostics
@@ -1096,6 +1100,35 @@ invalidRtl.css:54:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
        54 │ + → left:·anchor(start);
     55 55 │   }
     56 56 │   
+  
+
+```
+
+```
+invalidRtl.css:58:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+    57 │ .shorthand {
+  > 58 │ 	margin: 1px 2px 3px 4px;
+       │ 	^^^^^^
+    59 │ }
+    60 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with margin-block and margin-inline.
+  
+    56 56 │   
+    57 57 │   .shorthand {
+    58    │ - → margin:·1px·2px·3px·4px;
+       58 │ + → margin-block:·1px·3px;·margin-inline:·2px·4px;
+    59 59 │   }
+    60 60 │   
   
 
 ```

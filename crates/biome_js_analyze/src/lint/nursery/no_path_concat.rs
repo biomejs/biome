@@ -78,7 +78,7 @@ declare_lint_rule! {
     /// - If you want to disallow `__dirname` and `__filename` in ES modules, see [`noGlobalDirnameFilename`](https://biomejs.dev/linter/rules/no-global-dirname-filename/).
     ///
     pub NoPathConcat {
-        version: "next",
+        version: "2.6.3",
         name: "noPathConcat",
         language: "js",
         sources: &[RuleSource::EslintN("no-path-concat").same()],

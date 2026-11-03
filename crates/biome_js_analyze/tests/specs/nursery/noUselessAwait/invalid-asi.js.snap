@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-asi.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// Not fixable: without `await`, the value would join the previous statement.
+foo()
+await []
+
+```
+
+# Diagnostics
+```
+invalid-asi.js:4:1 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    2 │ // Not fixable: without `await`, the value would join the previous statement.
+    3 │ foo()
+  > 4 │ await []
+      │ ^^^^^
+    5 │ 
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

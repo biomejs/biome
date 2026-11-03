@@ -1,0 +1,572 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-slot="{ data }">{{ data }}</div>
+  <div v-slot:named="{ data }">{{ data }}</div>
+  <div><template v-slot></template></div>
+  <template v-slot:named></template>
+
+  <MyComponent v-slot:named="{ data }">{{ data }}</MyComponent>
+  <MyComponent #named />
+  <MyComponent v-slot="{ data }">
+    {{ data }}
+    <template #named></template>
+  </MyComponent>
+
+  <MyComponent v-slot="{ data }" #default="other">{{ data }}</MyComponent>
+  <MyComponent>
+    <template v-slot:one v-slot:two></template>
+  </MyComponent>
+
+  <MyComponent>
+    <template v-slot:one>1st</template>
+    <template v-slot:one>2nd</template>
+  </MyComponent>
+  <MyComponent>
+    <template v-slot:[one]>1st</template>
+    <template v-slot:[one]>2nd</template>
+  </MyComponent>
+  <MyComponent>
+    <template v-slot>1st</template>
+    <template v-slot:default>2nd</template>
+  </MyComponent>
+  <MyComponent>
+    <template v-if="c1" v-slot:one>1st</template>
+    <template v-slot:one>2nd</template>
+  </MyComponent>
+  <MyComponent>
+    <template v-if="c1" v-slot:one>1st</template>
+    <template v-else v-slot:one>2nd</template>
+    <template v-if="c2" v-slot:one>3rd</template>
+  </MyComponent>
+  <MyComponent>
+    <template v-for="(key, value) in definition" v-slot:one>{{ value }}</template>
+  </MyComponent>
+  <MyComponent>
+    <template v-for="item in items" #key>{{ item }}</template>
+  </MyComponent>
+
+  <MyComponent v-slot.foo="{ data }">{{ data }}</MyComponent>
+  <MyComponent>
+    <template v-slot.foo></template>
+  </MyComponent>
+  <MyComponent>
+    <template #foo.bar.baz></template>
+  </MyComponent>
+
+  <MyComponent v-slot>content</MyComponent>
+  <MyComponent v-slot="">content</MyComponent>
+  <MyComponent #default="  ">content</MyComponent>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:8 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive must be used on a component, but <div> is not a component.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-slot="{ data }">{{ data }}</div>
+      │        ^^^^^^^^^^^^^^^^^
+    4 │   <div v-slot:named="{ data }">{{ data }}</div>
+    5 │   <div><template v-slot></template></div>
+  
+  i Slots belong to components. Vue rejects v-slot anywhere else.
+  
+  i Move the directive to a component, or to a <template> placed directly inside a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:8 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive must be used on a component, but <div> is not a component.
+  
+    2 │ <template>
+    3 │   <div v-slot="{ data }">{{ data }}</div>
+  > 4 │   <div v-slot:named="{ data }">{{ data }}</div>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <div><template v-slot></template></div>
+    6 │   <template v-slot:named></template>
+  
+  i Slots belong to components. Vue rejects v-slot anywhere else.
+  
+  i Move the directive to a component, or to a <template> placed directly inside a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:18 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive must be used on a component, but <div> is not a component.
+  
+    3 │   <div v-slot="{ data }">{{ data }}</div>
+    4 │   <div v-slot:named="{ data }">{{ data }}</div>
+  > 5 │   <div><template v-slot></template></div>
+      │                  ^^^^^^
+    6 │   <template v-slot:named></template>
+    7 │ 
+  
+  i Slots belong to components. Vue rejects v-slot anywhere else.
+  
+  i Move the directive to a component, or to a <template> placed directly inside a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:13 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive must be used on a component, but <template> is not a component.
+  
+    4 │   <div v-slot:named="{ data }">{{ data }}</div>
+    5 │   <div><template v-slot></template></div>
+  > 6 │   <template v-slot:named></template>
+      │             ^^^^^^^^^^^^
+    7 │ 
+    8 │   <MyComponent v-slot:named="{ data }">{{ data }}</MyComponent>
+  
+  i Slots belong to components. Vue rejects v-slot anywhere else.
+  
+  i Move the directive to a component, or to a <template> placed directly inside a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Named slots must use a <template> inside the component.
+  
+     6 │   <template v-slot:named></template>
+     7 │ 
+   > 8 │   <MyComponent v-slot:named="{ data }">{{ data }}</MyComponent>
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <MyComponent #named />
+    10 │   <MyComponent v-slot="{ data }">
+  
+  i Only the default slot is meant to be written on the component itself. A named slot there is easy to mistake for the default slot.
+  
+  i Wrap the content in a <template> with this directive, and place it inside the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Named slots must use a <template> inside the component.
+  
+     8 │   <MyComponent v-slot:named="{ data }">{{ data }}</MyComponent>
+   > 9 │   <MyComponent #named />
+       │                ^^^^^^
+    10 │   <MyComponent v-slot="{ data }">
+    11 │     {{ data }}
+  
+  i Only the default slot is meant to be written on the component itself. A named slot there is easy to mistake for the default slot.
+  
+  i Wrap the content in a <template> with this directive, and place it inside the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default slot must use a <template> when the component has other <template> slots.
+  
+     8 │   <MyComponent v-slot:named="{ data }">{{ data }}</MyComponent>
+     9 │   <MyComponent #named />
+  > 10 │   <MyComponent v-slot="{ data }">
+       │                ^^^^^^^^^^^^^^^^^
+    11 │     {{ data }}
+    12 │     <template #named></template>
+  
+  i Vue doesn't allow v-slot on the component itself when <template> elements inside it also use v-slot.
+  
+  i Move the default slot content into a <template #default> inside the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:34 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An element can have only one v-slot directive.
+  
+    13 │   </MyComponent>
+    14 │ 
+  > 15 │   <MyComponent v-slot="{ data }" #default="other">{{ data }}</MyComponent>
+       │                                  ^^^^^^^^^^^^^^^^
+    16 │   <MyComponent>
+    17 │     <template v-slot:one v-slot:two></template>
+  
+  i Each element fills a single slot, so Vue ignores the extra directives.
+  
+  i Remove this directive, or move it to its own <template> inside the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:26 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An element can have only one v-slot directive.
+  
+    15 │   <MyComponent v-slot="{ data }" #default="other">{{ data }}</MyComponent>
+    16 │   <MyComponent>
+  > 17 │     <template v-slot:one v-slot:two></template>
+       │                          ^^^^^^^^^^
+    18 │   </MyComponent>
+    19 │ 
+  
+  i Each element fills a single slot, so Vue ignores the extra directives.
+  
+  i Remove this directive, or move it to its own <template> inside the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:22:15 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is already filled by another <template> in the same component.
+  
+    20 │   <MyComponent>
+    21 │     <template v-slot:one>1st</template>
+  > 22 │     <template v-slot:one>2nd</template>
+       │               ^^^^^^^^^^
+    23 │   </MyComponent>
+    24 │   <MyComponent>
+  
+  i The slot is first filled here.
+  
+    20 │   <MyComponent>
+  > 21 │     <template v-slot:one>1st</template>
+       │               ^^^^^^^^^^
+    22 │     <template v-slot:one>2nd</template>
+    23 │   </MyComponent>
+  
+  i A slot can receive content from only one <template>.
+  
+  i Remove one of the <template> elements, or give it another slot name. If only one of them should be shown at a time, use v-if and v-else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:26:15 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is already filled by another <template> in the same component.
+  
+    24 │   <MyComponent>
+    25 │     <template v-slot:[one]>1st</template>
+  > 26 │     <template v-slot:[one]>2nd</template>
+       │               ^^^^^^^^^^^^
+    27 │   </MyComponent>
+    28 │   <MyComponent>
+  
+  i The slot is first filled here.
+  
+    23 │   </MyComponent>
+    24 │   <MyComponent>
+  > 25 │     <template v-slot:[one]>1st</template>
+       │               ^^^^^^^^^^^^
+    26 │     <template v-slot:[one]>2nd</template>
+    27 │   </MyComponent>
+  
+  i A slot can receive content from only one <template>.
+  
+  i Remove one of the <template> elements, or give it another slot name. If only one of them should be shown at a time, use v-if and v-else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:30:15 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is already filled by another <template> in the same component.
+  
+    28 │   <MyComponent>
+    29 │     <template v-slot>1st</template>
+  > 30 │     <template v-slot:default>2nd</template>
+       │               ^^^^^^^^^^^^^^
+    31 │   </MyComponent>
+    32 │   <MyComponent>
+  
+  i The slot is first filled here.
+  
+    27 │   </MyComponent>
+    28 │   <MyComponent>
+  > 29 │     <template v-slot>1st</template>
+       │               ^^^^^^
+    30 │     <template v-slot:default>2nd</template>
+    31 │   </MyComponent>
+  
+  i A slot can receive content from only one <template>.
+  
+  i Remove one of the <template> elements, or give it another slot name. If only one of them should be shown at a time, use v-if and v-else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:34:15 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is already filled by another <template> in the same component.
+  
+    32 │   <MyComponent>
+    33 │     <template v-if="c1" v-slot:one>1st</template>
+  > 34 │     <template v-slot:one>2nd</template>
+       │               ^^^^^^^^^^
+    35 │   </MyComponent>
+    36 │   <MyComponent>
+  
+  i The slot is first filled here.
+  
+    31 │   </MyComponent>
+    32 │   <MyComponent>
+  > 33 │     <template v-if="c1" v-slot:one>1st</template>
+       │                         ^^^^^^^^^^
+    34 │     <template v-slot:one>2nd</template>
+    35 │   </MyComponent>
+  
+  i A slot can receive content from only one <template>.
+  
+  i Remove one of the <template> elements, or give it another slot name. If only one of them should be shown at a time, use v-if and v-else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:39:25 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This slot is already filled by another <template> in the same component.
+  
+    37 │     <template v-if="c1" v-slot:one>1st</template>
+    38 │     <template v-else v-slot:one>2nd</template>
+  > 39 │     <template v-if="c2" v-slot:one>3rd</template>
+       │                         ^^^^^^^^^^
+    40 │   </MyComponent>
+    41 │   <MyComponent>
+  
+  i The slot is first filled here.
+  
+    35 │   </MyComponent>
+    36 │   <MyComponent>
+  > 37 │     <template v-if="c1" v-slot:one>1st</template>
+       │                         ^^^^^^^^^^
+    38 │     <template v-else v-slot:one>2nd</template>
+    39 │     <template v-if="c2" v-slot:one>3rd</template>
+  
+  i A slot can receive content from only one <template>.
+  
+  i Remove one of the <template> elements, or give it another slot name. If only one of them should be shown at a time, use v-if and v-else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:42:50 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> is repeated with v-for, but every repetition fills the same slot.
+  
+    40 │   </MyComponent>
+    41 │   <MyComponent>
+  > 42 │     <template v-for="(key, value) in definition" v-slot:one>{{ value }}</template>
+       │                                                  ^^^^^^^^^^
+    43 │   </MyComponent>
+    44 │   <MyComponent>
+  
+  i A slot can receive content from only one <template>, so only one of the repetitions is shown.
+  
+  i Use a slot name that changes with each item, such as #[item.name], or remove v-for.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:45:37 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <template> is repeated with v-for, but every repetition fills the same slot.
+  
+    43 │   </MyComponent>
+    44 │   <MyComponent>
+  > 45 │     <template v-for="item in items" #key>{{ item }}</template>
+       │                                     ^^^^
+    46 │   </MyComponent>
+    47 │ 
+  
+  i A slot can receive content from only one <template>, so only one of the repetitions is shown.
+  
+  i Use a slot name that changes with each item, such as #[item.name], or remove v-for.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:48:22 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive doesn't support modifiers.
+  
+    46 │   </MyComponent>
+    47 │ 
+  > 48 │   <MyComponent v-slot.foo="{ data }">{{ data }}</MyComponent>
+       │                      ^^^^
+    49 │   <MyComponent>
+    50 │     <template v-slot.foo></template>
+  
+  i v-slot has no modifiers, so Vue either ignores the text after the dot or reads it as part of the slot name.
+  
+  i Remove the modifiers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:50:21 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive doesn't support modifiers.
+  
+    48 │   <MyComponent v-slot.foo="{ data }">{{ data }}</MyComponent>
+    49 │   <MyComponent>
+  > 50 │     <template v-slot.foo></template>
+       │                     ^^^^
+    51 │   </MyComponent>
+    52 │   <MyComponent>
+  
+  i v-slot has no modifiers, so Vue either ignores the text after the dot or reads it as part of the slot name.
+  
+  i Remove the modifiers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:53:19 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive doesn't support modifiers.
+  
+    51 │   </MyComponent>
+    52 │   <MyComponent>
+  > 53 │     <template #foo.bar.baz></template>
+       │                   ^^^^^^^^
+    54 │   </MyComponent>
+    55 │ 
+  
+  i v-slot has no modifiers, so Vue either ignores the text after the dot or reads it as part of the slot name.
+  
+  i Remove the modifiers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:56:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive on a component needs a value.
+  
+    54 │   </MyComponent>
+    55 │ 
+  > 56 │   <MyComponent v-slot>content</MyComponent>
+       │                ^^^^^^
+    57 │   <MyComponent v-slot="">content</MyComponent>
+    58 │   <MyComponent #default="  ">content</MyComponent>
+  
+  i Without a value, the directive has no effect: the content of the component already goes to its default slot.
+  
+  i Add the slot props you want to use, such as v-slot="{ item }", or remove the directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:57:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive on a component needs a value.
+  
+    56 │   <MyComponent v-slot>content</MyComponent>
+  > 57 │   <MyComponent v-slot="">content</MyComponent>
+       │                ^^^^^^^^^
+    58 │   <MyComponent #default="  ">content</MyComponent>
+    59 │ </template>
+  
+  i Without a value, the directive has no effect: the content of the component already goes to its default slot.
+  
+  i Add the slot props you want to use, such as v-slot="{ item }", or remove the directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:58:16 lint/nursery/useVueValidVSlot ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-slot directive on a component needs a value.
+  
+    56 │   <MyComponent v-slot>content</MyComponent>
+    57 │   <MyComponent v-slot="">content</MyComponent>
+  > 58 │   <MyComponent #default="  ">content</MyComponent>
+       │                ^^^^^^^^^^^^^
+    59 │ </template>
+    60 │ 
+  
+  i Without a value, the directive has no effect: the content of the component already goes to its default slot.
+  
+  i Add the slot props you want to use, such as v-slot="{ item }", or remove the directive.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

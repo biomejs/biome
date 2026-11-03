@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-imported-props-type-destructure.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import type { Props } from "./types";
+
+let { count } = defineProps<Props>();
+
+function reset() {
+  count = 0;
+  count++;
+}
+</script>
+
+```

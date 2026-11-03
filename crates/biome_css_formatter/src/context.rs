@@ -1,10 +1,11 @@
 use crate::CssCommentStyle;
 use crate::utils::case::CssCase;
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
 };
-use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, prelude::*};
+use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, rowan::prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
 use biome_css_syntax::{CssLanguage, TextRange};
@@ -66,6 +67,7 @@ impl CssFormatContext {
 
 impl FormatContext for CssFormatContext {
     type Options = CssFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

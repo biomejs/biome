@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-defined-in-both.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: { msg: String },
+};
+</script>
+<script setup>
+defineProps({ count: Number });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-defined-in-both.vue:8:1 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Props are declared both with defineProps() and with the props option of the default export.
+  
+     6 │ </script>
+     7 │ <script setup>
+   > 8 │ defineProps({ count: Number });
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ </script>
+    10 │ 
+  
+  i With two declarations, it's hard to tell which props the component accepts.
+  
+  i Declare all the props in defineProps(), or all of them in the props option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -3,8 +3,7 @@ use crate::js::auxiliary::template_chunk_element::AnyTemplateChunkElement;
 use crate::js::auxiliary::template_element::{AnyTemplateElement, TemplateElementOptions};
 use crate::prelude::*;
 use crate::utils::test_each_template::EachTemplateTable;
-use biome_formatter::format_element::tag::Tag;
-use biome_formatter::{FormatContext, FormatRuleWithOptions, VecBuffer, write};
+use biome_formatter::{FormatContext, FormatRuleWithOptions};
 use biome_js_syntax::{
     AnyJsTemplateElement, AnyTsTemplateElement, JsLanguage, JsTemplateElementList,
     TsTemplateElementList,
@@ -33,21 +32,9 @@ impl FormatRule<JsTemplateElementList> for FormatJsTemplateElementList {
         if self.options.is_test_each_pattern {
             EachTemplateTable::from(node, f)?.fmt(f)
         } else if let Some(range) = embedded_source_range(f, node.syntax().text_trimmed_range()) {
-            // The template's own formatting is printed unless the embedded
-            // formatter replaces it.
-            let content = {
-                let mut buffer = VecBuffer::new(f.state_mut());
-                write!(
-                    buffer,
-                    [AnyTemplateElementList::JsTemplateElementList(node.clone())]
-                )?;
-                buffer.into_vec()
-            };
-            f.write_elements(vec![
-                FormatElement::Tag(Tag::StartEmbedded(range)),
-                FormatElement::Interned(Interned::new(content)),
-                FormatElement::Tag(Tag::EndEmbedded),
-            ])
+            let content = AnyTemplateElementList::JsTemplateElementList(node.clone());
+            let embedded = FormatEmbedded::new(range, &content, f)?;
+            embedded.fmt(f)
         } else {
             AnyTemplateElementList::JsTemplateElementList(node.clone()).fmt(f)
         }

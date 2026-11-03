@@ -1,0 +1,1127 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+value.trim().startsWith("-");
+value.trim().endsWith("-");
+value.trim().startsWith();
+value.trim().endsWith();
+" foo ".trim().startsWith("f");
+" foo ".trim().endsWith("o");
+value.trim().startsWith(" foo");
+value.trim().endsWith("foo ");
+value.trim().startsWith("");
+value.trim().startsWith(`foo`);
+value.trim().endsWith(``);
+value.trim().startsWith("foo\\n");
+value.trim().endsWith("\\tfoo");
+value.trim().startsWith("foo" + "bar");
+value.trim().startsWith(" " + "foo");
+value.trim().startsWith("foo " + "x" + "");
+value.trim().endsWith("" + "foo " + 1);
+value.trim().startsWith(undefined);
+value.trim().endsWith(void 0);
+value.trim().startsWith(123);
+value.trim().endsWith(false);
+value.trim().startsWith(null);
+value.trim().endsWith(1n);
+value.trim().startsWith(1 + 2);
+value.trim().endsWith(1 + " foo");
+(value).trim().startsWith("-");
+(value.trim()).startsWith("-");
+object.value.trim().startsWith("-");
+getValue().trim().endsWith("-");
+{ const prefix = "foo"; value.trim().startsWith(prefix); }
+{ const suffix = `foo`; value.trim().endsWith(suffix); }
+{ const search = undefined; value.trim().startsWith(search); }
+{ const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+{ const text = "foo"; text.trim().startsWith("f"); }
+if (value.trim().startsWith("-")) {}
+value
+	// comment
+	.trim/* comment */()
+	.startsWith("-");
+
+```
+
+# Diagnostics
+```
+invalid.js:2:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ value.trim().startsWith("-");
+      │       ^^^^^^
+    3 │ value.trim().endsWith("-");
+    4 │ value.trim().startsWith();
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - value.trim().startsWith("-");
+        2 │ + value.trimStart().startsWith("-");
+     3  3 │   value.trim().endsWith("-");
+     4  4 │   value.trim().startsWith();
+  
+
+```
+
+```
+invalid.js:3:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    1 │ /* should generate diagnostics */
+    2 │ value.trim().startsWith("-");
+  > 3 │ value.trim().endsWith("-");
+      │       ^^^^^^
+    4 │ value.trim().startsWith();
+    5 │ value.trim().endsWith();
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   value.trim().startsWith("-");
+     3    │ - value.trim().endsWith("-");
+        3 │ + value.trimEnd().endsWith("-");
+     4  4 │   value.trim().startsWith();
+     5  5 │   value.trim().endsWith();
+  
+
+```
+
+```
+invalid.js:4:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    2 │ value.trim().startsWith("-");
+    3 │ value.trim().endsWith("-");
+  > 4 │ value.trim().startsWith();
+      │       ^^^^^^
+    5 │ value.trim().endsWith();
+    6 │ " foo ".trim().startsWith("f");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+     2  2 │   value.trim().startsWith("-");
+     3  3 │   value.trim().endsWith("-");
+     4    │ - value.trim().startsWith();
+        4 │ + value.trimStart().startsWith();
+     5  5 │   value.trim().endsWith();
+     6  6 │   " foo ".trim().startsWith("f");
+  
+
+```
+
+```
+invalid.js:5:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    3 │ value.trim().endsWith("-");
+    4 │ value.trim().startsWith();
+  > 5 │ value.trim().endsWith();
+      │       ^^^^^^
+    6 │ " foo ".trim().startsWith("f");
+    7 │ " foo ".trim().endsWith("o");
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+     3  3 │   value.trim().endsWith("-");
+     4  4 │   value.trim().startsWith();
+     5    │ - value.trim().endsWith();
+        5 │ + value.trimEnd().endsWith();
+     6  6 │   " foo ".trim().startsWith("f");
+     7  7 │   " foo ".trim().endsWith("o");
+  
+
+```
+
+```
+invalid.js:6:9 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    4 │ value.trim().startsWith();
+    5 │ value.trim().endsWith();
+  > 6 │ " foo ".trim().startsWith("f");
+      │         ^^^^^^
+    7 │ " foo ".trim().endsWith("o");
+    8 │ value.trim().startsWith(" foo");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+     4  4 │   value.trim().startsWith();
+     5  5 │   value.trim().endsWith();
+     6    │ - "·foo·".trim().startsWith("f");
+        6 │ + "·foo·".trimStart().startsWith("f");
+     7  7 │   " foo ".trim().endsWith("o");
+     8  8 │   value.trim().startsWith(" foo");
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    5 │ value.trim().endsWith();
+    6 │ " foo ".trim().startsWith("f");
+  > 7 │ " foo ".trim().endsWith("o");
+      │         ^^^^^^
+    8 │ value.trim().startsWith(" foo");
+    9 │ value.trim().endsWith("foo ");
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+     5  5 │   value.trim().endsWith();
+     6  6 │   " foo ".trim().startsWith("f");
+     7    │ - "·foo·".trim().endsWith("o");
+        7 │ + "·foo·".trimEnd().endsWith("o");
+     8  8 │   value.trim().startsWith(" foo");
+     9  9 │   value.trim().endsWith("foo ");
+  
+
+```
+
+```
+invalid.js:8:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+     6 │ " foo ".trim().startsWith("f");
+     7 │ " foo ".trim().endsWith("o");
+   > 8 │ value.trim().startsWith(" foo");
+       │       ^^^^^^
+     9 │ value.trim().endsWith("foo ");
+    10 │ value.trim().startsWith("");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+     6  6 │   " foo ".trim().startsWith("f");
+     7  7 │   " foo ".trim().endsWith("o");
+     8    │ - value.trim().startsWith("·foo");
+        8 │ + value.trimStart().startsWith("·foo");
+     9  9 │   value.trim().endsWith("foo ");
+    10 10 │   value.trim().startsWith("");
+  
+
+```
+
+```
+invalid.js:9:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+     7 │ " foo ".trim().endsWith("o");
+     8 │ value.trim().startsWith(" foo");
+   > 9 │ value.trim().endsWith("foo ");
+       │       ^^^^^^
+    10 │ value.trim().startsWith("");
+    11 │ value.trim().startsWith(`foo`);
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+     7  7 │   " foo ".trim().endsWith("o");
+     8  8 │   value.trim().startsWith(" foo");
+     9    │ - value.trim().endsWith("foo·");
+        9 │ + value.trimEnd().endsWith("foo·");
+    10 10 │   value.trim().startsWith("");
+    11 11 │   value.trim().startsWith(`foo`);
+  
+
+```
+
+```
+invalid.js:10:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+     8 │ value.trim().startsWith(" foo");
+     9 │ value.trim().endsWith("foo ");
+  > 10 │ value.trim().startsWith("");
+       │       ^^^^^^
+    11 │ value.trim().startsWith(`foo`);
+    12 │ value.trim().endsWith(``);
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+     8  8 │   value.trim().startsWith(" foo");
+     9  9 │   value.trim().endsWith("foo ");
+    10    │ - value.trim().startsWith("");
+       10 │ + value.trimStart().startsWith("");
+    11 11 │   value.trim().startsWith(`foo`);
+    12 12 │   value.trim().endsWith(``);
+  
+
+```
+
+```
+invalid.js:11:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+     9 │ value.trim().endsWith("foo ");
+    10 │ value.trim().startsWith("");
+  > 11 │ value.trim().startsWith(`foo`);
+       │       ^^^^^^
+    12 │ value.trim().endsWith(``);
+    13 │ value.trim().startsWith("foo\\n");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+     9  9 │   value.trim().endsWith("foo ");
+    10 10 │   value.trim().startsWith("");
+    11    │ - value.trim().startsWith(`foo`);
+       11 │ + value.trimStart().startsWith(`foo`);
+    12 12 │   value.trim().endsWith(``);
+    13 13 │   value.trim().startsWith("foo\\n");
+  
+
+```
+
+```
+invalid.js:12:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    10 │ value.trim().startsWith("");
+    11 │ value.trim().startsWith(`foo`);
+  > 12 │ value.trim().endsWith(``);
+       │       ^^^^^^
+    13 │ value.trim().startsWith("foo\\n");
+    14 │ value.trim().endsWith("\\tfoo");
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    10 10 │   value.trim().startsWith("");
+    11 11 │   value.trim().startsWith(`foo`);
+    12    │ - value.trim().endsWith(``);
+       12 │ + value.trimEnd().endsWith(``);
+    13 13 │   value.trim().startsWith("foo\\n");
+    14 14 │   value.trim().endsWith("\\tfoo");
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    11 │ value.trim().startsWith(`foo`);
+    12 │ value.trim().endsWith(``);
+  > 13 │ value.trim().startsWith("foo\\n");
+       │       ^^^^^^
+    14 │ value.trim().endsWith("\\tfoo");
+    15 │ value.trim().startsWith("foo" + "bar");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    11 11 │   value.trim().startsWith(`foo`);
+    12 12 │   value.trim().endsWith(``);
+    13    │ - value.trim().startsWith("foo\\n");
+       13 │ + value.trimStart().startsWith("foo\\n");
+    14 14 │   value.trim().endsWith("\\tfoo");
+    15 15 │   value.trim().startsWith("foo" + "bar");
+  
+
+```
+
+```
+invalid.js:14:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    12 │ value.trim().endsWith(``);
+    13 │ value.trim().startsWith("foo\\n");
+  > 14 │ value.trim().endsWith("\\tfoo");
+       │       ^^^^^^
+    15 │ value.trim().startsWith("foo" + "bar");
+    16 │ value.trim().startsWith(" " + "foo");
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    12 12 │   value.trim().endsWith(``);
+    13 13 │   value.trim().startsWith("foo\\n");
+    14    │ - value.trim().endsWith("\\tfoo");
+       14 │ + value.trimEnd().endsWith("\\tfoo");
+    15 15 │   value.trim().startsWith("foo" + "bar");
+    16 16 │   value.trim().startsWith(" " + "foo");
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    13 │ value.trim().startsWith("foo\\n");
+    14 │ value.trim().endsWith("\\tfoo");
+  > 15 │ value.trim().startsWith("foo" + "bar");
+       │       ^^^^^^
+    16 │ value.trim().startsWith(" " + "foo");
+    17 │ value.trim().startsWith("foo " + "x" + "");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    13 13 │   value.trim().startsWith("foo\\n");
+    14 14 │   value.trim().endsWith("\\tfoo");
+    15    │ - value.trim().startsWith("foo"·+·"bar");
+       15 │ + value.trimStart().startsWith("foo"·+·"bar");
+    16 16 │   value.trim().startsWith(" " + "foo");
+    17 17 │   value.trim().startsWith("foo " + "x" + "");
+  
+
+```
+
+```
+invalid.js:16:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    14 │ value.trim().endsWith("\\tfoo");
+    15 │ value.trim().startsWith("foo" + "bar");
+  > 16 │ value.trim().startsWith(" " + "foo");
+       │       ^^^^^^
+    17 │ value.trim().startsWith("foo " + "x" + "");
+    18 │ value.trim().endsWith("" + "foo " + 1);
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    14 14 │   value.trim().endsWith("\\tfoo");
+    15 15 │   value.trim().startsWith("foo" + "bar");
+    16    │ - value.trim().startsWith("·"·+·"foo");
+       16 │ + value.trimStart().startsWith("·"·+·"foo");
+    17 17 │   value.trim().startsWith("foo " + "x" + "");
+    18 18 │   value.trim().endsWith("" + "foo " + 1);
+  
+
+```
+
+```
+invalid.js:17:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    15 │ value.trim().startsWith("foo" + "bar");
+    16 │ value.trim().startsWith(" " + "foo");
+  > 17 │ value.trim().startsWith("foo " + "x" + "");
+       │       ^^^^^^
+    18 │ value.trim().endsWith("" + "foo " + 1);
+    19 │ value.trim().startsWith(undefined);
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    15 15 │   value.trim().startsWith("foo" + "bar");
+    16 16 │   value.trim().startsWith(" " + "foo");
+    17    │ - value.trim().startsWith("foo·"·+·"x"·+·"");
+       17 │ + value.trimStart().startsWith("foo·"·+·"x"·+·"");
+    18 18 │   value.trim().endsWith("" + "foo " + 1);
+    19 19 │   value.trim().startsWith(undefined);
+  
+
+```
+
+```
+invalid.js:18:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    16 │ value.trim().startsWith(" " + "foo");
+    17 │ value.trim().startsWith("foo " + "x" + "");
+  > 18 │ value.trim().endsWith("" + "foo " + 1);
+       │       ^^^^^^
+    19 │ value.trim().startsWith(undefined);
+    20 │ value.trim().endsWith(void 0);
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    16 16 │   value.trim().startsWith(" " + "foo");
+    17 17 │   value.trim().startsWith("foo " + "x" + "");
+    18    │ - value.trim().endsWith(""·+·"foo·"·+·1);
+       18 │ + value.trimEnd().endsWith(""·+·"foo·"·+·1);
+    19 19 │   value.trim().startsWith(undefined);
+    20 20 │   value.trim().endsWith(void 0);
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    17 │ value.trim().startsWith("foo " + "x" + "");
+    18 │ value.trim().endsWith("" + "foo " + 1);
+  > 19 │ value.trim().startsWith(undefined);
+       │       ^^^^^^
+    20 │ value.trim().endsWith(void 0);
+    21 │ value.trim().startsWith(123);
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    17 17 │   value.trim().startsWith("foo " + "x" + "");
+    18 18 │   value.trim().endsWith("" + "foo " + 1);
+    19    │ - value.trim().startsWith(undefined);
+       19 │ + value.trimStart().startsWith(undefined);
+    20 20 │   value.trim().endsWith(void 0);
+    21 21 │   value.trim().startsWith(123);
+  
+
+```
+
+```
+invalid.js:20:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    18 │ value.trim().endsWith("" + "foo " + 1);
+    19 │ value.trim().startsWith(undefined);
+  > 20 │ value.trim().endsWith(void 0);
+       │       ^^^^^^
+    21 │ value.trim().startsWith(123);
+    22 │ value.trim().endsWith(false);
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    18 18 │   value.trim().endsWith("" + "foo " + 1);
+    19 19 │   value.trim().startsWith(undefined);
+    20    │ - value.trim().endsWith(void·0);
+       20 │ + value.trimEnd().endsWith(void·0);
+    21 21 │   value.trim().startsWith(123);
+    22 22 │   value.trim().endsWith(false);
+  
+
+```
+
+```
+invalid.js:21:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    19 │ value.trim().startsWith(undefined);
+    20 │ value.trim().endsWith(void 0);
+  > 21 │ value.trim().startsWith(123);
+       │       ^^^^^^
+    22 │ value.trim().endsWith(false);
+    23 │ value.trim().startsWith(null);
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    19 19 │   value.trim().startsWith(undefined);
+    20 20 │   value.trim().endsWith(void 0);
+    21    │ - value.trim().startsWith(123);
+       21 │ + value.trimStart().startsWith(123);
+    22 22 │   value.trim().endsWith(false);
+    23 23 │   value.trim().startsWith(null);
+  
+
+```
+
+```
+invalid.js:22:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    20 │ value.trim().endsWith(void 0);
+    21 │ value.trim().startsWith(123);
+  > 22 │ value.trim().endsWith(false);
+       │       ^^^^^^
+    23 │ value.trim().startsWith(null);
+    24 │ value.trim().endsWith(1n);
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    20 20 │   value.trim().endsWith(void 0);
+    21 21 │   value.trim().startsWith(123);
+    22    │ - value.trim().endsWith(false);
+       22 │ + value.trimEnd().endsWith(false);
+    23 23 │   value.trim().startsWith(null);
+    24 24 │   value.trim().endsWith(1n);
+  
+
+```
+
+```
+invalid.js:23:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    21 │ value.trim().startsWith(123);
+    22 │ value.trim().endsWith(false);
+  > 23 │ value.trim().startsWith(null);
+       │       ^^^^^^
+    24 │ value.trim().endsWith(1n);
+    25 │ value.trim().startsWith(1 + 2);
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    21 21 │   value.trim().startsWith(123);
+    22 22 │   value.trim().endsWith(false);
+    23    │ - value.trim().startsWith(null);
+       23 │ + value.trimStart().startsWith(null);
+    24 24 │   value.trim().endsWith(1n);
+    25 25 │   value.trim().startsWith(1 + 2);
+  
+
+```
+
+```
+invalid.js:24:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    22 │ value.trim().endsWith(false);
+    23 │ value.trim().startsWith(null);
+  > 24 │ value.trim().endsWith(1n);
+       │       ^^^^^^
+    25 │ value.trim().startsWith(1 + 2);
+    26 │ value.trim().endsWith(1 + " foo");
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    22 22 │   value.trim().endsWith(false);
+    23 23 │   value.trim().startsWith(null);
+    24    │ - value.trim().endsWith(1n);
+       24 │ + value.trimEnd().endsWith(1n);
+    25 25 │   value.trim().startsWith(1 + 2);
+    26 26 │   value.trim().endsWith(1 + " foo");
+  
+
+```
+
+```
+invalid.js:25:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    23 │ value.trim().startsWith(null);
+    24 │ value.trim().endsWith(1n);
+  > 25 │ value.trim().startsWith(1 + 2);
+       │       ^^^^^^
+    26 │ value.trim().endsWith(1 + " foo");
+    27 │ (value).trim().startsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    23 23 │   value.trim().startsWith(null);
+    24 24 │   value.trim().endsWith(1n);
+    25    │ - value.trim().startsWith(1·+·2);
+       25 │ + value.trimStart().startsWith(1·+·2);
+    26 26 │   value.trim().endsWith(1 + " foo");
+    27 27 │   (value).trim().startsWith("-");
+  
+
+```
+
+```
+invalid.js:26:7 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    24 │ value.trim().endsWith(1n);
+    25 │ value.trim().startsWith(1 + 2);
+  > 26 │ value.trim().endsWith(1 + " foo");
+       │       ^^^^^^
+    27 │ (value).trim().startsWith("-");
+    28 │ (value.trim()).startsWith("-");
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    24 24 │   value.trim().endsWith(1n);
+    25 25 │   value.trim().startsWith(1 + 2);
+    26    │ - value.trim().endsWith(1·+·"·foo");
+       26 │ + value.trimEnd().endsWith(1·+·"·foo");
+    27 27 │   (value).trim().startsWith("-");
+    28 28 │   (value.trim()).startsWith("-");
+  
+
+```
+
+```
+invalid.js:27:9 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    25 │ value.trim().startsWith(1 + 2);
+    26 │ value.trim().endsWith(1 + " foo");
+  > 27 │ (value).trim().startsWith("-");
+       │         ^^^^^^
+    28 │ (value.trim()).startsWith("-");
+    29 │ object.value.trim().startsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    25 25 │   value.trim().startsWith(1 + 2);
+    26 26 │   value.trim().endsWith(1 + " foo");
+    27    │ - (value).trim().startsWith("-");
+       27 │ + (value).trimStart().startsWith("-");
+    28 28 │   (value.trim()).startsWith("-");
+    29 29 │   object.value.trim().startsWith("-");
+  
+
+```
+
+```
+invalid.js:28:8 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    26 │ value.trim().endsWith(1 + " foo");
+    27 │ (value).trim().startsWith("-");
+  > 28 │ (value.trim()).startsWith("-");
+       │        ^^^^^^
+    29 │ object.value.trim().startsWith("-");
+    30 │ getValue().trim().endsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    26 26 │   value.trim().endsWith(1 + " foo");
+    27 27 │   (value).trim().startsWith("-");
+    28    │ - (value.trim()).startsWith("-");
+       28 │ + (value.trimStart()).startsWith("-");
+    29 29 │   object.value.trim().startsWith("-");
+    30 30 │   getValue().trim().endsWith("-");
+  
+
+```
+
+```
+invalid.js:29:14 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    27 │ (value).trim().startsWith("-");
+    28 │ (value.trim()).startsWith("-");
+  > 29 │ object.value.trim().startsWith("-");
+       │              ^^^^^^
+    30 │ getValue().trim().endsWith("-");
+    31 │ { const prefix = "foo"; value.trim().startsWith(prefix); }
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    27 27 │   (value).trim().startsWith("-");
+    28 28 │   (value.trim()).startsWith("-");
+    29    │ - object.value.trim().startsWith("-");
+       29 │ + object.value.trimStart().startsWith("-");
+    30 30 │   getValue().trim().endsWith("-");
+    31 31 │   { const prefix = "foo"; value.trim().startsWith(prefix); }
+  
+
+```
+
+```
+invalid.js:30:12 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    28 │ (value.trim()).startsWith("-");
+    29 │ object.value.trim().startsWith("-");
+  > 30 │ getValue().trim().endsWith("-");
+       │            ^^^^^^
+    31 │ { const prefix = "foo"; value.trim().startsWith(prefix); }
+    32 │ { const suffix = `foo`; value.trim().endsWith(suffix); }
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    28 28 │   (value.trim()).startsWith("-");
+    29 29 │   object.value.trim().startsWith("-");
+    30    │ - getValue().trim().endsWith("-");
+       30 │ + getValue().trimEnd().endsWith("-");
+    31 31 │   { const prefix = "foo"; value.trim().startsWith(prefix); }
+    32 32 │   { const suffix = `foo`; value.trim().endsWith(suffix); }
+  
+
+```
+
+```
+invalid.js:31:31 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    29 │ object.value.trim().startsWith("-");
+    30 │ getValue().trim().endsWith("-");
+  > 31 │ { const prefix = "foo"; value.trim().startsWith(prefix); }
+       │                               ^^^^^^
+    32 │ { const suffix = `foo`; value.trim().endsWith(suffix); }
+    33 │ { const search = undefined; value.trim().startsWith(search); }
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    29 29 │   object.value.trim().startsWith("-");
+    30 30 │   getValue().trim().endsWith("-");
+    31    │ - {·const·prefix·=·"foo";·value.trim().startsWith(prefix);·}
+       31 │ + {·const·prefix·=·"foo";·value.trimStart().startsWith(prefix);·}
+    32 32 │   { const suffix = `foo`; value.trim().endsWith(suffix); }
+    33 33 │   { const search = undefined; value.trim().startsWith(search); }
+  
+
+```
+
+```
+invalid.js:32:31 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but endsWith() only needs it removed from the end.
+  
+    30 │ getValue().trim().endsWith("-");
+    31 │ { const prefix = "foo"; value.trim().startsWith(prefix); }
+  > 32 │ { const suffix = `foo`; value.trim().endsWith(suffix); }
+       │                               ^^^^^^
+    33 │ { const search = undefined; value.trim().startsWith(search); }
+    34 │ { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+  
+  i Whitespace at the start of the string can't change the result of endsWith() here.
+  
+  i Use trimEnd() to remove whitespace from the end only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimEnd() instead.
+  
+    30 30 │   getValue().trim().endsWith("-");
+    31 31 │   { const prefix = "foo"; value.trim().startsWith(prefix); }
+    32    │ - {·const·suffix·=·`foo`;·value.trim().endsWith(suffix);·}
+       32 │ + {·const·suffix·=·`foo`;·value.trimEnd().endsWith(suffix);·}
+    33 33 │   { const search = undefined; value.trim().startsWith(search); }
+    34 34 │   { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+  
+
+```
+
+```
+invalid.js:33:35 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    31 │ { const prefix = "foo"; value.trim().startsWith(prefix); }
+    32 │ { const suffix = `foo`; value.trim().endsWith(suffix); }
+  > 33 │ { const search = undefined; value.trim().startsWith(search); }
+       │                                   ^^^^^^
+    34 │ { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+    35 │ { const text = "foo"; text.trim().startsWith("f"); }
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    31 31 │   { const prefix = "foo"; value.trim().startsWith(prefix); }
+    32 32 │   { const suffix = `foo`; value.trim().endsWith(suffix); }
+    33    │ - {·const·search·=·undefined;·value.trim().startsWith(search);·}
+       33 │ + {·const·search·=·undefined;·value.trimStart().startsWith(search);·}
+    34 34 │   { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+    35 35 │   { const text = "foo"; text.trim().startsWith("f"); }
+  
+
+```
+
+```
+invalid.js:34:59 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    32 │ { const suffix = `foo`; value.trim().endsWith(suffix); }
+    33 │ { const search = undefined; value.trim().startsWith(search); }
+  > 34 │ { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+       │                                                           ^^^^^^
+    35 │ { const text = "foo"; text.trim().startsWith("f"); }
+    36 │ if (value.trim().startsWith("-")) {}
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    32 32 │   { const suffix = `foo`; value.trim().endsWith(suffix); }
+    33 33 │   { const search = undefined; value.trim().startsWith(search); }
+    34    │ - {·const·head·=·"·foo";·const·prefix·=·head·+·"bar";·value.trim().startsWith(prefix);·}
+       34 │ + {·const·head·=·"·foo";·const·prefix·=·head·+·"bar";·value.trimStart().startsWith(prefix);·}
+    35 35 │   { const text = "foo"; text.trim().startsWith("f"); }
+    36 36 │   if (value.trim().startsWith("-")) {}
+  
+
+```
+
+```
+invalid.js:35:28 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    33 │ { const search = undefined; value.trim().startsWith(search); }
+    34 │ { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+  > 35 │ { const text = "foo"; text.trim().startsWith("f"); }
+       │                            ^^^^^^
+    36 │ if (value.trim().startsWith("-")) {}
+    37 │ value
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    33 33 │   { const search = undefined; value.trim().startsWith(search); }
+    34 34 │   { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+    35    │ - {·const·text·=·"foo";·text.trim().startsWith("f");·}
+       35 │ + {·const·text·=·"foo";·text.trimStart().startsWith("f");·}
+    36 36 │   if (value.trim().startsWith("-")) {}
+    37 37 │   value
+  
+
+```
+
+```
+invalid.js:36:11 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    34 │ { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+    35 │ { const text = "foo"; text.trim().startsWith("f"); }
+  > 36 │ if (value.trim().startsWith("-")) {}
+       │           ^^^^^^
+    37 │ value
+    38 │ 	// comment
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    34 34 │   { const head = " foo"; const prefix = head + "bar"; value.trim().startsWith(prefix); }
+    35 35 │   { const text = "foo"; text.trim().startsWith("f"); }
+    36    │ - if·(value.trim().startsWith("-"))·{}
+       36 │ + if·(value.trimStart().startsWith("-"))·{}
+    37 37 │   value
+    38 38 │   	// comment
+  
+
+```
+
+```
+invalid.js:39:3 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    37 │ value
+    38 │ 	// comment
+  > 39 │ 	.trim/* comment */()
+       │ 	 ^^^^^^^^^^^^^^^^^^^
+    40 │ 	.startsWith("-");
+    41 │ 
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    37 37 │   value
+    38 38 │     // comment
+    39    │ - → .trim/*·comment·*/()
+       39 │ + → .trimStart/*·comment·*/()
+    40 40 │     .startsWith("-");
+    41 41 │   
+  
+
+```

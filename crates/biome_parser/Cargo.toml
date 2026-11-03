@@ -13,12 +13,18 @@ publish              = true
 
 [dependencies]
 biome_console       = { workspace = true }
+biome_db            = { workspace = true, optional = true }
 biome_diagnostics   = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
 drop_bomb           = "0.1.5"
 enumflags2          = { workspace = true }
+salsa               = { workspace = true, optional = true }
 unicode-bom         = { workspace = true }
+
+[features]
+# Parsing on top of the Salsa database of `biome_db`.
+db = ["dep:biome_db", "dep:salsa"]
 
 [lints]
 workspace = true

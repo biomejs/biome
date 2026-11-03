@@ -2,13 +2,14 @@ use crate::context::CssFormatContext;
 use biome_css_syntax::{CssLanguage, CssSyntaxNode, CssSyntaxToken};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{Tag, located_token_text, text};
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::prelude::{Tag, located_token_text, text};
 use biome_formatter::trivia::{
     format_leading_comments_from_slice, format_trailing_comments_from_slice,
 };
 use biome_formatter::{
-    Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    Buffer, CstFormatContext, Format, FormatContext, FormatError, FormatResult, FormatWithRule,
+    LINE_TERMINATORS, normalize_newlines,
 };
 #[cfg(debug_assertions)]
 use biome_rowan::SyntaxElement;

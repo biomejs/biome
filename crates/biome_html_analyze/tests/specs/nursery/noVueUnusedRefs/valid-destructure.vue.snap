@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-destructure.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  mounted() {
+    const { a } = this.$refs;
+  },
+};
+</script>
+
+<template>
+  <input ref="a" />
+</template>
+
+```

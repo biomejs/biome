@@ -1,8 +1,7 @@
 use crate::prelude::*;
 use crate::verbatim::format_css_verbatim_node;
 use biome_css_syntax::CssMetavariable;
-use biome_formatter::format_element::tag::Tag;
-use biome_formatter::{VecBuffer, write};
+use biome_formatter::write;
 use biome_rowan::{AstNode, TextRange};
 
 #[derive(Debug, Clone, Default)]
@@ -32,17 +31,10 @@ impl FormatNodeRule<CssMetavariable> for FormatCssMetavariable {
                     write!(f, [text(&source[segment], Some(position))])?;
                 }
 
-                let embedded = {
-                    let mut buffer = VecBuffer::new(f.state_mut());
-                    let metavariable = *range - token_range.start();
-                    write!(buffer, [text(&source[metavariable], Some(range.start()))])?;
-                    buffer.into_vec()
-                };
-                f.write_elements(vec![
-                    FormatElement::Tag(Tag::StartEmbedded(*range)),
-                    FormatElement::Interned(Interned::new(embedded)),
-                    FormatElement::Tag(Tag::EndEmbedded),
-                ])?;
+                let metavariable = *range - token_range.start();
+                let content = text(&source[metavariable], Some(range.start()));
+                let embedded = FormatEmbedded::new(*range, &content, f)?;
+                write!(f, [embedded])?;
                 position = range.end();
             }
 

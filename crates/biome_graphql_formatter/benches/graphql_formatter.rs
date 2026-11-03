@@ -1,4 +1,4 @@
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql;
@@ -14,7 +14,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[cfg(all(
     any(target_os = "macos", target_os = "linux"),
-    not(target_env = "musl"),
+    not(all(target_env = "musl", target_arch = "aarch64")),
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;

@@ -16,11 +16,23 @@
 //! drops diagnostics for the file.
 
 use biome_js_syntax::{
-    AnyJsRoot, JsAssignmentExpression, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
-    JsFunctionExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
+    AnyJsRoot, JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsLanguage, JsSyntaxKind,
+    JsSyntaxNode, JsVariableDeclarator,
 };
-use biome_rowan::{AstNode, TokenText, WalkEvent};
+use biome_rowan::{AstNode, SyntaxKindSet, TokenText, WalkEvent};
 use react_compiler_hir::environment::is_react_like_name;
+
+const VISITED_KINDS: SyntaxKindSet<JsLanguage> = JsVariableDeclarator::KIND_SET
+    .union(JsAssignmentExpression::KIND_SET)
+    .union(JsFunctionDeclaration::KIND_SET)
+    .union(JsFunctionExportDefaultDeclaration::KIND_SET)
+    .union(JsFunctionExpression::KIND_SET)
+    .union(JsArrowFunctionExpression::KIND_SET)
+    .union(JsClassDeclaration::KIND_SET)
+    .union(JsClassExpression::KIND_SET)
+    .union(JsClassExportDefaultDeclaration::KIND_SET);
 
 /// Returns `true` if the file defines at least one function whose name looks
 /// like a React component or hook.
@@ -32,7 +44,7 @@ pub fn has_react_like_functions(root: &AnyJsRoot) -> bool {
         stack.last().and_then(|(_, name)| name.clone())
     };
 
-    let mut preorder = root.syntax().preorder();
+    let mut preorder = root.syntax().preorder_of_kinds(VISITED_KINDS);
     while let Some(event) = preorder.next() {
         match event {
             WalkEvent::Enter(node) => match node.kind() {

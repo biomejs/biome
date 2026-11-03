@@ -251,9 +251,10 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.parent().map(Self::from)
     }
 
-    /// Returns the grandparent.
+    /// Returns the parent of this node's parent, or [None] if this node has no
+    /// grandparent.
     pub fn grand_parent(&self) -> Option<Self> {
-        self.parent().and_then(|parent| parent.parent())
+        self.raw.grand_parent().map(Self::from)
     }
 
     /// Returns the index of this node inside of its parent
@@ -510,6 +511,19 @@ impl<L: Language> SyntaxNode<L> {
         self.raw
             .child_or_token_at_range(range)
             .map(SyntaxElement::from)
+    }
+
+    /// Returns the first node with the given range and kind on the path that
+    /// repeated calls to [Self::child_or_token_at_range] take from this node,
+    /// this node included.
+    pub(crate) fn descendant_at_range_with_kind(
+        &self,
+        range: TextRange,
+        kind: L::Kind,
+    ) -> Option<Self> {
+        self.raw
+            .descendant_at_range_with_kind(range, kind.to_raw())
+            .map(Self::from)
     }
 
     /// Returns an independent copy of the subtree rooted at this node.

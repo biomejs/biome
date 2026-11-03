@@ -3,7 +3,7 @@
 //!
 use std::any::TypeId;
 use std::collections::{BTreeMap, HashMap};
-use std::fmt::{Display, Formatter, Write};
+use std::fmt::{Display, Formatter};
 use std::mem;
 use std::str::FromStr;
 
@@ -22,10 +22,10 @@ use biome_json_syntax::JsonLanguage;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_ruledoc_utils::{
     AnalyzerServicesBuilder, CodeBlock, DiagnosticConsoleWriter, DiagnosticWriter,
-    OptionsParsingMode, RuleCodeAnalyzer, parse_rule_options,
+    OptionsParsingMode, RuleCodeAnalyzer, RuleDocumentItem, parse_rule_document,
+    parse_rule_options,
 };
 use biome_yaml_syntax::YamlLanguage;
-use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
 struct Errors {
@@ -351,7 +351,7 @@ fn parse_documentation(
     rule_metadata: RuleMetadata,
     category: RuleCategory,
 ) -> anyhow::Result<()> {
-    let parser = Parser::new(rule_metadata.docs);
+    let document = parse_rule_document(rule_metadata.docs).into_document();
 
     let mut diagnostics_writer = DiagnosticConsoleWriter::default();
 
@@ -367,63 +367,45 @@ fn parse_documentation(
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
 
-    // Tracks the content of the current code block if it's using a
-    // language supported for analysis
-    let mut language = None;
-    for event in parser {
-        match event {
-            // CodeBlock-specific handling
-            Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(meta))) => {
-                // Track the content of code blocks to pass them through the analyzer
-                let test = CodeBlock::from_str(meta.as_ref())?;
-                language = Some((test, String::new()));
-            }
-            Event::End(TagEnd::CodeBlock) => {
-                if let Some((test, block)) = language.take() {
-                    if test.options != OptionsParsingMode::NoOptions {
-                        last_options = parse_rule_options(
-                            group,
-                            &rule_metadata,
-                            category,
-                            &test,
-                            &block,
-                            &mut diagnostics_writer,
-                        )?;
-                    } else {
-                        if let Some(file_path) = test.explicit_file_path() {
-                            test_runner
-                                .file_system
-                                .insert(file_path.to_string(), block.clone());
-                        }
-
-                        test_runner.pending_tests.push(PendingTest {
-                            test,
-                            block,
-                            options_snapshot: last_options.clone(),
-                        });
+    for item in document.into_items() {
+        match item {
+            RuleDocumentItem::FencedCodeBlock(code_block) => {
+                let test = CodeBlock::from_str(&code_block.info)?;
+                let block = code_block.body;
+                if test.options != OptionsParsingMode::NoOptions {
+                    last_options = parse_rule_options(
+                        group,
+                        &rule_metadata,
+                        category,
+                        &test,
+                        &block,
+                        &mut diagnostics_writer,
+                    )?;
+                } else {
+                    if let Some(file_path) = test.explicit_file_path() {
+                        test_runner
+                            .file_system
+                            .insert(file_path.to_string(), block.clone());
                     }
+
+                    test_runner.pending_tests.push(PendingTest {
+                        test,
+                        block,
+                        options_snapshot: last_options.clone(),
+                    });
                 }
             }
-            Event::Text(text) => {
-                if let Some((_, block)) = &mut language {
-                    write!(block, "{text}")?;
+            RuleDocumentItem::RawHtml(html) => {
+                for source in html.source_fragments {
+                    html_checker.push(&source);
                 }
             }
-            Event::Html(html) | Event::InlineHtml(html) => {
-                html_checker.push(&html);
-            }
-            Event::Start(Tag::Heading { level, .. }) => {
+            RuleDocumentItem::Heading(heading) if heading.level <= 4 => {
                 // Major headings delineate testable sections. When we encounter a new section,
                 // run all tests from the previous section with the complete file system.
-                if matches!(
-                    level,
-                    HeadingLevel::H1 | HeadingLevel::H2 | HeadingLevel::H3 | HeadingLevel::H4
-                ) {
-                    test_runner.run_pending_tests()?;
-                }
+                test_runner.run_pending_tests()?;
             }
-            // We don't care other events
-            _ => {}
+            RuleDocumentItem::Heading(_) => {}
         }
     }
 
@@ -568,5 +550,31 @@ impl TestRunner {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn check_html(source: &str) -> Result<(), String> {
+        let mut checker = HtmlTagChecker::default();
+        for item in parse_rule_document(source).into_document().into_items() {
+            if let RuleDocumentItem::RawHtml(html) = item {
+                for source in html.source_fragments {
+                    checker.push(&source);
+                }
+            }
+        }
+        checker.finish()
+    }
+
+    #[test]
+    fn preserves_html_block_fragment_boundaries() {
+        assert_eq!(
+            check_html("<!--\n<div>\n-->\n"),
+            Err("`<div>` is never closed".to_string())
+        );
+        assert!(check_html("<!--\ncomment\n-->\n").is_ok());
     }
 }

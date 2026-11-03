@@ -446,20 +446,20 @@ impl Manifest for PackageJson {
 pub struct Dependencies(pub Box<[(Box<str>, Box<str>)]>);
 
 impl Deserializable for Dependencies {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = Dependencies;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -524,14 +524,14 @@ pub struct BundleDependencies(pub Box<[Box<str>]>);
 /// The "bundleDependencies" field is usually an array of package names (not a map like the other dependencies fields).
 /// It can also be a boolean (`true` to mean “bundle everything”).
 impl Deserializable for BundleDependencies {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
 
-        impl DeserializationVisitor for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = BundleDependencies;
 
             const EXPECTED_TYPE: DeserializableTypes =
@@ -539,8 +539,10 @@ impl Deserializable for BundleDependencies {
 
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                items: &mut dyn ExactSizeIterator<
+                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                >,
                 _range: TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -556,7 +558,7 @@ impl Deserializable for BundleDependencies {
 
             fn visit_bool(
                 self,
-                _ctx: &mut dyn DeserializationContext,
+                _ctx: &mut dyn DeserializationContext<State = S>,
                 _value: bool,
                 _range: TextRange,
                 _name: &str,
@@ -613,9 +615,9 @@ impl From<String> for Version {
 }
 
 impl Deserializable for PackageJson {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         value.deserialize(ctx, PackageJsonVisitor, name)
@@ -623,15 +625,15 @@ impl Deserializable for PackageJson {
 }
 
 struct PackageJsonVisitor;
-impl DeserializationVisitor for PackageJsonVisitor {
+impl<S> DeserializationVisitor<S> for PackageJsonVisitor {
     type Output = PackageJson;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext,
-        members: &mut MapMembers<'_>,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        members: &mut MapMembers<'_, S>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
@@ -730,9 +732,9 @@ impl DeserializationVisitor for PackageJsonVisitor {
 }
 
 impl Deserializable for Version {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let version = Text::deserialize(ctx, value, name)?;

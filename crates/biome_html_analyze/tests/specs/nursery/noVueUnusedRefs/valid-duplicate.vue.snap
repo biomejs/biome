@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-duplicate.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div v-if="ok" ref="box" />
+  <div v-else ref="box" />
+  <button @click="$refs.box.focus()">Focus</button>
+</template>
+
+```

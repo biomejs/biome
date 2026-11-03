@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-destructure-runtime.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const { foo, bar, baz = 1 } = defineProps({
+  foo: Boolean,
+  bar: { type: String },
+  baz: Number,
+  qux: Number,
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-destructure-runtime.vue:5:3 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop bar has no default value.
+  
+    3 │ const { foo, bar, baz = 1 } = defineProps({
+    4 │   foo: Boolean,
+  > 5 │   bar: { type: String },
+      │   ^^^
+    6 │   baz: Number,
+    7 │   qux: Number,
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-destructure-runtime.vue:7:3 lint/nursery/useVueDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The optional prop qux has no default value.
+  
+    5 │   bar: { type: String },
+    6 │   baz: Number,
+  > 7 │   qux: Number,
+      │   ^^^
+    8 │ });
+    9 │ </script>
+  
+  i When a parent component doesn't pass this prop, its value is undefined, which the component has to handle everywhere it uses the prop.
+  
+  i Give the prop a default value, or mark it as required if parent components must always pass it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

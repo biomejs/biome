@@ -1,0 +1,85 @@
+/* should generate diagnostics */
+@use "sass:math";
+
+$gap: 8px;
+$path: "a.png";
+
+@function double($x) {
+	@return $x * 2;
+}
+
+@function snake_case($x) {
+	@return $x;
+}
+
+@function rem($px) {
+	@return math.div($px, 16px) * 1rem;
+}
+
+:root {
+	--gap: $gap;
+	--pi: math.$pi;
+	--calc: calc($gap * 2);
+	--fallback: var(--x, $gap);
+	--url: url($path);
+	--list: $gap $gap;
+	--braced: {a: $gap};
+	--commented:
+		/* before */ $gap /* after */;
+	--own-line:
+		math.$pi;
+	--url-module: url(t.$path);
+	--sass-call: darken($gap, 10%);
+	--module-call: math.max($gap, 1px);
+	--unknown-call: bpx($gap);
+	--url-interpolated: url($dir/#{$name}.svg);
+	--url-upper: URL($path);
+	--url-expression: url($path + ".png");
+	--if-branch: if(media(print): $gap; else: 0);
+	--if-style-query: if(style(--a: $gap): 1; else: 2);
+	--if-sass: if(sass($flag): 1; else: 2);
+	--if-supports: if(supports(display: $display): 1; else: 2);
+	--if-media: if(media(width > $breakpoint): 1; else: 2);
+	--if-module: if(sass(t.$flag): 1; else: 2);
+	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+	--module: math.div(8px, 2);
+	--own: double(3px);
+	--own-dash: snake-case(1px);
+	--built-in: darken(#fff, 10%);
+	--built-in-underscore: map_get($map, key);
+	--inside-calc: calc(double(3px) + 1px);
+	--outer-only: darken(lighten(#000, 10%), 5%);
+	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+	--legacy-if: if($condition, 1px, 2px);
+	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+	--if-sass-test: if(sass(true): 1; else: 2);
+	--if-sass-branch: if(sass($flag): $gap; else: 0);
+	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+	--own-css-name: rem(24px);
+	--own-css-name-variable: rem($gap);
+	--if-in-call-nested: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+}
+
+@supports (--raw: $gap) {
+	a {
+		color: red;
+	}
+}
+
+@supports (--raw: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
+@container style(--c: $gap) {
+	a {
+		color: red;
+	}
+}
+
+@container style(--c: double(1px)) {
+	a {
+		color: red;
+	}
+}

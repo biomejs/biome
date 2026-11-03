@@ -6,7 +6,7 @@ use crate::{SfcSnippet, VueSemanticModel, component_model, sfc_model};
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, AnyVueDirective, HtmlDoubleTextExpression, HtmlElement,
-    HtmlEmbeddedContent, HtmlRoot, VueVForValue,
+    HtmlEmbeddedContent, HtmlRoot, VueVForDefaultBinding, VueVForValue,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
@@ -102,6 +102,19 @@ pub(crate) fn sfc(code: &str) -> VueSemanticModel {
                     token.text().to_string(),
                     token.text_trimmed_range(),
                     token.text_range().start(),
+                    vue_kind(SnippetKind::Expression),
+                ));
+            }
+        } else if let Some(binding) = VueVForDefaultBinding::cast_ref(&node) {
+            if let Some(token) = binding
+                .default()
+                .ok()
+                .and_then(|expression| expression.html_literal_token().ok())
+            {
+                found.push((
+                    token.text_trimmed().to_string(),
+                    token.text_trimmed_range(),
+                    token.text_trimmed_range().start(),
                     vue_kind(SnippetKind::Expression),
                 ));
             }

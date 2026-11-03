@@ -557,20 +557,20 @@ impl FixtureRuleGroups {
 struct FixtureRuleNames(BTreeSet<String>);
 
 impl Deserializable for FixtureRuleNames {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = FixtureRuleNames;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

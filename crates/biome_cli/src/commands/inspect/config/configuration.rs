@@ -628,6 +628,7 @@ struct SourceRangeCollector {
     entries: BTreeMap<String, TextRange>,
     diagnostics: Vec<Error>,
     path: Vec<PathSegment>,
+    state: (),
 }
 
 impl SourceRangeCollector {
@@ -646,12 +647,22 @@ impl SourceRangeCollector {
 }
 
 impl DeserializationContext for SourceRangeCollector {
+    type State = ();
+
     fn id(&self) -> Option<&str> {
         None
     }
 
     fn report(&mut self, diagnostic: DeserializationDiagnostic) {
         self.diagnostics.push(Error::from(diagnostic));
+    }
+
+    fn state(&self) -> &Self::State {
+        &self.state
+    }
+
+    fn state_mut(&mut self) -> &mut Self::State {
+        &mut self.state
     }
 
     fn enter_property(&mut self, name: &str, _key_range: TextRange, value_range: TextRange) {

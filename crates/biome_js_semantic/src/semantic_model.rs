@@ -64,7 +64,7 @@ pub fn semantic_model(root: &AnyJsRoot, options: SemanticModelOptions) -> Semant
     }
 
     let root = root.syntax();
-    for node in root.preorder() {
+    for node in root.preorder_of_kinds(SemanticModelBuilder::VISITED_KINDS) {
         match node {
             biome_js_syntax::WalkEvent::Enter(node) => {
                 builder.push_node(&node);

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
 expression: valid.vue
 ---
 # Input
@@ -9,6 +10,8 @@ expression: valid.vue
 <div v-for="item in items"></div>
 
 <div v-for="({ id }, index) in items" :key="id"></div>
+
+<div v-for="({ id = 0 }, index) in items" :key="id"></div>
 
 <MyItem v-for="item in items" :key="item.id" />
 

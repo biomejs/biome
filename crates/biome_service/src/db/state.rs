@@ -168,27 +168,30 @@
 //! while the current thread holds a [`DbReadGuard`].
 
 use super::{
-    ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, WorkspaceDb, WorkspaceDbData,
+    ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, ViewId, WorkspaceDb,
+    WorkspaceDbData,
 };
 use crate::WorkspaceError;
-use crate::embed::EmbedContent;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
 use crate::settings::Settings;
-use biome_db::{ParsedSnippet, ParsedSource};
+use crate::workspace::ClientId;
+use biome_configuration::Configuration;
+use biome_db::Source;
 use biome_languages::DocumentFileSource;
-use biome_parser::AnyParse;
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
 use biome_resolver::ResolverPathChanges;
 use camino::{Utf8Path, Utf8PathBuf};
+use ignore::gitignore::Gitignore;
 use parking_lot::{Mutex, MutexGuard};
+#[cfg(feature = "module_graph")]
+use salsa::Setter;
 use std::cell::Cell;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::panic::resume_unwind;
-#[cfg(feature = "module_graph")]
 use std::sync::atomic::AtomicBool;
 use std::sync::{
     Arc,
@@ -199,92 +202,310 @@ use tracing::error;
 /// Represents the state of the database in the workspace.
 pub struct DbState {
     storage: DbStorage,
-    /// Records module-map changes made by a scanner epoch's shared view.
-    #[cfg(feature = "module_graph")]
-    scanner_module_graph_dirty: Option<Arc<AtomicBool>>,
-    /// Records the resolver path info a scanner epoch's shared view must refresh.
-    #[cfg(feature = "module_graph")]
-    scanner_resolver_changes: Option<ResolverChanges>,
+    /// Collects the changes that need Salsa setters when this state is the
+    /// view of a scan over Owned storage. It's `None` in every other state.
+    scanner_changes: Option<Arc<ScannerEpochChanges>>,
+    /// See [Self::defers_manifests].
+    defers_manifests: bool,
 }
 
-/// Resolver changes accumulated while Salsa setters can't run.
-#[cfg(feature = "module_graph")]
-type ResolverChanges = Arc<Mutex<Vec<(Utf8PathBuf, ResolverPathChanges)>>>;
+/// The changes from the view of a scan that need Salsa setters. The scan
+/// publishes them when it commits a phase.
+#[derive(Default)]
+struct ScannerEpochChanges {
+    /// Set when the view adds or removes a project.
+    projects_replaced: AtomicBool,
+    /// The settings changes, in the order the view made them.
+    project_updates: Mutex<Vec<ProjectUpdate>>,
+    /// Set when the view changes the module map.
+    #[cfg(feature = "module_graph")]
+    module_graph_dirty: AtomicBool,
+    /// The resolver path info to refresh.
+    #[cfg(feature = "module_graph")]
+    resolver_changes: Mutex<Vec<(Utf8PathBuf, ResolverPathChanges)>>,
+    /// The kinds to set on the modules that existed before the scan.
+    #[cfg(feature = "module_graph")]
+    module_kinds: Mutex<Vec<(ModuleInfo, ModuleInfoKind)>>,
+    /// The views that the view couldn't publish, because the inputs of their
+    /// paths need setters.
+    deferred_views: Mutex<Vec<DeferredView>>,
+}
+
+/// A change to the settings of a project.
+enum ProjectUpdate {
+    RootSettings {
+        project_key: ProjectKey,
+        settings: Settings,
+    },
+    NestedSettings {
+        project_key: ProjectKey,
+        path: Utf8PathBuf,
+        settings: Settings,
+    },
+    /// The matchers of nested ignore files, from
+    /// [WorkspaceDb::nested_git_ignores].
+    NestedGitIgnores {
+        project_key: ProjectKey,
+        git_ignores: Vec<Gitignore>,
+    },
+}
+
+impl ProjectUpdate {
+    fn apply(self, db: &mut WorkspaceDb) {
+        match self {
+            Self::RootSettings {
+                project_key,
+                settings,
+            } => {
+                db.insert_root_settings_with_mode(project_key, settings, ProjectUpdateMode::Setters)
+            }
+            Self::NestedSettings {
+                project_key,
+                path,
+                settings,
+            } => db.insert_nested_setting_with_mode(
+                project_key,
+                path,
+                settings,
+                ProjectUpdateMode::Setters,
+            ),
+            Self::NestedGitIgnores {
+                project_key,
+                git_ignores,
+            } => {
+                // The only error is a missing project. During a scan, the
+                // setter gate blocks the writes that remove projects.
+                let _ = db.insert_nested_git_ignores_with_mode(
+                    project_key,
+                    &git_ignores,
+                    ProjectUpdateMode::Setters,
+                );
+            }
+        }
+    }
+}
+
+/// A text to publish as a view of a path. See [WorkspaceDb::update_or_insert_view].
+struct DeferredView {
+    path: Utf8PathBuf,
+    view: ViewId,
+    text: Arc<str>,
+    file_source_index: usize,
+    configuration_index: Option<usize>,
+}
 
 enum DbStorage {
     Shared(SharedWorkspaceDb),
     Owned(OwnedDb),
 }
 
-/// Database view used for the duration of a project scan.
+/// A project scan, split into three phases: [ScanSetup], [ScanFiles] and
+/// [ScanDeferredFiles].
 ///
-/// For owned storage, the epoch holds the setter gate and supplies a shared
-/// replacement-update view over the same Salsa storage and workspace
-/// collections. This keeps individual scanner updates from announcing pending
-/// Salsa writes. Queries that run during the epoch may observe outdated
-/// resolver path info or module associations. Dropping the epoch discards the view
-/// before publishing the accumulated resolver changes and one module graph
-/// invalidation, then releases the setter gate.
-/// Shared storage needs no setter gate and reuses its existing update mode.
-pub(crate) struct ScannerDbEpoch<'a> {
-    // Struct fields drop in declaration order. The shared view must be gone
-    // before the finalizer invokes a setter on the canonical database.
+/// The scanner works through [Self::view] during each phase. The view can't
+/// run Salsa setters, so it records the changes that need them. Committing a
+/// phase publishes these changes, and the next phase reads them. Within a
+/// phase, queries may read outdated resolver path info or module
+/// associations.
+///
+/// With Owned storage, the session holds the setter gate from start to end,
+/// so the scan is a single epoch: other writes wait, while reads continue.
+/// Dropping the session commits the current phase. With Shared storage, the
+/// view publishes each change immediately, so a commit has nothing to publish.
+pub(crate) struct ScanSession<'a, Phase> {
+    // Fields drop in declaration order. `view` must drop before `writer`,
+    // because `writer` runs Salsa setters when it drops.
     view: DbState,
-    _finalizer: ScannerDbEpochFinalizer<'a>,
+    writer: ScanWriter<'a>,
+    phase: PhantomData<Phase>,
 }
 
-impl ScannerDbEpoch<'_> {
-    /// Returns the database state scanner operations must use during the epoch.
+/// The first phase of a scan: reads the configuration files, manifests and
+/// ignore files of the project.
+///
+/// Its view defers every file whose inputs need Salsa setters, including the
+/// manifests. No other file reads them before [ScanFiles] indexes them again.
+pub(crate) struct ScanSetup;
+
+/// The second phase of a scan: indexes again the files that [ScanSetup]
+/// deferred, then the other files of the project and their dependencies.
+///
+/// Its view never defers the manifests and the JSON files, because the files
+/// that it indexes after them read them.
+pub(crate) struct ScanFiles;
+
+/// The last phase of a scan: indexes again the files that [ScanFiles]
+/// deferred, because updating their inputs needed Salsa setters.
+pub(crate) struct ScanDeferredFiles;
+
+impl<Phase> ScanSession<'_, Phase> {
+    /// Returns the database state for the scanner to use during this phase.
     pub(crate) fn view(&self) -> &DbState {
         &self.view
     }
 }
 
-/// Publishes accumulated scanner changes before releasing the setter gate.
-enum ScannerDbEpochFinalizer<'a> {
-    Shared,
+impl<'a, Phase> ScanSession<'a, Phase> {
+    /// Publishes the changes of this phase, then starts the phase `Next` with
+    /// a new view that reads them. Returns the paths of the files that this
+    /// phase deferred, sorted and without duplicates.
+    fn commit_into<Next>(self) -> (ScanSession<'a, Next>, Vec<Utf8PathBuf>) {
+        let Self {
+            view, mut writer, ..
+        } = self;
+        // `publish` runs Salsa setters, which wait until every handle to the
+        // storage is dropped, and `view` holds one. Leaving `view` out of the
+        // pattern would keep it alive until the function returns.
+        drop(view);
+        writer.publish();
+        let mut deferred_paths = std::mem::take(&mut writer.deferred_paths);
+        deferred_paths.sort_unstable();
+        deferred_paths.dedup();
+        let session = ScanSession {
+            view: writer.view(false),
+            writer,
+            phase: PhantomData,
+        };
+        (session, deferred_paths)
+    }
+}
+
+impl<'a> ScanSession<'a, ScanSetup> {
+    /// Publishes the changes of the setup phase, such as project settings, and
+    /// starts [ScanFiles]. Returns the paths of the deferred files, which
+    /// [ScanFiles] indexes again first.
+    pub(crate) fn commit(self) -> (ScanSession<'a, ScanFiles>, Vec<Utf8PathBuf>) {
+        self.commit_into()
+    }
+}
+
+impl<'a> ScanSession<'a, ScanFiles> {
+    /// Publishes the changes of the files phase and starts [ScanDeferredFiles].
+    /// Returns the paths of the deferred files, which [ScanDeferredFiles]
+    /// indexes again.
+    pub(crate) fn commit(self) -> (ScanSession<'a, ScanDeferredFiles>, Vec<Utf8PathBuf>) {
+        self.commit_into()
+    }
+}
+
+impl ScanSession<'_, ScanDeferredFiles> {
+    /// Publishes the changes of the last phase and ends the session.
+    pub(crate) fn finish(self) {}
+}
+
+/// Publishes the changes that the views of a [ScanSession] record. Dropping
+/// it publishes the pending changes.
+struct ScanWriter<'a> {
+    storage: ScanStorage<'a>,
+    changes: Arc<ScannerEpochChanges>,
+    /// The paths of the files that the view of the current phase deferred.
+    /// Committing the phase returns them.
+    deferred_paths: Vec<Utf8PathBuf>,
+}
+
+enum ScanStorage<'a> {
+    Shared(SharedWorkspaceDb),
     Owned {
-        #[cfg(feature = "module_graph")]
         owner: &'a OwnedDb,
         setter_guard: MutexGuard<'a, ()>,
-        #[cfg(feature = "module_graph")]
-        module_graph_dirty: Arc<AtomicBool>,
-        #[cfg(feature = "module_graph")]
-        resolver_changes: ResolverChanges,
     },
 }
 
-impl Drop for ScannerDbEpochFinalizer<'_> {
-    fn drop(&mut self) {
-        match self {
-            Self::Shared => {}
-            Self::Owned {
-                #[cfg(feature = "module_graph")]
-                owner,
-                setter_guard,
-                #[cfg(feature = "module_graph")]
-                module_graph_dirty,
-                #[cfg(feature = "module_graph")]
-                resolver_changes,
-            } => {
-                #[cfg(feature = "module_graph")]
-                {
-                    let resolver_changes = std::mem::take(&mut *resolver_changes.lock());
-                    let module_graph_dirty = module_graph_dirty.load(Ordering::Acquire);
-                    if module_graph_dirty || !resolver_changes.is_empty() {
-                        owner.with_setter_gate_held(setter_guard, |db| {
-                            db.sync_resolver_paths(resolver_changes);
-                            if module_graph_dirty {
-                                db.invalidate_module_graph();
-                            }
-                        });
-                    }
+impl ScanWriter<'_> {
+    /// Returns a new view of the database. The view records the changes that
+    /// need Salsa setters. See [DbState::defers_manifests] for
+    /// `defers_manifests`.
+    fn view(&self, defers_manifests: bool) -> DbState {
+        match &self.storage {
+            ScanStorage::Shared(shared_db) => DbState {
+                storage: DbStorage::Shared(shared_db.clone()),
+                scanner_changes: None,
+                defers_manifests,
+            },
+            ScanStorage::Owned { owner, .. } => {
+                let shared_db = {
+                    let db = owner.db.lock();
+                    SharedWorkspaceDb::from_workspace_db(db.clone())
+                };
+                DbState {
+                    storage: DbStorage::Shared(shared_db),
+                    scanner_changes: Some(self.changes.clone()),
+                    defers_manifests,
                 }
-
-                #[cfg(not(feature = "module_graph"))]
-                let _ = setter_guard;
             }
         }
+    }
+
+    /// Publishes the changes that the views recorded, with Salsa setters.
+    ///
+    /// Call it only after every view is dropped, because a setter waits until
+    /// no view is alive.
+    fn publish(&mut self) {
+        let ScanStorage::Owned {
+            owner,
+            setter_guard,
+        } = &self.storage
+        else {
+            return;
+        };
+        let changes = &self.changes;
+        let projects_replaced = changes.projects_replaced.swap(false, Ordering::AcqRel);
+        let project_updates = std::mem::take(&mut *changes.project_updates.lock());
+        let deferred_views = std::mem::take(&mut *changes.deferred_views.lock());
+        self.deferred_paths
+            .extend(deferred_views.iter().map(|deferred| deferred.path.clone()));
+        #[cfg(feature = "module_graph")]
+        let resolver_changes = std::mem::take(&mut *changes.resolver_changes.lock());
+        #[cfg(feature = "module_graph")]
+        let module_kinds = std::mem::take(&mut *changes.module_kinds.lock());
+        #[cfg(feature = "module_graph")]
+        let module_graph_dirty = changes.module_graph_dirty.swap(false, Ordering::AcqRel);
+
+        let projects_changed = projects_replaced || !project_updates.is_empty();
+        #[cfg(feature = "module_graph")]
+        let needs_setter = projects_changed
+            || !deferred_views.is_empty()
+            || module_graph_dirty
+            || !resolver_changes.is_empty()
+            || !module_kinds.is_empty();
+        #[cfg(not(feature = "module_graph"))]
+        let needs_setter = projects_changed || !deferred_views.is_empty();
+        if needs_setter {
+            owner.with_setter_gate_held(setter_guard, |db| {
+                for update in project_updates {
+                    update.apply(db);
+                }
+                if projects_changed {
+                    db.invalidate_projects();
+                }
+                for deferred in deferred_views {
+                    db.update_or_insert_view(
+                        &deferred.path,
+                        deferred.view,
+                        deferred.text,
+                        deferred.file_source_index,
+                        deferred.configuration_index,
+                        ParsedSourceUpdateMode::Setters,
+                    );
+                }
+                #[cfg(feature = "module_graph")]
+                {
+                    db.sync_resolver_paths(resolver_changes);
+                    for (module, kind) in module_kinds {
+                        module.set_kind(db).to(kind);
+                    }
+                    if module_graph_dirty {
+                        db.invalidate_module_graph();
+                    }
+                }
+            });
+        }
+    }
+}
+
+impl Drop for ScanWriter<'_> {
+    fn drop(&mut self) {
+        self.publish();
     }
 }
 
@@ -376,7 +597,7 @@ struct OwnedDb {
     /// The database instance itself. The lock is held only briefly to create
     /// a clone, and for the whole duration of a setter-based update.
     db: Mutex<WorkspaceDb>,
-    /// Serializes setter intent and keeps setters outside scanner epochs.
+    /// Serializes the setters, and keeps them from running during a scan.
     /// Queued setters do not announce pending writes while waiting here.
     setter_lock: Mutex<()>,
     /// The collections shared between the database and all its clones. See
@@ -473,10 +694,8 @@ impl DbState {
     pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
             storage: DbStorage::Shared(SharedWorkspaceDb::new(fs)),
-            #[cfg(feature = "module_graph")]
-            scanner_module_graph_dirty: None,
-            #[cfg(feature = "module_graph")]
-            scanner_resolver_changes: None,
+            scanner_changes: None,
+            defers_manifests: false,
         }
     }
 
@@ -486,76 +705,49 @@ impl DbState {
     pub fn lsp(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
             storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::new(fs))),
-            #[cfg(feature = "module_graph")]
-            scanner_module_graph_dirty: None,
-            #[cfg(feature = "module_graph")]
-            scanner_resolver_changes: None,
+            scanner_changes: None,
+            defers_manifests: false,
         }
     }
 
-    /// Creates the database epoch used by one project scan.
+    /// Starts a project scan. See [ScanSession].
     ///
-    /// Owned storage waits for the setter gate without announcing a pending
-    /// Salsa write, then returns a replacement-update view. This leaves reads
-    /// available while preventing setter-based updates from overlapping the
-    /// scan. Shared storage returns an equivalent shared view without locking.
-    pub(crate) fn scanner_epoch(&self) -> ScannerDbEpoch<'_> {
-        #[cfg(feature = "module_graph")]
-        let module_graph_dirty = Arc::new(AtomicBool::new(false));
-        #[cfg(feature = "module_graph")]
-        let resolver_changes = ResolverChanges::default();
-
-        match &self.storage {
-            DbStorage::Shared(shared_db) => ScannerDbEpoch {
-                view: Self {
-                    storage: DbStorage::Shared(shared_db.clone()),
-                    #[cfg(feature = "module_graph")]
-                    scanner_module_graph_dirty: None,
-                    #[cfg(feature = "module_graph")]
-                    scanner_resolver_changes: None,
-                },
-                _finalizer: ScannerDbEpochFinalizer::Shared,
+    /// With Owned storage, this waits for the setter gate. It doesn't announce
+    /// a pending Salsa write, so reads continue meanwhile.
+    pub(crate) fn scan_session(&self) -> ScanSession<'_, ScanSetup> {
+        let storage = match &self.storage {
+            DbStorage::Shared(shared_db) => ScanStorage::Shared(shared_db.clone()),
+            DbStorage::Owned(owner) => ScanStorage::Owned {
+                owner,
+                setter_guard: owner.setter_lock.lock(),
             },
-            DbStorage::Owned(owner) => {
-                let setter_guard = owner.setter_lock.lock();
-                let shared_db = {
-                    let db = owner.db.lock();
-                    SharedWorkspaceDb::from_workspace_db(db.clone())
-                };
-
-                ScannerDbEpoch {
-                    view: Self {
-                        storage: DbStorage::Shared(shared_db),
-                        #[cfg(feature = "module_graph")]
-                        scanner_module_graph_dirty: Some(module_graph_dirty.clone()),
-                        #[cfg(feature = "module_graph")]
-                        scanner_resolver_changes: Some(resolver_changes.clone()),
-                    },
-                    _finalizer: ScannerDbEpochFinalizer::Owned {
-                        #[cfg(feature = "module_graph")]
-                        owner,
-                        setter_guard,
-                        #[cfg(feature = "module_graph")]
-                        module_graph_dirty,
-                        #[cfg(feature = "module_graph")]
-                        resolver_changes,
-                    },
-                }
-            }
+        };
+        let writer = ScanWriter {
+            storage,
+            changes: Arc::default(),
+            deferred_paths: Vec::new(),
+        };
+        ScanSession {
+            view: writer.view(true),
+            writer,
+            phase: PhantomData,
         }
+    }
+
+    /// Returns whether the scanner can defer the manifests and the JSON files
+    /// that it indexes in this state, like any other file.
+    ///
+    /// Only the view of [ScanSetup] allows it, because no other file reads
+    /// them before [ScanFiles] indexes them again. Other states publish them
+    /// right away, because the files that the scanner indexes next read them.
+    pub(crate) fn defers_manifests(&self) -> bool {
+        self.defers_manifests
     }
 
     pub(crate) fn fork(&self) -> DbReadGuard {
         match &self.storage {
             DbStorage::Shared(shared_db) => DbReadGuard::new(shared_db.fork(), false),
             DbStorage::Owned(db) => DbReadGuard::new(db.fork(), true),
-        }
-    }
-
-    pub(crate) fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
-        match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_source(document_file_source),
-            DbStorage::Owned(db) => db.data.insert_source(document_file_source),
         }
     }
 
@@ -571,12 +763,25 @@ impl DbState {
         settings: Settings,
     ) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_nested_setting_with_mode(
-                project_key,
-                path,
-                settings,
-                ProjectUpdateMode::Replace,
-            ),
+            DbStorage::Shared(shared_db) => {
+                if let Some(changes) = &self.scanner_changes {
+                    changes
+                        .project_updates
+                        .lock()
+                        .push(ProjectUpdate::NestedSettings {
+                            project_key,
+                            path,
+                            settings,
+                        });
+                } else {
+                    shared_db.fork().insert_nested_setting_with_mode(
+                        project_key,
+                        path,
+                        settings,
+                        ProjectUpdateMode::Replace,
+                    );
+                }
+            }
             DbStorage::Owned(db) => db.with_setter(|db| {
                 db.insert_nested_setting_with_mode(
                     project_key,
@@ -590,11 +795,23 @@ impl DbState {
 
     pub fn insert_root_settings(&self, project_key: ProjectKey, settings: Settings) {
         match &self.storage {
-            DbStorage::Shared(db) => db.fork().insert_root_settings_with_mode(
-                project_key,
-                settings,
-                ProjectUpdateMode::Replace,
-            ),
+            DbStorage::Shared(db) => {
+                if let Some(changes) = &self.scanner_changes {
+                    changes
+                        .project_updates
+                        .lock()
+                        .push(ProjectUpdate::RootSettings {
+                            project_key,
+                            settings,
+                        });
+                } else {
+                    db.fork().insert_root_settings_with_mode(
+                        project_key,
+                        settings,
+                        ProjectUpdateMode::Replace,
+                    );
+                }
+            }
             DbStorage::Owned(db) => db.with_setter(|db| {
                 db.insert_root_settings_with_mode(project_key, settings, ProjectUpdateMode::Setters)
             }),
@@ -604,36 +821,78 @@ impl DbState {
     /// Inserts project
     pub fn insert_project(&self, path: Utf8PathBuf) -> ProjectKey {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_project(path),
-            DbStorage::Owned(db) => db.with_setter(|db| db.insert_project(path)),
+            DbStorage::Shared(shared_db) => {
+                let project_key = shared_db.fork().insert_project(path);
+                self.record_projects_replaced();
+                project_key
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                let projects = db.projects.pin().len();
+                let project_key = db.insert_project(path);
+                if db.projects.pin().len() != projects {
+                    db.invalidate_projects();
+                }
+                project_key
+            }),
         }
     }
 
-    /// Inserts project
+    /// Removes the project with the given key.
     pub fn remove_project(&self, project_key: ProjectKey) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.data().remove_project(project_key),
-            DbStorage::Owned(db) => db.data.remove_project(project_key),
+            DbStorage::Shared(shared_db) => {
+                shared_db.data().remove_project(project_key);
+                self.record_projects_replaced();
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_project(project_key);
+                db.invalidate_projects();
+            }),
         }
     }
 
+    /// Adds the patterns of nested ignore files to the root settings of the
+    /// project `project_key`. Each entry of `payload` holds the directory of
+    /// an ignore file and its patterns.
+    ///
+    /// Does nothing when `payload` is empty.
     pub fn store_nested_ignore_patterns(
         &self,
         project_key: ProjectKey,
         payload: Vec<(Utf8PathBuf, Vec<String>)>,
     ) -> Result<(), WorkspaceError> {
+        // Storing patterns only adds matchers, so storing none changes
+        // nothing. Updating the root settings anyway would make every query
+        // that reads them run again, including the parses.
+        if payload.is_empty() {
+            return Ok(());
+        }
         match &self.storage {
             DbStorage::Shared(shared_db) => {
-                shared_db.fork().store_nested_ignore_patterns_with_mode(
-                    project_key,
-                    payload,
-                    ProjectUpdateMode::Replace,
-                )
+                let mut db = shared_db.fork();
+                let git_ignores = db.nested_git_ignores(project_key, &payload)?;
+                if let Some(changes) = &self.scanner_changes {
+                    changes
+                        .project_updates
+                        .lock()
+                        .push(ProjectUpdate::NestedGitIgnores {
+                            project_key,
+                            git_ignores,
+                        });
+                    Ok(())
+                } else {
+                    db.insert_nested_git_ignores_with_mode(
+                        project_key,
+                        &git_ignores,
+                        ProjectUpdateMode::Replace,
+                    )
+                }
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                db.store_nested_ignore_patterns_with_mode(
+                let git_ignores = db.nested_git_ignores(project_key, &payload)?;
+                db.insert_nested_git_ignores_with_mode(
                     project_key,
-                    payload,
+                    &git_ignores,
                     ProjectUpdateMode::Setters,
                 )
             }),
@@ -655,40 +914,185 @@ impl DbState {
         }
     }
 
-    pub(crate) fn update_parsed_file(
+    /// Publishes `text` as `view` of `path`, and returns the view of `path`
+    /// that the services shared by the clients read. See
+    /// [FileViews](super::FileViews).
+    ///
+    /// The text is parsed as the file source at `file_source_index`, with the
+    /// `inline_configuration` of the client on top of the settings. It isn't
+    /// parsed here: the parse runs the first time a query reads it.
+    pub(crate) fn update_file_view(
         &self,
         path: &Utf8Path,
-        parsed: AnyParse,
-        language_index: usize,
-        snippets: Vec<(AnyParse, EmbedContent, usize)>,
-    ) -> ParsedSource {
+        view: ViewId,
+        text: Arc<str>,
+        file_source_index: usize,
+        inline_configuration: Option<Configuration>,
+    ) -> Source {
+        let configuration_index = inline_configuration.map(|configuration| {
+            self.shared_data()
+                .insert_inline_configuration(configuration)
+        });
+        self.publish_file_view(path, view, text, file_source_index, configuration_index)
+    }
+
+    /// Publishes `text` as `view` of `path`, like [Self::update_file_view].
+    ///
+    /// In the view of a scan, it defers the update when the inputs of `path`
+    /// hold other text, because updating them needs Salsa setters. The scan
+    /// publishes the text when it commits the phase, and this returns `None`.
+    /// See [ScanSession].
+    pub(crate) fn update_file_view_or_defer(
+        &self,
+        path: &Utf8Path,
+        view: ViewId,
+        text: Arc<str>,
+        file_source_index: usize,
+        inline_configuration: Option<Configuration>,
+    ) -> Option<Source> {
+        let configuration_index = inline_configuration.map(|configuration| {
+            self.shared_data()
+                .insert_inline_configuration(configuration)
+        });
+        if let DbStorage::Shared(shared_db) = &self.storage
+            && let Some(changes) = &self.scanner_changes
+            && shared_db.fork().view_update_needs_setters(
+                path,
+                view,
+                &text,
+                file_source_index,
+                configuration_index,
+            )
+        {
+            changes.deferred_views.lock().push(DeferredView {
+                path: path.to_path_buf(),
+                view,
+                text,
+                file_source_index,
+                configuration_index,
+            });
+            return None;
+        }
+        Some(self.publish_file_view(path, view, text, file_source_index, configuration_index))
+    }
+
+    /// Publishes `text` as `view` of `path`, with the inline configuration at
+    /// `configuration_index`. See [Self::update_file_view].
+    fn publish_file_view(
+        &self,
+        path: &Utf8Path,
+        view: ViewId,
+        text: Arc<str>,
+        file_source_index: usize,
+        configuration_index: Option<usize>,
+    ) -> Source {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let parsed_snippets = create_parsed_snippets(&db, snippets);
-                let file = db.update_or_insert_file(
-                    path,
-                    parsed,
-                    language_index,
-                    parsed_snippets,
-                    ParsedSourceUpdateMode::Replace,
-                );
-                // The replacement publishes a new parsed source for `path`.
+                // Only the view of a scan over Owned storage reuses inputs,
+                // because the database it reads outlives the scan. Other Shared
+                // storage lives for one operation, so it allocates new inputs.
+                let reused = self.scanner_changes.as_ref().and_then(|_| {
+                    db.reuse_view(path, view, &text, file_source_index, configuration_index)
+                });
+                let file = reused.unwrap_or_else(|| {
+                    db.update_or_insert_view(
+                        path,
+                        view,
+                        text,
+                        file_source_index,
+                        configuration_index,
+                        ParsedSourceUpdateMode::Replace,
+                    )
+                });
+                // The update may publish another parsed source for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
                 file
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                let parsed_snippets = create_parsed_snippets(db, snippets);
-                db.update_or_insert_file(
+                db.update_or_insert_view(
                     path,
-                    parsed,
-                    language_index,
-                    parsed_snippets,
+                    view,
+                    text,
+                    file_source_index,
+                    configuration_index,
                     ParsedSourceUpdateMode::Setters,
                 )
             }),
         }
+    }
+
+    /// Removes `view` of `path`, and removes the file when it has no view
+    /// left.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn remove_file_view(&self, path: &Utf8Path, view: ViewId) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db
+                    .fork()
+                    .remove_view(path, view, ParsedSourceUpdateMode::Replace);
+                // The replacement publishes another `Source` input for `path`.
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(shared_db.data().resolver_source_change(path));
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_view(path, view, ParsedSourceUpdateMode::Setters);
+            }),
+        }
+    }
+
+    /// Removes the editor view that `client` has of `path`. See
+    /// [WorkspaceDb::remove_editor_view].
+    pub(crate) fn remove_editor_view(
+        &self,
+        path: &Utf8Path,
+        client: ClientId,
+        keep_disk_view: bool,
+    ) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().remove_editor_view(
+                    path,
+                    client,
+                    keep_disk_view,
+                    ParsedSourceUpdateMode::Replace,
+                );
+                // The replacement publishes another `Source` input for `path`.
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(shared_db.data().resolver_source_change(path));
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_editor_view(
+                    path,
+                    client,
+                    keep_disk_view,
+                    ParsedSourceUpdateMode::Setters,
+                );
+            }),
+        }
+    }
+
+    /// Returns the index of `file_source` in the table of file sources of the
+    /// database, and inserts it first if the table doesn't have it.
+    pub(crate) fn insert_file_source(&self, file_source: DocumentFileSource) -> usize {
+        self.shared_data().insert_source(file_source)
+    }
+
+    /// Keeps a node cache for `path`. See [WorkspaceDbData::retain_node_cache].
+    pub(crate) fn retain_node_cache(&self, path: &Utf8Path) {
+        self.shared_data().retain_node_cache(path);
+    }
+
+    /// Drops the node cache of `path`, if there is one.
+    pub(crate) fn remove_node_cache(&self, path: &Utf8Path) {
+        self.shared_data().remove_node_cache(path);
+    }
+
+    /// Returns whether a node cache is kept for `path`.
+    #[cfg(test)]
+    pub(crate) fn has_node_cache(&self, path: &Utf8Path) -> bool {
+        self.shared_data().node_caches.pin().contains_key(path)
     }
 
     pub(crate) fn unload_path(&self, path: &Utf8Path) {
@@ -706,35 +1110,39 @@ impl DbState {
         }
     }
 
-    /// Removes the cached parsed source for `path`.
+    /// Removes the disk views of the files within `path`, and the modules
+    /// within it. The files that a client has open keep their editor views.
     ///
-    /// Only the resolver reads the `files` map from Salsa-tracked queries, and
-    /// only for the content of manifests. Removing any other parsed source is
-    /// an untracked removal. See the "Remove" section of the module
-    /// documentation above.
-    pub(crate) fn remove_file(&self, path: &Utf8Path) {
+    /// Use this when the filesystem reports that `path` was removed.
+    pub(crate) fn unload_disk_views(&self, path: &Utf8Path) {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
+                shared_db
+                    .fork()
+                    .remove_disk_views_within(path, ParsedSourceUpdateMode::Replace);
                 let data = shared_db.data();
-                data.remove_file(path);
+                data.unload_modules(path);
                 #[cfg(feature = "module_graph")]
-                self.record_resolver_changes(data.resolver_source_change(path));
+                {
+                    self.mark_module_graph_dirty();
+                    self.record_resolver_changes(data.resolver_changes_within(path));
+                }
             }
-            #[cfg(feature = "module_graph")]
-            DbStorage::Owned(db) if db.data.is_resolver_manifest(path) => {
-                db.with_setter(|db| db.remove_file(path));
-            }
-            DbStorage::Owned(db) => db.data.remove_file(path),
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_disk_views_within(path, ParsedSourceUpdateMode::Setters);
+                db.unload_modules(path);
+            }),
         }
     }
 
     /// Refreshes the resolver path info of the given paths from the filesystem.
     ///
     /// Call this when the filesystem reports a change, for example from the
-    /// watcher. Owned storage applies the changes immediately, and skips the
-    /// write when the path info is already up to date. A scanner epoch applies
-    /// them when it ends. Shared storage outside an epoch never refreshes
-    /// path info, because it doesn't observe filesystem changes.
+    /// watcher. Outside a scan, Owned storage applies the changes immediately,
+    /// and skips the write when the path info is already up to date. In the
+    /// view of a scan, the scan applies them when it commits the phase. Shared
+    /// storage outside a scan never refreshes path info, because it doesn't
+    /// observe filesystem changes.
     #[cfg(feature = "module_graph")]
     pub(crate) fn sync_resolver_paths(&self, changes: Vec<(Utf8PathBuf, ResolverPathChanges)>) {
         match &self.storage {
@@ -788,6 +1196,10 @@ impl DbState {
     /// Returns handles to the collections shared by every database fork.
     #[cfg(feature = "module_graph")]
     fn data(&self) -> WorkspaceDbData {
+        self.shared_data()
+    }
+
+    fn shared_data(&self) -> WorkspaceDbData {
         match &self.storage {
             DbStorage::Shared(shared_db) => shared_db.data(),
             DbStorage::Owned(db) => db.data.clone(),
@@ -803,6 +1215,14 @@ impl DbState {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let db = shared_db.fork();
+                // The view of a scan can't run Salsa setters, so the scan sets
+                // the kind of an existing module when it commits the phase.
+                if let Some(changes) = &self.scanner_changes
+                    && let Some(module) = db.get_module(&path)
+                {
+                    changes.module_kinds.lock().push((module, kind));
+                    return module;
+                }
                 let module = ModuleInfo::new(&db, path.clone(), kind);
                 db.data().insert_module(path, module);
                 self.mark_module_graph_dirty();
@@ -823,26 +1243,38 @@ impl DbState {
         }
     }
 
+    /// Records that a project was replaced.
+    ///
+    /// In the view of a scan, the scan advances the projects generation when
+    /// it commits the phase. Outside a scan, Shared storage can't run Salsa
+    /// setters, so queries that looked up a project keep their results until
+    /// another input changes.
+    fn record_projects_replaced(&self) {
+        if let Some(changes) = &self.scanner_changes {
+            changes.projects_replaced.store(true, Ordering::Release);
+        }
+    }
+
     /// Records that a replacement update changed the external module map.
     #[cfg(feature = "module_graph")]
     fn mark_module_graph_dirty(&self) {
-        if let Some(dirty) = &self.scanner_module_graph_dirty {
-            dirty.store(true, Ordering::Release);
+        if let Some(changes) = &self.scanner_changes {
+            changes.module_graph_dirty.store(true, Ordering::Release);
         }
     }
 
     /// Records resolver changes made through a replacement update.
     ///
-    /// A scanner epoch applies them when it ends. Outside an epoch, Shared
-    /// storage discards them: it can't run Salsa setters, and the operations
-    /// using it don't observe filesystem changes.
+    /// In the view of a scan, the scan applies them when it commits the phase.
+    /// Outside a scan, Shared storage discards them: it can't run Salsa
+    /// setters, and the operations using it don't observe filesystem changes.
     #[cfg(feature = "module_graph")]
     fn record_resolver_changes(
         &self,
         changes: impl IntoIterator<Item = (Utf8PathBuf, ResolverPathChanges)>,
     ) {
-        if let Some(pending) = &self.scanner_resolver_changes {
-            pending.lock().extend(changes);
+        if let Some(scanner_changes) = &self.scanner_changes {
+            scanner_changes.resolver_changes.lock().extend(changes);
         }
     }
 
@@ -867,32 +1299,12 @@ impl DbState {
     }
 }
 
-fn create_parsed_snippets(
-    db: &WorkspaceDb,
-    snippets: Vec<(AnyParse, EmbedContent, usize)>,
-) -> Vec<ParsedSnippet> {
-    snippets
-        .into_iter()
-        .map(|(parse, content, index)| {
-            ParsedSnippet::new(
-                db,
-                parse,
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-                index,
-            )
-        })
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     use crate::projects::ProjectDb;
     use biome_configuration::vcs::VcsClientKind;
-    use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::JsFileSource;
     use camino::Utf8PathBuf;
     use salsa::plumbing::AsId;
@@ -907,13 +1319,9 @@ mod tests {
         Arc::new(biome_fs::MemoryFileSystem::default())
     }
 
-    fn parse_js(source: &str) -> AnyParse {
-        parse(
-            source,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into()
+    /// Returns the index of the JavaScript module file source in `state`.
+    fn js(state: &DbState) -> usize {
+        state.insert_file_source(DocumentFileSource::Js(JsFileSource::js_module()))
     }
 
     fn git_settings() -> Settings {
@@ -945,7 +1353,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -961,7 +1369,9 @@ mod tests {
                 wait_for_pending_setter(&state);
                 // This must complete on its own, without waiting for the
                 // lock held by the setter.
-                state.insert_source(DocumentFileSource::Js(JsFileSource::js_script()));
+                state
+                    .shared_data()
+                    .insert_source(DocumentFileSource::Js(JsFileSource::js_script()));
                 drop(db);
             })
         };
@@ -971,7 +1381,7 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -992,7 +1402,7 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -1001,7 +1411,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
             })
         };
 
@@ -1025,14 +1435,14 @@ mod tests {
     fn owned_storage_queues_only_one_pending_setter() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let db = state.fork();
         let first_setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
             })
         };
         wait_for_pending_setter(&state);
@@ -1043,9 +1453,8 @@ mod tests {
             let path = path.clone();
             let second_start = second_start.clone();
             thread::spawn(move || {
-                let parsed = parse_js("let c = 3;");
                 second_start.wait();
-                state.update_parsed_file(&path, parsed, 0, vec![]);
+                state.update_file_view(&path, ViewId::Disk, "let c = 3;".into(), js(&state), None);
             })
         };
         second_start.wait();
@@ -1079,14 +1488,14 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
             })
         };
 
@@ -1104,7 +1513,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
     }
 
     #[test]
@@ -1113,10 +1522,64 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
+    }
+
+    /// Shared storage lives for one operation, so publishing a file again
+    /// allocates a new input, even after the file lost its last view.
+    #[test]
+    fn shared_storage_allocates_inputs_of_reopened_file() {
+        let state = DbState::new(test_fs());
+        let path = Utf8PathBuf::from("test.js");
+        let client = ClientId::new(1);
+        let open = || {
+            state.update_file_view(
+                &path,
+                ViewId::Editor(client),
+                "let a = 1;".into(),
+                js(&state),
+                None,
+            )
+        };
+
+        let first = open();
+        state.remove_editor_view(&path, client, false);
+        let second = open();
+
+        assert_ne!(first.as_id(), second.as_id());
+    }
+
+    /// Committing the setup phase applies its settings to the parses that the
+    /// next phases read, including the parses cached before the scan.
+    #[cfg(feature = "lang_json")]
+    #[test]
+    fn scan_setup_commit_applies_settings_to_cached_parses() {
+        use biome_parser::db::SourceExt;
+
+        let state = DbState::lsp(test_fs());
+        let project_key = state.insert_project(Utf8PathBuf::from("/project"));
+        let source = state.update_file_view(
+            Utf8Path::new("/project/data.json"),
+            ViewId::Disk,
+            "[1,]".into(),
+            state.insert_file_source(DocumentFileSource::Json(
+                biome_languages::JsonFileSource::json(),
+            )),
+            None,
+        );
+        assert!(source.has_errors(&*state.fork()));
+
+        let session = state.scan_session();
+        let mut settings = Settings::default();
+        settings.languages.json.parser.allow_trailing_commas = Some(true.into());
+        session.view().insert_root_settings(project_key, settings);
+        assert!(source.has_errors(&*session.view().fork()));
+        let (session, _) = session.commit();
+
+        assert!(!source.has_errors(&*session.view().fork()));
     }
 
     #[test]
@@ -1165,6 +1628,38 @@ mod tests {
         assert!(retained_db.get_project(&project_key).is_none());
     }
 
+    /// Storing no nested ignore patterns keeps the root settings of the
+    /// project, during a scan and outside one, so the parses that read them
+    /// stay valid.
+    #[test]
+    fn storing_no_nested_ignore_patterns_keeps_root_settings() {
+        let state = DbState::lsp(test_fs());
+        let project_key = state.insert_project(Utf8PathBuf::from("/project"));
+        state.insert_root_settings(project_key, git_settings());
+        let read = || {
+            let db = state.fork();
+            let root_settings = db.get_project(&project_key).unwrap().root_settings(&*db);
+            let generation = crate::db::ProjectsGeneration::try_get(&*db)
+                .map(|generation| generation.value(&*db));
+            (root_settings, generation)
+        };
+        let before = read();
+
+        {
+            let session = state.scan_session();
+            session
+                .view()
+                .store_nested_ignore_patterns(project_key, Vec::new())
+                .unwrap();
+        }
+        assert_eq!(read(), before);
+
+        state
+            .store_nested_ignore_patterns(project_key, Vec::new())
+            .unwrap();
+        assert_eq!(read(), before);
+    }
+
     #[test]
     fn owned_storage_project_lifecycle_preserves_input_identity() {
         let state = DbState::lsp(test_fs());
@@ -1209,7 +1704,7 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -1218,7 +1713,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1252,8 +1747,11 @@ mod tests {
             Arc::new(MemoryFileSystem::from_files(fs.files.0.clone()))
         }
 
-        fn parse_json(source: &str) -> AnyParse {
-            biome_json_parser::parse_json(source, Default::default()).into()
+        /// Returns the index of the JSON file source in `state`.
+        fn json(state: &DbState) -> usize {
+            state.insert_file_source(DocumentFileSource::Json(
+                biome_languages::JsonFileSource::json(),
+            ))
         }
 
         /// Looks up the resolver path info of `path`, like a resolver query does.
@@ -1286,17 +1784,41 @@ mod tests {
             let source = lookup(&state, SOURCE);
             let setters = state.setter_gate_attempts();
 
-            state.update_parsed_file(Utf8Path::new(SOURCE), parse_js(""), 0, vec![]);
-            state.update_parsed_file(Utf8Path::new(SOURCE), parse_js("a"), 0, vec![]);
+            state.update_file_view(
+                Utf8Path::new(SOURCE),
+                ViewId::Disk,
+                "".into(),
+                js(&state),
+                None,
+            );
+            state.update_file_view(
+                Utf8Path::new(SOURCE),
+                ViewId::Disk,
+                "a".into(),
+                js(&state),
+                None,
+            );
             assert_eq!(
                 revision(&state, source),
                 0,
                 "sources aren't read by the resolver"
             );
 
-            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("{}"), 0, vec![]);
+            state.update_file_view(
+                Utf8Path::new(MANIFEST),
+                ViewId::Disk,
+                "{}".into(),
+                json(&state),
+                None,
+            );
             assert_eq!(revision(&state, manifest), 1);
-            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("[]"), 0, vec![]);
+            state.update_file_view(
+                Utf8Path::new(MANIFEST),
+                ViewId::Disk,
+                "[]".into(),
+                json(&state),
+                None,
+            );
             assert_eq!(
                 revision(&state, manifest),
                 1,
@@ -1348,26 +1870,27 @@ mod tests {
         }
 
         #[test]
-        fn scanner_epoch_applies_resolver_changes_when_it_ends() {
+        fn scan_session_applies_resolver_changes_when_it_ends() {
             let fs = MemoryFileSystem::default();
             let state = DbState::lsp(resolver_fs(&fs));
             let manifest = read_manifest(&state, MANIFEST);
             let source = lookup(&state, SOURCE);
 
             {
-                let epoch = state.scanner_epoch();
-                epoch.view().update_parsed_file(
+                let session = state.scan_session();
+                session.view().update_file_view(
                     Utf8Path::new(MANIFEST),
-                    parse_json("{}"),
-                    0,
-                    vec![],
+                    ViewId::Disk,
+                    "{}".into(),
+                    json(&state),
+                    None,
                 );
                 fs.insert(SOURCE.into(), "");
-                epoch
+                session
                     .view()
                     .sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
 
-                let db = epoch.view().fork();
+                let db = session.view().fork();
                 assert_eq!(manifest.revision(&*db), 0);
                 assert_eq!(source.info(&*db), &Err(ResolveError::NotFound));
             }
@@ -1385,7 +1908,13 @@ mod tests {
 
             fs.insert(SOURCE.into(), "");
             state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
-            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("{}"), 0, vec![]);
+            state.update_file_view(
+                Utf8Path::new(MANIFEST),
+                ViewId::Disk,
+                "{}".into(),
+                json(&state),
+                None,
+            );
 
             assert_eq!(info(&state, source), Err(ResolveError::NotFound));
             assert_eq!(revision(&state, manifest), 0);

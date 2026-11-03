@@ -152,7 +152,7 @@ fn main() {}
     let sources: Vec<_> = snippets
         .iter()
         .map(|snippet| {
-            db.source_from_index(snippet.document_source_index(&db))
+            db.source_from_index(snippet.document_source_index())
                 .unwrap()
         })
         .collect();
@@ -180,15 +180,15 @@ fn main() {}
     );
 
     for snippet in snippets {
-        let content_range = snippet.content_range(&db);
-        let content_offset = snippet.content_offset(&db);
+        let content_range = snippet.content_range();
+        let content_offset = snippet.content_offset();
         assert_eq!(content_offset, content_range.start());
         assert!(
             !CONTENT[usize::from(content_range.start())..usize::from(content_range.end())]
                 .is_empty()
         );
 
-        let AnyParse::EmbeddedNode(parse) = snippet.parsed(&db) else {
+        let AnyParse::EmbeddedNode(parse) = snippet.parsed() else {
             panic!("Markdown snippets must use offset-aware parses");
         };
         assert_eq!(parse.root().offset(), content_offset);
@@ -203,15 +203,15 @@ fn parses_html_block_at_document_start() {
     let snippets = workspace.get_snippets(Utf8Path::new(FILE_PATH));
 
     assert_eq!(snippets.len(), 1);
-    let snippet = snippets[0];
-    assert_eq!(snippet.content_offset(&db), TextSize::from(0));
+    let snippet = &snippets[0];
+    assert_eq!(snippet.content_offset(), TextSize::from(0));
     assert_eq!(
-        db.source_from_index(snippet.document_source_index(&db)),
+        db.source_from_index(snippet.document_source_index()),
         Some(DocumentFileSource::Html(
             HtmlFileSource::html().with_embedding_kind(HtmlEmbeddingKind::MarkdownBlock)
         ))
     );
-    let AnyParse::EmbeddedNode(parse) = snippet.parsed(&db) else {
+    let AnyParse::EmbeddedNode(parse) = snippet.parsed() else {
         panic!("HTML blocks must use offset-aware parses");
     };
     assert_eq!(parse.root().offset(), TextSize::from(0));
@@ -280,11 +280,10 @@ fn skips_comment_only_html_blocks() {
         "<!-- biome-ignore lint/suspicious/noDebugger: example -->\n\n<div>content</div>\n";
 
     let (workspace, _) = open_markdown_with_embeds(CONTENT, false);
-    let db = workspace.get_db();
     let snippets = workspace.get_snippets(Utf8Path::new(FILE_PATH));
 
     assert_eq!(snippets.len(), 1);
-    let content_range = snippets[0].content_range(&db);
+    let content_range = snippets[0].content_range();
     assert_eq!(
         &CONTENT[usize::from(content_range.start())..usize::from(content_range.end())],
         "<div>content</div>"

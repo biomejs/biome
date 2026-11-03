@@ -1,0 +1,702 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidMerge.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.margin-block {
+	margin-block-start: 1px;
+	color: red;
+	margin-block-end: 2px;
+}
+
+.margin-inline {
+	margin-inline-end: 4px;
+	margin-inline-start: 3px;
+}
+
+.padding-block {
+	padding-block-start: 1px;
+	padding-block-end: 2px;
+}
+
+.padding-inline {
+	padding-inline-start: 1px;
+	padding-inline-end: 2px;
+}
+
+.inset-block {
+	inset-block-start: 1px;
+	inset-block-end: 2px;
+}
+
+.inset-inline {
+	inset-inline-start: 1px;
+	inset-inline-end: 2px;
+}
+
+.scroll-margin-block {
+	scroll-margin-block-start: 1px;
+	scroll-margin-block-end: 2px;
+}
+
+.scroll-margin-inline {
+	scroll-margin-inline-start: 1px;
+	scroll-margin-inline-end: 2px;
+}
+
+.scroll-padding-block {
+	scroll-padding-block-start: 1px;
+	scroll-padding-block-end: 2px;
+}
+
+.scroll-padding-inline {
+	scroll-padding-inline-start: 1px;
+	scroll-padding-inline-end: 2px;
+}
+
+.border-block {
+	border-block-start: 1px solid blue;
+	border-block-end: 1px solid blue;
+}
+
+.border-inline {
+	border-inline-start: 1px solid blue;
+	border-inline-end: 1px solid blue;
+}
+
+.border-width {
+	border-block-start-width: 1px;
+	border-block-end-width: 2px;
+	border-inline-end-width: 4px;
+	border-inline-start-width: 3px;
+}
+
+.border-style {
+	border-block-start-style: solid;
+	border-block-end-style: dashed;
+	border-inline-start-style: double;
+	border-inline-end-style: dotted;
+}
+
+.border-color {
+	border-block-start-color: red;
+	border-block-end-color: blue;
+	border-inline-start-color: green;
+	border-inline-end-color: yellow;
+}
+
+.same-values-collapse {
+	margin-block-start: 1px;
+	margin-block-end: 1px;
+}
+
+.important {
+	border-block-start-width: 1px !important;
+	border-block-end-width: 2px !important;
+}
+
+.conflicting-physical-longhand {
+	margin-block-start: 1px;
+	margin-top: 2px;
+	margin-block-end: 3px;
+}
+
+```
+
+# Diagnostics
+```
+invalidMerge.css:3:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .margin-block {
+  > 3 │ 	margin-block-start: 1px;
+      │ 	^^^^^^^^^^^^^^^^^^
+    4 │ 	color: red;
+    5 │ 	margin-block-end: 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as margin-block.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   .margin-block {
+     3    │ - → margin-block-start:·1px;
+        3 │ + → margin-block:·1px·2px;
+     4  4 │     color: red;
+     5    │ - → margin-block-end:·2px;
+     6  5 │   }
+     7  6 │   
+  
+
+```
+
+```
+invalidMerge.css:9:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+     8 │ .margin-inline {
+   > 9 │ 	margin-inline-end: 4px;
+       │ 	^^^^^^^^^^^^^^^^^
+    10 │ 	margin-inline-start: 3px;
+    11 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as margin-inline.
+  
+     7  7 │   
+     8  8 │   .margin-inline {
+     9    │ - → margin-inline-end:·4px;
+    10    │ - → margin-inline-start:·3px;
+        9 │ + → margin-inline:·3px·4px;
+    11 10 │   }
+    12 11 │   
+  
+
+```
+
+```
+invalidMerge.css:14:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    13 │ .padding-block {
+  > 14 │ 	padding-block-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^
+    15 │ 	padding-block-end: 2px;
+    16 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as padding-block.
+  
+    12 12 │   
+    13 13 │   .padding-block {
+    14    │ - → padding-block-start:·1px;
+    15    │ - → padding-block-end:·2px;
+       14 │ + → padding-block:·1px·2px;
+    16 15 │   }
+    17 16 │   
+  
+
+```
+
+```
+invalidMerge.css:19:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    18 │ .padding-inline {
+  > 19 │ 	padding-inline-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    20 │ 	padding-inline-end: 2px;
+    21 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as padding-inline.
+  
+    17 17 │   
+    18 18 │   .padding-inline {
+    19    │ - → padding-inline-start:·1px;
+    20    │ - → padding-inline-end:·2px;
+       19 │ + → padding-inline:·1px·2px;
+    21 20 │   }
+    22 21 │   
+  
+
+```
+
+```
+invalidMerge.css:24:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    23 │ .inset-block {
+  > 24 │ 	inset-block-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^
+    25 │ 	inset-block-end: 2px;
+    26 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as inset-block.
+  
+    22 22 │   
+    23 23 │   .inset-block {
+    24    │ - → inset-block-start:·1px;
+    25    │ - → inset-block-end:·2px;
+       24 │ + → inset-block:·1px·2px;
+    26 25 │   }
+    27 26 │   
+  
+
+```
+
+```
+invalidMerge.css:29:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    28 │ .inset-inline {
+  > 29 │ 	inset-inline-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^
+    30 │ 	inset-inline-end: 2px;
+    31 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as inset-inline.
+  
+    27 27 │   
+    28 28 │   .inset-inline {
+    29    │ - → inset-inline-start:·1px;
+    30    │ - → inset-inline-end:·2px;
+       29 │ + → inset-inline:·1px·2px;
+    31 30 │   }
+    32 31 │   
+  
+
+```
+
+```
+invalidMerge.css:34:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    33 │ .scroll-margin-block {
+  > 34 │ 	scroll-margin-block-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 	scroll-margin-block-end: 2px;
+    36 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as scroll-margin-block.
+  
+    32 32 │   
+    33 33 │   .scroll-margin-block {
+    34    │ - → scroll-margin-block-start:·1px;
+    35    │ - → scroll-margin-block-end:·2px;
+       34 │ + → scroll-margin-block:·1px·2px;
+    36 35 │   }
+    37 36 │   
+  
+
+```
+
+```
+invalidMerge.css:39:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    38 │ .scroll-margin-inline {
+  > 39 │ 	scroll-margin-inline-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 	scroll-margin-inline-end: 2px;
+    41 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as scroll-margin-inline.
+  
+    37 37 │   
+    38 38 │   .scroll-margin-inline {
+    39    │ - → scroll-margin-inline-start:·1px;
+    40    │ - → scroll-margin-inline-end:·2px;
+       39 │ + → scroll-margin-inline:·1px·2px;
+    41 40 │   }
+    42 41 │   
+  
+
+```
+
+```
+invalidMerge.css:44:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    43 │ .scroll-padding-block {
+  > 44 │ 	scroll-padding-block-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 	scroll-padding-block-end: 2px;
+    46 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as scroll-padding-block.
+  
+    42 42 │   
+    43 43 │   .scroll-padding-block {
+    44    │ - → scroll-padding-block-start:·1px;
+    45    │ - → scroll-padding-block-end:·2px;
+       44 │ + → scroll-padding-block:·1px·2px;
+    46 45 │   }
+    47 46 │   
+  
+
+```
+
+```
+invalidMerge.css:49:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    48 │ .scroll-padding-inline {
+  > 49 │ 	scroll-padding-inline-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 	scroll-padding-inline-end: 2px;
+    51 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as scroll-padding-inline.
+  
+    47 47 │   
+    48 48 │   .scroll-padding-inline {
+    49    │ - → scroll-padding-inline-start:·1px;
+    50    │ - → scroll-padding-inline-end:·2px;
+       49 │ + → scroll-padding-inline:·1px·2px;
+    51 50 │   }
+    52 51 │   
+  
+
+```
+
+```
+invalidMerge.css:54:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    53 │ .border-block {
+  > 54 │ 	border-block-start: 1px solid blue;
+       │ 	^^^^^^^^^^^^^^^^^^
+    55 │ 	border-block-end: 1px solid blue;
+    56 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-block.
+  
+    52 52 │   
+    53 53 │   .border-block {
+    54    │ - → border-block-start:·1px·solid·blue;
+    55    │ - → border-block-end:·1px·solid·blue;
+       54 │ + → border-block:·1px·solid·blue;
+    56 55 │   }
+    57 56 │   
+  
+
+```
+
+```
+invalidMerge.css:59:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    58 │ .border-inline {
+  > 59 │ 	border-inline-start: 1px solid blue;
+       │ 	^^^^^^^^^^^^^^^^^^^
+    60 │ 	border-inline-end: 1px solid blue;
+    61 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-inline.
+  
+    57 57 │   
+    58 58 │   .border-inline {
+    59    │ - → border-inline-start:·1px·solid·blue;
+    60    │ - → border-inline-end:·1px·solid·blue;
+       59 │ + → border-inline:·1px·solid·blue;
+    61 60 │   }
+    62 61 │   
+  
+
+```
+
+```
+invalidMerge.css:64:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    63 │ .border-width {
+  > 64 │ 	border-block-start-width: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 	border-block-end-width: 2px;
+    66 │ 	border-inline-end-width: 4px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-block-width.
+  
+    62 62 │   
+    63 63 │   .border-width {
+    64    │ - → border-block-start-width:·1px;
+    65    │ - → border-block-end-width:·2px;
+       64 │ + → border-block-width:·1px·2px;
+    66 65 │     border-inline-end-width: 4px;
+    67 66 │     border-inline-start-width: 3px;
+  
+
+```
+
+```
+invalidMerge.css:66:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    64 │ 	border-block-start-width: 1px;
+    65 │ 	border-block-end-width: 2px;
+  > 66 │ 	border-inline-end-width: 4px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ 	border-inline-start-width: 3px;
+    68 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-inline-width.
+  
+    64 64 │     border-block-start-width: 1px;
+    65 65 │     border-block-end-width: 2px;
+    66    │ - → border-inline-end-width:·4px;
+    67    │ - → border-inline-start-width:·3px;
+       66 │ + → border-inline-width:·3px·4px;
+    68 67 │   }
+    69 68 │   
+  
+
+```
+
+```
+invalidMerge.css:71:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    70 │ .border-style {
+  > 71 │ 	border-block-start-style: solid;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ 	border-block-end-style: dashed;
+    73 │ 	border-inline-start-style: double;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-block-style.
+  
+    69 69 │   
+    70 70 │   .border-style {
+    71    │ - → border-block-start-style:·solid;
+    72    │ - → border-block-end-style:·dashed;
+       71 │ + → border-block-style:·solid·dashed;
+    73 72 │     border-inline-start-style: double;
+    74 73 │     border-inline-end-style: dotted;
+  
+
+```
+
+```
+invalidMerge.css:73:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    71 │ 	border-block-start-style: solid;
+    72 │ 	border-block-end-style: dashed;
+  > 73 │ 	border-inline-start-style: double;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 	border-inline-end-style: dotted;
+    75 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-inline-style.
+  
+    71 71 │     border-block-start-style: solid;
+    72 72 │     border-block-end-style: dashed;
+    73    │ - → border-inline-start-style:·double;
+    74    │ - → border-inline-end-style:·dotted;
+       73 │ + → border-inline-style:·double·dotted;
+    75 74 │   }
+    76 75 │   
+  
+
+```
+
+```
+invalidMerge.css:78:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    77 │ .border-color {
+  > 78 │ 	border-block-start-color: red;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ 	border-block-end-color: blue;
+    80 │ 	border-inline-start-color: green;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-block-color.
+  
+    76 76 │   
+    77 77 │   .border-color {
+    78    │ - → border-block-start-color:·red;
+    79    │ - → border-block-end-color:·blue;
+       78 │ + → border-block-color:·red·blue;
+    80 79 │     border-inline-start-color: green;
+    81 80 │     border-inline-end-color: yellow;
+  
+
+```
+
+```
+invalidMerge.css:80:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    78 │ 	border-block-start-color: red;
+    79 │ 	border-block-end-color: blue;
+  > 80 │ 	border-inline-start-color: green;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ 	border-inline-end-color: yellow;
+    82 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-inline-color.
+  
+    78 78 │     border-block-start-color: red;
+    79 79 │     border-block-end-color: blue;
+    80    │ - → border-inline-start-color:·green;
+    81    │ - → border-inline-end-color:·yellow;
+       80 │ + → border-inline-color:·green·yellow;
+    82 81 │   }
+    83 82 │   
+  
+
+```
+
+```
+invalidMerge.css:85:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    84 │ .same-values-collapse {
+  > 85 │ 	margin-block-start: 1px;
+       │ 	^^^^^^^^^^^^^^^^^^
+    86 │ 	margin-block-end: 1px;
+    87 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as margin-block.
+  
+    83 83 │   
+    84 84 │   .same-values-collapse {
+    85    │ - → margin-block-start:·1px;
+    86    │ - → margin-block-end:·1px;
+       85 │ + → margin-block:·1px;
+    87 86 │   }
+    88 87 │   
+  
+
+```
+
+```
+invalidMerge.css:90:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    89 │ .important {
+  > 90 │ 	border-block-start-width: 1px !important;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    91 │ 	border-block-end-width: 2px !important;
+    92 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as border-block-width.
+  
+    88 88 │   
+    89 89 │   .important {
+    90    │ - → border-block-start-width:·1px·!important;
+    91    │ - → border-block-end-width:·2px·!important;
+       90 │ + → border-block-width:·1px·2px·!important;
+    92 91 │   }
+    93 92 │   
+  
+
+```
+
+```
+invalidMerge.css:96:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    94 │ .conflicting-physical-longhand {
+    95 │ 	margin-block-start: 1px;
+  > 96 │ 	margin-top: 2px;
+       │ 	^^^^^^^^^^
+    97 │ 	margin-block-end: 3px;
+    98 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace margin-top with margin-block-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the logical CSS replacement.
+  
+    94 94 │   .conflicting-physical-longhand {
+    95 95 │     margin-block-start: 1px;
+    96    │ - → margin-top:·2px;
+       96 │ + → margin-block-start:·2px;
+    97 97 │     margin-block-end: 3px;
+    98 98 │   }
+  
+
+```

@@ -1,0 +1,62 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-ignore-parents.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <other-component>
+    <span slot="header">Title</span>
+  </other-component>
+  <my-web-component>
+    <div>
+      <span slot="header">Not a direct child</span>
+    </div>
+  </my-web-component>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-ignore-parents.vue:4:11 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+    2 │ <template>
+    3 │   <other-component>
+  > 4 │     <span slot="header">Title</span>
+      │           ^^^^^^^^^^^^^
+    5 │   </other-component>
+    6 │   <my-web-component>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-ignore-parents.vue:8:13 lint/nursery/noVueDeprecatedSlotAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot attribute is deprecated.
+  
+     6 │   <my-web-component>
+     7 │     <div>
+   > 8 │       <span slot="header">Not a direct child</span>
+       │             ^^^^^^^^^^^^^
+     9 │     </div>
+    10 │   </my-web-component>
+  
+  i Vue 3 treats it as a regular attribute, so the content goes to the component's default slot instead of the named slot.
+  
+  i Use the v-slot directive on a <template> element instead, for example <template v-slot:name> or <template #name>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

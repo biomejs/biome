@@ -1,0 +1,131 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function f1() {
+	return /* comment */ array.push(value);
+}
+function f2() {
+	foo()
+	return [array].push(value);
+}
+function f3() {
+	return function () { return []; }().push(1);
+}
+function f4() {
+	return (/* comment */ array.push(value));
+}
+function f5() {
+	return `${a}`.split("").push(value);
+}
+
+```
+
+# Diagnostics
+```
+invalidNoFix.js:3:29 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function f1() {
+  > 3 │ 	return /* comment */ array.push(value);
+      │ 	                           ^^^^
+    4 │ }
+    5 │ function f2() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:7:17 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    5 │ function f2() {
+    6 │ 	foo()
+  > 7 │ 	return [array].push(value);
+      │ 	               ^^^^
+    8 │ }
+    9 │ function f3() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:10:38 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+     8 │ }
+     9 │ function f3() {
+  > 10 │ 	return function () { return []; }().push(1);
+       │ 	                                    ^^^^
+    11 │ }
+    12 │ function f4() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:13:30 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    11 │ }
+    12 │ function f4() {
+  > 13 │ 	return (/* comment */ array.push(value));
+       │ 	                            ^^^^
+    14 │ }
+    15 │ function f5() {
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:16:26 lint/nursery/noReturnArrayPush ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The return value of push() is used here.
+  
+    14 │ }
+    15 │ function f5() {
+  > 16 │ 	return `${a}`.split("").push(value);
+       │ 	                        ^^^^
+    17 │ }
+    18 │ 
+  
+  i push() returns the new length of the array, not the added item or the array. Using this length is usually a mistake.
+  
+  i Call push() as its own statement. If you need the new length, read the length property of the array afterward.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

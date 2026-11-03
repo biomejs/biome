@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noVueTemplateShadow": {
+          "level": "error",
+          "options": {
+            "allow": ["i"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -27,7 +27,7 @@ pub(super) fn snippet_analyzers<'a>(
         let Some(language) = snippet.file_source(&params.workspace_db) else {
             continue;
         };
-        let offset = snippet.content_offset(&params.workspace_db);
+        let offset = snippet.content_offset();
         let snippet_params = params.for_snippet(&snippet, language);
         let analyzer = match language {
             DocumentFileSource::Js(_) => LintSnippetAnalyzer::new(

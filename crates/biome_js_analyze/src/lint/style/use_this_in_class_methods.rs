@@ -345,7 +345,13 @@ fn is_ignored_method(name: &AnyJsClassMemberName, ignore_methods: &[Box<str>]) -
 /// }
 /// ```
 fn uses_lexical_this(node: &JsSyntaxNode) -> bool {
-    let mut preorder = node.preorder();
+    let mut preorder = node.preorder_of_kinds(
+        JsThisExpression::KIND_SET
+            .union(JsSuperExpression::KIND_SET)
+            .union(AnyJsClass::KIND_SET)
+            .union(JsStaticInitializationBlockClassMember::KIND_SET)
+            .union(AnyJsControlFlowRoot::KIND_SET),
+    );
 
     while let Some(event) = preorder.next() {
         let WalkEvent::Enter(node) = event else {

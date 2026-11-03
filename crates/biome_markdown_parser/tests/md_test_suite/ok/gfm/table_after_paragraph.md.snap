@@ -49,11 +49,11 @@ MdRoot {
                     GfmTableCell {
                         content: MdInlineItemList [
                             MdTextual {
-                                value_token: MD_TEXTUAL_LITERAL@6..8 "a" [] [Whitespace(" ")],
+                                value_token: MD_TEXTUAL_LITERAL@6..7 "a" [] [],
                             },
                         ],
                     },
-                    PIPE@8..10 "|" [] [Whitespace(" ")],
+                    PIPE@7..10 "|" [Whitespace(" ")] [Whitespace(" ")],
                     GfmTableCell {
                         content: MdInlineItemList [
                             MdTextual {
@@ -79,12 +79,12 @@ MdRoot {
                                 minus_token: MINUS@13..14 "-" [] [],
                             },
                             GfmTableDelimiterDash {
-                                minus_token: MINUS@14..16 "-" [] [Whitespace(" ")],
+                                minus_token: MINUS@14..15 "-" [] [],
                             },
                         ],
                         r_colon_token: missing (optional),
                     },
-                    PIPE@16..18 "|" [] [Whitespace(" ")],
+                    PIPE@15..18 "|" [Whitespace(" ")] [Whitespace(" ")],
                     GfmTableDelimiterCell {
                         l_colon_token: missing (optional),
                         dashes: GfmTableDelimiterDashList [
@@ -112,11 +112,11 @@ MdRoot {
                         GfmTableCell {
                             content: MdInlineItemList [
                                 MdTextual {
-                                    value_token: MD_TEXTUAL_LITERAL@22..24 "c" [] [Whitespace(" ")],
+                                    value_token: MD_TEXTUAL_LITERAL@22..23 "c" [] [],
                                 },
                             ],
                         },
-                        PIPE@24..26 "|" [] [Whitespace(" ")],
+                        PIPE@23..26 "|" [Whitespace(" ")] [Whitespace(" ")],
                         GfmTableCell {
                             content: MdInlineItemList [
                                 MdTextual {
@@ -163,11 +163,11 @@ MdRoot {
                             GfmTableCell {
                                 content: MdInlineItemList [
                                     MdTextual {
-                                        value_token: MD_TEXTUAL_LITERAL@39..41 "a" [] [Whitespace(" ")],
+                                        value_token: MD_TEXTUAL_LITERAL@39..40 "a" [] [],
                                     },
                                 ],
                             },
-                            PIPE@41..43 "|" [] [Whitespace(" ")],
+                            PIPE@40..43 "|" [Whitespace(" ")] [Whitespace(" ")],
                             GfmTableCell {
                                 content: MdInlineItemList [
                                     MdTextual {
@@ -199,12 +199,12 @@ MdRoot {
                                         minus_token: MINUS@48..49 "-" [] [],
                                     },
                                     GfmTableDelimiterDash {
-                                        minus_token: MINUS@49..51 "-" [] [Whitespace(" ")],
+                                        minus_token: MINUS@49..50 "-" [] [],
                                     },
                                 ],
                                 r_colon_token: missing (optional),
                             },
-                            PIPE@51..53 "|" [] [Whitespace(" ")],
+                            PIPE@50..53 "|" [Whitespace(" ")] [Whitespace(" ")],
                             GfmTableDelimiterCell {
                                 l_colon_token: missing (optional),
                                 dashes: GfmTableDelimiterDashList [
@@ -238,11 +238,11 @@ MdRoot {
                                 GfmTableCell {
                                     content: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@59..61 "c" [] [Whitespace(" ")],
+                                            value_token: MD_TEXTUAL_LITERAL@59..60 "c" [] [],
                                         },
                                     ],
                                 },
-                                PIPE@61..63 "|" [] [Whitespace(" ")],
+                                PIPE@60..63 "|" [Whitespace(" ")] [Whitespace(" ")],
                                 GfmTableCell {
                                     content: MdInlineItemList [
                                         MdTextual {
@@ -296,11 +296,11 @@ MdRoot {
                                     GfmTableCell {
                                         content: MdInlineItemList [
                                             MdTextual {
-                                                value_token: MD_TEXTUAL_LITERAL@76..78 "a" [] [Whitespace(" ")],
+                                                value_token: MD_TEXTUAL_LITERAL@76..77 "a" [] [],
                                             },
                                         ],
                                     },
-                                    PIPE@78..80 "|" [] [Whitespace(" ")],
+                                    PIPE@77..80 "|" [Whitespace(" ")] [Whitespace(" ")],
                                     GfmTableCell {
                                         content: MdInlineItemList [
                                             MdTextual {
@@ -326,12 +326,12 @@ MdRoot {
                                                 minus_token: MINUS@85..86 "-" [] [],
                                             },
                                             GfmTableDelimiterDash {
-                                                minus_token: MINUS@86..88 "-" [] [Whitespace(" ")],
+                                                minus_token: MINUS@86..87 "-" [] [],
                                             },
                                         ],
                                         r_colon_token: missing (optional),
                                     },
-                                    PIPE@88..90 "|" [] [Whitespace(" ")],
+                                    PIPE@87..90 "|" [Whitespace(" ")] [Whitespace(" ")],
                                     GfmTableDelimiterCell {
                                         l_colon_token: missing (optional),
                                         dashes: GfmTableDelimiterDashList [
@@ -359,11 +359,11 @@ MdRoot {
                                         GfmTableCell {
                                             content: MdInlineItemList [
                                                 MdTextual {
-                                                    value_token: MD_TEXTUAL_LITERAL@94..98 "c" [Whitespace("  ")] [Whitespace(" ")],
+                                                    value_token: MD_TEXTUAL_LITERAL@94..97 "c" [Whitespace("  ")] [],
                                                 },
                                             ],
                                         },
-                                        PIPE@98..100 "|" [] [Whitespace(" ")],
+                                        PIPE@97..100 "|" [Whitespace(" ")] [Whitespace(" ")],
                                         GfmTableCell {
                                             content: MdInlineItemList [
                                                 MdTextual {
@@ -404,11 +404,11 @@ MdRoot {
         0: MD_QUOTE_PREFIX_LIST@6..6
         1: (empty)
         2: GFM_TABLE_CELL_LIST@6..11
-          0: GFM_TABLE_CELL@6..8
-            0: MD_INLINE_ITEM_LIST@6..8
-              0: MD_TEXTUAL@6..8
-                0: MD_TEXTUAL_LITERAL@6..8 "a" [] [Whitespace(" ")]
-          1: PIPE@8..10 "|" [] [Whitespace(" ")]
+          0: GFM_TABLE_CELL@6..7
+            0: MD_INLINE_ITEM_LIST@6..7
+              0: MD_TEXTUAL@6..7
+                0: MD_TEXTUAL_LITERAL@6..7 "a" [] []
+          1: PIPE@7..10 "|" [Whitespace(" ")] [Whitespace(" ")]
           2: GFM_TABLE_CELL@10..11
             0: MD_INLINE_ITEM_LIST@10..11
               0: MD_TEXTUAL@10..11
@@ -419,17 +419,17 @@ MdRoot {
         0: MD_QUOTE_PREFIX_LIST@12..12
         1: (empty)
         2: GFM_TABLE_DELIMITER_CELL_LIST@12..21
-          0: GFM_TABLE_DELIMITER_CELL@12..16
+          0: GFM_TABLE_DELIMITER_CELL@12..15
             0: (empty)
-            1: GFM_TABLE_DELIMITER_DASH_LIST@12..16
+            1: GFM_TABLE_DELIMITER_DASH_LIST@12..15
               0: GFM_TABLE_DELIMITER_DASH@12..13
                 0: MINUS@12..13 "-" [] []
               1: GFM_TABLE_DELIMITER_DASH@13..14
                 0: MINUS@13..14 "-" [] []
-              2: GFM_TABLE_DELIMITER_DASH@14..16
-                0: MINUS@14..16 "-" [] [Whitespace(" ")]
+              2: GFM_TABLE_DELIMITER_DASH@14..15
+                0: MINUS@14..15 "-" [] []
             2: (empty)
-          1: PIPE@16..18 "|" [] [Whitespace(" ")]
+          1: PIPE@15..18 "|" [Whitespace(" ")] [Whitespace(" ")]
           2: GFM_TABLE_DELIMITER_CELL@18..21
             0: (empty)
             1: GFM_TABLE_DELIMITER_DASH_LIST@18..21
@@ -447,11 +447,11 @@ MdRoot {
           0: MD_QUOTE_PREFIX_LIST@22..22
           1: (empty)
           2: GFM_TABLE_CELL_LIST@22..27
-            0: GFM_TABLE_CELL@22..24
-              0: MD_INLINE_ITEM_LIST@22..24
-                0: MD_TEXTUAL@22..24
-                  0: MD_TEXTUAL_LITERAL@22..24 "c" [] [Whitespace(" ")]
-            1: PIPE@24..26 "|" [] [Whitespace(" ")]
+            0: GFM_TABLE_CELL@22..23
+              0: MD_INLINE_ITEM_LIST@22..23
+                0: MD_TEXTUAL@22..23
+                  0: MD_TEXTUAL_LITERAL@22..23 "c" [] []
+            1: PIPE@23..26 "|" [Whitespace(" ")] [Whitespace(" ")]
             2: GFM_TABLE_CELL@26..27
               0: MD_INLINE_ITEM_LIST@26..27
                 0: MD_TEXTUAL@26..27
@@ -481,11 +481,11 @@ MdRoot {
             0: MD_QUOTE_PREFIX_LIST@39..39
             1: (empty)
             2: GFM_TABLE_CELL_LIST@39..44
-              0: GFM_TABLE_CELL@39..41
-                0: MD_INLINE_ITEM_LIST@39..41
-                  0: MD_TEXTUAL@39..41
-                    0: MD_TEXTUAL_LITERAL@39..41 "a" [] [Whitespace(" ")]
-              1: PIPE@41..43 "|" [] [Whitespace(" ")]
+              0: GFM_TABLE_CELL@39..40
+                0: MD_INLINE_ITEM_LIST@39..40
+                  0: MD_TEXTUAL@39..40
+                    0: MD_TEXTUAL_LITERAL@39..40 "a" [] []
+              1: PIPE@40..43 "|" [Whitespace(" ")] [Whitespace(" ")]
               2: GFM_TABLE_CELL@43..44
                 0: MD_INLINE_ITEM_LIST@43..44
                   0: MD_TEXTUAL@43..44
@@ -500,17 +500,17 @@ MdRoot {
                 2: MD_QUOTE_POST_MARKER_SPACE@46..47 " " [] []
             1: (empty)
             2: GFM_TABLE_DELIMITER_CELL_LIST@47..56
-              0: GFM_TABLE_DELIMITER_CELL@47..51
+              0: GFM_TABLE_DELIMITER_CELL@47..50
                 0: (empty)
-                1: GFM_TABLE_DELIMITER_DASH_LIST@47..51
+                1: GFM_TABLE_DELIMITER_DASH_LIST@47..50
                   0: GFM_TABLE_DELIMITER_DASH@47..48
                     0: MINUS@47..48 "-" [] []
                   1: GFM_TABLE_DELIMITER_DASH@48..49
                     0: MINUS@48..49 "-" [] []
-                  2: GFM_TABLE_DELIMITER_DASH@49..51
-                    0: MINUS@49..51 "-" [] [Whitespace(" ")]
+                  2: GFM_TABLE_DELIMITER_DASH@49..50
+                    0: MINUS@49..50 "-" [] []
                 2: (empty)
-              1: PIPE@51..53 "|" [] [Whitespace(" ")]
+              1: PIPE@50..53 "|" [Whitespace(" ")] [Whitespace(" ")]
               2: GFM_TABLE_DELIMITER_CELL@53..56
                 0: (empty)
                 1: GFM_TABLE_DELIMITER_DASH_LIST@53..56
@@ -532,11 +532,11 @@ MdRoot {
                   2: MD_QUOTE_POST_MARKER_SPACE@58..59 " " [] []
               1: (empty)
               2: GFM_TABLE_CELL_LIST@59..64
-                0: GFM_TABLE_CELL@59..61
-                  0: MD_INLINE_ITEM_LIST@59..61
-                    0: MD_TEXTUAL@59..61
-                      0: MD_TEXTUAL_LITERAL@59..61 "c" [] [Whitespace(" ")]
-                1: PIPE@61..63 "|" [] [Whitespace(" ")]
+                0: GFM_TABLE_CELL@59..60
+                  0: MD_INLINE_ITEM_LIST@59..60
+                    0: MD_TEXTUAL@59..60
+                      0: MD_TEXTUAL_LITERAL@59..60 "c" [] []
+                1: PIPE@60..63 "|" [Whitespace(" ")] [Whitespace(" ")]
                 2: GFM_TABLE_CELL@63..64
                   0: MD_INLINE_ITEM_LIST@63..64
                     0: MD_TEXTUAL@63..64
@@ -569,11 +569,11 @@ MdRoot {
                 0: MD_QUOTE_PREFIX_LIST@76..76
                 1: (empty)
                 2: GFM_TABLE_CELL_LIST@76..81
-                  0: GFM_TABLE_CELL@76..78
-                    0: MD_INLINE_ITEM_LIST@76..78
-                      0: MD_TEXTUAL@76..78
-                        0: MD_TEXTUAL_LITERAL@76..78 "a" [] [Whitespace(" ")]
-                  1: PIPE@78..80 "|" [] [Whitespace(" ")]
+                  0: GFM_TABLE_CELL@76..77
+                    0: MD_INLINE_ITEM_LIST@76..77
+                      0: MD_TEXTUAL@76..77
+                        0: MD_TEXTUAL_LITERAL@76..77 "a" [] []
+                  1: PIPE@77..80 "|" [Whitespace(" ")] [Whitespace(" ")]
                   2: GFM_TABLE_CELL@80..81
                     0: MD_INLINE_ITEM_LIST@80..81
                       0: MD_TEXTUAL@80..81
@@ -584,17 +584,17 @@ MdRoot {
                 0: MD_QUOTE_PREFIX_LIST@82..82
                 1: (empty)
                 2: GFM_TABLE_DELIMITER_CELL_LIST@82..93
-                  0: GFM_TABLE_DELIMITER_CELL@82..88
+                  0: GFM_TABLE_DELIMITER_CELL@82..87
                     0: (empty)
-                    1: GFM_TABLE_DELIMITER_DASH_LIST@82..88
+                    1: GFM_TABLE_DELIMITER_DASH_LIST@82..87
                       0: GFM_TABLE_DELIMITER_DASH@82..85
                         0: MINUS@82..85 "-" [Whitespace("  ")] []
                       1: GFM_TABLE_DELIMITER_DASH@85..86
                         0: MINUS@85..86 "-" [] []
-                      2: GFM_TABLE_DELIMITER_DASH@86..88
-                        0: MINUS@86..88 "-" [] [Whitespace(" ")]
+                      2: GFM_TABLE_DELIMITER_DASH@86..87
+                        0: MINUS@86..87 "-" [] []
                     2: (empty)
-                  1: PIPE@88..90 "|" [] [Whitespace(" ")]
+                  1: PIPE@87..90 "|" [Whitespace(" ")] [Whitespace(" ")]
                   2: GFM_TABLE_DELIMITER_CELL@90..93
                     0: (empty)
                     1: GFM_TABLE_DELIMITER_DASH_LIST@90..93
@@ -612,11 +612,11 @@ MdRoot {
                   0: MD_QUOTE_PREFIX_LIST@94..94
                   1: (empty)
                   2: GFM_TABLE_CELL_LIST@94..101
-                    0: GFM_TABLE_CELL@94..98
-                      0: MD_INLINE_ITEM_LIST@94..98
-                        0: MD_TEXTUAL@94..98
-                          0: MD_TEXTUAL_LITERAL@94..98 "c" [Whitespace("  ")] [Whitespace(" ")]
-                    1: PIPE@98..100 "|" [] [Whitespace(" ")]
+                    0: GFM_TABLE_CELL@94..97
+                      0: MD_INLINE_ITEM_LIST@94..97
+                        0: MD_TEXTUAL@94..97
+                          0: MD_TEXTUAL_LITERAL@94..97 "c" [Whitespace("  ")] []
+                    1: PIPE@97..100 "|" [Whitespace(" ")] [Whitespace(" ")]
                     2: GFM_TABLE_CELL@100..101
                       0: MD_INLINE_ITEM_LIST@100..101
                         0: MD_TEXTUAL@100..101

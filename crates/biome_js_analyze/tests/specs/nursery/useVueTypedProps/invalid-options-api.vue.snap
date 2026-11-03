@@ -1,0 +1,171 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: {
+    empty: {},
+    defaultOnly: { default: 1 },
+    emptyType: { type: [] },
+    emptyArray: [],
+    method() {},
+    arrow: () => {},
+    wrapped: ({}),
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:5:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop empty has no type.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     empty: {},
+      │     ^^^^^
+    6 │     defaultOnly: { default: 1 },
+    7 │     emptyType: { type: [] },
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:6:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop defaultOnly has no type.
+  
+    4 │   props: {
+    5 │     empty: {},
+  > 6 │     defaultOnly: { default: 1 },
+      │     ^^^^^^^^^^^
+    7 │     emptyType: { type: [] },
+    8 │     emptyArray: [],
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop emptyType has no type.
+  
+    5 │     empty: {},
+    6 │     defaultOnly: { default: 1 },
+  > 7 │     emptyType: { type: [] },
+      │     ^^^^^^^^^
+    8 │     emptyArray: [],
+    9 │     method() {},
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:8:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop emptyArray has no type.
+  
+     6 │     defaultOnly: { default: 1 },
+     7 │     emptyType: { type: [] },
+   > 8 │     emptyArray: [],
+       │     ^^^^^^^^^^
+     9 │     method() {},
+    10 │     arrow: () => {},
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:9:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop method has no type.
+  
+     7 │     emptyType: { type: [] },
+     8 │     emptyArray: [],
+   > 9 │     method() {},
+       │     ^^^^^^
+    10 │     arrow: () => {},
+    11 │     wrapped: ({}),
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:10:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop arrow has no type.
+  
+     8 │     emptyArray: [],
+     9 │     method() {},
+  > 10 │     arrow: () => {},
+       │     ^^^^^
+    11 │     wrapped: ({}),
+    12 │   },
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:11:5 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop wrapped has no type.
+  
+     9 │     method() {},
+    10 │     arrow: () => {},
+  > 11 │     wrapped: ({}),
+       │     ^^^^^^^
+    12 │   },
+    13 │ };
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

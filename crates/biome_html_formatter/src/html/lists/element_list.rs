@@ -200,7 +200,7 @@ use crate::{
 };
 #[cfg(debug_assertions)]
 use biome_console::{ColorMode, ConsoleExt, EnvConsole, markup};
-use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
+use biome_formatter::{FormatRuleWithOptions, GroupId, rowan::prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, HtmlClosingElement,

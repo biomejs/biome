@@ -1,7 +1,7 @@
 use crate::to_capitalized;
+use biome_ruledoc::{RuleSummaryFragment, parse_rule_summary};
 use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
-use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use quote::quote;
 use std::collections::BTreeMap;
 
@@ -23,38 +23,20 @@ pub fn generate_group_struct(
 
     for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
+            let parsed = parse_rule_summary(metadata.docs);
             let mut docs = String::new();
-            let parser = Parser::new(metadata.docs);
-            for event in parser {
-                match event {
-                    Event::Text(text) => {
-                        docs.push_str(text.as_ref());
-                    }
-                    Event::Code(text) => {
-                        // Escape `[` and `<` to obtain valid Markdown
-                        docs.push_str(text.replace('[', "\\[").replace('<', "\\<").as_ref());
-                    }
-                    Event::SoftBreak => {
-                        docs.push(' ');
-                    }
-
-                    Event::Start(Tag::Paragraph) => {}
-                    Event::End(TagEnd::Paragraph) => {
-                        break;
-                    }
-
-                    Event::Start(tag) => match tag {
-                        Tag::Emphasis | Tag::Strong | Tag::Paragraph => {}
-                        _ => panic!("Unimplemented tag {:?}", { tag }),
-                    },
-
-                    Event::End(tag) => match tag {
-                        TagEnd::Emphasis | TagEnd::Strong | TagEnd::Paragraph => {}
-                        _ => panic!("Unimplemented tag {:?}", { tag }),
-                    },
-
-                    _ => {
-                        panic!("Unimplemented event {:?}", { event })
+            if let Some(summary) = parsed
+                .summary()
+                .unwrap_or_else(|error| panic!("Failed to lower documentation for {rule}: {error}"))
+            {
+                for fragment in summary.fragments() {
+                    match fragment {
+                        RuleSummaryFragment::Text(text) => docs.push_str(text),
+                        RuleSummaryFragment::InlineCode(code) => {
+                            // Escape `[` and `<` to obtain valid Markdown.
+                            docs.push_str(&code.replace('[', "\\[").replace('<', "\\<"));
+                        }
+                        RuleSummaryFragment::SoftBreak => docs.push(' '),
                     }
                 }
             }

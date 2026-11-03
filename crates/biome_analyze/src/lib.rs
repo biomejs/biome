@@ -51,9 +51,8 @@ pub use crate::registry::{
     RuleRegistry, RuleRegistryBuilder, RuleSuppressions,
 };
 pub use crate::rule::{
-    CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RulePreset, RuleSource, RuleSourceKind,
-    RuleSourceWithKind, SuppressAction,
+    FixKind, GroupCategory, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleGroup, RuleMeta,
+    RuleMetadata, RulePreset, RuleSource, RuleSourceKind, RuleSourceWithKind, SuppressAction,
 };
 pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
@@ -244,6 +243,9 @@ where
 
             if let ControlFlow::Break(br) = result {
                 return Some(br);
+            }
+            if query_matcher.has_panicked() {
+                return None;
             }
 
             // Finish all the active visitors, this is executed outside of the
@@ -444,6 +446,13 @@ where
                 };
 
                 visitor.visit(&event, ctx);
+                if self.query_matcher.has_panicked() {
+                    break;
+                }
+            }
+
+            if self.query_matcher.has_panicked() {
+                return self.flush_matches(None);
             }
 
             after_event(self)?;
@@ -556,7 +565,9 @@ where
                 continue;
             }
 
-            if range_match(self.range, entry.text_range) {
+            if matches!(&entry.rule, SignalRuleKey::Internal)
+                || range_match(self.range, entry.text_range)
+            {
                 // TODO: would be nice to remove suppressed instances, if any, before emitting
                 (self.emit_signal)(&*entry.signal)?;
             }

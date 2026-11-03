@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-no-events.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const emit = defineEmits();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-no-events.vue:3:14 lint/nursery/useVueValidDefineEmits ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits call does not declare any events.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ const emit = defineEmits();
+      │              ^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Vue does not know which events the component sends, so it treats listeners for them as plain attributes and passes them to the root element of the component.
+  
+  i Declare the events with an array of names, an object, or a type.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

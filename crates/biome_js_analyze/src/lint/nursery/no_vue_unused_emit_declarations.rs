@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// });
     /// ```
     ///
-    /// ```vue,expect_diagnostic,ignore
+    /// ```vue,expect_diagnostic
     /// <script setup lang="ts">
     /// const emit = defineEmits<{
     ///   change: [value: string];
@@ -88,7 +88,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueUnusedEmitDeclarations {
-        version: "next",
+        version: "2.6.3",
         name: "noVueUnusedEmitDeclarations",
         language: "js",
         recommended: true,

@@ -33,6 +33,21 @@ pub(crate) fn migrate_stylelint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
+        "csstools/use-logical" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_logical_properties
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
         "custom-property-no-missing-var-function" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
@@ -136,6 +151,21 @@ pub(crate) fn migrate_stylelint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
+        "liberty/use-logical-spec" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_logical_properties
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
         "lightness-notation" => {
             if !options.include_nursery {
                 results.add(
@@ -148,6 +178,21 @@ pub(crate) fn migrate_stylelint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .use_consistent_lightness_notation
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
+        "max-nesting-depth" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_excessive_nested_blocks
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
@@ -228,6 +273,28 @@ pub(crate) fn migrate_stylelint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_unknown_property
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
+        "scss/dollar-variable-no-missing-interpolation" => {
+            if !options.include_inspired {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Inspired,
+                );
+                return false;
+            }
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_missing_scss_interpolation
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }

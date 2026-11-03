@@ -10,7 +10,7 @@ use biome_analyze::{
     ServiceBag,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
+use biome_diagnostics::{Severity, category};
 use biome_js_runtime::{JsExecContext, JsPluginRule};
 use biome_js_syntax::JsSyntaxNode;
 use biome_languages::JsFileSource;
@@ -148,7 +148,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         markup!(
                             "Could not run the plugin because the analyzed file's source type is unavailable."
                         ),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             };
@@ -165,7 +166,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                             category!("plugin"),
                             None::<TextRange>,
                             markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
-                        ),
+                        )
+                        .with_severity(Severity::Error),
                         action: None,
                     }],
                 };
@@ -181,7 +183,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         category!("plugin"),
                         None::<TextRange>,
                         markup!("Could not pass the AST to the plugin"),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             };
@@ -204,7 +207,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         category!("plugin"),
                         None::<TextRange>,
                         markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 });
             }
@@ -224,7 +228,9 @@ mod tests {
     use super::*;
     use crate::test_utils::snapshot_content;
     use biome_diagnostics::advice::CodeSuggestionAdvice;
-    use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
+    use biome_diagnostics::{
+        Diagnostic, DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string,
+    };
     use biome_fs::MemoryFileSystem;
     use biome_glob::NormalizedGlob;
     use biome_js_parser::JsParserOptions;
@@ -235,6 +241,67 @@ mod tests {
         let mut services = ServiceBag::default();
         services.insert_service(source_type);
         services
+    }
+
+    #[test]
+    fn throwing_rule_reports_error_severity() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            export const boom = defineRule({
+                query: ast("JS_MODULE"),
+                run() {
+                    throw new Error("boom");
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "console.log('hello');",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
+        let [entry] = result.entries.as_slice() else {
+            panic!("{result:?}");
+        };
+        assert!(
+            PrintDescription(&entry.diagnostic)
+                .to_string()
+                .contains("Rule boom errored: Error: boom")
+        );
+        assert_eq!(entry.diagnostic.severity(), Severity::Error);
+    }
+
+    #[test]
+    fn missing_source_type_reports_error_severity() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            export const noop = defineRule({
+                query: ast("JS_MODULE"),
+                run() {},
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "console.log('hello');",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &ServiceBag::default(),
+        );
+        let [entry] = result.entries.as_slice() else {
+            panic!("{result:?}");
+        };
+        assert_eq!(entry.diagnostic.severity(), Severity::Error);
     }
 
     #[test]
@@ -2277,3 +2344,11 @@ mod tests {
 #[cfg(test)]
 #[path = "semantic.tests.rs"]
 mod semantic_tests;
+
+#[cfg(test)]
+#[path = "kind_sets.tests.rs"]
+mod kind_sets_tests;
+
+#[cfg(test)]
+#[path = "traversal.tests.rs"]
+mod traversal_tests;

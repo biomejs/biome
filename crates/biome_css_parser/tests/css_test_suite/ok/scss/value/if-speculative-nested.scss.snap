@@ -307,98 +307,106 @@ CssRoot {
                                                                     colon_token: COLON@192..194 ":" [] [Whitespace(" ")],
                                                                     value: CssCustomPropertyValue {
                                                                         components: CssCustomPropertyComponentList [
-                                                                            CssCustomPropertyFunction {
-                                                                                name: CssCustomIdentifier {
-                                                                                    value_token: IDENT@194..196 "if" [] [],
-                                                                                },
+                                                                            CssIfFunction {
+                                                                                if_token: IF_KW@194..196 "if" [] [],
                                                                                 l_paren_token: L_PAREN@196..197 "(" [] [],
-                                                                                components: CssCustomPropertyComponentList [
-                                                                                    CssCustomPropertyFunction {
-                                                                                        name: CssCustomIdentifier {
-                                                                                            value_token: IDENT@197..201 "sass" [] [],
-                                                                                        },
-                                                                                        l_paren_token: L_PAREN@201..202 "(" [] [],
-                                                                                        components: CssCustomPropertyComponentList [
-                                                                                            CssCustomIdentifier {
-                                                                                                value_token: IDENT@202..206 "true" [] [],
-                                                                                            },
-                                                                                        ],
-                                                                                        r_paren_token: R_PAREN@206..207 ")" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: COLON@207..209 ":" [] [Whitespace(" ")],
-                                                                                    },
-                                                                                    CssCustomPropertyFunction {
-                                                                                        name: CssCustomIdentifier {
-                                                                                            value_token: IDENT@209..211 "if" [] [],
-                                                                                        },
-                                                                                        l_paren_token: L_PAREN@211..212 "(" [] [],
-                                                                                        components: CssCustomPropertyComponentList [
-                                                                                            CssCustomIdentifier {
-                                                                                                value_token: IDENT@212..216 "true" [] [],
-                                                                                            },
-                                                                                            CssCustomPropertyDelimiter {
-                                                                                                value: COMMA@216..218 "," [] [Whitespace(" ")],
-                                                                                            },
-                                                                                            CssCustomPropertyFunction {
-                                                                                                name: CssCustomIdentifier {
-                                                                                                    value_token: IDENT@218..220 "if" [] [],
-                                                                                                },
-                                                                                                l_paren_token: L_PAREN@220..221 "(" [] [],
-                                                                                                components: CssCustomPropertyComponentList [
-                                                                                                    CssCustomPropertyFunction {
-                                                                                                        name: CssCustomIdentifier {
-                                                                                                            value_token: IDENT@221..225 "sass" [] [],
-                                                                                                        },
-                                                                                                        l_paren_token: L_PAREN@225..226 "(" [] [],
-                                                                                                        components: CssCustomPropertyComponentList [
-                                                                                                            CssCustomIdentifier {
-                                                                                                                value_token: IDENT@226..231 "false" [] [],
-                                                                                                            },
-                                                                                                        ],
-                                                                                                        r_paren_token: R_PAREN@231..232 ")" [] [],
-                                                                                                    },
-                                                                                                    CssCustomPropertyDelimiter {
-                                                                                                        value: COLON@232..234 ":" [] [Whitespace(" ")],
-                                                                                                    },
-                                                                                                    CssCustomIdentifier {
-                                                                                                        value_token: IDENT@234..237 "red" [] [],
-                                                                                                    },
-                                                                                                    CssCustomPropertyDelimiter {
-                                                                                                        value: SEMICOLON@237..239 ";" [] [Whitespace(" ")],
-                                                                                                    },
-                                                                                                    CssCustomIdentifier {
-                                                                                                        value_token: IDENT@239..243 "else" [] [],
-                                                                                                    },
-                                                                                                    CssCustomPropertyDelimiter {
-                                                                                                        value: COLON@243..245 ":" [] [Whitespace(" ")],
-                                                                                                    },
-                                                                                                    CssCustomIdentifier {
-                                                                                                        value_token: IDENT@245..249 "blue" [] [],
+                                                                                css_if_branch_list: CssIfBranchList [
+                                                                                    CssIfBranch {
+                                                                                        condition: CssIfSassTest {
+                                                                                            sass_token: SASS_KW@197..201 "sass" [] [],
+                                                                                            l_paren_token: L_PAREN@201..202 "(" [] [],
+                                                                                            test: ScssExpression {
+                                                                                                items: ScssExpressionItemList [
+                                                                                                    CssIdentifier {
+                                                                                                        value_token: IDENT@202..206 "true" [] [],
                                                                                                     },
                                                                                                 ],
-                                                                                                r_paren_token: R_PAREN@249..250 ")" [] [],
                                                                                             },
-                                                                                            CssCustomPropertyDelimiter {
-                                                                                                value: COMMA@250..252 "," [] [Whitespace(" ")],
-                                                                                            },
-                                                                                            CssCustomIdentifier {
-                                                                                                value_token: IDENT@252..257 "black" [] [],
-                                                                                            },
-                                                                                        ],
-                                                                                        r_paren_token: R_PAREN@257..258 ")" [] [],
+                                                                                            r_paren_token: R_PAREN@206..207 ")" [] [],
+                                                                                        },
+                                                                                        colon_token: COLON@207..209 ":" [] [Whitespace(" ")],
+                                                                                        value: CssCustomPropertyValue {
+                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                CssCustomPropertyFunction {
+                                                                                                    name: CssCustomIdentifier {
+                                                                                                        value_token: IDENT@209..211 "if" [] [],
+                                                                                                    },
+                                                                                                    l_paren_token: L_PAREN@211..212 "(" [] [],
+                                                                                                    components: CssCustomPropertyComponentList [
+                                                                                                        CssCustomIdentifier {
+                                                                                                            value_token: IDENT@212..216 "true" [] [],
+                                                                                                        },
+                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                            value: COMMA@216..218 "," [] [Whitespace(" ")],
+                                                                                                        },
+                                                                                                        CssIfFunction {
+                                                                                                            if_token: IF_KW@218..220 "if" [] [],
+                                                                                                            l_paren_token: L_PAREN@220..221 "(" [] [],
+                                                                                                            css_if_branch_list: CssIfBranchList [
+                                                                                                                CssIfBranch {
+                                                                                                                    condition: CssIfSassTest {
+                                                                                                                        sass_token: SASS_KW@221..225 "sass" [] [],
+                                                                                                                        l_paren_token: L_PAREN@225..226 "(" [] [],
+                                                                                                                        test: ScssExpression {
+                                                                                                                            items: ScssExpressionItemList [
+                                                                                                                                CssIdentifier {
+                                                                                                                                    value_token: IDENT@226..231 "false" [] [],
+                                                                                                                                },
+                                                                                                                            ],
+                                                                                                                        },
+                                                                                                                        r_paren_token: R_PAREN@231..232 ")" [] [],
+                                                                                                                    },
+                                                                                                                    colon_token: COLON@232..234 ":" [] [Whitespace(" ")],
+                                                                                                                    value: CssCustomPropertyValue {
+                                                                                                                        components: CssCustomPropertyComponentList [
+                                                                                                                            CssCustomIdentifier {
+                                                                                                                                value_token: IDENT@234..237 "red" [] [],
+                                                                                                                            },
+                                                                                                                        ],
+                                                                                                                    },
+                                                                                                                },
+                                                                                                                SEMICOLON@237..239 ";" [] [Whitespace(" ")],
+                                                                                                                CssIfBranch {
+                                                                                                                    condition: CssElseKeyword {
+                                                                                                                        else_token: ELSE_KW@239..243 "else" [] [],
+                                                                                                                    },
+                                                                                                                    colon_token: COLON@243..245 ":" [] [Whitespace(" ")],
+                                                                                                                    value: CssCustomPropertyValue {
+                                                                                                                        components: CssCustomPropertyComponentList [
+                                                                                                                            CssCustomIdentifier {
+                                                                                                                                value_token: IDENT@245..249 "blue" [] [],
+                                                                                                                            },
+                                                                                                                        ],
+                                                                                                                    },
+                                                                                                                },
+                                                                                                            ],
+                                                                                                            r_paren_token: R_PAREN@249..250 ")" [] [],
+                                                                                                        },
+                                                                                                        CssCustomPropertyDelimiter {
+                                                                                                            value: COMMA@250..252 "," [] [Whitespace(" ")],
+                                                                                                        },
+                                                                                                        CssCustomIdentifier {
+                                                                                                            value_token: IDENT@252..257 "black" [] [],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                    r_paren_token: R_PAREN@257..258 ")" [] [],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
                                                                                     },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: SEMICOLON@258..260 ";" [] [Whitespace(" ")],
-                                                                                    },
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@260..264 "else" [] [],
-                                                                                    },
-                                                                                    CssCustomPropertyDelimiter {
-                                                                                        value: COLON@264..266 ":" [] [Whitespace(" ")],
-                                                                                    },
-                                                                                    CssCustomIdentifier {
-                                                                                        value_token: IDENT@266..271 "white" [] [],
+                                                                                    SEMICOLON@258..260 ";" [] [Whitespace(" ")],
+                                                                                    CssIfBranch {
+                                                                                        condition: CssElseKeyword {
+                                                                                            else_token: ELSE_KW@260..264 "else" [] [],
+                                                                                        },
+                                                                                        colon_token: COLON@264..266 ":" [] [Whitespace(" ")],
+                                                                                        value: CssCustomPropertyValue {
+                                                                                            components: CssCustomPropertyComponentList [
+                                                                                                CssCustomIdentifier {
+                                                                                                    value_token: IDENT@266..271 "white" [] [],
+                                                                                                },
+                                                                                            ],
+                                                                                        },
                                                                                     },
                                                                                 ],
                                                                                 r_paren_token: R_PAREN@271..272 ")" [] [],
@@ -1179,69 +1187,73 @@ CssRoot {
                                   1: COLON@192..194 ":" [] [Whitespace(" ")]
                                   2: CSS_CUSTOM_PROPERTY_VALUE@194..272
                                     0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@194..272
-                                      0: CSS_CUSTOM_PROPERTY_FUNCTION@194..272
-                                        0: CSS_CUSTOM_IDENTIFIER@194..196
-                                          0: IDENT@194..196 "if" [] []
+                                      0: CSS_IF_FUNCTION@194..272
+                                        0: IF_KW@194..196 "if" [] []
                                         1: L_PAREN@196..197 "(" [] []
-                                        2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@197..271
-                                          0: CSS_CUSTOM_PROPERTY_FUNCTION@197..207
-                                            0: CSS_CUSTOM_IDENTIFIER@197..201
-                                              0: IDENT@197..201 "sass" [] []
-                                            1: L_PAREN@201..202 "(" [] []
-                                            2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@202..206
-                                              0: CSS_CUSTOM_IDENTIFIER@202..206
-                                                0: IDENT@202..206 "true" [] []
-                                            3: R_PAREN@206..207 ")" [] []
-                                          1: CSS_CUSTOM_PROPERTY_DELIMITER@207..209
-                                            0: COLON@207..209 ":" [] [Whitespace(" ")]
-                                          2: CSS_CUSTOM_PROPERTY_FUNCTION@209..258
-                                            0: CSS_CUSTOM_IDENTIFIER@209..211
-                                              0: IDENT@209..211 "if" [] []
-                                            1: L_PAREN@211..212 "(" [] []
-                                            2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@212..257
-                                              0: CSS_CUSTOM_IDENTIFIER@212..216
-                                                0: IDENT@212..216 "true" [] []
-                                              1: CSS_CUSTOM_PROPERTY_DELIMITER@216..218
-                                                0: COMMA@216..218 "," [] [Whitespace(" ")]
-                                              2: CSS_CUSTOM_PROPERTY_FUNCTION@218..250
-                                                0: CSS_CUSTOM_IDENTIFIER@218..220
-                                                  0: IDENT@218..220 "if" [] []
-                                                1: L_PAREN@220..221 "(" [] []
-                                                2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@221..249
-                                                  0: CSS_CUSTOM_PROPERTY_FUNCTION@221..232
-                                                    0: CSS_CUSTOM_IDENTIFIER@221..225
-                                                      0: IDENT@221..225 "sass" [] []
-                                                    1: L_PAREN@225..226 "(" [] []
-                                                    2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@226..231
-                                                      0: CSS_CUSTOM_IDENTIFIER@226..231
-                                                        0: IDENT@226..231 "false" [] []
-                                                    3: R_PAREN@231..232 ")" [] []
-                                                  1: CSS_CUSTOM_PROPERTY_DELIMITER@232..234
-                                                    0: COLON@232..234 ":" [] [Whitespace(" ")]
-                                                  2: CSS_CUSTOM_IDENTIFIER@234..237
-                                                    0: IDENT@234..237 "red" [] []
-                                                  3: CSS_CUSTOM_PROPERTY_DELIMITER@237..239
-                                                    0: SEMICOLON@237..239 ";" [] [Whitespace(" ")]
-                                                  4: CSS_CUSTOM_IDENTIFIER@239..243
-                                                    0: IDENT@239..243 "else" [] []
-                                                  5: CSS_CUSTOM_PROPERTY_DELIMITER@243..245
-                                                    0: COLON@243..245 ":" [] [Whitespace(" ")]
-                                                  6: CSS_CUSTOM_IDENTIFIER@245..249
-                                                    0: IDENT@245..249 "blue" [] []
-                                                3: R_PAREN@249..250 ")" [] []
-                                              3: CSS_CUSTOM_PROPERTY_DELIMITER@250..252
-                                                0: COMMA@250..252 "," [] [Whitespace(" ")]
-                                              4: CSS_CUSTOM_IDENTIFIER@252..257
-                                                0: IDENT@252..257 "black" [] []
-                                            3: R_PAREN@257..258 ")" [] []
-                                          3: CSS_CUSTOM_PROPERTY_DELIMITER@258..260
-                                            0: SEMICOLON@258..260 ";" [] [Whitespace(" ")]
-                                          4: CSS_CUSTOM_IDENTIFIER@260..264
-                                            0: IDENT@260..264 "else" [] []
-                                          5: CSS_CUSTOM_PROPERTY_DELIMITER@264..266
-                                            0: COLON@264..266 ":" [] [Whitespace(" ")]
-                                          6: CSS_CUSTOM_IDENTIFIER@266..271
-                                            0: IDENT@266..271 "white" [] []
+                                        2: CSS_IF_BRANCH_LIST@197..271
+                                          0: CSS_IF_BRANCH@197..258
+                                            0: CSS_IF_SASS_TEST@197..207
+                                              0: SASS_KW@197..201 "sass" [] []
+                                              1: L_PAREN@201..202 "(" [] []
+                                              2: SCSS_EXPRESSION@202..206
+                                                0: SCSS_EXPRESSION_ITEM_LIST@202..206
+                                                  0: CSS_IDENTIFIER@202..206
+                                                    0: IDENT@202..206 "true" [] []
+                                              3: R_PAREN@206..207 ")" [] []
+                                            1: COLON@207..209 ":" [] [Whitespace(" ")]
+                                            2: CSS_CUSTOM_PROPERTY_VALUE@209..258
+                                              0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@209..258
+                                                0: CSS_CUSTOM_PROPERTY_FUNCTION@209..258
+                                                  0: CSS_CUSTOM_IDENTIFIER@209..211
+                                                    0: IDENT@209..211 "if" [] []
+                                                  1: L_PAREN@211..212 "(" [] []
+                                                  2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@212..257
+                                                    0: CSS_CUSTOM_IDENTIFIER@212..216
+                                                      0: IDENT@212..216 "true" [] []
+                                                    1: CSS_CUSTOM_PROPERTY_DELIMITER@216..218
+                                                      0: COMMA@216..218 "," [] [Whitespace(" ")]
+                                                    2: CSS_IF_FUNCTION@218..250
+                                                      0: IF_KW@218..220 "if" [] []
+                                                      1: L_PAREN@220..221 "(" [] []
+                                                      2: CSS_IF_BRANCH_LIST@221..249
+                                                        0: CSS_IF_BRANCH@221..237
+                                                          0: CSS_IF_SASS_TEST@221..232
+                                                            0: SASS_KW@221..225 "sass" [] []
+                                                            1: L_PAREN@225..226 "(" [] []
+                                                            2: SCSS_EXPRESSION@226..231
+                                                              0: SCSS_EXPRESSION_ITEM_LIST@226..231
+                                                                0: CSS_IDENTIFIER@226..231
+                                                                  0: IDENT@226..231 "false" [] []
+                                                            3: R_PAREN@231..232 ")" [] []
+                                                          1: COLON@232..234 ":" [] [Whitespace(" ")]
+                                                          2: CSS_CUSTOM_PROPERTY_VALUE@234..237
+                                                            0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@234..237
+                                                              0: CSS_CUSTOM_IDENTIFIER@234..237
+                                                                0: IDENT@234..237 "red" [] []
+                                                        1: SEMICOLON@237..239 ";" [] [Whitespace(" ")]
+                                                        2: CSS_IF_BRANCH@239..249
+                                                          0: CSS_ELSE_KEYWORD@239..243
+                                                            0: ELSE_KW@239..243 "else" [] []
+                                                          1: COLON@243..245 ":" [] [Whitespace(" ")]
+                                                          2: CSS_CUSTOM_PROPERTY_VALUE@245..249
+                                                            0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@245..249
+                                                              0: CSS_CUSTOM_IDENTIFIER@245..249
+                                                                0: IDENT@245..249 "blue" [] []
+                                                      3: R_PAREN@249..250 ")" [] []
+                                                    3: CSS_CUSTOM_PROPERTY_DELIMITER@250..252
+                                                      0: COMMA@250..252 "," [] [Whitespace(" ")]
+                                                    4: CSS_CUSTOM_IDENTIFIER@252..257
+                                                      0: IDENT@252..257 "black" [] []
+                                                  3: R_PAREN@257..258 ")" [] []
+                                          1: SEMICOLON@258..260 ";" [] [Whitespace(" ")]
+                                          2: CSS_IF_BRANCH@260..271
+                                            0: CSS_ELSE_KEYWORD@260..264
+                                              0: ELSE_KW@260..264 "else" [] []
+                                            1: COLON@264..266 ":" [] [Whitespace(" ")]
+                                            2: CSS_CUSTOM_PROPERTY_VALUE@266..271
+                                              0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@266..271
+                                                0: CSS_CUSTOM_IDENTIFIER@266..271
+                                                  0: IDENT@266..271 "white" [] []
                                         3: R_PAREN@271..272 ")" [] []
                                 1: (empty)
                               2: R_PAREN@272..273 ")" [] []

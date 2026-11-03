@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/nested_markdown_frontmatter.md
+---
+
+# Input
+
+```md
+```markdown
+---
+title: Refund policy
+verified:
+  by: human:jane@acme.example
+  at: 2026-09-01T00:00:00Z
+---
+# Refund policy
+```
+
+  ```md
+  ---
+  verified:
+    by: human
+  ---
+  #   Policy
+  ```
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+```markdown
+---
+title: Refund policy
+verified:
+  by: human:jane@acme.example
+  at: 2026-09-01T00:00:00Z
+---
+
+# Refund policy
+```
+
+```md
+---
+verified:
+  by: human
+---
+
+# Policy
+```
+
+```

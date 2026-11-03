@@ -10,9 +10,7 @@ use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
-use biome_formatter::{
-    AttributePosition, BracketSpacing, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle,
-};
+use biome_formatter::{AttributePosition, Expand, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -260,7 +258,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
             line_ending: Some(value.end_of_line.into()),
             bracket_same_line: Some(value.bracket_line.into()),
             attribute_position: Some(AttributePosition::default()),
-            bracket_spacing: Some(BracketSpacing::default()),
+            bracket_spacing: Some(value.bracket_spacing.into()),
             delimiter_spacing: None,
             expand: Some(value.object_wrap.into()),
             format_with_errors: Some(false.into()),
@@ -359,6 +357,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             || options.use_tabs.is_some()
             || options.tab_width.is_some()
             || options.end_of_line.is_some()
+            || options.bracket_spacing.is_some()
         {
             // are global options are set
             let line_width = if let Some(print_width) = options.print_width {
@@ -384,6 +383,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 line_width,
                 indent_style,
                 line_ending: options.end_of_line.map(|end_of_line| end_of_line.into()),
+                bracket_spacing: options.bracket_spacing.map(Into::into),
                 ..Default::default()
             };
             result.formatter = Some(formatter);
@@ -396,7 +396,6 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             && options.arrow_parens.is_none()
             && options.trailing_comma.is_none()
             && options.quote_props.is_none()
-            && options.bracket_spacing.is_none()
         {
             // no js option are set
             return Ok(result);

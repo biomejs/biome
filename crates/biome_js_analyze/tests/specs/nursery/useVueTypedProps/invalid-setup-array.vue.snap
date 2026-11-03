@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-setup-array.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineProps(["foo"]);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-array.vue:3:14 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop foo has no type.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineProps(["foo"]);
+      │              ^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

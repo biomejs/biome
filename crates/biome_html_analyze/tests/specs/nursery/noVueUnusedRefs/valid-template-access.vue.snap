@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-template-access.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <input ref="foo" />
+  <input ref="bar" />
+  <input ref="baz" />
+  <button @click="alert($refs.foo.value, $refs?.bar, $refs['baz'])">Click</button>
+</template>
+
+```

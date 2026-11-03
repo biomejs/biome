@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/expression/optional_chain_parentheses.ts
+---
+
+# Input
+
+```ts
+(a?.b).c;
+(a?.b)!.c;
+(a?.b)![c];
+(a?.b!).c;
+(a?.b!.c).d;
+((a?.b)).c;
+(a?.b)!();
+(a?.b!)();
+(a?.b<C>).d;
+(a?.b!<C>).d;
+x = (a?.b)!;
+
+```
+
+
+# Formatted
+
+```ts
+(a?.b).c;
+(a?.b)!.c;
+(a?.b)![c];
+(a?.b!).c;
+(a?.b!.c).d;
+(a?.b).c;
+(a?.b)!();
+(a?.b!)();
+(a?.b<C>).d;
+(a?.b!<C>).d;
+x = a?.b!;
+
+```

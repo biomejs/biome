@@ -6,13 +6,9 @@ use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, advice::CodeSuggestionAdvice};
-use biome_embeds::{EmbeddedSnippet, collect_embedded_data};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
-use biome_html_syntax::{
-    AnyAstroDirective, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlLanguage, HtmlRoot,
-    HtmlTextExpression, ScriptType,
-};
+use biome_html_syntax::HtmlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
 use biome_json_analyze::JsonAnalyzeServices;
@@ -20,17 +16,15 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_languages::{
     DocumentFileSource, HtmlFileSource,
-    javascript::{JsEmbeddingKind, JsFileSource, SvelteEmbeddingKind, SvelteFileKind},
+    javascript::{JsEmbeddingKind, JsFileSource},
 };
 use biome_markdown_parser::MarkdownParserOptions;
 use biome_markdown_syntax::MarkdownLanguage;
-use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, Language, NodeCache, TextRange, TextSize, TokenText};
+use biome_rowan::{Language, TextSize};
 use biome_text_edit::TextEdit;
 use biome_yaml_syntax::YamlLanguage;
 use camino::Utf8PathBuf;
 use std::slice;
-use std::sync::Arc;
 
 /// Analyzes a documentation code block with a single rule enabled.
 ///
@@ -100,80 +94,37 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 )?;
             }
         } else {
-            let mut node_cache = NodeCache::default();
-            let html_root: HtmlRoot = parse.tree();
-            let mut parser_options = JsParserOptions::default();
-            if let Some(config) = configuration.as_ref()
-                && let Some(js) = &config.javascript
-                && let Some(parser) = &js.parser
-                && parser
-                    .unsafe_parameter_decorators_enabled
-                    .is_some_and(|b| b.into())
-            {
-                parser_options = parser_options.with_parse_class_parameter_decorators();
-            }
+            let snippets = services_builder.store_html_parse(
+                Utf8PathBuf::from(&file_path),
+                parse,
+                html_file_source,
+                configuration.clone().filter(|_| code_block.use_options),
+            );
 
-            let snippets = extract_html_embedded_js(code, &html_root, &html_file_source);
-
-            let mut parsed_snippets: Vec<AnyParse> = Vec::with_capacity(snippets.len());
             let mut has_parse_errors = false;
             for snippet in &snippets {
-                let parse = biome_js_parser::parse_js_with_offset_and_cache(
-                    snippet.text,
-                    snippet.offset,
-                    snippet.file_source,
-                    parser_options,
-                    &mut node_cache,
-                );
-                let any_parse: AnyParse = parse.into();
-
-                if any_parse.has_errors() {
+                for diagnostic in snippet.parse.diagnostics() {
                     has_parse_errors = true;
-                    for diagnostic in any_parse.into_diagnostics() {
-                        let span = diagnostic.location().span.map(|s| s + snippet.offset);
-                        writer.write_parse_error(
-                            diagnostic
-                                .with_file_span(span)
-                                .with_file_path(&file_path)
-                                .with_file_source_code(code),
-                        )?;
-                    }
-                } else {
-                    parsed_snippets.push(any_parse);
+                    let span = diagnostic
+                        .location()
+                        .span
+                        .map(|s| s + snippet.range.start());
+                    writer.write_parse_error(
+                        diagnostic
+                            .clone()
+                            .with_file_span(span)
+                            .with_file_path(&file_path)
+                            .with_file_source_code(code),
+                    )?;
                 }
             }
 
             if !has_parse_errors {
-                let embedded_snippets: Vec<EmbeddedSnippet> = parsed_snippets
-                    .iter()
-                    .zip(&snippets)
-                    .map(|(any_parse, snippet)| {
-                        EmbeddedSnippet::new(
-                            any_parse,
-                            TextRange::at(snippet.offset, TextSize::of(snippet.text)),
-                            DocumentFileSource::Js(snippet.file_source),
-                        )
-                    })
-                    .collect();
-
-                let html_any_parse: AnyParse = parse.into();
-                let embedded_data = Arc::new(collect_embedded_data(
-                    DocumentFileSource::Html(html_file_source),
-                    &html_any_parse,
-                    embedded_snippets,
-                ));
-
-                for (any_parse, snippet) in parsed_snippets.into_iter().zip(snippets) {
-                    let root = any_parse.tree();
+                for snippet in &snippets {
+                    let root = snippet.parse.tree();
                     let options =
                         code_block.create_analyzer_options::<JsLanguage>(configuration.clone())?;
-                    let services = services_builder
-                        .build_for_js_any_parse(
-                            Utf8PathBuf::from(&file_path),
-                            any_parse,
-                            snippet.file_source,
-                        )
-                        .with_embedded_data(Some(embedded_data.clone()));
+                    let services = services_builder.build_for_js_snippet(snippet);
                     let result = biome_js_analyze::analyze(
                         &root,
                         filter,
@@ -186,8 +137,8 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                                 code,
                                 &file_path,
                                 writer,
-                                Some(snippet.offset),
-                                Some(snippet.text),
+                                Some(snippet.range.start()),
+                                Some(&code[snippet.range]),
                             )
                         },
                     );
@@ -478,180 +429,6 @@ fn propagate_break<T>((result, _): (Option<anyhow::Error>, Vec<T>)) -> Result<()
     } else {
         Ok(())
     }
-}
-
-struct EmbeddedJsSnippet<'a> {
-    text: &'a str,
-    offset: TextSize,
-    file_source: JsFileSource,
-}
-
-fn extract_html_embedded_js<'a>(
-    code: &'a str,
-    html_root: &HtmlRoot,
-    host_file_source: &HtmlFileSource,
-) -> Vec<EmbeddedJsSnippet<'a>> {
-    let mut snippets = Vec::new();
-
-    for node in html_root.syntax().descendants() {
-        if let Some(frontmatter) = AstroEmbeddedContent::cast_ref(&node) {
-            if let Some(token) = frontmatter.content_token() {
-                let range = token.text_range();
-                snippets.push(EmbeddedJsSnippet {
-                    text: &code[range],
-                    offset: range.start(),
-                    file_source: JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Astro {
-                        frontmatter: true,
-                        is_class_attribute: false,
-                    }),
-                });
-            }
-        } else if let Some(element) = HtmlElement::cast_ref(&node) {
-            if !element.has_astro_is_raw()
-                && element
-                    .tag_name()
-                    .is_some_and(|name| name.text().eq_ignore_ascii_case("script"))
-            {
-                let opening = element.opening_element().ok();
-                let find_attr = |name: &str| -> Option<TokenText> {
-                    opening.as_ref()?.attributes().into_iter().find_map(|attr| {
-                        let attr = attr.as_html_attribute()?;
-                        let attr_name = attr.name().ok()?.value_token().ok()?;
-                        if attr_name.text_trimmed().eq_ignore_ascii_case(name) {
-                            let value = attr.initializer()?.value().ok()?;
-                            let string_literal = value.as_html_string()?;
-                            string_literal.inner_string_text().ok()
-                        } else {
-                            None
-                        }
-                    })
-                };
-
-                let type_value = find_attr("type");
-                if let Some(ref type_val) = type_value {
-                    let script_type = ScriptType::from_type_value(type_val.text());
-                    if script_type.is_json() || !script_type.is_javascript() {
-                        continue;
-                    }
-                }
-
-                let lang_value = find_attr("lang");
-                let lang = lang_value.as_ref().map(|t| t.text());
-
-                let base_source = if host_file_source.is_vue() || host_file_source.is_svelte() {
-                    match lang {
-                        Some(l) if l.eq_ignore_ascii_case("ts") => JsFileSource::ts(),
-                        Some(l) if l.eq_ignore_ascii_case("tsx") => JsFileSource::tsx(),
-                        Some(l) if l.eq_ignore_ascii_case("jsx") => JsFileSource::jsx(),
-                        _ => JsFileSource::js_module(),
-                    }
-                } else if host_file_source.is_astro() {
-                    JsFileSource::ts()
-                } else if type_value
-                    .as_ref()
-                    .is_some_and(|t| t.text().eq_ignore_ascii_case("module"))
-                {
-                    JsFileSource::js_module()
-                } else {
-                    JsFileSource::js_script()
-                };
-
-                let file_source = if host_file_source.is_svelte() {
-                    let is_module_script = element.find_attribute_by_name("module").is_some()
-                        || element.has_attribute_with_value("context", "module");
-                    base_source.with_embedding_kind(JsEmbeddingKind::Svelte {
-                        is_module_script,
-                        file_kind: SvelteFileKind::Component,
-                        embedding_kind: SvelteEmbeddingKind::Source,
-                        is_class_attribute: false,
-                    })
-                } else if host_file_source.is_vue() {
-                    base_source.with_embedding_kind(JsEmbeddingKind::Vue {
-                        setup: element.find_attribute_by_name("setup").is_some(),
-                        is_source: true,
-                        event_handler: false,
-                        allow_statements: true,
-                        slot_props: false,
-                        generics_list: false,
-                        is_class_attribute: false,
-                    })
-                } else {
-                    base_source
-                };
-
-                let content_child = element.children().iter().find_map(|child| {
-                    let child = child.as_any_html_content()?;
-                    child.as_html_embedded_content().cloned()
-                });
-                if let Some(content_child) = content_child
-                    && let Ok(token) = content_child.value_token()
-                {
-                    let range = token.text_range();
-                    snippets.push(EmbeddedJsSnippet {
-                        text: &code[range],
-                        offset: range.start(),
-                        file_source,
-                    });
-                }
-            }
-        } else if let Some(expr) = HtmlTextExpression::cast_ref(&node)
-            && let Ok(token) = expr.html_literal_token()
-        {
-            let is_class_attribute = expr.syntax().ancestors().any(|ancestor| {
-                if let Some(attr) = HtmlAttribute::cast_ref(&ancestor) {
-                    return attr
-                        .name()
-                        .ok()
-                        .and_then(|n| n.value_token().ok())
-                        .is_some_and(|t| t.text_trimmed() == "class");
-                }
-                if let Some(directive) = AnyAstroDirective::cast_ref(&ancestor) {
-                    return directive.as_astro_class_directive().is_some();
-                }
-                false
-            });
-
-            let file_source = if host_file_source.is_astro() {
-                JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
-                    frontmatter: false,
-                    is_class_attribute,
-                })
-            } else if host_file_source.is_svelte() {
-                let embedding_kind = if expr.is_svelte_text_interpolation() {
-                    SvelteEmbeddingKind::TextInterpolation
-                } else {
-                    SvelteEmbeddingKind::Expression
-                };
-                JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Svelte {
-                    is_module_script: false,
-                    file_kind: SvelteFileKind::Component,
-                    embedding_kind,
-                    is_class_attribute,
-                })
-            } else if host_file_source.is_vue() {
-                JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Vue {
-                    setup: false,
-                    is_source: false,
-                    event_handler: false,
-                    allow_statements: false,
-                    slot_props: false,
-                    generics_list: false,
-                    is_class_attribute,
-                })
-            } else {
-                JsFileSource::tsx()
-            };
-
-            let range = token.text_range();
-            snippets.push(EmbeddedJsSnippet {
-                text: &code[range],
-                offset: range.start(),
-                file_source,
-            });
-        }
-    }
-
-    snippets
 }
 
 #[cfg(test)]
@@ -1265,6 +1042,102 @@ mod tests {
 
         assert!(!writer.has_parse_error);
         assert_eq!(writer.all_diagnostics.len(), 0);
+    }
+
+    #[test]
+    fn analyzes_js_rule_with_the_vue_model_of_the_file() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("vue expect_diagnostic").expect("valid code block");
+        let code = "<script setup>\nconst emit = defineEmits([\"change\"]);\n</script>\n\n<template><button @click=\"emit('close')\"></button></template>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "nursery",
+            rule: "noVueUnusedEmitDeclarations",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        assert_eq!(writer.all_diagnostics.len(), 1);
+        let span = writer.all_diagnostics[0].location().span.unwrap();
+        assert_eq!(&code[span], "\"change\"");
+    }
+
+    #[test]
+    fn analyzes_each_code_block_at_the_same_path_on_its_own() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let analyze = |services_builder: &mut AnalyzerServicesBuilder, code: &str| {
+            let code_block = CodeBlock::from_str("vue").expect("valid code block");
+            let mut writer = DiagnosticConsoleWriter::default();
+            RuleCodeAnalyzer {
+                group: "correctness",
+                rule: "noUnusedVariables",
+                rule_language: "js",
+                code_block: &code_block,
+                code,
+                configuration: None,
+                services_builder,
+                writer: &mut writer,
+            }
+            .analyze()
+            .unwrap();
+            writer.all_diagnostics.len()
+        };
+
+        let used =
+            "<script setup>\nconst count = 1;\n</script>\n\n<template>{{ count }}</template>";
+        let unused =
+            "<script setup>\nconst count = 1;\n</script>\n\n<template><div></div></template>";
+        assert_eq!(analyze(&mut services_builder, used), 0);
+        assert_eq!(analyze(&mut services_builder, unused), 1);
+        assert_eq!(analyze(&mut services_builder, used), 0);
+    }
+
+    #[test]
+    fn parses_embedded_scripts_with_code_block_options() {
+        let code = "<script lang=\"ts\">\nclass A { m(@dec x) {} }\n</script>";
+        let parse_errors = |tag: &str, configuration: Option<Configuration>| {
+            let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+            let code_block = CodeBlock::from_str(tag).expect("valid code block");
+            let mut writer = DiagnosticConsoleWriter::default();
+            RuleCodeAnalyzer {
+                group: "suspicious",
+                rule: "noVar",
+                rule_language: "js",
+                code_block: &code_block,
+                code,
+                configuration,
+                services_builder: &mut services_builder,
+                writer: &mut writer,
+            }
+            .analyze()
+            .unwrap();
+            writer
+                .all_diagnostics
+                .iter()
+                .map(|diagnostic| &code[diagnostic.location().span.unwrap()])
+                .collect::<Vec<_>>()
+        };
+        let configuration = Configuration {
+            javascript: Some(biome_configuration::JsConfiguration {
+                parser: Some(biome_configuration::javascript::JsParserConfiguration {
+                    unsafe_parameter_decorators_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+
+        assert_eq!(parse_errors("vue", None), ["@dec"]);
+        assert!(parse_errors("vue use_options", Some(configuration)).is_empty());
     }
 
     #[test]

@@ -14,6 +14,9 @@ expression: invalid.vue
 		width: 100%;
 		margin-left: 1rem;
 		float: left;
+		padding: 1px 2px;
+		padding-inline-start: 1px;
+		padding-inline-end: 2px;
 	}
 </style>
 
@@ -40,12 +43,12 @@ invalid.vue:8:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
   i Unsafe fix: Use the logical CSS replacement.
   
-    1 1 │   
-    2 2 │     .card {
-    3   │ - → → width:·100%;
-      3 │ + → → inline-size:·100%;
-    4 4 │       margin-left: 1rem;
-    5 5 │       float: left;
+     1  1 │   
+     2  2 │     .card {
+     3    │ - → → width:·100%;
+        3 │ + → → inline-size:·100%;
+     4  4 │       margin-left: 1rem;
+     5  5 │       float: left;
   
 
 ```
@@ -60,7 +63,7 @@ invalid.vue:9:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
    > 9 │ 		margin-left: 1rem;
        │ 		^^^^^^^^^^^
     10 │ 		float: left;
-    11 │ 	}
+    11 │ 		padding: 1px 2px;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -70,12 +73,12 @@ invalid.vue:9:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
   i Unsafe fix: Use the logical CSS replacement.
   
-    2 2 │     .card {
-    3 3 │       width: 100%;
-    4   │ - → → margin-left:·1rem;
-      4 │ + → → margin-inline-start:·1rem;
-    5 5 │       float: left;
-    6 6 │     }
+     2  2 │     .card {
+     3  3 │       width: 100%;
+     4    │ - → → margin-left:·1rem;
+        4 │ + → → margin-inline-start:·1rem;
+     5  5 │       float: left;
+     6  6 │       padding: 1px 2px;
   
 
 ```
@@ -89,8 +92,8 @@ invalid.vue:10:10 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
      9 │ 		margin-left: 1rem;
   > 10 │ 		float: left;
        │ 		       ^^^^
-    11 │ 	}
-    12 │ </style>
+    11 │ 		padding: 1px 2px;
+    12 │ 		padding-inline-start: 1px;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -100,12 +103,66 @@ invalid.vue:10:10 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Unsafe fix: Use the logical CSS replacement.
   
-    3 3 │       width: 100%;
-    4 4 │       margin-left: 1rem;
-    5   │ - → → float:·left;
-      5 │ + → → float:·inline-start;
-    6 6 │     }
-    7 7 │   
+     3  3 │       width: 100%;
+     4  4 │       margin-left: 1rem;
+     5    │ - → → float:·left;
+        5 │ + → → float:·inline-start;
+     6  6 │       padding: 1px 2px;
+     7  7 │       padding-inline-start: 1px;
+  
+
+```
+
+```
+invalid.vue:11:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS longhands instead of a multi-value physical shorthand.
+  
+     9 │ 		margin-left: 1rem;
+    10 │ 		float: left;
+  > 11 │ 		padding: 1px 2px;
+       │ 		^^^^^^^
+    12 │ 		padding-inline-start: 1px;
+    13 │ 		padding-inline-end: 2px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Multi-value shorthands always map to physical sides.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with padding-block and padding-inline.
+  
+    6 │ → → padding-block:·1px;·padding-inline:·2px;
+      │            ++++++     +++++++++++++++++     
+
+```
+
+```
+invalid.vue:12:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These logical longhands can be combined into a shorthand.
+  
+    10 │ 		float: left;
+    11 │ 		padding: 1px 2px;
+  > 12 │ 		padding-inline-start: 1px;
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    13 │ 		padding-inline-end: 2px;
+    14 │ 	}
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine these properties as padding-inline.
+  
+     5 5 │       float: left;
+     6 6 │       padding: 1px 2px;
+     7   │ - → → padding-inline-start:·1px;
+     8   │ - → → padding-inline-end:·2px;
+       7 │ + → → padding-inline:·1px·2px;
+     9 8 │     }
+    10 9 │   
   
 
 ```

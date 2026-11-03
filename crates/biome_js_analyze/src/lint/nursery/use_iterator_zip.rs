@@ -99,7 +99,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseIteratorZip {
-        version: "next",
+        version: "2.6.3",
         name: "useIteratorZip",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-iterator-zip").same()],

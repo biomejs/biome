@@ -1,0 +1,46 @@
+/* should not generate diagnostics */
+
+const strings = ["foo", "bar"];
+const largestString = strings.reduce((a, b) => (a > b ? a : b));
+const smallestString = strings.reduce((a, b) => (a < b ? a : b));
+
+const dates = [new Date("2026-01-01"), new Date("2026-06-01")];
+const latestDate = dates.reduce((a, b) => (a > b ? a : b));
+const earliestDate = dates.reduce((a, b) => (a < b ? a : b));
+
+const rightmostString = ["foo", "bar"].reduceRight((a, b) => (a > b ? a : b));
+
+const numbersWithStringAccumulator = [1, 2];
+const stringAccumulator = numbersWithStringAccumulator.reduce(
+    (a, b) => (a < b ? a : b),
+    "",
+);
+
+const wordsWithNumericStart = ["foo", "bar"];
+const stringCurrentValue = wordsWithNumericStart.reduce(
+    (a, b) => (a > b ? a : b),
+    0,
+);
+
+const largestBigInt = [1n, 2n].reduce((a, b) => (a > b ? a : b));
+const largestBoolean = [true, false].reduce((a, b) => (a > b ? a : b));
+
+const templateStrings = [`foo`, `bar`];
+const largestTemplateString = templateStrings.reduce((a, b) => (a > b ? a : b));
+
+const suffix = 1;
+const interpolatedStrings = [`foo${suffix}`, `bar${suffix}`];
+const largestInterpolatedString = interpolatedStrings.reduce((a, b) => (a > b ? a : b));
+
+const wrappedStrings = ["foo", "bar"];
+const largestWrappedString = ((wrappedStrings).reduce)(((a, b) => (a > b ? a : b)));
+
+const functionStrings = ["foo", "bar"];
+const largestFunctionString = functionStrings.reduce((function (a, b) {
+    return a > b ? a : b;
+}));
+
+const firstWord = "foo";
+const secondWord = "bar";
+const boundStrings = [firstWord, secondWord];
+const largestBoundString = boundStrings.reduce((a, b) => (a > b ? a : b));

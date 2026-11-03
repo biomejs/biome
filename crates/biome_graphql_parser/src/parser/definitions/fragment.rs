@@ -1,7 +1,7 @@
 use crate::parser::{
     GraphqlParser,
     directive::DirectiveList,
-    parse_binding,
+    parse_binding, parse_description,
     parse_error::{expected_name, expected_named_type, fragment_name_must_not_be_on},
     parse_reference,
 };
@@ -11,17 +11,19 @@ use biome_parser::{
     prelude::ParsedSyntax::*,
 };
 
-use super::operation::parse_selection_set;
+use super::operation::{parse_selection_set, parse_variable_definitions};
 
 #[inline]
 pub(crate) fn parse_fragment_definition(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
+    parse_description(p).ok();
     p.bump(T![fragment]);
 
     if p.at(T![on]) {
         p.error(fragment_name_must_not_be_on(p, p.cur_range()));
     }
     parse_binding(p).or_add_diagnostic(p, expected_name);
+    parse_variable_definitions(p).ok();
     parse_type_condition(p);
 
     DirectiveList.parse_list(p);

@@ -23,14 +23,14 @@ use biome_analyze::{
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::yaml::YamlLinterEnabled;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
-use biome_db::AnyParsedSource;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
-    TrailingNewline,
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::NodeParse;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache};
 use biome_yaml_analyze::{analyze, analyze_snippet};
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
@@ -408,7 +408,7 @@ fn parse(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: YamlSyntaxNode = parse.syntax(&workspace_db);
@@ -422,7 +422,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -564,7 +564,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     analyze(&tree, filter, &analyzer_options, |signal| {
         if compute_actions {
             actions.extend(

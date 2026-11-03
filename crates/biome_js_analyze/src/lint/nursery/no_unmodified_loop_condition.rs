@@ -180,6 +180,14 @@ const SKIPPED_SUBTREE_KINDS: SyntaxKindSet<JsLanguage> = JsFunctionExpression::K
     .union(JsFormalParameter::KIND_SET)
     .union(AnyTsType::KIND_SET);
 
+/// The kinds of the nodes that [condition_references] reads.
+const CONDITION_KINDS: SyntaxKindSet<JsLanguage> = GROUP_EXPRESSION_KINDS
+    .union(DYNAMIC_EXPRESSION_KINDS)
+    .union(SKIPPED_SUBTREE_KINDS)
+    .union(JsTemplateExpression::KIND_SET)
+    .union(JsReferenceIdentifier::KIND_SET)
+    .union(JsIdentifierAssignment::KIND_SET);
+
 /// One variable use collected from the loop condition.
 struct ConditionReference {
     /// Where the variable appears in the condition.
@@ -246,7 +254,7 @@ fn condition_references(
 ) -> Vec<ConditionReference> {
     let mut references = Vec::new();
     let mut active_group: Option<ActiveGroup> = None;
-    let mut preorder = test.syntax().preorder();
+    let mut preorder = test.syntax().preorder_of_kinds(CONDITION_KINDS);
 
     while let Some(event) = preorder.next() {
         match event {

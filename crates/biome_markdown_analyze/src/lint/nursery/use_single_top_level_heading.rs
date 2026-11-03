@@ -84,7 +84,10 @@ declare_lint_rule! {
         name: "useSingleTopLevelHeading",
         language: "md",
         recommended: true,
-        sources: &[RuleSource::MarkdownLint("md025", "single-title").inspired()],
+        sources: &[
+            RuleSource::MarkdownLint("md025", "single-title").inspired(),
+            RuleSource::EslintMarkdown("no-multiple-h1").inspired(),
+        ],
     }
 }
 

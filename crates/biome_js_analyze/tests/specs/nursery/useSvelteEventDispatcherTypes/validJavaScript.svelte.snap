@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validJavaScript.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+</script>
+
+<button onclick={() => dispatch('save')}>Save</button>
+
+```

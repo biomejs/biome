@@ -3,7 +3,7 @@ use biome_analyze::{
     PluginTargetLanguage, RuleFilter, ServiceBag,
 };
 use biome_db::{
-    AnyParsedSource, Db, ParsedSnippet, ParsedSource,
+    Db, Source,
     testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run},
 };
 use biome_js_analyze::JsAnalyzerServices;
@@ -12,6 +12,7 @@ use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_semantic::{SemanticModel, semantic_model_from_snippet, semantic_model_from_source};
 use biome_js_syntax::{AnyJsRoot, JsSyntaxKind};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_parser::db::{AnalyzedSource, ParseDb, SnippetOutput, SourceExt, SourceOutput};
 use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Setter;
@@ -51,8 +52,39 @@ impl salsa::Database for TestDb {}
 
 #[salsa::db]
 impl Db for TestDb {
-    fn parsed_source_for_path(&self, _: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _: &Utf8Path) -> Option<Source> {
         None
+    }
+}
+
+/// Marks the start of a snippet that a test document embeds: the text up to
+/// the next marker.
+const SNIPPET_MARKER: &str = "<script>";
+
+#[salsa::db]
+impl ParseDb for TestDb {
+    /// Parses the text before the first [SNIPPET_MARKER] as the document, and
+    /// the text after each marker as a snippet of the document.
+    fn parse_source(&self, source: Source) -> SourceOutput {
+        let text = source.text(self);
+        let mut parts = text.split(SNIPPET_MARKER);
+        let document = parts.next().unwrap_or_default();
+        let mut offset = TextSize::of(document);
+        let snippets = parts
+            .map(|snippet| {
+                offset += TextSize::of(SNIPPET_MARKER);
+                let content_offset = offset;
+                offset += TextSize::of(snippet);
+                SnippetOutput::new(
+                    parsed(snippet).into(),
+                    TextRange::default(),
+                    TextRange::default(),
+                    content_offset,
+                    0,
+                )
+            })
+            .collect();
+        SourceOutput::new(parsed(document).into(), 0).with_snippets(snippets)
     }
 }
 
@@ -74,7 +106,7 @@ fn parsed(source: &str) -> Parse<AnyJsRoot> {
 fn analyze(
     db: &Rc<TestDb>,
     root: &AnyJsRoot,
-    source: Option<AnyParsedSource>,
+    source: Option<AnalyzedSource>,
     rule: &str,
 ) -> Vec<TextRange> {
     let mut ranges = Vec::new();
@@ -105,10 +137,14 @@ fn analyze(
 
 #[test]
 fn cfg_only_analysis_reports_unreachable_code() {
-    let parse = parsed("function example() { return; neverCalled(); }");
-    let root = parse.tree();
     let db = TestDb::default();
-    let source = ParsedSource::new(&db, "/file.js".into(), parse.into(), 0, vec![]);
+    let source = Source::new(
+        &db,
+        "/file.js".into(),
+        "function example() { return; neverCalled(); }".into(),
+        0,
+    );
+    let root: AnyJsRoot = source.parsed(&db).tree();
     let db = Rc::new(db);
 
     for services in [
@@ -147,10 +183,14 @@ fn cfg_only_analysis_reports_unreachable_code() {
 
 #[test]
 fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
-    let original = parsed("function f() { return; unreachable(); }");
-    let original_root = original.tree();
     let db = TestDb::default();
-    let source = ParsedSource::new(&db, "/file.js".into(), original.into(), 0, vec![]);
+    let source = Source::new(
+        &db,
+        "/file.js".into(),
+        "function f() { return; unreachable(); }".into(),
+        0,
+    );
+    let original_root: AnyJsRoot = source.parsed(&db).tree();
     let mut db = Rc::new(db);
 
     let (_, errors) = biome_js_analyze::analyze(
@@ -219,8 +259,9 @@ fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
     );
 
     source
-        .set_parsed(Rc::get_mut(&mut db).unwrap())
-        .to(changed.into());
+        .set_text(Rc::get_mut(&mut db).unwrap())
+        .to("\nfunction f() { return; unreachable(); }".into());
+    let changed_root: AnyJsRoot = source.parsed(db.as_ref()).tree();
     db.take_events();
     assert_eq!(
         analyze(&db, &changed_root, Some(source.into()), "noUnreachable"),
@@ -250,35 +291,23 @@ fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
 #[test]
 fn cfg_queries_use_the_supplied_snippet_with_identical_content() {
     let db = TestDb::default();
-    let first_parse = parsed("function second() { return; second(); }");
-    let second_parse = parsed("function second() { return; second(); }");
-    let second_root = second_parse.tree();
-    let first = ParsedSnippet::new(
-        &db,
-        first_parse.into(),
-        TextRange::default(),
-        TextRange::default(),
-        10.into(),
-        0,
-    );
-    let second = ParsedSnippet::new(
-        &db,
-        second_parse.into(),
-        TextRange::default(),
-        TextRange::default(),
-        100.into(),
-        0,
-    );
-    let source = ParsedSource::new(
+    let source = Source::new(
         &db,
         "/file.js".into(),
-        parsed("host();").into(),
+        "host();<script>function second() { return; second(); }<script>function second() { return; second(); }".into(),
         0,
-        vec![first, second],
     );
     let db = Rc::new(db);
+    let snippets = source.snippets(db.as_ref());
+    let (first, second) = (snippets[0], snippets[1]);
+    let second_root: AnyJsRoot = second.parsed(db.as_ref()).tree();
 
-    let ranges = analyze(&db, &second_root, Some(second.into()), "noUnreachable");
+    let ranges = analyze(
+        &db,
+        &second_root,
+        Some(second.to_ref(db.as_ref()).into()),
+        "noUnreachable",
+    );
     assert_eq!(ranges.len(), 1);
     let events = db.take_events();
     assert_function_query_was_not_run(db.as_ref(), semantic_model_from_snippet, second, &events);
@@ -293,7 +322,12 @@ fn cfg_queries_use_the_supplied_snippet_with_identical_content() {
     assert_function_query_was_not_run(db.as_ref(), control_flow_model_from_source, source, &events);
 
     assert_eq!(
-        analyze(&db, &second_root, Some(second.into()), "noUnreachable"),
+        analyze(
+            &db,
+            &second_root,
+            Some(second.to_ref(db.as_ref()).into()),
+            "noUnreachable"
+        ),
         ranges
     );
     assert_function_query_was_not_run(
@@ -346,9 +380,8 @@ impl AnalyzerPlugin for ModelConsumerPlugin {
 fn plugins_request_semantic_models_before_evaluation() {
     for (requires_model, disabled) in [(false, false), (true, false), (true, true)] {
         let db = TestDb::default();
-        let parse = parsed("let value = 1; value;");
-        let root = parse.tree();
-        let source = ParsedSource::new(&db, "/file.js".into(), parse.into(), 0, vec![]);
+        let source = Source::new(&db, "/file.js".into(), "let value = 1; value;".into(), 0);
+        let root: AnyJsRoot = source.parsed(&db).tree();
         let db = Rc::new(db);
         let evaluations = Arc::new(AtomicUsize::new(0));
         let plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>> =

@@ -9,7 +9,9 @@ use biome_js_syntax::{
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 
 use crate::JsDeclarationKind;
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, Text, TextSize, syntax::Preorder};
+use biome_rowan::{
+    AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxNodeOptionExt, Text, TextSize, syntax::Preorder,
+};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
@@ -301,12 +303,89 @@ struct ScopeOptions {
     implies_strict_mode: bool,
 }
 
+/// Returns the set of `kinds`, for building sets of [JsSyntaxKind] in constants.
+pub(crate) const fn kind_set(kinds: &[JsSyntaxKind]) -> SyntaxKindSet<JsLanguage> {
+    let mut set = SyntaxKindSet::EMPTY;
+    let mut index = 0;
+    while index < kinds.len() {
+        set = set.union(SyntaxKindSet::from_raw(RawSyntaxKind(kinds[index] as u16)));
+        index += 1;
+    }
+    set
+}
+
 impl SemanticEventExtractor {
+    /// The kinds of the nodes that [Self::enter] and [Self::leave] read.
+    ///
+    /// Passing only the events of these nodes, such as the ones of
+    /// [biome_rowan::SyntaxNode::preorder_of_kinds], extracts the same events
+    /// as passing the events of every node.
+    pub const VISITED_KINDS: SyntaxKindSet<JsLanguage> = kind_set(&[
+        TS_DECLARE_STATEMENT,
+        TS_EXPORT_DECLARE_CLAUSE,
+        JS_IDENTIFIER_BINDING,
+        TS_IDENTIFIER_BINDING,
+        TS_TYPE_PARAMETER_NAME,
+        TS_LITERAL_ENUM_MEMBER_NAME,
+        JS_REFERENCE_IDENTIFIER,
+        JSX_REFERENCE_IDENTIFIER,
+        JS_IDENTIFIER_ASSIGNMENT,
+        JS_MODULE,
+        TS_DECLARATION_MODULE,
+        JS_SCRIPT,
+        JS_EXPRESSION_TEMPLATE_ROOT,
+        JS_SVELTE_DECLARATION_ROOT,
+        JS_SVELTE_SNIPPET_ROOT,
+        JS_VUE_SLOT_PROPS_ROOT,
+        JS_VUE_GENERIC_ROOT,
+        JS_DIRECTIVE,
+        JS_CONSTRUCTOR_CLASS_MEMBER,
+        JS_METHOD_CLASS_MEMBER,
+        JS_GETTER_CLASS_MEMBER,
+        JS_SETTER_CLASS_MEMBER,
+        JS_FUNCTION_DECLARATION,
+        JS_FUNCTION_EXPRESSION,
+        JS_ARROW_FUNCTION_EXPRESSION,
+        JS_METHOD_OBJECT_MEMBER,
+        JS_GETTER_OBJECT_MEMBER,
+        JS_SETTER_OBJECT_MEMBER,
+        JS_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+        JS_FUNCTION_BODY,
+        JS_CLASS_DECLARATION,
+        JS_CLASS_EXPORT_DEFAULT_DECLARATION,
+        JS_CLASS_EXPRESSION,
+        JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER,
+        TS_MODULE_DECLARATION,
+        TS_ENUM_DECLARATION,
+        TS_EXTERNAL_MODULE_DECLARATION,
+        TS_INTERFACE_DECLARATION,
+        TS_TYPE_ALIAS_DECLARATION,
+        TS_DECLARE_FUNCTION_DECLARATION,
+        TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+        TS_CALL_SIGNATURE_TYPE_MEMBER,
+        TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER,
+        TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
+        TS_METHOD_SIGNATURE_CLASS_MEMBER,
+        TS_METHOD_SIGNATURE_TYPE_MEMBER,
+        TS_GETTER_SIGNATURE_CLASS_MEMBER,
+        TS_SETTER_SIGNATURE_CLASS_MEMBER,
+        TS_INDEX_SIGNATURE_CLASS_MEMBER,
+        TS_INDEX_SIGNATURE_TYPE_MEMBER,
+        JS_BLOCK_STATEMENT,
+        JS_FOR_STATEMENT,
+        JS_FOR_OF_STATEMENT,
+        JS_FOR_IN_STATEMENT,
+        JS_SWITCH_STATEMENT,
+        JS_CATCH_CLAUSE,
+    ])
+    .union(AnyTsType::KIND_SET);
+
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
         // IMPORTANT: If you push a scope for a given node type, don't forget to
         // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
+        // If you read a new node kind, add it to [Self::VISITED_KINDS].
         match node.kind() {
             TS_DECLARE_STATEMENT | TS_EXPORT_DECLARE_CLAUSE => {
                 self.is_ambient_context = true;

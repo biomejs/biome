@@ -1,0 +1,177 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+while (true) {
+	if (!value!) {
+		break;
+	}
+
+	process(value);
+}
+
+while (true) {
+	if (value!) {
+		break;
+	}
+
+	process(value);
+}
+
+while (true) {
+	if (value as boolean) {
+		break;
+	}
+
+	process(value);
+}
+
+while (true) {
+	if (!(value as boolean)) {
+		break;
+	}
+
+	process(value);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    1 │ /* should generate diagnostics */
+    2 │ while (true) {
+  > 3 │ 	if (!value!) {
+      │ 	^^^^^^^^^^^^^^
+  > 4 │ 		break;
+  > 5 │ 	}
+      │ 	^
+    6 │ 
+    7 │ 	process(value);
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - while·(true)·{
+     3    │ - → if·(!value!)·{
+     4    │ - → → break;
+     5    │ - → }
+     6    │ - 
+        2 │ + while·(value!)·{
+     7  3 │     process(value);
+     8  4 │   }
+  
+
+```
+
+```
+invalid.ts:11:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    10 │ while (true) {
+  > 11 │ 	if (value!) {
+       │ 	^^^^^^^^^^^^^
+  > 12 │ 		break;
+  > 13 │ 	}
+       │ 	^
+    14 │ 
+    15 │ 	process(value);
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+     8  8 │   }
+     9  9 │   
+    10    │ - while·(true)·{
+    11    │ - → if·(value!)·{
+    12    │ - → → break;
+    13    │ - → }
+    14    │ - 
+       10 │ + while·(!value!)·{
+    15 11 │     process(value);
+    16 12 │   }
+  
+
+```
+
+```
+invalid.ts:19:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    18 │ while (true) {
+  > 19 │ 	if (value as boolean) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+  > 20 │ 		break;
+  > 21 │ 	}
+       │ 	^
+    22 │ 
+    23 │ 	process(value);
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    16 16 │   }
+    17 17 │   
+    18    │ - while·(true)·{
+    19    │ - → if·(value·as·boolean)·{
+    20    │ - → → break;
+    21    │ - → }
+    22    │ - 
+       18 │ + while·(!(value·as·boolean))·{
+    23 19 │     process(value);
+    24 20 │   }
+  
+
+```
+
+```
+invalid.ts:27:2 lint/nursery/useWhileLoopCondition  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The condition that ends this loop is checked by an if statement at the start of its body.
+  
+    26 │ while (true) {
+  > 27 │ 	if (!(value as boolean)) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 28 │ 		break;
+  > 29 │ 	}
+       │ 	^
+    30 │ 
+    31 │ 	process(value);
+  
+  i Writing the condition in the while statement shows when the loop stops without reading its body.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Move the condition into the while statement.
+  
+    24 24 │   }
+    25 25 │   
+    26    │ - while·(true)·{
+    27    │ - → if·(!(value·as·boolean))·{
+    28    │ - → → break;
+    29    │ - → }
+    30    │ - 
+       26 │ + while·(value·as·boolean)·{
+    31 27 │     process(value);
+    32 28 │   }
+  
+
+```

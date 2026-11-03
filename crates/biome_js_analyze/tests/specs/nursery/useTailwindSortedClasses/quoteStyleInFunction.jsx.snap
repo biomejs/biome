@@ -32,8 +32,6 @@ quoteStyleInFunction.jsx:2:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚îÅ
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -60,8 +58,6 @@ quoteStyleInFunction.jsx:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚î
     5 ‚îÇ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -91,8 +87,6 @@ quoteStyleInFunction.jsx:4:24 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚î
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -120,8 +114,6 @@ quoteStyleInFunction.jsx:4:56 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚î
     6 ‚îÇ 
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -151,8 +143,6 @@ quoteStyleInFunction.jsx:5:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚îÅ
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -179,8 +169,6 @@ quoteStyleInFunction.jsx:8:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚î
     10 ‚îÇ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -210,8 +198,6 @@ quoteStyleInFunction.jsx:9:24 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚î
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -239,8 +225,6 @@ quoteStyleInFunction.jsx:10:36 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚
     12 ‚îÇ 
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -270,8 +254,6 @@ quoteStyleInFunction.jsx:10:68 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -298,8 +280,6 @@ quoteStyleInFunction.jsx:11:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ‚
     12 ‚îÇ 
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

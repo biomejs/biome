@@ -111,7 +111,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTanstackQueryRestDestructuring {
-        version: "next",
+        version: "2.6.3",
         name: "noTanstackQueryRestDestructuring",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("no-rest-destructuring").same()],

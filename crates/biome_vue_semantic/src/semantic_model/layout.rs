@@ -19,6 +19,8 @@ pub(crate) struct VFor {
     pub(crate) element: ElementId,
     /// The name and range of each variable the directive introduces.
     pub(crate) bindings: Vec<(TokenText, TextRange)>,
+    /// The range of the variables, with their default values.
+    pub(crate) binding_range: Option<TextRange>,
 }
 
 /// What the layout pass leaves for the later passes.
@@ -359,6 +361,7 @@ fn visit_attribute(
                     layout.v_fors.push(VFor {
                         element,
                         bindings: v_for_bindings(&v_for),
+                        binding_range: v_for.binding().ok().map(|binding| binding.range()),
                     });
                     (
                         AttrValueData::Unparsed,

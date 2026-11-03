@@ -1,0 +1,40 @@
+/* should not generate diagnostics */
+
+for (const element of array) {
+	bar(element);
+}
+
+for (const [index, element] of array.entries()) {
+	bar(element, index);
+}
+
+new foo.forEach((element) => bar());
+
+forEach((element) => bar());
+
+foo.notForEach((element) => bar());
+
+foo[forEach]((element) => bar());
+
+React.Children.forEach(children, (child) => {});
+
+Children.forEach(children, (child) => {});
+
+R.forEach((element) => bar(element), list);
+
+await pIteration.forEach(plugins, async (pluginName) => {});
+
+Effect.forEach([1, 2, 3], (n) => Effect.succeed(n));
+
+const map = new Map();
+map.forEach((value) => console.log(value));
+
+const set = new Set();
+set.forEach((value) => console.log(value));
+
+new Map().forEach((value) => console.log(value));
+
+new URLSearchParams(query).forEach((value, key) => consume(key, value));
+
+const aliased = map;
+aliased.forEach((value) => console.log(value));

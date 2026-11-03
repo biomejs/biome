@@ -1,0 +1,244 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <LinkList>
+    <template slot-scope="{a}"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template slot-scope><a /></template>
+  </LinkList>
+  <LinkList>
+    <a slot-scope="{a}" />
+  </LinkList>
+  <LinkList>
+    <span class="item" slot-scope="props">{{ props.title }}</span>
+  </LinkList>
+  <link-list>
+    <template slot-scope="props">{{ props.title }}</template>
+    <template #header>Header</template>
+    <div slot="footer">Footer</div>
+  </link-list>
+  <LinkList>
+    <template v-if="ready" slot-scope="props">{{ props.title }}</template>
+    <template v-else slot-scope="props">{{ props.title }}</template>
+  </LinkList>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:15 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    2 │ <template>
+    3 │   <LinkList>
+  > 4 │     <template slot-scope="{a}"><a /></template>
+      │               ^^^^^^^^^^^^^^^^
+    5 │   </LinkList>
+    6 │   <LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace slot-scope with v-slot.
+  
+     2  2 │   <template>
+     3  3 │     <LinkList>
+     4    │ - ····<template·slot-scope="{a}"><a·/></template>
+        4 │ + ····<template·v-slot="{a}"><a·/></template>
+     5  5 │     </LinkList>
+     6  6 │     <LinkList>
+  
+
+```
+
+```
+invalid.vue:7:15 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    5 │   </LinkList>
+    6 │   <LinkList>
+  > 7 │     <template slot-scope><a /></template>
+      │               ^^^^^^^^^^
+    8 │   </LinkList>
+    9 │   <LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace slot-scope with v-slot.
+  
+     5  5 │     </LinkList>
+     6  6 │     <LinkList>
+     7    │ - ····<template·slot-scope><a·/></template>
+        7 │ + ····<template·v-slot><a·/></template>
+     8  8 │     </LinkList>
+     9  9 │     <LinkList>
+  
+
+```
+
+```
+invalid.vue:10:8 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+     8 │   </LinkList>
+     9 │   <LinkList>
+  > 10 │     <a slot-scope="{a}" />
+       │        ^^^^^^^^^^^^^^^^
+    11 │   </LinkList>
+    12 │   <LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the element in a <template> with v-slot.
+  
+     8  8 │     </LinkList>
+     9  9 │     <LinkList>
+    10    │ - ····<a·slot-scope="{a}"·/>
+       10 │ + ····<template·v-slot="{a}"><a·/></template>
+    11 11 │     </LinkList>
+    12 12 │     <LinkList>
+  
+
+```
+
+```
+invalid.vue:13:24 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    11 │   </LinkList>
+    12 │   <LinkList>
+  > 13 │     <span class="item" slot-scope="props">{{ props.title }}</span>
+       │                        ^^^^^^^^^^^^^^^^^^
+    14 │   </LinkList>
+    15 │   <link-list>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the element in a <template> with v-slot.
+  
+    11 11 │     </LinkList>
+    12 12 │     <LinkList>
+    13    │ - ····<span·class="item"·slot-scope="props">{{·props.title·}}</span>
+       13 │ + ····<template·v-slot="props"><span·class="item">{{·props.title·}}</span></template>
+    14 14 │     </LinkList>
+    15 15 │     <link-list>
+  
+
+```
+
+```
+invalid.vue:16:15 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    14 │   </LinkList>
+    15 │   <link-list>
+  > 16 │     <template slot-scope="props">{{ props.title }}</template>
+       │               ^^^^^^^^^^^^^^^^^^
+    17 │     <template #header>Header</template>
+    18 │     <div slot="footer">Footer</div>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace slot-scope with v-slot.
+  
+    14 14 │     </LinkList>
+    15 15 │     <link-list>
+    16    │ - ····<template·slot-scope="props">{{·props.title·}}</template>
+       16 │ + ····<template·v-slot="props">{{·props.title·}}</template>
+    17 17 │       <template #header>Header</template>
+    18 18 │       <div slot="footer">Footer</div>
+  
+
+```
+
+```
+invalid.vue:21:28 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    19 │   </link-list>
+    20 │   <LinkList>
+  > 21 │     <template v-if="ready" slot-scope="props">{{ props.title }}</template>
+       │                            ^^^^^^^^^^^^^^^^^^
+    22 │     <template v-else slot-scope="props">{{ props.title }}</template>
+    23 │   </LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace slot-scope with v-slot.
+  
+    19 19 │     </link-list>
+    20 20 │     <LinkList>
+    21    │ - ····<template·v-if="ready"·slot-scope="props">{{·props.title·}}</template>
+       21 │ + ····<template·v-if="ready"·v-slot="props">{{·props.title·}}</template>
+    22 22 │       <template v-else slot-scope="props">{{ props.title }}</template>
+    23 23 │     </LinkList>
+  
+
+```
+
+```
+invalid.vue:22:22 lint/nursery/noVueDeprecatedSlotScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    20 │   <LinkList>
+    21 │     <template v-if="ready" slot-scope="props">{{ props.title }}</template>
+  > 22 │     <template v-else slot-scope="props">{{ props.title }}</template>
+       │                      ^^^^^^^^^^^^^^^^^^
+    23 │   </LinkList>
+    24 │ </template>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace slot-scope with v-slot.
+  
+    20 20 │     <LinkList>
+    21 21 │       <template v-if="ready" slot-scope="props">{{ props.title }}</template>
+    22    │ - ····<template·v-else·slot-scope="props">{{·props.title·}}</template>
+       22 │ + ····<template·v-else·v-slot="props">{{·props.title·}}</template>
+    23 23 │     </LinkList>
+    24 24 │   </template>
+  
+
+```

@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+(() => {
+	const value = getValue() satisfies number;
+	run(value);
+})();
+
+((): void => {
+	run();
+})();
+
+(function (): void {
+	run();
+})();
+
+(() => {
+	enum Direction {
+		Up,
+		Down,
+	}
+	type Value = Direction;
+	interface Options {
+		value: Value;
+	}
+	run(Direction.Up satisfies Value);
+})();
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:1 lint/nursery/useBlockStatementOverIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function is called immediately, and a block statement can replace it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ (() => {
+      │ ^^^^^^^^
+    4 │ 	const value = getValue() satisfies number;
+    5 │ 	run(value);
+  
+  i A block statement hides let, const, and class declarations from the surrounding code in the same way, with less code and without a function call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a block statement instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+     3    │ - (()·=>·{
+        3 │ + {
+     4  4 │   	const value = getValue() satisfies number;
+     5  5 │   	run(value);
+     6    │ - })();
+        6 │ + }
+     7  7 │   
+     8  8 │   ((): void => {
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/useBlockStatementOverIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function is called immediately, and a block statement can replace it.
+  
+     6 │ })();
+     7 │ 
+   > 8 │ ((): void => {
+       │ ^^^^^^^^^^^^^^
+     9 │ 	run();
+    10 │ })();
+  
+  i A block statement hides let, const, and class declarations from the surrounding code in the same way, with less code and without a function call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a block statement instead.
+  
+     6  6 │   })();
+     7  7 │   
+     8    │ - (():·void·=>·{
+        8 │ + {
+     9  9 │   	run();
+    10    │ - })();
+       10 │ + }
+    11 11 │   
+    12 12 │   (function (): void {
+  
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/useBlockStatementOverIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function is called immediately, and a block statement can replace it.
+  
+    10 │ })();
+    11 │ 
+  > 12 │ (function (): void {
+       │ ^^^^^^^^^^^^^^^^^^^^
+    13 │ 	run();
+    14 │ })();
+  
+  i A block statement hides let, const, and class declarations from the surrounding code in the same way, with less code and without a function call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a block statement instead.
+  
+    10 10 │   })();
+    11 11 │   
+    12    │ - (function·():·void·{
+       12 │ + {
+    13 13 │   	run();
+    14    │ - })();
+       14 │ + }
+    15 15 │   
+    16 16 │   (() => {
+  
+
+```
+
+```
+invalid.ts:16:1 lint/nursery/useBlockStatementOverIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function is called immediately, and a block statement can replace it.
+  
+    14 │ })();
+    15 │ 
+  > 16 │ (() => {
+       │ ^^^^^^^^
+    17 │ 	enum Direction {
+    18 │ 		Up,
+  
+  i A block statement hides let, const, and class declarations from the surrounding code in the same way, with less code and without a function call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use a block statement instead.
+  
+    14 14 │   })();
+    15 15 │   
+    16    │ - (()·=>·{
+       16 │ + {
+    17 17 │   	enum Direction {
+    18 18 │   		Up,
+    ····· │ 
+    24 24 │   	}
+    25 25 │   	run(Direction.Up satisfies Value);
+    26    │ - })();
+       26 │ + }
+    27 27 │   
+  
+
+```

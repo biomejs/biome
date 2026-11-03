@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function typed(bar: Bar): Bar {
+	return typed(bar.baz as Bar);
+}
+
+function generic<T>(value: T): T {
+	return generic<T>(value);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function typed(bar: Bar): Bar {
+  > 3 │ 	return typed(bar.baz as Bar);
+      │ 	       ^^^^^
+    4 │ }
+    5 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:9 lint/nursery/noUselessRecursion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a call to itself, which can be replaced with a loop.
+  
+    6 │ function generic<T>(value: T): T {
+  > 7 │ 	return generic<T>(value);
+      │ 	       ^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Each nested call uses more memory, and too many nested calls crash the program with a stack overflow error.
+  
+  i Use a loop, such as while, that updates the values on each step instead of calling the function again.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

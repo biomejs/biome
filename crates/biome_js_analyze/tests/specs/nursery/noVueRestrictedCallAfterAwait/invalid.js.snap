@@ -1,0 +1,191 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+import { useI18n } from "vue-i18n";
+
+defineComponent({
+	setup: async function () {
+		await doSomething();
+		useI18n();
+	},
+});
+
+defineComponent({
+	setup: async () => {
+		await doSomething();
+		useI18n();
+	},
+});
+
+createApp({
+	async setup() {
+		await doSomething();
+		useI18n();
+	},
+});
+
+// The `await` is inside a block that comes before the call.
+defineComponent({
+	async setup() {
+		if (shouldLoad) {
+			await doSomething();
+		}
+		useI18n();
+	},
+});
+
+defineComponent({
+	async setup() {
+		for await (const item of items) {
+		}
+		useI18n();
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:8:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+     6 │ 	setup: async function () {
+     7 │ 		await doSomething();
+   > 8 │ 		useI18n();
+       │ 		^^^^^^^^^
+     9 │ 	},
+    10 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    5 │ defineComponent({
+    6 │ 	setup: async function () {
+  > 7 │ 		await doSomething();
+      │ 		^^^^^
+    8 │ 		useI18n();
+    9 │ 	},
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    13 │ 	setup: async () => {
+    14 │ 		await doSomething();
+  > 15 │ 		useI18n();
+       │ 		^^^^^^^^^
+    16 │ 	},
+    17 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    12 │ defineComponent({
+    13 │ 	setup: async () => {
+  > 14 │ 		await doSomething();
+       │ 		^^^^^
+    15 │ 		useI18n();
+    16 │ 	},
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    20 │ 	async setup() {
+    21 │ 		await doSomething();
+  > 22 │ 		useI18n();
+       │ 		^^^^^^^^^
+    23 │ 	},
+    24 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    19 │ createApp({
+    20 │ 	async setup() {
+  > 21 │ 		await doSomething();
+       │ 		^^^^^
+    22 │ 		useI18n();
+    23 │ 	},
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    30 │ 			await doSomething();
+    31 │ 		}
+  > 32 │ 		useI18n();
+       │ 		^^^^^^^^^
+    33 │ 	},
+    34 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    28 │ 	async setup() {
+    29 │ 		if (shouldLoad) {
+  > 30 │ 			await doSomething();
+       │ 			^^^^^
+    31 │ 		}
+    32 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:3 lint/nursery/noVueRestrictedCallAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This call to useI18n() from vue-i18n comes after an await in setup().
+  
+    38 │ 		for await (const item of items) {
+    39 │ 		}
+  > 40 │ 		useI18n();
+       │ 		^^^^^^^^^
+    41 │ 	},
+    42 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component is being set up.
+  
+    36 │ defineComponent({
+    37 │ 	async setup() {
+  > 38 │ 		for await (const item of items) {
+       │ 		    ^^^^^
+    39 │ 		}
+    40 │ 		useI18n();
+  
+  i This function is listed in the functions option because it needs to know which component is being set up. Call it before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

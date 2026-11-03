@@ -12,14 +12,14 @@ use crate::markdown::lists::block_list::list_ends_with_line_break;
 use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter, prelude::format_suppressed_node};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
 use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, MarkdownLanguage, MdBlockList,
     MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
-    MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
+    MdIndentTokenList, MdOrderedListItem, MdQuote, MdQuotePrefix,
 };
 use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction, SyntaxError};
 use std::collections::VecDeque;
@@ -40,7 +40,16 @@ impl FmtAnyList {
 impl Format<MarkdownFormatContext> for FmtAnyList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         if f.context().comments().is_suppressed(self.node.syntax()) {
-            Format::fmt(&format_suppressed_node(self.node.syntax()), f)?;
+            let source = format_suppressed_node(self.node.syntax());
+            // The quote prefix at the end of the list belongs to the next
+            // line, whose formatter prints it again.
+            match list_trailing_quote_prefix(&self.node) {
+                Some(prefix) => Format::fmt(
+                    &source.until(prefix.syntax().text_range_with_trivia().start()),
+                    f,
+                )?,
+                None => Format::fmt(&source, f)?,
+            }
             if !list_ends_with_line_break(&self.node) {
                 write!(f, [hard_line_break()])?;
             }
@@ -163,7 +172,7 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
 
         for item in &self.bullets {
             if let Some(previous) = previous
-                && content_ends_with_quote_prefix(&previous.node)
+                && content_trailing_quote_prefix(&previous.node).is_some()
             {
                 let line_prefix = quote_line_prefix(item.node.syntax())?;
                 if !line_prefix.is_empty() {
@@ -185,14 +194,33 @@ impl Format<MarkdownFormatContext> for BulletListPrinter {
     }
 }
 
-/// A trailing [MdQuotePrefix] in a bullet's content is the `> ` of the line
-/// that starts the next bullet: the parser attaches continuation-line
-/// prefixes to the previous sibling's content.
-fn content_ends_with_quote_prefix(bullet: &MdBullet) -> bool {
-    matches!(
-        bullet.content().iter().last(),
-        Some(AnyMdBlock::MdQuotePrefix(_))
-    )
+/// Returns the [MdQuotePrefix] at the end of a bullet's content.
+///
+/// The parser attaches the `> ` of the line after a bullet to the end of the
+/// bullet's content. That line starts the next bullet, or the block after the
+/// list. When the content ends with a nested list, the prefix sits at the end
+/// of that list's last bullet, as in `> - one\n>   - nested\n> - two`.
+fn content_trailing_quote_prefix(bullet: &MdBullet) -> Option<MdQuotePrefix> {
+    match bullet.content().iter().last()? {
+        AnyMdBlock::MdQuotePrefix(prefix) => Some(prefix),
+        block => list_trailing_quote_prefix(&block.as_any_list_item()?),
+    }
+}
+
+/// Returns the quote prefix of the line after `list_item`, which the parser
+/// attaches to the end of the list's last bullet.
+fn list_trailing_quote_prefix(list_item: &AnyListItem) -> Option<MdQuotePrefix> {
+    content_trailing_quote_prefix(&list_item.list().iter().last()?)
+}
+
+/// Whether the last bullet of `list_item` ends with the quote prefix of the
+/// line after the list.
+///
+/// The list formatter doesn't print that prefix, so the formatter of the block
+/// on that line must print the quote prefix again, as for `> quoted` in
+/// `> - one\n> > quoted`.
+pub(crate) fn list_ends_with_quote_prefix(list_item: &AnyListItem) -> bool {
+    list_trailing_quote_prefix(list_item).is_some()
 }
 
 pub(crate) struct ListBullet {
@@ -651,6 +679,14 @@ impl ListBlockList {
         Ok(())
     }
 
+    /// Whether `content` is a list that removed the quote prefix of the line
+    /// after it, which the next content must print again.
+    fn ends_with_quote_prefix(content: &AnyMdBlock) -> bool {
+        content
+            .as_any_list_item()
+            .is_some_and(|list_item| list_ends_with_quote_prefix(&list_item))
+    }
+
     fn fmt_list_content(content: &AnyMdBlock, f: &mut MarkdownFormatter) -> FormatResult<()> {
         if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) = content {
             let preserve_quote_prefixes = paragraph
@@ -811,6 +847,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             f,
                         )?;
                         Self::fmt_list_content(&content, f)?;
+                        pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                     }
 
                     let middle_is_terminator = middle_block.is_newline()
@@ -929,6 +966,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                         f,
                     )?;
                     Self::fmt_list_content(&content, f)?;
+                    pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                     write!(
                         f,
                         [continuation
@@ -1002,6 +1040,7 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                             f,
                         )?;
                         Self::fmt_list_content(&content, f)?;
+                        pending_quote_continuation |= Self::ends_with_quote_prefix(&content);
                         pending_breaks = if content.is_thematic_break() { 2 } else { 1 };
                         last_content_was_thematic_break = content.is_thematic_break();
                         last_content_was_fenced_code_block = content.is_fenced_block();
@@ -1021,7 +1060,25 @@ impl Format<MarkdownFormatContext> for ListBlockList {
             ) {
                 (_, true) => write!(f, [hard_line_break()])?,
                 (1, false) => write!(f, [hard_line_break()])?,
-                (_, false) => write!(f, [empty_line()])?,
+                (_, false) => match self.content.syntax().ancestors().find_map(MdQuote::cast) {
+                    // A blank line without `>` ends a blockquote, so trailing
+                    // blank lines of an item inside a blockquote keep the
+                    // quote's markers.
+                    Some(quote) => {
+                        let line_prefix = quote_line_prefix(quote.content().syntax())?;
+                        write!(
+                            f,
+                            [
+                                dedent_to_root(&format_args![
+                                    hard_line_break(),
+                                    line_prefix.format(false)
+                                ]),
+                                hard_line_break()
+                            ]
+                        )?;
+                    }
+                    None => write!(f, [empty_line()])?,
+                },
             }
         }
         Ok(())

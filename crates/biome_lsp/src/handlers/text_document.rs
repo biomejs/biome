@@ -131,6 +131,10 @@ async fn ensure_project_for_opened_document(
         })
     } else {
         error!("Configuration could not be loaded for {path}");
+        let folder = resolve_workspace_base_path(session, path.parent().unwrap_or(path));
+        session
+            .notify_broken_configuration_for_folder(&folder, status)
+            .await;
         None
     }
 }

@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: of-valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div v-for="x of xs"></div>
+  <div v-for="(x, index) of xs"></div>
+  <div v-for="x    of    xs"></div>
+</template>
+
+```

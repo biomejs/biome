@@ -96,8 +96,6 @@ unsorted.jsx:4:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -125,8 +123,6 @@ unsorted.jsx:5:17 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     7 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -156,8 +152,6 @@ unsorted.jsx:11:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -185,8 +179,6 @@ unsorted.jsx:12:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     14 │ 	<div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -216,8 +208,6 @@ unsorted.jsx:13:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -245,8 +235,6 @@ unsorted.jsx:14:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     16 │ 	<div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -276,8 +264,6 @@ unsorted.jsx:15:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -305,8 +291,6 @@ unsorted.jsx:16:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     18 │ 	<div class="underline custom-text foo text-2xl font-semibold my-2" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -336,8 +320,6 @@ unsorted.jsx:17:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -365,8 +347,6 @@ unsorted.jsx:18:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     20 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -396,8 +376,6 @@ unsorted.jsx:19:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -425,8 +403,6 @@ unsorted.jsx:20:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     22 │ 	{/* SHOULD emit diagnostics (arbitrary variants) */}
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -456,8 +432,6 @@ unsorted.jsx:23:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -485,8 +459,6 @@ unsorted.jsx:24:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     26 │ 	<div class="lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -516,8 +488,6 @@ unsorted.jsx:25:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -545,8 +515,6 @@ unsorted.jsx:26:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     28 │ 	{/* TODO: arbitrary variant */}
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -576,8 +544,6 @@ unsorted.jsx:27:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -605,8 +571,6 @@ unsorted.jsx:29:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     31 │ 	<div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -636,8 +600,6 @@ unsorted.jsx:30:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -665,8 +627,6 @@ unsorted.jsx:31:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     33 │ 	{/* negative value utilities */}
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -696,8 +656,6 @@ unsorted.jsx:32:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -725,8 +683,6 @@ unsorted.jsx:35:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     37 │ 	<div class="text-center -mx-2 bg-blue-500 -my-4" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -756,8 +712,6 @@ unsorted.jsx:36:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -785,8 +739,6 @@ unsorted.jsx:37:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     39 │ 	<div class="-space-x-2 flex -space-y-4 items-center" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -816,8 +768,6 @@ unsorted.jsx:38:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -845,8 +795,6 @@ unsorted.jsx:39:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     41 │ 	<div class="sm:-mx-4 lg:-my-2 md:p-2" />
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -876,8 +824,6 @@ unsorted.jsx:40:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -905,8 +851,6 @@ unsorted.jsx:41:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     43 │ 
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -936,8 +880,6 @@ unsorted.jsx:46:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -965,8 +907,6 @@ unsorted.jsx:47:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     49 │ notClassFunction("px-2 foo p-4 bar");
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -996,8 +936,6 @@ unsorted.jsx:48:8 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -1025,8 +963,6 @@ unsorted.jsx:55:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     57 │ <div class={["px-2 foo p-4 bar"]} />;
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1056,8 +992,6 @@ unsorted.jsx:56:14 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -1085,8 +1019,6 @@ unsorted.jsx:57:14 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     59 │ <div
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1116,8 +1048,6 @@ unsorted.jsx:58:15 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -1145,8 +1075,6 @@ unsorted.jsx:61:3 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     63 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1176,8 +1104,6 @@ unsorted.jsx:68:7 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
   
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Unsafe fix: Sort the classes.
@@ -1205,8 +1131,6 @@ unsorted.jsx:70:2 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     72 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
   i A consistent class order makes class lists easier to read and keeps changes to them small.
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

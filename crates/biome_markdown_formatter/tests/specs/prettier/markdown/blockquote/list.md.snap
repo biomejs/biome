@@ -32,16 +32,8 @@ info: markdown/blockquote/list.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,18 +1,16 @@
- > - list in quote
- >   with multiple lines
- >   - nested list item
-->   - nested list item 2
-+>     - nested list item 2
- >     across multiple lines
- >     > quote in nested list in quote
- >     > with multiple lines
--
+@@ -8,11 +8,10 @@
+ 
  - > quote in list
    > with multiple lines
 -  >
@@ -54,7 +46,7 @@ info: markdown/blockquote/list.md
 -- > quote in list
 -  > this line is indented by tab
 +-   > quote in list
-+	> this line is indented by tab
++    > this line is indented by tab
 ```
 
 # Output
@@ -63,10 +55,11 @@ info: markdown/blockquote/list.md
 > - list in quote
 >   with multiple lines
 >   - nested list item
->     - nested list item 2
+>   - nested list item 2
 >     across multiple lines
 >     > quote in nested list in quote
 >     > with multiple lines
+
 - > quote in list
   > with multiple lines
   > - list item in quote in list
@@ -75,5 +68,5 @@ info: markdown/blockquote/list.md
       - nested list
 
 -   > quote in list
-	> this line is indented by tab
+    > this line is indented by tab
 ```

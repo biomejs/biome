@@ -1,5 +1,6 @@
 use biome_diagnostics::{Advices, Diagnostic, LogCategory, Visit};
 use biome_formatter::formatter::Formatter;
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     Buffer, Format, FormatContext, FormatOptions, FormatResult, IndentStyle, IndentWidth,
     LineEnding, LineWidth, SourceMapGeneration, TrailingNewline, TransformSourceMap,
@@ -417,6 +418,7 @@ pub struct PropertyFmtContext {
 
 impl FormatContext for PropertyFmtContext {
     type Options = PropertyFmtOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

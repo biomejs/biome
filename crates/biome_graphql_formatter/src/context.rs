@@ -1,5 +1,8 @@
 use crate::GraphqlCommentStyle;
-use biome_formatter::{AttributePosition, BracketSpacing, IndentWidth, QuoteStyle, prelude::*};
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentWidth, QuoteStyle, rowan::prelude::*,
+};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
@@ -35,6 +38,7 @@ impl GraphqlFormatContext {
 
 impl FormatContext for GraphqlFormatContext {
     type Options = GraphqlFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

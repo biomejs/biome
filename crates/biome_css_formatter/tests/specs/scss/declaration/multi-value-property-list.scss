@@ -1,0 +1,25 @@
+.a {
+	box-shadow:
+		inset 1px 1px 0 0 red,
+		inset -1px -1px 0 0 blue;
+	background-position: left top, right top;
+	box-shadow: inset 1px 1px 0 0 $red, be-bevel(1px, 2px) blue;
+	transition: opacity 1s, color 2s !important;
+	#{$p}: a b, c d;
+	--#{$p}: a b, c d;
+	font-family: a, b, c;
+	--x: a b, c d;
+	width: fn((a b c), (d e f));
+}
+
+@font-face {
+	src: url(a.woff2) format("woff2"), url(a.woff) format("woff");
+}
+
+@supports (transition: opacity 1s, color 2s) {
+	a {
+		transition: opacity 1s, color 2s
+	}
+}
+
+@import url(x.css) supports(transition: opacity 1s, color 2s);

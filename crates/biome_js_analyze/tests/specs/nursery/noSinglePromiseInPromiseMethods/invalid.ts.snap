@@ -1,0 +1,166 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+await Promise.race([value as Promise<number>]);
+await Promise.any([promise!]);
+async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+Promise.race<number>([promise]);
+await Promise.race([promise satisfies Promise<number>]);
+
+// Reported without a fix.
+const [foo]: [Foo] = await Promise.all([promise]);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:20 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ await Promise.race([value as Promise<number>]);
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ await Promise.any([promise!]);
+    4 │ async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    2 │ await·Promise.race([value·as·Promise<number>]);
+      │       ------------ -                        -  
+
+```
+
+```
+invalid.ts:3:19 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.any() has only one element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ await Promise.race([value as Promise<number>]);
+  > 3 │ await Promise.any([promise!]);
+      │                   ^^^^^^^^^^
+    4 │ async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+    5 │ Promise.race<number>([promise]);
+  
+  i Promise.any() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    3 │ await·Promise.any([promise!]);
+      │       -------------        -- 
+
+```
+
+```
+invalid.ts:4:81 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.any() has only one element.
+  
+    2 │ await Promise.race([value as Promise<number>]);
+    3 │ await Promise.any([promise!]);
+  > 4 │ async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+      │                                                                                 ^^^^^^^^^^
+    5 │ Promise.race<number>([promise]);
+    6 │ await Promise.race([promise satisfies Promise<number>]);
+  
+  i Promise.any() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    4 │ async·function·run(promise:·Promise<number>)·{·return·await·Promise.any<number>([promise!]);·}
+      │                                                             ---------------------        --   
+
+```
+
+```
+invalid.ts:5:22 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    3 │ await Promise.any([promise!]);
+    4 │ async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+  > 5 │ Promise.race<number>([promise]);
+      │                      ^^^^^^^^^
+    6 │ await Promise.race([promise satisfies Promise<number>]);
+    7 │ 
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Promise.resolve() instead.
+  
+     3  3 │   await Promise.any([promise!]);
+     4  4 │   async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+     5    │ - Promise.race<number>([promise]);
+        5 │ + Promise.resolve<number>(promise);
+     6  6 │   await Promise.race([promise satisfies Promise<number>]);
+     7  7 │   
+  
+
+```
+
+```
+invalid.ts:6:20 lint/nursery/noSinglePromiseInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.race() has only one element.
+  
+    4 │ async function run(promise: Promise<number>) { return await Promise.any<number>([promise!]); }
+    5 │ Promise.race<number>([promise]);
+  > 6 │ await Promise.race([promise satisfies Promise<number>]);
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Reported without a fix.
+  
+  i Promise.race() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, use the value directly, or pass it to Promise.resolve() if you need a promise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Await the value directly.
+  
+    6 │ await·Promise.race([promise·satisfies·Promise<number>]);
+      │       ------------ -                                 -  
+
+```
+
+```
+invalid.ts:9:40 lint/nursery/noSinglePromiseInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This array passed to Promise.all() has only one element.
+  
+     8 │ // Reported without a fix.
+   > 9 │ const [foo]: [Foo] = await Promise.all([promise]);
+       │                                        ^^^^^^^^^
+    10 │ 
+  
+  i Promise.all() is meant to combine several promises. With only one element, the array is unnecessary, or another promise is missing from it.
+  
+  i If the array is complete, await the value directly, and update the code that reads the array that Promise.all() returns.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

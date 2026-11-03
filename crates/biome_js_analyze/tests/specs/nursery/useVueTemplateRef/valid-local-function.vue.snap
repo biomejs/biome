@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-local-function.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <div ref="root" />
+</template>
+
+<script setup>
+function ref() {
+  return null;
+}
+
+const root = ref();
+</script>
+
+```

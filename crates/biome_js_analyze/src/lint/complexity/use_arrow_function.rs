@@ -10,8 +10,9 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, JsConstructorClassMember, JsFunctionBody,
     JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
     JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsModule,
-    JsReferenceIdentifier, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
+    JsNewTargetExpression, JsReferenceIdentifier, JsScript, JsSetterClassMember,
+    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxKind, JsThisExpression,
+    T,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -107,7 +108,12 @@ impl Rule for UseArrowFunction {
         let scope = ctx.query();
         let model = ctx.model();
         let root = scope.syntax();
-        let mut preorder = root.preorder();
+        let mut preorder = root.preorder_of_kinds(
+            AnyThisScope::KIND_SET
+                .union(JsThisExpression::KIND_SET)
+                .union(JsNewTargetExpression::KIND_SET)
+                .union(JsReferenceIdentifier::KIND_SET),
+        );
 
         let AnyThisScope::JsFunctionExpression(function_expression) = scope else {
             return None;

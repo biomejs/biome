@@ -1,0 +1,27 @@
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  render() {
+    this.$slots.default();
+    this.$slots.foo(foo);
+    this.$slots.default({ foo, bar });
+    this.$slots.default?.(foo);
+    const bar = this.$slots.bar;
+    bar(foo);
+
+    unknown.$slots.default(foo, bar);
+    this.$foo.default(foo, bar);
+    this.$slots(foo, bar);
+
+    let mutableAlias = this;
+    mutableAlias.$slots.default(foo, bar);
+
+    const other = this.$attrs.other;
+    other(foo, bar);
+  },
+};
+
+function outsideComponent() {
+  return this.$slots.default(foo, bar);
+}
+</script>

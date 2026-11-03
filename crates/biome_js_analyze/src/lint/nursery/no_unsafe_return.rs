@@ -78,7 +78,7 @@ declare_lint_rule! {
     ///
     /// - If you want to disallow writing the `any` type, see [`noExplicitAny`](https://biomejs.dev/linter/rules/no-explicit-any/).
     pub NoUnsafeReturn {
-        version: "next",
+        version: "2.6.3",
         name: "noUnsafeReturn",
         language: "ts",
         sources: &[RuleSource::EslintTypeScript("no-unsafe-return").same()],

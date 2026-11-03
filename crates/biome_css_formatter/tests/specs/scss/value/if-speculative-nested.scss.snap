@@ -41,8 +41,8 @@ info: scss/value/if-speculative-nested.scss
 		style(
 			(
 				--x: if(
-					sass(true):if(true, if(sass(false): red; else: blue), black); else:
-						white
+					sass(true): if(true, if(sass(false): red; else: blue), black);
+					else: white;
 				)
 			)
 		): green;

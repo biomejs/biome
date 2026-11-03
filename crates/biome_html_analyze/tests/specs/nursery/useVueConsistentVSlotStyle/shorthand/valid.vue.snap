@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <MyComponent #default="data">
+    <template #default></template>
+    <template #foo></template>
+    <template #[foo]></template>
+  </MyComponent>
+</template>
+
+```

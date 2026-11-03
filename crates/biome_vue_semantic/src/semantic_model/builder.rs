@@ -26,6 +26,21 @@ pub(crate) struct ModelBuilder {
     /// Whether a `<script src>` block moves declarations of the file to
     /// another file while no component was found to record that on.
     pub(crate) has_unread_script: bool,
+    /// Names written as strings in component options. They are resolved by
+    /// the reference pass, once every declaration is known.
+    pub(crate) option_names: Vec<OptionName>,
+}
+
+/// A name of the component instance written as a string in an option, as in
+/// `watch: { 'user.name': 'onRename' }`.
+pub(crate) struct OptionName {
+    pub(crate) component: ComponentId,
+    /// The host range of the string.
+    pub(crate) range: TextRange,
+    pub(crate) name: TokenText,
+    /// The members a dotted watch key reads after the name.
+    pub(crate) path: Box<[TokenText]>,
+    pub(crate) access: Access,
 }
 
 /// Everything needed to describe a new symbol.
@@ -99,9 +114,15 @@ impl ModelBuilder {
             instance,
             name: None,
             inherit_attrs: Tri::Unknown,
+            render: None,
+            model_option: None,
             decl_open: [OpenReasons::default(); Namespace::COUNT],
             uses_open: [false; Namespace::COUNT],
-            macro_conflict: false,
+            macro_options: MacroOptions::empty(),
+            data_function: None,
+            mixins: None,
+            is_defined_in_place: false,
+            is_default_export: false,
             merged: None,
             merged_into: None,
             symbols: Vec::new(),
@@ -109,16 +130,28 @@ impl ModelBuilder {
         id
     }
 
-    /// Returns `component` followed by the component Vue merges into it, if
-    /// any.
-    fn with_merged(&self, component: ComponentId) -> impl Iterator<Item = ComponentId> {
-        std::iter::once(component).chain(self.data.components[component.index()].merged)
+    /// Returns `component` followed by the component whose declarations in
+    /// `namespace` it also sees, if any.
+    ///
+    /// Both script blocks of a file emit on the same instance, so each sees
+    /// the events of the other. Other names are only seen in the direction
+    /// Vue merges the blocks.
+    fn with_merged(
+        &self,
+        component: ComponentId,
+        namespace: Namespace,
+    ) -> impl Iterator<Item = ComponentId> {
+        let other = match namespace {
+            Namespace::Emit => self.paired(component),
+            _ => self.data.components[component.index()].merged,
+        };
+        std::iter::once(component).chain(other)
     }
 
     /// Returns the component Vue combines with `component` into one
     /// instance, if any: the default export of the plain `<script>` block
     /// for a `<script setup>` component, and the reverse.
-    fn paired(&self, component: ComponentId) -> Option<ComponentId> {
+    pub(crate) fn paired(&self, component: ComponentId) -> Option<ComponentId> {
         let component = &self.data.components[component.index()];
         component.merged.or(component.merged_into)
     }
@@ -127,7 +160,7 @@ impl ModelBuilder {
     /// be incomplete.
     pub(crate) fn is_open(&self, component: Option<ComponentId>, namespace: Namespace) -> bool {
         match component {
-            Some(component) => self.with_merged(component).any(|id| {
+            Some(component) => self.with_merged(component, namespace).any(|id| {
                 !self.data.components[id.index()].decl_open[namespace.index()].is_empty()
             }),
             None => self.has_unread_script,
@@ -156,14 +189,7 @@ impl ModelBuilder {
                 .map_or(Resolution::Unresolved, Resolution::Symbol);
         } else {
             component.and_then(|component| {
-                // Both script blocks of a file emit on the same instance, so
-                // an event is looked up in either of them. Other names are
-                // only looked up in the direction Vue merges the blocks.
-                let other = match namespace {
-                    Namespace::Emit => self.paired(component),
-                    _ => self.data.components[component.index()].merged,
-                };
-                std::iter::once(component).chain(other).find_map(|id| {
+                self.with_merged(component, namespace).find_map(|id| {
                     self.data.components[id.index()]
                         .symbols
                         .iter()
@@ -216,6 +242,13 @@ impl ModelBuilder {
         if let Resolution::Symbol(symbol) = reference.resolution {
             self.data.uses[symbol.index()].push(id);
         }
+        let slot = reference.snippet.map_or(0, |snippet| snippet.index() + 1);
+        if self.data.references_by_snippet.len() <= slot {
+            self.data
+                .references_by_snippet
+                .resize_with(slot + 1, Vec::new);
+        }
+        self.data.references_by_snippet[slot].push(id);
         self.data.references.push(reference);
         id
     }

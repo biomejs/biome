@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-ts.vue
+---
+# Input
+```vue
+<script lang="ts">
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  props: {
+    a: {
+      type: 'String',
+      default: 10,
+    } as PropOptions<string>,
+    b: 'Number' as any,
+    c: {
+      type: 'Object' as unknown as PropType<Foo>,
+    },
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-ts.vue:8:13 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop a is not a constructor.
+  
+     6 │   props: {
+     7 │     a: {
+   > 8 │       type: 'String',
+       │             ^^^^^^^^
+     9 │       default: 10,
+    10 │     } as PropOptions<string>,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor String instead.
+  
+    8 │ ······type:·'String',
+      │             -      - 
+
+```
+
+```
+invalid-ts.vue:11:8 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop b is not a constructor.
+  
+     9 │       default: 10,
+    10 │     } as PropOptions<string>,
+  > 11 │     b: 'Number' as any,
+       │        ^^^^^^^^
+    12 │     c: {
+    13 │       type: 'Object' as unknown as PropType<Foo>,
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor Number instead.
+  
+    11 │ ····b:·'Number'·as·any,
+       │        -      -        
+
+```
+
+```
+invalid-ts.vue:13:13 lint/nursery/useVuePropTypeConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The type of the prop c is not a constructor.
+  
+    11 │     b: 'Number' as any,
+    12 │     c: {
+  > 13 │       type: 'Object' as unknown as PropType<Foo>,
+       │             ^^^^^^^^
+    14 │     },
+    15 │   },
+  
+  i Vue uses the type of a prop to check the values passed to it. It can only do that with a constructor, such as String or Number, or with an array of constructors.
+  
+  i Replace this value with the constructor of the type the prop accepts.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the constructor Object instead.
+  
+    13 │ ······type:·'Object'·as·unknown·as·PropType<Foo>,
+       │             -      -                             
+
+```

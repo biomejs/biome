@@ -5,8 +5,6 @@
 //!
 //! The current implementation has some limitations:
 //!
-//! - Alternates (choices) are limited to one level, which means nested alternates are not supported.
-//!   For example, `{a,b{a,b},d}` is not supported
 //! - Empty choice inside alternates such as `{a,b,}` is not supported
 //! - `.editorconfig` allows globstars `**` at any position.
 //!   It matches any character including `/`.
@@ -127,9 +125,9 @@ impl TryFrom<String> for EditorconfigGlob {
 // We use a custom impl to precisely report the location of the error.
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for EditorconfigGlob {
-    fn deserialize(
-        ctx: &mut dyn biome_deserialize::DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let glob = String::deserialize(ctx, value, name)?;
@@ -195,8 +193,6 @@ impl std::fmt::Display for EditorconfigGlobError {
 pub enum EditorconfigGlobErrorKind {
     /// Occurs when an unescaped '\' is found at the end of a glob.
     DanglingEscape,
-    /// Nested `{}` are not supported.
-    UnsupportedNestedAlternates,
     /// Reversed numeric range such as `{1..0}` are not supported.
     UnsupportedReversedNumericRange,
 }
@@ -204,9 +200,6 @@ impl std::fmt::Display for EditorconfigGlobErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let desc = match self {
             Self::DanglingEscape => "Unterminated escape sequence.",
-            Self::UnsupportedNestedAlternates => {
-                r"Nested alternates `{}` are not supported. Use a separate glob for each nested alternate."
-            }
             Self::UnsupportedReversedNumericRange => {
                 r"Reversed numeric ranges such as `{1..0}` are not supported. Flip the numbers to obtain a valid numeric range."
             }
@@ -221,6 +214,8 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
     // Rust doesn't allow us to iterate and mutate a string at the same time.
     // Thus, we first gather all changes (operations) to perform on the pattern and
     // then we perform them in a second step.
+    // The changes are applied from the last position to the first, so an insertion never
+    // shifts a position that hasn't been applied yet.
     enum StrOp {
         Insert {
             index: usize,
@@ -231,12 +226,16 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
             range: std::ops::Range<usize>,
         },
     }
+    // As in the reference implementation, a single unmatched brace makes every brace literal.
+    // For example, `{a,{b,c}` only matches the file named `{a,{b,c}`.
+    let braces_are_paired = are_braces_paired(pattern.as_bytes());
     let mut it = pattern.bytes().enumerate();
     let mut changes = Vec::new();
     let mut has_no_slashes = true;
     let mut prev_is_slash = true;
-    let mut alternation_start = None;
-    let mut alternation_has_coma = false;
+    // Each entry is the index of an unclosed `{` and whether a comma appears inside it,
+    // including inside nested braces.
+    let mut alternations = Vec::new();
     while let Some((i, c)) = it.next() {
         match c {
             b'\\'
@@ -297,27 +296,34 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
                             break;
                         }
                         Some((j, b']')) => {
-                            it.nth(j - i);
+                            it.nth(j - i - 1);
                             break;
                         }
                         _ => {}
                     }
                 }
             }
-            b'{' => {
-                if alternation_start.is_some() {
-                    return Err(EditorconfigGlobError::Regular {
-                        kind: EditorconfigGlobErrorKind::UnsupportedNestedAlternates,
-                        index: i as u32,
-                    });
-                }
-                alternation_start = Some(i);
+            b'{' if braces_are_paired => {
+                alternations.push((i, false));
             }
-            b',' if alternation_start.is_some() => {
-                alternation_has_coma = true;
+            b'{' => {
+                changes.push(StrOp::Insert {
+                    index: i,
+                    content: r"\",
+                });
+            }
+            b',' => {
+                if let Some((_, has_comma)) = alternations.last_mut() {
+                    *has_comma = true;
+                }
             }
             b'}' => {
-                if let Some(alternation_start) = alternation_start.take() {
+                if let Some((alternation_start, has_comma)) = alternations.pop() {
+                    // As in the reference implementation, a comma inside nested braces also makes
+                    // the enclosing braces an alternation: `{{js,ts}}` matches `js` and `ts`.
+                    if has_comma && let Some((_, parent_has_comma)) = alternations.last_mut() {
+                        *parent_has_comma = true;
+                    }
                     let range_candidate = &pattern[(alternation_start + 1)..i];
                     if let Some((start, end)) = range_candidate
                         .split_once("..")
@@ -333,7 +339,7 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
                             indexes: (alternation_start + 1)..(i),
                             range: start..(end + 1),
                         });
-                    } else if !alternation_has_coma {
+                    } else if !has_comma {
                         // `{}` and `{single}` are not considered as alternations.
                         changes.push(StrOp::Insert {
                             index: alternation_start,
@@ -343,7 +349,6 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
                             index: i,
                             content: r"\",
                         });
-                        alternation_has_coma = false;
                     }
                 } else {
                     changes.push(StrOp::Insert {
@@ -356,13 +361,21 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
         }
         prev_is_slash = false;
     }
-    if let Some(alternation_start) = alternation_start {
-        // If it is not closed, then it is not an alternation.
+    // Braces can be paired while a `{` stays unclosed here, because the pairing check also
+    // counts braces inside bracket expressions: in `{[}]`, the `}` belongs to `[}]`.
+    for (alternation_start, _) in alternations {
         changes.push(StrOp::Insert {
             index: alternation_start,
             content: r"\",
         });
     }
+    // Changes are not recorded in position order: whether a `{` should be escaped is only known
+    // after later characters have recorded their own changes. The sort is stable so that
+    // insertions at the same position keep the order in which they were recorded.
+    changes.sort_by_key(|change| match change {
+        StrOp::Insert { index, .. } => *index,
+        StrOp::ConvertNumericRange { indexes, .. } => indexes.start,
+    });
     for change in changes.into_iter().rev() {
         match change {
             StrOp::Insert { index, content } => {
@@ -386,6 +399,29 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
         pattern.insert_str(0, "**/");
     }
     Ok(pattern)
+}
+
+/// Returns `true` if every `{` in `pattern` is closed by a later `}` and every `}` closes an
+/// earlier `{`. Escaped braces are ignored, but braces inside bracket expressions such as `[{]`
+/// are counted, as in the reference implementation.
+fn are_braces_paired(pattern: &[u8]) -> bool {
+    let mut depth = 0usize;
+    let mut i = 0;
+    while i < pattern.len() {
+        match pattern[i] {
+            b'\\' => i += 1,
+            b'{' => depth += 1,
+            b'}' => {
+                let Some(new_depth) = depth.checked_sub(1) else {
+                    return false;
+                };
+                depth = new_depth;
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    depth == 0
 }
 
 #[cfg(test)]
@@ -434,6 +470,31 @@ mod tests {
 
         assert_eq!(convert_valid_glob(r"\{0..0}"), r"**/\{0..0\}");
         assert_eq!(convert_valid_glob("{a..b}"), r"**/\{a..b\}");
+
+        assert_eq!(convert_valid_glob("{a,b}{c}"), r"**/{a,b}\{c\}");
+        assert_eq!(convert_valid_glob("{a,{b,c}}"), "**/{a,{b,c}}");
+        assert_eq!(convert_valid_glob("{a,{b}}"), r"**/{a,\{b\}}");
+        assert_eq!(convert_valid_glob("{{js,ts}}"), "**/{{js,ts}}");
+        assert_eq!(convert_valid_glob("{a{b,c}}"), "**/{a{b,c}}");
+        assert_eq!(convert_valid_glob("{a,{0..2}}"), "**/{a,{0,1,2}}");
+        assert_eq!(
+            convert_valid_glob("{*.{json,toml},biome.jsonc}"),
+            "**/{*.{json,toml},biome.jsonc}"
+        );
+        assert_eq!(convert_valid_glob("{a,{b"), r"**/\{a,\{b");
+        assert_eq!(convert_valid_glob("{a,{b,c}"), r"**/\{a,\{b,c\}");
+        assert_eq!(convert_valid_glob("{a,b}}"), r"**/\{a,b\}\}");
+        assert_eq!(convert_valid_glob("}{a,b}"), r"**/\}\{a,b\}");
+        assert_eq!(convert_valid_glob("{[}],b}"), r"**/\{[}],b\}");
+        assert_eq!(convert_valid_glob("{[}]"), r"**/\{[}]");
+        assert_eq!(convert_valid_glob(r"{a,\{b}"), r"**/{a,\{b}");
+        assert_eq!(convert_valid_glob("{a,{b}"), r"**/\{a,\{b\}");
+        assert_eq!(convert_valid_glob("{**a"), r"**/\{*/**/*a");
+        assert_eq!(convert_valid_glob("**}"), r"**/*\}");
+        assert_eq!(convert_valid_glob("{a,[b]}"), "**/{a,[b]}");
+        assert_eq!(convert_valid_glob("[ab]/c"), "[ab]/c");
+        assert_eq!(convert_valid_glob("[ab]**"), "**/[ab]*/**");
+        assert_eq!(convert_valid_glob("[b]}"), r"**/[b]\}");
     }
 
     // Editorconfig glob tests are ported from https://github.com/editorconfig/editorconfig-core-test/tree/master/glob
@@ -622,8 +683,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "tests that should pass and we don't support yet"]
-    fn test_editorconfig_glob_alternates_2() {
+    fn test_editorconfig_glob_nested_alternates() {
         let mut glob: EditorconfigGlob;
 
         // nested braces
@@ -657,6 +717,19 @@ mod tests {
         assert!(!is_matching(&glob, "b.i"));
         assert!(!is_matching(&glob, "c{d.i"));
         assert!(!is_matching(&glob, ".i"));
+
+        // comma only inside nested braces
+        glob = "{{js,ts}}".parse().unwrap();
+        assert!(is_matching(&glob, "js"));
+        assert!(is_matching(&glob, "ts"));
+        assert!(!is_matching(&glob, "{js}"));
+        assert!(!is_matching(&glob, "{{js,ts}}"));
+
+        // unmatched brace next to a matched pair
+        glob = "{a,{b,c}.m".parse().unwrap();
+        assert!(is_matching(&glob, "{a,{b,c}.m"));
+        assert!(!is_matching(&glob, "{a,b.m"));
+        assert!(!is_matching(&glob, "{a,c.m"));
 
         // patterns nested in braces
         glob = "{some,a{*c,b}[ef]}.j".parse().unwrap();

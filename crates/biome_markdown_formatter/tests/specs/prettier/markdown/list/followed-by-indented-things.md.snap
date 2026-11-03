@@ -215,7 +215,7 @@ info: markdown/list/followed-by-indented-things.md
  
      top level indented code block
  
-@@ -60,42 +58,41 @@
+@@ -60,10 +58,10 @@
  
  ---
  
@@ -229,13 +229,8 @@ info: markdown/list/followed-by-indented-things.md
  
  ---
  
- - item 1
-   - item 1-1
--  - item 1-2
-+    - item 1-2
- 
--  naive paragraph in item 1
-+    naive paragraph in item 1
+@@ -74,22 +72,21 @@
+   naive paragraph in item 1
  
  ---
 -
@@ -265,35 +260,26 @@ info: markdown/list/followed-by-indented-things.md
  
  ---
  
+@@ -104,36 +101,30 @@
  1. item 1
     1. item 1-1
--   2. item 1-2
-+      2. item 1-2
- 
-    naive paragraph in item 1
- 
-@@ -103,37 +100,31 @@
- 
- 1. item 1
-    1. item 1-1
--   2. item 1-2
+    2. item 1-2
 -2. item 1
--
-+      2. item 1-2
 +2.   item 1
  
+-
      top level indented code block
  
  ---
 -
 -- item 1
- 
+-
 -  > quote
+ 
+-  text
 +   -    item 1
 +        > quote
  
--  text
--
 +        text
  
      top level indented code block
@@ -303,14 +289,14 @@ info: markdown/list/followed-by-indented-things.md
 -- item 1
 -  - item 1-1
 -  - item 1-2
--
  
+-
 -      indented code block
+-
 +   -    item 1
 +        -    item 1-1
 +        -    item 1-2
  
--
 +            indented code block
      top level indented code block
  
@@ -395,9 +381,9 @@ info: markdown/list/followed-by-indented-things.md
 
 - item 1
   - item 1-1
-    - item 1-2
+  - item 1-2
 
-    naive paragraph in item 1
+  naive paragraph in item 1
 
 ---
 
@@ -420,7 +406,7 @@ info: markdown/list/followed-by-indented-things.md
 
 1. item 1
    1. item 1-1
-      2. item 1-2
+   2. item 1-2
 
    naive paragraph in item 1
 
@@ -428,7 +414,7 @@ info: markdown/list/followed-by-indented-things.md
 
 1. item 1
    1. item 1-1
-      2. item 1-2
+   2. item 1-2
 2.   item 1
 
     top level indented code block

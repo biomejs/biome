@@ -90,7 +90,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
                 &params.workspace_db,
                 InternedBindingTokenText::new(
                     &params.workspace_db,
-                    params.path.clone(),
+                    params.parsed_source.document(),
                     element_value.token_text_trimmed(),
                 ),
             )
@@ -109,7 +109,7 @@ pub(crate) fn resolve_binding_html(params: ResolveBindingParams) -> Option<Defin
                 &params.workspace_db,
                 InternedBindingTokenText::new(
                     &params.workspace_db,
-                    params.path.clone(),
+                    params.parsed_source.document(),
                     element_value.token_text_trimmed(),
                 ),
             )

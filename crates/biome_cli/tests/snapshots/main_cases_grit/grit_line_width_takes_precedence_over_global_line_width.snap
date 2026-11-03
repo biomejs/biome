@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.grit
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "lineWidth": 120 },
+  "grit": { "formatter": { "lineWidth": 40 } }
+}
+```
+
+## `file.grit`
+
+```grit
+language js
+
+`foo($x)` where {
+	$x <: `1`,
+	register_diagnostic(span=$x, message="mm")
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

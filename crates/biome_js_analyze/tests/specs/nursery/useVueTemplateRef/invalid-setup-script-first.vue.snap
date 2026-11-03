@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-script-first.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div ref="root" :data-a="A" />
+</template>
+
+<script setup>
+import { ref } from "vue";
+const root = ref();
+</script>
+
+<script>
+const A = "foo";
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-script-first.vue:8:7 lint/nursery/useVueTemplateRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The template ref root is created with ref().
+  
+     6 │ <script setup>
+     7 │ import { ref } from "vue";
+   > 8 │ const root = ref();
+       │       ^^^^
+     9 │ </script>
+    10 │ 
+  
+  i Vue links this variable to the element only by its name, so renaming the variable breaks the link without warning.
+  
+  i Use useTemplateRef("root") instead, which names the element explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

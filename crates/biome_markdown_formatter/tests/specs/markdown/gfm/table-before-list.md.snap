@@ -1,0 +1,78 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/table-before-list.md
+---
+
+# Input
+
+```md
+| Table |
+| ----- |
+| Value |
+
+- Hello
+
+| Table |
+| ----- |
+| Value |
+
+1. one
+2. two
+
+| Many blank lines |
+| ---------------- |
+| Value |
+
+
+
+- Hello
+
+| No blank line |
+| ------------- |
+| Value |
+- Hello
+
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+| Table |
+| ----- |
+| Value |
+
+- Hello
+
+| Table |
+| ----- |
+| Value |
+
+1. one
+2. two
+
+| Many blank lines |
+| ---------------- |
+| Value            |
+
+- Hello
+
+| No blank line |
+| ------------- |
+| Value         |
+- Hello
+
+```

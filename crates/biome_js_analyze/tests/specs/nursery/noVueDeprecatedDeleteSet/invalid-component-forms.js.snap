@@ -1,0 +1,109 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-component-forms.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+  mounted() {
+    this.$set(obj, key, value);
+  },
+});
+
+createApp({
+  mounted() {
+    this.$delete(obj, key);
+  },
+});
+
+// `Vue` is not declared in this file, so it refers to the global Vue object.
+Vue.set(obj, key, value);
+Vue.delete(obj, key);
+
+```
+
+# Diagnostics
+```
+invalid-component-forms.js:6:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    4 │ defineComponent({
+    5 │   mounted() {
+  > 6 │     this.$set(obj, key, value);
+      │     ^^^^^^^^^
+    7 │   },
+    8 │ });
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-component-forms.js:12:5 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+    10 │ createApp({
+    11 │   mounted() {
+  > 12 │     this.$delete(obj, key);
+       │     ^^^^^^^^^^^^
+    13 │   },
+    14 │ });
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-component-forms.js:17:1 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue set function, which Vue 3 removed.
+  
+    16 │ // `Vue` is not declared in this file, so it refers to the global Vue object.
+  > 17 │ Vue.set(obj, key, value);
+       │ ^^^^^^^
+    18 │ Vue.delete(obj, key);
+    19 │ 
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Assign the property directly instead, for example object.key = value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-component-forms.js:18:1 lint/nursery/noVueDeprecatedDeleteSet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This calls the Vue delete function, which Vue 3 removed.
+  
+    16 │ // `Vue` is not declared in this file, so it refers to the global Vue object.
+    17 │ Vue.set(obj, key, value);
+  > 18 │ Vue.delete(obj, key);
+       │ ^^^^^^^^^^
+    19 │ 
+  
+  i Vue 3 detects added and deleted properties on its own, so this function no longer exists and calling it throws an error.
+  
+  i Use the delete operator instead, for example delete object.key.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

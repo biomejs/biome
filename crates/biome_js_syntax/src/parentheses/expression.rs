@@ -957,7 +957,12 @@ fn member_chain_callee_needs_parens(node: AnyJsExpression) -> bool {
         AnyJsExpression::TsNonNullAssertionExpression(expr) => expr.expression().ok(),
         _ => None,
     });
-    object_chain.any(|object| matches!(object, AnyJsExpression::JsCallExpression(_)))
+    object_chain.any(|object| {
+        matches!(
+            object,
+            AnyJsExpression::JsCallExpression(_) | AnyJsExpression::JsImportCallExpression(_)
+        )
+    })
 }
 
 fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: JsSyntaxNode) -> bool {

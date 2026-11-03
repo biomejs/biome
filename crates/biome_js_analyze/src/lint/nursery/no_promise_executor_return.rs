@@ -233,7 +233,9 @@ fn find_promise_executor(
 /// ignoring the ones inside nested functions and classes.
 fn collect_returns(body: &JsFunctionBody) -> Box<[ExecutorReturn]> {
     let mut returns = Vec::new();
-    let mut preorder = body.syntax().preorder();
+    let mut preorder = body
+        .syntax()
+        .preorder_of_kinds(JsReturnStatement::KIND_SET.union(NESTED_FUNCTION_KINDS));
     while let Some(event) = preorder.next() {
         let WalkEvent::Enter(node) = event else {
             continue;

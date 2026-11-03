@@ -5,12 +5,9 @@ use std::{collections::HashMap, sync::LazyLock};
 /// The properties are grouped by the specification module in which they appear. Modules
 /// are ordered semantically, by importance.
 ///
-/// This is the same ordering used by stylelint-config-recess-order, except that vendor prefixes
-/// and some legacy and draft properties not known to biome are removed.
-pub(crate) const PROPERTY_ORDER: [&str; 427] = [
-    // Compose rules from other selectors in CSS Modules.
-    // https://github.com/css-modules/css-modules#composition
-    // "composes",
+/// This follows stylelint-config-recess-order 7.9.0, with vendor prefixes removed,
+/// duplicate entries merged, and properties not known to Biome omitted.
+pub(crate) const PROPERTY_ORDER: [&str; 487] = [
     // Cascade and inheritance.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade#reference
     "all",
@@ -36,6 +33,13 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "box-sizing",
     "display",
     "visibility",
+    // Multi-column layout.
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Multicol_layout#reference
+    "columns",
+    "column-width",
+    "column-count",
+    "column-span",
+    "column-fill",
     // Flexible box layout.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout#reference
     "flex",
@@ -66,11 +70,17 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "grid-gap",
     "grid-row-gap",
     "grid-column-gap",
-    // Box alignment. Relates to both Flexbox and Grid layout.
-    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_alignment#reference
+    // Gaps.
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Gaps#reference
     "gap",
     "row-gap",
     "column-gap",
+    "column-rule",
+    "column-rule-width",
+    "column-rule-style",
+    "column-rule-color",
+    // Box alignment. Relates to both Flexbox and Grid layout.
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_box_alignment#reference
     "place-content",
     "place-items",
     "place-self",
@@ -127,6 +137,16 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "margin-right",
     "margin-bottom",
     "margin-left",
+    // Anchor positioning.
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_anchor_positioning#reference
+    "anchor-name",
+    "anchor-scope",
+    "position-area",
+    "position-anchor",
+    "position-try",
+    "position-try-order",
+    "position-try-fallbacks",
+    "position-visibility",
     // Containment.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment#reference
     "contain",
@@ -142,11 +162,10 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "overflow-x",
     "overflow-y",
     "scrollbar-gutter",
-    // "overflow-scrolling",
     "overflow-style",
     "text-overflow",
     "line-clamp",
-    // "scroll-behaviour",
+    "scroll-behavior",
     // Overscroll behavior.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_overscroll_behavior#reference
     "overscroll-behavior",
@@ -176,7 +195,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "font-variant-position",
     "font-smoothing",
     "osx-font-smoothing",
-    // "font-smooth",
     "font-synthesis",
     "font-synthesis-weight",
     "font-synthesis-style",
@@ -188,6 +206,9 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "alignment-baseline",
     "baseline-shift",
     "dominant-baseline",
+    "text-box",
+    "text-box-trim",
+    "text-box-edge",
     // Colors.
     //
     // Although `opacity` is technically part of this module, it is grouped
@@ -209,6 +230,7 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "text-justify",
     "text-indent",
     "text-transform",
+    "text-autospace",
     "word-spacing",
     "letter-spacing",
     "hyphens",
@@ -260,9 +282,9 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "cursor",
     "caret-color",
     "zoom",
+    "field-sizing",
     "resize",
     "user-select",
-    // "nav-index",
     "nav-up",
     "nav-right",
     "nav-down",
@@ -354,6 +376,9 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "border-style",
     "border-width",
     "border-block",
+    "border-block-color",
+    "border-block-style",
+    "border-block-width",
     "border-block-start",
     "border-block-start-color",
     "border-block-start-style",
@@ -363,6 +388,9 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "border-block-end-style",
     "border-block-end-width",
     "border-inline",
+    "border-inline-color",
+    "border-inline-style",
+    "border-inline-width",
     "border-inline-start",
     "border-inline-start-color",
     "border-inline-start-style",
@@ -396,6 +424,23 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "border-top-right-radius",
     "border-bottom-right-radius",
     "border-bottom-left-radius",
+    "corner-shape",
+    "corner-block-start-shape",
+    "corner-block-end-shape",
+    "corner-inline-start-shape",
+    "corner-inline-end-shape",
+    "corner-start-start-shape",
+    "corner-start-end-shape",
+    "corner-end-start-shape",
+    "corner-end-end-shape",
+    "corner-top-shape",
+    "corner-right-shape",
+    "corner-bottom-shape",
+    "corner-left-shape",
+    "corner-top-left-shape",
+    "corner-top-right-shape",
+    "corner-bottom-right-shape",
+    "corner-bottom-left-shape",
     "border-image",
     "border-image-source",
     "border-image-slice",
@@ -451,6 +496,14 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     //
     // Some of these may fall under a specific module, but if they only apply
     // to SVG-specific elements, they will be grouped here.
+    "x",
+    "y",
+    "rx",
+    "ry",
+    "cx",
+    "cy",
+    "r",
+    "d",
     "text-anchor",
     "fill",
     "fill-rule",
@@ -463,6 +516,7 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "stroke-miterlimit",
     "stroke-dasharray",
     "stroke-dashoffset",
+    "vector-effect",
     "color-interpolation",
     "color-interpolation-filters",
     "flood-color",
@@ -477,6 +531,11 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "paint-order",
     "shape-rendering",
     "text-rendering",
+    // MathML properties.
+    // https://w3c.github.io/mathml-core/
+    "math-style",
+    "math-shift",
+    "math-depth",
     // Transforms.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transforms#reference
     "transform",
@@ -496,6 +555,7 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     "transition-timing-function",
     "transition-duration",
     "transition-property",
+    "transition-behavior",
     // View transitions.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_view_transitions#reference
     "view-transition-name",
@@ -523,6 +583,9 @@ pub(crate) const PROPERTY_ORDER: [&str; 427] = [
     // Will change.
     // https://drafts.csswg.org/css-will-change/#will-change
     "will-change",
+    // Paged media.
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Paged_media#reference
+    "page",
     // Fragmentation.
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_fragmentation#reference
     "break-before",

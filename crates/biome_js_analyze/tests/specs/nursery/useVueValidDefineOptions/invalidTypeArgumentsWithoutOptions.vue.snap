@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidTypeArgumentsWithoutOptions.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineOptions<{ name: "Foo" }>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalidTypeArgumentsWithoutOptions.vue:3:1 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() is called without options.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ defineOptions<{ name: "Foo" }>();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Without options, the call doesn't change the component.
+  
+  i Pass an object with the component options, or remove the call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeArgumentsWithoutOptions.vue:3:14 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() doesn't accept type arguments.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ defineOptions<{ name: "Foo" }>();
+      │              ^^^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Vue reads the options only from the object passed in parentheses, and reports an error when it compiles a call with type arguments.
+  
+  i Remove the type arguments, and pass the options as an object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

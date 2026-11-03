@@ -53,6 +53,8 @@ impl SemanticModelBuilder {
     #[inline]
     pub fn push_node(&mut self, node: &GraphqlSyntaxNode) {
         use GraphqlSyntaxKind::*;
+        // `semantic_model` only pushes the nodes of `SemanticEventExtractor::VISITED_KINDS`,
+        // so a node kind read here must be in that set.
         if matches!(
             node.kind(),
             GRAPHQL_NAME_BINDING

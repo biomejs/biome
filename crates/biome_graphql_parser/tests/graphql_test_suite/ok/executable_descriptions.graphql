@@ -1,0 +1,23 @@
+"Operation description"
+query myQuery(
+  "Variable a description"
+  $a: Int
+  """Variable b
+multiline description"""
+  $b: String
+) {
+  field(a: $a, b: $b)
+}
+
+"Fragment description"
+fragment fields(
+  "Fragment variable description"
+  $size: Int
+) on Type {
+  field(size: $size)
+}
+
+"Nameless operation description"
+query {
+  field
+}

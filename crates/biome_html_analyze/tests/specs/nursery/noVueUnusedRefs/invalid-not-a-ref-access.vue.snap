@@ -1,0 +1,42 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid-not-a-ref-access.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  mounted() {
+    x[this.$refs];
+    const { [this.$refs]: a } = foo;
+  },
+};
+</script>
+
+<template>
+  <input ref="x" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-not-a-ref-access.vue:12:15 lint/nursery/noVueUnusedRefs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template ref x is never used.
+  
+    11 │ <template>
+  > 12 │   <input ref="x" />
+       │               ^
+    13 │ </template>
+    14 │ 
+  
+  i Nothing reads this element through $refs or useTemplateRef(), so the ref attribute has no effect.
+  
+  i Remove the ref attribute, or use the ref.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-object.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+import { h } from "vue";
+
+export default {
+	render() {
+		if (this.visible) {
+			return h("div", "hello");
+		}
+	},
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-object.vue:6:2 lint/nursery/useVueRenderReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This render function doesn't always return a value.
+  
+    5 │ export default {
+  > 6 │ 	render() {
+      │ 	^^^^^^
+    7 │ 		if (this.visible) {
+    8 │ 			return h("div", "hello");
+  
+  i Vue displays what the render function returns. When the function ends without returning a value, the component displays nothing.
+  
+  i Return a value at the end of every path through the function. Return null if the component should display nothing.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

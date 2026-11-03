@@ -1,0 +1,8 @@
+"Descriptions require an explicit operation type"
+{
+  field
+}
+
+query valid {
+  field
+}

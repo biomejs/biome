@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function readParameter({ innerText }: { innerText: string }) {
+    return innerText;
+}
+
+function readAliased({ innerText: text }: { innerText: string }) {
+    return text;
+}
+
+const { innerText }: { innerText: string } = getValue();
+
+function readMember(value: { innerText: string }) {
+    return value.innerText;
+}
+
+function readComputed(value: { innerText: string }) {
+    return value["innerText"];
+}
+
+function writeMember(value: { innerText: string }) {
+    value.innerText = "Biome";
+}
+
+declare const maybe: { innerText: string } | null | undefined;
+maybe?.innerText;
+
+declare const text: string;
+text.innerText;
+
+declare const list: (string | number)[];
+(list).innerText;
+
+```

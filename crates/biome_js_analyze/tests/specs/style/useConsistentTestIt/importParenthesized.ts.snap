@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importParenthesized.ts
+---
+# Input
+```ts
+import { test } from "vitest";
+test("first", () => {});
+(test)("second", () => {});
+
+```
+
+# Diagnostics
+```
+importParenthesized.ts:2:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { test } from "vitest";
+  > 2 │ test("first", () => {});
+      │ ^^^^
+    3 │ (test)("second", () => {});
+    4 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i Safe fix: Use it instead.
+  
+    1   │ - import·{·test·}·from·"vitest";
+    2   │ - test("first",·()·=>·{});
+      1 │ + import·{·test,·test·as·it·}·from·"vitest";
+      2 │ + it("first",·()·=>·{});
+    3 3 │   (test)("second", () => {});
+    4 4 │   
+  
+
+```
+
+```
+importParenthesized.ts:3:2 lint/style/useConsistentTestIt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { test } from "vitest";
+    2 │ test("first", () => {});
+  > 3 │ (test)("second", () => {});
+      │  ^^^^
+    4 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+
+```

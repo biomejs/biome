@@ -83,9 +83,9 @@ pub struct Convention {
 }
 
 impl DeserializableValidator for Convention {
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {
@@ -245,9 +245,9 @@ impl Selector {
 }
 
 impl DeserializableValidator for Selector {
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {
@@ -384,11 +384,7 @@ impl Kind {
                     )
                     | (
                         Self::TypeMember,
-                        Self::TypeGetter
-                            | Self::TypeMethod
-                            | Self::TypeParameter
-                            | Self::TypeProperty
-                            | Self::TypeSetter
+                        Self::TypeGetter | Self::TypeMethod | Self::TypeProperty | Self::TypeSetter
                     )
                     | (
                         Self::NamespaceLike,

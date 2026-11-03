@@ -1,0 +1,388 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { QueryClient } from "@tanstack/react-query";
+import { QueryClient as Client } from "@tanstack/react-query";
+
+function Component() {
+	const queryClient = new QueryClient();
+	return null;
+}
+
+function useHook() {
+	const queryClient = new QueryClient();
+	return queryClient;
+}
+
+function WithOptions() {
+	const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+	return null;
+}
+
+function CustomName() {
+	let customName = new QueryClient();
+	return null;
+}
+
+function Destructured() {
+	const { defaultOptions } = new QueryClient();
+	return null;
+}
+
+const Arrow = () => {
+	const queryClient = new QueryClient();
+	return null;
+};
+
+const useArrowHook = () => {
+	const queryClient = new QueryClient();
+	return queryClient;
+};
+
+const Expression = function () {
+	const queryClient = new QueryClient();
+	return null;
+};
+
+export default function DefaultExport() {
+	const queryClient = new QueryClient();
+	return null;
+}
+
+function Renamed() {
+	const queryClient = new Client();
+	return null;
+}
+
+function Parenthesized() {
+	const queryClient = (new QueryClient());
+	return null;
+}
+
+function WithComment() {
+	const queryClient = new QueryClient(); // shared by the whole tree
+	return null;
+}
+
+function InsideBlock({ enabled }) {
+	if (enabled) {
+		const queryClient = new QueryClient();
+	}
+	return null;
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:6:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    5 │ function Component() {
+  > 6 │ 	const queryClient = new QueryClient();
+      │ 	                    ^^^^^^^^^^^^^^^^^
+    7 │ 	return null;
+    8 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    6 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+      │         +           +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:11:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    10 │ function useHook() {
+  > 11 │ 	const queryClient = new QueryClient();
+       │ 	                    ^^^^^^^^^^^^^^^^^
+    12 │ 	return queryClient;
+    13 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    11 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+       │         +           +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:16:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    15 │ function WithOptions() {
+  > 16 │ 	const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+       │ 	                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	return null;
+    18 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    16 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient({·defaultOptions:·{·queries:·{·retry:·false·}·}·}));
+       │         +           +   +++++++++++++++++++++                                                                  + 
+
+```
+
+```
+invalid.js:21:19 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    20 │ function CustomName() {
+  > 21 │ 	let customName = new QueryClient();
+       │ 	                 ^^^^^^^^^^^^^^^^^
+    22 │ 	return null;
+    23 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    21 │ → let·[customName]·=·React.useState(()·=>·new·QueryClient());
+       │       +          +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:26:29 lint/nursery/useTanstackQueryStableQueryClient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    25 │ function Destructured() {
+  > 26 │ 	const { defaultOptions } = new QueryClient();
+       │ 	                           ^^^^^^^^^^^^^^^^^
+    27 │ 	return null;
+    28 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    30 │ const Arrow = () => {
+  > 31 │ 	const queryClient = new QueryClient();
+       │ 	                    ^^^^^^^^^^^^^^^^^
+    32 │ 	return null;
+    33 │ };
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    31 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+       │         +           +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:36:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    35 │ const useArrowHook = () => {
+  > 36 │ 	const queryClient = new QueryClient();
+       │ 	                    ^^^^^^^^^^^^^^^^^
+    37 │ 	return queryClient;
+    38 │ };
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    36 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+       │         +           +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:41:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    40 │ const Expression = function () {
+  > 41 │ 	const queryClient = new QueryClient();
+       │ 	                    ^^^^^^^^^^^^^^^^^
+    42 │ 	return null;
+    43 │ };
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    41 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+       │         +           +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:46:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    45 │ export default function DefaultExport() {
+  > 46 │ 	const queryClient = new QueryClient();
+       │ 	                    ^^^^^^^^^^^^^^^^^
+    47 │ 	return null;
+    48 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    46 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+       │         +           +   +++++++++++++++++++++                 + 
+
+```
+
+```
+invalid.js:51:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    50 │ function Renamed() {
+  > 51 │ 	const queryClient = new Client();
+       │ 	                    ^^^^^^^^^^^^
+    52 │ 	return null;
+    53 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    51 │ → const·[queryClient]·=·React.useState(()·=>·new·Client());
+       │         +           +   +++++++++++++++++++++            + 
+
+```
+
+```
+invalid.js:56:23 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    55 │ function Parenthesized() {
+  > 56 │ 	const queryClient = (new QueryClient());
+       │ 	                     ^^^^^^^^^^^^^^^^^
+    57 │ 	return null;
+    58 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    56 │ → const·[queryClient]·=·React.useState(()·=>·(new·QueryClient()));
+       │         +           +   ++++++++++++++ +++++++                  + 
+
+```
+
+```
+invalid.js:61:22 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    60 │ function WithComment() {
+  > 61 │ 	const queryClient = new QueryClient(); // shared by the whole tree
+       │ 	                    ^^^^^^^^^^^^^^^^^
+    62 │ 	return null;
+    63 │ }
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    61 │ → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());·//·shared·by·the·whole·tree
+       │         +           +   +++++++++++++++++++++                 +                             
+
+```
+
+```
+invalid.js:67:23 lint/nursery/useTanstackQueryStableQueryClient  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This QueryClient is created again each time the component renders.
+  
+    65 │ function InsideBlock({ enabled }) {
+    66 │ 	if (enabled) {
+  > 67 │ 		const queryClient = new QueryClient();
+       │ 		                    ^^^^^^^^^^^^^^^^^
+    68 │ 	}
+    69 │ 	return null;
+  
+  i Each new client starts with an empty cache, so the data that was already fetched is lost on every render.
+  
+  i Create the client outside of the component, or store it with useState.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Store the client with React.useState.
+  
+    67 │ → → const·[queryClient]·=·React.useState(()·=>·new·QueryClient());
+       │           +           +   +++++++++++++++++++++                 + 
+
+```

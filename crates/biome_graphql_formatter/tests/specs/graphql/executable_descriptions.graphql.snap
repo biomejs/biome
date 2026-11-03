@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/executable_descriptions.graphql
+---
+
+# Input
+
+```graphql
+"Operation description" query myQuery("Variable a description" $a:Int """Variable b
+multiline description""" $b:String = "value" @dir){field(a:$a,b:$b)}
+
+"Fragment description" fragment fields("Fragment variable description" $size:Int) on Type {field(size:$size)}
+
+"Nameless operation description" query {field}
+
+```
+
+
+# Formatted
+
+```graphql
+"Operation description"
+query myQuery(
+	"Variable a description"
+	$a: Int
+	"""
+	Variable b
+	multiline description
+	"""
+	$b: String = "value" @dir
+) {
+	field(a: $a, b: $b)
+}
+
+"Fragment description"
+fragment fields(
+	"Fragment variable description"
+	$size: Int
+) on Type {
+	field(size: $size)
+}
+
+"Nameless operation description"
+query {
+	field
+}
+
+```

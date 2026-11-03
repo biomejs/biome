@@ -1,0 +1,470 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+window.removeEventListener("scroll", handler.bind(abc));
+window.removeEventListener("scroll", this.handler.bind(abc));
+window.removeEventListener("click", () => {});
+window.removeEventListener("keydown", function () {});
+el.removeEventListener("click", function handleClick() {});
+el.removeEventListener("click", async () => {});
+el.removeEventListener("click", (e) => { e.preventDefault(); });
+el.removeEventListener("click", (e) => e.preventDefault());
+el.removeEventListener("mouseover", fn.bind(abc));
+el?.removeEventListener("mouseover", fn.bind(abc));
+el.removeEventListener("mouseout", function (e) {});
+el?.removeEventListener("mouseout", function (e) {});
+el.removeEventListener("mouseout", function (e) {}, true);
+el.removeEventListener("click", function (e) {}, ...moreArguments);
+el.removeEventListener(() => {}, () => {}, () => {});
+el.removeEventListener("click", this.handler["bind"](this));
+el.removeEventListener("click", this.handler[`bind`](this));
+el.removeEventListener("click", (() => {}));
+el.removeEventListener("click", (handler.bind)(this));
+(el.removeEventListener)("click", () => {});
+el.removeEventListener("click", obj?.handler.bind(this));
+
+```
+
+# Diagnostics
+```
+invalid.js:2:46 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ window.removeEventListener("scroll", handler.bind(abc));
+      │                                              ^^^^
+    3 │ window.removeEventListener("scroll", this.handler.bind(abc));
+    4 │ window.removeEventListener("click", () => {});
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:51 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+    1 │ /* should generate diagnostics */
+    2 │ window.removeEventListener("scroll", handler.bind(abc));
+  > 3 │ window.removeEventListener("scroll", this.handler.bind(abc));
+      │                                                   ^^^^
+    4 │ window.removeEventListener("click", () => {});
+    5 │ window.removeEventListener("keydown", function () {});
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:37 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    2 │ window.removeEventListener("scroll", handler.bind(abc));
+    3 │ window.removeEventListener("scroll", this.handler.bind(abc));
+  > 4 │ window.removeEventListener("click", () => {});
+      │                                     ^^^^^
+    5 │ window.removeEventListener("keydown", function () {});
+    6 │ el.removeEventListener("click", function handleClick() {});
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:39 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    3 │ window.removeEventListener("scroll", this.handler.bind(abc));
+    4 │ window.removeEventListener("click", () => {});
+  > 5 │ window.removeEventListener("keydown", function () {});
+      │                                       ^^^^^^^^^^^
+    6 │ el.removeEventListener("click", function handleClick() {});
+    7 │ el.removeEventListener("click", async () => {});
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:33 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    4 │ window.removeEventListener("click", () => {});
+    5 │ window.removeEventListener("keydown", function () {});
+  > 6 │ el.removeEventListener("click", function handleClick() {});
+      │                                 ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ el.removeEventListener("click", async () => {});
+    8 │ el.removeEventListener("click", (e) => { e.preventDefault(); });
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:33 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    5 │ window.removeEventListener("keydown", function () {});
+    6 │ el.removeEventListener("click", function handleClick() {});
+  > 7 │ el.removeEventListener("click", async () => {});
+      │                                 ^^^^^^^^^^^
+    8 │ el.removeEventListener("click", (e) => { e.preventDefault(); });
+    9 │ el.removeEventListener("click", (e) => e.preventDefault());
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:33 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+     6 │ el.removeEventListener("click", function handleClick() {});
+     7 │ el.removeEventListener("click", async () => {});
+   > 8 │ el.removeEventListener("click", (e) => { e.preventDefault(); });
+       │                                 ^^^^^^
+     9 │ el.removeEventListener("click", (e) => e.preventDefault());
+    10 │ el.removeEventListener("mouseover", fn.bind(abc));
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:33 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+     7 │ el.removeEventListener("click", async () => {});
+     8 │ el.removeEventListener("click", (e) => { e.preventDefault(); });
+   > 9 │ el.removeEventListener("click", (e) => e.preventDefault());
+       │                                 ^^^^^^
+    10 │ el.removeEventListener("mouseover", fn.bind(abc));
+    11 │ el?.removeEventListener("mouseover", fn.bind(abc));
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:40 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+     8 │ el.removeEventListener("click", (e) => { e.preventDefault(); });
+     9 │ el.removeEventListener("click", (e) => e.preventDefault());
+  > 10 │ el.removeEventListener("mouseover", fn.bind(abc));
+       │                                        ^^^^
+    11 │ el?.removeEventListener("mouseover", fn.bind(abc));
+    12 │ el.removeEventListener("mouseout", function (e) {});
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:41 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+     9 │ el.removeEventListener("click", (e) => e.preventDefault());
+    10 │ el.removeEventListener("mouseover", fn.bind(abc));
+  > 11 │ el?.removeEventListener("mouseover", fn.bind(abc));
+       │                                         ^^^^
+    12 │ el.removeEventListener("mouseout", function (e) {});
+    13 │ el?.removeEventListener("mouseout", function (e) {});
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:36 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    10 │ el.removeEventListener("mouseover", fn.bind(abc));
+    11 │ el?.removeEventListener("mouseover", fn.bind(abc));
+  > 12 │ el.removeEventListener("mouseout", function (e) {});
+       │                                    ^^^^^^^^^^^^
+    13 │ el?.removeEventListener("mouseout", function (e) {});
+    14 │ el.removeEventListener("mouseout", function (e) {}, true);
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:37 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    11 │ el?.removeEventListener("mouseover", fn.bind(abc));
+    12 │ el.removeEventListener("mouseout", function (e) {});
+  > 13 │ el?.removeEventListener("mouseout", function (e) {});
+       │                                     ^^^^^^^^^^^^
+    14 │ el.removeEventListener("mouseout", function (e) {}, true);
+    15 │ el.removeEventListener("click", function (e) {}, ...moreArguments);
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:36 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    12 │ el.removeEventListener("mouseout", function (e) {});
+    13 │ el?.removeEventListener("mouseout", function (e) {});
+  > 14 │ el.removeEventListener("mouseout", function (e) {}, true);
+       │                                    ^^^^^^^^^^^^
+    15 │ el.removeEventListener("click", function (e) {}, ...moreArguments);
+    16 │ el.removeEventListener(() => {}, () => {}, () => {});
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:33 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    13 │ el?.removeEventListener("mouseout", function (e) {});
+    14 │ el.removeEventListener("mouseout", function (e) {}, true);
+  > 15 │ el.removeEventListener("click", function (e) {}, ...moreArguments);
+       │                                 ^^^^^^^^^^^^
+    16 │ el.removeEventListener(() => {}, () => {}, () => {});
+    17 │ el.removeEventListener("click", this.handler["bind"](this));
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:34 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    14 │ el.removeEventListener("mouseout", function (e) {}, true);
+    15 │ el.removeEventListener("click", function (e) {}, ...moreArguments);
+  > 16 │ el.removeEventListener(() => {}, () => {}, () => {});
+       │                                  ^^^^^
+    17 │ el.removeEventListener("click", this.handler["bind"](this));
+    18 │ el.removeEventListener("click", this.handler[`bind`](this));
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:46 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+    15 │ el.removeEventListener("click", function (e) {}, ...moreArguments);
+    16 │ el.removeEventListener(() => {}, () => {}, () => {});
+  > 17 │ el.removeEventListener("click", this.handler["bind"](this));
+       │                                              ^^^^^^
+    18 │ el.removeEventListener("click", this.handler[`bind`](this));
+    19 │ el.removeEventListener("click", (() => {}));
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:46 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+    16 │ el.removeEventListener(() => {}, () => {}, () => {});
+    17 │ el.removeEventListener("click", this.handler["bind"](this));
+  > 18 │ el.removeEventListener("click", this.handler[`bind`](this));
+       │                                              ^^^^^^
+    19 │ el.removeEventListener("click", (() => {}));
+    20 │ el.removeEventListener("click", (handler.bind)(this));
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:34 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    17 │ el.removeEventListener("click", this.handler["bind"](this));
+    18 │ el.removeEventListener("click", this.handler[`bind`](this));
+  > 19 │ el.removeEventListener("click", (() => {}));
+       │                                  ^^^^^
+    20 │ el.removeEventListener("click", (handler.bind)(this));
+    21 │ (el.removeEventListener)("click", () => {});
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:42 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+    18 │ el.removeEventListener("click", this.handler[`bind`](this));
+    19 │ el.removeEventListener("click", (() => {}));
+  > 20 │ el.removeEventListener("click", (handler.bind)(this));
+       │                                          ^^^^
+    21 │ (el.removeEventListener)("click", () => {});
+    22 │ el.removeEventListener("click", obj?.handler.bind(this));
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:35 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This inline function is never removed by removeEventListener().
+  
+    19 │ el.removeEventListener("click", (() => {}));
+    20 │ el.removeEventListener("click", (handler.bind)(this));
+  > 21 │ (el.removeEventListener)("click", () => {});
+       │                                   ^^^^^
+    22 │ el.removeEventListener("click", obj?.handler.bind(this));
+    23 │ 
+  
+  i An inline function is a new function, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:46 lint/nursery/noInvalidRemoveEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returned by .bind() is never removed by removeEventListener().
+  
+    20 │ el.removeEventListener("click", (handler.bind)(this));
+    21 │ (el.removeEventListener)("click", () => {});
+  > 22 │ el.removeEventListener("click", obj?.handler.bind(this));
+       │                                              ^^^^
+    23 │ 
+  
+  i .bind() returns a new function every time it's called, so it can't be the same function that was passed to addEventListener(). The original listener stays attached.
+  
+  i Store the listener in a variable or property, and pass that same reference to both addEventListener() and removeEventListener().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

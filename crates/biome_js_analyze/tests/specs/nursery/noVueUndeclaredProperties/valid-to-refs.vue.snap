@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-to-refs.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { reactive, toRefs } from "vue";
+
+export default {
+  setup() {
+    const state = reactive({ a: 1, b: 2 });
+    return { ...toRefs(state) };
+  },
+};
+</script>
+
+<template>
+  <p>{{ a }} {{ b }} {{ c }}</p>
+</template>
+
+```

@@ -1,0 +1,276 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+let a: string | null = null;
+let b = null as unknown;
+const c = <unknown>null;
+delete (null as unknown);
+delete (null satisfies unknown);
+delete (<unknown>null);
+delete null!;
+using d = null;
+for (using e = null; ; ) { break; }
+enum Values {
+	Empty = null,
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:24 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ let a: string | null = null;
+      │                        ^^^^
+    3 │ let b = null as unknown;
+    4 │ const c = <unknown>null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - let·a:·string·|·null·=·null;
+        2 │ + let·a:·string·|·null·=·undefined;
+     3  3 │   let b = null as unknown;
+     4  4 │   const c = <unknown>null;
+  
+
+```
+
+```
+invalid.ts:3:9 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    1 │ /* should generate diagnostics */
+    2 │ let a: string | null = null;
+  > 3 │ let b = null as unknown;
+      │         ^^^^
+    4 │ const c = <unknown>null;
+    5 │ delete (null as unknown);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   let a: string | null = null;
+     3    │ - let·b·=·null·as·unknown;
+        3 │ + let·b·=·undefined·as·unknown;
+     4  4 │   const c = <unknown>null;
+     5  5 │   delete (null as unknown);
+  
+
+```
+
+```
+invalid.ts:4:20 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    2 │ let a: string | null = null;
+    3 │ let b = null as unknown;
+  > 4 │ const c = <unknown>null;
+      │                    ^^^^
+    5 │ delete (null as unknown);
+    6 │ delete (null satisfies unknown);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     2  2 │   let a: string | null = null;
+     3  3 │   let b = null as unknown;
+     4    │ - const·c·=·<unknown>null;
+        4 │ + const·c·=·<unknown>undefined;
+     5  5 │   delete (null as unknown);
+     6  6 │   delete (null satisfies unknown);
+  
+
+```
+
+```
+invalid.ts:5:9 lint/nursery/noNull ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    3 │ let b = null as unknown;
+    4 │ const c = <unknown>null;
+  > 5 │ delete (null as unknown);
+      │         ^^^^
+    6 │ delete (null satisfies unknown);
+    7 │ delete (<unknown>null);
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:9 lint/nursery/noNull ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    4 │ const c = <unknown>null;
+    5 │ delete (null as unknown);
+  > 6 │ delete (null satisfies unknown);
+      │         ^^^^
+    7 │ delete (<unknown>null);
+    8 │ delete null!;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:18 lint/nursery/noNull ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    5 │ delete (null as unknown);
+    6 │ delete (null satisfies unknown);
+  > 7 │ delete (<unknown>null);
+      │                  ^^^^
+    8 │ delete null!;
+    9 │ using d = null;
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:8 lint/nursery/noNull ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     6 │ delete (null satisfies unknown);
+     7 │ delete (<unknown>null);
+   > 8 │ delete null!;
+       │        ^^^^
+     9 │ using d = null;
+    10 │ for (using e = null; ; ) { break; }
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:11 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     7 │ delete (<unknown>null);
+     8 │ delete null!;
+   > 9 │ using d = null;
+       │           ^^^^
+    10 │ for (using e = null; ; ) { break; }
+    11 │ enum Values {
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     7  7 │   delete (<unknown>null);
+     8  8 │   delete null!;
+     9    │ - using·d·=·null;
+        9 │ + using·d·=·undefined;
+    10 10 │   for (using e = null; ; ) { break; }
+    11 11 │   enum Values {
+  
+
+```
+
+```
+invalid.ts:10:16 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+     8 │ delete null!;
+     9 │ using d = null;
+  > 10 │ for (using e = null; ; ) { break; }
+       │                ^^^^
+    11 │ enum Values {
+    12 │ 	Empty = null,
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+     8  8 │   delete null!;
+     9  9 │   using d = null;
+    10    │ - for·(using·e·=·null;·;·)·{·break;·}
+       10 │ + for·(using·e·=·undefined;·;·)·{·break;·}
+    11 11 │   enum Values {
+    12 12 │   	Empty = null,
+  
+
+```
+
+```
+invalid.ts:12:10 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    10 │ for (using e = null; ; ) { break; }
+    11 │ enum Values {
+  > 12 │ 	Empty = null,
+       │ 	        ^^^^
+    13 │ }
+    14 │ 
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    10 10 │   for (using e = null; ; ) { break; }
+    11 11 │   enum Values {
+    12    │ - → Empty·=·null,
+       12 │ + → Empty·=·undefined,
+    13 13 │   }
+    14 14 │   
+  
+
+```

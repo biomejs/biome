@@ -1,0 +1,21 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-unreadable-types.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import type { BaseSlots } from "./slots";
+
+interface Slots extends BaseSlots {
+    default(props: { msg: string }): any;
+}
+defineSlots<Slots>();
+</script>
+
+<template>
+    <slot name="from-base-slots" />
+</template>
+
+```

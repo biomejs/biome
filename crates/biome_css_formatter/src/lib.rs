@@ -30,14 +30,15 @@ use biome_css_syntax::{
     AnyCssDeclarationBlock, AnyCssRule, AnyCssRuleBlock, AnyCssValue, CssLanguage, CssSyntaxKind,
     CssSyntaxNode, CssSyntaxNodeWithOffset, CssSyntaxToken,
 };
+use biome_formatter::Formatted;
 use biome_formatter::comments::Comments;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::Printed;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
     FormatRuleWithTextCase, TransformSourceMap, write,
 };
-use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
 use biome_string_case::StrLikeExtension;
 

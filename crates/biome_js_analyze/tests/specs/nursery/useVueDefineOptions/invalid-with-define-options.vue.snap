@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-define-options.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default { name: "Foo" };
+</script>
+
+<script setup>
+defineOptions({ inheritAttrs: false });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-define-options.vue:3:16 lint/nursery/useVueDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This component sets its options with a default export, but it also uses <script setup>.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ export default { name: "Foo" };
+      │                ^^^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Splitting the component across two script blocks makes it harder to read. The defineOptions() macro sets the same options inside <script setup>.
+  
+  i Move these options into a defineOptions() call in the <script setup> block, and remove the default export. Declare props and events with defineProps() and defineEmits() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

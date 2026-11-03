@@ -78,8 +78,8 @@ impl BlockLangOptions {
 
 /// Accepts an omitted `lang`, but rejects an empty list, which would allow no
 /// value at all.
-fn non_empty_lang(
-    ctx: &mut dyn DeserializationContext,
+fn non_empty_lang<S>(
+    ctx: &mut dyn DeserializationContext<State = S>,
     value: &Option<Box<[Box<str>]>>,
     name: &str,
     range: TextRange,

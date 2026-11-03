@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueTypedRef {
-        version: "next",
+        version: "2.6.3",
         name: "useVueTypedRef",
         language: "ts",
         recommended: false,

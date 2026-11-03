@@ -1,0 +1,555 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+import { nextTick as nt } from "vue";
+import * as Vue from "vue";
+
+export default {
+	async mounted() {
+		// The Promise is ignored.
+		nt();
+		Vue.nextTick();
+		this.$nextTick();
+
+		// Too many arguments.
+		nt(callback, anotherCallback);
+		Vue.nextTick(callback, anotherCallback);
+		this.$nextTick(callback, anotherCallback);
+
+		// Not called.
+		nt.then(callback);
+		Vue.nextTick.then(callback);
+		this.$nextTick.then(callback);
+		await nt;
+		await Vue.nextTick;
+		await this.$nextTick;
+		Promise.all([nt, someOtherPromise]);
+
+		// Both a callback and the Promise.
+		nt(callback).then(anotherCallback);
+		Vue.nextTick(callback).then(anotherCallback);
+		this.$nextTick(callback).then(anotherCallback);
+		await nt(callback);
+		await Vue.nextTick(callback);
+		await this.$nextTick(callback);
+	},
+	updated() {
+		// No `await` fix outside of an async function.
+		nt();
+		this.$nextTick();
+		return this.$nextTick;
+	},
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:9:3 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Promise returned by nextTick() is ignored.
+  
+     7 │ 	async mounted() {
+     8 │ 		// The Promise is ignored.
+   > 9 │ 		nt();
+       │ 		^^
+    10 │ 		Vue.nextTick();
+    11 │ 		this.$nextTick();
+  
+  i Code after this call doesn't wait for Vue to update the page, so this call has no effect.
+  
+  i Await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await.
+  
+    8 │ → → await·nt();
+      │     ++++++     
+
+```
+
+```
+invalid.vue:10:3 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Promise returned by nextTick() is ignored.
+  
+     8 │ 		// The Promise is ignored.
+     9 │ 		nt();
+  > 10 │ 		Vue.nextTick();
+       │ 		^^^^^^^^^^^^
+    11 │ 		this.$nextTick();
+    12 │ 
+  
+  i Code after this call doesn't wait for Vue to update the page, so this call has no effect.
+  
+  i Await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await.
+  
+    9 │ → → await·Vue.nextTick();
+      │     ++++++               
+
+```
+
+```
+invalid.vue:11:3 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Promise returned by nextTick() is ignored.
+  
+     9 │ 		nt();
+    10 │ 		Vue.nextTick();
+  > 11 │ 		this.$nextTick();
+       │ 		^^^^^^^^^^^^^^
+    12 │ 
+    13 │ 		// Too many arguments.
+  
+  i Code after this call doesn't wait for Vue to update the page, so this call has no effect.
+  
+  i Await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await.
+  
+    10 │ → → await·this.$nextTick();
+       │     ++++++                 
+
+```
+
+```
+invalid.vue:14:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with more than one argument.
+  
+    13 │ 		// Too many arguments.
+  > 14 │ 		nt(callback, anotherCallback);
+       │ 		^^
+    15 │ 		Vue.nextTick(callback, anotherCallback);
+    16 │ 		this.$nextTick(callback, anotherCallback);
+  
+  i nextTick accepts a single callback function. The other arguments are ignored.
+  
+  i Pass at most one callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with more than one argument.
+  
+    13 │ 		// Too many arguments.
+    14 │ 		nt(callback, anotherCallback);
+  > 15 │ 		Vue.nextTick(callback, anotherCallback);
+       │ 		^^^^^^^^^^^^
+    16 │ 		this.$nextTick(callback, anotherCallback);
+    17 │ 
+  
+  i nextTick accepts a single callback function. The other arguments are ignored.
+  
+  i Pass at most one callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with more than one argument.
+  
+    14 │ 		nt(callback, anotherCallback);
+    15 │ 		Vue.nextTick(callback, anotherCallback);
+  > 16 │ 		this.$nextTick(callback, anotherCallback);
+       │ 		^^^^^^^^^^^^^^
+    17 │ 
+    18 │ 		// Not called.
+  
+  i nextTick accepts a single callback function. The other arguments are ignored.
+  
+  i Pass at most one callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:3 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    18 │ 		// Not called.
+  > 19 │ 		nt.then(callback);
+       │ 		^^
+    20 │ 		Vue.nextTick.then(callback);
+    21 │ 		this.$nextTick.then(callback);
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    18 │ → → nt().then(callback);
+       │       ++                
+
+```
+
+```
+invalid.vue:20:3 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    18 │ 		// Not called.
+    19 │ 		nt.then(callback);
+  > 20 │ 		Vue.nextTick.then(callback);
+       │ 		^^^^^^^^^^^^
+    21 │ 		this.$nextTick.then(callback);
+    22 │ 		await nt;
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    19 │ → → Vue.nextTick().then(callback);
+       │                 ++                
+
+```
+
+```
+invalid.vue:21:3 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    19 │ 		nt.then(callback);
+    20 │ 		Vue.nextTick.then(callback);
+  > 21 │ 		this.$nextTick.then(callback);
+       │ 		^^^^^^^^^^^^^^
+    22 │ 		await nt;
+    23 │ 		await Vue.nextTick;
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    20 │ → → this.$nextTick().then(callback);
+       │                   ++                
+
+```
+
+```
+invalid.vue:22:9 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    20 │ 		Vue.nextTick.then(callback);
+    21 │ 		this.$nextTick.then(callback);
+  > 22 │ 		await nt;
+       │ 		      ^^
+    23 │ 		await Vue.nextTick;
+    24 │ 		await this.$nextTick;
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    21 │ → → await·nt();
+       │             ++ 
+
+```
+
+```
+invalid.vue:23:9 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    21 │ 		this.$nextTick.then(callback);
+    22 │ 		await nt;
+  > 23 │ 		await Vue.nextTick;
+       │ 		      ^^^^^^^^^^^^
+    24 │ 		await this.$nextTick;
+    25 │ 		Promise.all([nt, someOtherPromise]);
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    22 │ → → await·Vue.nextTick();
+       │                       ++ 
+
+```
+
+```
+invalid.vue:24:9 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    22 │ 		await nt;
+    23 │ 		await Vue.nextTick;
+  > 24 │ 		await this.$nextTick;
+       │ 		      ^^^^^^^^^^^^^^
+    25 │ 		Promise.all([nt, someOtherPromise]);
+    26 │ 
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    23 │ → → await·this.$nextTick();
+       │                         ++ 
+
+```
+
+```
+invalid.vue:25:16 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    23 │ 		await Vue.nextTick;
+    24 │ 		await this.$nextTick;
+  > 25 │ 		Promise.all([nt, someOtherPromise]);
+       │ 		             ^^
+    26 │ 
+    27 │ 		// Both a callback and the Promise.
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    24 │ → → Promise.all([nt(),·someOtherPromise]);
+       │                    ++                     
+
+```
+
+```
+invalid.vue:28:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with a callback function, and the Promise it returns is also used.
+  
+    27 │ 		// Both a callback and the Promise.
+  > 28 │ 		nt(callback).then(anotherCallback);
+       │ 		^^
+    29 │ 		Vue.nextTick(callback).then(anotherCallback);
+    30 │ 		this.$nextTick(callback).then(anotherCallback);
+  
+  i Using both splits the code that runs after Vue updates the page into two places.
+  
+  i Either await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with a callback function, and the Promise it returns is also used.
+  
+    27 │ 		// Both a callback and the Promise.
+    28 │ 		nt(callback).then(anotherCallback);
+  > 29 │ 		Vue.nextTick(callback).then(anotherCallback);
+       │ 		^^^^^^^^^^^^
+    30 │ 		this.$nextTick(callback).then(anotherCallback);
+    31 │ 		await nt(callback);
+  
+  i Using both splits the code that runs after Vue updates the page into two places.
+  
+  i Either await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:30:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with a callback function, and the Promise it returns is also used.
+  
+    28 │ 		nt(callback).then(anotherCallback);
+    29 │ 		Vue.nextTick(callback).then(anotherCallback);
+  > 30 │ 		this.$nextTick(callback).then(anotherCallback);
+       │ 		^^^^^^^^^^^^^^
+    31 │ 		await nt(callback);
+    32 │ 		await Vue.nextTick(callback);
+  
+  i Using both splits the code that runs after Vue updates the page into two places.
+  
+  i Either await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:31:9 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with a callback function, and the Promise it returns is also used.
+  
+    29 │ 		Vue.nextTick(callback).then(anotherCallback);
+    30 │ 		this.$nextTick(callback).then(anotherCallback);
+  > 31 │ 		await nt(callback);
+       │ 		      ^^
+    32 │ 		await Vue.nextTick(callback);
+    33 │ 		await this.$nextTick(callback);
+  
+  i Using both splits the code that runs after Vue updates the page into two places.
+  
+  i Either await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:32:9 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with a callback function, and the Promise it returns is also used.
+  
+    30 │ 		this.$nextTick(callback).then(anotherCallback);
+    31 │ 		await nt(callback);
+  > 32 │ 		await Vue.nextTick(callback);
+       │ 		      ^^^^^^^^^^^^
+    33 │ 		await this.$nextTick(callback);
+    34 │ 	},
+  
+  i Using both splits the code that runs after Vue updates the page into two places.
+  
+  i Either await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:33:9 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is called with a callback function, and the Promise it returns is also used.
+  
+    31 │ 		await nt(callback);
+    32 │ 		await Vue.nextTick(callback);
+  > 33 │ 		await this.$nextTick(callback);
+       │ 		      ^^^^^^^^^^^^^^
+    34 │ 	},
+    35 │ 	updated() {
+  
+  i Using both splits the code that runs after Vue updates the page into two places.
+  
+  i Either await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:37:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Promise returned by nextTick() is ignored.
+  
+    35 │ 	updated() {
+    36 │ 		// No `await` fix outside of an async function.
+  > 37 │ 		nt();
+       │ 		^^
+    38 │ 		this.$nextTick();
+    39 │ 		return this.$nextTick;
+  
+  i Code after this call doesn't wait for Vue to update the page, so this call has no effect.
+  
+  i Await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:38:3 lint/nursery/useVueValidNextTick ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Promise returned by nextTick() is ignored.
+  
+    36 │ 		// No `await` fix outside of an async function.
+    37 │ 		nt();
+  > 38 │ 		this.$nextTick();
+       │ 		^^^^^^^^^^^^^^
+    39 │ 		return this.$nextTick;
+    40 │ 	},
+  
+  i Code after this call doesn't wait for Vue to update the page, so this call has no effect.
+  
+  i Await the Promise, or pass a callback function to nextTick.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:39:10 lint/nursery/useVueValidNextTick  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × nextTick is used without being called.
+  
+    37 │ 		nt();
+    38 │ 		this.$nextTick();
+  > 39 │ 		return this.$nextTick;
+       │ 		       ^^^^^^^^^^^^^^
+    40 │ 	},
+    41 │ };
+  
+  i nextTick is a function. It only waits for Vue to update the page when it's called.
+  
+  i Call nextTick().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Call nextTick.
+  
+    38 │ → → return·this.$nextTick();
+       │                          ++ 
+
+```
