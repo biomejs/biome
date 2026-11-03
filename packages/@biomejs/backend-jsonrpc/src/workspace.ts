@@ -3993,6 +3993,11 @@ export interface Nursery {
 	 */
 	useVueComputedPropertyReturn?: UseVueComputedPropertyReturnConfiguration;
 	/**
+	 * Enforce a consistent style for component props set to true.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-boolean-prop-style
+	 */
+	useVueConsistentBooleanPropStyle?: UseVueConsistentBooleanPropStyleConfiguration;
+	/**
 	 * Enforce a consistent declaration style for Vue's defineEmits macro.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-define-emits-declaration
 	 */
@@ -6950,6 +6955,9 @@ export type UseVueComponentIsConfiguration =
 export type UseVueComputedPropertyReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueComputedPropertyReturnOptions;
+export type UseVueConsistentBooleanPropStyleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentBooleanPropStyleOptions;
 export type UseVueConsistentDefineEmitsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefineEmitsDeclarationOptions;
@@ -10249,6 +10257,14 @@ export interface RuleWithUseVueComputedPropertyReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueComputedPropertyReturnOptions;
 }
+export interface RuleWithUseVueConsistentBooleanPropStyleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentBooleanPropStyleOptions;
+}
 export interface RuleWithUseVueConsistentDefineEmitsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefineEmitsDeclarationOptions;
@@ -12940,6 +12956,19 @@ export interface UseVueBlockOrderOptions {
 export type UseVueBooleanPropTypeFirstOptions = {};
 export type UseVueComponentIsOptions = {};
 export type UseVueComputedPropertyReturnOptions = {};
+export interface UseVueConsistentBooleanPropStyleOptions {
+	/**
+	 * A list of prop names that must use the opposite of `style`.
+	 * Names must match exactly, as written in the template.
+	 */
+	except?: string[];
+	/**
+	 * How a component prop set to `true` should be written: `"shorthand"` writes only the
+	 * prop name, and `"longhand"` writes the value `true` explicitly.
+	 * Default: `"shorthand"`.
+	 */
+	style?: BooleanPropStyle;
+}
 export interface UseVueConsistentDefineEmitsDeclarationOptions {
 	/**
 	 * The style that `defineEmits` calls must use to declare events.
@@ -14024,6 +14053,7 @@ export type ComponentDefinitionStyle =
  * One position in the configured block order.
  */
 export type BlockOrderEntry = string | string[];
+export type BooleanPropStyle = "shorthand" | "longhand";
 export type DefineEmitsDeclarationStyle = "type" | "typeLiteral" | "runtime";
 export type EventHyphenation = "always" | "never";
 export type PropNameCasing = "camelCase" | "snake_case";
@@ -14771,6 +14801,7 @@ export type Category =
 	| "lint/nursery/useVueBooleanPropTypeFirst"
 	| "lint/nursery/useVueComponentIs"
 	| "lint/nursery/useVueComputedPropertyReturn"
+	| "lint/nursery/useVueConsistentBooleanPropStyle"
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"

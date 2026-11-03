@@ -763,6 +763,7 @@ pub enum RuleName {
     UseVueBooleanPropTypeFirst,
     UseVueComponentIs,
     UseVueComputedPropertyReturn,
+    UseVueConsistentBooleanPropStyle,
     UseVueConsistentDefineEmitsDeclaration,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
@@ -1509,6 +1510,7 @@ impl RuleName {
             Self::UseVueBooleanPropTypeFirst => "useVueBooleanPropTypeFirst",
             Self::UseVueComponentIs => "useVueComponentIs",
             Self::UseVueComputedPropertyReturn => "useVueComputedPropertyReturn",
+            Self::UseVueConsistentBooleanPropStyle => "useVueConsistentBooleanPropStyle",
             Self::UseVueConsistentDefineEmitsDeclaration => {
                 "useVueConsistentDefineEmitsDeclaration"
             }
@@ -2249,6 +2251,7 @@ impl RuleName {
             Self::UseVueBooleanPropTypeFirst => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
             Self::UseVueComputedPropertyReturn => RuleGroup::Nursery,
+            Self::UseVueConsistentBooleanPropStyle => RuleGroup::Nursery,
             Self::UseVueConsistentDefineEmitsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
@@ -3000,6 +3003,7 @@ impl std::str::FromStr for RuleName {
             "useVueBooleanPropTypeFirst" => Ok(Self::UseVueBooleanPropTypeFirst),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
             "useVueComputedPropertyReturn" => Ok(Self::UseVueComputedPropertyReturn),
+            "useVueConsistentBooleanPropStyle" => Ok(Self::UseVueConsistentBooleanPropStyle),
             "useVueConsistentDefineEmitsDeclaration" => {
                 Ok(Self::UseVueConsistentDefineEmitsDeclaration)
             }

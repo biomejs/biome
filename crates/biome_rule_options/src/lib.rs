@@ -687,6 +687,7 @@ pub mod use_vue_block_order;
 pub mod use_vue_boolean_prop_type_first;
 pub mod use_vue_component_is;
 pub mod use_vue_computed_property_return;
+pub mod use_vue_consistent_boolean_prop_style;
 pub mod use_vue_consistent_define_emits_declaration;
 pub mod use_vue_consistent_define_props_declaration;
 pub mod use_vue_consistent_event_hyphenation;
