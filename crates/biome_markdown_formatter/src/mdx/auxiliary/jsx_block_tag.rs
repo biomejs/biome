@@ -7,20 +7,14 @@ use biome_markdown_syntax::{MdxJsxBlockTag, MdxJsxBlockTagFields};
 pub(crate) struct FormatMdxJsxBlockTag;
 impl FormatNodeRule<MdxJsxBlockTag> for FormatMdxJsxBlockTag {
     fn fmt_fields(&self, node: &MdxJsxBlockTag, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        let MdxJsxBlockTagFields {
-            indent,
-            value_token,
-        } = node.as_fields();
+        let MdxJsxBlockTagFields { value_token } = node.as_fields();
         let value_token = value_token?;
 
         write!(
             f,
-            [
-                indent.format(),
-                FormatMdxSnippet {
-                    token: &value_token
-                }
-            ]
+            [FormatMdxSnippet {
+                token: &value_token
+            }]
         )
     }
 }
