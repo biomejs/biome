@@ -3873,6 +3873,11 @@ export interface Nursery {
 	 */
 	useConsistentBlockLang?: UseConsistentBlockLangConfiguration;
 	/**
+	 * Enforce a consistent notation for font weights.
+	 * See https://biomejs.dev/linter/rules/use-consistent-font-weight-notation
+	 */
+	useConsistentFontWeightNotation?: UseConsistentFontWeightNotationConfiguration;
+	/**
 	 * Enforce consistent use of function declarations or expressions assigned to variables.
 	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
@@ -7113,6 +7118,9 @@ export type UseCapitalizedConstructorsConfiguration =
 export type UseConsistentBlockLangConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBlockLangOptions;
+export type UseConsistentFontWeightNotationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentFontWeightNotationOptions;
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
@@ -10457,6 +10465,14 @@ export interface RuleWithUseConsistentBlockLangOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBlockLangOptions;
 }
+export interface RuleWithUseConsistentFontWeightNotationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentFontWeightNotationOptions;
+}
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
@@ -13485,6 +13501,20 @@ export interface UseConsistentBlockLangOptions {
 	 */
 	blocks?: Record<string, BlockLangOptions>;
 }
+export interface UseConsistentFontWeightNotationOptions {
+	/**
+	 * Whether to allow the relative keywords `bolder` and `lighter` when `notation` is `"numeric"`.
+	 *
+	 * Default: `false`
+	 */
+	ignoreRelative?: boolean;
+	/**
+	 * Whether font weights should be written as numbers, or as keywords where a keyword exists.
+	 *
+	 * Default: `"numeric"`
+	 */
+	notation?: FontWeightNotation;
+}
 /**
  * Configures the required function style and whether declaration mode permits arrow functions.
  */
@@ -14812,6 +14842,7 @@ export interface BlockLangOptions {
 	 */
 	required?: boolean;
 }
+export type FontWeightNotation = "numeric" | "namedWherePossible";
 /**
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
@@ -15545,6 +15576,7 @@ export type Category =
 	| "lint/nursery/useBlockStatementOverIife"
 	| "lint/nursery/useCapitalizedConstructors"
 	| "lint/nursery/useConsistentBlockLang"
+	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentJsonFileRead"
