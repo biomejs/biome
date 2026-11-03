@@ -1,0 +1,226 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+/// <reference path="./globals.d.ts" />
+/// <reference path='../types/env.d.ts'/>
+///<reference path="./no-space.d.ts" />
+/// <reference types="lodash" />
+/// <reference types="foo" resolution-mode="import" />
+/// <reference resolution-mode="require" types="bar" />
+/// <reference types="baz" />
+/// <reference types="qux" />
+import { debounce } from "lodash";
+import type { Foo } from "foo";
+import "bar";
+import baz = require("baz");
+import * as qux from "qux";
+import * as quxAgain from "qux";
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to ./globals.d.ts.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ /// <reference path="./globals.d.ts" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ /// <reference path='../types/env.d.ts'/>
+    4 │ ///<reference path="./no-space.d.ts" />
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Use an import statement to load the file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to ../types/env.d.ts.
+  
+    1 │ /* should generate diagnostics */
+    2 │ /// <reference path="./globals.d.ts" />
+  > 3 │ /// <reference path='../types/env.d.ts'/>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ ///<reference path="./no-space.d.ts" />
+    5 │ /// <reference types="lodash" />
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Use an import statement to load the file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected triple-slash reference to ./no-space.d.ts.
+  
+    2 │ /// <reference path="./globals.d.ts" />
+    3 │ /// <reference path='../types/env.d.ts'/>
+  > 4 │ ///<reference path="./no-space.d.ts" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ /// <reference types="lodash" />
+    6 │ /// <reference types="foo" resolution-mode="import" />
+  
+  i A triple-slash reference loads code for the whole file without showing which parts the file uses.
+  
+  i Use an import statement to load the file instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This triple-slash reference to lodash is redundant.
+  
+    3 │ /// <reference path='../types/env.d.ts'/>
+    4 │ ///<reference path="./no-space.d.ts" />
+  > 5 │ /// <reference types="lodash" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ /// <reference types="foo" resolution-mode="import" />
+    7 │ /// <reference resolution-mode="require" types="bar" />
+  
+  i The file already imports lodash here, which also loads its types.
+  
+     8 │ /// <reference types="baz" />
+     9 │ /// <reference types="qux" />
+  > 10 │ import { debounce } from "lodash";
+       │                          ^^^^^^^^
+    11 │ import type { Foo } from "foo";
+    12 │ import "bar";
+  
+  i Remove the triple-slash reference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This triple-slash reference to foo is redundant.
+  
+    4 │ ///<reference path="./no-space.d.ts" />
+    5 │ /// <reference types="lodash" />
+  > 6 │ /// <reference types="foo" resolution-mode="import" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ /// <reference resolution-mode="require" types="bar" />
+    8 │ /// <reference types="baz" />
+  
+  i The file already imports foo here, which also loads its types.
+  
+     9 │ /// <reference types="qux" />
+    10 │ import { debounce } from "lodash";
+  > 11 │ import type { Foo } from "foo";
+       │                          ^^^^^
+    12 │ import "bar";
+    13 │ import baz = require("baz");
+  
+  i Remove the triple-slash reference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This triple-slash reference to bar is redundant.
+  
+    5 │ /// <reference types="lodash" />
+    6 │ /// <reference types="foo" resolution-mode="import" />
+  > 7 │ /// <reference resolution-mode="require" types="bar" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ /// <reference types="baz" />
+    9 │ /// <reference types="qux" />
+  
+  i The file already imports bar here, which also loads its types.
+  
+    10 │ import { debounce } from "lodash";
+    11 │ import type { Foo } from "foo";
+  > 12 │ import "bar";
+       │        ^^^^^
+    13 │ import baz = require("baz");
+    14 │ import * as qux from "qux";
+  
+  i Remove the triple-slash reference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This triple-slash reference to baz is redundant.
+  
+     6 │ /// <reference types="foo" resolution-mode="import" />
+     7 │ /// <reference resolution-mode="require" types="bar" />
+   > 8 │ /// <reference types="baz" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ /// <reference types="qux" />
+    10 │ import { debounce } from "lodash";
+  
+  i The file already imports baz here, which also loads its types.
+  
+    11 │ import type { Foo } from "foo";
+    12 │ import "bar";
+  > 13 │ import baz = require("baz");
+       │                      ^^^^^
+    14 │ import * as qux from "qux";
+    15 │ import * as quxAgain from "qux";
+  
+  i Remove the triple-slash reference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noTripleSlashReference ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This triple-slash reference to qux is redundant.
+  
+     7 │ /// <reference resolution-mode="require" types="bar" />
+     8 │ /// <reference types="baz" />
+   > 9 │ /// <reference types="qux" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ import { debounce } from "lodash";
+    11 │ import type { Foo } from "foo";
+  
+  i The file already imports qux here, which also loads its types.
+  
+    12 │ import "bar";
+    13 │ import baz = require("baz");
+  > 14 │ import * as qux from "qux";
+       │                      ^^^^^
+    15 │ import * as quxAgain from "qux";
+    16 │ 
+  
+  i Remove the triple-slash reference.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

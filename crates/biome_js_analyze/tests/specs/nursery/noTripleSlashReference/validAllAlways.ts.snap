@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAllAlways.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+/// <reference path="./globals.d.ts" />
+/// <reference types="lodash" />
+/// <reference lib="dom" />
+import { debounce } from "lodash";
+
+```

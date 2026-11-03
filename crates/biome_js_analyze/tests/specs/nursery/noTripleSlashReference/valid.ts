@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+// <reference path="./globals.d.ts" />
+//// <reference path="./globals.d.ts" />
+/* /// <reference path="./globals.d.ts" /> */
+/// <reference types="vite/client" />
+/// <reference types="foo" />
+/// <reference lib="dom" />
+/// <reference no-default-lib="true" />
+/// <amd-module name="module" />
+import * as bar from "bar";
+import { x } from "foo/sub";
+export * from "vite/client";
+/// <reference path="./late.d.ts" />
