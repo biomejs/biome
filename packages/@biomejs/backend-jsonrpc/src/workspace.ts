@@ -4053,6 +4053,11 @@ export interface Nursery {
 	 */
 	useVueRenderReturn?: UseVueRenderReturnConfiguration;
 	/**
+	 * Require static class names to be in a separate class attribute.
+	 * See https://biomejs.dev/linter/rules/use-vue-separate-static-class
+	 */
+	useVueSeparateStaticClass?: UseVueSeparateStaticClassConfiguration;
+	/**
 	 * Require Vue component events to carry at most one value.
 	 * See https://biomejs.dev/linter/rules/use-vue-single-event-payload
 	 */
@@ -6971,6 +6976,9 @@ export type UseVuePropTypeConstructorConfiguration =
 export type UseVueRenderReturnConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueRenderReturnOptions;
+export type UseVueSeparateStaticClassConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueSeparateStaticClassOptions;
 export type UseVueSingleEventPayloadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueSingleEventPayloadOptions;
@@ -10293,6 +10301,10 @@ export interface RuleWithUseVueRenderReturnOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueRenderReturnOptions;
 }
+export interface RuleWithUseVueSeparateStaticClassOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueSeparateStaticClassOptions;
+}
 export interface RuleWithUseVueSingleEventPayloadOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueSingleEventPayloadOptions;
@@ -12961,6 +12973,7 @@ export type UseVueEmitsValidatorReturnOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
 export type UseVueRenderReturnOptions = {};
+export type UseVueSeparateStaticClassOptions = {};
 export type UseVueSingleEventPayloadOptions = {};
 export interface UseVueSlotNameCasingOptions {
 	/**
@@ -14712,6 +14725,7 @@ export type Category =
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVuePropTypeConstructor"
 	| "lint/nursery/useVueRenderReturn"
+	| "lint/nursery/useVueSeparateStaticClass"
 	| "lint/nursery/useVueSingleEventPayload"
 	| "lint/nursery/useVueSlotsAsFunctions"
 	| "lint/nursery/useVueTemplateRef"
