@@ -456,6 +456,7 @@ define_categories! {
     "lint/nursery/useCatchErrorName": "https://biomejs.dev/linter/rules/use-catch-error-name",
     "lint/nursery/useConsistentBlockLang": "https://biomejs.dev/linter/rules/use-consistent-block-lang",
     "lint/nursery/useConsistentBooleanName": "https://biomejs.dev/linter/rules/use-consistent-boolean-name",
+    "lint/nursery/useConsistentBooleanProps": "https://biomejs.dev/linter/rules/use-consistent-boolean-props",
     "lint/nursery/useConsistentFontWeightNotation": "https://biomejs.dev/linter/rules/use-consistent-font-weight-notation",
     "lint/nursery/useConsistentFunctionStyle": "https://biomejs.dev/linter/rules/use-consistent-function-style",
     "lint/nursery/useConsistentHeadingLevel": "https://biomejs.dev/linter/rules/use-consistent-heading-level",

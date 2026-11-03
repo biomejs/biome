@@ -544,6 +544,7 @@ pub mod use_consistent_array_type;
 pub mod use_consistent_arrow_return;
 pub mod use_consistent_block_lang;
 pub mod use_consistent_boolean_name;
+pub mod use_consistent_boolean_props;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_enum_value_type;

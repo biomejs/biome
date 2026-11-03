@@ -3968,6 +3968,11 @@ export interface Nursery {
 	 */
 	useConsistentBooleanName?: UseConsistentBooleanNameConfiguration;
 	/**
+	 * Require a consistent style for JSX props with the value true.
+	 * See https://biomejs.dev/linter/rules/use-consistent-boolean-props
+	 */
+	useConsistentBooleanProps?: UseConsistentBooleanPropsConfiguration;
+	/**
 	 * Enforce a consistent notation for font weights.
 	 * See https://biomejs.dev/linter/rules/use-consistent-font-weight-notation
 	 */
@@ -7280,6 +7285,9 @@ export type UseConsistentBlockLangConfiguration =
 export type UseConsistentBooleanNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBooleanNameOptions;
+export type UseConsistentBooleanPropsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBooleanPropsOptions;
 export type UseConsistentFontWeightNotationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFontWeightNotationOptions;
@@ -10737,6 +10745,14 @@ export interface RuleWithUseConsistentBooleanNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentBooleanNameOptions;
 }
+export interface RuleWithUseConsistentBooleanPropsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentBooleanPropsOptions;
+}
 export interface RuleWithUseConsistentFontWeightNotationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13883,6 +13899,12 @@ export interface UseConsistentBooleanNameOptions {
 	 */
 	prefixes?: Record<string, boolean>;
 }
+export interface UseConsistentBooleanPropsOptions {
+	/**
+	 * How to write JSX props whose value is `true`. Defaults to `explicit`.
+	 */
+	mode?: BooleanPropMode;
+}
 export interface UseConsistentFontWeightNotationOptions {
 	/**
 	 * Whether to allow the relative keywords `bolder` and `lighter` when `notation` is `"numeric"`.
@@ -15241,6 +15263,7 @@ export interface BlockLangOptions {
 	 */
 	required?: boolean;
 }
+export type BooleanPropMode = "implicit" | "explicit";
 export type FontWeightNotation = "numeric" | "namedWherePossible";
 /**
  * The required form for function definitions: `"expression"` or `"declaration"`.
@@ -16009,6 +16032,7 @@ export type Category =
 	| "lint/nursery/useCatchErrorName"
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentBooleanName"
+	| "lint/nursery/useConsistentBooleanProps"
 	| "lint/nursery/useConsistentFontWeightNotation"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
