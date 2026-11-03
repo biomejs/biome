@@ -1,0 +1,18 @@
+/* should generate diagnostics */
+.foo > .bar {}
+.foo + .bar > a {}
+.foo .bar {}
+button:hover {}
+a:not(.foo):hover {}
+a:HOVER {}
+li::marker {}
+a::before {}
+a:before {}
+[class*="foo"] {}
+img[alt^="foo"] {}
+:has(> img) {}
+.parent {
+	> .child {}
+}
+.multi
+	.line {}
