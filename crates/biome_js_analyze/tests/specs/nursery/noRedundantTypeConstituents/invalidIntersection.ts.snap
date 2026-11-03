@@ -1,0 +1,490 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIntersection.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+type A1 = number & any;
+type A2 = any & "foo";
+type N1 = number & never;
+type N2 = never & number;
+type U1 = number & unknown;
+type U2 = unknown & number;
+
+type P1 = number & 0;
+type P2 = "" & string;
+type P3 = 0n & bigint;
+type P4 = -1n & bigint;
+type P5 = false & boolean;
+type P6 = true & boolean;
+type P7 = `a${string}` & string;
+type P8 = ("a" | "b") & string;
+type P9 = (1 | 2) & ("a" | "b") & string & number;
+type P10 = (true | false) & boolean;
+
+// Only the outermost intersection reports nested members.
+type Nested = string & ("a" & (unknown & { a: 1 }));
+
+// A leading `&` with a single parenthesized intersection.
+type S1 = & (number & 0);
+
+// `any` has no effect next to `never`.
+type K1 = any & never;
+
+```
+
+# Diagnostics
+```
+invalidIntersection.ts:3:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The any type makes every other member of this intersection redundant.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ type A1 = number & any;
+      │                    ^^^
+    4 │ type A2 = any & "foo";
+    5 │ type N1 = number & never;
+  
+  i This intersection is always any, whatever its other members are.
+  
+  i If the type should be any, replace the whole intersection with any. Otherwise, remove any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:4:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The any type makes every other member of this intersection redundant.
+  
+    3 │ type A1 = number & any;
+  > 4 │ type A2 = any & "foo";
+      │           ^^^
+    5 │ type N1 = number & never;
+    6 │ type N2 = never & number;
+  
+  i This intersection is always any, whatever its other members are.
+  
+  i If the type should be any, replace the whole intersection with any. Otherwise, remove any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:5:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type makes every other member of this intersection redundant.
+  
+    3 │ type A1 = number & any;
+    4 │ type A2 = any & "foo";
+  > 5 │ type N1 = number & never;
+      │                    ^^^^^
+    6 │ type N2 = never & number;
+    7 │ type U1 = number & unknown;
+  
+  i This intersection is always never, whatever its other members are.
+  
+  i If the type should be never, replace the whole intersection with never. Otherwise, remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:6:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type makes every other member of this intersection redundant.
+  
+    4 │ type A2 = any & "foo";
+    5 │ type N1 = number & never;
+  > 6 │ type N2 = never & number;
+      │           ^^^^^
+    7 │ type U1 = number & unknown;
+    8 │ type U2 = unknown & number;
+  
+  i This intersection is always never, whatever its other members are.
+  
+  i If the type should be never, replace the whole intersection with never. Otherwise, remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:7:20 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type has no effect in this intersection.
+  
+    5 │ type N1 = number & never;
+    6 │ type N2 = never & number;
+  > 7 │ type U1 = number & unknown;
+      │                    ^^^^^^^
+    8 │ type U2 = unknown & number;
+    9 │ 
+  
+  i This intersection accepts the same values with or without unknown.
+  
+  i Remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:8:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type has no effect in this intersection.
+  
+     6 │ type N2 = never & number;
+     7 │ type U1 = number & unknown;
+   > 8 │ type U2 = unknown & number;
+       │           ^^^^^^^
+     9 │ 
+    10 │ type P1 = number & 0;
+  
+  i This intersection accepts the same values with or without unknown.
+  
+  i Remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:10:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The number type is redundant because the intersection also includes a number literal type.
+  
+     8 │ type U2 = unknown & number;
+     9 │ 
+  > 10 │ type P1 = number & 0;
+       │           ^^^^^^
+    11 │ type P2 = "" & string;
+    12 │ type P3 = 0n & bigint;
+  
+  i The literal type already limits the values to specific number values, so number doesn't change the result.
+  
+  i Remove number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:11:16 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The string type is redundant because the intersection also includes a string literal type.
+  
+    10 │ type P1 = number & 0;
+  > 11 │ type P2 = "" & string;
+       │                ^^^^^^
+    12 │ type P3 = 0n & bigint;
+    13 │ type P4 = -1n & bigint;
+  
+  i The literal type already limits the values to specific string values, so string doesn't change the result.
+  
+  i Remove string.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:12:16 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bigint type is redundant because the intersection also includes a bigint literal type.
+  
+    10 │ type P1 = number & 0;
+    11 │ type P2 = "" & string;
+  > 12 │ type P3 = 0n & bigint;
+       │                ^^^^^^
+    13 │ type P4 = -1n & bigint;
+    14 │ type P5 = false & boolean;
+  
+  i The literal type already limits the values to specific bigint values, so bigint doesn't change the result.
+  
+  i Remove bigint.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:13:17 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bigint type is redundant because the intersection also includes a bigint literal type.
+  
+    11 │ type P2 = "" & string;
+    12 │ type P3 = 0n & bigint;
+  > 13 │ type P4 = -1n & bigint;
+       │                 ^^^^^^
+    14 │ type P5 = false & boolean;
+    15 │ type P6 = true & boolean;
+  
+  i The literal type already limits the values to specific bigint values, so bigint doesn't change the result.
+  
+  i Remove bigint.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:14:19 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The boolean type is redundant because the intersection also includes a boolean literal type.
+  
+    12 │ type P3 = 0n & bigint;
+    13 │ type P4 = -1n & bigint;
+  > 14 │ type P5 = false & boolean;
+       │                   ^^^^^^^
+    15 │ type P6 = true & boolean;
+    16 │ type P7 = `a${string}` & string;
+  
+  i The literal type already limits the values to specific boolean values, so boolean doesn't change the result.
+  
+  i Remove boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:15:18 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The boolean type is redundant because the intersection also includes a boolean literal type.
+  
+    13 │ type P4 = -1n & bigint;
+    14 │ type P5 = false & boolean;
+  > 15 │ type P6 = true & boolean;
+       │                  ^^^^^^^
+    16 │ type P7 = `a${string}` & string;
+    17 │ type P8 = ("a" | "b") & string;
+  
+  i The literal type already limits the values to specific boolean values, so boolean doesn't change the result.
+  
+  i Remove boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:16:26 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The string type is redundant because the intersection also includes a string literal type.
+  
+    14 │ type P5 = false & boolean;
+    15 │ type P6 = true & boolean;
+  > 16 │ type P7 = `a${string}` & string;
+       │                          ^^^^^^
+    17 │ type P8 = ("a" | "b") & string;
+    18 │ type P9 = (1 | 2) & ("a" | "b") & string & number;
+  
+  i The literal type already limits the values to specific string values, so string doesn't change the result.
+  
+  i Remove string.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:17:25 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The string type is redundant because the intersection also includes a string literal type.
+  
+    15 │ type P6 = true & boolean;
+    16 │ type P7 = `a${string}` & string;
+  > 17 │ type P8 = ("a" | "b") & string;
+       │                         ^^^^^^
+    18 │ type P9 = (1 | 2) & ("a" | "b") & string & number;
+    19 │ type P10 = (true | false) & boolean;
+  
+  i The literal type already limits the values to specific string values, so string doesn't change the result.
+  
+  i Remove string.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:18:35 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The string type is redundant because the intersection also includes a string literal type.
+  
+    16 │ type P7 = `a${string}` & string;
+    17 │ type P8 = ("a" | "b") & string;
+  > 18 │ type P9 = (1 | 2) & ("a" | "b") & string & number;
+       │                                   ^^^^^^
+    19 │ type P10 = (true | false) & boolean;
+    20 │ 
+  
+  i The literal type already limits the values to specific string values, so string doesn't change the result.
+  
+  i Remove string.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:18:44 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The number type is redundant because the intersection also includes a number literal type.
+  
+    16 │ type P7 = `a${string}` & string;
+    17 │ type P8 = ("a" | "b") & string;
+  > 18 │ type P9 = (1 | 2) & ("a" | "b") & string & number;
+       │                                            ^^^^^^
+    19 │ type P10 = (true | false) & boolean;
+    20 │ 
+  
+  i The literal type already limits the values to specific number values, so number doesn't change the result.
+  
+  i Remove number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:19:29 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The boolean type is redundant because the intersection also includes a boolean literal type.
+  
+    17 │ type P8 = ("a" | "b") & string;
+    18 │ type P9 = (1 | 2) & ("a" | "b") & string & number;
+  > 19 │ type P10 = (true | false) & boolean;
+       │                             ^^^^^^^
+    20 │ 
+    21 │ // Only the outermost intersection reports nested members.
+  
+  i The literal type already limits the values to specific boolean values, so boolean doesn't change the result.
+  
+  i Remove boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:22:15 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The string type is redundant because the intersection also includes a string literal type.
+  
+    21 │ // Only the outermost intersection reports nested members.
+  > 22 │ type Nested = string & ("a" & (unknown & { a: 1 }));
+       │               ^^^^^^
+    23 │ 
+    24 │ // A leading `&` with a single parenthesized intersection.
+  
+  i The literal type already limits the values to specific string values, so string doesn't change the result.
+  
+  i Remove string.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:22:32 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The unknown type has no effect in this intersection.
+  
+    21 │ // Only the outermost intersection reports nested members.
+  > 22 │ type Nested = string & ("a" & (unknown & { a: 1 }));
+       │                                ^^^^^^^
+    23 │ 
+    24 │ // A leading `&` with a single parenthesized intersection.
+  
+  i This intersection accepts the same values with or without unknown.
+  
+  i Remove unknown.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:25:14 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The number type is redundant because the intersection also includes a number literal type.
+  
+    24 │ // A leading `&` with a single parenthesized intersection.
+  > 25 │ type S1 = & (number & 0);
+       │              ^^^^^^
+    26 │ 
+    27 │ // `any` has no effect next to `never`.
+  
+  i The literal type already limits the values to specific number values, so number doesn't change the result.
+  
+  i Remove number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:28:11 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The any type has no effect in this intersection.
+  
+    27 │ // `any` has no effect next to `never`.
+  > 28 │ type K1 = any & never;
+       │           ^^^
+    29 │ 
+  
+  i This intersection accepts the same values with or without any.
+  
+  i Remove any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidIntersection.ts:28:17 lint/nursery/noRedundantTypeConstituents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The never type makes every other member of this intersection redundant.
+  
+    27 │ // `any` has no effect next to `never`.
+  > 28 │ type K1 = any & never;
+       │                 ^^^^^
+    29 │ 
+  
+  i This intersection is always never, whatever its other members are.
+  
+  i If the type should be never, replace the whole intersection with never. Otherwise, remove never.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
