@@ -12,6 +12,7 @@ expression: invalid.css
 .b::after {
     content: "useless \'"
 }
+.b::after { content: "\#{foo}"; }
 
 ```
 
@@ -46,7 +47,7 @@ invalid.css:7:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━�
   > 7 │     content: "useless \'"
       │                        ^
     8 │ }
-    9 │ 
+    9 │ .b::after { content: "\#{foo}"; }
   
   i Only quotes that enclose the string and special characters need to be escaped.
   
@@ -54,5 +55,25 @@ invalid.css:7:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━�
   
     7 │ ····content:·"useless·\'"
       │                       -  
+
+```
+
+```
+invalid.css:9:24 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+     7 │     content: "useless \'"
+     8 │ }
+   > 9 │ .b::after { content: "\#{foo}"; }
+       │                        ^
+    10 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    9 │ .b::after·{·content:·"\#{foo}";·}
+      │                       -          
 
 ```
