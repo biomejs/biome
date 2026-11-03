@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+Promise.all([promise1, promise2, promise3, promise4]);
+Promise.allSettled([promise1, promise2, promise3, promise4]);
+Promise.any([promise1, promise2, promise3, promise4]);
+Promise.race([promise1, promise2, promise3, promise4]);
+Promise.all(...[await promise]);
+Promise.all([await promise], extraArguments);
+Promise.all();
+Promise.all(notArrayExpression);
+Promise.all([,]);
+Promise[all]([await promise]);
+Promise.all?.([await promise]);
+Promise?.all([await promise]);
+Promise.notListedMethod([await promise]);
+NotPromise.all([await promise]);
+new Promise.all([await promise]);
+Promise.all([(async () => await promise)()]);
+Promise.all([(async () => (await fetch(url)).json())(), ...otherPromises]);
+Promise.all([async function () { await promise }]);
+Promise.all([foo.then(async (value) => await value)]);
+Promise.all([class { async foo() { await bar } }]);
+Promise.all([{async foo() { await bar }}]);
+Promise.all([async function* () { await promise }]);
+Promise.all([class { static async foo() { await bar } }]);
+Promise.all([class { foo = async () => await bar }]);
+Promise.all([new Promise(async (resolve) => resolve(await promise))]);
+Promise.all([promise1, promise2].map(async (promise) => (await promise).foo));
+await Promise.all([promise]);
+Promise.all([await promise].map(foo));
+Promise.all(await promises);
+Promise.all([promise]).then(await foo);
+foo([await promise]);
+foo([(await promise).bar]);
+
+async function shadowed(Promise) {
+	return Promise.all([await promise]);
+}
+
+```
