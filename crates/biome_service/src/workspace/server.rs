@@ -1,5 +1,6 @@
 use super::{
     document::{Document, DocumentView},
+    views::new_views_map,
     *,
 };
 use crate::Watcher;
@@ -482,7 +483,7 @@ impl WorkspaceServer {
             project_layout: Default::default(),
             #[cfg(feature = "plugins")]
             plugin_caches: Default::default(),
-            documents: Default::default(),
+            documents: new_views_map(FxBuildHasher),
             search_provider,
             scanner: Scanner::new(watcher_tx),
             fs,

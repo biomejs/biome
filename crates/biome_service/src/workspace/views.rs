@@ -11,6 +11,29 @@
 //! read the editor view of the client that opened the file first, which is the
 //! primary editor view, or the disk view when no client has the file open.
 
+use camino::Utf8PathBuf;
+use papaya::{HashMap, ResizeMode};
+
+/// Creates an empty map from the paths of files to their views.
+///
+/// Opening a file adds its entry and closing it removes the entry, both
+/// through `compute`, so the CLI adds and removes an entry for every file it
+/// checks while the map holds only a few at a time. Lookups stay as fast after
+/// thousands of files as after a few.
+pub(crate) fn new_views_map<V, S>(hasher: S) -> HashMap<Utf8PathBuf, V, S> {
+    // A removed entry leaves a slot that papaya reuses only after a resize,
+    // so this pattern fills a table and resizes it every few files. In
+    // papaya's default incremental mode, `compute` and the methods built on
+    // it never copy entries to the next table, so a map written only through
+    // them never retires the full table: tables pile up, and every lookup
+    // probes all of them. In blocking mode, the write that starts a resize
+    // also finishes it.
+    HashMap::builder()
+        .hasher(hasher)
+        .resize_mode(ResizeMode::Blocking)
+        .build()
+}
+
 /// Identifies a client of the workspace, such as one connection to the daemon.
 ///
 /// The default client stands for the in-process uses of the workspace, such as
