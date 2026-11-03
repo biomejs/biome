@@ -67,7 +67,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueTypedObjectProps {
-        version: "next",
+        version: "2.6.5",
         name: "useVueTypedObjectProps",
         language: "ts",
         recommended: false,

@@ -152,7 +152,7 @@ declare_lint_rule! {
     /// - [Vue named slots](https://vuejs.org/guide/components/slots.html#named-slots)
     /// - [Vue `v-slot` directive](https://vuejs.org/api/built-in-directives.html#v-slot)
     pub NoVueDeprecatedSlotAttribute {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedSlotAttribute",
         language: "html",
         recommended: true,

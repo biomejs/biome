@@ -109,7 +109,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidDefaultProp {
-        version: "next",
+        version: "2.6.5",
         name: "useVueValidDefaultProp",
         language: "js",
         recommended: true,

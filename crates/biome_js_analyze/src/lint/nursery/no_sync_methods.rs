@@ -109,7 +109,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSyncMethods {
-        version: "next",
+        version: "2.6.5",
         name: "noSyncMethods",
         language: "js",
         sources: &[RuleSource::EslintN("no-sync").same()],

@@ -143,7 +143,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExcessiveNestedBlocks {
-        version: "next",
+        version: "2.6.5",
         name: "noExcessiveNestedBlocks",
         language: "css",
         sources: &[RuleSource::Stylelint("max-nesting-depth").same()],

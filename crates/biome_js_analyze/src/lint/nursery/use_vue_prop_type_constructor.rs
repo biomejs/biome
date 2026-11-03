@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVuePropTypeConstructor {
-        version: "next",
+        version: "2.6.5",
         name: "useVuePropTypeConstructor",
         language: "js",
         recommended: true,

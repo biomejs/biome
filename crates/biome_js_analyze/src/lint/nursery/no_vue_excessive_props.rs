@@ -105,7 +105,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueExcessiveProps {
-        version: "next",
+        version: "2.6.5",
         name: "noVueExcessiveProps",
         language: "js",
         recommended: false,

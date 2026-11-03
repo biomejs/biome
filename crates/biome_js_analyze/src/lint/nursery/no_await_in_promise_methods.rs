@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoAwaitInPromiseMethods {
-        version: "next",
+        version: "2.6.5",
         name: "noAwaitInPromiseMethods",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-await-in-promise-methods").same()],

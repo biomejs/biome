@@ -123,7 +123,7 @@ declare_lint_rule! {
     /// - To require `get` accessors of classes and objects to return a value, see [`useGetterReturn`](https://biomejs.dev/linter/rules/use-getter-return/).
     ///
     pub UseVueComputedPropertyReturn {
-        version: "next",
+        version: "2.6.5",
         name: "useVueComputedPropertyReturn",
         language: "js",
         recommended: true,

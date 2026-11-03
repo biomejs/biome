@@ -62,7 +62,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueBooleanPropTypeFirst {
-        version: "next",
+        version: "2.6.5",
         name: "useVueBooleanPropTypeFirst",
         language: "js",
         recommended: false,

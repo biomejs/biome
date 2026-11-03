@@ -81,7 +81,7 @@ declare_lint_rule! {
     /// - [`noForEach`](https://biomejs.dev/linter/rules/no-for-each/) also reports `forEach()` calls,
     ///   but allows callbacks that use the index of each item.
     pub NoArrayForEach {
-        version: "next",
+        version: "2.6.5",
         name: "noArrayForEach",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-for-each").inspired()],

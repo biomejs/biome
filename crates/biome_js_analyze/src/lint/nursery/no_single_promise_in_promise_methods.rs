@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSinglePromiseInPromiseMethods {
-        version: "next",
+        version: "2.6.5",
         name: "noSinglePromiseInPromiseMethods",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-single-promise-in-promise-methods").same()],

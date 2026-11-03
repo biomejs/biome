@@ -139,7 +139,7 @@ declare_lint_rule! {
     ///   reports variables that are not declared anywhere, including in Vue templates.
     ///
     pub NoVueUndeclaredProperties {
-        version: "next",
+        version: "2.6.5",
         name: "noVueUndeclaredProperties",
         language: "js",
         recommended: false,
