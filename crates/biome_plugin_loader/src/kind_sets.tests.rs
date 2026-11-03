@@ -116,6 +116,22 @@ fn kind_set_membership_contract() {
                 assert(!EMPTY.has(root), "empty set");
                 assert(!EMPTY.has(keyword), "empty set with a token");
 
+                const VARIABLE_STATEMENTS = nodeKinds("JS_VARIABLE_STATEMENT");
+                const STATEMENTS = NODES.union(VARIABLE_STATEMENTS);
+                assert(STATEMENTS.has(statement) && STATEMENTS.has(root), "node set union");
+                assert(!NODES.has(statement), "node set union leaves the receiver unchanged");
+                assert(!VARIABLE_STATEMENTS.has(root), "node set union leaves the argument unchanged");
+                assert(Object.getPrototypeOf(STATEMENTS) === Object.getPrototypeOf(NODES), "union returns a node set");
+                assert(EMPTY.union(EMPTY).has(root) === false, "union of empty sets");
+                const name = binding.token("nameToken");
+                const IDENTIFIERS = tokenKinds("IDENT");
+                const KEYWORDS = TOKENS.union(IDENTIFIERS);
+                assert(KEYWORDS.has(keyword) && KEYWORDS.has(name), "token set union");
+                assert(!TOKENS.has(name), "token set union leaves the receiver unchanged");
+                assert(!IDENTIFIERS.has(keyword), "token set union leaves the argument unchanged");
+                assert(!KEYWORDS.has(root), "token set union with a node");
+                assert(Object.getPrototypeOf(KEYWORDS) === Object.getPrototypeOf(TOKENS), "union returns a token set");
+
                 const prototype = Object.getPrototypeOf(NODES);
                 assert(prototype === Object.getPrototypeOf(EMPTY), "shared node set prototype");
                 assert(prototype !== Object.getPrototypeOf(TOKENS), "separate token set prototype");
@@ -133,6 +149,14 @@ fn kind_set_membership_contract() {
                 throwsTypeError(() => NODES.has.call(TOKENS, root), "has() was called on a value that is not a node kind set.");
                 throwsTypeError(() => TOKENS.has.call(NODES, keyword), "has() was called on a value that is not a token kind set.");
                 throwsTypeError(() => TOKENS.has("LET_KW"), "set.has() requires a Biome node or token");
+                throwsTypeError(() => NODES.union(), "set.union() received the wrong number of arguments. Pass exactly one set returned by nodeKinds().");
+                throwsTypeError(() => NODES.union(NODES, NODES), "set.union() received the wrong number of arguments.");
+                throwsTypeError(() => NODES.union(TOKENS), "set.union() received a token kind set, but this is a node kind set. Pass a set returned by nodeKinds() instead.");
+                throwsTypeError(() => TOKENS.union(NODES), "set.union() received a node kind set, but this is a token kind set. Pass a set returned by tokenKinds() instead.");
+                throwsTypeError(() => NODES.union("JS_MODULE"), "set.union() requires a node kind set, but the argument is not one.");
+                throwsTypeError(() => TOKENS.union(["LET_KW"]), "set.union() requires a token kind set, but the argument is not one.");
+                throwsTypeError(() => NODES.union.call({}, NODES), "union() was called on a value that is not a node kind set.");
+                throwsTypeError(() => TOKENS.union.call(NODES, TOKENS), "union() was called on a value that is not a token kind set.");
                 registerDiagnostic(root, "information", "Kind set contract holds");
             },
         });"#,

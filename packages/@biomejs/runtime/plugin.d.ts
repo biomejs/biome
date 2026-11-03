@@ -326,6 +326,22 @@ export interface NodeKindSet<
 	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
 	 */
 	has(element: JsAstElement | undefined): element is JsNodeByKind[K];
+	/**
+	 * Returns a new set with the kinds of this set and `other`. Neither set
+	 * changes.
+	 *
+	 * For example, extend a shared set of calls:
+	 * ```ts
+	 * const CALLS = nodeKinds("JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION");
+	 * const CALLS_AND_IMPORTS = CALLS.union(nodeKinds("JS_IMPORT_CALL_EXPRESSION"));
+	 * ```
+	 *
+	 * @throws {TypeError} If `other` is not a set returned by {@link nodeKinds},
+	 * including when it is a token kind set.
+	 */
+	union<J extends keyof JsNodeByKind>(
+		other: NodeKindSet<J>,
+	): NodeKindSet<K | J>;
 }
 
 /**
@@ -366,6 +382,22 @@ export interface TokenKindSet<
 	has(
 		element: JsAstElement | undefined,
 	): element is JsAstToken & { readonly kind: K };
+	/**
+	 * Returns a new set with the kinds of this set and `other`. Neither set
+	 * changes.
+	 *
+	 * For example, combine equality and relational operators:
+	 * ```ts
+	 * const EQUALITY = tokenKinds("EQ2", "EQ3", "NEQ", "NEQ2");
+	 * const COMPARISON = EQUALITY.union(tokenKinds("L_ANGLE", "R_ANGLE", "LTEQ", "GTEQ"));
+	 * ```
+	 *
+	 * @throws {TypeError} If `other` is not a set returned by {@link tokenKinds},
+	 * including when it is a node kind set.
+	 */
+	union<J extends JsAstToken["kind"]>(
+		other: TokenKindSet<J>,
+	): TokenKindSet<K | J>;
 }
 
 /**

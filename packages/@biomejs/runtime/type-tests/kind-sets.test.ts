@@ -76,6 +76,26 @@ function firstMember<K extends JsAstToken["kind"]>(
 countMembers(calls, [node]) satisfies number;
 firstMember(equality, [element])?.kind satisfies "EQ2" | "NEQ" | undefined;
 
+// Unions combine the kinds of both sets.
+const callsAndModules = calls.union(nodeKinds("JS_MODULE"));
+callsAndModules satisfies NodeKindSet<
+	"JS_CALL_EXPRESSION" | "JS_NEW_EXPRESSION" | "JS_MODULE"
+>;
+const comparisons = equality.union(tokenKinds("L_ANGLE"));
+comparisons satisfies TokenKindSet<"EQ2" | "NEQ" | "L_ANGLE">;
+empty.union(calls) satisfies NodeKindSet<
+	"JS_CALL_EXPRESSION" | "JS_NEW_EXPRESSION"
+>;
+if (callsAndModules.has(element)) {
+	element.kind satisfies "JS_CALL_EXPRESSION" | "JS_NEW_EXPRESSION" | "JS_MODULE";
+}
+// @ts-expect-error Node kind sets do not union with token kind sets.
+calls.union(equality);
+// @ts-expect-error Token kind sets do not union with node kind sets.
+equality.union(calls);
+// @ts-expect-error Unions take a set, not kind names.
+calls.union("JS_MODULE");
+
 // @ts-expect-error Unknown node kinds are rejected.
 nodeKinds("NOT_A_KIND");
 // @ts-expect-error Token kinds do not build node kind sets.
