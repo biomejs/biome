@@ -1337,6 +1337,11 @@ export interface MarkdownFormatterConfiguration {
 	 */
 	proseWrap?: ProseWrap;
 	/**
+	 * Selects the preferred quote style for link and image titles. Biome uses the other quote,
+	 * or parentheses, when that avoids additional escaping. Defaults to `double`.
+	 */
+	quoteStyle?: QuoteStyle;
+	/**
 	 * Whether to add a trailing newline at the end of the file.
 	 *
 	 * Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:

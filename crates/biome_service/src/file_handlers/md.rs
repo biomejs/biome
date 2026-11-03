@@ -39,7 +39,9 @@ use biome_configuration::markdown::{
     MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
 };
 use biome_formatter::rowan::Printed;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
 use biome_fs::BiomePath;
 #[cfg(feature = "md_embeds")]
 use biome_markdown_analyze::analyze_with_snippets;
@@ -66,6 +68,7 @@ pub struct MarkdownFormatterSettings {
     pub enabled: Option<MarkdownFormatterEnabled>,
     pub prose_wrap: Option<ProseWrap>,
     pub unordered_list_marker: Option<UnorderedListMarker>,
+    pub quote_style: Option<QuoteStyle>,
     pub format_embeds: Option<MarkdownFormatEmbeds>,
 }
 
@@ -80,6 +83,7 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
             trailing_newline: configuration.trailing_newline,
             prose_wrap: configuration.prose_wrap,
             unordered_list_marker: configuration.unordered_list_marker,
+            quote_style: configuration.quote_style,
             format_embeds: configuration.format_embeds,
         }
     }
@@ -188,7 +192,8 @@ impl ServiceLanguage for MarkdownLanguage {
                 .with_line_ending(line_ending)
                 .with_trailing_newline(trailing_newline)
                 .with_prose_wrap(prose_wrap)
-                .with_unordered_list_marker(unordered_list_marker);
+                .with_unordered_list_marker(unordered_list_marker)
+                .with_quote_style(language.quote_style.unwrap_or_default());
 
         overrides.apply_override_markdown_format_options_by_indices(override_indices, &mut options);
 
