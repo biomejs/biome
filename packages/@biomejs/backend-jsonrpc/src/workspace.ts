@@ -3938,6 +3938,11 @@ export interface Nursery {
 	 */
 	useNamedLayer?: UseNamedLayerConfiguration;
 	/**
+	 * Enforce the use of the @next/third-parties/google components to load Google Analytics and Google Tag Manager.
+	 * See https://biomejs.dev/linter/rules/use-next-script-for-google-analytics
+	 */
+	useNextScriptForGoogleAnalytics?: UseNextScriptForGoogleAnalyticsConfiguration;
+	/**
 	 * Enforce using the nullish coalescing operator (??) instead of logical or (||).
 	 * See https://biomejs.dev/linter/rules/use-nullish-coalescing
 	 */
@@ -7057,6 +7062,9 @@ export type UseNamedFunctionConfiguration =
 export type UseNamedLayerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedLayerOptions;
+export type UseNextScriptForGoogleAnalyticsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNextScriptForGoogleAnalyticsOptions;
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
@@ -10405,6 +10413,10 @@ export interface RuleWithUseNamedLayerOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedLayerOptions;
 }
+export interface RuleWithUseNextScriptForGoogleAnalyticsOptions {
+	level: RulePlainConfiguration;
+	options?: UseNextScriptForGoogleAnalyticsOptions;
+}
 export interface RuleWithUseNullishCoalescingOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13276,6 +13288,7 @@ export type UseMathTruncOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
+export type UseNextScriptForGoogleAnalyticsOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
  */
@@ -15223,6 +15236,7 @@ export type Category =
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
+	| "lint/nursery/useNextScriptForGoogleAnalytics"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/useObjectFromEntries"
 	| "lint/nursery/usePackageJsonValidCpu"

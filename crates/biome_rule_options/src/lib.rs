@@ -612,6 +612,7 @@ pub mod use_named_function;
 pub mod use_named_layer;
 pub mod use_namespace_keyword;
 pub mod use_naming_convention;
+pub mod use_next_script_for_google_analytics;
 pub mod use_node_assert_strict;
 pub mod use_nodejs_import_protocol;
 pub mod use_nullish_coalescing;
