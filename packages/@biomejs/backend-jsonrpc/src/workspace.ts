@@ -3083,6 +3083,11 @@ export interface Nursery {
 	 */
 	noImpliedEval?: NoImpliedEvalConfiguration;
 	/**
+	 * Disallow a request body in fetch() and new Request() when the method is GET or HEAD.
+	 * See https://biomejs.dev/linter/rules/no-invalid-fetch-options
+	 */
+	noInvalidFetchOptions?: NoInvalidFetchOptionsConfiguration;
+	/**
 	 * Disallow invalid accept values on file inputs.
 	 * See https://biomejs.dev/linter/rules/no-invalid-file-input-accept
 	 */
@@ -6659,6 +6664,9 @@ export type NoFloatingPromisesConfiguration =
 export type NoImpliedEvalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoImpliedEvalOptions;
+export type NoInvalidFetchOptionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidFetchOptionsOptions;
 export type NoInvalidFileInputAcceptConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidFileInputAcceptOptions;
@@ -9676,6 +9684,10 @@ export interface RuleWithNoFloatingPromisesOptions {
 export interface RuleWithNoImpliedEvalOptions {
 	level: RulePlainConfiguration;
 	options?: NoImpliedEvalOptions;
+}
+export interface RuleWithNoInvalidFetchOptionsOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidFetchOptionsOptions;
 }
 export interface RuleWithNoInvalidFileInputAcceptOptions {
 	/**
@@ -13210,6 +13222,7 @@ export interface NoExtendNativeOptions {
 }
 export type NoFloatingPromisesOptions = {};
 export type NoImpliedEvalOptions = {};
+export type NoInvalidFetchOptionsOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
 export type NoInvalidRemoveEventListenerOptions = {};
@@ -15455,6 +15468,7 @@ export type Category =
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
 	| "lint/nursery/noImpliedEval"
+	| "lint/nursery/noInvalidFetchOptions"
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noInvalidRemoveEventListener"
