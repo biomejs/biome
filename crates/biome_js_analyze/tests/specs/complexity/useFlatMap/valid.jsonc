@@ -3,5 +3,8 @@
 	"array.flat().map(Number);",
 	"array.map(Number).flat(customFn);",
 	"MyObject.map(one, two, tree).flat();",
-	"MyObject.map().flat(1, 'test')"
+	"MyObject.map().flat(1, 'test')",
+	"obj.map((x) => [x])?.flat();",
+	"obj.map((x) => [x]).flat?.();",
+	"obj.map((x) => [x])?.[\"flat\"]();"
 ]

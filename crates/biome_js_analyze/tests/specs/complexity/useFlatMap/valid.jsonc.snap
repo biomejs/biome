@@ -26,3 +26,18 @@ MyObject.map(one, two, tree).flat();
 ```cjs
 MyObject.map().flat(1, 'test')
 ```
+
+# Input
+```cjs
+obj.map((x) => [x])?.flat();
+```
+
+# Input
+```cjs
+obj.map((x) => [x]).flat?.();
+```
+
+# Input
+```cjs
+obj.map((x) => [x])?.["flat"]();
+```

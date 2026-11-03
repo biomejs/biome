@@ -75,6 +75,17 @@ impl Rule for UseFlatMap {
         }
         let flat_member_expression =
             AnyJsMemberExpression::cast(flat_call.callee().ok()?.into_syntax())?;
+        // `.map(f)?.flat()` and `.map(f).flat?.()` short-circuit when the `map()` result or its
+        // `flat` method is nullish, while `.flatMap(f)` would throw. That only happens when `map`
+        // isn't `Array.prototype.map`, so leave these chains alone instead of dropping the `?.`.
+        let flat_is_optional = flat_call.is_optional()
+            || match &flat_member_expression {
+                AnyJsMemberExpression::JsStaticMemberExpression(member) => member.is_optional(),
+                AnyJsMemberExpression::JsComputedMemberExpression(member) => member.is_optional(),
+            };
+        if flat_is_optional {
+            return None;
+        }
         if flat_member_expression.member_name()?.text() == "flat" {
             let Ok(AnyJsExpression::JsCallExpression(map_call)) = flat_member_expression.object()
             else {

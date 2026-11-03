@@ -121,3 +121,27 @@ invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━�
   
 
 ```
+
+# Input
+```cjs
+arr?.map((x) => [x]).flat();
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The call chain .map().flat() can be replaced with a single .flatMap() call.
+  
+  > 1 │ arr?.map((x) => [x]).flat();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .flatMap() avoids the creation of an intermediate array.
+  
+  i Safe fix: Replace the chain with .flatMap().
+  
+  - arr?.map((x)·=>·[x]).flat();
+  + arr?.flatMap((x)·=>·[x]);
+  
+
+```
