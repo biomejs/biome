@@ -1,0 +1,3240 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// Array literal spread into an array literal
+const a1 = [...[a]];
+const a2 = [...[a,]];
+const a3 = [...[a,],];
+const a4 = [...(( [a] ))];
+const a5 = [...[]];
+const a6 = [...[,]];
+const a7 = [...[,,]];
+const a8 = [...[a, , b,]];
+const a9 = [...[a, , b,],];
+const a10 = [a, ...[a, b]];
+const a11 = [...[a, b], b,];
+const a12 = [a, ...[a, b], b,];
+const a13 = [a, ...[], b];
+const a14 = [a, ...(( [] )),];
+const a15 = [a, ...(( [] ))];
+const a16 = [a, ...[b], c];
+const a17 = [...[,], b];
+const a18 = [
+	a,
+	...[
+		b,
+		c,
+	],
+	d,
+];
+
+// Array literal spread into arguments
+foo(...[a]);
+foo(...[a,]);
+foo(...[a,],);
+foo(...(( [a] )));
+foo(...[]);
+foo(...[,]);
+foo(...[,,]);
+foo(...[a, , b,]);
+foo(...[,, ,(( a )), ,,(0, b), ,,]);
+foo(a, ...[a, b]);
+foo(...[a, b], b,);
+new Foo(...[a]);
+new Foo(a, ...[a, b], b,);
+call(foo, ...[bar, ...baz]);
+new Map(...[...iterable]);
+new Set(...[iterable]);
+Promise.all(...[...iterable]);
+
+// Object literal spread into an object literal
+const o1 = {...{a}};
+const o2 = {...{a,}};
+const o3 = {...{a,},};
+const o4 = {...(( {a} ))};
+const o5 = {...{}};
+const o6 = {a, ...{a, b}};
+const o7 = {...{a, b}, b,};
+const o8 = {a, ...(({})), b,};
+const o9 = {a:1, ...{a: 2}};
+const o10 = {...{a:1}, ...{a: 2}};
+const o11 = {[a]:1, ...{[a]: 2}};
+const o12 = {...{["__proto__"]: p}};
+const o13 = {...{__proto__}};
+const o14 = {...{read() { return this /* keep */ .value; }}};
+const o15 = {
+	a: 1,
+	...{
+		get b() {},
+	},
+};
+
+// Object.assign() source with only spreads
+Object.assign(target, {...source});
+Object.assign(target, {...a}, {...b});
+Object.assign(target, first, {...second});
+Object.assign(...args, target, {...source});
+Object.assign(target, {...first, ...second}, third);
+Object.assign(target, {...source,}, third);
+Object.assign(target, {...(( source ))});
+Object.assign(target, {...(foo, bar)});
+Object.assign(target, {/* keep */ ...source});
+
+// Spread as the only argument of a collection constructor
+new Set(...iterable);
+new Map(...iterable);
+new WeakSet(...iterable);
+new WeakMap(...iterable);
+new Set(...getNames());
+
+// Iterable converted to an array
+const i1 = new Map([...iterable]);
+const i2 = new WeakMap([...iterable]);
+const i3 = new Set([...iterable]);
+const i4 = new WeakSet([...iterable]);
+const i5 = Promise.all([...iterable]);
+const i6 = Promise.allSettled([...iterable]);
+const i7 = Promise.any([...iterable]);
+const i8 = Promise.race([...iterable]);
+const i9 = Array.from([...iterable]);
+const i10 = BigUint64Array.from([...iterable]);
+const i11 = Object.fromEntries([...iterable]);
+const i12 = new Map([...iterable,]);
+const i13 = new Map([...iterable,],);
+const i14 = new Map([...(( iterable ))]);
+const i15 = new Map((( [...(( iterable ))] )));
+const i16 = Promise.all([.../* keep */ values]);
+for (const foo of [...iterable]);
+for (const foo of [...iterable,]);
+for (const foo of [...(( iterable ))]);
+for (const foo of (( [...(( iterable ))] )));
+for (const foo of[...iterable]);
+for (const value of [...(first || second)]) {}
+async () => {for await (const foo of [...iterable]);};
+function * f1() {
+	yield * [...iterable];
+}
+function * f2() {
+	yield * [...iterable,];
+}
+function * f3() {
+	yield * (( [...iterable] ));
+}
+function * f4() {
+	return yield* [.../* keep */ values];
+}
+
+// Copy of a new array
+const c1 = [...foo.concat(bar)];
+const c2 = [...foo.flat()];
+const c3 = [...foo.slice(1)];
+const c4 = [...foo.splice(1)];
+const c5 = [...foo.toReversed()];
+const c6 = [...foo.toSorted()];
+const c7 = [...foo.toSpliced(0, 1)];
+const c8 = [...foo.with(0, bar)];
+const c9 = [...foo.split("|")];
+const c10 = [...Object.keys(foo)];
+const c11 = [...Object.values(foo)];
+const c12 = [...Array.from(foo)];
+const c13 = [...Array.of()];
+const c14 = [...new Array(3)];
+async () => [...await Promise.all(foo)];
+async () => [...await Promise.allSettled(foo)];
+function r1(bar) {
+	return[...Object.keys(bar)];
+}
+function r2(bar) {
+	return[
+		...Object.keys(bar)
+	];
+}
+function r3(bar) {
+	return[
+		...(
+			Object.keys(bar)
+		)
+	];
+}
+function r4(bar) {
+	return([
+		...Object.keys(bar)
+	]);
+}
+async () => [...await Promise.all(x)].length;
+async () => [...await Promise.all(x)][0];
+async () => [...await Promise.all(x)]?.length;
+new [...Array.of(1)].constructor(2).length;
+new ([...Array.of(1)]).constructor(2);
+new [...(Array.of(1))].constructor(2);
+[...function () { return [1]; }().toReversed()];
+const p1 = () => [...{value: [1]}.value.toReversed()];
+const p2 = [...function () { return [1]; }().toReversed()];
+const k1 = [a, ...[
+	// keep
+	b,
+]];
+foo(
+	a,
+	...[b, c],
+);
+function shadowedUndefined(undefined) {
+	foo(...[,]);
+	foo(...[a]);
+}
+Object.assign(target, {
+	...a,
+	...b,
+});
+const g1 = {...{set b(value) {}}};
+
+```
+
+# Diagnostics
+```
+invalid.js:4:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    3 │ // Array literal spread into an array literal
+  > 4 │ const a1 = [...[a]];
+      │             ^^^^^^
+    5 │ const a2 = [...[a,]];
+    6 │ const a3 = [...[a,],];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    4 │ const·a1·=·[...[a]];
+      │             ---- -  
+
+```
+
+```
+invalid.js:5:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    3 │ // Array literal spread into an array literal
+    4 │ const a1 = [...[a]];
+  > 5 │ const a2 = [...[a,]];
+      │             ^^^^^^^
+    6 │ const a3 = [...[a,],];
+    7 │ const a4 = [...(( [a] ))];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    5 │ const·a2·=·[...[a,]];
+      │             ---- --  
+
+```
+
+```
+invalid.js:6:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    4 │ const a1 = [...[a]];
+    5 │ const a2 = [...[a,]];
+  > 6 │ const a3 = [...[a,],];
+      │             ^^^^^^^
+    7 │ const a4 = [...(( [a] ))];
+    8 │ const a5 = [...[]];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    6 │ const·a3·=·[...[a,],];
+      │             ---- --   
+
+```
+
+```
+invalid.js:7:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    5 │ const a2 = [...[a,]];
+    6 │ const a3 = [...[a,],];
+  > 7 │ const a4 = [...(( [a] ))];
+      │             ^^^^^^^^^^^^
+    8 │ const a5 = [...[]];
+    9 │ const a6 = [...[,]];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    7 │ const·a4·=·[...((·[a]·))];
+      │             ------- ----  
+
+```
+
+```
+invalid.js:8:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+     6 │ const a3 = [...[a,],];
+     7 │ const a4 = [...(( [a] ))];
+   > 8 │ const a5 = [...[]];
+       │             ^^^^^
+     9 │ const a6 = [...[,]];
+    10 │ const a7 = [...[,,]];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    8 │ const·a5·=·[...[]];
+      │             -----  
+
+```
+
+```
+invalid.js:9:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+     7 │ const a4 = [...(( [a] ))];
+     8 │ const a5 = [...[]];
+   > 9 │ const a6 = [...[,]];
+       │             ^^^^^^
+    10 │ const a7 = [...[,,]];
+    11 │ const a8 = [...[a, , b,]];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    9 │ const·a6·=·[...[,]];
+      │             ---- -  
+
+```
+
+```
+invalid.js:10:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+     8 │ const a5 = [...[]];
+     9 │ const a6 = [...[,]];
+  > 10 │ const a7 = [...[,,]];
+       │             ^^^^^^^
+    11 │ const a8 = [...[a, , b,]];
+    12 │ const a9 = [...[a, , b,],];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    10 │ const·a7·=·[...[,,]];
+       │             ----  -  
+
+```
+
+```
+invalid.js:11:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+     9 │ const a6 = [...[,]];
+    10 │ const a7 = [...[,,]];
+  > 11 │ const a8 = [...[a, , b,]];
+       │             ^^^^^^^^^^^^
+    12 │ const a9 = [...[a, , b,],];
+    13 │ const a10 = [a, ...[a, b]];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    11 │ const·a8·=·[...[a,·,·b,]];
+       │             ----      --  
+
+```
+
+```
+invalid.js:12:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    10 │ const a7 = [...[,,]];
+    11 │ const a8 = [...[a, , b,]];
+  > 12 │ const a9 = [...[a, , b,],];
+       │             ^^^^^^^^^^^^
+    13 │ const a10 = [a, ...[a, b]];
+    14 │ const a11 = [...[a, b], b,];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    12 │ const·a9·=·[...[a,·,·b,],];
+       │             ----      --   
+
+```
+
+```
+invalid.js:13:17 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    11 │ const a8 = [...[a, , b,]];
+    12 │ const a9 = [...[a, , b,],];
+  > 13 │ const a10 = [a, ...[a, b]];
+       │                 ^^^^^^^^^
+    14 │ const a11 = [...[a, b], b,];
+    15 │ const a12 = [a, ...[a, b], b,];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    13 │ const·a10·=·[a,·...[a,·b]];
+       │                 ----    -  
+
+```
+
+```
+invalid.js:14:14 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    12 │ const a9 = [...[a, , b,],];
+    13 │ const a10 = [a, ...[a, b]];
+  > 14 │ const a11 = [...[a, b], b,];
+       │              ^^^^^^^^^
+    15 │ const a12 = [a, ...[a, b], b,];
+    16 │ const a13 = [a, ...[], b];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    14 │ const·a11·=·[...[a,·b],·b,];
+       │              ----    -      
+
+```
+
+```
+invalid.js:15:17 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    13 │ const a10 = [a, ...[a, b]];
+    14 │ const a11 = [...[a, b], b,];
+  > 15 │ const a12 = [a, ...[a, b], b,];
+       │                 ^^^^^^^^^
+    16 │ const a13 = [a, ...[], b];
+    17 │ const a14 = [a, ...(( [] )),];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    15 │ const·a12·=·[a,·...[a,·b],·b,];
+       │                 ----    -      
+
+```
+
+```
+invalid.js:16:17 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    14 │ const a11 = [...[a, b], b,];
+    15 │ const a12 = [a, ...[a, b], b,];
+  > 16 │ const a13 = [a, ...[], b];
+       │                 ^^^^^
+    17 │ const a14 = [a, ...(( [] )),];
+    18 │ const a15 = [a, ...(( [] ))];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    16 │ const·a13·=·[a,·...[],·b];
+       │                 -------   
+
+```
+
+```
+invalid.js:17:17 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    15 │ const a12 = [a, ...[a, b], b,];
+    16 │ const a13 = [a, ...[], b];
+  > 17 │ const a14 = [a, ...(( [] )),];
+       │                 ^^^^^^^^^^^
+    18 │ const a15 = [a, ...(( [] ))];
+    19 │ const a16 = [a, ...[b], c];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    17 │ const·a14·=·[a,·...((·[]·)),];
+       │                 ------------  
+
+```
+
+```
+invalid.js:18:17 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    16 │ const a13 = [a, ...[], b];
+    17 │ const a14 = [a, ...(( [] )),];
+  > 18 │ const a15 = [a, ...(( [] ))];
+       │                 ^^^^^^^^^^^
+    19 │ const a16 = [a, ...[b], c];
+    20 │ const a17 = [...[,], b];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    18 │ const·a15·=·[a,·...((·[]·))];
+       │                 -----------  
+
+```
+
+```
+invalid.js:19:17 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    17 │ const a14 = [a, ...(( [] )),];
+    18 │ const a15 = [a, ...(( [] ))];
+  > 19 │ const a16 = [a, ...[b], c];
+       │                 ^^^^^^
+    20 │ const a17 = [...[,], b];
+    21 │ const a18 = [
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    19 │ const·a16·=·[a,·...[b],·c];
+       │                 ---- -     
+
+```
+
+```
+invalid.js:20:14 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    18 │ const a15 = [a, ...(( [] ))];
+    19 │ const a16 = [a, ...[b], c];
+  > 20 │ const a17 = [...[,], b];
+       │              ^^^^^^
+    21 │ const a18 = [
+    22 │ 	a,
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    20 │ const·a17·=·[...[,],·b];
+       │              ------     
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    21 │ const a18 = [
+    22 │ 	a,
+  > 23 │ 	...[
+       │ 	^^^^
+  > 24 │ 		b,
+  > 25 │ 		c,
+  > 26 │ 	],
+       │ 	^
+    27 │ 	d,
+    28 │ ];
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+     21  21 │   const a18 = [
+     22  22 │     a,
+     23     │ - → ...[
+     24     │ - → → b,
+     25     │ - → → c,
+     26     │ - → ],
+         23 │ + → → b,
+         24 │ + → → c,
+     27  25 │     d,
+     28  26 │   ];
+  
+
+```
+
+```
+invalid.js:31:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    30 │ // Array literal spread into arguments
+  > 31 │ foo(...[a]);
+       │     ^^^^^^
+    32 │ foo(...[a,]);
+    33 │ foo(...[a,],);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    31 │ foo(...[a]);
+       │     ---- -  
+
+```
+
+```
+invalid.js:32:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    30 │ // Array literal spread into arguments
+    31 │ foo(...[a]);
+  > 32 │ foo(...[a,]);
+       │     ^^^^^^^
+    33 │ foo(...[a,],);
+    34 │ foo(...(( [a] )));
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    32 │ foo(...[a,]);
+       │     ---- --  
+
+```
+
+```
+invalid.js:33:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    31 │ foo(...[a]);
+    32 │ foo(...[a,]);
+  > 33 │ foo(...[a,],);
+       │     ^^^^^^^
+    34 │ foo(...(( [a] )));
+    35 │ foo(...[]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    33 │ foo(...[a,],);
+       │     ---- --   
+
+```
+
+```
+invalid.js:34:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    32 │ foo(...[a,]);
+    33 │ foo(...[a,],);
+  > 34 │ foo(...(( [a] )));
+       │     ^^^^^^^^^^^^
+    35 │ foo(...[]);
+    36 │ foo(...[,]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    34 │ foo(...((·[a]·)));
+       │     ------- ----  
+
+```
+
+```
+invalid.js:35:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    33 │ foo(...[a,],);
+    34 │ foo(...(( [a] )));
+  > 35 │ foo(...[]);
+       │     ^^^^^
+    36 │ foo(...[,]);
+    37 │ foo(...[,,]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    35 │ foo(...[]);
+       │     -----  
+
+```
+
+```
+invalid.js:36:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    34 │ foo(...(( [a] )));
+    35 │ foo(...[]);
+  > 36 │ foo(...[,]);
+       │     ^^^^^^
+    37 │ foo(...[,,]);
+    38 │ foo(...[a, , b,]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+     34  34 │   foo(...(( [a] )));
+     35  35 │   foo(...[]);
+     36     │ - foo(...[,]);
+         36 │ + foo(undefined);
+     37  37 │   foo(...[,,]);
+     38  38 │   foo(...[a, , b,]);
+  
+
+```
+
+```
+invalid.js:37:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    35 │ foo(...[]);
+    36 │ foo(...[,]);
+  > 37 │ foo(...[,,]);
+       │     ^^^^^^^
+    38 │ foo(...[a, , b,]);
+    39 │ foo(...[,, ,(( a )), ,,(0, b), ,,]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+     35  35 │   foo(...[]);
+     36  36 │   foo(...[,]);
+     37     │ - foo(...[,,]);
+         37 │ + foo(undefined,undefined);
+     38  38 │   foo(...[a, , b,]);
+     39  39 │   foo(...[,, ,(( a )), ,,(0, b), ,,]);
+  
+
+```
+
+```
+invalid.js:38:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    36 │ foo(...[,]);
+    37 │ foo(...[,,]);
+  > 38 │ foo(...[a, , b,]);
+       │     ^^^^^^^^^^^^
+    39 │ foo(...[,, ,(( a )), ,,(0, b), ,,]);
+    40 │ foo(a, ...[a, b]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+     36  36 │   foo(...[,]);
+     37  37 │   foo(...[,,]);
+     38     │ - foo(...[a,·,·b,]);
+         38 │ + foo(a,·undefined,·b);
+     39  39 │   foo(...[,, ,(( a )), ,,(0, b), ,,]);
+     40  40 │   foo(a, ...[a, b]);
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    37 │ foo(...[,,]);
+    38 │ foo(...[a, , b,]);
+  > 39 │ foo(...[,, ,(( a )), ,,(0, b), ,,]);
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ foo(a, ...[a, b]);
+    41 │ foo(...[a, b], b,);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+     37  37 │   foo(...[,,]);
+     38  38 │   foo(...[a, , b,]);
+     39     │ - foo(...[,,·,((·a·)),·,,(0,·b),·,,]);
+         39 │ + foo(undefined,undefined,·undefined,((·a·)),·undefined,undefined,(0,·b),·undefined,undefined);
+     40  40 │   foo(a, ...[a, b]);
+     41  41 │   foo(...[a, b], b,);
+  
+
+```
+
+```
+invalid.js:40:8 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    38 │ foo(...[a, , b,]);
+    39 │ foo(...[,, ,(( a )), ,,(0, b), ,,]);
+  > 40 │ foo(a, ...[a, b]);
+       │        ^^^^^^^^^
+    41 │ foo(...[a, b], b,);
+    42 │ new Foo(...[a]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    40 │ foo(a,·...[a,·b]);
+       │        ----    -  
+
+```
+
+```
+invalid.js:41:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    39 │ foo(...[,, ,(( a )), ,,(0, b), ,,]);
+    40 │ foo(a, ...[a, b]);
+  > 41 │ foo(...[a, b], b,);
+       │     ^^^^^^^^^
+    42 │ new Foo(...[a]);
+    43 │ new Foo(a, ...[a, b], b,);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    41 │ foo(...[a,·b],·b,);
+       │     ----    -      
+
+```
+
+```
+invalid.js:42:9 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    40 │ foo(a, ...[a, b]);
+    41 │ foo(...[a, b], b,);
+  > 42 │ new Foo(...[a]);
+       │         ^^^^^^
+    43 │ new Foo(a, ...[a, b], b,);
+    44 │ call(foo, ...[bar, ...baz]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    42 │ new·Foo(...[a]);
+       │         ---- -  
+
+```
+
+```
+invalid.js:43:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    41 │ foo(...[a, b], b,);
+    42 │ new Foo(...[a]);
+  > 43 │ new Foo(a, ...[a, b], b,);
+       │            ^^^^^^^^^
+    44 │ call(foo, ...[bar, ...baz]);
+    45 │ new Map(...[...iterable]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    43 │ new·Foo(a,·...[a,·b],·b,);
+       │            ----    -      
+
+```
+
+```
+invalid.js:44:11 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    42 │ new Foo(...[a]);
+    43 │ new Foo(a, ...[a, b], b,);
+  > 44 │ call(foo, ...[bar, ...baz]);
+       │           ^^^^^^^^^^^^^^^^
+    45 │ new Map(...[...iterable]);
+    46 │ new Set(...[iterable]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    44 │ call(foo,·...[bar,·...baz]);
+       │           ----           -  
+
+```
+
+```
+invalid.js:45:9 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    43 │ new Foo(a, ...[a, b], b,);
+    44 │ call(foo, ...[bar, ...baz]);
+  > 45 │ new Map(...[...iterable]);
+       │         ^^^^^^^^^^^^^^^^
+    46 │ new Set(...[iterable]);
+    47 │ Promise.all(...[...iterable]);
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:9 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    44 │ call(foo, ...[bar, ...baz]);
+    45 │ new Map(...[...iterable]);
+  > 46 │ new Set(...[iterable]);
+       │         ^^^^^^^^^^^^^
+    47 │ Promise.all(...[...iterable]);
+    48 │ 
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    46 │ new·Set(...[iterable]);
+       │         ----        -  
+
+```
+
+```
+invalid.js:47:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    45 │ new Map(...[...iterable]);
+    46 │ new Set(...[iterable]);
+  > 47 │ Promise.all(...[...iterable]);
+       │             ^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ // Object literal spread into an object literal
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    47 │ Promise.all(...[...iterable]);
+       │                ----        -  
+
+```
+
+```
+invalid.js:50:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    49 │ // Object literal spread into an object literal
+  > 50 │ const o1 = {...{a}};
+       │             ^^^^^^
+    51 │ const o2 = {...{a,}};
+    52 │ const o3 = {...{a,},};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    50 │ const·o1·=·{...{a}};
+       │             ---- -  
+
+```
+
+```
+invalid.js:51:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    49 │ // Object literal spread into an object literal
+    50 │ const o1 = {...{a}};
+  > 51 │ const o2 = {...{a,}};
+       │             ^^^^^^^
+    52 │ const o3 = {...{a,},};
+    53 │ const o4 = {...(( {a} ))};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    51 │ const·o2·=·{...{a,}};
+       │             ---- --  
+
+```
+
+```
+invalid.js:52:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    50 │ const o1 = {...{a}};
+    51 │ const o2 = {...{a,}};
+  > 52 │ const o3 = {...{a,},};
+       │             ^^^^^^^
+    53 │ const o4 = {...(( {a} ))};
+    54 │ const o5 = {...{}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    52 │ const·o3·=·{...{a,},};
+       │             ---- --   
+
+```
+
+```
+invalid.js:53:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    51 │ const o2 = {...{a,}};
+    52 │ const o3 = {...{a,},};
+  > 53 │ const o4 = {...(( {a} ))};
+       │             ^^^^^^^^^^^^
+    54 │ const o5 = {...{}};
+    55 │ const o6 = {a, ...{a, b}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    53 │ const·o4·=·{...((·{a}·))};
+       │             ------- ----  
+
+```
+
+```
+invalid.js:54:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    52 │ const o3 = {...{a,},};
+    53 │ const o4 = {...(( {a} ))};
+  > 54 │ const o5 = {...{}};
+       │             ^^^^^
+    55 │ const o6 = {a, ...{a, b}};
+    56 │ const o7 = {...{a, b}, b,};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    54 │ const·o5·=·{...{}};
+       │             -----  
+
+```
+
+```
+invalid.js:55:16 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    53 │ const o4 = {...(( {a} ))};
+    54 │ const o5 = {...{}};
+  > 55 │ const o6 = {a, ...{a, b}};
+       │                ^^^^^^^^^
+    56 │ const o7 = {...{a, b}, b,};
+    57 │ const o8 = {a, ...(({})), b,};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    55 │ const·o6·=·{a,·...{a,·b}};
+       │                ----    -  
+
+```
+
+```
+invalid.js:56:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    54 │ const o5 = {...{}};
+    55 │ const o6 = {a, ...{a, b}};
+  > 56 │ const o7 = {...{a, b}, b,};
+       │             ^^^^^^^^^
+    57 │ const o8 = {a, ...(({})), b,};
+    58 │ const o9 = {a:1, ...{a: 2}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    56 │ const·o7·=·{...{a,·b},·b,};
+       │             ----    -      
+
+```
+
+```
+invalid.js:57:16 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    55 │ const o6 = {a, ...{a, b}};
+    56 │ const o7 = {...{a, b}, b,};
+  > 57 │ const o8 = {a, ...(({})), b,};
+       │                ^^^^^^^^^
+    58 │ const o9 = {a:1, ...{a: 2}};
+    59 │ const o10 = {...{a:1}, ...{a: 2}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    57 │ const·o8·=·{a,·...(({})),·b,};
+       │                -----------    
+
+```
+
+```
+invalid.js:58:18 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    56 │ const o7 = {...{a, b}, b,};
+    57 │ const o8 = {a, ...(({})), b,};
+  > 58 │ const o9 = {a:1, ...{a: 2}};
+       │                  ^^^^^^^^^
+    59 │ const o10 = {...{a:1}, ...{a: 2}};
+    60 │ const o11 = {[a]:1, ...{[a]: 2}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    58 │ const·o9·=·{a:1,·...{a:·2}};
+       │                  ----    -  
+
+```
+
+```
+invalid.js:59:14 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    57 │ const o8 = {a, ...(({})), b,};
+    58 │ const o9 = {a:1, ...{a: 2}};
+  > 59 │ const o10 = {...{a:1}, ...{a: 2}};
+       │              ^^^^^^^^
+    60 │ const o11 = {[a]:1, ...{[a]: 2}};
+    61 │ const o12 = {...{["__proto__"]: p}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    59 │ const·o10·=·{...{a:1},·...{a:·2}};
+       │              ----   -             
+
+```
+
+```
+invalid.js:59:24 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    57 │ const o8 = {a, ...(({})), b,};
+    58 │ const o9 = {a:1, ...{a: 2}};
+  > 59 │ const o10 = {...{a:1}, ...{a: 2}};
+       │                        ^^^^^^^^^
+    60 │ const o11 = {[a]:1, ...{[a]: 2}};
+    61 │ const o12 = {...{["__proto__"]: p}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    59 │ const·o10·=·{...{a:1},·...{a:·2}};
+       │                        ----    -  
+
+```
+
+```
+invalid.js:60:21 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    58 │ const o9 = {a:1, ...{a: 2}};
+    59 │ const o10 = {...{a:1}, ...{a: 2}};
+  > 60 │ const o11 = {[a]:1, ...{[a]: 2}};
+       │                     ^^^^^^^^^^^
+    61 │ const o12 = {...{["__proto__"]: p}};
+    62 │ const o13 = {...{__proto__}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    60 │ const·o11·=·{[a]:1,·...{[a]:·2}};
+       │                     ----      -  
+
+```
+
+```
+invalid.js:61:14 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    59 │ const o10 = {...{a:1}, ...{a: 2}};
+    60 │ const o11 = {[a]:1, ...{[a]: 2}};
+  > 61 │ const o12 = {...{["__proto__"]: p}};
+       │              ^^^^^^^^^^^^^^^^^^^^^
+    62 │ const o13 = {...{__proto__}};
+    63 │ const o14 = {...{read() { return this /* keep */ .value; }}};
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    61 │ const·o12·=·{...{["__proto__"]:·p}};
+       │              ----                -  
+
+```
+
+```
+invalid.js:62:14 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    60 │ const o11 = {[a]:1, ...{[a]: 2}};
+    61 │ const o12 = {...{["__proto__"]: p}};
+  > 62 │ const o13 = {...{__proto__}};
+       │              ^^^^^^^^^^^^^^
+    63 │ const o14 = {...{read() { return this /* keep */ .value; }}};
+    64 │ const o15 = {
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    62 │ const·o13·=·{...{__proto__}};
+       │              ----         -  
+
+```
+
+```
+invalid.js:63:14 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    61 │ const o12 = {...{["__proto__"]: p}};
+    62 │ const o13 = {...{__proto__}};
+  > 63 │ const o14 = {...{read() { return this /* keep */ .value; }}};
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ const o15 = {
+    65 │ 	a: 1,
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the curly braces.
+  
+    63 │ const·o14·=·{...{read()·{·return·this·/*·keep·*/·.value;·}}};
+       │              ----                                        -   
+
+```
+
+```
+invalid.js:66:2 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    64 │ const o15 = {
+    65 │ 	a: 1,
+  > 66 │ 	...{
+       │ 	^^^^
+  > 67 │ 		get b() {},
+  > 68 │ 	},
+       │ 	^
+    69 │ };
+    70 │ 
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:72:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    71 │ // Object.assign() source with only spreads
+  > 72 │ Object.assign(target, {...source});
+       │                       ^^^^^^^^^^^
+    73 │ Object.assign(target, {...a}, {...b});
+    74 │ Object.assign(target, first, {...second});
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    72 │ Object.assign(target,·{...source});
+       │                       ----      -  
+
+```
+
+```
+invalid.js:73:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    71 │ // Object.assign() source with only spreads
+    72 │ Object.assign(target, {...source});
+  > 73 │ Object.assign(target, {...a}, {...b});
+       │                       ^^^^^^
+    74 │ Object.assign(target, first, {...second});
+    75 │ Object.assign(...args, target, {...source});
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    73 │ Object.assign(target,·{...a},·{...b});
+       │                       ---- -          
+
+```
+
+```
+invalid.js:73:31 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    71 │ // Object.assign() source with only spreads
+    72 │ Object.assign(target, {...source});
+  > 73 │ Object.assign(target, {...a}, {...b});
+       │                               ^^^^^^
+    74 │ Object.assign(target, first, {...second});
+    75 │ Object.assign(...args, target, {...source});
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    73 │ Object.assign(target,·{...a},·{...b});
+       │                               ---- -  
+
+```
+
+```
+invalid.js:74:30 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    72 │ Object.assign(target, {...source});
+    73 │ Object.assign(target, {...a}, {...b});
+  > 74 │ Object.assign(target, first, {...second});
+       │                              ^^^^^^^^^^^
+    75 │ Object.assign(...args, target, {...source});
+    76 │ Object.assign(target, {...first, ...second}, third);
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    74 │ Object.assign(target,·first,·{...second});
+       │                              ----      -  
+
+```
+
+```
+invalid.js:75:32 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    73 │ Object.assign(target, {...a}, {...b});
+    74 │ Object.assign(target, first, {...second});
+  > 75 │ Object.assign(...args, target, {...source});
+       │                                ^^^^^^^^^^^
+    76 │ Object.assign(target, {...first, ...second}, third);
+    77 │ Object.assign(target, {...source,}, third);
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    75 │ Object.assign(...args,·target,·{...source});
+       │                                ----      -  
+
+```
+
+```
+invalid.js:76:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    74 │ Object.assign(target, first, {...second});
+    75 │ Object.assign(...args, target, {...source});
+  > 76 │ Object.assign(target, {...first, ...second}, third);
+       │                       ^^^^^^^^^^^^^^^^^^^^^
+    77 │ Object.assign(target, {...source,}, third);
+    78 │ Object.assign(target, {...(( source ))});
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    76 │ Object.assign(target,·{...first,·...second},·third);
+       │                       ----       ---      -         
+
+```
+
+```
+invalid.js:77:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    75 │ Object.assign(...args, target, {...source});
+    76 │ Object.assign(target, {...first, ...second}, third);
+  > 77 │ Object.assign(target, {...source,}, third);
+       │                       ^^^^^^^^^^^^
+    78 │ Object.assign(target, {...(( source ))});
+    79 │ Object.assign(target, {...(foo, bar)});
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    77 │ Object.assign(target,·{...source,},·third);
+       │                       ----      --         
+
+```
+
+```
+invalid.js:78:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    76 │ Object.assign(target, {...first, ...second}, third);
+    77 │ Object.assign(target, {...source,}, third);
+  > 78 │ Object.assign(target, {...(( source ))});
+       │                       ^^^^^^^^^^^^^^^^^
+    79 │ Object.assign(target, {...(foo, bar)});
+    80 │ Object.assign(target, {/* keep */ ...source});
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    78 │ Object.assign(target,·{...((·source·))});
+       │                       ----            -  
+
+```
+
+```
+invalid.js:79:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    77 │ Object.assign(target, {...source,}, third);
+    78 │ Object.assign(target, {...(( source ))});
+  > 79 │ Object.assign(target, {...(foo, bar)});
+       │                       ^^^^^^^^^^^^^^^
+    80 │ Object.assign(target, {/* keep */ ...source});
+    81 │ 
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    79 │ Object.assign(target,·{...(foo,·bar)});
+       │                       ----          -  
+
+```
+
+```
+invalid.js:80:23 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    78 │ Object.assign(target, {...(( source ))});
+    79 │ Object.assign(target, {...(foo, bar)});
+  > 80 │ Object.assign(target, {/* keep */ ...source});
+       │                       ^^^^^^^^^^^^^^^^^^^^^^
+    81 │ 
+    82 │ // Spread as the only argument of a collection constructor
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:83:9 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading into new Set() passes each item as a separate argument.
+  
+    82 │ // Spread as the only argument of a collection constructor
+  > 83 │ new Set(...iterable);
+       │         ^^^^^^^^^^^
+    84 │ new Map(...iterable);
+    85 │ new WeakSet(...iterable);
+  
+  i The constructor reads a single iterable, so only the first item is used.
+  
+  i Pass the iterable directly, without spreading it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:9 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading into new Map() passes each item as a separate argument.
+  
+    82 │ // Spread as the only argument of a collection constructor
+    83 │ new Set(...iterable);
+  > 84 │ new Map(...iterable);
+       │         ^^^^^^^^^^^
+    85 │ new WeakSet(...iterable);
+    86 │ new WeakMap(...iterable);
+  
+  i The constructor reads a single iterable, so only the first item is used.
+  
+  i Pass the iterable directly, without spreading it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:13 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading into new WeakSet() passes each item as a separate argument.
+  
+    83 │ new Set(...iterable);
+    84 │ new Map(...iterable);
+  > 85 │ new WeakSet(...iterable);
+       │             ^^^^^^^^^^^
+    86 │ new WeakMap(...iterable);
+    87 │ new Set(...getNames());
+  
+  i The constructor reads a single iterable, so only the first item is used.
+  
+  i Pass the iterable directly, without spreading it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:86:13 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading into new WeakMap() passes each item as a separate argument.
+  
+    84 │ new Map(...iterable);
+    85 │ new WeakSet(...iterable);
+  > 86 │ new WeakMap(...iterable);
+       │             ^^^^^^^^^^^
+    87 │ new Set(...getNames());
+    88 │ 
+  
+  i The constructor reads a single iterable, so only the first item is used.
+  
+  i Pass the iterable directly, without spreading it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:87:9 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading into new Set() passes each item as a separate argument.
+  
+    85 │ new WeakSet(...iterable);
+    86 │ new WeakMap(...iterable);
+  > 87 │ new Set(...getNames());
+       │         ^^^^^^^^^^^^^
+    88 │ 
+    89 │ // Iterable converted to an array
+  
+  i The constructor reads a single iterable, so only the first item is used.
+  
+  i Pass the iterable directly, without spreading it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:90:20 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new Map() accepts any iterable.
+  
+    89 │ // Iterable converted to an array
+  > 90 │ const i1 = new Map([...iterable]);
+       │                    ^^^^^^^^^^^^^
+    91 │ const i2 = new WeakMap([...iterable]);
+    92 │ const i3 = new Set([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    90 │ const·i1·=·new·Map([...iterable]);
+       │                    ----        -  
+
+```
+
+```
+invalid.js:91:24 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new WeakMap() accepts any iterable.
+  
+    89 │ // Iterable converted to an array
+    90 │ const i1 = new Map([...iterable]);
+  > 91 │ const i2 = new WeakMap([...iterable]);
+       │                        ^^^^^^^^^^^^^
+    92 │ const i3 = new Set([...iterable]);
+    93 │ const i4 = new WeakSet([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    91 │ const·i2·=·new·WeakMap([...iterable]);
+       │                        ----        -  
+
+```
+
+```
+invalid.js:92:20 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new Set() accepts any iterable.
+  
+    90 │ const i1 = new Map([...iterable]);
+    91 │ const i2 = new WeakMap([...iterable]);
+  > 92 │ const i3 = new Set([...iterable]);
+       │                    ^^^^^^^^^^^^^
+    93 │ const i4 = new WeakSet([...iterable]);
+    94 │ const i5 = Promise.all([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    92 │ const·i3·=·new·Set([...iterable]);
+       │                    ----        -  
+
+```
+
+```
+invalid.js:93:24 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new WeakSet() accepts any iterable.
+  
+    91 │ const i2 = new WeakMap([...iterable]);
+    92 │ const i3 = new Set([...iterable]);
+  > 93 │ const i4 = new WeakSet([...iterable]);
+       │                        ^^^^^^^^^^^^^
+    94 │ const i5 = Promise.all([...iterable]);
+    95 │ const i6 = Promise.allSettled([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    93 │ const·i4·=·new·WeakSet([...iterable]);
+       │                        ----        -  
+
+```
+
+```
+invalid.js:94:24 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Promise.all() accepts any iterable.
+  
+    92 │ const i3 = new Set([...iterable]);
+    93 │ const i4 = new WeakSet([...iterable]);
+  > 94 │ const i5 = Promise.all([...iterable]);
+       │                        ^^^^^^^^^^^^^
+    95 │ const i6 = Promise.allSettled([...iterable]);
+    96 │ const i7 = Promise.any([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    94 │ const·i5·=·Promise.all([...iterable]);
+       │                        ----        -  
+
+```
+
+```
+invalid.js:95:31 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Promise.allSettled() accepts any iterable.
+  
+    93 │ const i4 = new WeakSet([...iterable]);
+    94 │ const i5 = Promise.all([...iterable]);
+  > 95 │ const i6 = Promise.allSettled([...iterable]);
+       │                               ^^^^^^^^^^^^^
+    96 │ const i7 = Promise.any([...iterable]);
+    97 │ const i8 = Promise.race([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    95 │ const·i6·=·Promise.allSettled([...iterable]);
+       │                               ----        -  
+
+```
+
+```
+invalid.js:96:24 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Promise.any() accepts any iterable.
+  
+    94 │ const i5 = Promise.all([...iterable]);
+    95 │ const i6 = Promise.allSettled([...iterable]);
+  > 96 │ const i7 = Promise.any([...iterable]);
+       │                        ^^^^^^^^^^^^^
+    97 │ const i8 = Promise.race([...iterable]);
+    98 │ const i9 = Array.from([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    96 │ const·i7·=·Promise.any([...iterable]);
+       │                        ----        -  
+
+```
+
+```
+invalid.js:97:25 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Promise.race() accepts any iterable.
+  
+    95 │ const i6 = Promise.allSettled([...iterable]);
+    96 │ const i7 = Promise.any([...iterable]);
+  > 97 │ const i8 = Promise.race([...iterable]);
+       │                         ^^^^^^^^^^^^^
+    98 │ const i9 = Array.from([...iterable]);
+    99 │ const i10 = BigUint64Array.from([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    97 │ const·i8·=·Promise.race([...iterable]);
+       │                         ----        -  
+
+```
+
+```
+invalid.js:98:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Array.from() accepts any iterable.
+  
+     96 │ const i7 = Promise.any([...iterable]);
+     97 │ const i8 = Promise.race([...iterable]);
+   > 98 │ const i9 = Array.from([...iterable]);
+        │                       ^^^^^^^^^^^^^
+     99 │ const i10 = BigUint64Array.from([...iterable]);
+    100 │ const i11 = Object.fromEntries([...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    98 │ const·i9·=·Array.from([...iterable]);
+       │                       ----        -  
+
+```
+
+```
+invalid.js:99:33 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because BigUint64Array.from() accepts any iterable.
+  
+     97 │ const i8 = Promise.race([...iterable]);
+     98 │ const i9 = Array.from([...iterable]);
+   > 99 │ const i10 = BigUint64Array.from([...iterable]);
+        │                                 ^^^^^^^^^^^^^
+    100 │ const i11 = Object.fromEntries([...iterable]);
+    101 │ const i12 = new Map([...iterable,]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    99 │ const·i10·=·BigUint64Array.from([...iterable]);
+       │                                 ----        -  
+
+```
+
+```
+invalid.js:100:32 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Object.fromEntries() accepts any iterable.
+  
+     98 │ const i9 = Array.from([...iterable]);
+     99 │ const i10 = BigUint64Array.from([...iterable]);
+  > 100 │ const i11 = Object.fromEntries([...iterable]);
+        │                                ^^^^^^^^^^^^^
+    101 │ const i12 = new Map([...iterable,]);
+    102 │ const i13 = new Map([...iterable,],);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    100 │ const·i11·=·Object.fromEntries([...iterable]);
+        │                                ----        -  
+
+```
+
+```
+invalid.js:101:21 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new Map() accepts any iterable.
+  
+     99 │ const i10 = BigUint64Array.from([...iterable]);
+    100 │ const i11 = Object.fromEntries([...iterable]);
+  > 101 │ const i12 = new Map([...iterable,]);
+        │                     ^^^^^^^^^^^^^^
+    102 │ const i13 = new Map([...iterable,],);
+    103 │ const i14 = new Map([...(( iterable ))]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    101 │ const·i12·=·new·Map([...iterable,]);
+        │                     ----        --  
+
+```
+
+```
+invalid.js:102:21 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new Map() accepts any iterable.
+  
+    100 │ const i11 = Object.fromEntries([...iterable]);
+    101 │ const i12 = new Map([...iterable,]);
+  > 102 │ const i13 = new Map([...iterable,],);
+        │                     ^^^^^^^^^^^^^^
+    103 │ const i14 = new Map([...(( iterable ))]);
+    104 │ const i15 = new Map((( [...(( iterable ))] )));
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    102 │ const·i13·=·new·Map([...iterable,],);
+        │                     ----        --   
+
+```
+
+```
+invalid.js:103:21 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new Map() accepts any iterable.
+  
+    101 │ const i12 = new Map([...iterable,]);
+    102 │ const i13 = new Map([...iterable,],);
+  > 103 │ const i14 = new Map([...(( iterable ))]);
+        │                     ^^^^^^^^^^^^^^^^^^^
+    104 │ const i15 = new Map((( [...(( iterable ))] )));
+    105 │ const i16 = Promise.all([.../* keep */ values]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    103 │ const·i14·=·new·Map([...((·iterable·))]);
+        │                     ----              -  
+
+```
+
+```
+invalid.js:104:24 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because new Map() accepts any iterable.
+  
+    102 │ const i13 = new Map([...iterable,],);
+    103 │ const i14 = new Map([...(( iterable ))]);
+  > 104 │ const i15 = new Map((( [...(( iterable ))] )));
+        │                        ^^^^^^^^^^^^^^^^^^^
+    105 │ const i16 = Promise.all([.../* keep */ values]);
+    106 │ for (const foo of [...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    104 │ const·i15·=·new·Map(((·[...((·iterable·))]·)));
+        │                        ----              -     
+
+```
+
+```
+invalid.js:105:25 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because Promise.all() accepts any iterable.
+  
+    103 │ const i14 = new Map([...(( iterable ))]);
+    104 │ const i15 = new Map((( [...(( iterable ))] )));
+  > 105 │ const i16 = Promise.all([.../* keep */ values]);
+        │                         ^^^^^^^^^^^^^^^^^^^^^^
+    106 │ for (const foo of [...iterable]);
+    107 │ for (const foo of [...iterable,]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:106:19 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    104 │ const i15 = new Map((( [...(( iterable ))] )));
+    105 │ const i16 = Promise.all([.../* keep */ values]);
+  > 106 │ for (const foo of [...iterable]);
+        │                   ^^^^^^^^^^^^^
+    107 │ for (const foo of [...iterable,]);
+    108 │ for (const foo of [...(( iterable ))]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    106 │ for·(const·foo·of·[...iterable]);
+        │                   ----        -  
+
+```
+
+```
+invalid.js:107:19 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    105 │ const i16 = Promise.all([.../* keep */ values]);
+    106 │ for (const foo of [...iterable]);
+  > 107 │ for (const foo of [...iterable,]);
+        │                   ^^^^^^^^^^^^^^
+    108 │ for (const foo of [...(( iterable ))]);
+    109 │ for (const foo of (( [...(( iterable ))] )));
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    107 │ for·(const·foo·of·[...iterable,]);
+        │                   ----        --  
+
+```
+
+```
+invalid.js:108:19 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    106 │ for (const foo of [...iterable]);
+    107 │ for (const foo of [...iterable,]);
+  > 108 │ for (const foo of [...(( iterable ))]);
+        │                   ^^^^^^^^^^^^^^^^^^^
+    109 │ for (const foo of (( [...(( iterable ))] )));
+    110 │ for (const foo of[...iterable]);
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    108 │ for·(const·foo·of·[...((·iterable·))]);
+        │                   ----              -  
+
+```
+
+```
+invalid.js:109:22 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    107 │ for (const foo of [...iterable,]);
+    108 │ for (const foo of [...(( iterable ))]);
+  > 109 │ for (const foo of (( [...(( iterable ))] )));
+        │                      ^^^^^^^^^^^^^^^^^^^
+    110 │ for (const foo of[...iterable]);
+    111 │ for (const value of [...(first || second)]) {}
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    109 │ for·(const·foo·of·((·[...((·iterable·))]·)));
+        │                      ----              -     
+
+```
+
+```
+invalid.js:110:18 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    108 │ for (const foo of [...(( iterable ))]);
+    109 │ for (const foo of (( [...(( iterable ))] )));
+  > 110 │ for (const foo of[...iterable]);
+        │                  ^^^^^^^^^^^^^
+    111 │ for (const value of [...(first || second)]) {}
+    112 │ async () => {for await (const foo of [...iterable]);};
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    108 108 │   for (const foo of [...(( iterable ))]);
+    109 109 │   for (const foo of (( [...(( iterable ))] )));
+    110     │ - for·(const·foo·of[...iterable]);
+        110 │ + for·(const·foo·of·iterable);
+    111 111 │   for (const value of [...(first || second)]) {}
+    112 112 │   async () => {for await (const foo of [...iterable]);};
+  
+
+```
+
+```
+invalid.js:111:21 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    109 │ for (const foo of (( [...(( iterable ))] )));
+    110 │ for (const foo of[...iterable]);
+  > 111 │ for (const value of [...(first || second)]) {}
+        │                     ^^^^^^^^^^^^^^^^^^^^^^
+    112 │ async () => {for await (const foo of [...iterable]);};
+    113 │ function * f1() {
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    111 │ for·(const·value·of·[...(first·||·second)])·{}
+        │                     ----                 -    
+
+```
+
+```
+invalid.js:112:38 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because for...of accepts any iterable.
+  
+    110 │ for (const foo of[...iterable]);
+    111 │ for (const value of [...(first || second)]) {}
+  > 112 │ async () => {for await (const foo of [...iterable]);};
+        │                                      ^^^^^^^^^^^^^
+    113 │ function * f1() {
+    114 │ 	yield * [...iterable];
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i Keep the copy if the loop changes the iterable while it runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    112 │ async·()·=>·{for·await·(const·foo·of·[...iterable]);};
+        │                                      ----        -    
+
+```
+
+```
+invalid.js:114:10 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because yield* accepts any iterable.
+  
+    112 │ async () => {for await (const foo of [...iterable]);};
+    113 │ function * f1() {
+  > 114 │ 	yield * [...iterable];
+        │ 	        ^^^^^^^^^^^^^
+    115 │ }
+    116 │ function * f2() {
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    114 │ → yield·*·[...iterable];
+        │           ----        - 
+
+```
+
+```
+invalid.js:117:10 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because yield* accepts any iterable.
+  
+    115 │ }
+    116 │ function * f2() {
+  > 117 │ 	yield * [...iterable,];
+        │ 	        ^^^^^^^^^^^^^^
+    118 │ }
+    119 │ function * f3() {
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    117 │ → yield·*·[...iterable,];
+        │           ----        -- 
+
+```
+
+```
+invalid.js:120:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because yield* accepts any iterable.
+  
+    118 │ }
+    119 │ function * f3() {
+  > 120 │ 	yield * (( [...iterable] ));
+        │ 	           ^^^^^^^^^^^^^
+    121 │ }
+    122 │ function * f4() {
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the iterable directly.
+  
+    120 │ → yield·*·((·[...iterable]·));
+        │              ----        -    
+
+```
+
+```
+invalid.js:123:16 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Converting this iterable to an array is unnecessary, because yield* accepts any iterable.
+  
+    121 │ }
+    122 │ function * f4() {
+  > 123 │ 	return yield* [.../* keep */ values];
+        │ 	              ^^^^^^^^^^^^^^^^^^^^^^
+    124 │ }
+    125 │ 
+  
+  i Pass the iterable directly to avoid copying every item.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:127:12 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    126 │ // Copy of a new array
+  > 127 │ const c1 = [...foo.concat(bar)];
+        │            ^^^^^^^^^^^^^^^^^^^^
+    128 │ const c2 = [...foo.flat()];
+    129 │ const c3 = [...foo.slice(1)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:128:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    126 │ // Copy of a new array
+    127 │ const c1 = [...foo.concat(bar)];
+  > 128 │ const c2 = [...foo.flat()];
+        │            ^^^^^^^^^^^^^^^
+    129 │ const c3 = [...foo.slice(1)];
+    130 │ const c4 = [...foo.splice(1)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    128 │ const·c2·=·[...foo.flat()];
+        │            ----          - 
+
+```
+
+```
+invalid.js:129:12 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    127 │ const c1 = [...foo.concat(bar)];
+    128 │ const c2 = [...foo.flat()];
+  > 129 │ const c3 = [...foo.slice(1)];
+        │            ^^^^^^^^^^^^^^^^^
+    130 │ const c4 = [...foo.splice(1)];
+    131 │ const c5 = [...foo.toReversed()];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:130:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    128 │ const c2 = [...foo.flat()];
+    129 │ const c3 = [...foo.slice(1)];
+  > 130 │ const c4 = [...foo.splice(1)];
+        │            ^^^^^^^^^^^^^^^^^^
+    131 │ const c5 = [...foo.toReversed()];
+    132 │ const c6 = [...foo.toSorted()];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    130 │ const·c4·=·[...foo.splice(1)];
+        │            ----             - 
+
+```
+
+```
+invalid.js:131:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    129 │ const c3 = [...foo.slice(1)];
+    130 │ const c4 = [...foo.splice(1)];
+  > 131 │ const c5 = [...foo.toReversed()];
+        │            ^^^^^^^^^^^^^^^^^^^^^
+    132 │ const c6 = [...foo.toSorted()];
+    133 │ const c7 = [...foo.toSpliced(0, 1)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    131 │ const·c5·=·[...foo.toReversed()];
+        │            ----                - 
+
+```
+
+```
+invalid.js:132:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    130 │ const c4 = [...foo.splice(1)];
+    131 │ const c5 = [...foo.toReversed()];
+  > 132 │ const c6 = [...foo.toSorted()];
+        │            ^^^^^^^^^^^^^^^^^^^
+    133 │ const c7 = [...foo.toSpliced(0, 1)];
+    134 │ const c8 = [...foo.with(0, bar)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    132 │ const·c6·=·[...foo.toSorted()];
+        │            ----              - 
+
+```
+
+```
+invalid.js:133:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    131 │ const c5 = [...foo.toReversed()];
+    132 │ const c6 = [...foo.toSorted()];
+  > 133 │ const c7 = [...foo.toSpliced(0, 1)];
+        │            ^^^^^^^^^^^^^^^^^^^^^^^^
+    134 │ const c8 = [...foo.with(0, bar)];
+    135 │ const c9 = [...foo.split("|")];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    133 │ const·c7·=·[...foo.toSpliced(0,·1)];
+        │            ----                   - 
+
+```
+
+```
+invalid.js:134:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    132 │ const c6 = [...foo.toSorted()];
+    133 │ const c7 = [...foo.toSpliced(0, 1)];
+  > 134 │ const c8 = [...foo.with(0, bar)];
+        │            ^^^^^^^^^^^^^^^^^^^^^
+    135 │ const c9 = [...foo.split("|")];
+    136 │ const c10 = [...Object.keys(foo)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    134 │ const·c8·=·[...foo.with(0,·bar)];
+        │            ----                - 
+
+```
+
+```
+invalid.js:135:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    133 │ const c7 = [...foo.toSpliced(0, 1)];
+    134 │ const c8 = [...foo.with(0, bar)];
+  > 135 │ const c9 = [...foo.split("|")];
+        │            ^^^^^^^^^^^^^^^^^^^
+    136 │ const c10 = [...Object.keys(foo)];
+    137 │ const c11 = [...Object.values(foo)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    135 │ const·c9·=·[...foo.split("|")];
+        │            ----              - 
+
+```
+
+```
+invalid.js:136:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    134 │ const c8 = [...foo.with(0, bar)];
+    135 │ const c9 = [...foo.split("|")];
+  > 136 │ const c10 = [...Object.keys(foo)];
+        │             ^^^^^^^^^^^^^^^^^^^^^
+    137 │ const c11 = [...Object.values(foo)];
+    138 │ const c12 = [...Array.from(foo)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    136 │ const·c10·=·[...Object.keys(foo)];
+        │             ----                - 
+
+```
+
+```
+invalid.js:137:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    135 │ const c9 = [...foo.split("|")];
+    136 │ const c10 = [...Object.keys(foo)];
+  > 137 │ const c11 = [...Object.values(foo)];
+        │             ^^^^^^^^^^^^^^^^^^^^^^^
+    138 │ const c12 = [...Array.from(foo)];
+    139 │ const c13 = [...Array.of()];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    137 │ const·c11·=·[...Object.values(foo)];
+        │             ----                  - 
+
+```
+
+```
+invalid.js:138:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    136 │ const c10 = [...Object.keys(foo)];
+    137 │ const c11 = [...Object.values(foo)];
+  > 138 │ const c12 = [...Array.from(foo)];
+        │             ^^^^^^^^^^^^^^^^^^^^
+    139 │ const c13 = [...Array.of()];
+    140 │ const c14 = [...new Array(3)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    138 │ const·c12·=·[...Array.from(foo)];
+        │             ----               - 
+
+```
+
+```
+invalid.js:139:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    137 │ const c11 = [...Object.values(foo)];
+    138 │ const c12 = [...Array.from(foo)];
+  > 139 │ const c13 = [...Array.of()];
+        │             ^^^^^^^^^^^^^^^
+    140 │ const c14 = [...new Array(3)];
+    141 │ async () => [...await Promise.all(foo)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    139 │ const·c13·=·[...Array.of()];
+        │             ----          - 
+
+```
+
+```
+invalid.js:140:13 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    138 │ const c12 = [...Array.from(foo)];
+    139 │ const c13 = [...Array.of()];
+  > 140 │ const c14 = [...new Array(3)];
+        │             ^^^^^^^^^^^^^^^^^
+    141 │ async () => [...await Promise.all(foo)];
+    142 │ async () => [...await Promise.allSettled(foo)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:141:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    139 │ const c13 = [...Array.of()];
+    140 │ const c14 = [...new Array(3)];
+  > 141 │ async () => [...await Promise.all(foo)];
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    142 │ async () => [...await Promise.allSettled(foo)];
+    143 │ function r1(bar) {
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    141 │ async·()·=>·[...await·Promise.all(foo)];
+        │             ----                      - 
+
+```
+
+```
+invalid.js:142:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    140 │ const c14 = [...new Array(3)];
+    141 │ async () => [...await Promise.all(foo)];
+  > 142 │ async () => [...await Promise.allSettled(foo)];
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    143 │ function r1(bar) {
+    144 │ 	return[...Object.keys(bar)];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    142 │ async·()·=>·[...await·Promise.allSettled(foo)];
+        │             ----                             - 
+
+```
+
+```
+invalid.js:144:8 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    142 │ async () => [...await Promise.allSettled(foo)];
+    143 │ function r1(bar) {
+  > 144 │ 	return[...Object.keys(bar)];
+        │ 	      ^^^^^^^^^^^^^^^^^^^^^
+    145 │ }
+    146 │ function r2(bar) {
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    142 142 │   async () => [...await Promise.allSettled(foo)];
+    143 143 │   function r1(bar) {
+    144     │ - → return[...Object.keys(bar)];
+        144 │ + → return·Object.keys(bar);
+    145 145 │   }
+    146 146 │   function r2(bar) {
+  
+
+```
+
+```
+invalid.js:147:8 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    145 │ }
+    146 │ function r2(bar) {
+  > 147 │ 	return[
+        │ 	      ^
+  > 148 │ 		...Object.keys(bar)
+  > 149 │ 	];
+        │ 	^
+    150 │ }
+    151 │ function r3(bar) {
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    145 145 │   }
+    146 146 │   function r2(bar) {
+    147     │ - → return[
+    148     │ - → → ...Object.keys(bar)
+    149     │ - → ];
+        147 │ + → return·Object.keys(bar);
+    150 148 │   }
+    151 149 │   function r3(bar) {
+  
+
+```
+
+```
+invalid.js:152:8 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    150 │ }
+    151 │ function r3(bar) {
+  > 152 │ 	return[
+        │ 	      ^
+  > 153 │ 		...(
+  > 154 │ 			Object.keys(bar)
+  > 155 │ 		)
+  > 156 │ 	];
+        │ 	^
+    157 │ }
+    158 │ function r4(bar) {
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    150 150 │   }
+    151 151 │   function r3(bar) {
+    152     │ - → return[
+    153     │ - → → ...(
+        152 │ + → return·(
+    154 153 │         Object.keys(bar)
+    155     │ - → → )
+    156     │ - → ];
+        154 │ + → → );
+    157 155 │   }
+    158 156 │   function r4(bar) {
+  
+
+```
+
+```
+invalid.js:159:9 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    157 │ }
+    158 │ function r4(bar) {
+  > 159 │ 	return([
+        │ 	       ^
+  > 160 │ 		...Object.keys(bar)
+  > 161 │ 	]);
+        │ 	^
+    162 │ }
+    163 │ async () => [...await Promise.all(x)].length;
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    157 157 │   }
+    158 158 │   function r4(bar) {
+    159     │ - → return([
+    160     │ - → → ...Object.keys(bar)
+    161     │ - → ]);
+        159 │ + → return(Object.keys(bar));
+    162 160 │   }
+    163 161 │   async () => [...await Promise.all(x)].length;
+  
+
+```
+
+```
+invalid.js:163:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    161 │ 	]);
+    162 │ }
+  > 163 │ async () => [...await Promise.all(x)].length;
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ async () => [...await Promise.all(x)][0];
+    165 │ async () => [...await Promise.all(x)]?.length;
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    161 161 │   	]);
+    162 162 │   }
+    163     │ - async·()·=>·[...await·Promise.all(x)].length;
+        163 │ + async·()·=>·(await·Promise.all(x)).length;
+    164 164 │   async () => [...await Promise.all(x)][0];
+    165 165 │   async () => [...await Promise.all(x)]?.length;
+  
+
+```
+
+```
+invalid.js:164:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    162 │ }
+    163 │ async () => [...await Promise.all(x)].length;
+  > 164 │ async () => [...await Promise.all(x)][0];
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    165 │ async () => [...await Promise.all(x)]?.length;
+    166 │ new [...Array.of(1)].constructor(2).length;
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    162 162 │   }
+    163 163 │   async () => [...await Promise.all(x)].length;
+    164     │ - async·()·=>·[...await·Promise.all(x)][0];
+        164 │ + async·()·=>·(await·Promise.all(x))[0];
+    165 165 │   async () => [...await Promise.all(x)]?.length;
+    166 166 │   new [...Array.of(1)].constructor(2).length;
+  
+
+```
+
+```
+invalid.js:165:13 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    163 │ async () => [...await Promise.all(x)].length;
+    164 │ async () => [...await Promise.all(x)][0];
+  > 165 │ async () => [...await Promise.all(x)]?.length;
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    166 │ new [...Array.of(1)].constructor(2).length;
+    167 │ new ([...Array.of(1)]).constructor(2);
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    163 163 │   async () => [...await Promise.all(x)].length;
+    164 164 │   async () => [...await Promise.all(x)][0];
+    165     │ - async·()·=>·[...await·Promise.all(x)]?.length;
+        165 │ + async·()·=>·(await·Promise.all(x))?.length;
+    166 166 │   new [...Array.of(1)].constructor(2).length;
+    167 167 │   new ([...Array.of(1)]).constructor(2);
+  
+
+```
+
+```
+invalid.js:166:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    164 │ async () => [...await Promise.all(x)][0];
+    165 │ async () => [...await Promise.all(x)]?.length;
+  > 166 │ new [...Array.of(1)].constructor(2).length;
+        │     ^^^^^^^^^^^^^^^^
+    167 │ new ([...Array.of(1)]).constructor(2);
+    168 │ new [...(Array.of(1))].constructor(2);
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    164 164 │   async () => [...await Promise.all(x)][0];
+    165 165 │   async () => [...await Promise.all(x)]?.length;
+    166     │ - new·[...Array.of(1)].constructor(2).length;
+        166 │ + new·(Array.of(1)).constructor(2).length;
+    167 167 │   new ([...Array.of(1)]).constructor(2);
+    168 168 │   new [...(Array.of(1))].constructor(2);
+  
+
+```
+
+```
+invalid.js:167:6 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    165 │ async () => [...await Promise.all(x)]?.length;
+    166 │ new [...Array.of(1)].constructor(2).length;
+  > 167 │ new ([...Array.of(1)]).constructor(2);
+        │      ^^^^^^^^^^^^^^^^
+    168 │ new [...(Array.of(1))].constructor(2);
+    169 │ [...function () { return [1]; }().toReversed()];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    167 │ new·([...Array.of(1)]).constructor(2);
+        │      ----           -                 
+
+```
+
+```
+invalid.js:168:5 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    166 │ new [...Array.of(1)].constructor(2).length;
+    167 │ new ([...Array.of(1)]).constructor(2);
+  > 168 │ new [...(Array.of(1))].constructor(2);
+        │     ^^^^^^^^^^^^^^^^^^
+    169 │ [...function () { return [1]; }().toReversed()];
+    170 │ const p1 = () => [...{value: [1]}.value.toReversed()];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    168 │ new·[...(Array.of(1))].constructor(2);
+        │     ----             -                
+
+```
+
+```
+invalid.js:169:1 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    167 │ new ([...Array.of(1)]).constructor(2);
+    168 │ new [...(Array.of(1))].constructor(2);
+  > 169 │ [...function () { return [1]; }().toReversed()];
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    170 │ const p1 = () => [...{value: [1]}.value.toReversed()];
+    171 │ const p2 = [...function () { return [1]; }().toReversed()];
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    167 167 │   new ([...Array.of(1)]).constructor(2);
+    168 168 │   new [...(Array.of(1))].constructor(2);
+    169     │ - [...function·()·{·return·[1];·}().toReversed()];
+        169 │ + (function·()·{·return·[1];·}().toReversed());
+    170 170 │   const p1 = () => [...{value: [1]}.value.toReversed()];
+    171 171 │   const p2 = [...function () { return [1]; }().toReversed()];
+  
+
+```
+
+```
+invalid.js:170:18 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    168 │ new [...(Array.of(1))].constructor(2);
+    169 │ [...function () { return [1]; }().toReversed()];
+  > 170 │ const p1 = () => [...{value: [1]}.value.toReversed()];
+        │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ const p2 = [...function () { return [1]; }().toReversed()];
+    172 │ const k1 = [a, ...[
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    168 168 │   new [...(Array.of(1))].constructor(2);
+    169 169 │   [...function () { return [1]; }().toReversed()];
+    170     │ - const·p1·=·()·=>·[...{value:·[1]}.value.toReversed()];
+        170 │ + const·p1·=·()·=>·({value:·[1]}.value.toReversed());
+    171 171 │   const p2 = [...function () { return [1]; }().toReversed()];
+    172 172 │   const k1 = [a, ...[
+  
+
+```
+
+```
+invalid.js:171:12 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This spread copies an array that was just created.
+  
+    169 │ [...function () { return [1]; }().toReversed()];
+    170 │ const p1 = () => [...{value: [1]}.value.toReversed()];
+  > 171 │ const p2 = [...function () { return [1]; }().toReversed()];
+        │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    172 │ const k1 = [a, ...[
+    173 │ 	// keep
+  
+  i The spread value is already a new array, so it can be used directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the copy.
+  
+    169 169 │   [...function () { return [1]; }().toReversed()];
+    170 170 │   const p1 = () => [...{value: [1]}.value.toReversed()];
+    171     │ - const·p2·=·[...function·()·{·return·[1];·}().toReversed()];
+        171 │ + const·p2·=·(function·()·{·return·[1];·}().toReversed());
+    172 172 │   const k1 = [a, ...[
+    173 173 │   	// keep
+  
+
+```
+
+```
+invalid.js:172:16 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into another array literal is unnecessary.
+  
+    170 │ const p1 = () => [...{value: [1]}.value.toReversed()];
+    171 │ const p2 = [...function () { return [1]; }().toReversed()];
+  > 172 │ const k1 = [a, ...[
+        │                ^^^^
+  > 173 │ 	// keep
+  > 174 │ 	b,
+  > 175 │ ]];
+        │ ^
+    176 │ foo(
+    177 │ 	a,
+  
+  i Write the elements directly in the surrounding array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    170 170 │   const p1 = () => [...{value: [1]}.value.toReversed()];
+    171 171 │   const p2 = [...function () { return [1]; }().toReversed()];
+    172     │ - const·k1·=·[a,·...[
+        172 │ + const·k1·=·[a,·
+    173 173 │     // keep
+    174     │ - → b,
+    175     │ - ]];
+        174 │ + → b];
+    176 175 │   foo(
+    177 176 │     a,
+  
+
+```
+
+```
+invalid.js:178:2 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    176 │ foo(
+    177 │ 	a,
+  > 178 │ 	...[b, c],
+        │ 	^^^^^^^^^
+    179 │ );
+    180 │ function shadowedUndefined(undefined) {
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    178 │ → ...[b,·c],
+        │   ----    - 
+
+```
+
+```
+invalid.js:181:6 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    179 │ );
+    180 │ function shadowedUndefined(undefined) {
+  > 181 │ 	foo(...[,]);
+        │ 	    ^^^^^^
+    182 │ 	foo(...[a]);
+    183 │ }
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:182:6 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an array literal into the arguments of a call is unnecessary.
+  
+    180 │ function shadowedUndefined(undefined) {
+    181 │ 	foo(...[,]);
+  > 182 │ 	foo(...[a]);
+        │ 	    ^^^^^^
+    183 │ }
+    184 │ Object.assign(target, {
+  
+  i Pass the elements directly as arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the spread and the square brackets.
+  
+    182 │ → foo(...[a]);
+        │       ---- -  
+
+```
+
+```
+invalid.js:184:23 lint/nursery/noUselessSpread  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This object only copies the properties of other values before Object.assign() copies them again.
+  
+    182 │ 	foo(...[a]);
+    183 │ }
+  > 184 │ Object.assign(target, {
+        │                       ^
+  > 185 │ 	...a,
+  > 186 │ 	...b,
+  > 187 │ });
+        │ ^
+    188 │ const g1 = {...{set b(value) {}}};
+    189 │ 
+  
+  i Object.assign() copies the properties of each argument, so pass the spread values as separate arguments.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Pass the spread values as separate arguments.
+  
+    182 182 │     foo(...[a]);
+    183 183 │   }
+    184     │ - Object.assign(target,·{
+    185     │ - → ...a,
+    186     │ - → ...b,
+    187     │ - });
+        184 │ + Object.assign(target,·
+        185 │ + → a,
+        186 │ + → b);
+    188 187 │   const g1 = {...{set b(value) {}}};
+    189 188 │   
+  
+
+```
+
+```
+invalid.js:188:13 lint/nursery/noUselessSpread ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading an object literal into another object literal is unnecessary.
+  
+    186 │ 	...b,
+    187 │ });
+  > 188 │ const g1 = {...{set b(value) {}}};
+        │             ^^^^^^^^^^^^^^^^^^^^
+    189 │ 
+  
+  i Write the properties directly in the surrounding object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

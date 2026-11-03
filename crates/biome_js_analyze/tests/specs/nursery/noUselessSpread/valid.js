@@ -1,0 +1,116 @@
+/* should not generate diagnostics */
+const array = [[]];
+const array2 = [{}];
+const object = ({...[]});
+foo([]);
+foo({});
+new Foo([]);
+new Foo({});
+const array3 = [...a];
+const object2 = {...a};
+const [first, ...rest] = [];
+const {bar, ...others} = {};
+function a(foo, ...rest) {}
+const array4 = [...foo, bar];
+const object3 = {...foo, bar};
+foo(foo, ...bar);
+new Foo(...foo, bar);
+
+// Object literals that use `super` or set the prototype
+const s1 = {...(( {read() { return super.value; }} ))};
+const s2 = {...{read() { return super /* keep */ .value; }}};
+const s3 = {...{read() { return super.value?.(); }}};
+const s4 = {...{nested: {read() { return super.value; }}}};
+const s5 = {...{__proto__: p}};
+const s6 = {...{"__proto__": p}};
+const s7 = {__proto__: a, ...{__proto__: b}};
+const s8 = {...{a, __proto__: p}};
+
+// Object.assign()
+Object.assign(target, source);
+Object.assign(target, {});
+Object.assign(target, {foo});
+Object.assign(target, {foo, ...source});
+Object.assign(target, {...source, foo});
+Object.assign?.(target, {...source});
+Object?.assign(target, {...source});
+Object[assign](target, {...source});
+NotObject.assign(target, {...source});
+Object.assign({...source});
+Object.assign({...target}, source);
+Object.assign(...args, {...source});
+
+// Collection constructors
+new Set(iterable);
+new NotSet(...iterable);
+new namespace.Set(...iterable);
+Set(...iterable);
+new Uint8Array(...iterable);
+new Set(...iterable, extraArgument);
+
+// Iterables passed to something that doesn't accept any iterable
+new NotMatchedConstructor([...iterable]);
+new foo.Map([...iterable]);
+new Map([...iterable], extraArgument);
+new Map();
+new Map([,...iterable]);
+new Map([...iterable, extraElement]);
+new Map({...iterable});
+new Uint8Array([...iterable]);
+new Uint8Array(before, [...iterable]);
+new Float64Array([...iterable]);
+new Uint8Array([...iterable], 0);
+Promise.notMatchedMethod([...iterable]);
+NotPromise.all([...iterable]);
+foo.Promise.all([...iterable]);
+Promise.all?.([...iterable]);
+Promise?.all([...iterable]);
+Promise[all]([...iterable]);
+Promise.all();
+Promise.all([...iterable], extraArgument);
+Promise.all(...iterable);
+Promise.all([,...iterable]);
+Promise.all([...iterable, extraElement]);
+Promise.all({...iterable});
+Object.notFromEntries([...iterable]);
+NotObject.fromEntries([...iterable]);
+Object.fromEntries?.([...iterable]);
+Object.fromEntries([...iterable], extraArgument);
+Uint8Array.notFrom([...iterable]);
+NotTypedArray.from([...iterable]);
+Uint8Array.from?.([...iterable]);
+Uint8Array.from([...iterable], extraArgument);
+for (const [...iterable] of foo);
+for (const foo of bar) [...iterable];
+for (const foo of [,...iterable]);
+for (const foo of [...iterable, extraElement]);
+for (const foo of {...iterable});
+for (const foo in [...iterable]);
+function * fn() {yield [...iterable];}
+function * fn2() {yield* [...iterable, extraElement];}
+
+// Values that may not be new arrays
+const v1 = [...not.array];
+const v2 = [...not.array()];
+const v3 = [...array.unknown()];
+const v4 = [...Object.notReturningArray(foo)];
+const v5 = [...NotObject.keys(foo)];
+const v6 = [...Int8Array.from(foo)];
+const v7 = [...Int8Array.of()];
+const v8 = [...new Int8Array(3)];
+const v9 = [...Promise.all(foo)];
+const v10 = [...foo.filter(bar)];
+const v11 = [...foo.map(bar)];
+const v12 = [...Iterator.concat(bar)];
+const v13 = [..."abc".concat("def")];
+const v14 = [...values.copyWithin(0, 1)];
+async () => [...await Promise.all(foo, extraArgument)];
+
+// Shadowed globals
+function shadowed(Set, Promise, Object) {
+	new Set(...iterable);
+	new Set([...iterable]);
+	Promise.all([...iterable]);
+	Object.assign(target, {...source});
+	const keys = [...Object.keys(foo)];
+}
