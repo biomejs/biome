@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validScss.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@mixin font-face($weight) { a { font-weight: #{$weight}; } }
+a { font-weight: $foo; }
+a { font-weight: map-deep-get($theme, typography, weight, semibold); }
+a { font: italic $weight 16px serif; }
+a { font-weight: 700; }
+
+```

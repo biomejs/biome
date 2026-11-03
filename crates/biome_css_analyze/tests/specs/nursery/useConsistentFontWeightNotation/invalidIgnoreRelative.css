@@ -1,0 +1,3 @@
+/* should generate diagnostics */
+a { font-weight: normal; }
+a { font: italic bold 16px/3 cursive; }
