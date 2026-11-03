@@ -49,6 +49,7 @@ pub mod no_console_spaces;
 pub mod no_const_assign;
 pub mod no_const_enum;
 pub mod no_constant_binary_expressions;
+pub mod no_constant_comparisons;
 pub mod no_constant_condition;
 pub mod no_constant_math_min_max_clamp;
 pub mod no_constructor_return;
