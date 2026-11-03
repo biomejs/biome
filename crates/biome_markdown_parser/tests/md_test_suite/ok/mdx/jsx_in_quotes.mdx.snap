@@ -31,7 +31,6 @@ MdRoot {
             },
             content: MdBlockList [
                 MdxJsxBlockTag {
-                    indent: MdIndentTokenList [],
                     value_token: MDX_JSX_TAG_LITERAL@2..8 "<Note>" [] [],
                 },
                 MdNewline {
@@ -80,7 +79,6 @@ MdRoot {
                     post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@46..47 " " [] [],
                 },
                 MdxJsxBlockTag {
-                    indent: MdIndentTokenList [],
                     value_token: MDX_JSX_TAG_LITERAL@47..54 "</Note>" [] [],
                 },
                 MdNewline {
@@ -107,8 +105,7 @@ MdRoot {
         2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
       1: MD_BLOCK_LIST@2..55
         0: MDX_JSX_BLOCK_TAG@2..8
-          0: MD_INDENT_TOKEN_LIST@2..2
-          1: MDX_JSX_TAG_LITERAL@2..8 "<Note>" [] []
+          0: MDX_JSX_TAG_LITERAL@2..8 "<Note>" [] []
         1: MD_NEWLINE@8..9
           0: NEWLINE@8..9 "\n" [] []
         2: MD_QUOTE_PREFIX@9..10
@@ -142,8 +139,7 @@ MdRoot {
           1: R_ANGLE@45..46 ">" [] []
           2: MD_QUOTE_POST_MARKER_SPACE@46..47 " " [] []
         9: MDX_JSX_BLOCK_TAG@47..54
-          0: MD_INDENT_TOKEN_LIST@47..47
-          1: MDX_JSX_TAG_LITERAL@47..54 "</Note>" [] []
+          0: MDX_JSX_TAG_LITERAL@47..54 "</Note>" [] []
         10: MD_NEWLINE@54..55
           0: NEWLINE@54..55 "\n" [] []
   3: EOF@55..55 "" [] []

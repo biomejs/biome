@@ -26,7 +26,6 @@ MdRoot {
     frontmatter: missing (optional),
     value: MdBlockList [
         MdxJsxBlockTag {
-            indent: MdIndentTokenList [],
             value_token: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] [],
         },
         MdNewline {
@@ -36,7 +35,6 @@ MdRoot {
             value_token: NEWLINE@7..8 "\n" [] [],
         },
         MdxJsxBlockTag {
-            indent: MdIndentTokenList [],
             value_token: MDX_JSX_TAG_LITERAL@8..15 "</Card>" [] [],
         },
         MdNewline {
@@ -65,7 +63,6 @@ MdRoot {
             value_token: NEWLINE@30..31 "\n" [] [],
         },
         MdxJsxBlockTag {
-            indent: MdIndentTokenList [],
             value_token: MDX_JSX_TAG_LITERAL@31..38 "</Note>" [] [],
         },
         MdNewline {
@@ -84,15 +81,13 @@ MdRoot {
   1: (empty)
   2: MD_BLOCK_LIST@0..39
     0: MDX_JSX_BLOCK_TAG@0..6
-      0: MD_INDENT_TOKEN_LIST@0..0
-      1: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] []
+      0: MDX_JSX_TAG_LITERAL@0..6 "<Note>" [] []
     1: MD_NEWLINE@6..7
       0: NEWLINE@6..7 "\n" [] []
     2: MD_NEWLINE@7..8
       0: NEWLINE@7..8 "\n" [] []
     3: MDX_JSX_BLOCK_TAG@8..15
-      0: MD_INDENT_TOKEN_LIST@8..8
-      1: MDX_JSX_TAG_LITERAL@8..15 "</Card>" [] []
+      0: MDX_JSX_TAG_LITERAL@8..15 "</Card>" [] []
     4: MD_NEWLINE@15..16
       0: NEWLINE@15..16 "\n" [] []
     5: MD_NEWLINE@16..17
@@ -110,8 +105,7 @@ MdRoot {
     7: MD_NEWLINE@30..31
       0: NEWLINE@30..31 "\n" [] []
     8: MDX_JSX_BLOCK_TAG@31..38
-      0: MD_INDENT_TOKEN_LIST@31..31
-      1: MDX_JSX_TAG_LITERAL@31..38 "</Note>" [] []
+      0: MDX_JSX_TAG_LITERAL@31..38 "</Note>" [] []
     9: MD_NEWLINE@38..39
       0: NEWLINE@38..39 "\n" [] []
   3: EOF@39..39 "" [] []

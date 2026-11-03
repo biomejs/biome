@@ -2279,15 +2279,11 @@ impl MdxJsxBlockTag {
     }
     pub fn as_fields(&self) -> MdxJsxBlockTagFields {
         MdxJsxBlockTagFields {
-            indent: self.indent(),
             value_token: self.value_token(),
         }
     }
-    pub fn indent(&self) -> MdIndentTokenList {
-        support::list(&self.syntax, 0usize)
-    }
     pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+        support::required_token(&self.syntax, 0usize)
     }
 }
 impl Serialize for MdxJsxBlockTag {
@@ -2300,7 +2296,6 @@ impl Serialize for MdxJsxBlockTag {
 }
 #[derive(Serialize)]
 pub struct MdxJsxBlockTagFields {
-    pub indent: MdIndentTokenList,
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -5450,7 +5445,6 @@ impl std::fmt::Debug for MdxJsxBlockTag {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("MdxJsxBlockTag")
-                .field("indent", &self.indent())
                 .field(
                     "value_token",
                     &support::DebugSyntaxResult(self.value_token()),

@@ -32,7 +32,6 @@ MdRoot {
             },
             content: MdBlockList [
                 MdxJsxBlockTag {
-                    indent: MdIndentTokenList [],
                     value_token: MDX_JSX_TAG_LITERAL@2..26 "<Note\n>   title=\"x\"\n> />" [] [],
                 },
                 MdNewline {
@@ -88,8 +87,7 @@ MdRoot {
         2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
       1: MD_BLOCK_LIST@2..71
         0: MDX_JSX_BLOCK_TAG@2..26
-          0: MD_INDENT_TOKEN_LIST@2..2
-          1: MDX_JSX_TAG_LITERAL@2..26 "<Note\n>   title=\"x\"\n> />" [] []
+          0: MDX_JSX_TAG_LITERAL@2..26 "<Note\n>   title=\"x\"\n> />" [] []
         1: MD_NEWLINE@26..27
           0: NEWLINE@26..27 "\n" [] []
         2: MD_QUOTE_PREFIX@27..28

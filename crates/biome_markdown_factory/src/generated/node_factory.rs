@@ -911,13 +911,10 @@ impl MdxInlineExpressionBuilder {
         ))
     }
 }
-pub fn mdx_jsx_block_tag(indent: MdIndentTokenList, value_token: SyntaxToken) -> MdxJsxBlockTag {
+pub fn mdx_jsx_block_tag(value_token: SyntaxToken) -> MdxJsxBlockTag {
     MdxJsxBlockTag::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG,
-        [
-            Some(SyntaxElement::Node(indent.into_syntax())),
-            Some(SyntaxElement::Token(value_token)),
-        ],
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn mdx_jsx_inline_tag(value_token: SyntaxToken) -> MdxJsxInlineTag {

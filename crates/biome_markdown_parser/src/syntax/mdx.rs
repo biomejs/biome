@@ -227,13 +227,15 @@ fn is_flow_line(text: &str, quote_depth: usize) -> bool {
     }
 }
 
-/// Parses a JSX tag on a flow line. Only the first construct of the line
-/// owns the line's indentation.
+/// Parses a JSX tag on a flow line. The indentation before the first
+/// construct of the line becomes whitespace trivia.
 ///
-/// Grammar: MdxJsxBlockTag = indent: MdIndentTokenList value: 'mdx_jsx_tag_literal'
+/// Grammar: MdxJsxBlockTag = value: 'mdx_jsx_tag_literal'
 fn parse_block_tag(p: &mut MarkdownParser, length: usize, first: bool) -> ParsedSyntax {
+    if first {
+        p.consume_line_indent_as_whitespace_trivia(usize::MAX);
+    }
     let m = p.start();
-    p.emit_line_indent(if first { usize::MAX } else { 0 });
     if !p.at(L_ANGLE) {
         m.abandon(p);
         return Absent;

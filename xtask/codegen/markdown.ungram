@@ -511,9 +511,9 @@ MdxExpressionContent = value: 'mdx_expression_literal'
 // A JSX tag on a line that holds only tags and expressions. Each tag is its
 // own node: an opening tag and its closing tag are siblings around the
 // Markdown between them. The tag is parsed as an embedded JSX snippet.
-MdxJsxBlockTag =
-	indent: MdIndentTokenList
-	value: 'mdx_jsx_tag_literal'
+// Spaces and tabs before it are whitespace trivia, because MDX gives them no
+// meaning.
+MdxJsxBlockTag = value: 'mdx_jsx_tag_literal'
 
 // Some <Badge>new</Badge> text
 //      ^^^^^^^   ^^^^^^^^
