@@ -1,6 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_formatter::{
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
 use biome_markdown_formatter::context::{ProseWrap, UnorderedListMarker};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
@@ -189,6 +191,15 @@ pub struct MarkdownFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unordered_list_marker: Option<UnorderedListMarker>,
+
+    /// Selects the preferred quote style for link and image titles. Biome uses the other quote,
+    /// or parentheses, when that avoids additional escaping. Defaults to `double`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-formatter-quote-style"), argument("double|single"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
 
     /// Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter
     /// of the code's language. Defaults to `true`.
