@@ -6,7 +6,11 @@ use biome_analyze::RuleSource;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsIdentifierAssignment, TextRange};
+use biome_js_syntax::{
+    AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsExpressionStatement,
+    JsIdentifierAssignment, JsLabeledStatement, JsModuleItemList, TextRange,
+};
+use biome_rowan::AstNode;
 use biome_languages::JsFileSource;
 use biome_rule_options::no_global_assign::NoGlobalAssignOptions;
 
@@ -42,6 +46,9 @@ declare_lint_rule! {
     /// let window;
     /// window = {};
     /// ```
+    ///
+    /// In Svelte components, a top-level reactive statement such as `$: length = 2` declares a
+    /// component variable, so it isn't reported.
     pub NoGlobalAssign {
         version: "1.5.0",
         name: "noGlobalAssign",
@@ -68,6 +75,13 @@ impl Rule for NoGlobalAssign {
         }
         let token = assignment.name_token().ok()?;
 
+        let source_type = ctx.source_type::<JsFileSource>();
+        if source_type.as_embedding_kind().is_svelte()
+            && is_svelte_reactive_declaration(assignment)
+        {
+            return None;
+        }
+
         // Only trust a cross-embed binding from non-source embeds like template
         // expressions. Source embeds (e.g. Vue's `<script>` and `<script setup>`)
         // don't necessarily see each other's bindings, so trusting it there
@@ -84,7 +98,6 @@ impl Rule for NoGlobalAssign {
         let name = token.text_trimmed();
         // Apps Script service globals (e.g. `SpreadsheetApp`) are read-only
         // globals too, so reassigning them in a `.gs` file is reported.
-        let source_type = ctx.source_type::<JsFileSource>();
         let is_global_var = is_js_global(name)
             || (source_type.is_google_apps_script() && is_google_apps_script_global(name));
         is_global_var.then(|| token.text_trimmed_range())
@@ -107,4 +120,49 @@ impl Rule for NoGlobalAssign {
             }),
         )
     }
+}
+
+/// Returns whether `assignment` is a target of a top-level Svelte reactive declaration, such as
+/// `length` in `$: length = 2` or in `$: ({ length } = value)`.
+///
+/// Svelte declares a component variable for each target of such a statement, so the assignment
+/// doesn't reach a global. Assignments nested in a block or another expression, such as
+/// `$: { length = 2 }` or `$: x = (length = 2)`, don't declare anything.
+fn is_svelte_reactive_declaration(assignment: &JsIdentifierAssignment) -> bool {
+    let Some(assignment_expression) = assignment
+        .syntax()
+        .ancestors()
+        .find_map(JsAssignmentExpression::cast)
+    else {
+        return false;
+    };
+    if assignment_expression.operator() != Ok(JsAssignmentOperator::Assign) {
+        return false;
+    }
+    let mut expression = AnyJsExpression::from(assignment_expression);
+    while let Some(parent) = expression
+        .syntax()
+        .parent()
+        .and_then(AnyJsExpression::cast)
+    {
+        if parent.as_js_parenthesized_expression().is_none() {
+            return false;
+        }
+        expression = parent;
+    }
+    expression
+        .syntax()
+        .parent()
+        .and_then(JsExpressionStatement::cast)
+        .and_then(|statement| statement.syntax().parent())
+        .and_then(JsLabeledStatement::cast)
+        .is_some_and(|labeled| {
+            labeled
+                .label_token()
+                .is_ok_and(|label| label.text_trimmed() == "$")
+                && labeled
+                    .syntax()
+                    .parent()
+                    .is_some_and(|parent| JsModuleItemList::can_cast(parent.kind()))
+        })
 }
