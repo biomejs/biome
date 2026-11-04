@@ -97,7 +97,7 @@ pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
     VecBuffer,
 };
-pub use builders::BestFitting;
+pub use builders::{BestFitting, EmbeddedLayout};
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use printer::SourceMapGeneration;
@@ -1204,10 +1204,24 @@ impl<Context: FormatContext> Formatted<Context> {
     /// `fn_format_embedded` for the element's key.
     ///
     /// When `fn_format_embedded` returns `None`, the element keeps the content the host
-    /// formatter wrote for it.
+    /// formatter wrote for it. An [EmbeddedLayout::SingleLine] element also keeps it
+    /// when the returned document breaks.
     pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
     where
         F: FnMut(<Context::Source as Source>::EmbeddedKey) -> Option<Document<Context::Source>>,
+    {
+        self.format_embedded_with_layout(|key, _| fn_format_embedded(key));
+    }
+
+    /// Like [Self::format_embedded], but also passes the [EmbeddedLayout] of each
+    /// element to `fn_format_embedded`, so that the code of an
+    /// [EmbeddedLayout::SingleLine] element can be formatted to fit on one line.
+    pub fn format_embedded_with_layout<F>(&mut self, mut fn_format_embedded: F)
+    where
+        F: FnMut(
+            <Context::Source as Source>::EmbeddedKey,
+            EmbeddedLayout,
+        ) -> Option<Document<Context::Source>>,
     {
         self.document.replace_embedded(&mut fn_format_embedded);
     }
