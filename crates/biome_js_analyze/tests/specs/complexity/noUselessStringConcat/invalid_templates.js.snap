@@ -1,0 +1,533 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_templates.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = `a${x}` + `b`
+const a = 'a' + `b${x}`
+const a = `a${x}` + `b${y}`
+const a = `a` + `b${x}`
+const a = `a${x}` + ''
+const a = "a`b" + `${x}`
+const a = 'a${b}' + `${x}`
+const a = 'a\'b' + `${x}`
+const a = '\0' + `${x}`
+const a = 'a' + `b${x}` + 'c'
+const a = foo + `a${x}` + 'b'
+function foo() { return `a` + `b${x}` }
+function foo() { throw `a` + `b${x}` }
+const fn = () => `a` + `b${x}`
+const a = 'a' + 'b' + `${x}`
+// The fix would change the escape sequence `\0` into `\01`
+const a = '\0' + `1${x}`
+const a = `${x}\0` + '1'
+// The fix would call `bar()` before converting `foo` to a string
+const a = foo + 'a' + `${bar()}`
+const a = foo + `a` + `b${baz()}`
+// The fix would remove the parentheses
+const a = (foo + 'a') + `b${x}`
+// The fix would turn `foo` into a template tag
+foo
+'a' + `b${x}`
+// A string literal can't contain a line break
+const a = foo + `a
+b` + 'c'
+
+```
+
+# Diagnostics
+```
+invalid_templates.js:2:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = `a${x}` + `b`
+      │           ^^^^^^^^^^^^^
+    3 │ const a = 'a' + `b${x}`
+    4 │ const a = `a${x}` + `b${y}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    2 │ const·a·=·`a${x}`·+·`b`
+      │                 -----  
+
+```
+
+```
+invalid_templates.js:3:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = `a${x}` + `b`
+  > 3 │ const a = 'a' + `b${x}`
+      │           ^^^^^^^^^^^^^
+    4 │ const a = `a${x}` + `b${y}`
+    5 │ const a = `a` + `b${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = `a${x}` + `b`
+     3    │ - const·a·=·'a'·+·`b${x}`
+        3 │ + const·a·=·`ab${x}`
+     4  4 │   const a = `a${x}` + `b${y}`
+     5  5 │   const a = `a` + `b${x}`
+  
+
+```
+
+```
+invalid_templates.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    2 │ const a = `a${x}` + `b`
+    3 │ const a = 'a' + `b${x}`
+  > 4 │ const a = `a${x}` + `b${y}`
+      │           ^^^^^^^^^^^^^^^^^
+    5 │ const a = `a` + `b${x}`
+    6 │ const a = `a${x}` + ''
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    4 │ const·a·=·`a${x}`·+·`b${y}`
+      │                 -----      
+
+```
+
+```
+invalid_templates.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    3 │ const a = 'a' + `b${x}`
+    4 │ const a = `a${x}` + `b${y}`
+  > 5 │ const a = `a` + `b${x}`
+      │           ^^^^^^^^^^^^^
+    6 │ const a = `a${x}` + ''
+    7 │ const a = "a`b" + `${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     3  3 │   const a = 'a' + `b${x}`
+     4  4 │   const a = `a${x}` + `b${y}`
+     5    │ - const·a·=·`a`·+·`b${x}`
+        5 │ + const·a·=·`ab${x}`
+     6  6 │   const a = `a${x}` + ''
+     7  7 │   const a = "a`b" + `${x}`
+  
+
+```
+
+```
+invalid_templates.js:6:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    4 │ const a = `a${x}` + `b${y}`
+    5 │ const a = `a` + `b${x}`
+  > 6 │ const a = `a${x}` + ''
+      │           ^^^^^^^^^^^^
+    7 │ const a = "a`b" + `${x}`
+    8 │ const a = 'a${b}' + `${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    6 │ const·a·=·`a${x}`·+·''
+      │                  -----
+
+```
+
+```
+invalid_templates.js:7:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    5 │ const a = `a` + `b${x}`
+    6 │ const a = `a${x}` + ''
+  > 7 │ const a = "a`b" + `${x}`
+      │           ^^^^^^^^^^^^^^
+    8 │ const a = 'a${b}' + `${x}`
+    9 │ const a = 'a\'b' + `${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     5  5 │   const a = `a` + `b${x}`
+     6  6 │   const a = `a${x}` + ''
+     7    │ - const·a·=·"a`b"·+·`${x}`
+        7 │ + const·a·=·`a\`b${x}`
+     8  8 │   const a = 'a${b}' + `${x}`
+     9  9 │   const a = 'a\'b' + `${x}`
+  
+
+```
+
+```
+invalid_templates.js:8:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     6 │ const a = `a${x}` + ''
+     7 │ const a = "a`b" + `${x}`
+   > 8 │ const a = 'a${b}' + `${x}`
+       │           ^^^^^^^^^^^^^^^^
+     9 │ const a = 'a\'b' + `${x}`
+    10 │ const a = '\0' + `${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     6  6 │   const a = `a${x}` + ''
+     7  7 │   const a = "a`b" + `${x}`
+     8    │ - const·a·=·'a${b}'·+·`${x}`
+        8 │ + const·a·=·`a\${b}${x}`
+     9  9 │   const a = 'a\'b' + `${x}`
+    10 10 │   const a = '\0' + `${x}`
+  
+
+```
+
+```
+invalid_templates.js:9:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     7 │ const a = "a`b" + `${x}`
+     8 │ const a = 'a${b}' + `${x}`
+   > 9 │ const a = 'a\'b' + `${x}`
+       │           ^^^^^^^^^^^^^^^
+    10 │ const a = '\0' + `${x}`
+    11 │ const a = 'a' + `b${x}` + 'c'
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     7  7 │   const a = "a`b" + `${x}`
+     8  8 │   const a = 'a${b}' + `${x}`
+     9    │ - const·a·=·'a\'b'·+·`${x}`
+        9 │ + const·a·=·`a\'b${x}`
+    10 10 │   const a = '\0' + `${x}`
+    11 11 │   const a = 'a' + `b${x}` + 'c'
+  
+
+```
+
+```
+invalid_templates.js:10:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     8 │ const a = 'a${b}' + `${x}`
+     9 │ const a = 'a\'b' + `${x}`
+  > 10 │ const a = '\0' + `${x}`
+       │           ^^^^^^^^^^^^^
+    11 │ const a = 'a' + `b${x}` + 'c'
+    12 │ const a = foo + `a${x}` + 'b'
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     8  8 │   const a = 'a${b}' + `${x}`
+     9  9 │   const a = 'a\'b' + `${x}`
+    10    │ - const·a·=·'\0'·+·`${x}`
+       10 │ + const·a·=·`\0${x}`
+    11 11 │   const a = 'a' + `b${x}` + 'c'
+    12 12 │   const a = foo + `a${x}` + 'b'
+  
+
+```
+
+```
+invalid_templates.js:11:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     9 │ const a = 'a\'b' + `${x}`
+    10 │ const a = '\0' + `${x}`
+  > 11 │ const a = 'a' + `b${x}` + 'c'
+       │           ^^^^^^^^^^^^^^^^^^^
+    12 │ const a = foo + `a${x}` + 'b'
+    13 │ function foo() { return `a` + `b${x}` }
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     9  9 │   const a = 'a\'b' + `${x}`
+    10 10 │   const a = '\0' + `${x}`
+    11    │ - const·a·=·'a'·+·`b${x}`·+·'c'
+       11 │ + const·a·=·'a'·+·`b${x}c`
+    12 12 │   const a = foo + `a${x}` + 'b'
+    13 13 │   function foo() { return `a` + `b${x}` }
+  
+
+```
+
+```
+invalid_templates.js:12:17 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    10 │ const a = '\0' + `${x}`
+    11 │ const a = 'a' + `b${x}` + 'c'
+  > 12 │ const a = foo + `a${x}` + 'b'
+       │                 ^^^^^^^^^^^^^
+    13 │ function foo() { return `a` + `b${x}` }
+    14 │ function foo() { throw `a` + `b${x}` }
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    10 10 │   const a = '\0' + `${x}`
+    11 11 │   const a = 'a' + `b${x}` + 'c'
+    12    │ - const·a·=·foo·+·`a${x}`·+·'b'
+       12 │ + const·a·=·foo·+·`a${x}b`
+    13 13 │   function foo() { return `a` + `b${x}` }
+    14 14 │   function foo() { throw `a` + `b${x}` }
+  
+
+```
+
+```
+invalid_templates.js:13:25 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    11 │ const a = 'a' + `b${x}` + 'c'
+    12 │ const a = foo + `a${x}` + 'b'
+  > 13 │ function foo() { return `a` + `b${x}` }
+       │                         ^^^^^^^^^^^^^
+    14 │ function foo() { throw `a` + `b${x}` }
+    15 │ const fn = () => `a` + `b${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    11 11 │   const a = 'a' + `b${x}` + 'c'
+    12 12 │   const a = foo + `a${x}` + 'b'
+    13    │ - function·foo()·{·return·`a`·+·`b${x}`·}
+       13 │ + function·foo()·{·return·`ab${x}`·}
+    14 14 │   function foo() { throw `a` + `b${x}` }
+    15 15 │   const fn = () => `a` + `b${x}`
+  
+
+```
+
+```
+invalid_templates.js:14:24 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    12 │ const a = foo + `a${x}` + 'b'
+    13 │ function foo() { return `a` + `b${x}` }
+  > 14 │ function foo() { throw `a` + `b${x}` }
+       │                        ^^^^^^^^^^^^^
+    15 │ const fn = () => `a` + `b${x}`
+    16 │ const a = 'a' + 'b' + `${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    12 12 │   const a = foo + `a${x}` + 'b'
+    13 13 │   function foo() { return `a` + `b${x}` }
+    14    │ - function·foo()·{·throw·`a`·+·`b${x}`·}
+       14 │ + function·foo()·{·throw·`ab${x}`·}
+    15 15 │   const fn = () => `a` + `b${x}`
+    16 16 │   const a = 'a' + 'b' + `${x}`
+  
+
+```
+
+```
+invalid_templates.js:15:18 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    13 │ function foo() { return `a` + `b${x}` }
+    14 │ function foo() { throw `a` + `b${x}` }
+  > 15 │ const fn = () => `a` + `b${x}`
+       │                  ^^^^^^^^^^^^^
+    16 │ const a = 'a' + 'b' + `${x}`
+    17 │ // The fix would change the escape sequence `\0` into `\01`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    13 13 │   function foo() { return `a` + `b${x}` }
+    14 14 │   function foo() { throw `a` + `b${x}` }
+    15    │ - const·fn·=·()·=>·`a`·+·`b${x}`
+       15 │ + const·fn·=·()·=>·`ab${x}`
+    16 16 │   const a = 'a' + 'b' + `${x}`
+    17 17 │   // The fix would change the escape sequence `\0` into `\01`
+  
+
+```
+
+```
+invalid_templates.js:16:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    14 │ function foo() { throw `a` + `b${x}` }
+    15 │ const fn = () => `a` + `b${x}`
+  > 16 │ const a = 'a' + 'b' + `${x}`
+       │           ^^^^^^^^^^^^^^^^^^
+    17 │ // The fix would change the escape sequence `\0` into `\01`
+    18 │ const a = '\0' + `1${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    14 14 │   function foo() { throw `a` + `b${x}` }
+    15 15 │   const fn = () => `a` + `b${x}`
+    16    │ - const·a·=·'a'·+·'b'·+·`${x}`
+       16 │ + const·a·=·'a'·+·`b${x}`
+    17 17 │   // The fix would change the escape sequence `\0` into `\01`
+    18 18 │   const a = '\0' + `1${x}`
+  
+
+```
+
+```
+invalid_templates.js:18:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    16 │ const a = 'a' + 'b' + `${x}`
+    17 │ // The fix would change the escape sequence `\0` into `\01`
+  > 18 │ const a = '\0' + `1${x}`
+       │           ^^^^^^^^^^^^^^
+    19 │ const a = `${x}\0` + '1'
+    20 │ // The fix would call `bar()` before converting `foo` to a string
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates.js:19:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    17 │ // The fix would change the escape sequence `\0` into `\01`
+    18 │ const a = '\0' + `1${x}`
+  > 19 │ const a = `${x}\0` + '1'
+       │           ^^^^^^^^^^^^^^
+    20 │ // The fix would call `bar()` before converting `foo` to a string
+    21 │ const a = foo + 'a' + `${bar()}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates.js:21:17 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    19 │ const a = `${x}\0` + '1'
+    20 │ // The fix would call `bar()` before converting `foo` to a string
+  > 21 │ const a = foo + 'a' + `${bar()}`
+       │                 ^^^^^^^^^^^^^^^^
+    22 │ const a = foo + `a` + `b${baz()}`
+    23 │ // The fix would remove the parentheses
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates.js:22:17 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    20 │ // The fix would call `bar()` before converting `foo` to a string
+    21 │ const a = foo + 'a' + `${bar()}`
+  > 22 │ const a = foo + `a` + `b${baz()}`
+       │                 ^^^^^^^^^^^^^^^^^
+    23 │ // The fix would remove the parentheses
+    24 │ const a = (foo + 'a') + `b${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates.js:24:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    22 │ const a = foo + `a` + `b${baz()}`
+    23 │ // The fix would remove the parentheses
+  > 24 │ const a = (foo + 'a') + `b${x}`
+       │           ^^^^^^^^^^^^^^^^^^^^^
+    25 │ // The fix would turn `foo` into a template tag
+    26 │ foo
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates.js:27:1 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    25 │ // The fix would turn `foo` into a template tag
+    26 │ foo
+  > 27 │ 'a' + `b${x}`
+       │ ^^^^^^^^^^^^^
+    28 │ // A string literal can't contain a line break
+    29 │ const a = foo + `a
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates.js:29:17 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    27 │ 'a' + `b${x}`
+    28 │ // A string literal can't contain a line break
+  > 29 │ const a = foo + `a
+       │                 ^^
+  > 30 │ b` + 'c'
+       │ ^^^^^^^^
+    31 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```

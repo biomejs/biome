@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_templates_script.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+// Template literals don't allow these escapes, so there is no fix
+var a = '\1' + `${x}`
+var a = `${x}` + '\012'
+var a = '\8' + `${x}`
+
+```
+
+# Diagnostics
+```
+invalid_templates_script.cjs:3:9 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // Template literals don't allow these escapes, so there is no fix
+  > 3 │ var a = '\1' + `${x}`
+      │         ^^^^^^^^^^^^^
+    4 │ var a = `${x}` + '\012'
+    5 │ var a = '\8' + `${x}`
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates_script.cjs:4:9 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    2 │ // Template literals don't allow these escapes, so there is no fix
+    3 │ var a = '\1' + `${x}`
+  > 4 │ var a = `${x}` + '\012'
+      │         ^^^^^^^^^^^^^^^
+    5 │ var a = '\8' + `${x}`
+    6 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid_templates_script.cjs:5:9 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    3 │ var a = '\1' + `${x}`
+    4 │ var a = `${x}` + '\012'
+  > 5 │ var a = '\8' + `${x}`
+      │         ^^^^^^^^^^^^^
+    6 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
