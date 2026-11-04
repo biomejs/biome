@@ -389,6 +389,10 @@ impl<'a> SnippetsIterator<'a> {
     /// inside a block quote from guest analysis, and every
     /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
     /// host suppression extraction.
+    ///
+    /// The JavaScript of MDX constructs is analyzed regardless of
+    /// `markdown.analyzeEmbeds`: MDX compiles it into the document's module, so
+    /// its mistakes break the document, unlike the examples in code blocks.
     pub(crate) fn for_analysis(
         self,
         host: &'a ParsedOrigin,
@@ -404,7 +408,7 @@ impl<'a> SnippetsIterator<'a> {
         self.filter(move |snippet| {
             let _ = (host, source, snippet, db);
             #[cfg(feature = "md_embeds")]
-            if skips_markdown_snippets {
+            if skips_markdown_snippets && !is_mdx_snippet(snippet, db) {
                 return false;
             }
             #[cfg(feature = "html_embeds")]
