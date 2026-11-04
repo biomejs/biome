@@ -96,7 +96,7 @@ declare_lint_rule! {
     /// - To find destructured `props` in `setup()`, see [`noVueSetupPropsReactivityLoss`](https://biomejs.dev/linter/rules/no-vue-setup-props-reactivity-loss/).
     ///
     pub NoVueRefObjectReactivityLoss {
-        version: "next",
+        version: "2.6.5",
         name: "noVueRefObjectReactivityLoss",
         language: "js",
         recommended: false,

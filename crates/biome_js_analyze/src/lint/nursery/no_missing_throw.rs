@@ -56,7 +56,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMissingThrow {
-        version: "next",
+        version: "2.6.5",
         name: "noMissingThrow",
         language: "js",
         sources: &[RuleSource::Oxc("missing-throw").inspired()],

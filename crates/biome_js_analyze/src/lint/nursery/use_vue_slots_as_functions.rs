@@ -86,7 +86,7 @@ declare_lint_rule! {
     /// </script>
     /// ```
     pub UseVueSlotsAsFunctions {
-        version: "next",
+        version: "2.6.5",
         name: "useVueSlotsAsFunctions",
         language: "js",
         sources: &[RuleSource::EslintVueJs("require-slots-as-functions").same()],

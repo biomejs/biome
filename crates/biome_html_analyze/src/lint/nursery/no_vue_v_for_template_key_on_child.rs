@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueVForTemplateKeyOnChild {
-        version: "next",
+        version: "2.6.5",
         name: "noVueVForTemplateKeyOnChild",
         language: "html",
         recommended: true,

@@ -78,7 +78,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueBlockOrder {
-        version: "next",
+        version: "2.6.5",
         name: "useVueBlockOrder",
         language: "html",
         recommended: true,

@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoLateEventControl {
-        version: "next",
+        version: "2.6.5",
         name: "noLateEventControl",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-late-event-control").same()],

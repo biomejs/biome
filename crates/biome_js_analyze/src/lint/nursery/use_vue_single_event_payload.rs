@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueSingleEventPayload {
-        version: "next",
+        version: "2.6.5",
         name: "useVueSingleEventPayload",
         language: "js",
         recommended: false,

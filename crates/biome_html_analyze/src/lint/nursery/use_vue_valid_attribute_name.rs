@@ -75,7 +75,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueValidAttributeName {
-        version: "next",
+        version: "2.6.5",
         name: "useVueValidAttributeName",
         language: "html",
         recommended: true,

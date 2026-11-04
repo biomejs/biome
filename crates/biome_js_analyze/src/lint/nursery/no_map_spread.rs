@@ -147,7 +147,7 @@ declare_lint_rule! {
     /// - If you want to disallow spreading the accumulator of `reduce()`, see [`noAccumulatingSpread`](https://biomejs.dev/linter/rules/no-accumulating-spread/).
     ///
     pub NoMapSpread {
-        version: "next",
+        version: "2.6.5",
         name: "noMapSpread",
         language: "js",
         sources: &[RuleSource::Oxc("no-map-spread").same()],

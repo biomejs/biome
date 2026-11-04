@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoChainedComparison {
-        version: "next",
+        version: "2.6.5",
         name: "noChainedComparison",
         language: "js",
         sources: &[RuleSource::Oxc("bad-comparison-sequence").inspired()],

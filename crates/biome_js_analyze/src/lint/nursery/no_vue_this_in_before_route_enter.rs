@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueThisInBeforeRouteEnter {
-        version: "next",
+        version: "2.6.5",
         name: "noVueThisInBeforeRouteEnter",
         language: "js",
         recommended: false,
