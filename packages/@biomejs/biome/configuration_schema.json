@@ -10314,6 +10314,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentTupleLabels": {
+					"description": "Require either all or none of the elements of a tuple type to have labels.\nSee https://biomejs.dev/linter/rules/use-consistent-tuple-labels",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentTupleLabelsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentUnicodeBom": {
 					"description": "Require or disallow a Unicode byte order mark at the beginning of a file.\nSee https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
 					"anyOf": [
@@ -17395,6 +17402,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentTupleLabelsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentTupleLabelsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentTypeDefinitionsOptions": {
 			"type": "object",
 			"properties": {
@@ -22961,6 +22977,16 @@
 					"anyOf": [{ "$ref": "#/$defs/TestFunctionKind" }, { "type": "null" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseConsistentTupleLabelsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentTupleLabelsOptions" }
+			]
+		},
+		"UseConsistentTupleLabelsOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseConsistentTypeDefinitionsConfiguration": {

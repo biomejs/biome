@@ -443,6 +443,7 @@ define_categories! {
     "lint/nursery/useConsistentLightnessNotation": "https://biomejs.dev/linter/rules/use-consistent-lightness-notation",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentObjectKeys": "https://biomejs.dev/linter/rules/use-consistent-object-keys",
+    "lint/nursery/useConsistentTupleLabels": "https://biomejs.dev/linter/rules/use-consistent-tuple-labels",
     "lint/nursery/useConsistentUnicodeBom": "https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
     "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
