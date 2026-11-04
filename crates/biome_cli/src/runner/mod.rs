@@ -513,12 +513,10 @@ pub(crate) trait CommandRunner {
             .map(|(path, config)| (BiomePath::from(path), config))
             .collect();
 
-        // The scan finds the nested configurations, which can require a scan
-        // kind that indexes more files than the root configuration requires.
-        // Commands that derive their scan kind from the configuration keep a
-        // copy of the root settings, because the nested configurations that
-        // extend the root configuration are merged into it, and the root
-        // settings are registered again with the stronger scan kind.
+        // Only the scan finds nested configurations, and they can need a
+        // stronger scan kind. A copy of the root settings is kept: nested
+        // configurations merge into it, and it is registered again at that
+        // kind.
         let root_settings =
             (minimal_scan_kind.is_none() && stdin.is_none() && !scan_kind.is_type_aware())
                 .then(|| (configuration.clone(), extended_configurations.clone()));
@@ -567,10 +565,9 @@ pub(crate) trait CommandRunner {
             )
         {
             info!("Scanning the project again with {nested_scan_kind:?} for nested configurations");
-            // Files that the root settings govern, such as the dependencies of
-            // the nested projects, need the same module graph resolution. The
-            // root settings are unchanged, so their diagnostics were already
-            // printed after the first registration.
+            // Files under the root settings, such as dependencies of the nested
+            // projects, need the same resolution. The first registration
+            // already printed the configuration diagnostics.
             workspace.update_settings(UpdateSettingsParams {
                 project_key: open_project_result.project_key,
                 workspace_directory: Some(BiomePath::new(project_dir)),

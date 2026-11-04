@@ -80,14 +80,10 @@ pub(crate) fn derive_best_scan_kind(
 /// Returns the strongest scan kind that the nested configurations at
 /// `configuration_paths` require, if it indexes more files than `scan_kind`.
 ///
-/// The scan finds the nested configurations, so a scan kind derived from the
-/// root configuration doesn't account for them. The nested configurations are
-/// loaded as `update_project_config_files` of the workspace loads them: the
-/// configuration in `project_dir` and configurations with `"root": true` are
-/// skipped, and a configuration that extends the root configuration is merged
-/// into `root_configuration`. Configurations that fail to load or have errors
-/// are skipped too, because the scan reports their diagnostics. `compute`
-/// derives the scan kind of each nested configuration.
+/// Loads them as the workspace's `update_project_config_files` does: skips the
+/// configuration in `project_dir`, `"root": true` configurations and
+/// configurations with errors (the scan reports those), and merges a
+/// configuration that extends the root into `root_configuration`.
 pub(crate) fn derive_nested_scan_kind(
     fs: &dyn FsWithResolverProxy,
     project_dir: &Utf8Path,
@@ -147,8 +143,7 @@ pub(crate) fn derive_nested_scan_kind(
     nested_scan_kind
 }
 
-/// Orders the scan kinds that index the whole project. Other scan kinds
-/// return `0`.
+/// Ranks the scan kinds that index the whole project; the others rank `0`.
 fn project_scan_level(scan_kind: &ScanKind) -> u8 {
     match scan_kind {
         ScanKind::TypeAware => 2,
