@@ -148,7 +148,7 @@ impl Rule for NoHtmlLinkForPages {
     }
 }
 
-/// Returns the path of an `href` that targets the current origin, without its query and fragment.
+/// Strips the query and fragment, and rejects `href`s to other origins.
 fn path_of_internal_href(href: &str) -> Option<&str> {
     if !href.starts_with('/') || href.starts_with("//") {
         return None;

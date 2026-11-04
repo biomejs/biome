@@ -3,19 +3,15 @@
 use crate::ModuleDb;
 use camino::{Utf8Path, Utf8PathBuf};
 
-/// A page of a Next.js application, defined by a `page` file in its `app`
-/// directory or by a file in its `pages` directory.
 #[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct NextPage {
-    /// The directory that contains the `app` or `pages` directory, or the
-    /// `src` directory that contains it.
+    /// The directory that contains `app`/`pages`, or `src/app`/`src/pages`.
     pub project_path: Utf8PathBuf,
     route: Box<[Box<str>]>,
 }
 
 impl NextPage {
-    /// Returns whether the URL path, given as its non-empty segments, leads to
-    /// this page.
+    /// `path` is the URL path split into its non-empty segments.
     pub fn matches(&self, path: &[&str]) -> bool {
         route_matches(&self.route, path)
     }
@@ -24,15 +20,9 @@ impl NextPage {
 /// The default `pageExtensions` of Next.js.
 const PAGE_EXTENSIONS: [&str; 4] = ["tsx", "ts", "jsx", "js"];
 
-/// Returns the pages defined by the indexed modules.
+/// Returns the pages of all projects: rules keep those of their own project.
 ///
-/// The pages are not filtered by project, so they are computed once and rules
-/// keep those of the project of the file they analyze. A file below several
-/// directories named `app` or `pages` yields one page for each, with a
-/// different project path.
-///
-/// Only module paths are read, not their kind, which is replaced on every
-/// edit: the query then runs again only when modules are added or removed.
+/// Reads only module paths, not their kind, which changes on every edit.
 #[salsa::tracked(returns(deref))]
 pub fn next_pages(db: &dyn ModuleDb) -> Vec<NextPage> {
     let mut pages = Vec::new();
@@ -64,8 +54,7 @@ fn pages_of_file(path: &Utf8Path) -> Vec<NextPage> {
         .collect()
 }
 
-/// Returns the URL segments of the page defined by a file, given the router
-/// directory (`app` or `pages`) and the path of the file inside it.
+/// `router` is `app` or `pages`, and `path` the path of the file inside it.
 fn route_of_file(router: &str, path: &[&str]) -> Option<Box<[Box<str>]>> {
     let (file_name, directories) = path.split_last()?;
     let file_stem = Utf8Path::new(*file_name).file_stem()?;
