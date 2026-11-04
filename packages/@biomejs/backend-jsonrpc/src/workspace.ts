@@ -3893,6 +3893,11 @@ export interface Nursery {
 	 */
 	useCapitalizedConstructors?: UseCapitalizedConstructorsConfiguration;
 	/**
+	 * Require a specific name for caught errors.
+	 * See https://biomejs.dev/linter/rules/use-catch-error-name
+	 */
+	useCatchErrorName?: UseCatchErrorNameConfiguration;
+	/**
 	 * Enforce which languages the top-level blocks of Vue and Svelte components use.
 	 * See https://biomejs.dev/linter/rules/use-consistent-block-lang
 	 */
@@ -7160,6 +7165,9 @@ export type UseBlockStatementOverIifeConfiguration =
 export type UseCapitalizedConstructorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseCapitalizedConstructorsOptions;
+export type UseCatchErrorNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseCatchErrorNameOptions;
 export type UseConsistentBlockLangConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBlockLangOptions;
@@ -10533,6 +10541,14 @@ export interface RuleWithUseCapitalizedConstructorsOptions {
 	level: RulePlainConfiguration;
 	options?: UseCapitalizedConstructorsOptions;
 }
+export interface RuleWithUseCatchErrorNameOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseCatchErrorNameOptions;
+}
 export interface RuleWithUseConsistentBlockLangOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13575,6 +13591,17 @@ export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
 export type UseBlockStatementOverIifeOptions = {};
 export type UseCapitalizedConstructorsOptions = {};
+export interface UseCatchErrorNameOptions {
+	/**
+	 * Names that are always allowed.
+	 */
+	ignore?: string[];
+	/**
+	 * The required name of caught errors.
+	 * Defaults to `error`.
+	 */
+	name?: string;
+}
 export interface UseConsistentBlockLangOptions {
 	/**
 	 * The top-level blocks to check in Vue and Svelte components.
@@ -15681,6 +15708,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useBlockStatementOverIife"
 	| "lint/nursery/useCapitalizedConstructors"
+	| "lint/nursery/useCatchErrorName"
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentBooleanName"
 	| "lint/nursery/useConsistentFontWeightNotation"
