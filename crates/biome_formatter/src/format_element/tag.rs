@@ -1,3 +1,4 @@
+use crate::builders::EmbeddedLayout;
 use crate::format_element::PrintMode;
 use crate::prelude::AlignedStr;
 use crate::source::Source;
@@ -73,7 +74,7 @@ pub enum Tag<S: Source> {
     /// can format later.
     ///
     /// See [crate::builders::FormatEmbedded] for documentation.
-    StartEmbedded(S::EmbeddedKey),
+    StartEmbedded(S::EmbeddedKey, EmbeddedLayout),
     EndEmbedded,
 
     /// Entry inside of a [crate::FormatElement::BestFitting]
@@ -97,7 +98,7 @@ impl<S: Source> Tag<S> {
                 | Self::StartLineSuffix
                 | Self::StartVerbatim(_)
                 | Self::StartLabelled(_)
-                | Self::StartEmbedded(_)
+                | Self::StartEmbedded(..)
                 | Self::StartBestFittingEntry
         )
     }
@@ -122,7 +123,7 @@ impl<S: Source> Tag<S> {
             StartLineSuffix | EndLineSuffix => TagKind::LineSuffix,
             StartVerbatim(_) | EndVerbatim => TagKind::Verbatim,
             StartLabelled(_) | EndLabelled => TagKind::Labelled,
-            StartEmbedded(_) | EndEmbedded => TagKind::Embedded,
+            StartEmbedded(..) | EndEmbedded => TagKind::Embedded,
             StartBestFittingEntry | EndBestFittingEntry => TagKind::BestFittingEntry,
         }
     }

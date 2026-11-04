@@ -1978,7 +1978,7 @@ impl EmbeddedSnippetFormatter<'_, '_> {
     fn format_interpolation(&self, range: TextRange) -> Option<Document> {
         let content = self.host_contents.get(&range)?;
         let mut document = Document::new(content.to_vec());
-        document.replace_embedded(&mut |range| self.format(range));
+        document.replace_embedded(&mut |range, _| self.format(range));
         Some(document)
     }
 }
