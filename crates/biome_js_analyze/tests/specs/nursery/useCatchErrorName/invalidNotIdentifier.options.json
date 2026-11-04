@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useCatchErrorName": {
+          "level": "error",
+          "options": {
+            "name": "1_starts_with_a_number"
+          }
+        }
+      }
+    }
+  }
+}

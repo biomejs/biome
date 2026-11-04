@@ -1,5 +1,8 @@
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
+use biome_js_syntax::{
+    AnyJsExpression, JsBinaryExpression, JsSyntaxKind, JsSyntaxNode, inner_string_text,
+};
 use biome_rowan::{AstNode, Direction, WalkEvent};
+use biome_unicode_table::is_js_ident;
 use rustc_hash::FxHasher;
 use std::hash::{Hash, Hasher};
 use std::iter;
@@ -97,6 +100,14 @@ pub(crate) fn find_variable_position(
             unreachable!("The node can't have the same range of the operator.")
         })
         .next()
+}
+
+/// Returns `true` if `name` can be declared as a variable in a module, where
+/// strict mode reserves words such as `let` and `static`.
+pub(crate) fn can_be_variable_name(name: &str) -> bool {
+    is_js_ident(name)
+        && !JsSyntaxKind::from_keyword(name)
+            .is_some_and(|keyword| keyword.is_non_contextual_keyword())
 }
 
 // Parse the package name from an import value

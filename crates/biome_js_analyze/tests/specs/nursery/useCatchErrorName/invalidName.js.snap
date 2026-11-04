@@ -1,0 +1,169 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidName.js
+---
+# Input
+```js
+/* should generate diagnostics */
+try {} catch (error) {
+	console.log(error);
+}
+
+obj.catch((error) => error.stack);
+
+obj.then(undefined, (error) => error.stack);
+
+obj?.then(undefined, (error) => error.stack);
+
+try {} catch (descriptiveError) {}
+
+```
+
+# Diagnostics
+```
+invalidName.js:2:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named error instead of exception.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ try {} catch (error) {
+      │               ^^^^^
+    3 │ 	console.log(error);
+    4 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to exception.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to exception.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - try·{}·catch·(error)·{
+     3    │ - → console.log(error);
+        2 │ + try·{}·catch·(exception)·{
+        3 │ + → console.log(exception);
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalidName.js:6:12 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named error instead of exception.
+  
+    4 │ }
+    5 │ 
+  > 6 │ obj.catch((error) => error.stack);
+      │            ^^^^^
+    7 │ 
+    8 │ obj.then(undefined, (error) => error.stack);
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to exception.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to exception.
+  
+     4  4 │   }
+     5  5 │   
+     6    │ - obj.catch((error)·=>·error.stack);
+        6 │ + obj.catch((exception)·=>·exception.stack);
+     7  7 │   
+     8  8 │   obj.then(undefined, (error) => error.stack);
+  
+
+```
+
+```
+invalidName.js:8:22 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named error instead of exception.
+  
+     6 │ obj.catch((error) => error.stack);
+     7 │ 
+   > 8 │ obj.then(undefined, (error) => error.stack);
+       │                      ^^^^^
+     9 │ 
+    10 │ obj?.then(undefined, (error) => error.stack);
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to exception.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to exception.
+  
+     6  6 │   obj.catch((error) => error.stack);
+     7  7 │   
+     8    │ - obj.then(undefined,·(error)·=>·error.stack);
+        8 │ + obj.then(undefined,·(exception)·=>·exception.stack);
+     9  9 │   
+    10 10 │   obj?.then(undefined, (error) => error.stack);
+  
+
+```
+
+```
+invalidName.js:10:23 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named error instead of exception.
+  
+     8 │ obj.then(undefined, (error) => error.stack);
+     9 │ 
+  > 10 │ obj?.then(undefined, (error) => error.stack);
+       │                       ^^^^^
+    11 │ 
+    12 │ try {} catch (descriptiveError) {}
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to exception.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to exception.
+  
+     8  8 │   obj.then(undefined, (error) => error.stack);
+     9  9 │   
+    10    │ - obj?.then(undefined,·(error)·=>·error.stack);
+       10 │ + obj?.then(undefined,·(exception)·=>·exception.stack);
+    11 11 │   
+    12 12 │   try {} catch (descriptiveError) {}
+  
+
+```
+
+```
+invalidName.js:12:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named descriptiveError instead of exception.
+  
+    10 │ obj?.then(undefined, (error) => error.stack);
+    11 │ 
+  > 12 │ try {} catch (descriptiveError) {}
+       │               ^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to exception.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to exception.
+  
+    10 10 │   obj?.then(undefined, (error) => error.stack);
+    11 11 │   
+    12    │ - try·{}·catch·(descriptiveError)·{}
+       12 │ + try·{}·catch·(exception)·{}
+    13 13 │   
+  
+
+```

@@ -3783,6 +3783,11 @@ export interface Nursery {
 	 */
 	useCapitalizedConstructors?: UseCapitalizedConstructorsConfiguration;
 	/**
+	 * Require a specific name for caught errors.
+	 * See https://biomejs.dev/linter/rules/use-catch-error-name
+	 */
+	useCatchErrorName?: UseCatchErrorNameConfiguration;
+	/**
 	 * Enforce which languages the top-level blocks of Vue and Svelte components use.
 	 * See https://biomejs.dev/linter/rules/use-consistent-block-lang
 	 */
@@ -6939,6 +6944,9 @@ export type UseBlockStatementOverIifeConfiguration =
 export type UseCapitalizedConstructorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseCapitalizedConstructorsOptions;
+export type UseCatchErrorNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseCatchErrorNameOptions;
 export type UseConsistentBlockLangConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentBlockLangOptions;
@@ -10173,6 +10181,14 @@ export interface RuleWithUseCapitalizedConstructorsOptions {
 	level: RulePlainConfiguration;
 	options?: UseCapitalizedConstructorsOptions;
 }
+export interface RuleWithUseCatchErrorNameOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseCatchErrorNameOptions;
+}
 export interface RuleWithUseConsistentBlockLangOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13073,6 +13089,17 @@ export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
 export type UseBlockStatementOverIifeOptions = {};
 export type UseCapitalizedConstructorsOptions = {};
+export interface UseCatchErrorNameOptions {
+	/**
+	 * Names that are always allowed.
+	 */
+	ignore?: string[];
+	/**
+	 * The required name of caught errors.
+	 * Defaults to `error`.
+	 */
+	name?: string;
+}
 export interface UseConsistentBlockLangOptions {
 	/**
 	 * The top-level blocks to check in Vue and Svelte components.
@@ -14924,15 +14951,15 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noChainedComparison"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
@@ -15024,9 +15051,9 @@ export type Category =
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnmodifiedLoopCondition"
+	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"
-	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"
@@ -15062,22 +15089,22 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueDeprecatedSlotAttribute"
 	| "lint/nursery/noVueDeprecatedSlotScope"
+	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueExcessiveProps"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueLoneTemplate"
 	| "lint/nursery/noVueMixin"
 	| "lint/nursery/noVueMultipleObjectsInClass"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
-	| "lint/nursery/noVueRestrictedCallAfterAwait"
-	| "lint/nursery/noVueDeprecatedVBindSync"
-	| "lint/nursery/noVueRootVIf"
-	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRestrictedCallAfterAwait"
 	| "lint/nursery/noVueRestrictedVOn"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueTemplateKey"
@@ -15111,6 +15138,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useBlockStatementOverIife"
 	| "lint/nursery/useCapitalizedConstructors"
+	| "lint/nursery/useCatchErrorName"
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
@@ -15196,9 +15224,9 @@ export type Category =
 	| "lint/nursery/useVueConsistentVForDelimiter"
 	| "lint/nursery/useVueConsistentVSlotStyle"
 	| "lint/nursery/useVueDefaultExport"
-	| "lint/nursery/useVueDefinePropsDestructuring"
-	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
+	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueEmitValidator"
 	| "lint/nursery/useVueEmitsValidatorReturn"
 	| "lint/nursery/useVueMacroVariableName"
@@ -15209,28 +15237,28 @@ export type Category =
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueSeparateStaticClass"
 	| "lint/nursery/useVueSingleEventPayload"
+	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueSlotsAsFunctions"
 	| "lint/nursery/useVueTemplateRef"
-	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedObjectProps"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVModel"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidAttributeName"
 	| "lint/nursery/useVueValidDefaultProp"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineOptions"
 	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidNextTick"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVModel"
-	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
 	| "lint/nursery/useVueValidVSlot"
+	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

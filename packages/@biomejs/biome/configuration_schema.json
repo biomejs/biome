@@ -9868,6 +9868,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCatchErrorName": {
+					"description": "Require a specific name for caught errors.\nSee https://biomejs.dev/linter/rules/use-catch-error-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseCatchErrorNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentBlockLang": {
 					"description": "Enforce which languages the top-level blocks of Vue and Svelte components use.\nSee https://biomejs.dev/linter/rules/use-consistent-block-lang",
 					"anyOf": [
@@ -16553,6 +16560,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseCatchErrorNameOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseCatchErrorNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseCollapsedElseIfOptions": {
 			"type": "object",
 			"properties": {
@@ -21930,6 +21950,27 @@
 		},
 		"UseCapitalizedConstructorsOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseCatchErrorNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseCatchErrorNameOptions" }
+			]
+		},
+		"UseCatchErrorNameOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "Names that are always allowed.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"name": {
+					"description": "The required name of caught errors.\nDefaults to `error`.",
+					"type": ["string", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseCollapsedElseIfConfiguration": {

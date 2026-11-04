@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNotIdentifier.js
+---
+# Input
+```js
+/* should generate diagnostics */
+try {} catch (e) {}
+
+```
+
+# Diagnostics
+```
+invalidNotIdentifier.js:2:15 lint/nursery/useCatchErrorName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named e instead of 1_starts_with_a_number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ try {} catch (e) {}
+      │               ^
+    3 │ 
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i The configured name 1_starts_with_a_number can't be used as a variable name. Change the name option of this rule to a valid variable name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,115 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+promise.catch(function (err: Error) {
+	console.log(err);
+});
+
+promise.catch((err: unknown) => {
+	console.log(err);
+});
+
+try {} catch (err: unknown) {
+	console.log(err);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:25 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ promise.catch(function (err: Error) {
+      │                         ^^^
+    3 │ 	console.log(err);
+    4 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - promise.catch(function·(err:·Error)·{
+     3    │ - → console.log(err);
+        2 │ + promise.catch(function·(error:·Error)·{
+        3 │ + → console.log(error);
+     4  4 │   });
+     5  5 │   
+  
+
+```
+
+```
+invalid.ts:6:16 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+    4 │ });
+    5 │ 
+  > 6 │ promise.catch((err: unknown) => {
+      │                ^^^
+    7 │ 	console.log(err);
+    8 │ });
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     4  4 │   });
+     5  5 │   
+     6    │ - promise.catch((err:·unknown)·=>·{
+     7    │ - → console.log(err);
+        6 │ + promise.catch((error:·unknown)·=>·{
+        7 │ + → console.log(error);
+     8  8 │   });
+     9  9 │   
+  
+
+```
+
+```
+invalid.ts:10:15 lint/nursery/useCatchErrorName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The caught error is named err instead of error.
+  
+     8 │ });
+     9 │ 
+  > 10 │ try {} catch (err: unknown) {
+       │               ^^^
+    11 │ 	console.log(err);
+    12 │ }
+  
+  i Using the same name for caught errors everywhere makes error handling code easier to read and search.
+  
+  i Rename the variable to error.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to error.
+  
+     8  8 │   });
+     9  9 │   
+    10    │ - try·{}·catch·(err:·unknown)·{
+    11    │ - → console.log(err);
+       10 │ + try·{}·catch·(error:·unknown)·{
+       11 │ + → console.log(error);
+    12 12 │   }
+    13 13 │   
+  
+
+```
