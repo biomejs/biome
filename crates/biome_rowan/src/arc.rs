@@ -1,4 +1,7 @@
-//! Vendored and stripped down version of triomphe
+//! Vendored and stripped down version of triomphe, with support for elements allocated in a
+//! [GreenArena]: their count field holds [ARENA_TAG] and the address of the arena, and cloning or
+//! dropping them counts references to the arena instead.
+use crate::green::{ARENA_TAG, GreenArena, release_tagged, retain_tagged};
 use std::{
     alloc::{self, Layout},
     cmp::Ordering,
@@ -105,6 +108,16 @@ impl<T: ?Sized> Arc<T> {
 impl<T: ?Sized> Clone for Arc<T> {
     #[inline]
     fn clone(&self) -> Self {
+        let count = self.inner().count.load(Relaxed);
+        if count & ARENA_TAG != 0 {
+            // SAFETY: `count` is the count field of this live element.
+            unsafe { retain_tagged(count) };
+            return Self {
+                p: self.p,
+                phantom: PhantomData,
+            };
+        }
+
         // Using a relaxed ordering is alright here, as knowledge of the
         // original reference prevents other threads from erroneously deleting
         // the object.
@@ -149,32 +162,16 @@ impl<T: ?Sized> Deref for Arc<T> {
     }
 }
 
-impl<T: ?Sized> Arc<T> {
-    /// Provides mutable access to the contents _if_ the `Arc` is uniquely owned.
-    #[inline]
-    pub(crate) fn get_mut(this: &mut Self) -> Option<&mut T> {
-        if this.is_unique() {
-            unsafe {
-                // See make_mut() for documentation of the threadsafety here.
-                Some(&mut (*this.ptr()).data)
-            }
-        } else {
-            None
-        }
-    }
-
-    /// Whether or not the `Arc` is uniquely owned (is the refcount 1?).
-    pub(crate) fn is_unique(&self) -> bool {
-        // See the extensive discussion in [1] for why this needs to be Acquire.
-        //
-        // [1] https://github.com/servo/servo/issues/21186
-        self.inner().count.load(Acquire) == 1
-    }
-}
-
 impl<T: ?Sized> Drop for Arc<T> {
     #[inline]
     fn drop(&mut self) {
+        let count = self.inner().count.load(Relaxed);
+        if count & ARENA_TAG != 0 {
+            // SAFETY: `count` is the count field of this live element, whose handle is dropped.
+            unsafe { release_tagged(count) };
+            return;
+        }
+
         // Because `fetch_sub` is already atomic, we do not need to synchronize
         // with other threads unless we are going to delete the object.
         if self.inner().count.fetch_sub(1, Release) != 1 {
@@ -338,9 +335,35 @@ impl<H, T> ThinArc<H, T> {
         f(&transient)
     }
 
+    /// Returns the count field of the element: its reference count, or [ARENA_TAG] and the
+    /// address of its arena.
+    #[inline]
+    pub(crate) fn count_field(&self) -> usize {
+        // SAFETY: the handle keeps the element alive.
+        unsafe { (*self.ptr.as_ptr()).count.load(Relaxed) }
+    }
+
+    /// Returns the header to mutate.
+    ///
+    /// # Safety
+    /// No other handle to the element may exist, as right after its creation.
+    #[inline]
+    pub(crate) unsafe fn header_mut(&mut self) -> &mut H {
+        // SAFETY: the caller guarantees exclusive access.
+        unsafe { &mut (*self.ptr.as_ptr()).data.header }
+    }
+
     /// Creates a `ThinArc` for a HeaderSlice using the given header struct and
-    /// iterator to generate the slice.
-    pub(crate) fn from_header_and_iter<I>(header: H, mut items: I) -> Self
+    /// iterator to generate the slice, allocated in `arena` if there is one, and on its own
+    /// otherwise.
+    ///
+    /// # Safety
+    /// The caller must be the thread that runs the build of `arena`, while it's open.
+    pub(crate) unsafe fn from_header_and_iter_in<I>(
+        header: H,
+        mut items: I,
+        arena: Option<&GreenArena>,
+    ) -> Self
     where
         I: Iterator<Item = T> + ExactSizeIterator,
     {
@@ -369,7 +392,11 @@ impl<H, T> ThinArc<H, T> {
 
         let ptr: *mut ArcInner<HeaderSlice<H, [T; 0]>>;
         unsafe {
-            let buffer = alloc::alloc(layout);
+            let (buffer, count) = match arena {
+                // SAFETY: the caller upholds the requirements of the arena.
+                Some(arena) => (arena.alloc(layout).as_ptr(), arena.tag()),
+                None => (alloc::alloc(layout), 1),
+            };
 
             if buffer.is_null() {
                 alloc::handle_alloc_error(layout);
@@ -385,7 +412,7 @@ impl<H, T> ThinArc<H, T> {
             // ptr = fake_slice as *mut [T] as *mut ArcInner<HeaderSlice<H, [T]>>;
             ptr = buffer as *mut _;
 
-            let count = atomic::AtomicUsize::new(1);
+            let count = atomic::AtomicUsize::new(count);
 
             // Write the data.
             //

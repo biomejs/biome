@@ -20,13 +20,13 @@ impl<K: SyntaxKind> RawSyntaxNode<K> {
         I: IntoIterator<Item = Option<RawSyntaxElement<K>>>,
         I::IntoIter: ExactSizeIterator,
     {
+        let slots = slots
+            .into_iter()
+            .map(|slot| slot.map(|element| element.into_green()));
+        // A tree builder makes its arena current while a factory makes a node.
+        let raw = crate::green::new_node_in_current(kind.to_raw(), slots);
         Self {
-            raw: GreenNode::new(
-                kind.to_raw(),
-                slots
-                    .into_iter()
-                    .map(|slot| slot.map(|element| element.into_green())),
-            ),
+            raw,
             ph: PhantomData,
         }
     }
