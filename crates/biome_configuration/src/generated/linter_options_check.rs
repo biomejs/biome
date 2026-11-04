@@ -678,6 +678,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_hex_colors::NoHexColorsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noHtmlLinkForPages",
+        TypeId::of::<biome_rule_options::no_html_link_for_pages::NoHtmlLinkForPagesOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noIdenticalTestTitle",
         TypeId::of::<biome_rule_options::no_identical_test_title::NoIdenticalTestTitleOptions>(),

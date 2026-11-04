@@ -251,6 +251,7 @@ define_categories! {
     "lint/nursery/noExcessiveStatementsPerFunction": "https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
     "lint/nursery/noExtendNative": "https://biomejs.dev/linter/rules/no-extend-native",
     "lint/nursery/noFloatingPromises": "https://biomejs.dev/linter/rules/no-floating-promises",
+    "lint/nursery/noHtmlLinkForPages": "https://biomejs.dev/linter/rules/no-html-link-for-pages",
     "lint/nursery/noImplicitCoercion": "https://biomejs.dev/linter/rules/no-implicit-coercion",
     "lint/nursery/noImpliedEval": "https://biomejs.dev/linter/rules/no-implied-eval",
     "lint/nursery/noInvalidFileInputAccept": "https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
