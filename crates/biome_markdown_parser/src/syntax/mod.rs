@@ -1603,6 +1603,10 @@ fn parse_task_list_item(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(m.complete(p, GFM_TASK_LIST_ITEM))
 }
 
+/// Whether the current line is blank after at most `depth` quote markers.
+///
+/// A line with fewer markers still counts as blank because a blank line can't
+/// lazily continue a paragraph.
 fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> bool {
     if depth == 0 {
         return false;
@@ -1637,7 +1641,7 @@ fn is_quote_only_blank_line_from_source(p: &MarkdownParser, depth: usize) -> boo
     // Consume quote markers and optional single space after each
     for _ in 0..depth {
         if idx >= source.len() || source.as_bytes()[idx] != b'>' {
-            return false;
+            break;
         }
         idx += 1;
         if idx < source.len() {
