@@ -865,3 +865,38 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         process_fix_all.finish(tree.syntax().as_send().unwrap()),
     ))
 }
+
+/// Returns whether `snippet` is the JavaScript of an MDX construct that spans
+/// lines inside a block quote. Its code was parsed with the quote's `>`
+/// markers blanked, so a fix computed from it would drop those markers from
+/// the document. Such a snippet only contributes its syntax errors and its
+/// references.
+#[cfg(feature = "lang_mdx")]
+pub(crate) fn is_quoted_multiline_mdx_snippet(
+    host: &super::ParsedOrigin,
+    snippet: &super::ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    use biome_markdown_syntax::MarkdownSyntaxKind;
+
+    // Only MDX documents have MDX snippets, so the host is a Markdown tree.
+    if !super::is_mdx_snippet(snippet, db) {
+        return false;
+    }
+    let root: MarkdownSyntaxNode = host.syntax(db);
+    let Some(token) = root
+        .token_at_offset(snippet.content_range().start())
+        .right_biased()
+    else {
+        return false;
+    };
+    matches!(
+        token.kind(),
+        MarkdownSyntaxKind::MDX_ESM_LITERAL
+            | MarkdownSyntaxKind::MDX_EXPRESSION_LITERAL
+            | MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL
+    ) && token.text_trimmed().contains(['\n', '\r'])
+        && token
+            .ancestors()
+            .any(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
+}
