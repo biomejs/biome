@@ -2381,6 +2381,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useConsistentTestIt",
         TypeId::of::<biome_rule_options::use_consistent_test_it::UseConsistentTestItOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useConsistentTupleLabels",
+        TypeId::of::<
+            biome_rule_options::use_consistent_tuple_labels::UseConsistentTupleLabelsOptions,
+        >(),
+    ));
     result.push(("style", "useConsistentTypeDefinitions", TypeId::of::<biome_rule_options::use_consistent_type_definitions::UseConsistentTypeDefinitionsOptions>()));
     result.push(("nursery", "useConsistentUnicodeBom", TypeId::of::<biome_rule_options::use_consistent_unicode_bom::UseConsistentUnicodeBomOptions>()));
     result.push((

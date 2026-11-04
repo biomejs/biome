@@ -1,0 +1,366 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+type A1 = [a: string, number];
+type A2 = [string, b: number];
+type A3 = [a: string, b: number, c: boolean, d];
+type A4 = [a: string, number, c: boolean];
+
+// Each element without a label is reported
+type B1 = [a: string, number, boolean];
+
+// Optional elements
+type C1 = [a?: string, number?];
+type C2 = [string?, b: number];
+type C3 = [a?: string, number];
+
+// Rest elements
+type D1 = [string, ...rest: number[]];
+type D2 = [a: string, ...number[]];
+
+type E1 = readonly [a: string, number];
+
+// Nested tuple
+type F1 = [[a: number, number]];
+type F2 = [a: [x: number, number], b: string];
+
+type G1 = [a: string, /* no label */ number];
+
+function f(...args: [a: string, number]) {}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:23 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ type A1 = [a: string, number];
+      │                       ^^^^^^
+    3 │ type A2 = [string, b: number];
+    4 │ type A3 = [a: string, b: number, c: boolean, d];
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:12 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    1 │ /* should generate diagnostics */
+    2 │ type A1 = [a: string, number];
+  > 3 │ type A2 = [string, b: number];
+      │            ^^^^^^
+    4 │ type A3 = [a: string, b: number, c: boolean, d];
+    5 │ type A4 = [a: string, number, c: boolean];
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:46 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    2 │ type A1 = [a: string, number];
+    3 │ type A2 = [string, b: number];
+  > 4 │ type A3 = [a: string, b: number, c: boolean, d];
+      │                                              ^
+    5 │ type A4 = [a: string, number, c: boolean];
+    6 │ 
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:23 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    3 │ type A2 = [string, b: number];
+    4 │ type A3 = [a: string, b: number, c: boolean, d];
+  > 5 │ type A4 = [a: string, number, c: boolean];
+      │                       ^^^^^^
+    6 │ 
+    7 │ // Each element without a label is reported
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:23 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+     7 │ // Each element without a label is reported
+   > 8 │ type B1 = [a: string, number, boolean];
+       │                       ^^^^^^
+     9 │ 
+    10 │ // Optional elements
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:31 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+     7 │ // Each element without a label is reported
+   > 8 │ type B1 = [a: string, number, boolean];
+       │                               ^^^^^^^
+     9 │ 
+    10 │ // Optional elements
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:24 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    10 │ // Optional elements
+  > 11 │ type C1 = [a?: string, number?];
+       │                        ^^^^^^^
+    12 │ type C2 = [string?, b: number];
+    13 │ type C3 = [a?: string, number];
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:12 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    10 │ // Optional elements
+    11 │ type C1 = [a?: string, number?];
+  > 12 │ type C2 = [string?, b: number];
+       │            ^^^^^^^
+    13 │ type C3 = [a?: string, number];
+    14 │ 
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:24 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    11 │ type C1 = [a?: string, number?];
+    12 │ type C2 = [string?, b: number];
+  > 13 │ type C3 = [a?: string, number];
+       │                        ^^^^^^
+    14 │ 
+    15 │ // Rest elements
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:12 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    15 │ // Rest elements
+  > 16 │ type D1 = [string, ...rest: number[]];
+       │            ^^^^^^
+    17 │ type D2 = [a: string, ...number[]];
+    18 │ 
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:23 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    15 │ // Rest elements
+    16 │ type D1 = [string, ...rest: number[]];
+  > 17 │ type D2 = [a: string, ...number[]];
+       │                       ^^^^^^^^^^^
+    18 │ 
+    19 │ type E1 = readonly [a: string, number];
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:32 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    17 │ type D2 = [a: string, ...number[]];
+    18 │ 
+  > 19 │ type E1 = readonly [a: string, number];
+       │                                ^^^^^^
+    20 │ 
+    21 │ // Nested tuple
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:24 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    21 │ // Nested tuple
+  > 22 │ type F1 = [[a: number, number]];
+       │                        ^^^^^^
+    23 │ type F2 = [a: [x: number, number], b: string];
+    24 │ 
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:27 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    21 │ // Nested tuple
+    22 │ type F1 = [[a: number, number]];
+  > 23 │ type F2 = [a: [x: number, number], b: string];
+       │                           ^^^^^^
+    24 │ 
+    25 │ type G1 = [a: string, /* no label */ number];
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:38 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    23 │ type F2 = [a: [x: number, number], b: string];
+    24 │ 
+  > 25 │ type G1 = [a: string, /* no label */ number];
+       │                                      ^^^^^^
+    26 │ 
+    27 │ function f(...args: [a: string, number]) {}
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:33 lint/nursery/useConsistentTupleLabels ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This tuple element has no label, but other elements of the same tuple do.
+  
+    25 │ type G1 = [a: string, /* no label */ number];
+    26 │ 
+  > 27 │ function f(...args: [a: string, number]) {}
+       │                                 ^^^^^^
+    28 │ 
+  
+  i Labeling only some elements of a tuple makes it unclear what the other positions mean.
+  
+  i Add a label to this element, or remove the labels from the other elements.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

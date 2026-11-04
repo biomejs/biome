@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// All labeled
+type A1 = [a: string, b: number];
+type A2 = [a: string, b: number, c: boolean];
+
+// None labeled
+type B1 = [string, number];
+type B2 = [string, number, boolean];
+
+// Fewer than two elements
+type C1 = [];
+type C2 = [string];
+type C3 = [a: string];
+
+// Optional labeled elements
+type D1 = [a?: string, b?: number];
+type D2 = [a: string, b?: number];
+
+// Optional elements without labels
+type E1 = [string?, number?];
+
+// Rest elements
+type F1 = [a: string, ...b: number[]];
+type F2 = [string, ...number[]];
+type F3 = [...rest: string[]];
+
+// Nested tuples are checked on their own
+type G1 = [[a: number, b: number]];
+type G2 = [a: [x: number], b: [y: number]];
+type G3 = [a: [number, number], b: [string]];
+
+// Not a tuple
+type H1 = string[];
+type H2 = readonly string[];
+type H3 = { a: string; b: number };
+
+// Trailing comma
+type I1 = [a: string, b: number,];
+
+```
