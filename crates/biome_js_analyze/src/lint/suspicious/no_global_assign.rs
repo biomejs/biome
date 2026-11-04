@@ -7,7 +7,7 @@ use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rul
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExpression, JsAssignmentExpression, JsAssignmentOperator, JsExpressionStatement,
+    AnyJsExpression, JsAssignmentOperator, JsExpressionStatement,
     JsIdentifierAssignment, JsLabeledStatement, JsModuleItemList, TextRange,
 };
 use biome_rowan::AstNode;
