@@ -1326,6 +1326,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_script_url::NoScriptUrlOptions>(),
     ));
     result.push((
+        "nursery",
+        "noScssNullComparison",
+        TypeId::of::<biome_rule_options::no_scss_null_comparison::NoScssNullComparisonOptions>(),
+    ));
+    result.push((
         "security",
         "noSecrets",
         TypeId::of::<biome_rule_options::no_secrets::NoSecretsOptions>(),
