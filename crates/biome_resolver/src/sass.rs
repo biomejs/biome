@@ -57,10 +57,10 @@ pub fn resolve_sass(
         .filter(|extension| matches!(*extension, "sass" | "scss" | "css"))
     {
         Some(extension) => resolve_with_extension(&url, extension, fs, rule)?,
-        None => match resolve_without_extension(&url, fs, rule)? {
+        None => match resolve_without_extension(url.as_str(), fs, rule)? {
             Some(path) => Some(path),
             None if is_directory(&url, fs) => {
-                resolve_without_extension(&url.join("index"), fs, rule)?
+                resolve_without_extension(url.join("index").as_str(), fs, rule)?
             }
             None => None,
         },
@@ -80,62 +80,104 @@ fn resolve_with_extension(
     fs: &dyn ResolverFsProxy,
     rule: SassLoadRule,
 ) -> Result<Option<Utf8PathBuf>, ResolveError> {
+    let Some(mut candidates) = url
+        .as_str()
+        .strip_suffix(extension)
+        .and_then(|url| url.strip_suffix('.'))
+        .and_then(Candidates::new)
+    else {
+        return Ok(None);
+    };
     if rule == SassLoadRule::Import
-        && let Some(path) =
-            resolve_for_partials(&url.with_extension(format!("import.{extension}")), fs)?
+        && let Some(path) = candidates.find(".import", &[extension], fs)?
     {
         return Ok(Some(path));
     }
-    resolve_for_partials(url, fs)
+    candidates.find("", &[extension], fs)
 }
 
 fn resolve_without_extension(
-    url: &Utf8Path,
+    url: &str,
     fs: &dyn ResolverFsProxy,
     rule: SassLoadRule,
 ) -> Result<Option<Utf8PathBuf>, ResolveError> {
-    if rule == SassLoadRule::Import {
-        if let Some(path) = resolve_sass_or_scss(url, ".import", fs)? {
-            return Ok(Some(path));
-        }
-        if let Some(path) = resolve_for_partials(&with_suffix(url, ".import.css"), fs)? {
-            return Ok(Some(path));
-        }
-    }
-    if let Some(path) = resolve_sass_or_scss(url, "", fs)? {
-        return Ok(Some(path));
-    }
-    resolve_for_partials(&with_suffix(url, ".css"), fs)
-}
-
-/// Resolves `url` with `infix` and the `.sass` or `.scss` extension appended,
-/// which have equal precedence.
-fn resolve_sass_or_scss(
-    url: &Utf8Path,
-    infix: &str,
-    fs: &dyn ResolverFsProxy,
-) -> Result<Option<Utf8PathBuf>, ResolveError> {
-    let sass = resolve_for_partials(&with_suffix(url, &format!("{infix}.sass")), fs)?;
-    let scss = resolve_for_partials(&with_suffix(url, &format!("{infix}.scss")), fs)?;
-    match (sass, scss) {
-        (Some(_), Some(_)) => Err(ResolveError::AmbiguousSassUrl),
-        (sass, scss) => Ok(sass.or(scss)),
-    }
-}
-
-/// Resolves `url` as written, or as a partial with `_` prepended to its
-/// basename, even when the basename already starts with `_`.
-fn resolve_for_partials(
-    url: &Utf8Path,
-    fs: &dyn ResolverFsProxy,
-) -> Result<Option<Utf8PathBuf>, ResolveError> {
-    let Some(basename) = url.file_name() else {
+    let Some(mut candidates) = Candidates::new(url) else {
         return Ok(None);
     };
-    let partial = find_file(&url.with_file_name(format!("_{basename}")), fs);
-    match (find_file(url, fs), partial) {
-        (Some(_), Some(_)) => Err(ResolveError::AmbiguousSassUrl),
-        (file, partial) => Ok(file.or(partial)),
+    if rule == SassLoadRule::Import {
+        if let Some(path) = candidates.find(".import", &["sass", "scss"], fs)? {
+            return Ok(Some(path));
+        }
+        if let Some(path) = candidates.find(".import", &["css"], fs)? {
+            return Ok(Some(path));
+        }
+    }
+    if let Some(path) = candidates.find("", &["sass", "scss"], fs)? {
+        return Ok(Some(path));
+    }
+    candidates.find("", &["css"], fs)
+}
+
+/// The two paths Sass tries for a URL without its extension: as written, and
+/// as a partial with `_` prepended to its basename, even when the basename
+/// already starts with `_`. Each path is kept in one buffer that is reused for
+/// every extension.
+struct Candidates {
+    path: String,
+    path_len: usize,
+    partial: String,
+    partial_len: usize,
+}
+
+impl Candidates {
+    fn new(url: &str) -> Option<Self> {
+        let basename_start = url.rfind(std::path::is_separator)? + 1;
+        if basename_start == url.len() {
+            return None;
+        }
+        let capacity = url.len() + ".import.scss".len() + 1;
+        let mut path = String::with_capacity(capacity);
+        path.push_str(url);
+        let mut partial = String::with_capacity(capacity);
+        partial.push_str(&url[..basename_start]);
+        partial.push('_');
+        partial.push_str(&url[basename_start..]);
+        Some(Self {
+            path_len: path.len(),
+            path,
+            partial_len: partial.len(),
+            partial,
+        })
+    }
+
+    /// Returns the file among both paths with `infix` and one of `extensions`
+    /// appended, such as `_theme.import.scss`. These candidates have equal
+    /// precedence, so finding more than one is an error.
+    fn find(
+        &mut self,
+        infix: &str,
+        extensions: &[&str],
+        fs: &dyn ResolverFsProxy,
+    ) -> Result<Option<Utf8PathBuf>, ResolveError> {
+        let mut found = None;
+        for extension in extensions {
+            for (buffer, len) in [
+                (&mut self.path, self.path_len),
+                (&mut self.partial, self.partial_len),
+            ] {
+                buffer.truncate(len);
+                buffer.push_str(infix);
+                buffer.push('.');
+                buffer.push_str(extension);
+                if let Some(path) = find_file(Utf8Path::new(buffer), fs) {
+                    if found.is_some() {
+                        return Err(ResolveError::AmbiguousSassUrl);
+                    }
+                    found = Some(path);
+                }
+            }
+        }
+        Ok(found)
     }
 }
 
@@ -152,10 +194,6 @@ fn is_directory(path: &Utf8Path, fs: &dyn ResolverFsProxy) -> bool {
         resolve_path_info(Cow::Borrowed(path), fs, &ResolveOptions::default()),
         Ok((ResolvedPathInfo::Directory, _))
     )
-}
-
-fn with_suffix(url: &Utf8Path, suffix: &str) -> Utf8PathBuf {
-    format!("{url}{suffix}").into()
 }
 
 /// Returns whether `specifier` starts with a URL scheme, such as `sass:` or
