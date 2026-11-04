@@ -12,20 +12,20 @@ use biome_formatter::rowan::prelude::{
     Document, Formatter, RowanSource, literal_line_break_without_parent, text,
 };
 use biome_formatter::{
-    Buffer, Format, FormatContext, FormatLanguage, FormatResult, SimpleFormatContext,
-    SimpleFormatOptions, TrailingNewline, normalize_newlines, write,
+    Buffer, EmbeddedLayout, Format, FormatContext, FormatLanguage, FormatResult, LineWidth,
+    SimpleFormatContext, SimpleFormatOptions, TrailingNewline, normalize_newlines, write,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::GraphqlFormatLanguage;
 use biome_grit_formatter::GritFormatLanguage;
 use biome_html_formatter::HtmlFormatLanguage;
 use biome_js_formatter::JsFormatLanguage;
+use biome_js_syntax::{JsExpressionTemplateRoot, JsLanguage};
 use biome_json_formatter::JsonFormatLanguage;
 use biome_languages::DocumentFileSource;
 use biome_markdown_formatter::{MdFormatLanguage, format_node};
 use biome_markdown_syntax::{
-    MarkdownLanguage, MarkdownSyntaxKind, MarkdownSyntaxNode, MarkdownSyntaxToken,
-    MdFencedCodeBlock,
+    MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken, MdFencedCodeBlock,
 };
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize};
@@ -64,11 +64,10 @@ pub(super) fn format_embedded(
     // be formatted keeps the Markdown formatter's output.
     let snippets: FxHashMap<_, _> = embedded_nodes
         .into_iter()
-        .filter(|snippet| !is_multiline_mdx_snippet_in_container(&tree, snippet.content_range()))
         .map(|snippet| (snippet.content_range(), snippet))
         .collect();
     let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
-    formatted.format_embedded(move |range| {
+    formatted.format_embedded_with_layout(move |range, layout| {
         let snippet = snippets.get(&range)?;
         let file_source = snippet.file_source(&workspace_db)?;
         // This is needed due to the parsed representation of code blocks (mostly rowan), so we need
@@ -90,14 +89,13 @@ pub(super) fn format_embedded(
         if parse.has_errors() {
             return None;
         }
-        let single_line = requires_single_line_output(&tree, range);
         format_snippet(
             biome_path,
             file_source,
             parse,
             settings,
             &workspace_db,
-            single_line,
+            layout == EmbeddedLayout::SingleLine,
         )
     });
 
@@ -105,58 +103,6 @@ pub(super) fn format_embedded(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
-}
-
-/// Returns whether the formatted code of the snippet at `range` must fit on
-/// one line: the JavaScript of an inline MDX construct, or of any MDX
-/// construct inside a list item or a block quote. A line break would split a
-/// paragraph, or start a line without the indentation or `>` markers of its
-/// container.
-fn requires_single_line_output(root: &MarkdownSyntaxNode, range: TextRange) -> bool {
-    let Some(token) = root.token_at_offset(range.start()).right_biased() else {
-        return false;
-    };
-    let is_mdx_literal = matches!(
-        token.kind(),
-        MarkdownSyntaxKind::MDX_EXPRESSION_LITERAL | MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL
-    );
-    is_mdx_literal
-        && token.ancestors().any(|node| {
-            matches!(
-                node.kind(),
-                MarkdownSyntaxKind::MDX_INLINE_EXPRESSION
-                    | MarkdownSyntaxKind::MDX_JSX_INLINE_TAG
-                    | MarkdownSyntaxKind::MD_QUOTE
-                    | MarkdownSyntaxKind::MD_BULLET_LIST_ITEM
-                    | MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM
-            )
-        })
-}
-
-/// Returns whether the MDX literal at `range` spans lines inside a list item
-/// or a block quote. Its lines carry the indentation or the `>` markers of
-/// their container, which the formatted JavaScript would lose after its
-/// first line, so such a literal stays as written.
-fn is_multiline_mdx_snippet_in_container(root: &MarkdownSyntaxNode, range: TextRange) -> bool {
-    let Some(token) = root.token_at_offset(range.start()).right_biased() else {
-        return false;
-    };
-    let is_mdx_literal = matches!(
-        token.kind(),
-        MarkdownSyntaxKind::MDX_ESM_LITERAL
-            | MarkdownSyntaxKind::MDX_EXPRESSION_LITERAL
-            | MarkdownSyntaxKind::MDX_JSX_TAG_LITERAL
-    );
-    is_mdx_literal
-        && token.text_trimmed().contains(['\n', '\r'])
-        && token.ancestors().any(|node| {
-            matches!(
-                node.kind(),
-                MarkdownSyntaxKind::MD_QUOTE
-                    | MarkdownSyntaxKind::MD_BULLET_LIST_ITEM
-                    | MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM
-            )
-        })
 }
 
 /// Parses the Markdown code of the fenced code block of `root` whose code
@@ -273,8 +219,10 @@ impl IndentedFenceCode {
 /// language has no formatter. The document has no trailing line break, because
 /// the Markdown formatter ends the snippet's last line.
 ///
-/// With `single_line`, a snippet whose formatted code spans lines keeps its
-/// source instead.
+/// With `single_line`, the code is formatted to fit on one line: its line
+/// width is the maximum, so only the line breaks that the code requires
+/// remain. The Markdown formatter keeps the snippet as written when the
+/// result still breaks.
 fn format_snippet(
     path: &BiomePath,
     file_source: DocumentFileSource,
@@ -286,72 +234,49 @@ fn format_snippet(
     let trailing_newline = TrailingNewline::from(false);
     match file_source {
         DocumentFileSource::Js(_) => {
-            let options =
+            let mut options =
                 javascript::resolve_format_options(path, &file_source, settings, workspace_db)
                     .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                JsFormatLanguage::new(options),
-                single_line,
+            if single_line && let Ok(line_width) = LineWidth::try_from(LineWidth::MAX) {
+                options = options.with_line_width(line_width);
+            }
+            // The `}` of an MDX expression follows its code, so code that ends
+            // with a line comment must end with a line break.
+            let ends_with_line_comment = JsExpressionTemplateRoot::cast(
+                parse.clone().embedded_syntax::<JsLanguage>().into_inner(),
             )
+            .is_some_and(|root| root.ends_with_line_comment());
+            let mut code = format_code(path, settings, parse, JsFormatLanguage::new(options))?;
+            if ends_with_line_comment {
+                code.push('\n');
+            }
+            printed_document(&code)
         }
         DocumentFileSource::Json(_) => {
             let options = json::resolve_format_options(&file_source, settings, workspace_db)
                 .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                JsonFormatLanguage::new(options),
-                single_line,
-            )
+            format_with_language(path, settings, parse, JsonFormatLanguage::new(options))
         }
         DocumentFileSource::Css(_) => {
             let options = css::resolve_format_options(path, &file_source, settings, workspace_db)
                 .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                CssFormatLanguage::new(options),
-                single_line,
-            )
+            format_with_language(path, settings, parse, CssFormatLanguage::new(options))
         }
         DocumentFileSource::Graphql(_) => {
             let options =
                 graphql::resolve_format_options(path, &file_source, settings, workspace_db)
                     .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                GraphqlFormatLanguage::new(options),
-                single_line,
-            )
+            format_with_language(path, settings, parse, GraphqlFormatLanguage::new(options))
         }
         DocumentFileSource::Html(_) => {
             let options = html::resolve_format_options(path, &file_source, settings, workspace_db)
                 .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                HtmlFormatLanguage::new(options),
-                single_line,
-            )
+            format_with_language(path, settings, parse, HtmlFormatLanguage::new(options))
         }
         DocumentFileSource::Yaml(_) => {
             let options = yaml::resolve_format_options(path, &file_source, settings, workspace_db)
                 .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                YamlFormatLanguage::new(options),
-                single_line,
-            )
+            format_with_language(path, settings, parse, YamlFormatLanguage::new(options))
         }
         DocumentFileSource::Markdown(_) => {
             let options = resolve_format_options(path, &file_source, settings, workspace_db)
@@ -361,13 +286,7 @@ fn format_snippet(
         DocumentFileSource::Grit(_) => {
             let options = grit::resolve_format_options(path, &file_source, settings, workspace_db)
                 .with_trailing_newline(trailing_newline);
-            format_with_language(
-                path,
-                settings,
-                parse,
-                GritFormatLanguage::new(options),
-                single_line,
-            )
+            format_with_language(path, settings, parse, GritFormatLanguage::new(options))
         }
         DocumentFileSource::Ignore | DocumentFileSource::Unknown => None,
     }
@@ -380,8 +299,22 @@ fn format_with_language<F>(
     settings: &SettingsWithEditor,
     parse: AnyParse,
     language: F,
-    single_line: bool,
 ) -> Option<Document>
+where
+    F: FormatLanguage,
+    F::SyntaxLanguage: ServiceLanguage + 'static,
+{
+    printed_document(&format_code(path, settings, parse, language)?)
+}
+
+/// Returns the code of `parse` formatted with `language`, when the formatter
+/// of that language is enabled for the Markdown file at `path`.
+fn format_code<F>(
+    path: &BiomePath,
+    settings: &SettingsWithEditor,
+    parse: AnyParse,
+    language: F,
+) -> Option<String>
 where
     F: FormatLanguage,
     F::SyntaxLanguage: ServiceLanguage + 'static,
@@ -394,10 +327,7 @@ where
         .ok()?
         .print()
         .ok()?;
-    if single_line && printed.as_code().contains(['\n', '\r']) {
-        return None;
-    }
-    printed_document(printed.as_code())
+    Some(printed.into_code())
 }
 
 /// Formats Markdown written inside a fenced code block.
@@ -443,13 +373,14 @@ fn printed_document(code: &str) -> Option<Document> {
 /// writes with the line ending of the Markdown file and without adding
 /// indentation, so the snippet keeps its own indentation. The code can use any
 /// line ending, because the formatter of its language prints it with its own
-/// `lineEnding` option.
+/// `lineEnding` option. A line break at the end of the code is kept, so that
+/// what follows the snippet starts on a new line.
 struct PrintedCode<'a>(&'a str);
 
 impl<Context: FormatContext> Format<Context> for PrintedCode<'_> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let code = normalize_newlines(self.0, ['\r']);
-        for (index, line) in code.lines().enumerate() {
+        for (index, line) in code.split('\n').enumerate() {
             if index > 0 {
                 write!(f, [literal_line_break_without_parent()])?;
             }

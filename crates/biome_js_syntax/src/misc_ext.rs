@@ -1,9 +1,35 @@
-use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, SyntaxResult, TriviaPieceKind, declare_node_union};
 
 use crate::{
-    JsParenthesizedAssignment, JsParenthesizedExpression, JsSyntaxNode, JsSyntaxToken,
-    TsParenthesizedType,
+    JsExpressionTemplateRoot, JsParenthesizedAssignment, JsParenthesizedExpression, JsSyntaxNode,
+    JsSyntaxToken, TsParenthesizedType,
 };
+
+impl JsExpressionTemplateRoot {
+    /// Returns whether the code ends with a line comment, as `a // note` does.
+    ///
+    /// A host that writes a closing delimiter after the code, such as the `}`
+    /// of an MDX expression, must write it on the next line. On the same line,
+    /// the comment would contain the delimiter.
+    pub fn ends_with_line_comment(&self) -> bool {
+        let Ok(eof) = self.eof_token() else {
+            return false;
+        };
+        let last_comment = eof
+            .leading_trivia()
+            .pieces()
+            .rev()
+            .find(|piece| piece.is_comments())
+            .or_else(|| {
+                eof.prev_token()?
+                    .trailing_trivia()
+                    .pieces()
+                    .rev()
+                    .find(|piece| piece.is_comments())
+            });
+        last_comment.is_some_and(|comment| comment.kind() == TriviaPieceKind::SingleLineComment)
+    }
+}
 
 declare_node_union! {
     pub AnyJsParenthesized =

@@ -2,7 +2,9 @@ use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
 use biome_formatter::{normalize_newlines, write};
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxNode, MarkdownSyntaxToken};
+use biome_markdown_syntax::{
+    AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxKind, MarkdownSyntaxNode, MarkdownSyntaxToken,
+};
 use biome_rowan::TextSize;
 use std::borrow::Cow;
 
@@ -242,6 +244,12 @@ pub(crate) fn follows_construct_with_space(
 /// literal without its trivia, and the caller writes the space that may
 /// separate the construct from the previous one, see
 /// [follows_construct_with_space].
+///
+/// The formatted JavaScript of an inline construct, or of any construct in a
+/// list item or a block quote, must fit on one line. A line break would split
+/// a paragraph, or start a line without the indentation or the `>` markers of
+/// its container. For the same reason, a literal that already spans lines in
+/// a list item or a block quote prints as written.
 pub(crate) struct FormatMdxSnippet<'a> {
     pub(crate) token: &'a MarkdownSyntaxToken,
 }
@@ -249,16 +257,36 @@ pub(crate) struct FormatMdxSnippet<'a> {
 impl Format<MarkdownFormatContext> for FormatMdxSnippet<'_> {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let range = self.token.text_trimmed_range();
-        if f.context().is_embedded_node_range(range) {
-            let text = syntax_token_cow_slice(
-                normalize_newlines(self.token.text_trimmed(), ['\r']),
-                self.token,
-                range.start(),
-            );
-            let embedded = FormatEmbedded::new(range, &text, f)?;
-            write!(f, [format_replaced(self.token, &embedded)])
-        } else {
-            write!(f, [self.token.format()])
+        let in_container = self.token.ancestors().any(|node| {
+            matches!(
+                node.kind(),
+                MarkdownSyntaxKind::MD_QUOTE
+                    | MarkdownSyntaxKind::MD_BULLET_LIST_ITEM
+                    | MarkdownSyntaxKind::MD_ORDERED_LIST_ITEM
+            )
+        });
+        let spans_lines = self.token.text_trimmed().contains(['\n', '\r']);
+        if !f.context().is_embedded_node_range(range) || (in_container && spans_lines) {
+            return write!(f, [self.token.format()]);
         }
+
+        let is_inline = self.token.ancestors().any(|node| {
+            matches!(
+                node.kind(),
+                MarkdownSyntaxKind::MDX_INLINE_EXPRESSION | MarkdownSyntaxKind::MDX_JSX_INLINE_TAG
+            )
+        });
+        let layout = if is_inline || in_container {
+            EmbeddedLayout::SingleLine
+        } else {
+            EmbeddedLayout::Free
+        };
+        let text = syntax_token_cow_slice(
+            normalize_newlines(self.token.text_trimmed(), ['\r']),
+            self.token,
+            range.start(),
+        );
+        let embedded = FormatEmbedded::new(range, &text, f)?.with_layout(layout);
+        write!(f, [format_replaced(self.token, &embedded)])
     }
 }
