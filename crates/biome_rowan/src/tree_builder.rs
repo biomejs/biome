@@ -22,8 +22,8 @@ impl Checkpoint {
 
 /// A builder for a syntax tree.
 ///
-/// The builder allocates the elements of the tree in an arena of its own, which the tree keeps
-/// alive. See `green/arena.rs`.
+/// The builder allocates the elements of the tree in the arena of its node cache, which the tree
+/// keeps alive. See `green/arena.rs`.
 #[derive(Debug)]
 pub struct TreeBuilder<'cache, L: Language, S: SyntaxFactory<Kind = L::Kind>> {
     /// Declared before `cache` so that the children drop before an owned cache, which
@@ -53,8 +53,8 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
         TreeBuilder::default()
     }
 
-    /// Reusing a `NodeCache` between different [TreeBuilder]s reuses the memory of its tables.
-    /// Elements are only shared within a tree.
+    /// Reusing `NodeCache` between different [TreeBuilder]s saves memory.
+    /// It allows to structurally share underlying trees.
     pub fn with_cache(cache: &mut NodeCache) -> TreeBuilder<'_, L, S> {
         cache.begin_build();
         TreeBuilder {
@@ -216,23 +216,24 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
         assert_eq!(self.children.len(), 1);
         let root = match self.children.pop().unwrap().into_element() {
             NodeOrToken::Node(node) => node,
-            _ => panic!(),
+            token => {
+                // The handle isn't counted.
+                std::mem::forget(token);
+                panic!("the root of a tree must be a node")
+            }
         };
-        let arena = self.cache.end_build().expect("the build already ended");
-        // The handles to the elements of the build weren't counted while it was open; the root
-        // is the only one left outside them.
-        if root.count_field() == arena.arena().tag() {
-            arena.arena().retain();
-        }
+        // The handles of the build aren't counted; the root is the only one left outside its
+        // elements.
+        self.cache.end_build(Some(&root));
         root
     }
 }
 
 impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> Drop for TreeBuilder<'_, L, S> {
     fn drop(&mut self) {
-        // An unfinished build: discard the uncounted handles before the arena closes.
+        // The children don't count references, so an unfinished build just discards them.
         self.children.clear();
-        drop(self.cache.end_build());
+        self.cache.end_build(None);
     }
 }
 

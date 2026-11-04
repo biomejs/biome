@@ -3,7 +3,6 @@ use hashbrown::hash_map::{RawEntryMut, RawOccupiedEntryMut, RawVacantEntryMut};
 use rustc_hash::FxHasher;
 use std::fmt::{self, Debug, Formatter};
 use std::hash::{BuildHasherDefault, Hash, Hasher};
-use std::mem::ManuallyDrop;
 use std::ptr::NonNull;
 
 use crate::green::Slot;
@@ -55,14 +54,13 @@ impl CachedNode {
 
 /// A child of a node under construction, as stored by the [crate::TreeBuilder].
 ///
-/// A child with a hash other than [NodeCache::UNCACHED_NODE_HASH] is stored in the
-/// [NodeCache] and borrows its element: the cache keeps the arena of the build alive.
-/// [CacheChild::into_element] makes a handle of it when the child moves into a newly
-/// built node.
+/// The element is in the arena of the [NodeCache], and the child doesn't count a reference to
+/// it: the arena keeps it alive, so dropping a child does nothing. A child with a hash other than
+/// [NodeCache::UNCACHED_NODE_HASH] is also stored in the cache; one with that hash isn't, and
+/// only the node under construction will refer to it. [CacheChild::into_element] makes an
+/// uncounted handle of the element when the child moves into a newly built node.
 ///
-/// A child with the [NodeCache::UNCACHED_NODE_HASH] hash owns its element.
-///
-/// A borrowed child must not outlive the build of the [NodeCache] it was retrieved from.
+/// A child must not outlive the arena of the [NodeCache] it was retrieved from.
 ///
 /// The element is stored as a tagged pointer to keep the type at two words, which
 /// lets functions return it in registers.
@@ -77,7 +75,8 @@ pub(crate) struct CacheChild {
 impl CacheChild {
     const TOKEN_TAG: usize = 1;
 
-    /// Creates a child that owns `element`. Its hash is [NodeCache::UNCACHED_NODE_HASH].
+    /// Creates a child of `element`, an uncounted handle to a new element in the arena of the
+    /// cache. Its hash is [NodeCache::UNCACHED_NODE_HASH].
     #[inline]
     pub(crate) fn owned(element: GreenElement) -> Self {
         let element = match element {
@@ -101,9 +100,10 @@ impl CacheChild {
     #[inline]
     unsafe fn cached(hash: u64, element: GreenElementRef<'_>) -> Self {
         if hash == NodeCache::UNCACHED_NODE_HASH {
-            // An element whose hash collides with the uncached hash: own it so that the
-            // hash keeps telling borrowed and owned children apart.
-            return Self::owned(element.to_owned());
+            // An element whose hash collides with the uncached hash: treat it as uncached so
+            // that the node it moves into isn't looked up in the cache.
+            // SAFETY: the handle doesn't count a reference, as the child it becomes.
+            return Self::owned(unsafe { uncounted(element) });
         }
 
         let element = match element {
@@ -114,11 +114,6 @@ impl CacheChild {
         };
 
         Self { hash, element }
-    }
-
-    #[inline]
-    fn is_owned(&self) -> bool {
-        self.hash == NodeCache::UNCACHED_NODE_HASH
     }
 
     #[inline]
@@ -138,32 +133,29 @@ impl CacheChild {
         }
     }
 
-    /// Returns an owned handle to the element.
+    /// Returns an uncounted handle to the element, see [crate::green::arena].
     #[inline]
     pub(crate) fn into_element(self) -> GreenElement {
-        let this = ManuallyDrop::new(self);
-        if this.is_owned() {
-            // SAFETY: The child owns the element and `this` is never dropped.
-            unsafe { this.take_owned() }
-        } else {
-            this.as_element_ref().to_owned()
-        }
+        // SAFETY: the element is in the arena of the running build, and the handle must move
+        // into a node of it or be discarded, as every handle of a child.
+        unsafe { uncounted(self.as_element_ref()) }
     }
+}
 
-    /// # Safety
-    /// The child must own its element, and neither the child nor a copy of its pointer may be
-    /// used afterwards.
-    #[inline]
-    unsafe fn take_owned(&self) -> GreenElement {
-        // SAFETY: The handle created here takes over the reference count owned by the child.
-        unsafe {
-            match self.as_element_ref() {
-                NodeOrToken::Node(node) => {
-                    NodeOrToken::Node(GreenNode::from_raw(NonNull::from(node)))
-                }
-                NodeOrToken::Token(token) => {
-                    NodeOrToken::Token(GreenToken::from_raw(NonNull::from(token)))
-                }
+/// Makes a handle to `element` that doesn't count a reference.
+///
+/// # Safety
+/// The element must be in the arena of the running build, and the handle must not be dropped:
+/// it must move into an element of the arena, be discarded, or be counted, see
+/// [crate::green::arena].
+#[inline]
+unsafe fn uncounted(element: GreenElementRef<'_>) -> GreenElement {
+    // SAFETY: the caller upholds the requirements of the handle.
+    unsafe {
+        match element {
+            NodeOrToken::Node(node) => NodeOrToken::Node(GreenNode::from_raw(NonNull::from(node))),
+            NodeOrToken::Token(token) => {
+                NodeOrToken::Token(GreenToken::from_raw(NonNull::from(token)))
             }
         }
     }
@@ -174,16 +166,6 @@ impl CacheChild {
 unsafe impl Send for CacheChild {}
 // SAFETY: See `Send`.
 unsafe impl Sync for CacheChild {}
-
-impl Drop for CacheChild {
-    #[inline]
-    fn drop(&mut self) {
-        if self.is_owned() {
-            // SAFETY: The child owns the element and it's never accessed again.
-            drop(unsafe { self.take_owned() });
-        }
-    }
-}
 
 impl Debug for CacheChild {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -214,21 +196,25 @@ impl Debug for CacheChild {
 // To fix that, we additionally wrap the data in `Cached*` wrappers, to make sure
 // we don't accidentally use the wrong hash!
 //
-// The cache only lasts one build: each build allocates its elements in an arena of its own, and
-// sharing elements of earlier builds would keep their whole arenas alive along with the new tree.
-// The entries are pointers into the arena of the current build, which the cache keeps alive until
-// the build ends, when it empties itself.
+// The builds with a cache allocate their elements in its arena, so a build can share the elements
+// of earlier ones. The entries are pointers into that arena, which the cache keeps alive. When the
+// arena has grown well past what a build needs, the cache starts a new one and empties itself:
+// the trees of earlier builds keep the old arena alive until they're dropped.
 #[derive(Default, Debug)]
 pub struct NodeCache {
     nodes: HashMap<CachedNode, ()>,
     tokens: HashMap<CachedToken, ()>,
     trivia: TriviaCache,
-    /// The arena of the current build, if one is running.
-    build: Option<ArenaRef>,
+    /// The arena of the builds, which the entries point into.
+    arena: Option<ArenaRef>,
+    /// The bytes the arena held after its first build.
+    first_build_bytes: usize,
+    /// Whether a build is running.
+    building: bool,
 }
 
-// SAFETY: the entries are pointers to immutable elements in the arena of the current build,
-// which the cache keeps alive, and only the thread that runs the build allocates in the arena.
+// SAFETY: the entries are pointers to immutable elements in the arena, which the cache keeps
+// alive, and only a build of the cache allocates in the arena.
 unsafe impl Send for NodeCache {}
 // SAFETY: see `Send`.
 unsafe impl Sync for NodeCache {}
@@ -256,32 +242,63 @@ impl NodeCache {
     /// one of its children wasn't cached.
     pub(crate) const UNCACHED_NODE_HASH: u64 = 0;
 
-    /// Starts a build: creates the arena that the elements of the build go into.
+    /// The cache starts a new arena when the current one holds this many times the bytes of its
+    /// first build. The rest are elements that earlier builds made and later ones mostly don't
+    /// share, which the arena can't free one by one.
+    const REPLACE_FACTOR: usize = 2;
+
+    /// The arena of a small build is kept until it holds this many bytes, so that small builds,
+    /// like class strings, keep sharing their elements.
+    const REPLACE_MIN_BYTES: usize = 1024 * 1024;
+
+    /// Starts a build, in a new arena if the current one has grown past [Self::REPLACE_FACTOR]
+    /// times the bytes of its first build.
     pub(crate) fn begin_build(&mut self) {
-        assert!(self.build.is_none(), "a build is already running");
-        let arena = GreenArena::new_open();
-        // SAFETY: the arena was just created, and this thread runs its build.
-        self.trivia.whitespace =
-            Some(unsafe { GreenTrivia::new_in([TriviaPiece::whitespace(1)], Some(arena.arena())) });
-        self.build = Some(arena);
+        assert!(!self.building, "a build is already running");
+        if let Some(arena) = &self.arena {
+            // SAFETY: no build is running.
+            let allocated = unsafe { arena.arena().allocated() };
+            if allocated > Self::REPLACE_MIN_BYTES
+                && allocated > Self::REPLACE_FACTOR * self.first_build_bytes
+            {
+                self.nodes.clear();
+                self.tokens.clear();
+                self.trivia.cache.clear();
+                self.trivia.whitespace = None;
+                self.arena = None;
+            }
+        }
+        let arena = self.arena.get_or_insert_with(|| {
+            self.first_build_bytes = 0;
+            ArenaRef::new()
+        });
+        if self.trivia.whitespace.is_none() {
+            // SAFETY: the build of the arena's cache is starting, and the arena holds the trivia
+            // without counting it.
+            let whitespace =
+                unsafe { GreenTrivia::new_in([TriviaPiece::whitespace(1)], Some(arena.arena())) };
+            self.trivia.whitespace = NonNull::new(whitespace.into_raw());
+        }
+        self.building = true;
     }
 
-    /// Ends the build: empties the cache, and closes the arena of the build, after which handles
-    /// to its elements count references. Returns the cache's reference to the arena, if a build
-    /// was running.
-    ///
-    /// Every handle to an element of the build that hasn't been counted, other than those in its
-    /// elements, must be gone. [crate::TreeBuilder] counts the root.
-    pub(crate) fn end_build(&mut self) -> Option<ArenaRef> {
-        let arena = self.build.take()?;
-        // The entries don't own their elements, and the whitespace isn't counted while the arena
-        // is open.
-        self.nodes.clear();
-        self.tokens.clear();
-        self.trivia.cache.clear();
-        self.trivia.whitespace = None;
-        arena.close();
-        Some(arena)
+    /// Ends the build, if one is running, and counts a reference for `root`, the uncounted
+    /// handle to the root of the build. The other uncounted handles of the build must be gone,
+    /// see [crate::green::arena].
+    pub(crate) fn end_build(&mut self, root: Option<&GreenNode>) {
+        if !std::mem::take(&mut self.building) {
+            return;
+        }
+        let arena = self.arena.as_ref().expect("a build has an arena").arena();
+        if self.first_build_bytes == 0 {
+            // SAFETY: the build has ended, and no other build of the cache is running.
+            self.first_build_bytes = unsafe { arena.allocated() };
+        }
+        if let Some(root) = root
+            && root.count_field() == arena.tag()
+        {
+            arena.retain();
+        }
     }
 
     /// Tries to retrieve a node with the given `kind` and `children` from the cache.
@@ -296,11 +313,8 @@ impl NodeCache {
         kind: RawSyntaxKind,
         children: &[CacheChild],
     ) -> (NodeCacheNodeEntryMut<'_>, &GreenArena) {
-        let arena = self
-            .build
-            .as_ref()
-            .expect("the node cache is used outside a build")
-            .arena();
+        assert!(self.building, "the node cache is used outside a build");
+        let arena = self.arena.as_ref().expect("a build has an arena").arena();
         (Self::node_entry(&mut self.nodes, kind, children), arena)
     }
 
@@ -375,11 +389,8 @@ impl NodeCache {
     ) -> CacheChild {
         let hash = token_hash_of(kind, text);
 
-        let arena = self
-            .build
-            .as_ref()
-            .expect("the node cache is used outside a build")
-            .arena();
+        assert!(self.building, "the node cache is used outside a build");
+        let arena = self.arena.as_ref().expect("a build has an arena").arena();
         let entry = self.tokens.raw_entry_mut().from_hash(hash, |token| {
             token.value().kind() == kind && token.value().text() == text
         });
@@ -497,8 +508,8 @@ struct TriviaCache {
     /// Generic cache for trivia
     cache: HashMap<CachedTrivia, ()>,
 
-    /// Cached single whitespace trivia, in the arena of the cache's build.
-    whitespace: Option<GreenTrivia>,
+    /// Cached single whitespace trivia, in the arena of the cache.
+    whitespace: Option<NonNull<GreenTriviaData>>,
 }
 
 impl TriviaCache {
@@ -516,12 +527,13 @@ impl TriviaCache {
                     kind: TriviaPieceKind::Whitespace,
                     length,
                 },
-            ] if *length == TextSize::from(1) => (
-                self.whitespace
-                    .clone()
-                    .expect("the node cache is used outside a build"),
-                GreenElementFlags::default(),
-            ),
+            ] if *length == TextSize::from(1) => {
+                let whitespace = self.whitespace.expect("a build has the whitespace trivia");
+                // SAFETY: the trivia is in the arena of the running build, and the handle moves
+                // into a token of it.
+                let whitespace = unsafe { GreenTrivia::from_raw(whitespace.as_ptr()) };
+                (whitespace, GreenElementFlags::default())
+            }
 
             _ => {
                 let (hash, flags) = Self::trivia_hash::<true>(pieces);
@@ -532,18 +544,21 @@ impl TriviaCache {
                     .from_hash(hash, |trivia| trivia.value().pieces() == pieces);
 
                 match entry {
-                    RawEntryMut::Occupied(entry) => (entry.key().value().to_owned(), flags),
+                    RawEntryMut::Occupied(entry) => {
+                        let trivia = NonNull::from(entry.key().value());
+                        // SAFETY: as for the whitespace above.
+                        (unsafe { GreenTrivia::from_raw(trivia.as_ptr()) }, flags)
+                    }
                     RawEntryMut::Vacant(entry) => {
-                        // SAFETY: the arena of the running build is open, and this thread runs
-                        // it.
+                        // SAFETY: the arena is the one of the running build, and the handle moves
+                        // into a token of it.
                         let trivia =
                             unsafe { GreenTrivia::new_in(pieces.iter().copied(), Some(arena)) };
+                        // SAFETY: the copy is never dropped.
+                        let cached = unsafe { super::arena::duplicate(&trivia) }.into_raw();
                         entry.insert_with_hasher(
                             hash,
-                            CachedTrivia(
-                                NonNull::new(trivia.clone().into_raw())
-                                    .expect("the trivia isn't empty"),
-                            ),
+                            CachedTrivia(NonNull::new(cached).expect("the trivia isn't empty")),
                             (),
                             |cached| Self::trivia_hash::<false>(cached.value().pieces()).0,
                         );
@@ -637,9 +652,9 @@ mod tests {
         assert!(cached.flags().contains(GreenElementFlags::HAS_COMMENTS));
         assert!(cached.flags().contains(GreenElementFlags::HAS_SKIPPED));
 
-        // Handles to the elements of a build aren't counted while it's open.
-        drop((token, cached));
-        drop(cache.end_build());
+        // The handles of a build don't count references.
+        std::mem::forget((token, cached));
+        cache.end_build(None);
     }
 
     #[test]

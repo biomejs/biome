@@ -3,7 +3,6 @@ use crate::arc::{Arc, HeaderSlice, ThinArc};
 use crate::green::{GreenArena, GreenElementFlags};
 use biome_text_size::TextSize;
 use std::fmt::Formatter;
-use std::mem::ManuallyDrop;
 use std::{fmt, mem, ptr};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -34,15 +33,6 @@ impl GreenTriviaData {
     #[inline]
     pub fn pieces(&self) -> &[TriviaPiece] {
         self.data.slice()
-    }
-
-    #[inline]
-    pub(crate) fn to_owned(&self) -> GreenTrivia {
-        unsafe {
-            let green = GreenTrivia::from_raw(self as *const _ as *mut _);
-            let green = ManuallyDrop::new(green);
-            GreenTrivia::clone(&green)
-        }
     }
 }
 

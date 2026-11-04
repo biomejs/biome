@@ -7,8 +7,8 @@ mod trivia;
 
 pub(crate) use self::{
     arena::{
-        ARENA_TAG, ArenaRef, CurrentArena, GreenArena, new_node_in_current, release_tagged,
-        retain_tagged,
+        ARENA_TAG, ArenaRef, CurrentArena, GreenArena, discard_element, new_node_in_current,
+        release_tagged, retain_tagged,
     },
     element::{GreenElement, GreenElementRef},
     node::{Child, Children, GreenNode, GreenNodeData, Slot},

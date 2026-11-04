@@ -1,20 +1,22 @@
 //! Arena allocation of the green elements that a [TreeBuilder](crate::TreeBuilder) builds.
 //!
-//! Each build allocates its nodes, tokens and trivia in a [GreenArena] instead of allocating each
-//! element on its own. Elements built by edits and factories outside a build keep their own
-//! allocation and reference count, and a tree can mix both kinds.
+//! Each [NodeCache](crate::NodeCache) allocates the nodes, tokens and trivia of its builds in a
+//! [GreenArena] instead of allocating each element on its own, and keeps the arena across builds,
+//! so that a build can reuse the elements of earlier ones. Elements built by edits and factories
+//! outside a build keep their own allocation and reference count, and a tree can mix both kinds.
 //!
 //! The reference count field of an element in an arena holds a tagged pointer to its arena
 //! instead of a count ([ARENA_TAG]). Cloning or dropping a handle to such an element counts a
 //! reference to the whole arena, which frees all of its elements at once when the last reference
-//! goes away. Elements refer to the children in their own arena without counting them, and
-//! the arena never runs the destructors of its elements.
+//! goes away. Elements refer to the children in their own arena without counting them, and the
+//! arena never runs the destructors of its elements.
 //!
-//! While its build is open, handles to an arena's elements aren't counted at all: the builder,
-//! its node cache and the elements themselves are the only places such handles can be, and the
-//! builder discards them all before it closes the arena. When the build finishes, the root of the
-//! tree becomes a counted handle, and from then on every clone counts. That's why
-//! [GreenArena::is_open] is checked before counting.
+//! A build also holds handles that it doesn't count: those it creates for new elements and those
+//! it makes of cached ones, from their pointers rather than by cloning. Each one either moves into
+//! an element of the arena, is discarded without being dropped, or becomes the counted root of the
+//! tree. A factory is the only code outside this crate that holds them, and it can drop a child it
+//! was given; [discard_element] tells such a handle apart by the arena the builder makes current
+//! while the factory runs.
 //!
 //! An element can still have a child from outside its arena, an element that counts references
 //! itself or one in another arena. The arena keeps the handles of those children and drops them
@@ -26,7 +28,7 @@ use std::{
     cell::{Cell, UnsafeCell},
     mem,
     ptr::{self, NonNull},
-    sync::atomic::{self, AtomicBool, AtomicUsize, Ordering},
+    sync::atomic::{self, AtomicUsize, Ordering},
 };
 
 /// The bit of the reference count field that tells the element is in an arena. The other bits
@@ -47,15 +49,15 @@ const MAX_CHUNK: usize = 1024 * 1024;
 /// The alignment of every allocation in an arena, which suits every green element.
 const ALIGN: usize = 8;
 
-/// The memory of the green elements of one build.
+/// The memory of the green elements of the builds of one node cache.
 pub(crate) struct GreenArena {
     /// The references to the arena: the counted handles to its elements, and the [ArenaRef]s.
     refs: AtomicUsize,
-    /// Whether the arena's build is open, during which handles to its elements aren't counted.
-    open: AtomicBool,
     /// The current chunk: the next free byte and the end.
     next: Cell<*mut u8>,
     end: Cell<*mut u8>,
+    /// The bytes of every chunk.
+    allocated: Cell<usize>,
     /// Every chunk, to free them.
     chunks: UnsafeCell<Vec<(NonNull<u8>, Layout)>>,
     /// The children of the arena's elements that aren't in the arena, which the arena drops.
@@ -64,9 +66,10 @@ pub(crate) struct GreenArena {
     counts: UnsafeCell<ElementCounts>,
 }
 
-// SAFETY: Only the thread that runs the arena's build allocates from it and mutates `next`,
-// `end`, `chunks` and `foreign`, while the build is open. Other threads only read the elements,
-// count references with atomics, and free the arena once nothing refers to it.
+// SAFETY: Only a build of the node cache that owns the arena allocates from it and mutates `next`,
+// `end`, `allocated`, `chunks` and `foreign`, and the cache runs one build at a time. Other threads
+// only read the elements, count references with atomics, and free the arena once nothing refers
+// to it.
 unsafe impl Send for GreenArena {}
 // SAFETY: See `Send`.
 unsafe impl Sync for GreenArena {}
@@ -117,21 +120,6 @@ impl ArenaCounted for GreenTrivia {
 }
 
 impl GreenArena {
-    /// Creates an open arena, and returns the only reference to it.
-    pub(crate) fn new_open() -> ArenaRef {
-        let arena = Box::new(Self {
-            refs: AtomicUsize::new(1),
-            open: AtomicBool::new(true),
-            next: Cell::new(ptr::null_mut()),
-            end: Cell::new(ptr::null_mut()),
-            chunks: UnsafeCell::new(Vec::new()),
-            foreign: UnsafeCell::new(Vec::new()),
-            #[cfg(feature = "countme")]
-            counts: UnsafeCell::new(ElementCounts::default()),
-        });
-        ArenaRef(NonNull::from(Box::leak(arena)))
-    }
-
     /// The value of the reference count field of an element in this arena.
     #[inline]
     pub(crate) fn tag(&self) -> usize {
@@ -141,19 +129,21 @@ impl GreenArena {
         (addr >> 1) | ARENA_TAG
     }
 
-    #[inline]
-    pub(crate) fn is_open(&self) -> bool {
-        self.open.load(Ordering::Relaxed)
+    /// The bytes of the chunks the arena allocated.
+    ///
+    /// # Safety
+    /// As [Self::alloc].
+    pub(crate) unsafe fn allocated(&self) -> usize {
+        self.allocated.get()
     }
 
     /// Allocates `layout`, whose alignment must be at most [ALIGN].
     ///
     /// # Safety
-    /// Only the thread that runs the arena's build may allocate, while the build is open.
+    /// Only the running build of the node cache that owns the arena may allocate.
     #[inline]
     pub(crate) unsafe fn alloc(&self, layout: Layout) -> NonNull<u8> {
         debug_assert!(layout.align() <= ALIGN);
-        debug_assert!(self.is_open());
         let size = layout.size().next_multiple_of(ALIGN);
         let next = self.next.get();
         if self.end.get().addr().wrapping_sub(next.addr()) >= size && !next.is_null() {
@@ -171,7 +161,7 @@ impl GreenArena {
     /// As [Self::alloc].
     #[cold]
     unsafe fn alloc_chunk(&self, size: usize) -> NonNull<u8> {
-        // SAFETY: only the building thread allocates, so nothing else borrows the chunks.
+        // SAFETY: only the running build allocates, so nothing else borrows the chunks.
         let chunks = unsafe { &mut *self.chunks.get() };
         let chunk_size = FIRST_CHUNK
             .checked_shl(chunks.len().min(16) as u32)
@@ -187,6 +177,7 @@ impl GreenArena {
             alloc::handle_alloc_error(layout)
         };
         chunks.push((chunk, layout));
+        self.allocated.set(self.allocated.get() + layout.size());
         if !dedicated {
             self.next.set(chunk.as_ptr().wrapping_add(size));
             self.end.set(chunk.as_ptr().wrapping_add(chunk_size));
@@ -202,7 +193,7 @@ impl GreenArena {
     /// which is never dropped.
     #[cold]
     pub(crate) unsafe fn adopt_foreign_element(&self, child: GreenElement) {
-        // SAFETY: only the building thread adds foreign children, while the build is open.
+        // SAFETY: only the running build adds foreign children.
         unsafe { (*self.foreign.get()).push(ForeignChild::Element(child)) }
     }
 
@@ -212,7 +203,7 @@ impl GreenArena {
     /// As [Self::adopt_foreign_element].
     #[cold]
     pub(crate) unsafe fn adopt_foreign_trivia(&self, trivia: GreenTrivia) {
-        // SAFETY: only the building thread adds foreign children, while the build is open.
+        // SAFETY: only the running build adds foreign children.
         unsafe { (*self.foreign.get()).push(ForeignChild::Trivia(trivia)) }
     }
 
@@ -223,7 +214,7 @@ impl GreenArena {
     /// which is never dropped.
     #[cfg(feature = "countme")]
     pub(crate) unsafe fn adopt_count<T: ArenaCounted>(&self, count: countme::Count<T>) {
-        // SAFETY: only the building thread allocates elements, while the build is open.
+        // SAFETY: only the running build allocates elements.
         T::push(unsafe { &mut *self.counts.get() }, count);
     }
 
@@ -251,9 +242,17 @@ impl GreenArena {
         {
             return;
         }
+        // SAFETY: that was the last reference.
+        unsafe { Self::free(arena) }
+    }
+
+    /// # Safety
+    /// No reference to `arena` may remain.
+    #[cold]
+    unsafe fn free(arena: NonNull<Self>) {
         // Order the uses of the arena through other references before its release.
         atomic::fence(Ordering::Acquire);
-        // SAFETY: that was the last reference, and the arena was allocated as a `Box`.
+        // SAFETY: the arena was allocated as a `Box`, and nothing refers to it.
         drop(unsafe { Box::from_raw(arena.as_ptr()) });
     }
 }
@@ -270,33 +269,25 @@ impl Drop for GreenArena {
     }
 }
 
-/// Counts a reference to the arena of `tag`, the reference count field of an element in it,
-/// unless its build is open.
+/// Counts a reference to the arena of `tag`, the reference count field of an element in it.
 ///
 /// # Safety
 /// `tag` must be the field of an element that is alive.
 #[inline]
 pub(crate) unsafe fn retain_tagged(tag: usize) {
     // SAFETY: an element keeps its arena alive.
-    let arena = unsafe { &*arena_of(tag).as_ptr() };
-    if !arena.is_open() {
-        arena.retain();
-    }
+    unsafe { arena_of(tag).as_ref() }.retain();
 }
 
-/// Releases a reference to the arena of `tag` that a handle counted, unless its build is open.
+/// Releases the reference to the arena of `tag` that a handle counted.
 ///
 /// # Safety
 /// `tag` must be the field of an element that is alive, and the handle that counted the
 /// reference must not be used afterwards.
 #[inline]
 pub(crate) unsafe fn release_tagged(tag: usize) {
-    let arena = arena_of(tag);
-    // SAFETY: the handle keeps the arena alive.
-    if !unsafe { arena.as_ref() }.is_open() {
-        // SAFETY: the handle owned the reference.
-        unsafe { GreenArena::release(arena) };
-    }
+    // SAFETY: the handle owned the reference.
+    unsafe { GreenArena::release(arena_of(tag)) }
 }
 
 #[inline]
@@ -317,15 +308,25 @@ unsafe impl Send for ArenaRef {}
 unsafe impl Sync for ArenaRef {}
 
 impl ArenaRef {
+    /// Creates an arena, and the only reference to it.
+    pub(crate) fn new() -> Self {
+        let arena = Box::new(GreenArena {
+            refs: AtomicUsize::new(1),
+            next: Cell::new(ptr::null_mut()),
+            end: Cell::new(ptr::null_mut()),
+            allocated: Cell::new(0),
+            chunks: UnsafeCell::new(Vec::new()),
+            foreign: UnsafeCell::new(Vec::new()),
+            #[cfg(feature = "countme")]
+            counts: UnsafeCell::new(ElementCounts::default()),
+        });
+        Self(NonNull::from(Box::leak(arena)))
+    }
+
     #[inline]
     pub(crate) fn arena(&self) -> &GreenArena {
         // SAFETY: the reference keeps the arena alive.
         unsafe { self.0.as_ref() }
-    }
-
-    /// Closes the arena's build, after which handles to its elements count references.
-    pub(crate) fn close(&self) {
-        self.arena().open.store(false, Ordering::Release);
     }
 }
 
@@ -340,38 +341,39 @@ impl std::fmt::Debug for GreenArena {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GreenArena")
             .field("refs", &self.refs.load(Ordering::Relaxed))
-            .field("open", &self.is_open())
             .finish_non_exhaustive()
     }
 }
 
 thread_local! {
-    /// The arena that [RawSyntaxNode::new](crate::RawSyntaxNode::new) allocates nodes in.
+    /// The arena of the build that a factory is making a node for on this thread, see
+    /// [CurrentArena].
     static CURRENT: Cell<*const GreenArena> = const { Cell::new(ptr::null()) };
 }
 
 /// Calls `f` with the arena that nodes created on this thread go into, if any.
 #[inline]
 fn with_current<R>(f: impl FnOnce(Option<&GreenArena>) -> R) -> R {
-    // SAFETY: a `CurrentArena` keeps the arena alive and its build open while it's current.
+    // SAFETY: a `CurrentArena` borrows the arena, which keeps it alive while it's current.
     CURRENT.with(|current| f(unsafe { current.get().as_ref() }))
 }
 
-/// Makes an open arena the one that [with_current] returns on this thread, until dropped.
+/// Makes the arena of the running build the one that [with_current] returns on this thread,
+/// until dropped.
 ///
-/// The builder sets it only while a factory makes a node, so that no other code allocates in the
-/// arena. The guard borrows the arena, which keeps it alive, and its build can't end while it's
-/// borrowed.
+/// The builder sets it only while a factory makes a node: [RawSyntaxNode::new] allocates there,
+/// and [discard_element] recognizes the uncounted handles of the build by it.
+///
+/// [RawSyntaxNode::new]: crate::RawSyntaxNode::new
 pub(crate) struct CurrentArena<'a> {
     previous: *const GreenArena,
     _arena: std::marker::PhantomData<&'a GreenArena>,
 }
 
 impl<'a> CurrentArena<'a> {
-    /// Panics if the arena's build isn't open.
+    /// The arena must be the one of the running build of the caller's node cache.
     #[inline]
     pub(crate) fn enter(arena: &'a GreenArena) -> Self {
-        assert!(arena.is_open(), "the build of the arena has ended");
         let previous = CURRENT.with(|current| current.replace(arena));
         Self {
             previous,
@@ -395,9 +397,23 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     with_current(|arena| {
-        // SAFETY: a current arena is open, and the thread that runs its build made it current.
+        // SAFETY: the builder makes the arena of its running build current, on its thread.
         unsafe { crate::GreenNode::new_in(kind, slots, arena) }
     })
+}
+
+/// Drops a handle that a factory discards: forgets it if it's an uncounted handle to an element
+/// of the build the factory runs for, and drops it otherwise.
+pub(crate) fn discard_element(element: GreenElement) {
+    let tag = match &element {
+        crate::NodeOrToken::Node(node) => node.count_field(),
+        crate::NodeOrToken::Token(token) => token.count_field(),
+    };
+    if with_current(|arena| arena.is_some_and(|arena| arena.tag() == tag)) {
+        mem::forget(element);
+    } else {
+        drop(element);
+    }
 }
 
 /// Bitwise copies `handle`, for an arena to take over the copy an element holds.
@@ -412,7 +428,7 @@ pub(crate) unsafe fn duplicate<T>(handle: &T) -> T {
 
 #[cfg(test)]
 mod tests {
-    use crate::green::{GreenNode, GreenToken, NodeCache};
+    use crate::green::{GreenNode, GreenToken, GreenTokenData, NodeCache};
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
     use crate::{NodeOrToken, RawSyntaxKind, SyntaxNode, SyntaxToken};
 
@@ -533,20 +549,112 @@ mod tests {
         assert_eq!(builder.finish().to_string(), "ab");
     }
 
+    fn first_green_token(root: &SyntaxNode<RawLanguage>) -> *const GreenTokenData {
+        let token: crate::cursor::SyntaxToken = root.first_token().unwrap().into();
+        token.green()
+    }
+
     #[test]
-    fn builds_with_a_reused_cache_share_nothing() {
+    fn builds_with_a_reused_cache_share_elements() {
         let mut cache = NodeCache::default();
         let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
         build(&mut builder, &["a", "b"]);
         let first = builder.finish();
         let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
-        build(&mut builder, &["a", "b"]);
+        build(&mut builder, &["a", "c"]);
         let second = builder.finish();
 
-        let token = |root: &SyntaxNode<RawLanguage>| root.first_token().unwrap().key();
-        assert!(token(&first) != token(&second));
+        assert_eq!(first_green_token(&first), first_green_token(&second));
         drop((first, cache));
-        assert_eq!(second.to_string(), "ab");
+        assert_eq!(second.to_string(), "ac");
+    }
+
+    #[test]
+    fn earlier_tree_is_used_on_another_thread_during_a_build() {
+        let mut cache = NodeCache::default();
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        build(&mut builder, &["a", "b"]);
+        let first = builder.finish().as_send().unwrap();
+
+        let reader = std::thread::spawn(move || {
+            let root = first.into_node::<RawLanguage>().unwrap();
+            let texts: Vec<_> = (0..20)
+                .map(|_| root.first_token().unwrap().token_text())
+                .collect();
+            drop(root);
+            texts
+                .iter()
+                .map(|text| text.text().to_owned())
+                .collect::<String>()
+        });
+        let mut second = None;
+        for _ in 0..20 {
+            let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+            build(&mut builder, &["a", "b"]);
+            second = Some(builder.finish());
+        }
+        assert_eq!(reader.join().unwrap(), "a".repeat(20));
+        drop(cache);
+        assert_eq!(second.unwrap().to_string(), "ab");
+    }
+
+    #[test]
+    fn cache_replaces_an_arena_that_grew() {
+        let mut cache = NodeCache::default();
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        build(&mut builder, &["first"]);
+        let first = builder.finish();
+
+        // Distinct words never hit the cache, so the arena only grows.
+        let words: Vec<_> = (0..20_000).map(|i| format!("w{i}")).collect();
+        let words: Vec<_> = words.iter().map(String::as_str).collect();
+        for _ in 0..3 {
+            let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+            build(&mut builder, &words);
+            drop(builder.finish());
+        }
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        build(&mut builder, &["first"]);
+        let last = builder.finish();
+
+        // The cache replaced the arena, so the last build didn't reuse the first one's token.
+        assert_ne!(first_green_token(&first), first_green_token(&last));
+        drop(cache);
+        assert_eq!(
+            (first.to_string(), last.to_string()),
+            ("first".into(), "first".into())
+        );
+    }
+
+    /// A factory that drops the children of every node and makes an empty one.
+    #[derive(Debug)]
+    struct DroppingFactory;
+
+    impl crate::SyntaxFactory for DroppingFactory {
+        type Kind = RawLanguageKind;
+
+        fn make_syntax(
+            kind: RawLanguageKind,
+            children: crate::ParsedChildren<RawLanguageKind>,
+        ) -> crate::RawSyntaxNode<RawLanguageKind> {
+            drop(children.into_iter().collect::<Vec<_>>());
+            crate::RawSyntaxNode::new(kind, std::iter::empty())
+        }
+    }
+
+    #[test]
+    fn factory_drops_children_of_the_build() {
+        let mut cache = NodeCache::default();
+        let mut builder =
+            crate::TreeBuilder::<RawLanguage, DroppingFactory>::with_cache(&mut cache);
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token(RawLanguageKind::STRING_TOKEN, "a");
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish();
+        drop(cache);
+        assert_eq!(root.to_string(), "");
     }
 
     #[test]
@@ -576,7 +684,7 @@ mod tests {
         let mut cache = NodeCache::default();
         cache.begin_build();
         let (_, arena) = cache.node(kind, &[]);
-        // SAFETY: the build is open, and this thread runs it.
+        // SAFETY: the arena is the one of the running build.
         let node = unsafe {
             GreenNode::new_in(
                 kind,
@@ -589,8 +697,10 @@ mod tests {
         };
         assert_eq!(foreign.count_field(), 2);
         drop(other_green);
-        drop(node);
-        drop(cache.end_build());
+        // The handle of the build isn't counted.
+        std::mem::forget(node);
+        cache.end_build(None);
+        drop(cache);
         assert_eq!(foreign.count_field(), 1);
     }
 }
