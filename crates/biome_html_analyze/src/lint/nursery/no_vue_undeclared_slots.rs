@@ -77,7 +77,7 @@ declare_lint_rule! {
     /// </template>
     /// ```
     pub NoVueUndeclaredSlots {
-        version: "next",
+        version: "2.6.5",
         name: "noVueUndeclaredSlots",
         language: "html",
         sources: &[RuleSource::EslintVueJs("require-explicit-slots").inspired()],

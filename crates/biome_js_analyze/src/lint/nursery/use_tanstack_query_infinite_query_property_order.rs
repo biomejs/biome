@@ -77,7 +77,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTanstackQueryInfiniteQueryPropertyOrder {
-        version: "next",
+        version: "2.6.5",
         name: "useTanstackQueryInfiniteQueryPropertyOrder",
         language: "js",
         sources: &[RuleSource::EslintTanstackQuery("infinite-query-property-order").same()],

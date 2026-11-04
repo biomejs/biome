@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// - To report more comparisons that always give the same result, see [`noConstantBinaryExpressions`](https://biomejs.dev/linter/rules/no-constant-binary-expressions/).
     ///
     pub NoObjectLiteralComparison {
-        version: "next",
+        version: "2.6.5",
         name: "noObjectLiteralComparison",
         language: "js",
         recommended: true,

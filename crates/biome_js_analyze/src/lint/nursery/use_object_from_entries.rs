@@ -107,7 +107,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseObjectFromEntries {
-        version: "next",
+        version: "2.6.5",
         name: "useObjectFromEntries",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-object-from-entries").same()],

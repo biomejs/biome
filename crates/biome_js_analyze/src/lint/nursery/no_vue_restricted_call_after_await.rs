@@ -138,7 +138,7 @@ declare_lint_rule! {
     /// - [`noVueLifecycleAfterAwait`](https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await/) reports Vue lifecycle hooks, such as `onMounted()`, that are registered after an `await` in `setup()`.
     ///
     pub NoVueRestrictedCallAfterAwait {
-        version: "next",
+        version: "2.6.5",
         name: "noVueRestrictedCallAfterAwait",
         language: "js",
         recommended: false,

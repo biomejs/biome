@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessTypeAssertion {
-        version: "next",
+        version: "2.6.5",
         name: "noUselessTypeAssertion",
         language: "ts",
         recommended: true,

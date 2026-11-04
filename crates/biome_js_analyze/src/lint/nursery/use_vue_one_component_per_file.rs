@@ -74,7 +74,7 @@ declare_lint_rule! {
     /// - [Vue style guide: component files](https://vuejs.org/style-guide/rules-strongly-recommended.html#component-files)
     ///
     pub UseVueOneComponentPerFile {
-        version: "next",
+        version: "2.6.5",
         name: "useVueOneComponentPerFile",
         language: "js",
         recommended: true,

@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueEmitsValidatorReturn {
-        version: "next",
+        version: "2.6.5",
         name: "useVueEmitsValidatorReturn",
         language: "js",
         recommended: true,

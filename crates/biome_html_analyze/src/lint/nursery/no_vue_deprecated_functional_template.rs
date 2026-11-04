@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueDeprecatedFunctionalTemplate {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedFunctionalTemplate",
         language: "html",
         recommended: true,

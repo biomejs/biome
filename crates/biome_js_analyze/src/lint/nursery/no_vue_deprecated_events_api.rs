@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// </script>
     /// ```
     pub NoVueDeprecatedEventsApi {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedEventsApi",
         language: "js",
         sources: &[RuleSource::EslintVueJs("no-deprecated-events-api").inspired()],

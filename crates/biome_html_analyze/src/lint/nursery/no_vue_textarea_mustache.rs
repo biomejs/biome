@@ -41,7 +41,7 @@ declare_lint_rule! {
     ///
     /// - [Vue guide: multiline text in forms](https://vuejs.org/guide/essentials/forms.html#multiline-text)
     pub NoVueTextareaMustache {
-        version: "next",
+        version: "2.6.5",
         name: "noVueTextareaMustache",
         language: "html",
         recommended: true,

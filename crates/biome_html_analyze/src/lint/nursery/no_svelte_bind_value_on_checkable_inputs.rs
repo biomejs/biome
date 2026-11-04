@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// - [Svelte `bind:group`](https://svelte.dev/docs/svelte/bind#input-bind:group)
     ///
     pub NoSvelteBindValueOnCheckableInputs {
-        version: "next",
+        version: "2.6.5",
         name: "noSvelteBindValueOnCheckableInputs",
         language: "html",
         recommended: true,

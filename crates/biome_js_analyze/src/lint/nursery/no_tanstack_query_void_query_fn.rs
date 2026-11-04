@@ -112,7 +112,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTanstackQueryVoidQueryFn {
-        version: "next",
+        version: "2.6.5",
         name: "noTanstackQueryVoidQueryFn",
         language: "js",
         recommended: true,

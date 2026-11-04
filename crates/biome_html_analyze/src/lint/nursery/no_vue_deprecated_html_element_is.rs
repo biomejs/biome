@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// - [Vue 3 Migration Guide: Custom Elements Interop](https://v3-migration.vuejs.org/breaking-changes/custom-elements-interop.html#customized-built-in-elements)
     /// - [Vue `is` attribute](https://vuejs.org/api/built-in-special-attributes.html#is)
     pub NoVueDeprecatedHtmlElementIs {
-        version: "next",
+        version: "2.6.5",
         name: "noVueDeprecatedHtmlElementIs",
         language: "html",
         recommended: true,

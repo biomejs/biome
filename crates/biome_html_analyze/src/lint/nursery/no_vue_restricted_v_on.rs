@@ -162,7 +162,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueRestrictedVOn {
-        version: "next",
+        version: "2.6.5",
         name: "noVueRestrictedVOn",
         language: "html",
         recommended: false,
