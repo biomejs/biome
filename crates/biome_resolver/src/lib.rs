@@ -4,6 +4,7 @@ mod db;
 mod errors;
 mod resolver_fs_proxy;
 mod runtime_builtins;
+mod sass;
 
 use std::{borrow::Cow, cmp::Ordering, collections::HashSet, ops::Deref, sync::Arc};
 
@@ -22,6 +23,7 @@ pub use db::{
 pub use errors::*;
 pub use resolver_fs_proxy::*;
 pub use runtime_builtins::{is_builtin_bun_module, is_builtin_node_module};
+pub use sass::{SassLoadRule, resolve_sass};
 
 /// Resolves the given `specifier` from the given `base_dir`.
 ///
