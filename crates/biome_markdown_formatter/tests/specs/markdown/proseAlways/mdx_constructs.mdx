@@ -1,0 +1,24 @@
+import {Link, Badge, Card, Tip, Chart} from './components.js'
+
+See <Link href="https://example.com/docs/getting-started" target="_blank" rel="noopener">the docs</Link> for details.
+
+Total: {formatCurrency(order.items.reduce((sum, item) => sum + item.price * item.quantity, 0), "EUR")}
+
+A short one: <Badge   color='green' /> and {  value  }.
+
+- An item with <Badge   color='green' />
+- An item with <Card title="A rather long title for the card" description="And a long description too" />
+
+> A quote with {  value  } and <Tip type="warning" message="Remember to check the configuration before deploying" />
+
+<Chart data={[1, 2, 3]} title="A long block-level tag that is formatted across lines" description="because it stands alone" />
+
+This sentence is just long enough to wrap {count}
+
+Two tags close this paragraph, see <A /> <B />
+
+A paragraph
+split over
+lines with {an} expression and <C /> tag.
+
+{lead} unusually_long_identifier_that_cannot_fit_on_the_line

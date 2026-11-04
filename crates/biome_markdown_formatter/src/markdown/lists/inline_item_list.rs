@@ -1055,26 +1055,47 @@ impl FormatMdInlineItemList {
     }
 
     fn format_fill_segment(items: &[ProseItem], f: &mut MarkdownFormatter) -> FormatResult<()> {
-        let no_separator = format_with(|_| Ok(()));
         let mut fill = f.fill();
         let mut has_separator = false;
-        let mut previous_group = None;
+        let mut previous_group: Option<&WordGroup> = None;
+        let mut entry: Option<FillEntry> = None;
 
         for item in items {
             match item {
                 ProseItem::Space | ProseItem::SoftBreak => has_separator = true,
                 ProseItem::WordGroup(group) => {
-                    if group.starts_with_block_marker()
-                        || (has_separator
-                            && previous_group.is_some_and(|previous: &WordGroup| {
-                                previous.should_preserve_soft_break_before(group)
-                            }))
-                    {
-                        fill.entry(&space(), group);
-                    } else if has_separator {
-                        fill.entry(&soft_line_break_or_space(), group);
-                    } else {
-                        fill.entry(&no_separator, group);
+                    // A line that holds only inline MDX expressions and tags
+                    // is an MDX flow line, which is a block. A group made only
+                    // of these constructs therefore joins the entry before
+                    // it. At the start of the segment, where no entry comes
+                    // before it, it takes the groups after it until the entry
+                    // holds text.
+                    match &mut entry {
+                        Some(current)
+                            if group.is_mdx_construct_only() || current.is_mdx_construct_only() =>
+                        {
+                            current.groups.push((has_separator, group));
+                        }
+                        _ => {
+                            if let Some(previous) = entry.take() {
+                                previous.write(&mut fill);
+                            }
+                            let separator = if group.starts_with_block_marker()
+                                || (has_separator
+                                    && previous_group.is_some_and(|previous| {
+                                        previous.should_preserve_soft_break_before(group)
+                                    })) {
+                                FillSeparator::Space
+                            } else if has_separator {
+                                FillSeparator::SoftLineBreakOrSpace
+                            } else {
+                                FillSeparator::None
+                            };
+                            entry = Some(FillEntry {
+                                separator,
+                                groups: vec![(false, group)],
+                            });
+                        }
                     }
                     has_separator = false;
                     previous_group = Some(group);
@@ -1082,8 +1103,53 @@ impl FormatMdInlineItemList {
                 ProseItem::HardBreak(_) | ProseItem::OutdentedLineStart => {}
             }
         }
+        if let Some(entry) = entry {
+            entry.write(&mut fill);
+        }
 
         fill.finish()
+    }
+}
+
+/// The separator that precedes an entry of a prose fill.
+#[derive(Clone, Copy)]
+enum FillSeparator {
+    None,
+    Space,
+    SoftLineBreakOrSpace,
+}
+
+/// The word groups that form one entry of a prose fill, which the fill never
+/// breaks. Each group records whether whitespace precedes it.
+struct FillEntry<'a> {
+    separator: FillSeparator,
+    groups: Vec<(bool, &'a WordGroup)>,
+}
+
+impl FillEntry<'_> {
+    fn is_mdx_construct_only(&self) -> bool {
+        self.groups
+            .iter()
+            .all(|(_, group)| group.is_mdx_construct_only())
+    }
+
+    fn write(&self, fill: &mut FillBuilder<'_, '_, MarkdownFormatContext>) {
+        let content = format_with(|f| {
+            for (has_space, group) in &self.groups {
+                if *has_space {
+                    write!(f, [space()])?;
+                }
+                write!(f, [group])?;
+            }
+            Ok(())
+        });
+        match self.separator {
+            FillSeparator::None => fill.entry(&format_with(|_| Ok(())), &content),
+            FillSeparator::Space => fill.entry(&space(), &content),
+            FillSeparator::SoftLineBreakOrSpace => {
+                fill.entry(&soft_line_break_or_space(), &content)
+            }
+        };
     }
 }
 
