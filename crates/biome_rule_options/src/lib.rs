@@ -277,6 +277,7 @@ pub mod no_return_assign;
 pub mod no_return_in_finally;
 pub mod no_root_type;
 pub mod no_script_url;
+pub mod no_scss_null_comparison;
 pub mod no_secrets;
 pub mod no_self_assign;
 pub mod no_self_compare;

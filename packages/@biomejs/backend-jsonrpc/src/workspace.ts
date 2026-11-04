@@ -3243,6 +3243,11 @@ export interface Nursery {
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
+	 * Disallow comparing values to null in Sass @if conditions.
+	 * See https://biomejs.dev/linter/rules/no-scss-null-comparison
+	 */
+	noScssNullComparison?: NoScssNullComparisonConfiguration;
+	/**
 	 * Forbid a module from importing itself.
 	 * See https://biomejs.dev/linter/rules/no-self-import
 	 */
@@ -6615,6 +6620,9 @@ export type NoReturnArrayPushConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoScssNullComparisonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoScssNullComparisonOptions;
 export type NoSelfImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSelfImportOptions;
@@ -9628,6 +9636,10 @@ export interface RuleWithNoReturnArrayPushOptions {
 export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
+}
+export interface RuleWithNoScssNullComparisonOptions {
+	level: RulePlainConfiguration;
+	options?: NoScssNullComparisonOptions;
 }
 export interface RuleWithNoSelfImportOptions {
 	level: RulePlainConfiguration;
@@ -12829,6 +12841,7 @@ export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnArrayPushOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoScssNullComparisonOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSelfNestedLayerOptions = {};
 export interface NoShortTimeValuesOptions {
@@ -14924,15 +14937,15 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noChainedComparison"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noConsoleSpaces"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
@@ -14997,6 +15010,7 @@ export type Category =
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnArrayPush"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noScssNullComparison"
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSelfNestedLayer"
 	| "lint/nursery/noShortTimeValues"
@@ -15024,9 +15038,9 @@ export type Category =
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
 	| "lint/nursery/noUnmodifiedLoopCondition"
+	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"
-	| "lint/nursery/noUnnecessaryStringTrim"
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeReturn"
@@ -15062,22 +15076,22 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueDeprecatedSlotAttribute"
 	| "lint/nursery/noVueDeprecatedSlotScope"
+	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueExcessiveProps"
+	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueLoneTemplate"
 	| "lint/nursery/noVueMixin"
 	| "lint/nursery/noVueMultipleObjectsInClass"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
-	| "lint/nursery/noVueRestrictedCallAfterAwait"
-	| "lint/nursery/noVueDeprecatedVBindSync"
-	| "lint/nursery/noVueRootVIf"
-	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRestrictedCallAfterAwait"
 	| "lint/nursery/noVueRestrictedVOn"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueTemplateKey"
@@ -15196,9 +15210,9 @@ export type Category =
 	| "lint/nursery/useVueConsistentVForDelimiter"
 	| "lint/nursery/useVueConsistentVSlotStyle"
 	| "lint/nursery/useVueDefaultExport"
-	| "lint/nursery/useVueDefinePropsDestructuring"
-	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
+	| "lint/nursery/useVueDefineOptions"
+	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueEmitValidator"
 	| "lint/nursery/useVueEmitsValidatorReturn"
 	| "lint/nursery/useVueMacroVariableName"
@@ -15209,28 +15223,28 @@ export type Category =
 	| "lint/nursery/useVueRenderReturn"
 	| "lint/nursery/useVueSeparateStaticClass"
 	| "lint/nursery/useVueSingleEventPayload"
+	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueSlotsAsFunctions"
 	| "lint/nursery/useVueTemplateRef"
-	| "lint/nursery/useVueSlotNameCasing"
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedObjectProps"
 	| "lint/nursery/useVueTypedProps"
 	| "lint/nursery/useVueTypedRef"
+	| "lint/nursery/useVueVModel"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidAttributeName"
 	| "lint/nursery/useVueValidDefaultProp"
 	| "lint/nursery/useVueValidDefineEmits"
 	| "lint/nursery/useVueValidDefineOptions"
 	| "lint/nursery/useVueValidDefineProps"
 	| "lint/nursery/useVueValidNextTick"
-	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVMemo"
 	| "lint/nursery/useVueValidVModel"
-	| "lint/nursery/useVueVModel"
-	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
 	| "lint/nursery/useVueValidVSlot"
+	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

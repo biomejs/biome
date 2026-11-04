@@ -1,0 +1,446 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+a {
+  @if $x == null {}
+}
+
+a {
+  @if $x != null {}
+}
+
+a {
+  @if null == $x {}
+}
+
+a {
+  @if null != $x {}
+}
+
+a {
+  @if ($x == null) {}
+}
+
+a {
+  @if $a == 1 {} @else if $x == null {}
+}
+
+a {
+  @if $a == 1 {} @else if $x != null {}
+}
+
+a {
+  @if $y and $x == null {}
+}
+
+a {
+  @if $y or $x != null {}
+}
+
+a {
+  @if $x != null or $y {}
+}
+
+a {
+  @if $y and $x != null {}
+}
+
+a {
+  @if not ($x == null) {}
+}
+
+a {
+  @if not $x == null {}
+}
+
+a {
+  @if $x == null and $x > 1 {}
+}
+
+a {
+  @if ($x != null or $z) and $y {}
+}
+
+a {
+  @if map.get($map, "key") == null {}
+}
+
+@mixin m($x) {
+  @if $x == null {}
+}
+
+@function f($x) {
+  @if $x != null {
+    @return $x;
+  }
+  @return 0;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a {
+  > 3 │   @if $x == null {}
+      │       ^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:7:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    6 │ a {
+  > 7 │   @if $x != null {}
+      │       ^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:11:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    10 │ a {
+  > 11 │   @if null == $x {}
+       │       ^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:15:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    14 │ a {
+  > 15 │   @if null != $x {}
+       │       ^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:19:8 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    18 │ a {
+  > 19 │   @if ($x == null) {}
+       │        ^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:23:27 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    22 │ a {
+  > 23 │   @if $a == 1 {} @else if $x == null {}
+       │                           ^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:27:27 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    26 │ a {
+  > 27 │   @if $a == 1 {} @else if $x != null {}
+       │                           ^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:31:14 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    30 │ a {
+  > 31 │   @if $y and $x == null {}
+       │              ^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:35:13 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    34 │ a {
+  > 35 │   @if $y or $x != null {}
+       │             ^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:39:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    38 │ a {
+  > 39 │   @if $x != null or $y {}
+       │       ^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:43:14 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    42 │ a {
+  > 43 │   @if $y and $x != null {}
+       │              ^^^^^^^^^^
+    44 │ }
+    45 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:47:12 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    46 │ a {
+  > 47 │   @if not ($x == null) {}
+       │            ^^^^^^^^^^
+    48 │ }
+    49 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:51:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    50 │ a {
+  > 51 │   @if not $x == null {}
+       │       ^^^^^^^^^^^^^^
+    52 │ }
+    53 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:55:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    54 │ a {
+  > 55 │   @if $x == null and $x > 1 {}
+       │       ^^^^^^^^^^
+    56 │ }
+    57 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:59:8 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    58 │ a {
+  > 59 │   @if ($x != null or $z) and $y {}
+       │        ^^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:63:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    62 │ a {
+  > 63 │   @if map.get($map, "key") == null {}
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ }
+    65 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:67:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    66 │ @mixin m($x) {
+  > 67 │   @if $x == null {}
+       │       ^^^^^^^^^^
+    68 │ }
+    69 │ 
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Check the value with not instead, as in @if not $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:71:7 lint/nursery/noScssNullComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition compares a value to null.
+  
+    70 │ @function f($x) {
+  > 71 │   @if $x != null {
+       │       ^^^^^^^^^^
+    72 │     @return $x;
+    73 │   }
+  
+  i In Sass, null counts as false in a condition, so the comparison isn't needed.
+  
+  i Use the value as the condition instead, as in @if $value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
