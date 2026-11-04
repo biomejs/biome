@@ -783,15 +783,20 @@ pub(crate) struct PreorderMatching<'a, L: Language> {
     kinds: SyntaxKindSet<L>,
     /// Path from `start` to the node whose children are being read. Empty before
     /// the first call to `next` and after the traversal has left `start`.
+    ///
+    /// Below `start`, a node is on the path only if it matches `kinds` or has a
+    /// child node: any other node has no events to yield and nothing below it
+    /// to read.
     path: Vec<PathSegment<'a>>,
     entered_start: bool,
 }
 
 struct PathSegment<'a> {
     green: &'a GreenNodeData,
+    /// Index of the next slot of `green` to read.
+    next_slot: u32,
     slot: u32,
     offset: TextSize,
-    remaining_children: Children<'a>,
     is_match: bool,
     /// Allocated when this node or one of its descendants is yielded.
     node: Option<SyntaxNode>,
@@ -809,7 +814,7 @@ impl<'a, L: Language> PreorderMatching<'a, L> {
 
     pub fn skip_subtree(&mut self) {
         if let Some(segment) = self.path.last_mut() {
-            segment.remaining_children = Children::default();
+            segment.next_slot = u32::MAX;
         }
     }
 
@@ -840,9 +845,9 @@ impl<L: Language> Iterator for PreorderMatching<'_, L> {
             let is_match = self.kinds.matches_raw(green.kind());
             self.path.push(PathSegment {
                 green,
+                next_slot: 0,
                 slot: self.start.data().slot(),
                 offset: self.start.offset(),
-                remaining_children: green.children(),
                 is_match,
                 node: Some(self.start.clone()),
             });
@@ -853,23 +858,46 @@ impl<L: Language> Iterator for PreorderMatching<'_, L> {
 
         loop {
             let parent = self.path.last_mut()?;
-            let Some(child) = parent.remaining_children.next() else {
-                let left = self.path.pop()?;
-                if left.is_match {
-                    return left.node.map(WalkEvent::Leave);
+            let slots = parent.green.slice();
+            let next_child = slots
+                .get(parent.next_slot as usize..)
+                .unwrap_or_default()
+                .iter()
+                .enumerate()
+                .find_map(|(index, slot)| match slot {
+                    Slot::Node { rel_offset, node } => Some((index, *rel_offset, &**node)),
+                    Slot::Token { .. } | Slot::Empty { .. } => None,
+                });
+            let Some((index, rel_offset, green)) = next_child else {
+                // Only `is_match` and `node` are needed, so they are read in
+                // place instead of copying the whole segment out with `pop`.
+                let node = if parent.is_match {
+                    parent.node.take()
+                } else {
+                    None
+                };
+                self.path.truncate(self.path.len() - 1);
+                match node {
+                    Some(node) => return Some(WalkEvent::Leave(node)),
+                    None => continue,
                 }
-                continue;
             };
-            let GreenElementRef::Node(green) = child.element() else {
-                continue;
-            };
+            let slot = parent.next_slot + index as u32;
+            parent.next_slot = slot + 1;
             let is_match = self.kinds.matches_raw(green.kind());
-            let offset = parent.offset + child.rel_offset();
+            let has_child_node = green
+                .slice()
+                .iter()
+                .any(|slot| matches!(slot, Slot::Node { .. }));
+            if !is_match && !has_child_node {
+                continue;
+            }
+            let offset = parent.offset + rel_offset;
             self.path.push(PathSegment {
                 green,
-                slot: child.slot(),
+                next_slot: 0,
+                slot,
                 offset,
-                remaining_children: green.children(),
                 is_match,
                 node: None,
             });
@@ -1337,6 +1365,18 @@ mod tests {
                 ),
             ],
         );
+        // Nodes without child nodes, between and after nodes of the kinds they
+        // contain elsewhere.
+        let childless = detached_node(
+            EXPRESSION_LIST,
+            vec![
+                literal("4"),
+                Some(detached_node(CONDITION, vec![None]).into()),
+                Some(SyntaxToken::new_detached(RawLanguageKind::PLUS_TOKEN, "+", [], []).into()),
+                literal("5"),
+                Some(detached_node(CONDITION, vec![]).into()),
+            ],
+        );
         let leading_token = SyntaxToken::new_detached(RawLanguageKind::STRING_TOKEN, "'a'", [], []);
         detached_node(
             ROOT,
@@ -1345,6 +1385,7 @@ mod tests {
                 Some(condition.into()),
                 None,
                 Some(nested_literal.into()),
+                Some(childless.into()),
                 Some(detached_node(EXPRESSION_LIST, vec![]).into()),
             ],
         )
