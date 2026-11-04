@@ -28,6 +28,8 @@ use biome_languages::javascript::{JsEmbeddingKind, JsFileSource, MdxEmbeddingKin
 use biome_markdown_parser::parse_markdown_with_offset_and_cache;
 #[cfg(feature = "lang_mdx")]
 use biome_markdown_syntax::MarkdownSyntaxKind;
+#[cfg(feature = "lang_mdx")]
+use biome_markdown_syntax::text_ext::blank_quote_markers;
 use biome_markdown_syntax::{
     MarkdownLanguage, MarkdownSyntaxToken, MdFencedCodeBlock, MdFrontmatter, MdHtmlBlock, MdRoot,
 };
@@ -37,6 +39,8 @@ use biome_rowan::Direction;
 use biome_rowan::{AstNode, AstNodeList, NodeCache, TextRange, TextSize};
 #[cfg(feature = "lang_yaml")]
 use biome_yaml_parser::parse_yaml_with_offset_and_cache;
+#[cfg(feature = "lang_mdx")]
+use std::borrow::Cow;
 
 struct EmbedParseContext<'a, 'settings> {
     cache: &'a mut NodeCache,
@@ -127,15 +131,6 @@ fn push_mdx_snippets(
         let Some(element) = token.parent() else {
             continue;
         };
-        // The lines of a literal in a block quote start with `>` markers,
-        // which aren't JavaScript.
-        if token.text_trimmed().contains(['\n', '\r'])
-            && token
-                .ancestors()
-                .any(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
-        {
-            continue;
-        }
         let content_range = token.text_trimmed_range();
         let content = EmbedContent {
             element_range: element.text_trimmed_range(),
@@ -146,12 +141,19 @@ fn push_mdx_snippets(
         let file_source = DocumentFileSource::Js(
             JsFileSource::jsx().with_embedding_kind(JsEmbeddingKind::Mdx { kind }),
         );
-        if let Some(parse) = parse_code(
-            content.text.text(),
-            content.content_offset,
-            file_source,
-            context,
-        ) {
+        // The lines of a literal in a block quote start with the quote's `>`
+        // markers, which aren't JavaScript. Blanking them keeps the offsets
+        // of the parsed code aligned with the document.
+        let quote_depth = token
+            .ancestors()
+            .filter(|node| node.kind() == MarkdownSyntaxKind::MD_QUOTE)
+            .count();
+        let code = if quote_depth > 0 && content.text.text().contains(['\n', '\r']) {
+            Cow::Owned(blank_quote_markers(content.text.text(), quote_depth))
+        } else {
+            Cow::Borrowed(content.text.text())
+        };
+        if let Some(parse) = parse_code(&code, content.content_offset, file_source, context) {
             nodes.push((parse, content, file_source));
         }
     }

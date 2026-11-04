@@ -142,6 +142,31 @@ fn lint_mdx_files_with_javascript_syntax_errors() {
 }
 
 #[test]
+fn lint_mdx_files_with_javascript_syntax_errors_in_block_quotes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("file.mdx");
+    fs.insert(file_path.into(), "> {\n>   1 +\n> }\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_mdx_files_with_javascript_syntax_errors_in_block_quotes",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_mdx_files_with_embedded_formatting_disabled() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
