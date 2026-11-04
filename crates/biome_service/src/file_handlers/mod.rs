@@ -446,7 +446,7 @@ pub(crate) fn is_mdx_snippet(snippet: &ParsedSnippetOrigin, db: &WorkspaceDb) ->
 }
 
 #[cfg(not(feature = "lang_mdx"))]
-fn is_mdx_snippet(_snippet: &ParsedSnippetOrigin, _db: &WorkspaceDb) -> bool {
+pub(crate) fn is_mdx_snippet(_snippet: &ParsedSnippetOrigin, _db: &WorkspaceDb) -> bool {
     false
 }
 

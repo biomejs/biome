@@ -3,7 +3,8 @@ use super::{format, format_embeds_enabled, resolve_format_options};
 use crate::WorkspaceError;
 use crate::db::WorkspaceDb;
 use crate::file_handlers::{
-    ParsedOrigin, ParsedSnippetOrigin, css, graphql, grit, html, javascript, json, yaml,
+    ParsedOrigin, ParsedSnippetOrigin, css, graphql, grit, html, is_mdx_snippet, javascript, json,
+    yaml,
 };
 use crate::settings::{ServiceLanguage, SettingsWithEditor};
 use biome_css_formatter::CssFormatLanguage;
@@ -37,7 +38,9 @@ use rustc_hash::FxHashMap;
 ///
 /// Snippets stay as written when `markdown.formatter.formatEmbeds` is disabled
 /// for the file, when they contain syntax errors, or when the formatter of
-/// their language is disabled or unavailable.
+/// their language is disabled or unavailable. The JavaScript of MDX constructs
+/// is formatted regardless of `formatEmbeds`, because MDX compiles it into the
+/// document's module.
 pub(super) fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -46,7 +49,16 @@ pub(super) fn format_embedded(
     embedded_nodes: Vec<ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    if !format_embeds_enabled(settings.as_ref(), biome_path) {
+    let format_embeds = format_embeds_enabled(settings.as_ref(), biome_path);
+    let embedded_nodes = if format_embeds {
+        embedded_nodes
+    } else {
+        embedded_nodes
+            .into_iter()
+            .filter(|snippet| is_mdx_snippet(snippet, &workspace_db))
+            .collect()
+    };
+    if !format_embeds && embedded_nodes.is_empty() {
         return format(
             biome_path,
             document_file_source,

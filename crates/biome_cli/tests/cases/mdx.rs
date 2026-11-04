@@ -198,6 +198,43 @@ fn format_mdx_files_with_embedded_formatting_disabled() {
 }
 
 #[test]
+fn format_mdx_files_without_format_embeds() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // `formatEmbeds` is disabled: the JavaScript of the MDX constructs is
+    // formatted anyway, and the code block isn't.
+    fs.insert(
+        Utf8Path::new("biome.json").into(),
+        r#"{ "markdown": { "formatter": { "formatEmbeds": false } } }"#.as_bytes(),
+    );
+    let file_path = Utf8Path::new("file.mdx");
+    let content = "import {Chart} from './chart.js'\n\n<Chart   data={[1,2]} />\n\n```js\nconst   example = 1\n```\n";
+    fs.insert(file_path.into(), content.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        file_path,
+        "import { Chart } from \"./chart.js\";\n\n<Chart data={[1, 2]} />\n\n```js\nconst   example = 1\n```\n",
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_mdx_files_without_format_embeds",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn format_inline_and_contained_mdx_constructs() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
