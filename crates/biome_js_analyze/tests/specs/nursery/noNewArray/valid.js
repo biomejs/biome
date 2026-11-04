@@ -1,0 +1,19 @@
+/* should not generate diagnostics */
+const a1 = new Array();
+const a2 = new Array;
+const a3 = new Array(1, 2);
+const a4 = new Array(...items);
+const a5 = Array(1);
+const a6 = Array("x");
+const a7 = Array.from({ length: 1 });
+const a8 = new Foo("x");
+const a9 = new foo.Array("x");
+
+function f(Array) {
+	return new Array("x");
+}
+
+{
+	const Array = class {};
+	new Array(1);
+}

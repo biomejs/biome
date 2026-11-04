@@ -1,0 +1,145 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const a1 = new Array<string>("x");
+const a2 = new Array(1 as number);
+const a3 = new Array("x" as string);
+const a4 = new Array("x"!);
+const a5 = new Array("x" satisfies string);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:12 lint/nursery/noNewArray ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This new Array() call has a single argument, so its result depends on whether the argument is a number.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a1 = new Array<string>("x");
+      │            ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const a2 = new Array(1 as number);
+    4 │ const a3 = new Array("x" as string);
+  
+  i With a number, new Array() creates an empty array of that length. With any other value, it creates an array that holds the value.
+  
+  i Use an array literal such as [value] to create an array that holds the value, or Array.from({ length }) to create an array of a given length.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:12 lint/nursery/noNewArray ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This new Array() call has a single argument, so its result depends on whether the argument is a number.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a1 = new Array<string>("x");
+  > 3 │ const a2 = new Array(1 as number);
+      │            ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const a3 = new Array("x" as string);
+    5 │ const a4 = new Array("x"!);
+  
+  i With a number, new Array() creates an empty array of that length. With any other value, it creates an array that holds the value.
+  
+  i Use an array literal such as [value] to create an array that holds the value, or Array.from({ length }) to create an array of a given length.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:12 lint/nursery/noNewArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This new Array() call has a single argument, so its result depends on whether the argument is a number.
+  
+    2 │ const a1 = new Array<string>("x");
+    3 │ const a2 = new Array(1 as number);
+  > 4 │ const a3 = new Array("x" as string);
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const a4 = new Array("x"!);
+    6 │ const a5 = new Array("x" satisfies string);
+  
+  i With a number, new Array() creates an empty array of that length. With any other value, it creates an array that holds the value.
+  
+  i Use an array literal such as [value] to create an array that holds the value, or Array.from({ length }) to create an array of a given length.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an array literal.
+  
+    2 2 │   const a1 = new Array<string>("x");
+    3 3 │   const a2 = new Array(1 as number);
+    4   │ - const·a3·=·new·Array("x"·as·string);
+      4 │ + const·a3·=·["x"·as·string];
+    5 5 │   const a4 = new Array("x"!);
+    6 6 │   const a5 = new Array("x" satisfies string);
+  
+
+```
+
+```
+invalid.ts:5:12 lint/nursery/noNewArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This new Array() call has a single argument, so its result depends on whether the argument is a number.
+  
+    3 │ const a2 = new Array(1 as number);
+    4 │ const a3 = new Array("x" as string);
+  > 5 │ const a4 = new Array("x"!);
+      │            ^^^^^^^^^^^^^^^
+    6 │ const a5 = new Array("x" satisfies string);
+    7 │ 
+  
+  i With a number, new Array() creates an empty array of that length. With any other value, it creates an array that holds the value.
+  
+  i Use an array literal such as [value] to create an array that holds the value, or Array.from({ length }) to create an array of a given length.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an array literal.
+  
+    3 3 │   const a2 = new Array(1 as number);
+    4 4 │   const a3 = new Array("x" as string);
+    5   │ - const·a4·=·new·Array("x"!);
+      5 │ + const·a4·=·["x"!];
+    6 6 │   const a5 = new Array("x" satisfies string);
+    7 7 │   
+  
+
+```
+
+```
+invalid.ts:6:12 lint/nursery/noNewArray  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This new Array() call has a single argument, so its result depends on whether the argument is a number.
+  
+    4 │ const a3 = new Array("x" as string);
+    5 │ const a4 = new Array("x"!);
+  > 6 │ const a5 = new Array("x" satisfies string);
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i With a number, new Array() creates an empty array of that length. With any other value, it creates an array that holds the value.
+  
+  i Use an array literal such as [value] to create an array that holds the value, or Array.from({ length }) to create an array of a given length.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an array literal.
+  
+    4 4 │   const a3 = new Array("x" as string);
+    5 5 │   const a4 = new Array("x"!);
+    6   │ - const·a5·=·new·Array("x"·satisfies·string);
+      6 │ + const·a5·=·["x"·satisfies·string];
+    7 7 │   
+  
+
+```
