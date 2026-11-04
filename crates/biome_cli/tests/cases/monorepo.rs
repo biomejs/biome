@@ -907,3 +907,49 @@ fn object_syntax_plugins_in_extended_config_missing_plugin_reports_error() {
         result,
     ));
 }
+
+#[test]
+fn nested_config_enables_type_aware_scan() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("nested_config_enables_type_aware_scan");
+
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+    fs.create_file(
+        "app/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//",
+    "linter": {
+        "domains": { "types": "all" },
+        "rules": { "nursery": { "noFloatingPromises": "error" } }
+    }
+}"#,
+    );
+    // The root configuration governs `shared/`, which the nested files import.
+    fs.create_file(
+        "shared/save.ts",
+        "export async function save(): Promise<void> {}\n",
+    );
+    fs.create_file(
+        "app/src/a.ts",
+        "import { save } from \"../../shared/save.ts\";\n\nasync function load(): Promise<void> {}\n\nexport function run() {\n\tload();\n\tsave();\n}\n",
+    );
+
+    fs.append_to_working_directory("app");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "nested_config_enables_type_aware_scan",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

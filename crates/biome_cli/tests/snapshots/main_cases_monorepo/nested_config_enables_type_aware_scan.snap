@@ -1,0 +1,104 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/nested_config_enables_type_aware_scan/app'
+```
+
+## `app/biome.json`
+
+```json
+{
+  "root": false,
+  "extends": "//",
+  "linter": {
+    "domains": { "types": "all" },
+    "rules": { "nursery": { "noFloatingPromises": "error" } }
+  }
+}
+```
+
+## `biome.json`
+
+```json
+{ "root": true }
+```
+
+## `app/src/a.ts`
+
+```ts
+import { save } from "../../shared/save.ts";
+
+async function load(): Promise<void> {}
+
+export function run() {
+	load();
+	save();
+}
+
+```
+
+## `shared/save.ts`
+
+```ts
+export async function save(): Promise<void> {}
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/a.ts:6:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    5 │ export function run() {
+  > 6 │ 	load();
+      │ 	^^^^^^^
+    7 │ 	save();
+    8 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+src/a.ts:7:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    5 │ export function run() {
+    6 │ 	load();
+  > 7 │ 	save();
+      │ 	^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 2 errors.
+```

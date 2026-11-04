@@ -145,7 +145,7 @@ use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::handler::Handler;
 use crate::runner::impls::watchers::default::DefaultWatcher;
 use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload};
-use crate::runner::scan_kind::derive_best_scan_kind;
+use crate::runner::scan_kind::{derive_best_scan_kind, derive_nested_scan_kind};
 use crate::runner::watcher::{Watcher, WatcherEvent};
 use crate::{CliDiagnostic, CliSession, setup_cli_subscriber};
 use biome_configuration::Configuration;
@@ -494,28 +494,41 @@ pub(crate) trait CommandRunner {
         let computed_scan_kind =
             execution.scan_kind_computer(ProjectScanComputer::new(&configuration));
 
+        let minimal_scan_kind = self.minimal_scan_kind();
         let scan_kind = derive_best_scan_kind(
             computed_scan_kind,
             stdin.as_deref(),
             &root_configuration_dir,
             &working_dir,
             &configuration,
-            self.minimal_scan_kind(),
+            minimal_scan_kind.clone(),
         );
 
         // Scan the project
         let scan_kind =
             execution.compute_scan_kind(paths.as_slice(), working_dir.as_path(), scan_kind);
 
+        let extended_configurations: Vec<_> = extended_configurations
+            .into_iter()
+            .map(|(path, config)| (BiomePath::from(path), config))
+            .collect();
+
+        // The scan finds the nested configurations, which can require a scan
+        // kind that indexes more files than the root configuration requires.
+        // Commands that derive their scan kind from the configuration keep a
+        // copy of the root settings, because the nested configurations that
+        // extend the root configuration are merged into it, and the root
+        // settings are registered again with the stronger scan kind.
+        let root_settings =
+            (minimal_scan_kind.is_none() && stdin.is_none() && !scan_kind.is_type_aware())
+                .then(|| (configuration.clone(), extended_configurations.clone()));
+
         // Update the settings of the project
         let result = workspace.update_settings(UpdateSettingsParams {
             project_key: open_project_result.project_key,
             workspace_directory: Some(BiomePath::new(project_dir)),
             configuration,
-            extended_configurations: extended_configurations
-                .into_iter()
-                .map(|(path, config)| (BiomePath::from(path), config))
-                .collect(),
+            extended_configurations,
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         })?;
         if self.should_validate_configuration_diagnostics() {
@@ -526,13 +539,55 @@ pub(crate) trait CommandRunner {
             )?;
         }
 
-        let result = workspace.scan_project(ScanProjectParams {
+        let mut result = workspace.scan_project(ScanProjectParams {
             project_key: open_project_result.project_key,
             watch: self.is_watch_mode(),
             force: cli_options.use_server && !self.is_watch_mode(),
-            scan_kind,
+            scan_kind: scan_kind.clone(),
             verbose: cli_options.verbose,
         })?;
+
+        if let Some((root_configuration, root_extended_configurations)) = root_settings
+            && let Some(nested_scan_kind) = derive_nested_scan_kind(
+                fs,
+                project_dir,
+                &root_configuration,
+                &result.configuration_files,
+                &scan_kind,
+                |configuration| {
+                    derive_best_scan_kind(
+                        execution.scan_kind_computer(ProjectScanComputer::new(configuration)),
+                        None,
+                        &root_configuration_dir,
+                        &working_dir,
+                        configuration,
+                        None,
+                    )
+                },
+            )
+        {
+            info!("Scanning the project again with {nested_scan_kind:?} for nested configurations");
+            // Files that the root settings govern, such as the dependencies of
+            // the nested projects, need the same module graph resolution. The
+            // root settings are unchanged, so their diagnostics were already
+            // printed after the first registration.
+            workspace.update_settings(UpdateSettingsParams {
+                project_key: open_project_result.project_key,
+                workspace_directory: Some(BiomePath::new(project_dir)),
+                configuration: root_configuration,
+                extended_configurations: root_extended_configurations,
+                module_graph_resolution_kind: ModuleGraphResolutionKind::from(&nested_scan_kind),
+            })?;
+            let first_scan_duration = result.duration;
+            result = workspace.scan_project(ScanProjectParams {
+                project_key: open_project_result.project_key,
+                watch: self.is_watch_mode(),
+                force: true,
+                scan_kind: nested_scan_kind,
+                verbose: cli_options.verbose,
+            })?;
+            result.duration += first_scan_duration;
+        }
 
         if self.should_validate_configuration_diagnostics() {
             print_diagnostics_from_workspace_result(
