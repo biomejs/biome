@@ -76,7 +76,7 @@ impl Rule for NoGlobalAssign {
         let token = assignment.name_token().ok()?;
 
         let source_type = ctx.source_type::<JsFileSource>();
-        if source_type.as_embedding_kind().is_svelte()
+        if source_type.as_embedding_kind().is_svelte_instance_script()
             && is_svelte_reactive_declaration(assignment)
         {
             return None;
@@ -126,33 +126,26 @@ impl Rule for NoGlobalAssign {
 /// `length` in `$: length = 2` or in `$: ({ length } = value)`.
 ///
 /// Svelte declares a component variable for each target of such a statement, so the assignment
-/// doesn't reach a global. Assignments nested in a block or another expression, such as
-/// `$: { length = 2 }` or `$: x = (length = 2)`, don't declare anything.
+/// doesn't reach a global. Nothing is declared for an assignment in a block or another
+/// expression, such as `$: { length = 2 }` or `$: x = (length = 2)`, or for a variable that is
+/// only updated, such as `top` in `$: length = top++`.
 fn is_svelte_reactive_declaration(assignment: &JsIdentifierAssignment) -> bool {
-    let Some(assignment_expression) = assignment
+    // The nearest enclosing expression is the assignment when `assignment` is one of its targets,
+    // and an update expression such as `top++` when it isn't.
+    let Some(AnyJsExpression::JsAssignmentExpression(assignment_expression)) = assignment
         .syntax()
         .ancestors()
-        .find_map(JsAssignmentExpression::cast)
+        .skip(1)
+        .find_map(AnyJsExpression::cast)
     else {
         return false;
     };
     if assignment_expression.operator() != Ok(JsAssignmentOperator::Assign) {
         return false;
     }
-    let mut expression = AnyJsExpression::from(assignment_expression);
-    while let Some(parent) = expression
-        .syntax()
-        .parent()
-        .and_then(AnyJsExpression::cast)
-    {
-        if parent.as_js_parenthesized_expression().is_none() {
-            return false;
-        }
-        expression = parent;
-    }
-    expression
-        .syntax()
-        .parent()
+    AnyJsExpression::from(assignment_expression)
+        .outer_expression()
+        .and_then(|expression| expression.syntax().parent())
         .and_then(JsExpressionStatement::cast)
         .and_then(|statement| statement.syntax().parent())
         .and_then(JsLabeledStatement::cast)

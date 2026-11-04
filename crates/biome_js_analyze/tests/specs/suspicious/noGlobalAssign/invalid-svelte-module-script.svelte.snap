@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-module-script.svelte
+---
+# Input
+```svelte
+<script module>
+	// A module script doesn't declare reactive variables, so this assigns to the global.
+	$: length = 2;
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-module-script.svelte:3:5 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    1 │ <script module>
+    2 │ 	// A module script doesn't declare reactive variables, so this assigns to the global.
+  > 3 │ 	$: length = 2;
+      │ 	   ^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```

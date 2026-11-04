@@ -8,6 +8,8 @@
 	$: if (expanded) parent = 1;
 	$: x = (status = 1);
 	$: self += 1;
+	// Only `name` is declared here; `top` is the global.
+	$: name = top++;
 
 	function update() {
 		$: top = 1;

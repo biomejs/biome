@@ -14,6 +14,8 @@ expression: invalid-svelte-reactive-statement.svelte
 	$: if (expanded) parent = 1;
 	$: x = (status = 1);
 	$: self += 1;
+	// Only `name` is declared here; `top` is the global.
+	$: name = top++;
 
 	function update() {
 		$: top = 1;
@@ -71,7 +73,7 @@ invalid-svelte-reactive-statement.svelte:9:10 lint/suspicious/noGlobalAssign ━
    > 9 │ 	$: x = (status = 1);
        │ 	        ^^^^^^
     10 │ 	$: self += 1;
-    11 │ 
+    11 │ 	// Only `name` is declared here; `top` is the global.
   
   i Assigning to a global variable can override essential functionality.
   
@@ -89,8 +91,8 @@ invalid-svelte-reactive-statement.svelte:10:5 lint/suspicious/noGlobalAssign ━
      9 │ 	$: x = (status = 1);
   > 10 │ 	$: self += 1;
        │ 	   ^^^^
-    11 │ 
-    12 │ 	function update() {
+    11 │ 	// Only `name` is declared here; `top` is the global.
+    12 │ 	$: name = top++;
   
   i Assigning to a global variable can override essential functionality.
   
@@ -100,15 +102,34 @@ invalid-svelte-reactive-statement.svelte:10:5 lint/suspicious/noGlobalAssign ━
 ```
 
 ```
-invalid-svelte-reactive-statement.svelte:13:6 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━
+invalid-svelte-reactive-statement.svelte:12:12 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━
 
   × A global variable should not be reassigned.
   
-    12 │ 	function update() {
-  > 13 │ 		$: top = 1;
+    10 │ 	$: self += 1;
+    11 │ 	// Only `name` is declared here; `top` is the global.
+  > 12 │ 	$: name = top++;
+       │ 	          ^^^
+    13 │ 
+    14 │ 	function update() {
+  
+  i Assigning to a global variable can override essential functionality.
+  
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
+
+```
+
+```
+invalid-svelte-reactive-statement.svelte:15:6 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    14 │ 	function update() {
+  > 15 │ 		$: top = 1;
        │ 		   ^^^
-    14 │ 	}
-    15 │ </script>
+    16 │ 	}
+    17 │ </script>
   
   i Assigning to a global variable can override essential functionality.
   
