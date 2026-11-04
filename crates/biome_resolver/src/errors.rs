@@ -7,6 +7,10 @@ use camino::Utf8PathBuf;
 /// List of possible errors that may occur during resolution.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ResolveError {
+    /// A Sass URL matched more than one file of equal precedence, such as
+    /// both `theme.scss` and `_theme.scss`.
+    AmbiguousSassUrl,
+
     /// Couldn't resolve due to a broken symlink.
     BrokenSymlink,
 
@@ -41,6 +45,7 @@ pub enum ResolveError {
 impl Display for ResolveError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AmbiguousSassUrl => f.write_str("matches more than one file"),
             Self::BrokenSymlink => f.write_str("broken symlink"),
             Self::DirectoryWithoutDefault => f.write_str("found directory without index"),
             Self::ErrorLoadingManifest => f.write_str("error loading manifest"),
