@@ -572,6 +572,7 @@ pub mod use_for_of;
 pub mod use_fragment_syntax;
 pub mod use_generic_font_names;
 pub mod use_getter_return;
+pub mod use_global_regex_in_match_all;
 pub mod use_global_regex_in_replace_all;
 pub mod use_global_this;
 pub mod use_google_font_display;

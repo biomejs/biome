@@ -452,6 +452,7 @@ define_categories! {
     "lint/nursery/useFencedCodeLanguage": "https://biomejs.dev/linter/rules/use-fenced-code-language",
     "lint/nursery/useFind": "https://biomejs.dev/linter/rules/use-find",
     "lint/nursery/useFlatMathMinMax": "https://biomejs.dev/linter/rules/use-flat-math-min-max",
+    "lint/nursery/useGlobalRegexInMatchAll": "https://biomejs.dev/linter/rules/use-global-regex-in-match-all",
     "lint/nursery/useGlobalRegexInReplaceAll": "https://biomejs.dev/linter/rules/use-global-regex-in-replace-all",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useIncludes": "https://biomejs.dev/linter/rules/use-includes",
