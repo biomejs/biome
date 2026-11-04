@@ -4529,6 +4529,22 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDynamicRequireConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDynamicRequireOptions" }
+			]
+		},
+		"NoDynamicRequireOptions": {
+			"type": "object",
+			"properties": {
+				"checkDynamicImports": {
+					"description": "Also report `import()` calls whose module name isn't a fixed string.\nDisabled by default.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoEagerArrayMethodsInLoopsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9307,6 +9323,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDynamicRequire": {
+					"description": "Disallow require() calls whose module name isn't a fixed string.\nSee https://biomejs.dev/linter/rules/no-dynamic-require",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDynamicRequireConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noEagerArrayMethodsInLoops": {
 					"description": "Disallow .map() and .filter() calls in the header of for...of loops.\nSee https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops",
 					"anyOf": [
@@ -13213,6 +13236,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDynamicNamespaceImportAccessOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDynamicRequireOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDynamicRequireOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
