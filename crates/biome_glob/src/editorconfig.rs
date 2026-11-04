@@ -223,7 +223,7 @@ fn convert_glob(mut pattern: String) -> Result<String, EditorconfigGlobError> {
         },
         ConvertNumericRange {
             indexes: std::ops::Range<usize>,
-            range: std::ops::Range<usize>,
+            range: std::ops::Range<isize>,
         },
     }
     // As in the reference implementation, a single unmatched brace makes every brace literal.
@@ -468,6 +468,13 @@ mod tests {
         assert_eq!(convert_valid_glob("{10..12}"), "**/{10,11,12}");
         assert_eq!(convert_valid_glob("{10..10}"), "**/{10}");
 
+        assert_eq!(convert_valid_glob("{-3..3}"), "**/{-3,-2,-1,0,1,2,3}");
+        assert_eq!(convert_valid_glob("{-3..-1}"), "**/{-3,-2,-1}");
+        assert_eq!(convert_valid_glob("{-1..+1}"), "**/{-1,0,1}");
+        assert_eq!(convert_valid_glob("{-1..-1}"), "**/{-1}");
+        assert!(super::convert_glob("{1..-1}".into()).is_err());
+        assert!(super::convert_glob("{-1..-3}".into()).is_err());
+
         assert_eq!(convert_valid_glob(r"\{0..0}"), r"**/\{0..0\}");
         assert_eq!(convert_valid_glob("{a..b}"), r"**/\{a..b\}");
 
@@ -671,6 +678,15 @@ mod tests {
         assert!(is_matching(&glob, "120"));
         assert!(!is_matching(&glob, "121"));
         assert!(!is_matching(&glob, "060"));
+
+        // numeric brace range with a negative start
+        glob = "{-3..3}".parse().unwrap();
+        assert!(!is_matching(&glob, "-4"));
+        assert!(is_matching(&glob, "-3"));
+        assert!(is_matching(&glob, "0"));
+        assert!(is_matching(&glob, "3"));
+        assert!(!is_matching(&glob, "4"));
+        assert!(!is_matching(&glob, "{-3..3}"));
 
         // alphabetical brace range: letters should not be considered for ranges
         glob = "{aardvark..antelope}".parse().unwrap();
