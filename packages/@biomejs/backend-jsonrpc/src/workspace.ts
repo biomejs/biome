@@ -3153,7 +3153,7 @@ export interface Nursery {
 	 */
 	noNestedTemplateLiterals?: NoNestedTemplateLiteralsConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow new Array() with a single argument.
 	 * See https://biomejs.dev/linter/rules/no-new-array
 	 */
 	noNewArray?: NoNewArrayConfiguration;
@@ -9546,6 +9546,10 @@ export interface RuleWithNoNestedTemplateLiteralsOptions {
 	options?: NoNestedTemplateLiteralsOptions;
 }
 export interface RuleWithNoNewArrayOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoNewArrayOptions;
 }
