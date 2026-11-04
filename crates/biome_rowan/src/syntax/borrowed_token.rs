@@ -67,6 +67,63 @@ impl<'a, L: Language> Iterator for BorrowedTokensIterator<'a, L> {
 
 impl<L: Language> FusedIterator for BorrowedTokensIterator<'_, L> {}
 
+/// Iterator over the tokens in a node's subtree whose leading or trailing
+/// trivia contains a comment, in source order.
+///
+/// Created by [SyntaxNode::borrowed_tokens_with_comments](crate::SyntaxNode::borrowed_tokens_with_comments).
+/// It skips every subtree without comments, so its cost depends on where the
+/// comments are, not on the size of the tree.
+pub struct BorrowedTokensWithCommentsIterator<'a, L: Language> {
+    /// Same as [BorrowedTokensIterator::pending_children], for the nodes that
+    /// have comments.
+    pending_children: Vec<(slice::Iter<'a, Slot>, TextSize)>,
+    _p: PhantomData<L>,
+}
+
+impl<'a, L: Language> BorrowedTokensWithCommentsIterator<'a, L> {
+    /// Creates the iterator for `node`, whose range starts at `offset`.
+    pub(super) fn new(node: &'a GreenNodeData, offset: TextSize) -> Self {
+        let pending_children = if node.has_comments() {
+            vec![(node.slice().iter(), offset)]
+        } else {
+            Vec::new()
+        };
+        Self {
+            pending_children,
+            _p: PhantomData,
+        }
+    }
+}
+
+impl<'a, L: Language> Iterator for BorrowedTokensWithCommentsIterator<'a, L> {
+    type Item = BorrowedToken<'a, L>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let (slots, node_offset) = self.pending_children.last_mut()?;
+            match slots.next() {
+                Some(Slot::Token { rel_offset, token }) if token.has_comments() => {
+                    return Some(BorrowedToken {
+                        green: token,
+                        offset: *node_offset + *rel_offset,
+                        _p: PhantomData,
+                    });
+                }
+                Some(Slot::Node { rel_offset, node }) if node.has_comments() => {
+                    let offset = *node_offset + *rel_offset;
+                    self.pending_children.push((node.slice().iter(), offset));
+                }
+                Some(_) => {}
+                None => {
+                    self.pending_children.pop();
+                }
+            }
+        }
+    }
+}
+
+impl<L: Language> FusedIterator for BorrowedTokensWithCommentsIterator<'_, L> {}
+
 /// A token that borrows from the tree of the node it was reached from.
 pub struct BorrowedToken<'a, L: Language> {
     green: &'a GreenTokenData,
@@ -351,6 +408,46 @@ mod tests {
             tokens,
             expected(condition.descendants_tokens(Direction::Next))
         );
+    }
+
+    /// Ranges of the tokens with a comment in their trivia, read through
+    /// the cursor API.
+    fn expected_with_comments(node: &SyntaxNode<RawLanguage>) -> Vec<TextRange> {
+        node.descendants_tokens(Direction::Next)
+            .filter(|token| token.has_leading_comments() || token.has_trailing_comments())
+            .map(|token| token.text_range())
+            .collect()
+    }
+
+    fn borrowed_with_comments(node: &SyntaxNode<RawLanguage>) -> Vec<TextRange> {
+        node.borrowed_tokens_with_comments()
+            .map(|token| token.text_range())
+            .collect()
+    }
+
+    #[test]
+    fn with_comments_matches_the_tokens_with_comments() {
+        let root = tree();
+
+        let tokens = borrowed_with_comments(&root);
+
+        assert_eq!(tokens.len(), 3);
+        assert_eq!(tokens, expected_with_comments(&root));
+        for node in root.descendants() {
+            assert_eq!(borrowed_with_comments(&node), expected_with_comments(&node));
+        }
+    }
+
+    #[test]
+    fn with_comments_yields_nothing_without_comments() {
+        let root = tree();
+        // Only skipped trivia, which isn't a comment.
+        let list = child(&root, RawLanguageKind::SEPARATED_EXPRESSION_LIST)
+            .last_child()
+            .unwrap();
+
+        assert!(list.has_skipped_descendants());
+        assert_eq!(list.borrowed_tokens_with_comments().count(), 0);
     }
 
     #[test]
