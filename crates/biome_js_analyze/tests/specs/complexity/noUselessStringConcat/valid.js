@@ -4,8 +4,6 @@ const a = 1 * '2'
 const a = 1 - 2
 const a = foo + bar
 const a = 'foo' + bar
-const a = foo + 'a' + 'b'
-const a = foo + `a` + `b`
 const a = (number + 1) + 'px'
 const a = (1 + +2) + `b`
 const stylisticConcat = 'foo' + // formatting
@@ -30,3 +28,11 @@ const middleErrors = 1 +
   "longStringThatGoesOverLimit" +
   3
 const plusplusone = +1 + "ddd"
+// Only `+` joins strings
+const a = obj.foo * 'a' + 'b'
+const a = obj.foo - 'a' + 'b'
+const a = ('a' - 'b') + 'c'
+// The literals aren't next to each other
+const a = 'z' + (foo + 'a')
+const a = foo + 'a' + (bar + 'b')
+const a = (foo + 'a') + (bar + 'b')
