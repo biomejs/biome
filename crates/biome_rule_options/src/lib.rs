@@ -70,6 +70,7 @@ pub mod no_document_import_in_page;
 pub mod no_done_callback;
 pub mod no_double_comparison;
 pub mod no_double_equals;
+pub mod no_drizzle_db_object_inside_transaction;
 pub mod no_drizzle_delete_without_where;
 pub mod no_drizzle_update_without_where;
 pub mod no_duplicate_argument_names;

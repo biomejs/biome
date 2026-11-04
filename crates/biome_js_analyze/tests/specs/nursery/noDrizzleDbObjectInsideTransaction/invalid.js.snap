@@ -1,0 +1,222 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+import { db } from "./db";
+
+// query on the database object inside the callback
+await db.transaction(async (tx) => {
+	await db.insert(users).values({ name: "John" });
+});
+
+// non-async callback
+db.transaction(function () {
+	return db.select().from(users);
+});
+
+// passed as an argument
+await db.transaction(async (tx) => {
+	await createUser(db, "John");
+});
+
+// passed as a shorthand property
+await db.transaction(async (tx) => {
+	await createUser({ db, name: "John" });
+});
+
+// inside a nested function
+await db.transaction(async (tx) => {
+	await Promise.all(ids.map((id) => db.delete(users).where(eq(users.id, id))));
+});
+
+// nested transaction started on the database object
+await db.transaction(async (tx) => {
+	await db.transaction(async (tx2) => {});
+});
+
+// inside a nested transaction started on the transaction object
+await db.transaction(async (tx) => {
+	await tx.transaction(async (tx2) => {
+		await db.select().from(users);
+	});
+});
+
+// any configured object name, declared outside the file
+await database.transaction(async (tx) => {
+	await database.select().from(users);
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:7:8 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    5 │ // query on the database object inside the callback
+    6 │ await db.transaction(async (tx) => {
+  > 7 │ 	await db.insert(users).values({ name: "John" });
+      │ 	      ^^
+    8 │ });
+    9 │ 
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:9 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    10 │ // non-async callback
+    11 │ db.transaction(function () {
+  > 12 │ 	return db.select().from(users);
+       │ 	       ^^
+    13 │ });
+    14 │ 
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:19 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    15 │ // passed as an argument
+    16 │ await db.transaction(async (tx) => {
+  > 17 │ 	await createUser(db, "John");
+       │ 	                 ^^
+    18 │ });
+    19 │ 
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:21 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    20 │ // passed as a shorthand property
+    21 │ await db.transaction(async (tx) => {
+  > 22 │ 	await createUser({ db, name: "John" });
+       │ 	                   ^^
+    23 │ });
+    24 │ 
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:36 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    25 │ // inside a nested function
+    26 │ await db.transaction(async (tx) => {
+  > 27 │ 	await Promise.all(ids.map((id) => db.delete(users).where(eq(users.id, id))));
+       │ 	                                  ^^
+    28 │ });
+    29 │ 
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:8 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    30 │ // nested transaction started on the database object
+    31 │ await db.transaction(async (tx) => {
+  > 32 │ 	await db.transaction(async (tx2) => {});
+       │ 	      ^^
+    33 │ });
+    34 │ 
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:9 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i db is used inside db.transaction().
+  
+    36 │ await db.transaction(async (tx) => {
+    37 │ 	await tx.transaction(async (tx2) => {
+  > 38 │ 		await db.select().from(users);
+       │ 		      ^^
+    39 │ 	});
+    40 │ });
+  
+  i Queries made with db run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:44:8 lint/nursery/noDrizzleDbObjectInsideTransaction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i database is used inside database.transaction().
+  
+    42 │ // any configured object name, declared outside the file
+    43 │ await database.transaction(async (tx) => {
+  > 44 │ 	await database.select().from(users);
+       │ 	      ^^^^^^^^
+    45 │ });
+    46 │ 
+  
+  i Queries made with database run outside the transaction, so they aren't rolled back with it and can deadlock waiting for its locks.
+  
+  i Use the transaction object passed to the callback instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

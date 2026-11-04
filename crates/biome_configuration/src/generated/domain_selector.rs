@@ -12,6 +12,7 @@ static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static DRIZZLE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noDrizzleDbObjectInsideTransaction"),
         RuleFilter::Rule("suspicious", "noDrizzleDeleteWithoutWhere"),
         RuleFilter::Rule("suspicious", "noDrizzleUpdateWithoutWhere"),
     ]
