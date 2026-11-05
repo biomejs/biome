@@ -5302,6 +5302,7 @@ pub enum AnyHtmlElement {
     AstroFragment(AstroFragment),
     HtmlBogusElement(HtmlBogusElement),
     HtmlCdataSection(HtmlCdataSection),
+    HtmlDirective(HtmlDirective),
     HtmlElement(HtmlElement),
     HtmlProcessingInstruction(HtmlProcessingInstruction),
     HtmlSelfClosingElement(HtmlSelfClosingElement),
@@ -5328,6 +5329,12 @@ impl AnyHtmlElement {
     pub fn as_html_cdata_section(&self) -> Option<&HtmlCdataSection> {
         match &self {
             Self::HtmlCdataSection(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_html_directive(&self) -> Option<&HtmlDirective> {
+        match &self {
+            Self::HtmlDirective(item) => Some(item),
             _ => None,
         }
     }
@@ -12661,6 +12668,11 @@ impl From<HtmlCdataSection> for AnyHtmlElement {
         Self::HtmlCdataSection(node)
     }
 }
+impl From<HtmlDirective> for AnyHtmlElement {
+    fn from(node: HtmlDirective) -> Self {
+        Self::HtmlDirective(node)
+    }
+}
 impl From<HtmlElement> for AnyHtmlElement {
     fn from(node: HtmlElement) -> Self {
         Self::HtmlElement(node)
@@ -12682,6 +12694,7 @@ impl AstNode for AnyHtmlElement {
         .union(AstroFragment::KIND_SET)
         .union(HtmlBogusElement::KIND_SET)
         .union(HtmlCdataSection::KIND_SET)
+        .union(HtmlDirective::KIND_SET)
         .union(HtmlElement::KIND_SET)
         .union(HtmlProcessingInstruction::KIND_SET)
         .union(HtmlSelfClosingElement::KIND_SET);
@@ -12690,6 +12703,7 @@ impl AstNode for AnyHtmlElement {
             ASTRO_FRAGMENT
             | HTML_BOGUS_ELEMENT
             | HTML_CDATA_SECTION
+            | HTML_DIRECTIVE
             | HTML_ELEMENT
             | HTML_PROCESSING_INSTRUCTION
             | HTML_SELF_CLOSING_ELEMENT => true,
@@ -12702,6 +12716,7 @@ impl AstNode for AnyHtmlElement {
             ASTRO_FRAGMENT => Self::AstroFragment(AstroFragment { syntax }),
             HTML_BOGUS_ELEMENT => Self::HtmlBogusElement(HtmlBogusElement { syntax }),
             HTML_CDATA_SECTION => Self::HtmlCdataSection(HtmlCdataSection { syntax }),
+            HTML_DIRECTIVE => Self::HtmlDirective(HtmlDirective { syntax }),
             HTML_ELEMENT => Self::HtmlElement(HtmlElement { syntax }),
             HTML_PROCESSING_INSTRUCTION => {
                 Self::HtmlProcessingInstruction(HtmlProcessingInstruction { syntax })
@@ -12723,6 +12738,7 @@ impl AstNode for AnyHtmlElement {
             Self::AstroFragment(it) => it.syntax(),
             Self::HtmlBogusElement(it) => it.syntax(),
             Self::HtmlCdataSection(it) => it.syntax(),
+            Self::HtmlDirective(it) => it.syntax(),
             Self::HtmlElement(it) => it.syntax(),
             Self::HtmlProcessingInstruction(it) => it.syntax(),
             Self::HtmlSelfClosingElement(it) => it.syntax(),
@@ -12734,6 +12750,7 @@ impl AstNode for AnyHtmlElement {
             Self::AstroFragment(it) => it.into_syntax(),
             Self::HtmlBogusElement(it) => it.into_syntax(),
             Self::HtmlCdataSection(it) => it.into_syntax(),
+            Self::HtmlDirective(it) => it.into_syntax(),
             Self::HtmlElement(it) => it.into_syntax(),
             Self::HtmlProcessingInstruction(it) => it.into_syntax(),
             Self::HtmlSelfClosingElement(it) => it.into_syntax(),
@@ -12748,6 +12765,7 @@ impl std::fmt::Debug for AnyHtmlElement {
             Self::AstroFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlBogusElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlCdataSection(it) => std::fmt::Debug::fmt(it, f),
+            Self::HtmlDirective(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlElement(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlProcessingInstruction(it) => std::fmt::Debug::fmt(it, f),
             Self::HtmlSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
@@ -12761,6 +12779,7 @@ impl From<AnyHtmlElement> for SyntaxNode {
             AnyHtmlElement::AstroFragment(it) => it.into_syntax(),
             AnyHtmlElement::HtmlBogusElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlCdataSection(it) => it.into_syntax(),
+            AnyHtmlElement::HtmlDirective(it) => it.into_syntax(),
             AnyHtmlElement::HtmlElement(it) => it.into_syntax(),
             AnyHtmlElement::HtmlProcessingInstruction(it) => it.into_syntax(),
             AnyHtmlElement::HtmlSelfClosingElement(it) => it.into_syntax(),

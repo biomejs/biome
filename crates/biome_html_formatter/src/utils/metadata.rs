@@ -1026,6 +1026,7 @@ pub(crate) fn get_element_css_display(element: &AnyHtmlElement) -> CssDisplay {
         | AnyHtmlElement::AstroFragment(_)
         | AnyHtmlElement::HtmlBogusElement(_)
         | AnyHtmlElement::HtmlProcessingInstruction(_)
+        | AnyHtmlElement::HtmlDirective(_)
         | AnyHtmlElement::HtmlCdataSection(_) => CssDisplay::Inline,
     }
 }

@@ -755,6 +755,9 @@ pub(crate) fn parse_html_element(
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
         T![<?] => parse_processing_instruction(p),
+        // Astro hoists `<script>` and `<style>`, so a document type declaration can
+        // follow other markup instead of opening the file.
+        T![<] if Astro.is_supported(p) && p.nth_at(1, T![!]) => parse_doc_type(p),
         T![<] => parse_element(p, at_vue_sfc_top_level, in_math),
         // Astro turns expression parsing off inside MathML, so that LaTeX such
         // as `R^{2x}` and `R^{{2x}}` survives as text.

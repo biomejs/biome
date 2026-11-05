@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/doctype_after_script.astro
+---
+
+# Input
+
+```astro
+---
+import "../styles/global.css";
+---
+
+<script is:inline>
+</script>
+
+<!doctype html>
+<html lang="en">
+  <body></body>
+</html>
+
+```
+
+
+# Formatted
+
+```astro
+---
+import "../styles/global.css";
+---
+
+<script is:inline>
+</script>
+
+<!doctype html>
+<html lang="en">
+	<body></body>
+</html>
+
+```

@@ -265,6 +265,8 @@ fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: b
                 _ => false,
             }
         }
+        // A document type declaration renders nothing.
+        AnyHtmlElement::HtmlDirective(_) => false,
         AnyHtmlElement::HtmlBogusElement(_)
         | AnyHtmlElement::HtmlCdataSection(_)
         | AnyHtmlElement::HtmlProcessingInstruction(_) => true,
