@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{
     AnyScssIncludeTarget, CssImportAtRule, CssLanguage, CssLayerAtRule, CssNestedQualifiedRule,
-    CssQualifiedRule, CssSyntaxNode, ScssIncludeAtRule, ScssMixinAtRule,
+    CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, ScssIncludeAtRule, ScssMixinAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextSize, declare_node_union};
@@ -272,6 +272,7 @@ fn resolve_mixin(include: &ScssIncludeAtRule, called_at: TextSize) -> Option<Scs
             scope
                 .children()
                 .take_while(move |item| item.text_trimmed_range().end() <= called_at)
+                .filter(|item| item.kind() == CssSyntaxKind::CSS_AT_RULE)
                 .filter_map(|item| item.first_child().and_then(ScssMixinAtRule::cast))
         })
         .filter(|mixin| {
