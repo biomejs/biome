@@ -14,6 +14,7 @@ export * from "./js_ast";
 export * from "./semantic";
 
 declare const queriedNode: unique symbol;
+declare const queryContext: unique symbol;
 declare const nativeMutation: unique symbol;
 declare const nodeKindSet: unique symbol;
 declare const tokenKindSet: unique symbol;
@@ -24,14 +25,37 @@ declare const tokenKindSet: unique symbol;
  * `N` is the union of the node types matched by the query; it only exists at
  * the type level, to infer the argument type of {@link Rule#run}.
  */
-interface Query<N extends JsAstNode, K extends keyof ContextByQuery> {
-	readonly type: K;
-	readonly kinds: readonly (keyof JsNodeByKind)[];
+type QueryType<K extends keyof ContextByQuery> = K extends "gritSemantic" ? "grit" : K;
+
+interface Query<N extends JsAstNode | JsAstToken, K extends keyof ContextByQuery> {
+	readonly type: QueryType<K>;
 	readonly [queriedNode]?: N;
+	readonly [queryContext]?: K;
 }
 
-export type AstQuery<N extends JsAstNode> = Query<N, "ast">;
-export type SemanticQuery<N extends JsAstNode> = Query<N, "semantic">;
+export interface AstQuery<N extends JsAstNode> extends Query<N, "ast"> {
+	readonly kinds: readonly (keyof JsNodeByKind)[];
+}
+
+export interface SemanticQuery<N extends JsAstNode> extends Query<N, "semantic"> {
+	readonly kinds: readonly (keyof JsNodeByKind)[];
+}
+
+/**
+ * A query matching the nodes and tokens selected by a GritQL pattern, created
+ * with {@link grit}.
+ */
+export interface GritQuery extends Query<JsAstElement, "grit"> {
+	readonly pattern: string;
+}
+
+/**
+ * A Grit query created with `semantic: true`, whose `run` receives a semantic
+ * model.
+ */
+export interface SemanticGritQuery extends Query<JsAstElement, "gritSemantic"> {
+	readonly pattern: string;
+}
 
 /** File information supplied to each invocation of a rule. */
 export interface RuleContext {
@@ -50,6 +74,8 @@ export interface SemanticRuleContext extends RuleContext {
 type ContextByQuery = {
 	ast: RuleContext;
 	semantic: SemanticRuleContext;
+	grit: RuleContext;
+	gritSemantic: SemanticRuleContext;
 };
 
 /** JavaScript or TypeScript parsing settings for the analyzed source. */
@@ -94,17 +120,14 @@ export type JsEmbeddingKind =
  * A lint rule, created with {@link defineRule} and exported from the plugin
  * with `export const`. The name of the export is used as the rule name.
  */
-export interface Rule<
-	N extends JsAstNode,
-	K extends keyof ContextByQuery = "ast",
-> {
+export interface Rule<N extends JsAstElement, K extends keyof ContextByQuery = "ast"> {
 	/**
 	 * The query selecting the nodes the rule runs on.
 	 */
 	readonly query: Query<N, K>;
 
 	/**
-	 * Called with every node matching the query.
+	 * Called with every node, or token for Grit queries, matching the query.
 	 * `context` information is read-only
 	 *
 	 * For example, inspect declarations only in TypeScript sources:
@@ -149,13 +172,41 @@ export function semantic<K extends readonly (keyof JsNodeByKind)[]>(
 ): SemanticQuery<JsNodeByKind[K[number]]>;
 
 /**
+ * Creates a query matching the nodes and tokens selected by a GritQL pattern.
+ *
+ * The pattern runs against the analyzed file and `run` is called once for each
+ * match. When the pattern matches a list, such as several sibling statements,
+ * `run` is called for each node in the list. Patterns may also match leaf
+ * tokens, in which case `run` receives a token.
+ *
+ * The pattern cannot contain a rewrite. Report diagnostics from `run`
+ * instead. When the pattern matches a token, `run` receives a token and
+ * diagnostics can be reported on its `parent` node.
+ *
+ * Pass `{ semantic: true }` to provide a semantic model in `context`.
+ *
+ * For example, inspect console calls without a fixed list of syntax kinds:
+ * ```ts
+ * export const noConsole = defineRule({
+ *   query: grit("`console.log($args)`"),
+ *   run(element) {
+ *     if (element.kind !== "JS_CALL_EXPRESSION") return;
+ *     registerDiagnostic(element, "warning", "Unexpected console.log.");
+ *   },
+ * });
+ * ```
+ */
+export function grit(pattern: string): GritQuery;
+export function grit(pattern: string, options: { semantic: true }): SemanticGritQuery;
+export function grit(pattern: string, options?: { semantic?: false }): GritQuery;
+
+/**
  * Defines a lint rule. Export the returned rule with `export const` to
  * register it to the analyzer.
  */
-export function defineRule<
-	N extends JsAstNode,
-	K extends keyof ContextByQuery = "ast",
->(rule: Rule<N, K>): Rule<N, K>;
+export function defineRule<N extends JsAstElement, K extends keyof ContextByQuery = "ast">(
+	rule: Rule<N, K>,
+): Rule<N, K>;
 
 /**
  * Collects replacements and removals for one code fix without changing the
@@ -304,9 +355,7 @@ export const factory: {
  * kind set should be generic, as in
  * `function f<K extends keyof JsNodeByKind>(set: NodeKindSet<K>)`.
  */
-export interface NodeKindSet<
-	in out K extends keyof JsNodeByKind = keyof JsNodeByKind,
-> {
+export interface NodeKindSet<in out K extends keyof JsNodeByKind = keyof JsNodeByKind> {
 	readonly [nodeKindSet]: true;
 	/**
 	 * Returns whether `element` is a node whose kind is in this set.
@@ -339,9 +388,7 @@ export interface NodeKindSet<
 	 * @throws {TypeError} If `other` is not a set returned by {@link nodeKinds},
 	 * including when it is a token kind set.
 	 */
-	union<J extends keyof JsNodeByKind>(
-		other: NodeKindSet<J>,
-	): NodeKindSet<K | J>;
+	union<J extends keyof JsNodeByKind>(other: NodeKindSet<J>): NodeKindSet<K | J>;
 }
 
 /**
@@ -356,9 +403,7 @@ export interface NodeKindSet<
  * kind set should be generic, as in
  * `function f<K extends JsAstToken["kind"]>(set: TokenKindSet<K>)`.
  */
-export interface TokenKindSet<
-	in out K extends JsAstToken["kind"] = JsAstToken["kind"],
-> {
+export interface TokenKindSet<in out K extends JsAstToken["kind"] = JsAstToken["kind"]> {
 	readonly [tokenKindSet]: true;
 	/**
 	 * Returns whether `element` is a token whose kind is in this set.
@@ -379,9 +424,7 @@ export interface TokenKindSet<
 	 *
 	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
 	 */
-	has(
-		element: JsAstElement | undefined,
-	): element is JsAstToken & { readonly kind: K };
+	has(element: JsAstElement | undefined): element is JsAstToken & { readonly kind: K };
 	/**
 	 * Returns a new set with the kinds of this set and `other`. Neither set
 	 * changes.
@@ -395,9 +438,7 @@ export interface TokenKindSet<
 	 * @throws {TypeError} If `other` is not a set returned by {@link tokenKinds},
 	 * including when it is a node kind set.
 	 */
-	union<J extends JsAstToken["kind"]>(
-		other: TokenKindSet<J>,
-	): TokenKindSet<K | J>;
+	union<J extends JsAstToken["kind"]>(other: TokenKindSet<J>): TokenKindSet<K | J>;
 }
 
 /**
@@ -454,9 +495,7 @@ declare module "./js_ast" {
 		 *
 		 * @throws {TypeError} If `kinds` is not a set created with {@link nodeKinds}.
 		 */
-		descendants<K extends keyof JsNodeByKind>(
-			kinds: NodeKindSet<K>,
-		): readonly JsNodeByKind[K][];
+		descendants<K extends keyof JsNodeByKind>(kinds: NodeKindSet<K>): readonly JsNodeByKind[K][];
 		/**
 		 * Visits the nodes inside this node whose kind is in `kinds`, in source
 		 * order. This node itself is never visited, even when its kind is in

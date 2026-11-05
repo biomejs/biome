@@ -107,6 +107,14 @@ impl JsPluginApi {
         .name("semantic")
         .build();
 
+        let grit = FunctionObjectBuilder::new(
+            context.realm(),
+            NativeFunction::from_fn_ptr(Self::grit_query),
+        )
+        .length(1)
+        .name("grit")
+        .build();
+
         let define_rule = FunctionObjectBuilder::new(
             context.realm(),
             NativeFunction::from_fn_ptr(Self::define_rule),
@@ -151,6 +159,7 @@ impl JsPluginApi {
                 js_string!("registerDiagnostic"),
                 js_string!("ast"),
                 js_string!("semantic"),
+                js_string!("grit"),
                 js_string!("defineRule"),
                 js_string!("createMutation"),
                 js_string!("factory"),
@@ -163,6 +172,7 @@ impl JsPluginApi {
                     register_diagnostic,
                     ast,
                     semantic,
+                    grit,
                     define_rule,
                     create_mutation,
                     factory,
@@ -176,6 +186,7 @@ impl JsPluginApi {
                     )?;
                     module.set_export(&js_string!("ast"), ast.clone().into())?;
                     module.set_export(&js_string!("semantic"), semantic.clone().into())?;
+                    module.set_export(&js_string!("grit"), grit.clone().into())?;
                     module.set_export(&js_string!("defineRule"), define_rule.clone().into())?;
                     module.set_export(
                         &js_string!("createMutation"),
@@ -189,6 +200,7 @@ impl JsPluginApi {
                     register_diagnostic,
                     ast,
                     semantic,
+                    grit,
                     define_rule,
                     create_mutation,
                     factory,
@@ -213,6 +225,62 @@ impl JsPluginApi {
         context: &mut Context,
     ) -> JsResult<JsValue> {
         Self::node_query("semantic", args, context)
+    }
+
+    /// Implements `grit(pattern, options)`: builds a Grit query object from a pattern string.
+    fn grit_query(_this: &JsValue, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
+        let (pattern, semantic) = match args {
+            [pattern] => (pattern, false),
+            [pattern, options] if options.is_undefined() => (pattern, false),
+            [pattern, options] => {
+                let Some(options) = options.as_object() else {
+                    return Err(JsNativeError::typ()
+                        .with_message("grit() options must be an object. Pass { semantic: true } as the second argument.")
+                        .into());
+                };
+                let semantic = options.get(js_string!("semantic"), context)?;
+                let semantic = if semantic.is_undefined() {
+                    false
+                } else {
+                    semantic.as_boolean().ok_or_else(|| {
+                        JsNativeError::typ().with_message(
+                            "grit() option semantic must be a boolean. Pass { semantic: true } as the second argument.",
+                        )
+                    })?
+                };
+                (pattern, semantic)
+            }
+            _ => {
+                return Err(JsNativeError::typ()
+                    .with_message("grit() requires one Grit pattern string and an optional options object. Pass grit(\"`console.log($args)`\", { semantic: true }).")
+                    .into());
+            }
+        };
+        let Some(pattern) = pattern.as_string() else {
+            return Err(JsNativeError::typ()
+                .with_message("grit() requires a Grit pattern string. Pass a string such as \"`console.log($args)`\", not a node or other value.")
+                .into());
+        };
+
+        let query = ObjectInitializer::new(context)
+            .property(
+                js_string!("type"),
+                JsString::from("grit"),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("pattern"),
+                JsValue::from(pattern.clone()),
+                Attribute::ENUMERABLE,
+            )
+            .property(
+                js_string!("requiresSemantic"),
+                JsValue::from(semantic),
+                Attribute::ENUMERABLE,
+            )
+            .build();
+
+        Ok(query.into())
     }
 
     fn node_query(query_type: &str, args: &[JsValue], context: &mut Context) -> JsResult<JsValue> {
@@ -275,7 +343,7 @@ impl JsPluginApi {
         {
             return Err(JsNativeError::typ()
                 .with_message(
-                    "The rule's query property must be a query object. Set it to ast(...) or semantic(...) with the node kinds the rule should inspect.",
+                    "The rule's query property must be a query object. Set it to ast(...), semantic(...), or grit(...) with the nodes the rule should inspect.",
                 )
                 .into());
         }

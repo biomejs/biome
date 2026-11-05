@@ -212,6 +212,11 @@ impl<'a> GritTargetNode<'a> {
         DescendantsIterator::new(self)
     }
 
+    /// Returns the underlying language node, which may be a node or a token.
+    pub fn language_node(&self) -> &GritTargetLanguageNode {
+        &self.node
+    }
+
     pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone + use<'a> {
         NamedChildrenIterator::new(self)
     }
