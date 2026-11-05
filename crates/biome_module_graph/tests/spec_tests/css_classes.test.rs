@@ -10,7 +10,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 
 use super::support::{TestFs, add_css_modules, add_js_modules};
-use super::{TestModuleDb, resolve_js_module_kind_for_test};
+use super::{TestModuleDb, build_js_test_module_db, resolve_js_module_kind_for_test};
 
 fn graph(css: &[(&str, &str)], js: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
     let fs = MemoryFileSystem::default();
@@ -250,6 +250,60 @@ fn css_class_upward_traversal_does_not_revisit_the_start() {
 }
 
 #[test]
+fn css_class_queries_share_module_enumeration() {
+    const MODULE_COUNT: usize = 16;
+
+    let fs = MemoryFileSystem::default();
+    let paths = (0..MODULE_COUNT)
+        .map(|index| format!("/c-{index}.js"))
+        .collect::<Vec<_>>();
+    for (index, path) in paths.iter().enumerate() {
+        let source = if index == 0 {
+            String::new()
+        } else {
+            format!("import './c-{}.js';", index - 1)
+        };
+        fs.insert(path.into(), source);
+    }
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, false);
+    db.take_module_enumeration_count();
+
+    for path in &paths {
+        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
+        assert!(traverse_import_tree_for_classes(&db, module).is_empty());
+    }
+    let root = db.module_for_path(Utf8Path::new(&paths[0])).unwrap();
+    assert!(build_import_tree_for_js(&db, root).is_some());
+
+    assert_eq!(db.take_module_enumeration_count(), 1);
+}
+
+#[test]
+fn css_class_traversal_invalidates_importer_index() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/style.css".into(), ".available {}");
+    fs.insert("/leaf.js".into(), "export const leaf = true;");
+    fs.insert(
+        "/app.js".into(),
+        "import './style.css'; import './leaf.js';",
+    );
+
+    let mut db = WorkspaceDb::new(fs.share());
+    add_css_modules(&mut db, &fs, &[BiomePath::new("/style.css")]);
+    add_js_modules(&mut db, &fs, &[BiomePath::new("/leaf.js")], false);
+    let leaf = db.module_for_path(Utf8Path::new("/leaf.js")).unwrap();
+    assert!(traverse_import_tree_for_classes(&db, leaf).is_empty());
+
+    add_js_modules(&mut db, &fs, &[BiomePath::new("/app.js")], false);
+    assert_eq!(traverse_import_tree_for_classes(&db, leaf).len(), 1);
+
+    fs.insert("/app.js".into(), "import './style.css';");
+    add_js_modules(&mut db, &fs, &[BiomePath::new("/app.js")], false);
+    assert!(traverse_import_tree_for_classes(&db, leaf).is_empty());
+}
+
+#[test]
 fn css_importers_and_parent_nodes_are_sorted_and_deduplicated() {
     let (_, db) = graph(
         &[
@@ -290,6 +344,46 @@ fn resolve_css_module_kind_for_test(fs: &MemoryFileSystem, path: &str) -> Module
         .unwrap();
     let (info, _, _) = resolve_css_module(&TestModuleDb::with_fs(fs), root, &paths[0]);
     ModuleInfoKind::Css(info)
+}
+
+#[test]
+fn css_class_traversal_reuses_unrelated_edits_and_invalidates_importer_edits() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/style.css".into(), ".available {}");
+    fs.insert("/leaf.js".into(), "export const leaf = true;");
+    fs.insert(
+        "/app.js".into(),
+        "import './style.css'; import './leaf.js';",
+    );
+    fs.insert("/unrelated.js".into(), "export const unrelated = true;");
+
+    let mut db = build_js_test_module_db(&fs, &["/leaf.js", "/app.js", "/unrelated.js"], false);
+    let style = ModuleInfo::new(
+        &db,
+        Utf8PathBuf::from("/style.css"),
+        resolve_css_module_kind_for_test(&fs, "/style.css"),
+    );
+    db.modules.insert(Utf8PathBuf::from("/style.css"), style);
+    let leaf = db.module_for_path(Utf8Path::new("/leaf.js")).unwrap();
+    assert_eq!(traverse_import_tree_for_classes(&db, leaf).len(), 1);
+
+    let unrelated = db.module_for_path(Utf8Path::new("/unrelated.js")).unwrap();
+    fs.insert("/unrelated.js".into(), "export const unrelated = false;");
+    let kind = resolve_js_module_kind_for_test(&fs, "/unrelated.js", false);
+    salsa::Setter::to(unrelated.set_kind(&mut db), kind);
+    db.clear_salsa_events();
+    assert_eq!(traverse_import_tree_for_classes(&db, leaf).len(), 1);
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, traverse_import_tree_for_classes, leaf, &events);
+
+    let app = db.module_for_path(Utf8Path::new("/app.js")).unwrap();
+    fs.insert("/app.js".into(), "import './style.css';");
+    let kind = resolve_js_module_kind_for_test(&fs, "/app.js", false);
+    salsa::Setter::to(app.set_kind(&mut db), kind);
+    db.clear_salsa_events();
+    assert!(traverse_import_tree_for_classes(&db, leaf).is_empty());
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, traverse_import_tree_for_classes, leaf, &events);
 }
 
 #[test]

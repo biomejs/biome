@@ -1,11 +1,12 @@
-use super::SymbolFromModuleInfo;
+use super::{SymbolFromModuleInfo, module_importers};
 use crate::css_module_info::TailwindPosition;
 use crate::css_module_info::traverse::{
     CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
 };
 use crate::traverse::UpwardTraversalVisitor;
 use crate::{
-    CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind, TailwindStylesheet,
+    CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleGraphGeneration, ModuleInfo,
+    ModuleInfoKind, TailwindStylesheet,
 };
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -141,8 +142,7 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
     let mut result = Vec::new();
     let mut visited: FxHashSet<Utf8PathBuf> = FxHashSet::default();
     let mut queue = VecDeque::new();
-    let mut modules = db.all_modules().into_iter().collect::<Vec<_>>();
-    modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
+    let importers = module_importers(db, ModuleGraphGeneration::get(db));
     queue.push_back(module.path(db).to_path_buf());
 
     while let Some(current) = queue.pop_front() {
@@ -150,39 +150,17 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        for (file_path, _) in &modules {
-            if file_path == current.as_path() {
+        for owner in importers.for_path(&current) {
+            let file_path = owner.path(db);
+            if file_path.as_path() == current || visited.contains(file_path) {
                 continue;
             }
-            let Some(owner) = db.module_for_path(file_path) else {
-                continue;
-            };
-            let module_info = owner.kind(db);
-            let imports_current =
-                match &module_info {
-                    ModuleInfoKind::Js(js_info) => js_info.import_paths.iter().any(|p| {
-                        p.resolve_js(db, owner).path().as_path() == Some(current.as_path())
-                    }),
-                    ModuleInfoKind::Css(css_info) => css_info.imports.iter().any(|p| {
-                        p.resolve_css(db, owner).path().as_path() == Some(current.as_path())
-                    }),
-                    ModuleInfoKind::Html(html_info) => {
-                        html_info.imported_stylesheets.iter().any(|p| {
-                            p.resolve_css(db, owner).path().as_path() == Some(current.as_path())
-                        }) || html_info.import_paths.iter().any(|p| {
-                            p.resolve_html(db, owner).path().as_path() == Some(current.as_path())
-                        })
-                    }
-                };
-
-            if imports_current && !visited.contains(file_path.as_path()) {
-                match &module_info {
-                    ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
-                        result.push(file_path.to_path_buf());
-                    }
-                    ModuleInfoKind::Css(_) => {
-                        queue.push_back(file_path.to_path_buf());
-                    }
+            match owner.kind(db) {
+                ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
+                    result.push(file_path.to_path_buf());
+                }
+                ModuleInfoKind::Css(_) => {
+                    queue.push_back(file_path.to_path_buf());
                 }
             }
         }
@@ -574,80 +552,58 @@ fn build_parent_nodes(
     current_path: &Utf8Path,
     visited: &mut FxHashSet<Utf8PathBuf>,
 ) -> Vec<ImportTreeNode> {
-    let mut all_modules = db.all_modules().into_iter().collect::<Vec<_>>();
-    all_modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
+    let importers = module_importers(db, ModuleGraphGeneration::get(db))
+        .for_path(current_path)
+        .to_vec();
     let mut parents = Vec::new();
 
-    for (file_path, _) in &all_modules {
-        if visited.contains(file_path.as_path()) {
+    for owner in importers {
+        let file_path = owner.path(db);
+        if visited.contains(file_path) {
             continue;
         }
-        let Some(owner) = db.module_for_path(file_path) else {
-            continue;
-        };
         let module_info = owner.kind(db);
-
-        let imports_current = match &module_info {
+        let css_imports: Vec<Utf8PathBuf> = match &module_info {
             ModuleInfoKind::Js(js_info) => js_info
                 .import_paths
                 .iter()
-                .any(|p| p.resolve_js(db, owner).path().as_path() == Some(current_path)),
-            ModuleInfoKind::Html(html_info) => {
-                html_info
-                    .imported_stylesheets
-                    .iter()
-                    .any(|p| p.resolve_css(db, owner).path().as_path() == Some(current_path))
-                    || html_info
-                        .import_paths
-                        .iter()
-                        .any(|p| p.resolve_html(db, owner).path().as_path() == Some(current_path))
-            }
-            ModuleInfoKind::Css(_) => false,
+                .filter(|import| import.kind.is_static())
+                .filter_map(|import_path| {
+                    let resolved = import_path.resolve_js(db, owner);
+                    let path = resolved.path().as_path()?;
+                    db.css_module_info_for_path(path)?;
+                    Some(path.to_path_buf())
+                })
+                .collect(),
+            ModuleInfoKind::Html(html_info) => html_info
+                .imported_stylesheets
+                .iter()
+                .filter_map(|stylesheet_path| {
+                    let resolved = stylesheet_path.resolve_css(db, owner);
+                    let path = resolved.path().as_path()?;
+                    db.css_module_info_for_path(path)?;
+                    Some(path.to_path_buf())
+                })
+                .chain(html_info.import_paths.iter().filter_map(|import_path| {
+                    let resolved = import_path.resolve_html(db, owner);
+                    let path = resolved.path().as_path()?;
+                    db.css_module_info_for_path(path)?;
+                    Some(path.to_path_buf())
+                }))
+                .collect(),
+            ModuleInfoKind::Css(_) => continue,
         };
 
-        if imports_current {
-            let css_imports: Vec<Utf8PathBuf> = match &module_info {
-                ModuleInfoKind::Js(js_info) => js_info
-                    .import_paths
-                    .iter()
-                    .filter(|import| import.kind.is_static())
-                    .filter_map(|import_path| {
-                        let resolved = import_path.resolve_js(db, owner);
-                        let path = resolved.path().as_path()?;
-                        db.css_module_info_for_path(path)?;
-                        Some(path.to_path_buf())
-                    })
-                    .collect(),
-                ModuleInfoKind::Html(html_info) => html_info
-                    .imported_stylesheets
-                    .iter()
-                    .filter_map(|stylesheet_path| {
-                        let resolved = stylesheet_path.resolve_css(db, owner);
-                        let path = resolved.path().as_path()?;
-                        db.css_module_info_for_path(path)?;
-                        Some(path.to_path_buf())
-                    })
-                    .chain(html_info.import_paths.iter().filter_map(|import_path| {
-                        let resolved = import_path.resolve_html(db, owner);
-                        let path = resolved.path().as_path()?;
-                        db.css_module_info_for_path(path)?;
-                        Some(path.to_path_buf())
-                    }))
-                    .collect(),
-                ModuleInfoKind::Css(_) => Vec::new(),
-            };
+        let mut branch_visited = visited.clone();
+        branch_visited.insert(file_path.to_path_buf());
 
-            let mut branch_visited = visited.clone();
-            branch_visited.insert(file_path.clone());
+        let parent_components = build_parent_nodes(db, file_path, &mut branch_visited);
 
-            let parent_components = build_parent_nodes(db, file_path, &mut branch_visited);
-
-            parents.push(ImportTreeNode {
-                file_path: file_path.clone(),
-                css_imports,
-                parent_components,
-            });
-        }
+        parents.push(ImportTreeNode {
+            file_path: file_path.to_path_buf(),
+            css_imports,
+            parent_components,
+        });
     }
 
     parents

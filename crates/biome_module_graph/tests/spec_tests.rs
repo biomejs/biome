@@ -34,6 +34,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
 use std::collections::BTreeMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
@@ -95,6 +96,7 @@ struct TestModuleDb {
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     resolver_paths: ResolverPaths,
     events: Events,
+    module_enumeration_count: AtomicUsize,
     storage: Storage<Self>,
 }
 
@@ -111,6 +113,7 @@ impl TestModuleDb {
             files: BTreeMap::new(),
             modules: BTreeMap::new(),
             resolver_paths: ResolverPaths::default(),
+            module_enumeration_count: AtomicUsize::new(0),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -129,6 +132,10 @@ impl TestModuleDb {
 
     fn clear_salsa_events(&self) {
         self.take_salsa_events();
+    }
+
+    fn take_module_enumeration_count(&self) -> usize {
+        self.module_enumeration_count.swap(0, Ordering::Relaxed)
     }
 
     /// Indexes a JSON document, such as a manifest, as a parsed source.
@@ -203,6 +210,8 @@ impl ModuleDb for TestModuleDb {
     }
 
     fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
+        self.module_enumeration_count
+            .fetch_add(1, Ordering::Relaxed);
         for module in self.modules.values() {
             f(*module);
         }

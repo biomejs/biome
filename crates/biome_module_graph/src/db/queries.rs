@@ -20,7 +20,9 @@ use biome_jsdoc_comment::JsdocComment;
 pub use crate::db::type_inference::InferredModuleTypes;
 pub use css::*;
 pub use dependencies::module_dependencies;
-pub(crate) use dependencies::{css_dependencies, html_dependencies, js_dependencies};
+pub(crate) use dependencies::{
+    css_dependencies, html_dependencies, js_dependencies, module_importers,
+};
 pub use js_scc::*;
 pub use type_inference::*;
 
