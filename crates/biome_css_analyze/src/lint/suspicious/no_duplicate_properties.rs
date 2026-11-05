@@ -10,7 +10,6 @@ use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, AstNodeList, Text, TextRange};
 use biome_rule_options::no_duplicate_properties::NoDuplicatePropertiesOptions;
 use rustc_hash::FxHashMap;
-use std::collections::hash_map::Entry;
 
 use crate::utils::{AnyPropertyStatement, is_tailwind_utility_fallback};
 
@@ -163,21 +162,19 @@ fn find_duplicate(
             ),
         };
 
-        if sets_own_name {
-            match seen.entry(prop_name.clone()) {
-                Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (name.text_trimmed_range(), prop_name)));
-                }
-                Entry::Vacant(entry) => {
-                    entry.insert(name.text_trimmed_range());
-                }
-            }
+        if sets_own_name && let Some(&first) = seen.get(&prop_name) {
+            return Some((first, (name.text_trimmed_range(), prop_name)));
         }
 
         if let Some(nested) = nested
             && let Some(duplicate) = find_duplicate(&nested, Some(&prop_name), in_utility, seen)
         {
             return Some(duplicate);
+        }
+
+        // Every nested name extends this one, so it can be added after them and moved, not cloned.
+        if sets_own_name {
+            seen.insert(prop_name, name.text_trimmed_range());
         }
     }
 
