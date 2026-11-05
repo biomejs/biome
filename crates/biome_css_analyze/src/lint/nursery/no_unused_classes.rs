@@ -157,15 +157,15 @@ fn parent_suffix_class_names(selector: &ScssParentSelector) -> Option<Vec<Text>>
     {
         return None;
     }
-    let suffix = suffix.syntax().text_trimmed();
+    let suffix = suffix.syntax().text_trimmed().into_text();
     let mut class_names = Vec::new();
     push_parent_class_names(selector.syntax(), &mut class_names)?;
     class_names.sort_unstable();
     class_names.dedup();
     for class_name in &mut class_names {
-        let mut name = String::with_capacity(class_name.len() + usize::from(suffix.len()));
+        let mut name = String::with_capacity(class_name.len() + suffix.len());
         name.push_str(class_name);
-        suffix.for_each_chunk(|chunk| name.push_str(chunk));
+        name.push_str(&suffix);
         *class_name = name.into();
     }
     Some(class_names)
