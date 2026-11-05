@@ -26,3 +26,31 @@ $inherits: false;
   border-color: var(--registered-color);
   background-color: var(--dynamic-registration);
 }
+
+@mixin spacing-variables {
+  --spacing: 4px;
+}
+
+:root {
+  @include spacing-variables;
+
+  @each $name in primary, secondary {
+    --color-#{$name}: red;
+  }
+}
+
+@mixin root-scope {
+  :root {
+    @content;
+  }
+}
+
+@include root-scope {
+  --accent: blue;
+}
+
+.mixin-and-interpolated {
+  margin: var(--spacing);
+  color: var(--color-primary);
+  border-color: var(--accent);
+}
