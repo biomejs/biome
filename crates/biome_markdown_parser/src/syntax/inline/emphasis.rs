@@ -430,6 +430,10 @@ fn collect_delimiters(
         } else if b == b'`' {
             // Skip code spans - they block emphasis
             skip_code_span(bytes, &mut i);
+        } else if b == b'{' && options.is_mdx() {
+            // An MDX expression holds JavaScript, where `*` and `_` aren't
+            // delimiters: `*a {b * c} d*` is one emphasis.
+            i += crate::syntax::mdx_expression_len(&bytes[i..]);
         } else if b == b'<' {
             // Skip potential HTML tags and autolinks
             skip_angle_bracket(bytes, &mut i);

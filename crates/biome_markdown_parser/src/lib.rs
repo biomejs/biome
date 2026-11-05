@@ -281,6 +281,9 @@ impl From<MarkdownOffsetParse> for AnyParse {
 pub(crate) enum MarkdownSyntaxFeatures {
     /// GitHub Flavored Markdown extensions.
     Gfm,
+    /// The MDX variant, which adds ESM, expressions, and JSX, and drops
+    /// indented code, HTML, and autolinks.
+    Mdx,
 }
 
 impl SyntaxFeature for MarkdownSyntaxFeatures {
@@ -289,6 +292,7 @@ impl SyntaxFeature for MarkdownSyntaxFeatures {
     fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
         match self {
             Self::Gfm => p.options().gfm,
+            Self::Mdx => p.options().is_mdx(),
         }
     }
 }

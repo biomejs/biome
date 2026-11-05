@@ -1,0 +1,89 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+See [the {docs](./docs) for more.
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..4 "See " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@4..9 "[the " [] [],
+                },
+                MdxInlineExpression {
+                    l_curly_token: L_CURLY@9..10 "{" [] [],
+                    content: MdxExpressionContent {
+                        value_token: MDX_EXPRESSION_LITERAL@10..33 "docs](./docs) for more." [] [],
+                    },
+                    r_curly_token: missing (required),
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@33..34 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@34..34 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..34
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..34
+    0: MD_PARAGRAPH@0..34
+      0: MD_INLINE_ITEM_LIST@0..34
+        0: MD_TEXTUAL@0..4
+          0: MD_TEXTUAL_LITERAL@0..4 "See " [] []
+        1: MD_TEXTUAL@4..9
+          0: MD_TEXTUAL_LITERAL@4..9 "[the " [] []
+        2: MDX_INLINE_EXPRESSION@9..33
+          0: L_CURLY@9..10 "{" [] []
+          1: MDX_EXPRESSION_CONTENT@10..33
+            0: MDX_EXPRESSION_LITERAL@10..33 "docs](./docs) for more." [] []
+          2: (empty)
+        3: MD_TEXTUAL@33..34
+          0: MD_TEXTUAL_LITERAL@33..34 "\n" [] []
+  3: EOF@34..34 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unclosed_expression_in_link.mdx:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed expression, expected a closing `}`.
+  
+  > 1 │ See [the {docs](./docs) for more.
+      │          ^
+    2 │ 
+  
+  i expression started here
+  
+  > 1 │ See [the {docs](./docs) for more.
+      │          ^
+    2 │ 
+  
+  i Add the closing `}`. To write a literal brace in MDX, escape it as `\{`.
+  
+```

@@ -29,6 +29,8 @@ pub mod html_block;
 pub mod inline;
 pub mod link_block;
 pub mod list;
+#[cfg(feature = "lang_mdx")]
+mod mdx;
 pub mod parse_error;
 pub mod quote;
 pub mod reference;
@@ -75,6 +77,32 @@ use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 use crate::lexer::MarkdownReLexContext;
 use crate::parser::DeferredInlineFlavor;
 use crate::{MarkdownParser, MarkdownSyntaxFeatures};
+
+/// Stand-ins for the MDX parsers when the `lang_mdx` feature is off, where
+/// [`MarkdownSyntaxFeatures::Mdx`] is never supported.
+#[cfg(not(feature = "lang_mdx"))]
+mod mdx {
+    use crate::MarkdownParser;
+    use biome_parser::prelude::ParsedSyntax;
+
+    pub(crate) fn at_mdx_block(_p: &mut MarkdownParser) -> bool {
+        false
+    }
+
+    pub(crate) fn parse_mdx_block(_p: &mut MarkdownParser) -> ParsedSyntax {
+        ParsedSyntax::Absent
+    }
+
+    pub(crate) fn parse_mdx_inline_expression(_p: &mut MarkdownParser) -> ParsedSyntax {
+        ParsedSyntax::Absent
+    }
+
+    pub(crate) fn mdx_expression_len(bytes: &[u8]) -> usize {
+        bytes.len()
+    }
+}
+
+pub(crate) use mdx::{mdx_expression_len, parse_mdx_inline_expression};
 
 /// Check if current token consists only of ASCII spaces and/or tabs.
 ///
@@ -336,7 +364,9 @@ pub(crate) fn parse_any_block_with_indent_code_policy(
         let block_start_is_underscore =
             matches!(block_start_dispatch, Some(IDT)) && block_start_byte == Some(b'_');
 
-        if matches!(block_start_dispatch, Some(TPL | TLD)) && at_fenced_code_block(p) {
+        if MarkdownSyntaxFeatures::Mdx.is_supported(p) && mdx::at_mdx_block(p) {
+            mdx::parse_mdx_block(p)
+        } else if matches!(block_start_dispatch, Some(TPL | TLD)) && at_fenced_code_block(p) {
             parse_fenced_code_block(p)
         } else if matches!(block_start_dispatch, Some(TPL | TLD)) && line_starts_with_fence(p) {
             parse_fenced_code_block_force(p)
@@ -505,7 +535,9 @@ enum QuoteBreakKind {
 /// Uses `line_start_leading_indent()` to correctly handle indentation when NEWLINE
 /// tokens are explicit (not trivia).
 pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
-    if !p.is_at_line_start() {
+    // MDX has no indented code: indented lines are ordinary text, because
+    // content inside JSX is usually indented.
+    if MarkdownSyntaxFeatures::Mdx.is_supported(p) || !p.is_at_line_start() {
         return false;
     }
 
