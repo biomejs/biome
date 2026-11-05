@@ -1,0 +1,17 @@
+top = "level"
+[ table ]
+a = 1
+	b = 2
+[  dotted . "quoted" . 'literal'  ]
+
+
+c = 3
+
+
+
+[empty]
+[[ array ]]
+d = 4
+
+[[array]]
+e = 5

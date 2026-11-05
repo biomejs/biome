@@ -1,0 +1,16 @@
+point = {x=1,y=2}
+empty = { }
+nested = { a = { b = { c = 1 } } }
+trailing_comma = { a = 1, }
+long = { name = "a very long name that exceeds the line width", version = "1.0.0", optional = true }
+with_array = { features = ["one", "two"], default-features = false }
+multiline = {
+    key1 = "value",
+    # comment
+    key2 = [1, 2]
+}
+multiline_trailing = { a = 1,
+  b = 2 }
+empty_multiline = {
+  # only a comment
+}

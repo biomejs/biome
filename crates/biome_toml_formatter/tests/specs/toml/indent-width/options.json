@@ -1,0 +1,8 @@
+{
+  "toml": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 4
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# Leading comment of the document
+
+# Comment before a pair
+a = 1 # trailing comment
+b = [1, 2] # after an array
+[table] # after a header
+# own line inside a table
+c = 3
+
+[[array]]    # after an array table header
+d = 4
+# comment at the end of a table
+
+[other]
+e = 5
+# comment at the end of the document

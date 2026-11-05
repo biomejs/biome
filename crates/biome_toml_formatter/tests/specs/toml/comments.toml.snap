@@ -1,0 +1,56 @@
+---
+source: crates/biome_toml_formatter/tests/spec_test.rs
+expression: snapshot
+---
+# Input
+
+```toml
+# Leading comment of the document
+
+# Comment before a pair
+a = 1 # trailing comment
+b = [1, 2] # after an array
+[table] # after a header
+# own line inside a table
+c = 3
+
+[[array]]    # after an array table header
+d = 4
+# comment at the end of a table
+
+[other]
+e = 5
+# comment at the end of the document
+```
+
+# Options
+
+```
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Expand: Auto
+Trailing newline: true
+```
+
+# Output
+
+```toml
+# Leading comment of the document
+
+# Comment before a pair
+a = 1 # trailing comment
+b = [1, 2] # after an array
+[table] # after a header
+# own line inside a table
+c = 3
+
+[[array]] # after an array table header
+d = 4
+# comment at the end of a table
+
+[other]
+e = 5
+# comment at the end of the document
+```

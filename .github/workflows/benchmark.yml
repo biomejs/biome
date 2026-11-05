@@ -160,6 +160,7 @@ jobs:
               - 'crates/biome_toml_*/Cargo.toml'
               - 'crates/biome_toml_*/benches/**/*'
               - 'crates/biome_toml_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
             configuration:
@@ -573,6 +574,7 @@ jobs:
       matrix:
         package:
           - biome_toml_parser
+          - biome_toml_formatter
     steps: *bench_steps
 
   configuration:

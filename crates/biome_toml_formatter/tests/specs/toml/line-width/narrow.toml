@@ -1,0 +1,3 @@
+dependencies = ["serde", "toml", "biome_formatter"]
+short = [1, 2]
+table = { name = "this stays on one line", version = "1.0" }
