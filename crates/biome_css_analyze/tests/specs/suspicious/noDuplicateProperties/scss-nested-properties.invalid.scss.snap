@@ -1,0 +1,178 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: scss-nested-properties.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.prefixed-then-nested {
+  border-radius: 1px;
+  border: {
+    radius: 2px;
+  }
+}
+
+.nested-then-prefixed {
+  font: {
+    family: serif;
+  }
+  font-family: sans-serif;
+}
+
+.deeply-nested {
+  border: {
+    top: {
+      left-radius: 1px;
+    }
+  }
+  border-top-left-radius: 2px;
+}
+
+.group-with-value {
+  font: 12px;
+  font: bold {
+    family: serif;
+  }
+}
+
+.repeated-groups {
+  margin: {
+    top: 1px;
+  }
+  margin: {
+    top: 2px;
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-nested-properties.invalid.scss:5:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    3 │   border-radius: 1px;
+    4 │   border: {
+  > 5 │     radius: 2px;
+      │     ^^^^^^
+    6 │   }
+    7 │ }
+  
+  i border-radius is already defined here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .prefixed-then-nested {
+  > 3 │   border-radius: 1px;
+      │   ^^^^^^^^^^^^^
+    4 │   border: {
+    5 │     radius: 2px;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties.invalid.scss:13:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    11 │     family: serif;
+    12 │   }
+  > 13 │   font-family: sans-serif;
+       │   ^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i font-family is already defined here.
+  
+     9 │ .nested-then-prefixed {
+    10 │   font: {
+  > 11 │     family: serif;
+       │     ^^^^^^
+    12 │   }
+    13 │   font-family: sans-serif;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties.invalid.scss:22:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    20 │     }
+    21 │   }
+  > 22 │   border-top-left-radius: 2px;
+       │   ^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i border-top-left-radius is already defined here.
+  
+    17 │   border: {
+    18 │     top: {
+  > 19 │       left-radius: 1px;
+       │       ^^^^^^^^^^^
+    20 │     }
+    21 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties.invalid.scss:27:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    25 │ .group-with-value {
+    26 │   font: 12px;
+  > 27 │   font: bold {
+       │   ^^^^
+    28 │     family: serif;
+    29 │   }
+  
+  i font is already defined here.
+  
+    25 │ .group-with-value {
+  > 26 │   font: 12px;
+       │   ^^^^
+    27 │   font: bold {
+    28 │     family: serif;
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```
+scss-nested-properties.invalid.scss:37:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    35 │   }
+    36 │   margin: {
+  > 37 │     top: 2px;
+       │     ^^^
+    38 │   }
+    39 │ }
+  
+  i margin-top is already defined here.
+  
+    32 │ .repeated-groups {
+    33 │   margin: {
+  > 34 │     top: 1px;
+       │     ^^^
+    35 │   }
+    36 │   margin: {
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```

@@ -1,0 +1,39 @@
+/* should generate diagnostics */
+.prefixed-then-nested {
+  border-radius: 1px;
+  border: {
+    radius: 2px;
+  }
+}
+
+.nested-then-prefixed {
+  font: {
+    family: serif;
+  }
+  font-family: sans-serif;
+}
+
+.deeply-nested {
+  border: {
+    top: {
+      left-radius: 1px;
+    }
+  }
+  border-top-left-radius: 2px;
+}
+
+.group-with-value {
+  font: 12px;
+  font: bold {
+    family: serif;
+  }
+}
+
+.repeated-groups {
+  margin: {
+    top: 1px;
+  }
+  margin: {
+    top: 2px;
+  }
+}
