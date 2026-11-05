@@ -18,9 +18,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         SvelteSnippetBlock {
             opening_block: SvelteSnippetOpeningBlock {
                 sv_curly_hash_token: SV_CURLY_HASH@0..2 "{#" [] [],
@@ -68,9 +66,7 @@ HtmlRoot {
 0: HTML_ROOT@0..38
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..37
+  2: HTML_ROOT_ITEM_LIST@0..37
     0: SVELTE_SNIPPET_BLOCK@0..37
       0: SVELTE_SNIPPET_OPENING_BLOCK@0..37
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -96,7 +92,7 @@ HtmlRoot {
                 0: P_KW@35..36 "p" [] []
               3: R_ANGLE@36..37 ">" [] []
       1: (empty)
-  5: EOF@37..38 "" [Newline("\n")] []
+  3: EOF@37..38 "" [Newline("\n")] []
 
 ```
 
