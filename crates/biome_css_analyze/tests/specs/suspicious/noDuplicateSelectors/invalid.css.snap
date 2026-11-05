@@ -95,6 +95,10 @@ h3 {
   .card {}
 }
 
+/* 17. Duplicate with simple selectors inside a functional pseudo-class in a different order */
+.c:is(.a .b) {}
+:is(.a .b).c {}
+
 ```
 
 # Diagnostics
@@ -525,6 +529,32 @@ invalid.css:89:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │   ^^^^^^^^
     89 │   .card {}
     90 │ }
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:94:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".c:is(.a .b)".
+  
+    92 │ /* 17. Duplicate with simple selectors inside a functional pseudo-class in a different order */
+    93 │ .c:is(.a .b) {}
+  > 94 │ :is(.a .b).c {}
+       │ ^^^^^^^^^^^^^^^
+    95 │ 
+  
+  i It was first defined here.
+  
+    92 │ /* 17. Duplicate with simple selectors inside a functional pseudo-class in a different order */
+  > 93 │ .c:is(.a .b) {}
+       │ ^^^^^^^^^^^^^^^
+    94 │ :is(.a .b).c {}
+    95 │ 
   
   i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   

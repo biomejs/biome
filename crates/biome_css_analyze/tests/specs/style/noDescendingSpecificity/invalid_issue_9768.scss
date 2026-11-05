@@ -95,3 +95,15 @@ aside {
 #foo .bar.baz { color: red; }
 
 .baz.bar { color: blue; }
+
+// Type selectors are case-insensitive, so `span` is reported.
+.c11 SPAN:hover { color: red; }
+
+span { color: blue; }
+
+// A suffix added through nesting matches the class written out, so `.c12--x` is reported.
+.c12 {
+  .c12a &--x { color: red; }
+}
+
+.c12--x { color: blue; }
