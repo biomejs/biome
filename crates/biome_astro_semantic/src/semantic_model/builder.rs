@@ -1,5 +1,5 @@
 use super::model::*;
-use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
+use biome_rowan::{RawSyntaxKind, Text, TextRange, TextSize, TokenText};
 
 #[derive(Default)]
 pub(crate) struct ModelBuilder {
@@ -8,6 +8,7 @@ pub(crate) struct ModelBuilder {
 
 pub(crate) struct NewSymbol {
     pub(crate) name: TokenText,
+    pub(crate) semantic_name: Text,
     pub(crate) range: TextRange,
     pub(crate) declaration: TextRange,
     pub(crate) snippet: Option<SnippetId>,
@@ -41,6 +42,7 @@ impl ModelBuilder {
         kind: BlockKind,
         range: TextRange,
         content: Option<TextRange>,
+        external: bool,
         scope: Option<ScopeId>,
     ) -> BlockId {
         let id = BlockId::new(self.data.blocks.len());
@@ -48,6 +50,7 @@ impl ModelBuilder {
             kind,
             range,
             content,
+            external,
             scope,
             snippet: None,
         });
@@ -74,7 +77,7 @@ impl ModelBuilder {
             SnippetHost::Frontmatter(block) | SnippetHost::Script(block) => {
                 self.data.blocks[block.index()].snippet = Some(id);
             }
-            SnippetHost::Expression | SnippetHost::Unknown => {}
+            SnippetHost::ScriptDefineVars(_) | SnippetHost::Expression | SnippetHost::Unknown => {}
         }
         id
     }
@@ -84,6 +87,7 @@ impl ModelBuilder {
         self.data.scopes[symbol.scope.index()].symbols.push(id);
         self.data.symbols.push(SymbolData {
             name: symbol.name,
+            semantic_name: symbol.semantic_name,
             range: symbol.range,
             declaration: symbol.declaration,
             snippet: symbol.snippet,
@@ -104,6 +108,19 @@ impl ModelBuilder {
     }
 
     pub(crate) fn finish(mut self) -> AstroSemanticModel {
+        let symbols = &self.data.symbols;
+        for scope in &mut self.data.scopes {
+            scope.symbols.sort_by(|left, right| {
+                let left = &symbols[left.index()];
+                let right = &symbols[right.index()];
+                left.range
+                    .start()
+                    .cmp(&right.range.start())
+                    .then_with(|| left.range.end().cmp(&right.range.end()))
+                    .then_with(|| left.semantic_name.text().cmp(right.semantic_name.text()))
+                    .then_with(|| (left.kind as u8).cmp(&(right.kind as u8)))
+            });
+        }
         self.data.references.sort_by(|left, right| {
             left.range
                 .start()
