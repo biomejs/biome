@@ -683,18 +683,19 @@ impl<'a> SimpleSelector<'a> {
     fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
         self.tokens.iter().flat_map(|(_, text)| text.bytes())
     }
+
+    fn is_not_type(&self) -> bool {
+        !matches!(
+            self.kind,
+            SimpleSelectorKind::Type | SimpleSelectorKind::Universal
+        )
+    }
 }
 
 impl Ord for SimpleSelector<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
-        let is_not_type = |selector: &Self| {
-            !matches!(
-                selector.kind,
-                SimpleSelectorKind::Type | SimpleSelectorKind::Universal
-            )
-        };
-        is_not_type(self)
-            .cmp(&is_not_type(other))
+        self.is_not_type()
+            .cmp(&other.is_not_type())
             .then_with(|| self.bytes().cmp(other.bytes()))
     }
 }
