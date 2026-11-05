@@ -8,8 +8,8 @@ use biome_css_syntax::{
     property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
-    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
-    declare_node_union,
+    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, Text, TextRange, TextSize,
+    TokenText, declare_node_union,
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
@@ -52,11 +52,11 @@ impl SemanticModel {
 
     /// Returns the static prefixes of interpolated custom property names, such as `--color-` for
     /// `--color-#{$name}`, with the range of each name.
-    pub fn custom_property_prefixes(&self) -> impl Iterator<Item = (&str, TextRange)> {
+    pub fn custom_property_prefixes(&self) -> impl Iterator<Item = (&Text, TextRange)> {
         self.data
             .custom_property_prefixes
             .iter()
-            .map(|(prefix, range)| (prefix.as_str(), *range))
+            .map(|(prefix, range)| (prefix, *range))
     }
 
     /// Returns declarations that assign values to custom properties.
@@ -163,7 +163,7 @@ pub(crate) struct SemanticModelData {
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
     /// The static prefixes of interpolated custom property names, such as `--color-` for
     /// `--color-#{$name}`, with the range of each name.
-    pub(crate) custom_property_prefixes: Vec<(String, TextRange)>,
+    pub(crate) custom_property_prefixes: Vec<(Text, TextRange)>,
     /// Custom property names declared in `:root` or by an `@property` rule.
     ///
     /// The associated data retains the `:root` declaration. `@property` data is
