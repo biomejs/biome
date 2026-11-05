@@ -79,9 +79,7 @@ use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
-use biome_html_syntax::{
-    HtmlElementList, HtmlSingleTextExpression, HtmlSyntaxKind, HtmlTextExpression,
-};
+use biome_html_syntax::{HtmlSingleTextExpression, HtmlSyntaxKind, HtmlTextExpression};
 #[cfg(feature = "html_embeds")]
 use biome_js_analyze::JsSuppression;
 #[cfg(feature = "html_embeds")]
@@ -153,7 +151,12 @@ impl HtmlSuppressionService {
                 .descendants()
                 .filter_map(HtmlSingleTextExpression::cast)
             {
-                if expression.parent::<HtmlElementList>().is_none() {
+                if !expression.syntax().parent().is_some_and(|parent| {
+                    matches!(
+                        parent.kind(),
+                        HtmlSyntaxKind::HTML_ELEMENT_LIST | HtmlSyntaxKind::HTML_ROOT_ITEM_LIST
+                    )
+                }) {
                     continue;
                 }
                 let Some(token) = expression
@@ -216,7 +219,12 @@ impl HtmlSuppressionService {
         }
         let body = HtmlTextExpression::cast(token.parent()?)?;
         let expression = body.parent::<HtmlSingleTextExpression>()?;
-        expression.parent::<HtmlElementList>()?;
+        expression.syntax().parent().filter(|parent| {
+            matches!(
+                parent.kind(),
+                HtmlSyntaxKind::HTML_ELEMENT_LIST | HtmlSyntaxKind::HTML_ROOT_ITEM_LIST
+            )
+        })?;
         expression.l_curly_token().ok()?;
         expression.r_curly_token().ok()?;
         if eof.text() != token.text() {

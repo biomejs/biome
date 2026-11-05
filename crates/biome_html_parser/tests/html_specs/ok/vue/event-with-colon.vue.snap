@@ -17,9 +17,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
-    processing_instruction: missing (optional),
-    directive: missing (optional),
-    html: HtmlElementList [
+    items: HtmlRootItemList [
         HtmlSelfClosingElement {
             l_angle_token: L_ANGLE@0..1 "<" [] [],
             name: HtmlComponentName {
@@ -54,9 +52,7 @@ HtmlRoot {
 0: HTML_ROOT@0..38
   0: (empty)
   1: (empty)
-  2: (empty)
-  3: (empty)
-  4: HTML_ELEMENT_LIST@0..37
+  2: HTML_ROOT_ITEM_LIST@0..37
     0: HTML_SELF_CLOSING_ELEMENT@0..37
       0: L_ANGLE@0..1 "<" [] []
       1: HTML_COMPONENT_NAME@1..5
@@ -73,6 +69,6 @@ HtmlRoot {
               0: HTML_STRING_LITERAL@24..35 "\"onUpdate\"" [] [Whitespace(" ")]
       3: SLASH@35..36 "/" [] []
       4: R_ANGLE@36..37 ">" [] []
-  5: EOF@37..38 "" [Newline("\n")] []
+  3: EOF@37..38 "" [Newline("\n")] []
 
 ```

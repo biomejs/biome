@@ -9,7 +9,10 @@ use biome_console::{
 };
 use biome_formatter::rowan::FormatElement;
 use biome_formatter::{Buffer, Format, FormatResult, rowan::prelude::*};
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlLanguage, HtmlSyntaxToken};
+use biome_html_syntax::{
+    AnyHtmlContent, AnyHtmlElement, AnyHtmlRootItem, HtmlDirective, HtmlLanguage, HtmlSyntaxNode,
+    HtmlSyntaxToken,
+};
 use biome_rowan::{
     AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,
 };
@@ -19,8 +22,10 @@ use biome_unicode_table::{
 };
 
 use crate::{
-    HtmlFormatter, comments::HtmlComments, context::HtmlFormatContext,
-    utils::metadata::get_element_css_display,
+    HtmlFormatter,
+    comments::HtmlComments,
+    context::HtmlFormatContext,
+    utils::{css_display::CssDisplay, metadata::get_element_css_display},
 };
 
 pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = *b" \n\t\r";
@@ -94,6 +99,54 @@ impl Format<HtmlFormatContext> for HtmlWord {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub(crate) enum HtmlChildElement {
+    Element(AnyHtmlElement),
+    Directive(HtmlDirective),
+}
+
+impl HtmlChildElement {
+    pub(crate) fn syntax(&self) -> &HtmlSyntaxNode {
+        match self {
+            Self::Element(element) => element.syntax(),
+            Self::Directive(directive) => directive.syntax(),
+        }
+    }
+
+    pub(crate) fn as_element(&self) -> Option<&AnyHtmlElement> {
+        match self {
+            Self::Element(element) => Some(element),
+            Self::Directive(_) => None,
+        }
+    }
+
+    pub(crate) fn css_display(&self) -> CssDisplay {
+        match self {
+            Self::Element(element) => get_element_css_display(element),
+            Self::Directive(_) => CssDisplay::Block,
+        }
+    }
+
+    pub(crate) fn closing_r_angle_token(&self) -> Option<HtmlSyntaxToken> {
+        self.as_element()?.closing_r_angle_token()
+    }
+}
+
+impl From<AnyHtmlElement> for HtmlChildElement {
+    fn from(element: AnyHtmlElement) -> Self {
+        Self::Element(element)
+    }
+}
+
+impl From<AnyHtmlRootItem> for HtmlChildElement {
+    fn from(item: AnyHtmlRootItem) -> Self {
+        match item {
+            AnyHtmlRootItem::AnyHtmlElement(element) => Self::Element(element),
+            AnyHtmlRootItem::HtmlDirective(directive) => Self::Directive(directive),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) enum HtmlChild {
     /// A Single word in a HTML text. For example, the words for `a b\nc` are `[a, b, c]`
     Word(HtmlWord),
@@ -146,12 +199,12 @@ pub(crate) enum HtmlChild {
     PreservedSegmentBreak,
 
     /// Any other content that isn't a text. Should be formatted as is.
-    NonText(AnyHtmlElement),
+    NonText(HtmlChildElement),
 
     /// Any content that should be formatted verbatim, and not transformed in any way.
     ///
     /// Used for content that has formatting suppressed.
-    Verbatim(AnyHtmlElement),
+    Verbatim(HtmlChildElement),
 }
 
 impl HtmlChild {
@@ -217,24 +270,21 @@ impl fmt::Display for HtmlChildDetail<'_> {
 }
 
 #[cfg(debug_assertions)]
-struct HtmlElementDetail<'a>(&'a AnyHtmlElement);
+struct HtmlElementDetail<'a>(&'a HtmlChildElement);
 
 #[cfg(debug_assertions)]
 impl fmt::Display for HtmlElementDetail<'_> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(name) = self.0.name() {
-            std::write!(
-                fmt,
-                "<{}> display={:?}",
-                name.text(),
-                get_element_css_display(self.0)
-            )
+        if let Some(element) = self.0.as_element()
+            && let Some(name) = element.name()
+        {
+            std::write!(fmt, "<{}> display={:?}", name.text(), self.0.css_display())
         } else {
             std::write!(
                 fmt,
                 "{:?} display={:?}",
                 self.0.syntax().kind(),
-                get_element_css_display(self.0)
+                self.0.css_display()
             )
         }
     }
@@ -261,7 +311,8 @@ pub(crate) fn html_split_children<I>(
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
 where
-    I: IntoIterator<Item = AnyHtmlElement>,
+    I: IntoIterator,
+    I::Item: Into<HtmlChildElement>,
 {
     let mut builder = HtmlSplitChildrenBuilder::new();
 
@@ -276,19 +327,20 @@ where
 
     let mut prev_child_was_content = false;
     for child in children {
+        let child = child.into();
         let element_has_content = matches!(
-            &child,
-            AnyHtmlElement::AnyHtmlContent(
+            child.as_element(),
+            Some(AnyHtmlElement::AnyHtmlContent(
                 AnyHtmlContent::HtmlContent(_) | AnyHtmlContent::HtmlEmbeddedContent(_)
-            )
+            ))
         );
 
         if element_has_content {
-            let (text_syntax, value_token) = match &child {
-                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text)) => {
+            let (text_syntax, value_token) = match child.as_element() {
+                Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlContent(text))) => {
                     (text.syntax(), text.value_token()?)
                 }
-                AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(text)) => {
+                Some(AnyHtmlElement::AnyHtmlContent(AnyHtmlContent::HtmlEmbeddedContent(text))) => {
                     (text.syntax(), text.value_token()?)
                 }
                 _ => unreachable!(
@@ -702,7 +754,7 @@ impl HtmlSplitChildrenBuilder {
             _ => return, // avoid panicking in release builds
         };
 
-        if !get_element_css_display(element).is_externally_whitespace_sensitive(f)
+        if !element.css_display().is_externally_whitespace_sensitive(f)
             && matches!(self.buffer.last(), Some(HtmlChild::Whitespace))
             && matches!(
                 self.buffer.iter().rev().nth(1),
