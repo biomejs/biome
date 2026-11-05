@@ -1,7 +1,9 @@
+use crate::services::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
 };
+use biome_css_semantic::model::SemanticModel;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
 use biome_module_graph::ModuleDb;
 use biome_rowan::AstNode;
@@ -57,12 +59,56 @@ impl Phase for CssDbService {
     }
 }
 
+#[derive(Clone)]
+pub struct CssModuleGraphSemanticServices {
+    db: Rc<dyn ModuleDb>,
+    model: SemanticModel,
+}
+
+impl CssModuleGraphSemanticServices {
+    pub fn db(&self) -> &dyn ModuleDb {
+        self.db.as_ref()
+    }
+
+    pub fn model(&self) -> &SemanticModel {
+        &self.model
+    }
+}
+
+impl FromServices for CssModuleGraphSemanticServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        _rule_metadata: &RuleMetadata,
+        services: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        let db: &Rc<dyn ModuleDb> = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ModuleDb"]))?;
+        let model: &SemanticModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
+        Ok(Self {
+            db: db.clone(),
+            model: model.clone(),
+        })
+    }
+}
+
+impl Phase for CssModuleGraphSemanticServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
 /// Query type for CSS lint rules that require access to the [`CssDbService`].
 ///
 /// Use `type Query = CssModuleGraph<CssClassSelector>` to query AST nodes while
 /// also having access to the module database via `ctx.db()`.
 #[derive(Clone)]
 pub struct CssModuleGraph<N>(pub N);
+
+#[derive(Clone)]
+pub struct CssModuleGraphSemantic<N>(pub N);
 
 impl<N> Queryable for CssModuleGraph<N>
 where
@@ -75,6 +121,29 @@ where
 
     fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _root: &AnyCssRoot) {
         analyzer.add_visitor(Phases::Syntax, SyntaxVisitor::default);
+    }
+
+    fn key() -> QueryKey<Self::Language> {
+        QueryKey::Syntax(N::KIND_SET)
+    }
+
+    fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
+        N::unwrap_cast(node.clone())
+    }
+}
+
+impl<N> Queryable for CssModuleGraphSemantic<N>
+where
+    N: AstNode<Language = CssLanguage> + 'static,
+{
+    type Input = CssSyntaxNode;
+    type Output = N;
+    type Language = CssLanguage;
+    type Services = CssModuleGraphSemanticServices;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _root: &AnyCssRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+        analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
     fn key() -> QueryKey<Self::Language> {

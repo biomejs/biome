@@ -41,6 +41,9 @@ impl Display for AstroSemanticModel {
             if let Some(content) = block.content_range() {
                 write!(f, " content={}", range(content))?;
             }
+            if block.is_globally_scoped() {
+                write!(f, " global")?;
+            }
             if block.has_external_source() {
                 write!(f, " external")?;
             }
@@ -50,7 +53,23 @@ impl Display for AstroSemanticModel {
             if let Some(snippet) = block.snippet() {
                 write!(f, " snippet#{}", snippet.id().0)?;
             }
+            let define_vars_open = block.define_vars_open_reasons();
+            if !define_vars_open.is_empty() {
+                write!(
+                    f,
+                    " define-vars-open={}",
+                    open_reason_names(define_vars_open)
+                )?;
+            }
             writeln!(f)?;
+            for variable in block.define_vars() {
+                writeln!(
+                    f,
+                    "  define:vars {} {}",
+                    variable.name(),
+                    range(variable.host_range())
+                )?;
+            }
         }
 
         for snippet in self.snippets() {

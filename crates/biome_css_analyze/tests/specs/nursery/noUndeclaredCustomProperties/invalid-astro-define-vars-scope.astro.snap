@@ -1,0 +1,41 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid-astro-define-vars-scope.astro
+---
+# Input
+```astro
+---
+const dynamic = { background: "blue" };
+---
+<!-- should generate diagnostics -->
+
+<style define:vars={{ ...dynamic }}>
+.card { color: var(--possibly-injected); }
+</style>
+
+<style>
+.card { color: var(--missing-in-other-style); }
+</style>
+
+```
+
+# Diagnostics
+```
+invalid-astro-define-vars-scope.astro:11:20 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━
+
+  i The custom property --missing-in-other-style is not defined.
+  
+    10 │ <style>
+  > 11 │ .card { color: var(--missing-in-other-style); }
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ </style>
+    13 │ 
+  
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
+  
+  i Define the custom property in an available stylesheet, rename it or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

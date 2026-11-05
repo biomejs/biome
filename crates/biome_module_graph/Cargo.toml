@@ -30,6 +30,7 @@ harness = false
 name    = "type_inference"
 
 [dependencies]
+biome_astro_semantic = { workspace = true }
 biome_console        = { workspace = true }
 biome_css_semantic   = { workspace = true }
 biome_css_syntax     = { workspace = true }
