@@ -11239,6 +11239,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueRegisteredComponentNameCasing": {
+					"description": "Enforce a consistent casing style for the names of components registered in the components option of Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-registered-component-name-casing",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseVueRegisteredComponentNameCasingConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useVueRenderReturn": {
 					"description": "Require the render function of a Vue component to return a value.\nSee https://biomejs.dev/linter/rules/use-vue-render-return",
 					"anyOf": [
@@ -11953,6 +11962,25 @@
 		},
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
+		"RegisteredComponentNameCasing": {
+			"oneOf": [
+				{
+					"description": "Component names must be in PascalCase, e.g. `TodoItem`.",
+					"type": "string",
+					"const": "PascalCase"
+				},
+				{
+					"description": "Component names must be in camelCase, e.g. `todoItem`.",
+					"type": "string",
+					"const": "camelCase"
+				},
+				{
+					"description": "Component names must be in kebab-case, e.g. `todo-item`.",
+					"type": "string",
+					"const": "kebab-case"
+				}
+			]
+		},
 		"RestrictedFunction": {
 			"type": "object",
 			"properties": {
@@ -20227,6 +20255,21 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueRegisteredComponentNameCasingOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseVueRegisteredComponentNameCasingOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueRenderReturnOptions": {
 			"type": "object",
 			"properties": {
@@ -26375,6 +26418,25 @@
 		},
 		"UseVuePropTypeConstructorOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueRegisteredComponentNameCasingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueRegisteredComponentNameCasingOptions" }
+			]
+		},
+		"UseVueRegisteredComponentNameCasingOptions": {
+			"type": "object",
+			"properties": {
+				"casing": {
+					"description": "The casing that the names of components registered in the `components` option must\nfollow. If omitted, names must be in PascalCase.",
+					"anyOf": [
+						{ "$ref": "#/$defs/RegisteredComponentNameCasing" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseVueRenderReturnConfiguration": {

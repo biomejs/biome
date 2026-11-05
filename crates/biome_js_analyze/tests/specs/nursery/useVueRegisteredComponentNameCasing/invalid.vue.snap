@@ -1,0 +1,274 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  components: {
+    fooBar,
+    todoItem: TodoItem,
+    "todo-list": TodoList,
+    'side-bar': SideBar,
+    nav_bar: NavBar,
+    $modal: Modal,
+    ["foo-baz"]: FooBaz,
+    _: Underscore,
+    renderItem() {
+      return h("div");
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name fooBar isn't in PascalCase.
+  
+    3 │ export default {
+    4 │   components: {
+  > 5 │     fooBar,
+      │     ^^^^^^
+    6 │     todoItem: TodoItem,
+    7 │     "todo-list": TodoList,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to FooBar.
+  
+    5 │ ····FooBar:·fooBar,
+      │     ++++++++       
+
+```
+
+```
+invalid.vue:6:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name todoItem isn't in PascalCase.
+  
+    4 │   components: {
+    5 │     fooBar,
+  > 6 │     todoItem: TodoItem,
+      │     ^^^^^^^^
+    7 │     "todo-list": TodoList,
+    8 │     'side-bar': SideBar,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to TodoItem.
+  
+     4  4 │     components: {
+     5  5 │       fooBar,
+     6    │ - ····todoItem:·TodoItem,
+        6 │ + ····TodoItem:·TodoItem,
+     7  7 │       "todo-list": TodoList,
+     8  8 │       'side-bar': SideBar,
+  
+
+```
+
+```
+invalid.vue:7:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name todo-list isn't in PascalCase.
+  
+    5 │     fooBar,
+    6 │     todoItem: TodoItem,
+  > 7 │     "todo-list": TodoList,
+      │     ^^^^^^^^^^^
+    8 │     'side-bar': SideBar,
+    9 │     nav_bar: NavBar,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to TodoList.
+  
+     5  5 │       fooBar,
+     6  6 │       todoItem: TodoItem,
+     7    │ - ····"todo-list":·TodoList,
+        7 │ + ····TodoList:·TodoList,
+     8  8 │       'side-bar': SideBar,
+     9  9 │       nav_bar: NavBar,
+  
+
+```
+
+```
+invalid.vue:8:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name side-bar isn't in PascalCase.
+  
+     6 │     todoItem: TodoItem,
+     7 │     "todo-list": TodoList,
+   > 8 │     'side-bar': SideBar,
+       │     ^^^^^^^^^^
+     9 │     nav_bar: NavBar,
+    10 │     $modal: Modal,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to SideBar.
+  
+     6  6 │       todoItem: TodoItem,
+     7  7 │       "todo-list": TodoList,
+     8    │ - ····'side-bar':·SideBar,
+        8 │ + ····SideBar:·SideBar,
+     9  9 │       nav_bar: NavBar,
+    10 10 │       $modal: Modal,
+  
+
+```
+
+```
+invalid.vue:9:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name nav_bar isn't in PascalCase.
+  
+     7 │     "todo-list": TodoList,
+     8 │     'side-bar': SideBar,
+   > 9 │     nav_bar: NavBar,
+       │     ^^^^^^^
+    10 │     $modal: Modal,
+    11 │     ["foo-baz"]: FooBaz,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to NavBar.
+  
+     7  7 │       "todo-list": TodoList,
+     8  8 │       'side-bar': SideBar,
+     9    │ - ····nav_bar:·NavBar,
+        9 │ + ····NavBar:·NavBar,
+    10 10 │       $modal: Modal,
+    11 11 │       ["foo-baz"]: FooBaz,
+  
+
+```
+
+```
+invalid.vue:10:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name $modal isn't in PascalCase.
+  
+     8 │     'side-bar': SideBar,
+     9 │     nav_bar: NavBar,
+  > 10 │     $modal: Modal,
+       │     ^^^^^^
+    11 │     ["foo-baz"]: FooBaz,
+    12 │     _: Underscore,
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to Modal.
+  
+     8  8 │       'side-bar': SideBar,
+     9  9 │       nav_bar: NavBar,
+    10    │ - ····$modal:·Modal,
+       10 │ + ····Modal:·Modal,
+    11 11 │       ["foo-baz"]: FooBaz,
+    12 12 │       _: Underscore,
+  
+
+```
+
+```
+invalid.vue:11:5 lint/nursery/useVueRegisteredComponentNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name foo-baz isn't in PascalCase.
+  
+     9 │     nav_bar: NavBar,
+    10 │     $modal: Modal,
+  > 11 │     ["foo-baz"]: FooBaz,
+       │     ^^^^^^^^^^^
+    12 │     _: Underscore,
+    13 │     renderItem() {
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:5 lint/nursery/useVueRegisteredComponentNameCasing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name _ isn't in PascalCase.
+  
+    10 │     $modal: Modal,
+    11 │     ["foo-baz"]: FooBaz,
+  > 12 │     _: Underscore,
+       │     ^
+    13 │     renderItem() {
+    14 │       return h("div");
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:5 lint/nursery/useVueRegisteredComponentNameCasing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name renderItem isn't in PascalCase.
+  
+    11 │     ["foo-baz"]: FooBaz,
+    12 │     _: Underscore,
+  > 13 │     renderItem() {
+       │     ^^^^^^^^^^
+    14 │       return h("div");
+    15 │     },
+  
+  i Using one naming style for all registered components makes them easier to find and to use.
+  
+  i Rename the component to PascalCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to RenderItem.
+  
+    11 11 │       ["foo-baz"]: FooBaz,
+    12 12 │       _: Underscore,
+    13    │ - ····renderItem()·{
+       13 │ + ····RenderItem()·{
+    14 14 │         return h("div");
+    15 15 │       },
+  
+
+```

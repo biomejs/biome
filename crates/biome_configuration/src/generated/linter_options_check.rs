@@ -3544,6 +3544,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_vue_prop_type_constructor::UseVuePropTypeConstructorOptions,
         >(),
     ));
+    result.push(("nursery", "useVueRegisteredComponentNameCasing", TypeId::of::<biome_rule_options::use_vue_registered_component_name_casing::UseVueRegisteredComponentNameCasingOptions>()));
     result.push((
         "nursery",
         "useVueRenderReturn",

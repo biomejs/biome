@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useVueRegisteredComponentNameCasing": {
+          "level": "error",
+          "options": {
+            "casing": "kebab-case"
+          }
+        }
+      }
+    }
+  }
+}

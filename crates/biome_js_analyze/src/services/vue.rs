@@ -11,6 +11,9 @@
 //!   `defineModel()`. Use it when the rule judges one model on its own.
 //! - [`VueEmit`] runs the rule once per declared event. Use it when the rule
 //!   judges one event declaration on its own.
+//! - [`VueComponentRegistration`] runs the rule once per entry of the
+//!   `components` option. Use it when the rule judges one locally registered
+//!   component on its own.
 //! - [`VueSnippet`] runs the rule once on an embedded snippet, such as a
 //!   directive value. Use it when the rule judges a template expression
 //!   by where it is written.
@@ -174,6 +177,12 @@ impl Visitor for VueSemanticVisitor {
             for emit in component.emits().filter(|emit| service.declares(emit)) {
                 ctx.match_query(VueEmitMatch(emit));
             }
+            for registration in component
+                .registered_components()
+                .filter(|registration| service.declares(registration))
+            {
+                ctx.match_query(VueComponentRegistrationMatch(registration));
+            }
         }
         if let Some(snippet) = service.snippet {
             ctx.match_query(VueSnippetMatch(service.model.snippet(snippet)));
@@ -304,6 +313,12 @@ define_vue_query!(
     VueEmit,
     VueEmitMatch,
     Emit
+);
+define_vue_query!(
+    /// Matches each entry of the `components` option of each Vue component.
+    VueComponentRegistration,
+    VueComponentRegistrationMatch,
+    Symbol
 );
 define_vue_query!(
     /// Matches the analyzed tree when it is a snippet embedded in a `.vue`
