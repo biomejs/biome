@@ -30,8 +30,8 @@ pub(crate) fn collect_style_semantics(
             let variable = DefineVarData {
                 name: variable.name,
                 semantic_name: variable.semantic_name,
-                range: to_host(variable.range, snippet.content_offset),
-                declaration: to_host(variable.declaration, snippet.content_offset),
+                range: to_host(variable.range, snippet.range_offset()),
+                declaration: to_host(variable.declaration, snippet.range_offset()),
             };
             if let Some(existing) = data
                 .define_vars
