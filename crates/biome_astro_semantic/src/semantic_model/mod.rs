@@ -1,10 +1,14 @@
 mod builder;
 mod client;
+mod db;
+mod define_vars;
 mod javascript;
 mod model;
 mod server;
 mod snippets;
+mod style;
 
+pub use db::{astro_model_from_source, astro_model_from_source_with_options};
 pub use model::*;
 pub use snippets::AstroSnippet;
 
@@ -14,7 +18,7 @@ use biome_html_syntax::{
     HtmlSelfClosingElement, ScriptType,
 };
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
-use builder::{ModelBuilder, NewSymbol, synthetic_name};
+use builder::{ModelBuilder, NewBlock, NewSymbol, synthetic_name};
 
 /// Additional inputs used to build an Astro semantic model.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -63,13 +67,15 @@ pub fn astro_model_with_options(
             })
             .and_then(|content| content.content_token())
             .map(|token| token.text_trimmed_range());
-        let block = builder.add_block(
-            BlockKind::Frontmatter,
-            frontmatter.range(),
+        let block = builder.add_block(NewBlock {
+            kind: BlockKind::Frontmatter,
+            range: frontmatter.range(),
             content,
-            false,
-            Some(scope),
-        );
+            supported: true,
+            globally_scoped: false,
+            external: false,
+            scope: Some(scope),
+        });
         builder.data.scopes[scope.index()].kind = ScopeKind::Module(Some(block));
         block
     });
@@ -98,9 +104,10 @@ pub fn astro_model_with_options(
         let snippet_host = if embedding.is_astro_frontmatter() {
             frontmatter.map_or(SnippetHost::Unknown, SnippetHost::Frontmatter)
         } else if embedding.is_astro_template() {
-            match script_define_vars_target(host, &builder, snippet.content_range) {
-                Some(ScriptDefineVarsTarget::Client(block)) => SnippetHost::ScriptDefineVars(block),
-                Some(ScriptDefineVarsTarget::Ignored) => SnippetHost::Unknown,
+            match define_vars_target(host, &builder, snippet.content_range) {
+                Some(DefineVarsTarget::Script(block)) => SnippetHost::ScriptDefineVars(block),
+                Some(DefineVarsTarget::Style(block)) => SnippetHost::StyleDefineVars(block),
+                Some(DefineVarsTarget::Ignored) => SnippetHost::Unknown,
                 None => SnippetHost::Expression,
             }
         } else {
@@ -126,7 +133,9 @@ pub fn astro_model_with_options(
             SnippetHost::Expression if snippet.has_errors => {
                 Some(builder.add_scope(ScopeKind::Expression, Some(server_scope)))
             }
-            SnippetHost::ScriptDefineVars(_) | SnippetHost::Expression => Some(server_scope),
+            SnippetHost::ScriptDefineVars(_)
+            | SnippetHost::StyleDefineVars(_)
+            | SnippetHost::Expression => Some(server_scope),
             SnippetHost::Unknown => None,
         };
         if snippet.has_errors
@@ -154,20 +163,22 @@ pub fn astro_model_with_options(
         &options.globals,
     );
     client::collect_client_semantics(&mut builder, host, snippets, &snippet_ids, &options.globals);
+    style::collect_style_semantics(&mut builder, host, snippets, &snippet_ids);
     builder.finish()
 }
 
 #[derive(Clone, Copy)]
-enum ScriptDefineVarsTarget {
-    Client(BlockId),
+enum DefineVarsTarget {
+    Script(BlockId),
+    Style(BlockId),
     Ignored,
 }
 
-fn script_define_vars_target(
+fn define_vars_target(
     host: &HtmlRoot,
     builder: &ModelBuilder,
     content_range: TextRange,
-) -> Option<ScriptDefineVarsTarget> {
+) -> Option<DefineVarsTarget> {
     for event in host
         .syntax()
         .preorder_of_kinds(AstroDefineDirective::KIND_SET)
@@ -217,13 +228,13 @@ fn script_define_vars_target(
             .position(|block| block.range == element_range)
             .map(BlockId::new)?;
         let data = &builder.data.blocks[block.index()];
-        if data.kind != BlockKind::Script {
-            return None;
-        }
-        return Some(if data.scope.is_some() && !data.external {
-            ScriptDefineVarsTarget::Client(block)
-        } else {
-            ScriptDefineVarsTarget::Ignored
+        return Some(match data.kind {
+            BlockKind::Script if data.supported && !data.external => {
+                DefineVarsTarget::Script(block)
+            }
+            BlockKind::Style if data.supported && !data.external => DefineVarsTarget::Style(block),
+            BlockKind::Script | BlockKind::Style => DefineVarsTarget::Ignored,
+            BlockKind::Frontmatter => return None,
         });
     }
     None
@@ -249,6 +260,15 @@ fn add_element_block(builder: &mut ModelBuilder, element: &HtmlElement) {
         .map(|token| token.text_range());
     let module_scope =
         kind == BlockKind::Script && element.is_javascript_tag() && !element.has_astro_is_raw();
+    let supported = if kind == BlockKind::Script {
+        module_scope
+    } else {
+        element.is_supported_style_tag()
+    };
+    let globally_scoped = kind == BlockKind::Style
+        && element
+            .opening_element()
+            .is_ok_and(|opening| has_astro_is_value(&opening.attributes(), "global"));
     let external = if kind == BlockKind::Script {
         element
             .opening_element()
@@ -258,10 +278,15 @@ fn add_element_block(builder: &mut ModelBuilder, element: &HtmlElement) {
     };
     add_block(
         builder,
-        kind,
-        element.range(),
-        content,
-        external,
+        NewBlock {
+            kind,
+            range: element.range(),
+            content,
+            supported,
+            globally_scoped,
+            external,
+            scope: None,
+        },
         module_scope,
     );
 }
@@ -281,12 +306,26 @@ fn add_self_closing_block(builder: &mut ModelBuilder, element: &HtmlSelfClosingE
         return;
     };
     let module_scope = kind == BlockKind::Script && is_javascript_self_closing_script(element);
+    let globally_scoped =
+        kind == BlockKind::Style && has_astro_is_value(&element.attributes(), "global");
     let external = if kind == BlockKind::Script {
         classify_script(&element.attributes()) == ScriptKind::External
     } else {
         element.find_attribute_by_name("src").is_some()
     };
-    add_block(builder, kind, element.range(), None, external, module_scope);
+    add_block(
+        builder,
+        NewBlock {
+            kind,
+            range: element.range(),
+            content: None,
+            supported: module_scope,
+            globally_scoped,
+            external,
+            scope: None,
+        },
+        module_scope,
+    );
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
@@ -333,7 +372,11 @@ fn is_javascript_self_closing_script(element: &HtmlSelfClosingElement) -> bool {
 }
 
 fn has_astro_is_raw(element: &HtmlSelfClosingElement) -> bool {
-    element.attributes().iter().any(|attribute| {
+    has_astro_is_value(&element.attributes(), "raw")
+}
+
+fn has_astro_is_value(attributes: &HtmlAttributeList, value: &str) -> bool {
+    attributes.iter().any(|attribute| {
         let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroIsDirective(directive)) =
             attribute
         else {
@@ -344,20 +387,14 @@ fn has_astro_is_raw(element: &HtmlSelfClosingElement) -> bool {
             .ok()
             .and_then(|value| value.name().ok())
             .and_then(|name| name.value_token().ok())
-            .is_some_and(|token| token.text_trimmed() == "raw")
+            .is_some_and(|token| token.text_trimmed() == value)
     })
 }
 
-fn add_block(
-    builder: &mut ModelBuilder,
-    kind: BlockKind,
-    range: TextRange,
-    content: Option<TextRange>,
-    external: bool,
-    module_scope: bool,
-) {
+fn add_block(builder: &mut ModelBuilder, mut data: NewBlock, module_scope: bool) {
     let scope = module_scope.then(|| builder.add_scope(ScopeKind::Module(None), None));
-    let block = builder.add_block(kind, range, content, external, scope);
+    data.scope = scope;
+    let block = builder.add_block(data);
     if let Some(scope) = scope {
         builder.data.scopes[scope.index()].kind = ScopeKind::Module(Some(block));
     }

@@ -34,7 +34,9 @@ pub(crate) fn collect_server_semantics(
     for (snippet, id) in snippets.iter().zip(ids) {
         if matches!(
             builder.data.snippets[id.index()].host,
-            SnippetHost::Expression | SnippetHost::ScriptDefineVars(_)
+            SnippetHost::Expression
+                | SnippetHost::ScriptDefineVars(_)
+                | SnippetHost::StyleDefineVars(_)
         ) {
             let scope = builder.data.snippets[id.index()]
                 .scope

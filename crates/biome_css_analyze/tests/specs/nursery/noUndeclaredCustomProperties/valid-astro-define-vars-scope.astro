@@ -1,0 +1,12 @@
+---
+const foreground = "red";
+---
+<!-- should not generate diagnostics -->
+
+<style define:vars={{ foreground }}>
+.card { display: block; }
+</style>
+
+<style>
+.card { color: var(--foreground); }
+</style>

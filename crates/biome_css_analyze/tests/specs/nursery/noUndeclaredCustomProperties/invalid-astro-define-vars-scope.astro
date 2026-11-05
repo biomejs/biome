@@ -1,0 +1,12 @@
+---
+const dynamic = { background: "blue" };
+---
+<!-- should generate diagnostics -->
+
+<style define:vars={{ ...dynamic }}>
+.card { color: var(--possibly-injected); }
+</style>
+
+<style>
+.card { color: var(--missing-in-other-style); }
+</style>

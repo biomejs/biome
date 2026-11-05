@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid-astro-define-vars-scope.astro
+---
+# Input
+```astro
+---
+const foreground = "red";
+---
+<!-- should not generate diagnostics -->
+
+<style define:vars={{ foreground }}>
+.card { display: block; }
+</style>
+
+<style>
+.card { color: var(--foreground); }
+</style>
+
+```

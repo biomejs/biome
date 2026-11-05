@@ -17,7 +17,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use super::SemanticFlavor;
+use super::{SemanticFlavor, SyntheticCustomProperty};
 
 /// The façade for all semantic information of a CSS document.
 ///
@@ -42,6 +42,16 @@ impl SemanticModel {
     /// Returns the framework-specific semantic flavor of this model.
     pub fn flavor(&self) -> SemanticFlavor {
         self.data.flavor
+    }
+
+    /// Returns custom properties supplied by the embedding host.
+    pub fn synthetic_custom_properties(&self) -> &[SyntheticCustomProperty] {
+        &self.data.synthetic_custom_properties
+    }
+
+    /// Whether the host may supply additional custom properties.
+    pub fn custom_properties_are_open(&self) -> bool {
+        self.data.custom_properties_open
     }
 
     /// Returns all top-level rules in the CSS document.
@@ -153,6 +163,8 @@ impl SemanticModel {
 pub(crate) struct SemanticModelData {
     pub(crate) root: SendNode,
     pub(crate) flavor: SemanticFlavor,
+    pub(crate) synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    pub(crate) custom_properties_open: bool,
     /// Single source of truth for all rules, indexed by RuleId
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
@@ -195,6 +207,15 @@ impl PartialEq for SemanticModel {
         let other_root = other.data.root();
 
         self.data.flavor == other.data.flavor
+            && self.data.synthetic_custom_properties.len()
+                == other.data.synthetic_custom_properties.len()
+            && self
+                .data
+                .synthetic_custom_properties
+                .iter()
+                .zip(&other.data.synthetic_custom_properties)
+                .all(|(this, other)| this.name() == other.name())
+            && self.data.custom_properties_open == other.data.custom_properties_open
             && self_rules.len() == other_rules.len()
             && self_rules
                 .iter()
@@ -1051,6 +1072,8 @@ fn has_custom_property_component_gap_before(token: &CssSyntaxToken) -> bool {
 pub(crate) struct CssGlobalCustomVariableData {
     /// The declaration from a `:root` rule, if one is retained for the name.
     pub(crate) root: Option<CssModelDeclarationData>,
+    /// The host-provided declaration range, if one exists.
+    pub(crate) synthetic_range: Option<TextRange>,
 }
 
 /// Authored descriptors and source handles retained for an `@property` rule.
@@ -1080,11 +1103,12 @@ impl CssGlobalCustomVariableData {
     /// Compares global custom variable semantics using the root that owns each
     /// side's stored pointers.
     fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
-        match (&self.root, &other.root) {
+        let roots_are_equal = match (&self.root, &other.root) {
             (Some(this), Some(other)) => this.semantic_eq(other, self_root, other_root),
             (None, None) => true,
             _ => false,
-        }
+        };
+        roots_are_equal && self.synthetic_range.is_some() == other.synthetic_range.is_some()
     }
 }
 
@@ -1164,6 +1188,11 @@ impl CssGlobalCustomVariable {
     /// Returns whether the property is declared in a `:root` rule.
     pub fn is_root(&self) -> bool {
         self.value().root.is_some()
+    }
+
+    /// Returns the host-provided declaration range, if present.
+    pub fn synthetic_range(&self) -> Option<TextRange> {
+        self.value().synthetic_range
     }
 
     /// Returns the semantic data for the `@property` rule, if present.

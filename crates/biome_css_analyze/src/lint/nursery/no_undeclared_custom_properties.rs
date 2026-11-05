@@ -1,4 +1,4 @@
-use crate::services::module_graph::CssModuleGraph;
+use crate::services::module_graph::CssModuleGraphSemantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{CssFunction, property_syntax::custom_property_name_from_var_function};
@@ -50,7 +50,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUndeclaredCustomProperties {
-    type Query = CssModuleGraph<CssFunction>;
+    type Query = CssModuleGraphSemantic<CssFunction>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoUndeclaredCustomPropertiesOptions;
@@ -64,6 +64,14 @@ impl Rule for NoUndeclaredCustomProperties {
             return None;
         }
         let property = custom_property_name_from_var_function(ctx.query())?;
+        if ctx.model().custom_properties_are_open()
+            || ctx
+                .model()
+                .global_custom_variables()
+                .contains_key(property.text_trimmed())
+        {
+            return None;
+        }
         let db = ctx.db();
         let module = db.module_for_path(ctx.file_path())?;
 
