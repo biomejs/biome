@@ -9,6 +9,14 @@ fn range(range: TextRange) -> String {
     format!("{}..{}", u32::from(range.start()), u32::from(range.end()))
 }
 
+fn open_reason_names(reasons: OpenReasons) -> String {
+    reasons
+        .iter()
+        .map(|reason| format!("{reason:?}"))
+        .collect::<Vec<_>>()
+        .join("|")
+}
+
 fn source_name(source: JsFileSource) -> &'static str {
     let embedding = source.as_embedding_kind();
     if embedding.is_astro_frontmatter() {
@@ -32,6 +40,9 @@ impl Display for AstroSemanticModel {
             write!(f, "block {:?} {}", block.kind(), range(block.host_range()))?;
             if let Some(content) = block.content_range() {
                 write!(f, " content={}", range(content))?;
+            }
+            if block.has_external_source() {
+                write!(f, " external")?;
             }
             if let Some(scope) = block.scope() {
                 write!(f, " scope#{}", scope.id().0)?;
@@ -62,6 +73,12 @@ impl Display for AstroSemanticModel {
             write!(f, "scope#{} {:?}", scope.id().0, scope.kind())?;
             if let Some(parent) = scope.parent() {
                 write!(f, " parent=scope#{}", parent.id().0)?;
+            }
+            for namespace in [Namespace::Value, Namespace::Type, Namespace::Namespace] {
+                let reasons = scope.open_reasons(namespace);
+                if !reasons.is_empty() {
+                    write!(f, " open-{namespace:?}={}", open_reason_names(reasons))?;
+                }
             }
             writeln!(f)?;
             for symbol in scope.symbols() {
