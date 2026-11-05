@@ -1,0 +1,85 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@use "theme";
+@import "mixins";
+
+@mixin card {
+  .card {
+    color: red;
+  }
+}
+
+@mixin layered {
+  @layer components {
+    .layered {
+      color: red;
+    }
+  }
+}
+
+@mixin declarations {
+  color: red;
+}
+
+@layer base {
+  @include card;
+
+  .wrapper {
+    @include declarations;
+  }
+}
+
+@include layered;
+
+@include theme.button;
+@include from-import;
+
+@mixin scoped {
+  @layer components {
+    .scoped {
+      color: red;
+    }
+  }
+}
+
+@layer base {
+  .local-scope {
+    @mixin scoped {
+      .local {
+        color: red;
+      }
+    }
+
+    @include scoped;
+  }
+}
+
+@include scoped;
+
+@mixin countdown($n) {
+  @if $n > 0 {
+    @include countdown($n - 1);
+  }
+}
+
+@mixin ping($n) {
+  @if $n > 0 {
+    @include pong($n - 1);
+  }
+}
+
+@mixin pong($n) {
+  @if $n > 0 {
+    @include ping($n - 1);
+  }
+}
+
+@include countdown(3);
+@include ping(3);
+
+```

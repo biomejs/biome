@@ -3,3 +3,42 @@ $color: red;
 .unlayered {
   color: $color;
 }
+
+@mixin card {
+  .card {
+    color: red;
+  }
+}
+
+@mixin dashed_name {
+  .dashed {
+    color: red;
+  }
+}
+
+@include card;
+@include dashed-name;
+
+@mixin base-card {
+  .base {
+    color: red;
+  }
+}
+
+@mixin wrapped-card {
+  @include base-card;
+}
+
+@include wrapped-card;
+
+@mixin wrapper {
+  @include defined-after;
+}
+
+@mixin defined-after {
+  .after {
+    color: red;
+  }
+}
+
+@include wrapper;

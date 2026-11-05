@@ -356,8 +356,8 @@ fn normalize_scss_function_name_byte(byte: u8) -> u8 {
     if byte == b'_' { b'-' } else { byte }
 }
 
-/// Whether two Sass function names refer to the same function. Sass treats `-` and `_` in function
-/// names as the same character.
+/// Whether two Sass function or mixin names refer to the same member. Sass treats `-` and `_` in
+/// these names as the same character.
 pub fn scss_function_names_equal(left: &str, right: &str) -> bool {
     compare_scss_function_names(left, right) == Ordering::Equal
 }
