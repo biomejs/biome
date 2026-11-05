@@ -6,4 +6,4 @@ Fixed [#9768](https://github.com/biomejs/biome/issues/9768): [`noDescendingSpeci
 
 [`noDuplicateSelectors`](https://biomejs.dev/linter/rules/no-duplicate-selectors/) now keeps selectors inside functional pseudo-classes such as `:is()` together when it compares selectors, so `.c:is(.a .b) {}` and `:is(.a .b).c {}` are now reported as duplicates.
 
-Both rules now check selectors that contain `%` or `#{` only inside a quoted string, such as `[data-progress="50%"]`. Previously, they skipped these selectors as if they contained an SCSS placeholder or interpolation.
+Both rules now check selectors whose `%` or `#{` is plain text inside a quoted string, such as `[data-progress="50%"]`. Previously, they skipped these selectors as if they contained an SCSS placeholder or interpolation. Selectors with SCSS interpolation, even inside a quoted string such as `[title="#{$x}"]`, are still skipped.
