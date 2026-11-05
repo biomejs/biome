@@ -26,24 +26,26 @@ const title = "Hello";
 ```text
 block Frontmatter 0..30 content=4..27 scope#1 snippet#0
 block Script 53..122 content=93..113 scope#2 snippet#3
-block Script 150..177 scope#3
+block Script 150..177 external scope#3
 block Script 178..235 content=210..226
 block Script 236..284 content=261..275
 block Script 285..323 content=300..314
 block Script 324..358
-block Script 359..390
+block Script 359..390 external
 block Style 391..424 content=398..416
 snippet#0 4..27 Frontmatter(BlockId(0)) offset=4 source=astro-frontmatter scope#1
 snippet#1 36..41 Expression offset=36 source=astro-template scope#1
-snippet#2 74..91 Expression offset=74 source=astro-template scope#1
+snippet#2 74..91 ScriptDefineVars(BlockId(1)) offset=74 source=astro-template scope#1
 snippet#3 93..113 Script(BlockId(1)) offset=93 source=typescript scope#2
 scope#0 Builtins
   Builtin Astro 0..0 origin=AstroBuiltin
 scope#1 Module(Some(BlockId(0))) parent=scope#0
   Local title 10..15
 scope#2 Module(Some(BlockId(1)))
-scope#3 Module(Some(BlockId(2)))
+  Synthetic theme 76..81 origin=DefineVars
+scope#3 Module(Some(BlockId(2))) open-Value=ExternalSource open-Type=ExternalSource open-Namespace=ExternalSource
 ref title 36..41 Value Identifier Read -> Local title
+ref console 93..100 Value Identifier Read -> Global
 ref Script 130..136 Value TagName Read -> Unresolved
 ref Style 141..146 Value TagName Read -> Unresolved
 ```
