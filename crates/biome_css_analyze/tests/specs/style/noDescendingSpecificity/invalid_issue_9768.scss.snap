@@ -102,6 +102,18 @@ aside {
 
 .baz.bar { color: blue; }
 
+// Type selectors are case-insensitive, so `span` is reported.
+.c11 SPAN:hover { color: red; }
+
+span { color: blue; }
+
+// A suffix added through nesting matches the class written out, so `.c12--x` is reported.
+.c12 {
+  .c12a &--x { color: red; }
+}
+
+.c12--x { color: blue; }
+
 ```
 
 # Diagnostics
@@ -266,6 +278,7 @@ invalid_issue_9768.scss:97:1 lint/style/noDescendingSpecificity ━━━━━�
   > 97 │ .baz.bar { color: blue; }
        │ ^^^^^^^^
     98 │ 
+    99 │ // Type selectors are case-insensitive, so `span` is reported.
   
   i This selector specificity is (1, 2, 0)
   
@@ -274,6 +287,56 @@ invalid_issue_9768.scss:97:1 lint/style/noDescendingSpecificity ━━━━━�
        │ ^^^^^^^^^^^^^
     96 │ 
     97 │ .baz.bar { color: blue; }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:102:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
+  
+    100 │ .c11 SPAN:hover { color: red; }
+    101 │ 
+  > 102 │ span { color: blue; }
+        │ ^^^^
+    103 │ 
+    104 │ // A suffix added through nesting matches the class written out, so `.c12--x` is reported.
+  
+  i This selector specificity is (0, 2, 1)
+  
+     99 │ // Type selectors are case-insensitive, so `span` is reported.
+  > 100 │ .c11 SPAN:hover { color: red; }
+        │ ^^^^^^^^^^^^^^^
+    101 │ 
+    102 │ span { color: blue; }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:109:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    107 │ }
+    108 │ 
+  > 109 │ .c12--x { color: blue; }
+        │ ^^^^^^^
+    110 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    104 │ // A suffix added through nesting matches the class written out, so `.c12--x` is reported.
+    105 │ .c12 {
+  > 106 │   .c12a &--x { color: red; }
+        │   ^^^^^^^^^^
+    107 │ }
+    108 │ 
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   

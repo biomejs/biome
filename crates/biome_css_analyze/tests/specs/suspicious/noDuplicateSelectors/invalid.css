@@ -88,3 +88,7 @@ h3 {
   .card {}
   .card {}
 }
+
+/* 17. Duplicate with simple selectors inside a functional pseudo-class in a different order */
+.c:is(.a .b) {}
+:is(.a .b).c {}

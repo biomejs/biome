@@ -5,14 +5,15 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{
-    AnyRuleStart, ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity,
+    AnyRuleStart, ResolvedSelector, Rule as CssSemanticRule, RuleId, SimpleSelector,
+    SimpleSelectorKind, Specificity,
 };
 use biome_css_syntax::{
     AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssLayerAtRule, CssMediaAtRule,
     CssRelativeSelectorList, CssScopeAtRule, CssSelectorList, CssStartingStyleAtRule,
     CssSupportsAtRule, CssSupportsFeatureDeclaration, CssSyntaxNode, ScssAtRootAtRule,
     ScssEachAtRule, ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule,
-    ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule, T,
+    ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent};
@@ -55,7 +56,9 @@ declare_lint_rule! {
     ///
     /// Rules without declarations, such as a rule that only contains a comment or nested rules,
     /// are ignored because they can't lose to another selector. In SCSS, an `@include` counts as
-    /// a declaration.
+    /// a declaration, because the mixin it includes usually adds some. Stylelint doesn't count an
+    /// `@include` without a `{ ... }` block, so this rule can report selectors that Stylelint
+    /// doesn't.
     ///
     /// ## SCSS limitations
     ///
@@ -270,78 +273,29 @@ struct SelectorContext {
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
 /// Writes the element a selector styles into `key`: the last compound of the resolved selector,
 /// without pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as
-/// `:before`, because they style a different element. Simple selectors are sorted, so `.a.b` and
-/// `.b.a` share a key. Returns `false` when nothing is left, as for `:hover`.
+/// `:before`, because they style a different element. Simple selectors are sorted and type
+/// selectors lowercased, so `.a.b` and `.b.a` share a key, as do `A` and `a`. Returns `false` when
+/// nothing is left, as for `:hover`.
 ///
 /// ```css
 /// .a ul li:hover {
 ///       ^^
 /// }
 /// ```
-fn subject_key(selector: &ResolvedSelector, key: &mut String) -> bool {
+fn subject_key<'a>(
+    selector: &'a ResolvedSelector,
+    parts: &mut Vec<SimpleSelector<'a>>,
+    key: &mut String,
+) -> bool {
     key.clear();
-    // Where each simple selector after the type selector starts in `key`.
-    let mut first = None;
-    let mut rest = Vec::new();
-    let mut depth = 0u32;
-    let mut tokens = selector.tokens().peekable();
-    while let Some((kind, text)) = tokens.next() {
-        match *kind {
-            T!['('] => depth += 1,
-            T![')'] => depth = depth.saturating_sub(1),
-            kind if depth == 0 && ResolvedSelector::is_combinator(kind) => {
-                key.clear();
-                first = None;
-                rest.clear();
-                continue;
-            }
-            T![:]
-                if depth == 0
-                    && tokens
-                        .peek()
-                        .is_some_and(|(_, name)| !is_pseudo_elements(name)) =>
-            {
-                tokens.next();
-                if tokens.next_if(|(kind, _)| *kind == T!['(']).is_some() {
-                    let mut depth = 1u32;
-                    for (kind, _) in tokens.by_ref() {
-                        match *kind {
-                            T!['('] => depth += 1,
-                            T![')'] => depth -= 1,
-                            _ => {}
-                        }
-                        if depth == 0 {
-                            break;
-                        }
-                    }
-                }
-                continue;
-            }
-            T![.] | T![#] | T!['['] | T![:] | T![::] if depth == 0 => {
-                if first.is_none() {
-                    first = Some(key.len());
-                } else {
-                    rest.push(key.len());
-                }
-            }
-            _ => {}
-        }
-        key.push_str(text);
-    }
-    if let Some(first) = first
-        && !rest.is_empty()
-    {
-        let ends = rest.iter().copied().chain([key.len()]);
-        let mut parts: Vec<_> = std::iter::once(first)
-            .chain(rest.iter().copied())
-            .zip(ends)
-            .map(|(start, end)| &key[start..end])
-            .collect();
-        if !parts.is_sorted() {
-            parts.sort_unstable();
-            let sorted: String = [&key[..first]].into_iter().chain(parts).collect();
-            *key = sorted;
-        }
+    parts.clear();
+    parts.extend(selector.subject().simple_selectors().filter(|part| {
+        part.kind() != SimpleSelectorKind::PseudoClass
+            || part.name().is_some_and(is_pseudo_elements)
+    }));
+    parts.sort_unstable();
+    for part in parts.iter() {
+        part.write_normalized(key);
     }
     !key.is_empty()
 }
@@ -388,6 +342,7 @@ fn find_descending_selector(
     key: &mut String,
 ) {
     let visited_selectors = visited_selectors.entry(context).or_default();
+    let mut parts = Vec::new();
 
     for selector in rule.selectors() {
         let resolved_selector = selector.resolved();
@@ -396,7 +351,7 @@ fn find_descending_selector(
         if resolved_selector_text.contains('%') || resolved_selector_text.contains("#{") {
             continue;
         }
-        if !subject_key(resolved_selector, key) {
+        if !subject_key(resolved_selector, &mut parts, key) {
             continue;
         }
 
