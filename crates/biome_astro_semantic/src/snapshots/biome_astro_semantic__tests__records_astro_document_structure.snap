@@ -1,7 +1,29 @@
 ---
 source: crates/biome_astro_semantic/src/tests.rs
-expression: model.to_string()
+expression: "semantic_snapshot(source, &model)"
 ---
+## Input
+
+```astro
+---
+const title = "Hello";
+---
+<h1>{title}</h1>
+<div><script define:vars={{ theme: "dark" }}>console.log("ready")</script></div>
+<Script />
+<Style />
+<script src="/client.js" />
+<script type="application/json">{"name":"Biome"}</script>
+<script type="importmap">{"imports":{}}</script>
+<script is:raw>not JavaScript</script>
+<script type="application/json" />
+<script is:raw src="/raw.js" />
+<style>h1 { color: red; }</style>
+```
+
+## Semantic model
+
+```text
 block Frontmatter 0..30 content=4..27 scope#1 snippet#0
 block Script 53..122 content=93..113 scope#2 snippet#3
 block Script 150..177 scope#3
@@ -11,12 +33,17 @@ block Script 285..323 content=300..314
 block Script 324..358
 block Script 359..390
 block Style 391..424 content=398..416
-snippet#0 4..27 Frontmatter(BlockId(0)) offset=4 source=astro-frontmatter
-snippet#1 36..41 Expression offset=36 source=astro-template
-snippet#2 74..91 Expression offset=74 source=astro-template
-snippet#3 93..113 Script(BlockId(1)) offset=93 source=typescript
+snippet#0 4..27 Frontmatter(BlockId(0)) offset=4 source=astro-frontmatter scope#1
+snippet#1 36..41 Expression offset=36 source=astro-template scope#1
+snippet#2 74..91 Expression offset=74 source=astro-template scope#1
+snippet#3 93..113 Script(BlockId(1)) offset=93 source=typescript scope#2
 scope#0 Builtins
   Builtin Astro 0..0 origin=AstroBuiltin
 scope#1 Module(Some(BlockId(0))) parent=scope#0
+  Local title 10..15
 scope#2 Module(Some(BlockId(1)))
 scope#3 Module(Some(BlockId(2)))
+ref title 36..41 Value Identifier Read -> Local title
+ref Script 130..136 Value TagName Read -> Unresolved
+ref Style 141..146 Value TagName Read -> Unresolved
+```
