@@ -172,7 +172,8 @@ fn find_duplicate(
             return Some(duplicate);
         }
 
-        // Every nested name extends this one, so it can be added after them and moved, not cloned.
+        // Nested names are this name plus a hyphenated suffix, so none can match it, and it can be
+        // added after them by move instead of clone.
         if sets_own_name {
             seen.insert(prop_name, name.text_trimmed_range());
         }
