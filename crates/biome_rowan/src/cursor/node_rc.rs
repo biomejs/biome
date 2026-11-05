@@ -24,10 +24,32 @@ use std::alloc::{Layout, alloc, dealloc, handle_alloc_error};
 use std::cell::Cell;
 use std::mem::ManuallyDrop;
 use std::ops::Deref;
+use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::ptr::NonNull;
 use std::{fmt, process};
 
 /// Maximum number of free blocks a thread keeps for reuse.
+///
+/// The cap trades reuse against retained memory. Most frees come one at a
+/// time as a walk moves on, but some come in bursts of thousands, such as
+/// dropping a collection of nodes or unwinding a long ancestor chain. Blocks
+/// freed beyond the cap go back to the global allocator, and the allocations
+/// that follow miss the pool until it refills.
+///
+/// Share of red-node allocations served from the pool when linting the VS
+/// Code repository (`src`, pinned to 4 CPUs):
+///
+/// | Cap    | Default rules | 50 rules |
+/// | -----: | ------------: | -------: |
+/// | 64     | 92.2%         | 81.3%    |
+/// | 1024   | 96.3%         | 89.2%    |
+/// | 8192   | 99.1%         | 97.4%    |
+/// | 65536  | 99.9%         | 99.6%    |
+///
+/// 8192 is where the gain flattens. A full pool holds 320 KiB of blocks plus a
+/// 64 KiB slot array per thread. Larger caps are not free: peak memory in the
+/// same runs grew with the cap, by about 25 MiB at 8192 and 37 MiB at 65536,
+/// more than the pooled blocks themselves account for.
 const MAX_POOLED: u32 = 8192;
 
 /// The heap allocation behind a [NodeRc]: the reference count and the node.
@@ -155,6 +177,11 @@ impl Drop for NodeRc {
         }
     }
 }
+
+// Like `Rc`: the count is never left inconsistent by a panic, so a handle
+// observed after an unwind behaves like any other.
+impl UnwindSafe for NodeRc {}
+impl RefUnwindSafe for NodeRc {}
 
 impl Deref for NodeRc {
     type Target = NodeData;
@@ -371,7 +398,7 @@ mod tests {
             builder.finish_node();
         }
         builder.finish_node();
-        let root: SyntaxNode<RawLanguage> = builder.finish();
+        let root = builder.finish();
 
         let token = root.first_token().unwrap();
         clear_pool();
@@ -393,6 +420,10 @@ mod tests {
         impl Drop for UseOnDrop {
             fn drop(&mut self) {
                 if let Some(root) = self.0.take() {
+                    // Elsewhere the order may differ, and the test then only
+                    // covers nodes used while the pool is still alive.
+                    #[cfg(any(target_os = "linux", target_os = "macos"))]
+                    assert!(POOL.try_with(|_| ()).is_err());
                     let list = root.first_child().unwrap();
                     assert_eq!(list.kind(), RawLanguageKind::EXPRESSION_LIST);
                 }
