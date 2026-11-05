@@ -5,7 +5,8 @@ use biome_css_syntax::{
     CssPropertyAtRule, CssQualifiedRule, CssRelativeSelectorList, CssSelectorList, CssString,
     CssSyntaxKind::*,
     CssSyntaxToken, ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssFunctionAtRule,
-    ScssInterpolation, ScssUnaryExpression, ScssVariable, decode_css_identifier,
+    ScssInterpolatedDashedIdentifier, ScssInterpolation, ScssUnaryExpression, ScssVariable,
+    decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
@@ -64,6 +65,12 @@ pub enum SemanticEvent {
     /// An SCSS `@function` rule
     ScssFunctionDeclaration {
         name: CssSyntaxToken,
+    },
+    /// A custom property declaration whose name is interpolated after a static prefix, such as
+    /// `--color-#{$name}: red`, which declares custom properties that start with `--color-`.
+    CustomPropertyPrefixDeclaration {
+        prefix: String,
+        range: TextRange,
     },
 }
 
@@ -183,9 +190,19 @@ impl SemanticEventExtractor {
                                     AnyCssDashedIdentifier::CssDashedIdentifier(name),
                                 ) => CssProperty::from(name),
                                 AnyCssDeclarationName::AnyCssDashedIdentifier(
-                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
-                                )
-                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(name),
+                                ) => {
+                                    if let Some(prefix) = custom_property_prefix(&name) {
+                                        self.stash.push_back(
+                                            SemanticEvent::CustomPropertyPrefixDeclaration {
+                                                prefix,
+                                                range: name.syntax().text_trimmed_range(),
+                                            },
+                                        );
+                                    }
+                                    return;
+                                }
+                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
                                 | AnyCssDeclarationName::CssMetavariable(_) => {
                                     return;
                                 }
@@ -415,4 +432,16 @@ fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {
         PropertySyntaxErrorKind::ExpectedString,
         range,
     ))
+}
+
+/// Returns the static part of an interpolated custom property name before its first interpolation,
+/// such as `--color-` for `--color-#{$name}`, or `None` if the name isn't a custom property.
+fn custom_property_prefix(name: &ScssInterpolatedDashedIdentifier) -> Option<String> {
+    let prefix: String = name
+        .items()
+        .iter()
+        .take_while(|part| part.as_scss_interpolation().is_none())
+        .map(|part| part.syntax().text_trimmed().to_string())
+        .collect();
+    prefix.starts_with("--").then_some(prefix)
 }
