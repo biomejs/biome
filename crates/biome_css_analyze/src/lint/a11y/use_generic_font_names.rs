@@ -30,7 +30,8 @@ declare_lint_rule! {
     /// - the property uses a CSS-wide keyword such as `inherit` or `initial`;
     /// - the `font` shorthand uses a system-font value such as `caption` or `menu`;
     /// - the final family comes from a custom property through `var()`;
-    /// - `font-family` appears inside an `@font-face` rule.
+    /// - `font-family` appears inside an `@font-face` or `@font-palette-values` rule, where it is a
+    ///   descriptor that names font families rather than a fallback list.
     ///
     /// ## SCSS limitations
     ///
@@ -71,6 +72,10 @@ declare_lint_rule! {
     /// @font-face { font-family: Gentium; }
     /// ```
     ///
+    /// ```css
+    /// @font-palette-values --palette { font-family: Bixa; }
+    /// ```
+    ///
     pub UseGenericFontNames {
         version: "1.8.0",
         name: "useGenericFontNames",
@@ -92,8 +97,9 @@ impl Rule for UseGenericFontNames {
         let property_name = node.name().ok()?.to_trimmed_text();
         let property_name = property_name.to_ascii_lowercase_cow();
 
-        // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
-        if is_in_font_face_at_rule(node) {
+        // See https://drafts.csswg.org/css-fonts/#font-face-rule and
+        // https://drafts.csswg.org/css-fonts/#font-palette-values
+        if is_font_family_descriptor(node) {
             return None;
         }
 
@@ -167,14 +173,19 @@ impl Rule for UseGenericFontNames {
     }
 }
 
-fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
+fn is_font_family_descriptor(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
         .skip(1)
         .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
         .and_then(|n| n.cast::<CssAtRule>())
         .and_then(|n| n.rule().ok())
-        .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
+        .is_some_and(|n| {
+            matches!(
+                n,
+                AnyCssAtRule::CssFontFaceAtRule(_) | AnyCssAtRule::CssFontPaletteValuesAtRule(_)
+            )
+        })
 }
 
 /// Check if the node is inside a `@supports` feature declaration (the condition),
