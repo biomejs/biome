@@ -1,5 +1,6 @@
 ---
 source: crates/biome_html_parser/tests/spec_test.rs
+assertion_line: 155
 expression: snapshot
 ---
 
@@ -8,6 +9,7 @@ expression: snapshot
 ```astro
 <p>{cond && <span>It's<br>ok</span>}</p>
 <p>{open && <label><input type="text">don't</label>}</p>
+<p>{x && <BR>it's</BR>}</p>
 
 ```
 
@@ -75,20 +77,47 @@ HtmlRoot {
                 r_angle_token: R_ANGLE@96..97 ">" [] [],
             },
         },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@97..99 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: P_KW@99..100 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@100..101 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@101..102 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@102..120 "x && <BR>it's</BR>" [] [],
+                    },
+                    r_curly_token: R_CURLY@120..121 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@121..122 "<" [] [],
+                slash_token: SLASH@122..123 "/" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@123..124 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@124..125 ">" [] [],
+            },
+        },
     ],
-    eof_token: EOF@97..98 "" [Newline("\n")] [],
+    eof_token: EOF@125..126 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: HTML_ROOT@0..98
+0: HTML_ROOT@0..126
   0: (empty)
   1: (empty)
   2: (empty)
   3: (empty)
-  4: HTML_ELEMENT_LIST@0..97
+  4: HTML_ELEMENT_LIST@0..125
     0: HTML_ELEMENT@0..40
       0: HTML_OPENING_ELEMENT@0..3
         0: L_ANGLE@0..1 "<" [] []
@@ -127,6 +156,25 @@ HtmlRoot {
         2: HTML_TAG_NAME@95..96
           0: P_KW@95..96 "p" [] []
         3: R_ANGLE@96..97 ">" [] []
-  5: EOF@97..98 "" [Newline("\n")] []
+    2: HTML_ELEMENT@97..125
+      0: HTML_OPENING_ELEMENT@97..101
+        0: L_ANGLE@97..99 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@99..100
+          0: P_KW@99..100 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@100..100
+        3: R_ANGLE@100..101 ">" [] []
+      1: HTML_ELEMENT_LIST@101..121
+        0: HTML_SINGLE_TEXT_EXPRESSION@101..121
+          0: L_CURLY@101..102 "{" [] []
+          1: HTML_TEXT_EXPRESSION@102..120
+            0: HTML_LITERAL@102..120 "x && <BR>it's</BR>" [] []
+          2: R_CURLY@120..121 "}" [] []
+      2: HTML_CLOSING_ELEMENT@121..125
+        0: L_ANGLE@121..122 "<" [] []
+        1: SLASH@122..123 "/" [] []
+        2: HTML_TAG_NAME@123..124
+          0: P_KW@123..124 "p" [] []
+        3: R_ANGLE@124..125 ">" [] []
+  5: EOF@125..126 "" [Newline("\n")] []
 
 ```
