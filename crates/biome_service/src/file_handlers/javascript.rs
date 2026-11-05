@@ -870,46 +870,12 @@ fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandi
 /// - `gql\`\`` / `graphql\`\`` → Identifier("gql") / Identifier("graphql")
 /// - `styled.div\`\`` → MemberExpression { object: "styled", property: "div" }
 /// - `styled(Comp)\`\`` → CallExpression { callee: "styled" }
+/// - `styled.div.attrs({})\`\`` / `styled(Comp).attrs({})\`\`` → same as `styled.div` / `styled(Comp)`
 /// - `graphql(\`\`)` → CallExpression { callee: "graphql" } (template as argument)
 #[cfg(feature = "js_embeds")]
 fn template_expression_to_template_tag(expr: &JsTemplateExpression) -> Option<TemplateTagKind> {
     if let Some(tag) = expr.tag() {
-        match tag {
-            // css``, gql``, graphql``
-            AnyJsExpression::JsIdentifierExpression(ident) => {
-                let name = ident.name().ok()?;
-                Some(TemplateTagKind::Identifier(
-                    name.value_token().ok()?.token_text_trimmed(),
-                ))
-            }
-            // styled.div``
-            AnyJsExpression::JsStaticMemberExpression(member) => {
-                let object = match member.object().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(ident) => {
-                        ident.name().ok()?.value_token().ok()?.token_text_trimmed()
-                    }
-                    _ => return None,
-                };
-                let property = member
-                    .member()
-                    .ok()?
-                    .value_token()
-                    .ok()?
-                    .token_text_trimmed();
-                Some(TemplateTagKind::MemberExpression { object, property })
-            }
-            // styled(Component)``
-            AnyJsExpression::JsCallExpression(call) => {
-                let callee = match call.callee().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(ident) => {
-                        ident.name().ok()?.value_token().ok()?.token_text_trimmed()
-                    }
-                    _ => return None,
-                };
-                Some(TemplateTagKind::CallExpression { callee })
-            }
-            _ => None,
-        }
+        tag_expression_to_template_tag(tag)
     } else {
         // No tag — check if template is an argument to a call expression
         // e.g. graphql(`query { ... }`)
@@ -923,6 +889,63 @@ fn template_expression_to_template_tag(expr: &JsTemplateExpression) -> Option<Te
             _ => return None,
         };
         Some(TemplateTagKind::CallExpression { callee })
+    }
+}
+
+#[cfg(feature = "js_embeds")]
+fn tag_expression_to_template_tag(tag: AnyJsExpression) -> Option<TemplateTagKind> {
+    match tag {
+        // css``, gql``, graphql``
+        AnyJsExpression::JsIdentifierExpression(ident) => {
+            let name = ident.name().ok()?;
+            Some(TemplateTagKind::Identifier(
+                name.value_token().ok()?.token_text_trimmed(),
+            ))
+        }
+        // styled.div``
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object = match member.object().ok()? {
+                AnyJsExpression::JsIdentifierExpression(ident) => {
+                    ident.name().ok()?.value_token().ok()?.token_text_trimmed()
+                }
+                _ => return None,
+            };
+            let property = member
+                .member()
+                .ok()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed();
+            Some(TemplateTagKind::MemberExpression { object, property })
+        }
+        AnyJsExpression::JsCallExpression(call) => match call.callee().ok()? {
+            // styled.div.attrs({})``, styled(Component).attrs({})``
+            AnyJsExpression::JsStaticMemberExpression(member) => match member.object().ok()? {
+                object @ AnyJsExpression::JsStaticMemberExpression(_) => {
+                    tag_expression_to_template_tag(object)
+                }
+                AnyJsExpression::JsCallExpression(call) => call_expression_to_template_tag(&call),
+                _ => None,
+            }
+            .filter(|tag| match tag {
+                TemplateTagKind::MemberExpression { object: name, .. }
+                | TemplateTagKind::CallExpression { callee: name } => name.text() == "styled",
+                TemplateTagKind::Identifier(_) => false,
+            }),
+            // styled(Component)``
+            _ => call_expression_to_template_tag(&call),
+        },
+        _ => None,
+    }
+}
+
+#[cfg(feature = "js_embeds")]
+fn call_expression_to_template_tag(call: &JsCallExpression) -> Option<TemplateTagKind> {
+    match call.callee().ok()? {
+        AnyJsExpression::JsIdentifierExpression(ident) => Some(TemplateTagKind::CallExpression {
+            callee: ident.name().ok()?.value_token().ok()?.token_text_trimmed(),
+        }),
+        _ => None,
     }
 }
 
