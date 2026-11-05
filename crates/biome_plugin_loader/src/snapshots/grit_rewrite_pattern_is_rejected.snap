@@ -1,0 +1,30 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { defineRule, grit } from "@biomejs/runtime/plugin";
+export const rule = defineRule({
+	query: grit("`foo()` => `bar()`"),
+	run() {},
+});
+```
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Failed to compile the Grit plugin
+    
+    Caused by:
+      Grit patterns used as JavaScript plugin queries cannot contain rewrites
+```

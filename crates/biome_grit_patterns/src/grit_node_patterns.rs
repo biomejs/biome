@@ -130,16 +130,11 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         // Single-child lists are unwrapped to their child. Multi-child lists
         // are matched as a sequence by `execute_list`.
         let Some(node) = binding.singleton() else {
-            if !context.allow_list_matches {
-                return Ok(false);
-            }
-            let Some(node) = binding.as_node() else {
-                return Ok(false);
-            };
-            return if binding.is_list() {
-                self.execute_list(&node, init_state, context, logs)
-            } else {
-                Ok(false)
+            return match binding.as_node() {
+                Some(node) if node.is_list() && context.allow_list_matches => {
+                    self.execute_list(&node, init_state, context, logs)
+                }
+                _ => Ok(false),
             };
         };
 

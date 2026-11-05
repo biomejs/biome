@@ -181,7 +181,7 @@ export function semantic<K extends readonly (keyof JsNodeByKind)[]>(
 ): SemanticQuery<JsNodeByKind[K[number]]>;
 
 /**
- * Creates a query matching the nodes and tokens selected by a GritQL pattern.
+ * Creates a query matching the nodes selected by a GritQL pattern.
  *
  * The pattern runs against the analyzed file and `run` is called once for each
  * match. When the pattern matches a list, such as several sibling statements,

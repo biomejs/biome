@@ -1,3 +1,5 @@
+use crate::analyzer_js_plugin::tests::{render_diagnostics, snap_diagnostics};
+
 use super::tests::{load_test_plugin_from_source, services};
 use super::*;
 use biome_diagnostics::{Error, PrintDescription, print_diagnostic_to_string};
@@ -106,18 +108,15 @@ fn grit_matches_a_leaf_token() {
 
 #[test]
 fn grit_can_request_the_semantic_model() {
-    let plugin = load_test_plugin_from_source(
-        "/plugin.js",
-        r#"import { defineRule, grit, registerDiagnostic } from "@biomejs/runtime/plugin";
+    let plugin_source = r#"import { defineRule, grit, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const rule = defineRule({
             query: grit("JsReferenceIdentifier()", { semantic: true }),
             run(node, { model }) {
                 const binding = model.binding(node);
                 registerDiagnostic(node, "information", `${binding.syntax().text}:${binding.allReads().length}`);
             },
-        });"#,
-        None,
-    );
+        });"#;
+    let plugin = load_test_plugin_from_source("/plugin.js", plugin_source, None);
 
     let source_type = JsFileSource::js_module();
     let source = "let value = 1; value;";
@@ -128,7 +127,8 @@ fn grit_can_request_the_semantic_model() {
         SemanticModelOptions::from(&source_type),
     ));
 
-    let result = plugin.evaluate(parsed.syntax().into(), "/file.js".into(), &bag);
+    let path = "/file.js";
+    let result = plugin.evaluate(parsed.syntax().into(), path.into(), &bag);
     let messages: Vec<_> = result
         .entries
         .iter()
@@ -136,19 +136,59 @@ fn grit_can_request_the_semantic_model() {
         .collect();
 
     assert_eq!(messages, ["value:1"]);
+
+    let rendered = render_diagnostics(path, source, result);
+    snap_diagnostics(
+        "grit_can_request_the_semantic_model",
+        "/plugin.js",
+        plugin_source,
+        &[(path, source)],
+        rendered,
+    );
 }
 
 #[test]
 fn invalid_grit_pattern_is_rejected() {
+    let plugin_source = r#"import { defineRule, grit } from "@biomejs/runtime/plugin";
+        export const rule = defineRule({
+            query: grit("`foo()"),
+            run() {},
+        });"#;
+
     let fs = MemoryFileSystem::default();
-    fs.insert(
+    fs.insert("/plugin.js".into(), plugin_source);
+
+    let error = AnalyzerJsPlugin::load(
+        Arc::new(fs) as Arc<dyn FsWithResolverProxy>,
         "/plugin.js".into(),
-        r#"import { defineRule, grit } from "@biomejs/runtime/plugin";
+        None,
+    )
+    .expect_err("Grit rewrites cannot select nodes");
+    let output = print_diagnostic_to_string(&Error::from(error));
+
+    assert!(
+        output.contains("Missing closing quote"),
+        "unexpected error: {output}"
+    );
+    snap_diagnostics(
+        "grit_invalid_pattern_is_rejected",
+        "/plugin.js",
+        plugin_source,
+        &[],
+        output,
+    );
+}
+
+#[test]
+fn invalid_grit_rewrite_is_rejected() {
+    let plugin_source = r#"import { defineRule, grit } from "@biomejs/runtime/plugin";
         export const rule = defineRule({
             query: grit("`foo()` => `bar()`"),
             run() {},
-        });"#,
-    );
+        });"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert("/plugin.js".into(), plugin_source);
 
     let error = AnalyzerJsPlugin::load(
         Arc::new(fs) as Arc<dyn FsWithResolverProxy>,
@@ -161,5 +201,12 @@ fn invalid_grit_pattern_is_rejected() {
     assert!(
         output.contains("cannot contain rewrites"),
         "unexpected error: {output}"
+    );
+    snap_diagnostics(
+        "grit_rewrite_pattern_is_rejected",
+        "/plugin.js",
+        plugin_source,
+        &[],
+        output,
     );
 }
