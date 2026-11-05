@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+@utility tab-* {
+  --tab: --value([integer]);
+  --tab: --value(integer);
+  --tab: --value(--tab-size-*);
+}

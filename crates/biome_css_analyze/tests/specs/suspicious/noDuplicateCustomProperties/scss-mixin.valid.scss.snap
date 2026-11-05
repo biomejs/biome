@@ -1,0 +1,19 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: scss-mixin.valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@mixin colors {
+  --color: red;
+  color: red;
+  color: blue;
+
+  &:hover {
+    --color: blue;
+  }
+}
+
+```

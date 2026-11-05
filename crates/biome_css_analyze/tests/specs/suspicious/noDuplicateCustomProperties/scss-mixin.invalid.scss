@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+@mixin colors {
+  --color: red;
+  --color: blue;
+}
+
+@include wrapper {
+  --gap: 0;
+  --gap: 1px;
+}
