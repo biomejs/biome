@@ -4,15 +4,67 @@ pub mod model;
 pub mod specificity;
 
 use biome_css_syntax::AnyCssRoot;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Text, TextRange};
 use builder::SemanticModelBuilder;
 use model::SemanticModel;
 
 use crate::events::SemanticEventExtractor;
 
+/// A custom-property declaration supplied by an embedding host.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SyntheticCustomProperty {
+    name: Text,
+    host_range: Option<TextRange>,
+}
+
+impl SyntheticCustomProperty {
+    /// Creates a host-provided custom property from its name without the
+    /// leading `--`: the name `theme` declares `--theme`.
+    pub fn new(name: Text) -> Self {
+        Self {
+            name,
+            host_range: None,
+        }
+    }
+
+    /// Associates the declaration with its range in the embedding document.
+    pub fn with_host_range(mut self, range: TextRange) -> Self {
+        self.host_range = Some(range);
+        self
+    }
+
+    /// Returns the custom-property name without the leading `--`.
+    pub fn name(&self) -> &Text {
+        &self.name
+    }
+
+    /// Returns the declaration range in the embedding document, if available.
+    pub fn host_range(&self) -> Option<TextRange> {
+        self.host_range
+    }
+}
+
+/// Additional behavior selected for CSS semantic construction.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct SemanticModelOptions {
+    /// Custom properties supplied by the embedding host.
+    pub synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    /// Whether the host may supply additional custom properties.
+    pub custom_properties_open: bool,
+}
+
 pub fn semantic_model(root: &AnyCssRoot) -> SemanticModel {
+    semantic_model_with_options(root, SemanticModelOptions::default())
+}
+
+/// Builds a CSS semantic model with the supplied options.
+pub fn semantic_model_with_options(
+    root: &AnyCssRoot,
+    options: SemanticModelOptions,
+) -> SemanticModel {
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
+    builder.set_options(options);
 
     let root = root.syntax();
     for node in root.preorder_of_kinds(SemanticEventExtractor::VISITED_KINDS) {

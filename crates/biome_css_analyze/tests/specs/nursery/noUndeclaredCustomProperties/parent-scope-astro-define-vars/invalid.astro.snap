@@ -1,0 +1,38 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+
+<style>
+.child {
+  color: var(--globalColor);
+  background: var(--localColor);
+}
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.astro:6:19 lint/nursery/noUndeclaredCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The custom property --localColor is not defined.
+  
+    4 │ .child {
+    5 │   color: var(--globalColor);
+  > 6 │   background: var(--localColor);
+      │                   ^^^^^^^^^^^^
+    7 │ }
+    8 │ </style>
+  
+  i An undeclared custom property can indicate a misspelled name or a missing declaration.
+  
+  i Define the custom property in an available stylesheet, rename it or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
