@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write --use-editorconfig=true file-1.js file0.js file2.js
+```
+
+## `.editorconfig`
+
+```editorconfig
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+[file{-1..1}.js]
+indent_size = 2
+
+```
+
+## `file-1.js`
+
+```js
+function setName(name) {
+  currentName = name;
+}
+
+```
+
+## `file0.js`
+
+```js
+function setName(name) {
+  currentName = name;
+}
+
+```
+
+## `file2.js`
+
+```js
+function setName(name) {
+    currentName = name;
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 3 files in <TIME>. Fixed 3 files.
+```
