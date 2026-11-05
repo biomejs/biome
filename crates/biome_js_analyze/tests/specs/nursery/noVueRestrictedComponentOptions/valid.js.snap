@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { defineComponent } from "vue";
+
+const options = {
+  init() {},
+};
+
+defineComponent(options);
+
+configure({
+  init() {},
+});
+
+```

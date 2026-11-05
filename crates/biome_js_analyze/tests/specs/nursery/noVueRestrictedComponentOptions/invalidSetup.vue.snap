@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSetup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineOptions({
+  init() {},
+  props: {
+    label: { type: String, twoWay: true },
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalidSetup.vue:4:3 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option init is not allowed.
+  
+    2 │ <script setup>
+    3 │ defineOptions({
+  > 4 │   init() {},
+      │   ^^^^
+    5 │   props: {
+    6 │     label: { type: String, twoWay: true },
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSetup.vue:6:28 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option props.*.twoWay is not allowed.
+  
+    4 │   init() {},
+    5 │   props: {
+  > 6 │     label: { type: String, twoWay: true },
+      │                            ^^^^^^
+    7 │   },
+    8 │ });
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

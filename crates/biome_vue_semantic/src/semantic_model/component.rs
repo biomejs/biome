@@ -521,6 +521,15 @@ impl Collector<'_, '_> {
     }
 
     fn collect_options_object(&mut self, object: &JsObjectExpression, component: ComponentId) {
+        if self
+            .builder
+            .component_mut(component)
+            .options_object
+            .is_none()
+        {
+            let range = self.host(object.syntax().text_trimmed_range());
+            self.builder.component_mut(component).options_object = Some(range);
+        }
         for member in object.members().iter().flatten() {
             if matches!(member, AnyJsObjectMember::JsSpread(_)) {
                 self.builder.open_all(component, OpenReason::Spread);

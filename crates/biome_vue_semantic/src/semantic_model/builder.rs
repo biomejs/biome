@@ -121,6 +121,7 @@ impl ModelBuilder {
             macro_options: MacroOptions::empty(),
             data_function: None,
             mixins: None,
+            options_object: None,
             is_defined_in_place: false,
             is_default_export: false,
             merged: None,

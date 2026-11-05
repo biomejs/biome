@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: validSetup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const init = () => {};
+
+defineOptions({
+  name: "init",
+  inheritAttrs: false,
+});
+</script>
+
+```

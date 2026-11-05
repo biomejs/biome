@@ -790,6 +790,44 @@ fn model_option_in_define_options_is_recorded() {
 }
 
 #[test]
+fn options_object_range_is_recorded() {
+    let code = r#"import { defineComponent, createApp } from "vue";
+defineComponent({ name: "A" });
+defineComponent((props) => {}, ({ props: ["a"] }));
+createApp({ data() {} });
+const options = {};
+defineComponent(options);
+"#;
+    let model = js_model(code, JsFileSource::js_module());
+    let ranges: Vec<_> = model
+        .components()
+        .map(|component| component.options_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        ranges,
+        [
+            Some(r#"{ name: "A" }"#),
+            Some(r#"{ props: ["a"] }"#),
+            Some("{ data() {} }"),
+            None,
+        ]
+    );
+
+    let code = "defineOptions({ name: \"A\" });\ndefineOptions({ inheritAttrs: false });\n";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    assert_eq!(
+        component.options_range().map(|range| &code[range]),
+        Some("{ name: \"A\" }")
+    );
+
+    let code = "const a = 1;\n";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    assert_eq!(component.options_range(), None);
+}
+
+#[test]
 fn object_literal_data_lists_its_members() {
     let model = js_model(
         r#"import { defineComponent } from "vue";

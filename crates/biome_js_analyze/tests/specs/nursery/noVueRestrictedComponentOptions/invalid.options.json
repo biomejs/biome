@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noVueRestrictedComponentOptions": {
+          "level": "error",
+          "options": {
+            "componentOptions": [
+              "init",
+              "beforeCompile",
+              "attached",
+              "detached",
+              ["props", "*", "twoWay"],
+              ["foo", "*"],
+              ["spread", "bar"],
+              ["qux", "*", "baz"],
+              { "name": "ready", "message": "Use mounted() instead." },
+              { "name": ["computed", "full", "get"] }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

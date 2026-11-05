@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  beforeCreate() {},
+  mounted() {},
+  twoWay: true,
+  props: {
+    label: { type: String, required: true },
+    other: ["twoWay"],
+  },
+  spread: {
+    ...bar,
+  },
+  qux: {
+    ...bar,
+    baz,
+  },
+  computed: {
+    full() {},
+  },
+  data() {
+    return { init: 1, ready: 2 };
+  },
+  methods: {
+    init() {},
+  },
+};
+</script>
+
+```

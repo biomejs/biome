@@ -2051,6 +2051,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_vue_reserved_props::NoVueReservedPropsOptions>(),
     ));
     result.push(("nursery", "noVueRestrictedCallAfterAwait", TypeId::of::<biome_rule_options::no_vue_restricted_call_after_await::NoVueRestrictedCallAfterAwaitOptions>()));
+    result.push(("nursery", "noVueRestrictedComponentOptions", TypeId::of::<biome_rule_options::no_vue_restricted_component_options::NoVueRestrictedComponentOptionsOptions>()));
     result.push((
         "nursery",
         "noVueRestrictedVOn",

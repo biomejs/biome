@@ -779,6 +779,9 @@ pub(crate) struct ComponentData {
     pub(crate) data_function: Option<TextRange>,
     /// The range of the `mixins` option.
     pub(crate) mixins: Option<TextRange>,
+    /// The object the options are written in: the definition object, or the
+    /// object passed to `defineOptions()`.
+    pub(crate) options_object: Option<TextRange>,
     /// Whether the definition is written in place rather than reused from a
     /// value defined elsewhere.
     pub(crate) is_defined_in_place: bool,
@@ -2173,6 +2176,19 @@ impl Component {
     /// holds it.
     pub fn mixins_range(&self) -> Option<TextRange> {
         let range = self.row().mixins?;
+        Some(self.data.local(range, self.row().snippet))
+    }
+
+    /// The range of the object literal the options of the component are
+    /// written in, in the coordinates of the tree that holds it: the object
+    /// passed to `defineComponent()` or `createApp()`, the object of
+    /// `export default { ... }`, or the object passed to the first
+    /// `defineOptions()` call of `<script setup>`.
+    ///
+    /// `None` when the options are not written as an object literal in
+    /// place, as in `export default options`.
+    pub fn options_range(&self) -> Option<TextRange> {
+        let range = self.row().options_object?;
         Some(self.data.local(range, self.row().snippet))
     }
 

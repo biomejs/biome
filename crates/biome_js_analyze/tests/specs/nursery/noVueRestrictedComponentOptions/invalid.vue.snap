@@ -1,0 +1,252 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+const attached = () => {};
+const name = "label";
+
+export default {
+  init() {},
+  beforeCompile: function () {},
+  attached,
+  "detached": () => {},
+  ["ready"]() {},
+  props: ({
+    size: Number,
+    label: {
+      type: String,
+      twoWay: true,
+    },
+    [name]: {
+      type: String,
+      twoWay: true,
+    },
+  }),
+  foo: {
+    ...other,
+    value: 1,
+  },
+  computed: {
+    full: {
+      get() {},
+      set(value) {},
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:7:3 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option init is not allowed.
+  
+    6 │ export default {
+  > 7 │   init() {},
+      │   ^^^^
+    8 │   beforeCompile: function () {},
+    9 │   attached,
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:3 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option beforeCompile is not allowed.
+  
+     6 │ export default {
+     7 │   init() {},
+   > 8 │   beforeCompile: function () {},
+       │   ^^^^^^^^^^^^^
+     9 │   attached,
+    10 │   "detached": () => {},
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:3 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option attached is not allowed.
+  
+     7 │   init() {},
+     8 │   beforeCompile: function () {},
+   > 9 │   attached,
+       │   ^^^^^^^^
+    10 │   "detached": () => {},
+    11 │   ["ready"]() {},
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:3 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option detached is not allowed.
+  
+     8 │   beforeCompile: function () {},
+     9 │   attached,
+  > 10 │   "detached": () => {},
+       │   ^^^^^^^^^^
+    11 │   ["ready"]() {},
+    12 │   props: ({
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:3 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use mounted() instead.
+  
+     9 │   attached,
+    10 │   "detached": () => {},
+  > 11 │   ["ready"]() {},
+       │   ^^^^^^^^^
+    12 │   props: ({
+    13 │     size: Number,
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:7 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option props.*.twoWay is not allowed.
+  
+    14 │     label: {
+    15 │       type: String,
+  > 16 │       twoWay: true,
+       │       ^^^^^^
+    17 │     },
+    18 │     [name]: {
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:7 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option props.*.twoWay is not allowed.
+  
+    18 │     [name]: {
+    19 │       type: String,
+  > 20 │       twoWay: true,
+       │       ^^^^^^
+    21 │     },
+    22 │   }),
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:24:5 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option foo.* is not allowed.
+  
+    22 │   }),
+    23 │   foo: {
+  > 24 │     ...other,
+       │     ^^^^^^^^
+    25 │     value: 1,
+    26 │   },
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:5 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option foo.* is not allowed.
+  
+    23 │   foo: {
+    24 │     ...other,
+  > 25 │     value: 1,
+       │     ^^^^^
+    26 │   },
+    27 │   computed: {
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:29:7 lint/nursery/noVueRestrictedComponentOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The component option computed.full.get is not allowed.
+  
+    27 │   computed: {
+    28 │     full: {
+  > 29 │       get() {},
+       │       ^^^
+    30 │       set(value) {},
+    31 │     },
+  
+  i Your project lists this component option under componentOptions in the configuration of this rule, so it isn't allowed.
+  
+  i Remove this option, or replace it with the alternative your project recommends.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
