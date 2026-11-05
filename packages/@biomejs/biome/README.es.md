@@ -37,7 +37,7 @@
 
 **Biome es un [formatter rápido](https://github.com/biomejs/benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ y _SCSS_ que alcanza un **[97% de compatibilidad con _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome es un [linter de alto rendimiento](https://github.com/biomejs/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ y _SCSS_ que incluye **[más de 500 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
+**Biome es un [linter de alto rendimiento](https://github.com/biomejs/benchmark#linting)** para _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ y _SCSS_ que incluye **[más de 750 reglas](https://biomejs.dev/linter/javascript/rules/)** de ESLint, typescript-eslint, y [otras fuentes](https://github.com/biomejs/biome/discussions/3).
 Produce **diagnósticos detallados y contextualizados** que ayudan a mejorar tu código y convertirte en un mejor programador!
 
 **Biome** fue diseñado desde cero para usarse [interactivamente dentro de un editor](https://biomejs.dev/es/editors/first-party-extensions/).
