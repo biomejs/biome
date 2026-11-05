@@ -105,12 +105,9 @@ impl Rule for NoUnusedClasses {
                 .into_iter()
                 .collect(),
             AnyClassNameSelector::ScssParentSelector(selector) => {
-                parent_suffix_class_names(selector)
-                    .into_iter()
-                    .flatten()
-                    .filter(|class_name| is_unused(class_name))
-                    .map(Text::from)
-                    .collect()
+                let mut class_names = parent_suffix_class_names(selector).unwrap_or_default();
+                class_names.retain(|class_name| is_unused(class_name));
+                class_names
             }
         }
     }
@@ -151,7 +148,7 @@ fn class_selector_name(selector: &CssClassSelector) -> Option<TokenText> {
 /// class.
 ///
 /// Returns `None` if the suffix is interpolated or the parent selectors are unknown.
-fn parent_suffix_class_names(selector: &ScssParentSelector) -> Option<Vec<String>> {
+fn parent_suffix_class_names(selector: &ScssParentSelector) -> Option<Vec<Text>> {
     let suffix = selector.suffix().ok()?;
     if suffix
         .items()
@@ -160,22 +157,26 @@ fn parent_suffix_class_names(selector: &ScssParentSelector) -> Option<Vec<String
     {
         return None;
     }
-    let suffix = suffix.syntax().text_trimmed().to_string();
-    let mut class_names = parent_class_names(selector.syntax())?;
+    let suffix = suffix.syntax().text_trimmed();
+    let mut class_names = Vec::new();
+    push_parent_class_names(selector.syntax(), &mut class_names)?;
     class_names.sort_unstable();
     class_names.dedup();
     for class_name in &mut class_names {
-        class_name.push_str(&suffix);
+        let mut name = String::with_capacity(class_name.len() + usize::from(suffix.len()));
+        name.push_str(class_name);
+        suffix.for_each_chunk(|chunk| name.push_str(chunk));
+        *class_name = name.into();
     }
     Some(class_names)
 }
 
-/// Returns the classes that end the selectors `&` refers to in the selector containing `node`.
-/// Parent selectors that don't end in a class are left out.
+/// Pushes to `class_names` the classes that end the selectors `&` refers to in the selector
+/// containing `node`. Parent selectors that don't end in a class are left out.
 ///
-/// Returns `None` if the parent selectors are unknown: there is no style rule around the selector,
-/// or a mixin decides them, as in a mixin body or an `@include` content block.
-fn parent_class_names(node: &CssSyntaxNode) -> Option<Vec<String>> {
+/// Returns `None`, and pushes nothing, if the parent selectors are unknown: there is no style rule
+/// around the selector, or a mixin decides them, as in a mixin body or an `@include` content block.
+fn push_parent_class_names(node: &CssSyntaxNode, class_names: &mut Vec<Text>) -> Option<()> {
     let mut ancestors = node.ancestors().skip_while(|ancestor| {
         !matches!(
             ancestor.kind(),
@@ -198,33 +199,23 @@ fn parent_class_names(node: &CssSyntaxNode) -> Option<Vec<String>> {
         return None;
     }
 
-    let selectors: Vec<_> = loop {
+    loop {
         let ancestor = ancestors.next()?;
         if let Some(rule) = CssQualifiedRule::cast_ref(&ancestor) {
-            break rule.prelude().iter().collect::<Result<_, _>>().ok()?;
+            return push_trailing_class_names(rule.prelude().iter().map(Result::ok), class_names);
         }
         if let Some(rule) = CssNestedQualifiedRule::cast_ref(&ancestor) {
-            break rule
-                .prelude()
-                .iter()
-                .map(|selector| match selector.ok()? {
-                    AnyCssRelativeSelector::CssRelativeSelector(selector) => {
-                        selector.selector().ok()
-                    }
-                    _ => None,
-                })
-                .collect::<Option<_>>()?;
+            let selectors = rule.prelude().iter().map(|selector| match selector.ok()? {
+                AnyCssRelativeSelector::CssRelativeSelector(selector) => selector.selector().ok(),
+                _ => None,
+            });
+            return push_trailing_class_names(selectors, class_names);
         }
         if let Some(rule) = ScssAtRootAtRule::cast_ref(&ancestor)
             && let Some(selector) = rule.selector()
         {
-            break selector
-                .selector()
-                .ok()?
-                .as_css_selector_list()?
-                .iter()
-                .collect::<Result<_, _>>()
-                .ok()?;
+            let selectors = selector.selector().ok()?.as_css_selector_list()?.iter();
+            return push_trailing_class_names(selectors.map(Result::ok), class_names);
         }
         if matches!(
             ancestor.kind(),
@@ -232,20 +223,32 @@ fn parent_class_names(node: &CssSyntaxNode) -> Option<Vec<String>> {
         ) {
             return None;
         }
-    };
-
-    Some(
-        selectors
-            .into_iter()
-            .filter_map(trailing_class_names)
-            .flatten()
-            .collect(),
-    )
+    }
 }
 
-/// Returns the classes that end `selector`, resolving a trailing `&` or `&suffix` against the
-/// rule around it.
-fn trailing_class_names(mut selector: AnyCssSelector) -> Option<Vec<String>> {
+/// Pushes to `class_names` the classes that end each of `selectors`. Returns `None`, and pushes
+/// nothing, if one of `selectors` is `None`.
+fn push_trailing_class_names(
+    selectors: impl Iterator<Item = Option<AnyCssSelector>>,
+    class_names: &mut Vec<Text>,
+) -> Option<()> {
+    let len = class_names.len();
+    for selector in selectors {
+        let Some(selector) = selector else {
+            class_names.truncate(len);
+            return None;
+        };
+        push_trailing_class_name(selector, class_names);
+    }
+    Some(())
+}
+
+/// Pushes to `class_names` the classes that end `selector`, resolving a trailing `&` or `&suffix`
+/// against the rule around it.
+fn push_trailing_class_name(
+    mut selector: AnyCssSelector,
+    class_names: &mut Vec<Text>,
+) -> Option<()> {
     let compound = loop {
         match selector {
             AnyCssSelector::CssCompoundSelector(compound) => break compound,
@@ -255,15 +258,20 @@ fn trailing_class_names(mut selector: AnyCssSelector) -> Option<Vec<String>> {
     };
 
     if let Some(sub_selector) = compound.sub_selectors().last() {
-        let class_name = class_selector_name(sub_selector.as_css_class_selector()?)?;
-        return Some(vec![class_name.text().to_string()]);
+        class_names.push(class_selector_name(sub_selector.as_css_class_selector()?)?.into());
+        return Some(());
     }
     if compound.simple_selector().is_some() {
         return None;
     }
     match compound.nesting_selectors().last()? {
-        AnyCssNestedSelector::CssNestedSelector(_) => parent_class_names(compound.syntax()),
-        AnyCssNestedSelector::ScssParentSelector(selector) => parent_suffix_class_names(&selector),
+        AnyCssNestedSelector::CssNestedSelector(_) => {
+            push_parent_class_names(compound.syntax(), class_names)
+        }
+        AnyCssNestedSelector::ScssParentSelector(selector) => {
+            class_names.extend(parent_suffix_class_names(&selector)?);
+            Some(())
+        }
     }
 }
 
