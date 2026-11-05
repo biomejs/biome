@@ -268,17 +268,14 @@ fn resolve_mixin(include: &ScssIncludeAtRule, called_at: TextSize) -> Option<Scs
     include
         .syntax()
         .ancestors()
-        .last()?
-        .descendants()
-        .filter_map(ScssMixinAtRule::cast)
-        .take_while(|mixin| mixin.range().end() <= called_at)
+        .flat_map(|scope| {
+            scope
+                .children()
+                .take_while(move |item| item.text_trimmed_range().end() <= called_at)
+                .filter_map(|item| item.first_child().and_then(ScssMixinAtRule::cast))
+        })
         .filter(|mixin| {
-            mixin.syntax().grand_parent().is_some_and(|scope| {
-                include
-                    .syntax()
-                    .ancestors()
-                    .any(|ancestor| ancestor == scope)
-            }) && mixin
+            mixin
                 .name()
                 .ok()
                 .and_then(|name| name.value_token().ok())
@@ -286,5 +283,5 @@ fn resolve_mixin(include: &ScssIncludeAtRule, called_at: TextSize) -> Option<Scs
                     scss_function_names_equal(mixin_name.text_trimmed(), name.text_trimmed())
                 })
         })
-        .last()
+        .max_by_key(|mixin| mixin.range().start())
 }
