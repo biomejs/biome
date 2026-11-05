@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+@mixin colors {
+  color: red;
+  --color: red;
+  --color: blue;
+
+  &:hover {
+    color: blue;
+  }
+}

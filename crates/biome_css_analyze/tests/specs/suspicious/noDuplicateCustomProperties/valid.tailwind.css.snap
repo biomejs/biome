@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.tailwind.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@utility tab-* {
+  --tab: --value([integer]);
+  --tab: --value(integer);
+  --tab: --value(--tab-size-*);
+}
+
+```

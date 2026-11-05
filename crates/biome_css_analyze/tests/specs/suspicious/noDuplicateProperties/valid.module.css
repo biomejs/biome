@@ -1,0 +1,5 @@
+/* should not generate diagnostics */
+.button {
+  composes: base from "./base.css";
+  composes: primary from "./theme.css";
+}
