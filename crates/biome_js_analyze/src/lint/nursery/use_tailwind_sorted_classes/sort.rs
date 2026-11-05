@@ -162,7 +162,7 @@ impl TemplateLiteralSpaceContext {
         }
 
         JsTemplateChunkElement::cast(sibling).is_some_and(|chunk| {
-            chunk.template_chunk_token().ok().is_some_and(|token| {
+            chunk.template_chunk_token().is_ok_and(|token| {
                 let value = token.text_trimmed();
                 if value.is_empty() {
                     return chunk
@@ -181,7 +181,7 @@ impl TemplateLiteralSpaceContext {
         }
 
         JsTemplateChunkElement::cast(sibling).is_some_and(|chunk| {
-            chunk.template_chunk_token().ok().is_some_and(|token| {
+            chunk.template_chunk_token().is_ok_and(|token| {
                 let value = token.text_trimmed();
                 if value.is_empty() {
                     return chunk
