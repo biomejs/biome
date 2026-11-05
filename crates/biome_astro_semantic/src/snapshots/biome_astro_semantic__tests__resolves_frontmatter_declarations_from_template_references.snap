@@ -1,0 +1,172 @@
+---
+source: crates/biome_astro_semantic/src/tests.rs
+expression: "semantic_snapshot(source, &model)"
+---
+## Input
+
+```astro
+---
+import Card from "./Card.astro";
+import * as UI from "./ui";
+import type { Thing } from "./types";
+import type Legacy = require("./legacy");
+import LegacyValue = require("./legacy-value");
+const title = "Hello";
+let count = 0;
+const items = [1];
+const rest = { id: "hero" };
+const escaped = 1;
+const upper = title.toUpperCase();
+const currentUrl = Astro.url;
+interface TypeOnlyComponent {}
+interface Merged {}
+const Merged = Card;
+interface OnlyTypeNamespace {}
+interface MergedNamespace {}
+namespace MergedNamespace { export type Member = string }
+type ValueQuery = typeof MissingValue;
+type MissingAlias = MissingType;
+module LegacyModule { export type Member = string }
+type ModuleMember = LegacyModule.Member;
+const moduleValue = LegacyModule;
+type ModuleValueMember = typeof moduleValue.member;
+type ConfiguredGlobalType = console;
+type ConfiguredGlobalMember = console.Member;
+type ConfiguredGlobalValueMember = typeof console.log;
+class ComponentClass {}
+enum Status { Ready }
+type ComponentClassType = ComponentClass;
+type StatusType = Status;
+type StatusMember = Status.Ready;
+type LegacyValueType = LegacyValue;
+type LegacyValueMember = LegacyValue.Member;
+interface Props { name: string }
+---
+<Card label={title} />
+<UI.Card />
+<TypeOnlyComponent />
+<Legacy />
+<LegacyValue />
+<ComponentClass />
+<Merged />
+<div>{Status.Ready}</div>
+<div>{title as Legacy}</div>
+<div>{title as Merged}</div>
+<div>{null as MergedNamespace.Member}</div>
+<div>{null as OnlyTypeNamespace.Member}</div>
+<div>{items.map((title) => title + count)}</div>
+<div>{missing}</div>
+<div>{console.log(title)}</div>
+<div>{Astro.url}</div>
+<div>{esc\u0061ped}</div>
+<div>{Astr\u006f.url}</div>
+<div>{title as Thing}</div>
+<Card {title} {...rest} class:list={{ active: count > 0 }} />
+```
+
+## Semantic model
+
+```text
+block Frontmatter 0..1207 content=4..1204 scope#1 snippet#0
+snippet#0 4..1204 Frontmatter(BlockId(0)) offset=4 source=astro-frontmatter scope#1
+snippet#1 1221..1226 Expression offset=1221 source=astro-template scope#1
+snippet#2 1328..1340 Expression offset=1328 source=astro-template scope#1
+snippet#3 1354..1369 Expression offset=1354 source=astro-template scope#1
+snippet#4 1383..1398 Expression offset=1383 source=astro-template scope#1
+snippet#5 1412..1442 Expression offset=1412 source=astro-template scope#1
+snippet#6 1456..1488 Expression offset=1456 source=astro-template scope#1
+snippet#7 1502..1537 Expression offset=1502 source=astro-template scope#1
+snippet#8 1551..1558 Expression offset=1551 source=astro-template scope#1
+snippet#9 1572..1590 Expression offset=1572 source=astro-template scope#1
+snippet#10 1604..1613 Expression offset=1604 source=astro-template scope#1
+snippet#11 1627..1639 Expression offset=1627 source=astro-template scope#1
+snippet#12 1653..1667 Expression offset=1653 source=astro-template scope#1
+snippet#13 1681..1695 Expression offset=1681 source=astro-template scope#1
+snippet#14 1710..1715 Expression offset=1710 source=astro-template scope#1
+snippet#15 1721..1725 Expression offset=1721 source=astro-template scope#1
+snippet#16 1739..1760 Expression offset=1739 source=astro-template scope#1
+scope#0 Builtins
+  Builtin Astro 0..0 origin=AstroBuiltin
+scope#1 Module(Some(BlockId(0))) parent=scope#0
+  Import Card 11..15 type+value namespace
+  Import UI 49..51 type+value namespace
+  Import Thing 79..84 type-only namespace
+  Import Legacy 115..121 type-only namespace
+  Import LegacyValue 152..163 type+value namespace
+  Local title 199..204
+  Local count 220..225
+  Local items 237..242
+  Local rest 256..260
+  Local escaped 285..292
+  Local upper 304..309
+  Local currentUrl 339..349
+  Local TypeOnlyComponent 373..390 type-only
+  Local Merged 404..410 type-only
+  Local Merged 420..426
+  Local OnlyTypeNamespace 445..462 type-only
+  Local MergedNamespace 476..491 type-only
+  Local MergedNamespace 505..520 namespace
+  Local ValueQuery 558..568 type-only
+  Local MissingAlias 597..609 type-only
+  Local LegacyModule 632..644 namespace
+  Local ModuleMember 682..694 type-only
+  Local moduleValue 724..735
+  Local ModuleValueMember 757..774 type-only
+  Local ConfiguredGlobalType 809..829 type-only
+  Local ConfiguredGlobalMember 846..868 type-only
+  Local ConfiguredGlobalValueMember 892..919 type-only
+  Local ComponentClass 948..962 type+value
+  Local Status 971..977 type+value namespace
+  Local ComponentClassType 993..1011 type-only
+  Local StatusType 1035..1045 type-only
+  Local StatusMember 1061..1073 type-only
+  Local LegacyValueType 1095..1110 type-only
+  Local LegacyValueMember 1131..1148 type-only
+  Local Props 1181..1186 type-only
+ref title 312..317 Value Identifier Read -> Local title
+ref Astro 352..357 Value Identifier Read -> Builtin Astro
+ref Card 429..433 Value Identifier Read -> Import Card
+ref MissingValue 578..590 Value Identifier Type -> Unresolved
+ref MissingType 612..623 Type Identifier Type -> Unknowable
+ref LegacyModule 697..709 Namespace Identifier Type -> Local LegacyModule
+ref LegacyModule 738..750 Value Identifier Read -> Local LegacyModule
+ref moduleValue 784..795 Value Identifier Type -> Local moduleValue
+ref console 832..839 Type Identifier Type -> Unknowable
+ref console 871..878 Namespace Identifier Type -> Unknowable
+ref console 929..936 Value Identifier Type -> Global
+ref ComponentClass 1014..1028 Type Identifier Type -> Local ComponentClass
+ref Status 1048..1054 Type Identifier Type -> Local Status
+ref Status 1076..1082 Namespace Identifier Type -> Local Status
+ref LegacyValue 1113..1124 Type Identifier Type -> Import LegacyValue
+ref LegacyValue 1151..1162 Namespace Identifier Type -> Import LegacyValue
+ref Props 1181..1186 Type Implicit Type -> Local Props
+ref Card 1209..1213 Value TagName Read -> Import Card
+ref title 1221..1226 Value Identifier Read -> Local title
+ref UI 1232..1234 Value TagName Read -> Import UI
+ref TypeOnlyComponent 1244..1261 Value TagName Read -> Unresolved
+ref Legacy 1266..1272 Value TagName Read -> Unresolved
+ref LegacyValue 1277..1288 Value TagName Read -> Import LegacyValue
+ref ComponentClass 1293..1307 Value TagName Read -> Local ComponentClass
+ref Merged 1312..1318 Value TagName Read -> Local Merged
+ref Status 1328..1334 Value Identifier Read -> Local Status
+ref title 1354..1359 Value Identifier Read -> Local title
+ref Legacy 1363..1369 Type Identifier Type -> Import Legacy
+ref title 1383..1388 Value Identifier Read -> Local title
+ref Merged 1392..1398 Type Identifier Type -> Local Merged
+ref MergedNamespace 1420..1435 Namespace Identifier Type -> Local MergedNamespace
+ref OnlyTypeNamespace 1464..1481 Namespace Identifier Type -> Unknowable
+ref items 1502..1507 Value Identifier Read -> Local items
+ref count 1531..1536 Value Identifier Read -> Local count
+ref missing 1551..1558 Value Identifier Read -> Unresolved
+ref console 1572..1579 Value Identifier Read -> Global
+ref title 1584..1589 Value Identifier Read -> Local title
+ref Astro 1604..1609 Value Identifier Read -> Builtin Astro
+ref esc\u0061ped 1627..1639 Value Identifier Read -> Local escaped
+ref Astr\u006f 1653..1663 Value Identifier Read -> Builtin Astro
+ref title 1681..1686 Value Identifier Read -> Local title
+ref Thing 1690..1695 Type Identifier Type -> Import Thing
+ref Card 1704..1708 Value TagName Read -> Import Card
+ref title 1710..1715 Value Identifier Read -> Local title
+ref rest 1721..1725 Value Identifier Read -> Local rest
+ref count 1749..1754 Value Identifier Read -> Local count
+```
