@@ -911,6 +911,18 @@ impl MdxInlineExpressionBuilder {
         ))
     }
 }
+pub fn mdx_jsx_block_tag(value_token: SyntaxToken) -> MdxJsxBlockTag {
+    MdxJsxBlockTag::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_JSX_BLOCK_TAG,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn mdx_jsx_inline_tag(value_token: SyntaxToken) -> MdxJsxInlineTag {
+    MdxJsxInlineTag::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MDX_JSX_INLINE_TAG,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn gfm_table_cell_list<I, S>(items: I, separators: S) -> GfmTableCellList
 where
     I: IntoIterator<Item = GfmTableCell>,

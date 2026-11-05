@@ -1,0 +1,97 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+Autolinks such as <https://example.com> and inline HTML such as a <b>tag</b> are not parsed.
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..18 "Autolinks such as " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@18..39 "<https://example.com>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@39..66 " and inline HTML such as a " [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@66..69 "<b>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@69..72 "tag" [] [],
+                },
+                MdxJsxInlineTag {
+                    value_token: MDX_JSX_TAG_LITERAL@72..76 "</b>" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@76..92 " are not parsed." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@92..93 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@93..93 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..93
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..93
+    0: MD_PARAGRAPH@0..93
+      0: MD_INLINE_ITEM_LIST@0..93
+        0: MD_TEXTUAL@0..18
+          0: MD_TEXTUAL_LITERAL@0..18 "Autolinks such as " [] []
+        1: MDX_JSX_INLINE_TAG@18..39
+          0: MDX_JSX_TAG_LITERAL@18..39 "<https://example.com>" [] []
+        2: MD_TEXTUAL@39..66
+          0: MD_TEXTUAL_LITERAL@39..66 " and inline HTML such as a " [] []
+        3: MDX_JSX_INLINE_TAG@66..69
+          0: MDX_JSX_TAG_LITERAL@66..69 "<b>" [] []
+        4: MD_TEXTUAL@69..72
+          0: MD_TEXTUAL_LITERAL@69..72 "tag" [] []
+        5: MDX_JSX_INLINE_TAG@72..76
+          0: MDX_JSX_TAG_LITERAL@72..76 "</b>" [] []
+        6: MD_TEXTUAL@76..92
+          0: MD_TEXTUAL_LITERAL@76..92 " are not parsed." [] []
+        7: MD_TEXTUAL@92..93
+          0: MD_TEXTUAL_LITERAL@92..93 "\n" [] []
+  3: EOF@93..93 "" [] []
+
+```
+
+## Diagnostics
+
+```
+autolink_and_html.mdx:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `/` in the tag name `https://example.com`.
+  
+  > 1 │ Autolinks such as <https://example.com> and inline HTML such as a <b>tag</b> are not parsed.
+      │                   ^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i A tag name is a JavaScript name, optionally joined with `.` or a single `:`. To write a literal `<` in MDX, escape it as `\<`.
+  
+```

@@ -1,0 +1,115 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+assertion_line: 226
+expression: snapshot
+---
+
+## Input
+
+```
+> a <B
+> c
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdParagraph {
+                    list: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..4 "a " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@4..6 "<B" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@7..8 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@8..9 " " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@9..10 "c" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@10..11 "\n" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@11..11 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..11
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..11
+    0: MD_QUOTE@0..11
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..11
+        0: MD_PARAGRAPH@2..11
+          0: MD_INLINE_ITEM_LIST@2..11
+            0: MD_TEXTUAL@2..4
+              0: MD_TEXTUAL_LITERAL@2..4 "a " [] []
+            1: MD_TEXTUAL@4..6
+              0: MD_TEXTUAL_LITERAL@4..6 "<B" [] []
+            2: MD_TEXTUAL@6..7
+              0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
+            3: MD_QUOTE_PREFIX@7..9
+              0: MD_QUOTE_INDENT_LIST@7..7
+              1: R_ANGLE@7..8 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@8..9 " " [] []
+            4: MD_TEXTUAL@9..10
+              0: MD_TEXTUAL_LITERAL@9..10 "c" [] []
+            5: MD_TEXTUAL@10..11
+              0: MD_TEXTUAL_LITERAL@10..11 "\n" [] []
+  3: EOF@11..11 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_unclosed_tag_in_quote.mdx:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unclosed tag, expected a closing `>`.
+  
+  > 1 │ > a <B
+      │     ^
+    2 │ > c
+    3 │ 
+  
+  i tag started here
+  
+  > 1 │ > a <B
+      │     ^
+    2 │ > c
+    3 │ 
+  
+  i Add the closing `>`. To write a literal `<` in MDX, escape it as `\<`.
+  
+```

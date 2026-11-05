@@ -20,6 +20,7 @@ impl FormatRule<AnyMdLeafBlock> for FormatAnyMdLeafBlock {
             AnyMdLeafBlock::MdThematicBreakBlock(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdxBlockExpression(node) => node.format().fmt(f),
             AnyMdLeafBlock::MdxEsmBlock(node) => node.format().fmt(f),
+            AnyMdLeafBlock::MdxJsxBlockTag(node) => node.format().fmt(f),
         }
     }
 }
