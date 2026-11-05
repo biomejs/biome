@@ -89,12 +89,20 @@ impl Rule for NoDrizzleDbObjectInsideTransaction {
             .ancestors()
             .filter_map(JsCallArguments::cast)
             .any(|arguments| {
-                // Only the callback runs inside the transaction; a trailing config argument doesn't.
-                let in_callback = arguments
-                    .args()
-                    .first()
-                    .and_then(Result::ok)
-                    .is_some_and(|callback| callback.range().contains_range(reference.range()));
+                // Only an inline callback runs inside the transaction. A trailing config argument,
+                // or an expression that builds the callback, runs before the transaction starts.
+                let in_callback =
+                    arguments
+                        .args()
+                        .first()
+                        .and_then(Result::ok)
+                        .is_some_and(|callback| {
+                            matches!(
+                                callback.syntax().kind(),
+                                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
+                                    | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                            ) && callback.range().contains_range(reference.range())
+                        });
                 in_callback
                     && transaction_object(&arguments).is_some_and(|object| {
                         object.has_name(name) && model.binding(&object) == model.binding(reference)

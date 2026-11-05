@@ -47,6 +47,9 @@ await orm.transaction(async (tx) => {
 // transaction config argument runs outside the callback
 await db.transaction(async (tx) => {}, { isolationLevel: chooseLevel(db) });
 
+// callback factory runs before the transaction starts
+await db.transaction(makeCallback(db));
+
 // not a transaction call
 await db.batch([db.select().from(users)]);
 
