@@ -1,0 +1,34 @@
+// should not generate diagnostics
+declare const arr: number[];
+declare const index: number;
+
+arr.splice(index, 1);
+arr[index] = undefined as unknown as number;
+
+declare const obj: { a?: number; [key: string]: number | undefined };
+delete obj.a;
+delete obj["a"];
+delete obj[index];
+
+declare const record: Record<string, number>;
+delete record["key"];
+
+const map = new Map<string, number>();
+map.delete("key");
+
+declare const arrayOrObject: number[] | Record<number, number>;
+delete arrayOrObject[0];
+
+declare const anything: any;
+delete anything[0];
+
+declare const unknownValue: unknown;
+delete (unknownValue as any)[0];
+
+function generic<T>(items: T) {
+	delete (items as any)[0];
+}
+
+// `delete` on a property of an array element, not on the element itself.
+declare const objects: { a?: number }[];
+delete objects[0].a;

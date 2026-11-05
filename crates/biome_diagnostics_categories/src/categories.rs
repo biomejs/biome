@@ -222,6 +222,7 @@ define_categories! {
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/noAccidentalBitwiseOperators": "https://biomejs.dev/linter/rules/no-accidental-bitwise-operators",
     "lint/nursery/noArgumentsCallerOrCallee": "https://biomejs.dev/linter/rules/no-arguments-caller-or-callee",
+    "lint/nursery/noArrayDelete": "https://biomejs.dev/linter/rules/no-array-delete",
     "lint/nursery/noArrayForEach": "https://biomejs.dev/linter/rules/no-array-for-each",
     "lint/nursery/noArrayMethodsOnArguments": "https://biomejs.dev/linter/rules/no-array-methods-on-arguments",
     "lint/nursery/noArraySortForMinMax": "https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
