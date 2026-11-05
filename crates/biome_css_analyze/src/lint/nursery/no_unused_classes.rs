@@ -283,17 +283,26 @@ fn push_trailing_class_name(
 /// wherever the extending selector is.
 fn is_extended(node: &CssSyntaxNode, class_name: &str) -> bool {
     node.ancestors().last().is_some_and(|root| {
-        root.descendants()
-            .filter_map(ScssExtendAtRule::cast)
-            .flat_map(|extend| {
-                extend
-                    .syntax()
-                    .descendants()
-                    .filter_map(CssClassSelector::cast)
-            })
-            .any(|selector| {
-                class_selector_name(&selector).is_some_and(|name| name.text() == class_name)
-            })
+        // `@extend` is a statement, so the search skips selectors and declarations.
+        root.pruned_descendents(|descendant| {
+            !matches!(
+                descendant.kind(),
+                CssSyntaxKind::CSS_SELECTOR_LIST
+                    | CssSyntaxKind::CSS_RELATIVE_SELECTOR_LIST
+                    | CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON
+                    | CssSyntaxKind::SCSS_VARIABLE_DECLARATION
+            )
+        })
+        .filter_map(ScssExtendAtRule::cast)
+        .flat_map(|extend| {
+            extend
+                .syntax()
+                .descendants()
+                .filter_map(CssClassSelector::cast)
+        })
+        .any(|selector| {
+            class_selector_name(&selector).is_some_and(|name| name.text() == class_name)
+        })
     })
 }
 
