@@ -1,8 +1,8 @@
 //! Character classes of the source bytes, computed 64 bytes at a time.
 //!
 //! Each class is a bitmap per 64-byte block, where bit `i` describes byte `i` of the block.
-//! x86_64 uses AVX2 when the CPU has it and SSE2 otherwise; other targets classify one byte at a
-//! time with a lookup table.
+//! x86_64 uses AVX2 when the CPU has it and SSE2 otherwise, and aarch64 uses NEON; other targets
+//! classify one byte at a time with a lookup table.
 
 /// The class bitmaps of one 64-byte block, plus the token starts derived from them.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -112,7 +112,13 @@ struct Classes {
     non_ascii: u64,
 }
 
-#[cfg(any(test, not(target_arch = "x86_64")))]
+#[cfg(any(
+    test,
+    not(any(
+        target_arch = "x86_64",
+        all(target_arch = "aarch64", target_feature = "neon")
+    ))
+))]
 fn classify_scalar(bytes: &[u8; 64]) -> Classes {
     let mut classes = Classes::default();
     for (index, &byte) in bytes.iter().enumerate() {
@@ -202,7 +208,15 @@ pub(super) fn classify(source: &[u8]) -> Vec<Block> {
         // SAFETY: SSE2 is part of the x86_64 baseline.
         unsafe { x86::classify_sse2(source) }
     }
-    #[cfg(not(target_arch = "x86_64"))]
+    #[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
+    {
+        // SAFETY: the build enables NEON.
+        unsafe { neon::classify_neon(source) }
+    }
+    #[cfg(not(any(
+        target_arch = "x86_64",
+        all(target_arch = "aarch64", target_feature = "neon")
+    )))]
     {
         classify_with(source, classify_scalar)
     }
@@ -438,6 +452,125 @@ mod x86 {
                         "avx2, len {len}"
                     );
                 }
+            }
+        }
+    }
+}
+
+#[cfg(all(target_arch = "aarch64", target_feature = "neon"))]
+mod neon {
+    use super::{
+        ASCII_CLASSES, BRACE, Block, Classes, DIGIT, LOWER, OPERATOR, OPERATOR_NEXT, SPACE,
+        SPECIAL, WORD, classify_with,
+    };
+    use std::arch::aarch64::*;
+
+    /// The classes that [CLASS_BYTES] holds, in the order of their bits.
+    const CLASSES: [u16; 8] = [
+        WORD,
+        SPACE,
+        DIGIT,
+        LOWER,
+        SPECIAL,
+        BRACE,
+        OPERATOR,
+        OPERATOR_NEXT,
+    ];
+
+    /// The classes of each ASCII byte, as a byte with bit `i` set for `CLASSES[i]`.
+    static CLASS_BYTES: [u8; 128] = {
+        let mut table = [0; 128];
+        let mut byte = 0;
+        while byte < 128 {
+            let mut index = 0;
+            while index < CLASSES.len() {
+                if ASCII_CLASSES[byte] & CLASSES[index] != 0 {
+                    table[byte] |= 1 << index;
+                }
+                index += 1;
+            }
+            byte += 1;
+        }
+        table
+    };
+
+    /// The bit of each byte of a 16-byte vector in its byte of a bitmap.
+    static BITS: [u8; 16] = [1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128];
+
+    /// # Safety
+    /// The CPU must support NEON, which the build enables for every aarch64 CPU.
+    #[target_feature(enable = "neon")]
+    pub(super) unsafe fn classify_neon(source: &[u8]) -> Vec<Block> {
+        // SAFETY: the table is 128 bytes long, and `BITS` 16.
+        let (low_table, high_table, bits) = unsafe {
+            (
+                vld1q_u8_x4(CLASS_BYTES.as_ptr()),
+                vld1q_u8_x4(CLASS_BYTES.as_ptr().add(64)),
+                vld1q_u8(BITS.as_ptr()),
+            )
+        };
+        let lf = vdupq_n_u8(b'\n');
+        let cr = vdupq_n_u8(b'\r');
+
+        // The bitmap of the bytes set in four 16-byte masks, the first mask in the lowest bits.
+        // Each pairwise add halves the bytes per mask, until each mask is two bitmap bytes.
+        let bitmap = |masks: [uint8x16_t; 4]| {
+            let [a, b, c, d] = masks.map(|mask| vandq_u8(mask, bits));
+            let sums = vpaddq_u8(vpaddq_u8(a, b), vpaddq_u8(c, d));
+            vgetq_lane_u64::<0>(vreinterpretq_u64_u8(vpaddq_u8(sums, sums)))
+        };
+
+        classify_with(source, |bytes| {
+            // SAFETY: `bytes` is 64 bytes long.
+            let vectors = unsafe { vld1q_u8_x4(bytes.as_ptr()) };
+            let vectors = [vectors.0, vectors.1, vectors.2, vectors.3];
+            // Bytes from 64 index the high table after subtracting 64; the rest are out of the
+            // range of the table they don't belong to, which leaves them zero, as are non-ASCII
+            // bytes in both.
+            let classes = vectors.map(|v| {
+                vqtbx4q_u8(
+                    vqtbl4q_u8(low_table, v),
+                    high_table,
+                    vsubq_u8(v, vdupq_n_u8(64)),
+                )
+            });
+            let class = |index: usize| {
+                let class = vdupq_n_u8(1 << index);
+                bitmap(classes.map(|classes| vtstq_u8(classes, class)))
+            };
+            Classes {
+                word: class(0),
+                space: class(1),
+                digit: class(2),
+                lower: class(3),
+                special: class(4),
+                brace: class(5),
+                operator: class(6),
+                operator_next: class(7),
+                lf: bitmap(vectors.map(|v| vceqq_u8(v, lf))),
+                cr: bitmap(vectors.map(|v| vceqq_u8(v, cr))),
+                non_ascii: bitmap(vectors.map(|v| vcltzq_s8(vreinterpretq_s8_u8(v)))),
+            }
+        })
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::super::{classify_scalar, classify_with};
+
+        #[test]
+        fn neon_classes_match_scalar() {
+            let mut source: Vec<_> = (0..=255u8).collect();
+            source.extend_from_slice("let a = `x${b}` /* é */ // \u{2028}\r\n\t'\\'".as_bytes());
+            source.extend((0..300u32).map(|i| (i.wrapping_mul(2_654_435_761) >> 7) as u8));
+            for len in 0..source.len() {
+                let source = &source[..len];
+                // SAFETY: the build enables NEON.
+                assert_eq!(
+                    unsafe { super::classify_neon(source) },
+                    classify_with(source, classify_scalar),
+                    "len {len}"
+                );
             }
         }
     }
