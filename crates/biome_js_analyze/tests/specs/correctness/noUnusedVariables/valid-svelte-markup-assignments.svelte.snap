@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-markup-assignments.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+  let count = 0;
+  let total = 0;
+  let defaultCount = 0;
+  let items = [1];
+</script>
+
+<button
+  on:click={() => {
+    console.log(`id-${count++}`);
+  }}
+>
+  Log ID
+</button>
+
+<button on:click={() => (total += 1)}> Increment </button>
+
+{#if items.length > 0}
+  {@const [value = (defaultCount += 1)] = items}
+  <span>{value}</span>
+{/if}
+
+```
