@@ -56,7 +56,7 @@ pub fn generate_group_struct(
             }
         };
 
-        let rule_position = Literal::u8_unsuffixed(index as u8);
+        let rule_position = Literal::usize_unsuffixed(index);
         let rule_identifier = quote::format_ident!("{}", Case::Snake.convert(rule));
         let rule_config_type = quote::format_ident!(
             "{}",
