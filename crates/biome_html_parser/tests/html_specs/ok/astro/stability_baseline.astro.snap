@@ -1,0 +1,541 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+import Card from "./Card.astro";
+const title = "Hello";
+const items = [{ id: 1, label: "One" }];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>{title}</title>
+	</head>
+	<body>
+		<Card title={title} />
+		<>
+			<ul class:list={["items", { active: items.length > 0 }]}>
+				{items.map((item) => <li data-id={item.id}>{item.label}</li>)}
+			</ul>
+		</>
+		<script>
+		document.documentElement.dataset.ready = "true";
+		</script>
+		<style>
+		.items {
+			display: grid;
+		}
+		</style>
+		<pre is:raw>{title}</pre>
+	</body>
+</html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..101 "import Card from \"./Card.astro\";\nconst title = \"Hello\";\nconst items = [{ id: 1, label: \"One\" }];\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@101..104 "---" [] [],
+    },
+    processing_instruction: missing (optional),
+    directive: HtmlDirective {
+        l_angle_token: L_ANGLE@104..107 "<" [Newline("\n"), Newline("\n")] [],
+        excl_token: BANG@107..108 "!" [] [],
+        doctype_token: DOCTYPE_KW@108..116 "doctype" [] [Whitespace(" ")],
+        name_token: missing (optional),
+        html_token: HTML_KW@116..120 "html" [] [],
+        quirk_token: missing (optional),
+        public_id_token: missing (optional),
+        system_id_token: missing (optional),
+        r_angle_token: R_ANGLE@120..121 ">" [] [],
+    },
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@121..123 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_KW@123..128 "html" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@128..132 "lang" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@132..133 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@133..137 "\"en\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@137..138 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@138..141 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: HEAD_KW@141..145 "head" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@145..146 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@146..150 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: TITLE_KW@150..155 "title" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@155..156 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlSingleTextExpression {
+                                    l_curly_token: L_CURLY@156..157 "{" [] [],
+                                    expression: HtmlTextExpression {
+                                        html_literal_token: HTML_LITERAL@157..162 "title" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@162..163 "}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@163..164 "<" [] [],
+                                slash_token: SLASH@164..165 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: TITLE_KW@165..170 "title" [] [],
+                                },
+                                r_angle_token: R_ANGLE@170..171 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@171..174 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@174..175 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HEAD_KW@175..179 "head" [] [],
+                        },
+                        r_angle_token: R_ANGLE@179..180 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@180..183 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: BODY_KW@183..187 "body" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@187..188 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSelfClosingElement {
+                            l_angle_token: L_ANGLE@188..192 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                            name: HtmlComponentName {
+                                value_token: HTML_COMPONENT_LITERAL@192..197 "Card" [] [Whitespace(" ")],
+                            },
+                            attributes: HtmlAttributeList [
+                                HtmlAttribute {
+                                    name: HtmlAttributeName {
+                                        value_token: HTML_LITERAL@197..202 "title" [] [],
+                                    },
+                                    initializer: HtmlAttributeInitializerClause {
+                                        eq_token: EQ@202..203 "=" [] [],
+                                        value: HtmlAttributeSingleTextExpression {
+                                            l_curly_token: L_CURLY@203..204 "{" [] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@204..209 "title" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@209..211 "}" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                            ],
+                            slash_token: SLASH@211..212 "/" [] [],
+                            r_angle_token: R_ANGLE@212..213 ">" [] [],
+                        },
+                        AstroFragment {
+                            opening_fragment: AstroOpeningFragment {
+                                l_angle_token: L_ANGLE@213..217 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                r_angle_token: R_ANGLE@217..218 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlElement {
+                                    opening_element: HtmlOpeningElement {
+                                        l_angle_token: L_ANGLE@218..223 "<" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        name: HtmlTagName {
+                                            value_token: UL_KW@223..226 "ul" [] [Whitespace(" ")],
+                                        },
+                                        attributes: HtmlAttributeList [
+                                            AstroClassDirective {
+                                                class_token: CLASS_KW@226..231 "class" [] [],
+                                                value: AstroDirectiveValue {
+                                                    colon_token_token: COLON@231..232 ":" [] [],
+                                                    name: HtmlAttributeName {
+                                                        value_token: HTML_LITERAL@232..236 "list" [] [],
+                                                    },
+                                                    initializer: HtmlAttributeInitializerClause {
+                                                        eq_token: EQ@236..237 "=" [] [],
+                                                        value: HtmlAttributeSingleTextExpression {
+                                                            l_curly_token: L_CURLY@237..238 "{" [] [],
+                                                            expression: HtmlTextExpression {
+                                                                html_literal_token: HTML_LITERAL@238..277 "[\"items\", { active: items.length > 0 }]" [] [],
+                                                            },
+                                                            r_curly_token: R_CURLY@277..278 "}" [] [],
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        ],
+                                        r_angle_token: R_ANGLE@278..279 ">" [] [],
+                                    },
+                                    children: HtmlElementList [
+                                        HtmlSingleTextExpression {
+                                            l_curly_token: L_CURLY@279..285 "{" [Newline("\n"), Whitespace("\t\t\t\t")] [],
+                                            expression: HtmlTextExpression {
+                                                html_literal_token: HTML_LITERAL@285..345 "items.map((item) => <li data-id={item.id}>{item.label}</li>)" [] [],
+                                            },
+                                            r_curly_token: R_CURLY@345..346 "}" [] [],
+                                        },
+                                    ],
+                                    closing_element: HtmlClosingElement {
+                                        l_angle_token: L_ANGLE@346..351 "<" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                        slash_token: SLASH@351..352 "/" [] [],
+                                        name: HtmlTagName {
+                                            value_token: UL_KW@352..354 "ul" [] [],
+                                        },
+                                        r_angle_token: R_ANGLE@354..355 ">" [] [],
+                                    },
+                                },
+                            ],
+                            closing_fragment: AstroClosingFragment {
+                                l_angle_token: L_ANGLE@355..359 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                slash_token: SLASH@359..360 "/" [] [],
+                                r_angle_token: R_ANGLE@360..361 ">" [] [],
+                            },
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@361..365 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: SCRIPT_KW@365..371 "script" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@371..372 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlEmbeddedContent {
+                                    value_token: HTML_LITERAL@372..426 "\n\t\tdocument.documentElement.dataset.ready = \"true\";\n\t\t" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@426..427 "<" [] [],
+                                slash_token: SLASH@427..428 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: SCRIPT_KW@428..434 "script" [] [],
+                                },
+                                r_angle_token: R_ANGLE@434..435 ">" [] [],
+                            },
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@435..439 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: STYLE_KW@439..444 "style" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@444..445 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlEmbeddedContent {
+                                    value_token: HTML_LITERAL@445..481 "\n\t\t.items {\n\t\t\tdisplay: grid;\n\t\t}\n\t\t" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@481..482 "<" [] [],
+                                slash_token: SLASH@482..483 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: STYLE_KW@483..488 "style" [] [],
+                                },
+                                r_angle_token: R_ANGLE@488..489 ">" [] [],
+                            },
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@489..493 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlTagName {
+                                    value_token: PRE_KW@493..497 "pre" [] [Whitespace(" ")],
+                                },
+                                attributes: HtmlAttributeList [
+                                    AstroIsDirective {
+                                        is_token: IS_KW@497..499 "is" [] [],
+                                        value: AstroDirectiveValue {
+                                            colon_token_token: COLON@499..500 ":" [] [],
+                                            name: HtmlAttributeName {
+                                                value_token: HTML_LITERAL@500..503 "raw" [] [],
+                                            },
+                                            initializer: missing (optional),
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@503..504 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlEmbeddedContent {
+                                    value_token: HTML_LITERAL@504..511 "{title}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@511..512 "<" [] [],
+                                slash_token: SLASH@512..513 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: PRE_KW@513..516 "pre" [] [],
+                                },
+                                r_angle_token: R_ANGLE@516..517 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@517..520 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@520..521 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: BODY_KW@521..525 "body" [] [],
+                        },
+                        r_angle_token: R_ANGLE@525..526 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@526..528 "<" [Newline("\n")] [],
+                slash_token: SLASH@528..529 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_KW@529..533 "html" [] [],
+                },
+                r_angle_token: R_ANGLE@533..534 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@534..535 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..535
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..104
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..101
+      0: HTML_LITERAL@3..101 "import Card from \"./Card.astro\";\nconst title = \"Hello\";\nconst items = [{ id: 1, label: \"One\" }];\n" [Newline("\n")] []
+    2: FENCE@101..104 "---" [] []
+  2: (empty)
+  3: HTML_DIRECTIVE@104..121
+    0: L_ANGLE@104..107 "<" [Newline("\n"), Newline("\n")] []
+    1: BANG@107..108 "!" [] []
+    2: DOCTYPE_KW@108..116 "doctype" [] [Whitespace(" ")]
+    3: (empty)
+    4: HTML_KW@116..120 "html" [] []
+    5: (empty)
+    6: (empty)
+    7: (empty)
+    8: R_ANGLE@120..121 ">" [] []
+  4: HTML_ELEMENT_LIST@121..534
+    0: HTML_ELEMENT@121..534
+      0: HTML_OPENING_ELEMENT@121..138
+        0: L_ANGLE@121..123 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@123..128
+          0: HTML_KW@123..128 "html" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@128..137
+          0: HTML_ATTRIBUTE@128..137
+            0: HTML_ATTRIBUTE_NAME@128..132
+              0: HTML_LITERAL@128..132 "lang" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@132..137
+              0: EQ@132..133 "=" [] []
+              1: HTML_STRING@133..137
+                0: HTML_STRING_LITERAL@133..137 "\"en\"" [] []
+        3: R_ANGLE@137..138 ">" [] []
+      1: HTML_ELEMENT_LIST@138..526
+        0: HTML_ELEMENT@138..180
+          0: HTML_OPENING_ELEMENT@138..146
+            0: L_ANGLE@138..141 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@141..145
+              0: HEAD_KW@141..145 "head" [] []
+            2: HTML_ATTRIBUTE_LIST@145..145
+            3: R_ANGLE@145..146 ">" [] []
+          1: HTML_ELEMENT_LIST@146..171
+            0: HTML_ELEMENT@146..171
+              0: HTML_OPENING_ELEMENT@146..156
+                0: L_ANGLE@146..150 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@150..155
+                  0: TITLE_KW@150..155 "title" [] []
+                2: HTML_ATTRIBUTE_LIST@155..155
+                3: R_ANGLE@155..156 ">" [] []
+              1: HTML_ELEMENT_LIST@156..163
+                0: HTML_SINGLE_TEXT_EXPRESSION@156..163
+                  0: L_CURLY@156..157 "{" [] []
+                  1: HTML_TEXT_EXPRESSION@157..162
+                    0: HTML_LITERAL@157..162 "title" [] []
+                  2: R_CURLY@162..163 "}" [] []
+              2: HTML_CLOSING_ELEMENT@163..171
+                0: L_ANGLE@163..164 "<" [] []
+                1: SLASH@164..165 "/" [] []
+                2: HTML_TAG_NAME@165..170
+                  0: TITLE_KW@165..170 "title" [] []
+                3: R_ANGLE@170..171 ">" [] []
+          2: HTML_CLOSING_ELEMENT@171..180
+            0: L_ANGLE@171..174 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@174..175 "/" [] []
+            2: HTML_TAG_NAME@175..179
+              0: HEAD_KW@175..179 "head" [] []
+            3: R_ANGLE@179..180 ">" [] []
+        1: HTML_ELEMENT@180..526
+          0: HTML_OPENING_ELEMENT@180..188
+            0: L_ANGLE@180..183 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@183..187
+              0: BODY_KW@183..187 "body" [] []
+            2: HTML_ATTRIBUTE_LIST@187..187
+            3: R_ANGLE@187..188 ">" [] []
+          1: HTML_ELEMENT_LIST@188..517
+            0: HTML_SELF_CLOSING_ELEMENT@188..213
+              0: L_ANGLE@188..192 "<" [Newline("\n"), Whitespace("\t\t")] []
+              1: HTML_COMPONENT_NAME@192..197
+                0: HTML_COMPONENT_LITERAL@192..197 "Card" [] [Whitespace(" ")]
+              2: HTML_ATTRIBUTE_LIST@197..211
+                0: HTML_ATTRIBUTE@197..211
+                  0: HTML_ATTRIBUTE_NAME@197..202
+                    0: HTML_LITERAL@197..202 "title" [] []
+                  1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@202..211
+                    0: EQ@202..203 "=" [] []
+                    1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@203..211
+                      0: L_CURLY@203..204 "{" [] []
+                      1: HTML_TEXT_EXPRESSION@204..209
+                        0: HTML_LITERAL@204..209 "title" [] []
+                      2: R_CURLY@209..211 "}" [] [Whitespace(" ")]
+              3: SLASH@211..212 "/" [] []
+              4: R_ANGLE@212..213 ">" [] []
+            1: ASTRO_FRAGMENT@213..361
+              0: ASTRO_OPENING_FRAGMENT@213..218
+                0: L_ANGLE@213..217 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: R_ANGLE@217..218 ">" [] []
+              1: HTML_ELEMENT_LIST@218..355
+                0: HTML_ELEMENT@218..355
+                  0: HTML_OPENING_ELEMENT@218..279
+                    0: L_ANGLE@218..223 "<" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: HTML_TAG_NAME@223..226
+                      0: UL_KW@223..226 "ul" [] [Whitespace(" ")]
+                    2: HTML_ATTRIBUTE_LIST@226..278
+                      0: ASTRO_CLASS_DIRECTIVE@226..278
+                        0: CLASS_KW@226..231 "class" [] []
+                        1: ASTRO_DIRECTIVE_VALUE@231..278
+                          0: COLON@231..232 ":" [] []
+                          1: HTML_ATTRIBUTE_NAME@232..236
+                            0: HTML_LITERAL@232..236 "list" [] []
+                          2: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@236..278
+                            0: EQ@236..237 "=" [] []
+                            1: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@237..278
+                              0: L_CURLY@237..238 "{" [] []
+                              1: HTML_TEXT_EXPRESSION@238..277
+                                0: HTML_LITERAL@238..277 "[\"items\", { active: items.length > 0 }]" [] []
+                              2: R_CURLY@277..278 "}" [] []
+                    3: R_ANGLE@278..279 ">" [] []
+                  1: HTML_ELEMENT_LIST@279..346
+                    0: HTML_SINGLE_TEXT_EXPRESSION@279..346
+                      0: L_CURLY@279..285 "{" [Newline("\n"), Whitespace("\t\t\t\t")] []
+                      1: HTML_TEXT_EXPRESSION@285..345
+                        0: HTML_LITERAL@285..345 "items.map((item) => <li data-id={item.id}>{item.label}</li>)" [] []
+                      2: R_CURLY@345..346 "}" [] []
+                  2: HTML_CLOSING_ELEMENT@346..355
+                    0: L_ANGLE@346..351 "<" [Newline("\n"), Whitespace("\t\t\t")] []
+                    1: SLASH@351..352 "/" [] []
+                    2: HTML_TAG_NAME@352..354
+                      0: UL_KW@352..354 "ul" [] []
+                    3: R_ANGLE@354..355 ">" [] []
+              2: ASTRO_CLOSING_FRAGMENT@355..361
+                0: L_ANGLE@355..359 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: SLASH@359..360 "/" [] []
+                2: R_ANGLE@360..361 ">" [] []
+            2: HTML_ELEMENT@361..435
+              0: HTML_OPENING_ELEMENT@361..372
+                0: L_ANGLE@361..365 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@365..371
+                  0: SCRIPT_KW@365..371 "script" [] []
+                2: HTML_ATTRIBUTE_LIST@371..371
+                3: R_ANGLE@371..372 ">" [] []
+              1: HTML_ELEMENT_LIST@372..426
+                0: HTML_EMBEDDED_CONTENT@372..426
+                  0: HTML_LITERAL@372..426 "\n\t\tdocument.documentElement.dataset.ready = \"true\";\n\t\t" [] []
+              2: HTML_CLOSING_ELEMENT@426..435
+                0: L_ANGLE@426..427 "<" [] []
+                1: SLASH@427..428 "/" [] []
+                2: HTML_TAG_NAME@428..434
+                  0: SCRIPT_KW@428..434 "script" [] []
+                3: R_ANGLE@434..435 ">" [] []
+            3: HTML_ELEMENT@435..489
+              0: HTML_OPENING_ELEMENT@435..445
+                0: L_ANGLE@435..439 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@439..444
+                  0: STYLE_KW@439..444 "style" [] []
+                2: HTML_ATTRIBUTE_LIST@444..444
+                3: R_ANGLE@444..445 ">" [] []
+              1: HTML_ELEMENT_LIST@445..481
+                0: HTML_EMBEDDED_CONTENT@445..481
+                  0: HTML_LITERAL@445..481 "\n\t\t.items {\n\t\t\tdisplay: grid;\n\t\t}\n\t\t" [] []
+              2: HTML_CLOSING_ELEMENT@481..489
+                0: L_ANGLE@481..482 "<" [] []
+                1: SLASH@482..483 "/" [] []
+                2: HTML_TAG_NAME@483..488
+                  0: STYLE_KW@483..488 "style" [] []
+                3: R_ANGLE@488..489 ">" [] []
+            4: HTML_ELEMENT@489..517
+              0: HTML_OPENING_ELEMENT@489..504
+                0: L_ANGLE@489..493 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_TAG_NAME@493..497
+                  0: PRE_KW@493..497 "pre" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE_LIST@497..503
+                  0: ASTRO_IS_DIRECTIVE@497..503
+                    0: IS_KW@497..499 "is" [] []
+                    1: ASTRO_DIRECTIVE_VALUE@499..503
+                      0: COLON@499..500 ":" [] []
+                      1: HTML_ATTRIBUTE_NAME@500..503
+                        0: HTML_LITERAL@500..503 "raw" [] []
+                      2: (empty)
+                3: R_ANGLE@503..504 ">" [] []
+              1: HTML_ELEMENT_LIST@504..511
+                0: HTML_EMBEDDED_CONTENT@504..511
+                  0: HTML_LITERAL@504..511 "{title}" [] []
+              2: HTML_CLOSING_ELEMENT@511..517
+                0: L_ANGLE@511..512 "<" [] []
+                1: SLASH@512..513 "/" [] []
+                2: HTML_TAG_NAME@513..516
+                  0: PRE_KW@513..516 "pre" [] []
+                3: R_ANGLE@516..517 ">" [] []
+          2: HTML_CLOSING_ELEMENT@517..526
+            0: L_ANGLE@517..520 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@520..521 "/" [] []
+            2: HTML_TAG_NAME@521..525
+              0: BODY_KW@521..525 "body" [] []
+            3: R_ANGLE@525..526 ">" [] []
+      2: HTML_CLOSING_ELEMENT@526..534
+        0: L_ANGLE@526..528 "<" [Newline("\n")] []
+        1: SLASH@528..529 "/" [] []
+        2: HTML_TAG_NAME@529..533
+          0: HTML_KW@529..533 "html" [] []
+        3: R_ANGLE@533..534 ">" [] []
+  5: EOF@534..535 "" [Newline("\n")] []
+
+```

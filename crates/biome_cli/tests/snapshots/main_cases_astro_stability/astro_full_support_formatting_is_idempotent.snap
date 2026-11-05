@@ -1,0 +1,73 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write stability.astro
+biome check stability.astro
+biome format --write stability.astro
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  },
+  "linter": { "enabled": false },
+  "assist": { "enabled": false }
+}
+```
+
+## `stability.astro`
+
+```astro
+---
+import Card from "./Card.astro";
+const title = "Hello";
+const items = [{ id: 1, label: "One" }];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>{title}</title>
+	</head>
+	<body>
+		<Card title={title} />
+		<>
+			<ul class:list={["items", { active: items.length > 0 }]}>
+				{items.map((item) => <li data-id={item.id}>{item.label}</li>)}
+			</ul>
+		</>
+		<script>
+		document.documentElement.dataset.ready = "true";
+		</script>
+		<style>
+		.items {
+			display: grid;
+		}
+		</style>
+		<pre is:raw>{title}</pre>
+	</body>
+</html>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
+
+```block
+Formatted 1 file in <TIME>. No fixes applied.
+```
