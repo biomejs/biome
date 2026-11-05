@@ -19,6 +19,7 @@ biome_analyze                = { path = "./crates/biome_analyze", version = "0.7
 biome_analyze_macros         = { path = "./crates/biome_analyze_macros", version = "0.7.0" }
 biome_aria                   = { path = "./crates/biome_aria", version = "0.7.0" }
 biome_aria_metadata          = { path = "./crates/biome_aria_metadata", version = "0.7.0" }
+biome_astro_semantic         = { path = "./crates/biome_astro_semantic" }
 biome_bench_utils            = { path = "./crates/biome_bench_utils" }
 biome_embeds                 = { path = "./crates/biome_embeds" }
 biome_cli                    = { path = "./crates/biome_cli" }
