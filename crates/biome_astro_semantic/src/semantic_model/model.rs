@@ -438,6 +438,18 @@ impl AstroSemanticModel {
         })
     }
 
+    /// Returns the snippet whose guest-coordinate origin is `offset` in the host document.
+    pub fn snippet_at_offset(&self, offset: TextSize) -> Option<Snippet> {
+        self.data
+            .snippets
+            .iter()
+            .position(|snippet| snippet.offset == offset)
+            .map(|index| Snippet {
+                data: self.data.clone(),
+                id: SnippetId::new(index),
+            })
+    }
+
     /// Returns all scopes in the model.
     pub fn scopes(&self) -> impl Iterator<Item = Scope> + '_ {
         (0..self.data.scopes.len()).map(|index| Scope {
@@ -647,9 +659,10 @@ impl Scope {
         self.row().open[namespace.index()]
     }
 
-    /// Returns whether declarations in the namespace may be incomplete.
+    /// Returns whether this scope or an ancestor has an incomplete declaration set.
     pub fn is_open(&self, namespace: Namespace) -> bool {
-        !self.open_reasons(namespace).is_empty()
+        self.ancestors()
+            .any(|scope| !scope.open_reasons(namespace).is_empty())
     }
 }
 

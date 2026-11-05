@@ -155,8 +155,8 @@ fn collect_define_vars(
         builder.open(scope, Namespace::Value, reason);
     }
     for variable in result.variables {
-        let range = to_host(variable.range, snippet.content_offset);
-        let declaration = to_host(variable.declaration, snippet.content_offset);
+        let range = to_host(variable.range, snippet.range_offset());
+        let declaration = to_host(variable.declaration, snippet.range_offset());
         let existing = builder.data.scopes[scope]
             .symbols
             .iter()
