@@ -194,6 +194,7 @@ static TURBOREPO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> =
 static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "useArrayFind"),
+        RuleFilter::Rule("nursery", "noArrayDelete"),
         RuleFilter::Rule("nursery", "noBaseToString"),
         RuleFilter::Rule("nursery", "noFloatingPromises"),
         RuleFilter::Rule("nursery", "noMeaninglessVoidOperator"),

@@ -1,0 +1,730 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+declare const arr: number[];
+declare const index: number;
+
+delete arr[0];
+delete arr[index];
+delete arr[index + 1];
+delete arr[arr.length - 1];
+delete (arr[0]);
+delete (arr)[0];
+delete arr?.[0];
+
+declare const genericArr: Array<number>;
+delete genericArr[0];
+
+declare const tuple: [number, string];
+delete tuple[1];
+
+declare const arrayOrTuple: number[] | [boolean, string];
+delete arrayOrTuple[0];
+
+const literalArr = [1, 2, 3];
+delete literalArr[1];
+
+declare const obj: { items: number[] };
+delete obj.items[0];
+
+declare function getArr(): string[];
+delete getArr()[0];
+
+// The fix wraps a comma-separated expression in parentheses.
+let a = 0;
+let b = 1;
+delete arr[a, b];
+delete arr[(a, b)];
+
+// Comments before and after the expression are kept.
+delete arr[0] /* after */;
+delete arr[0]; // trailing
+/* leading */ delete arr[0];
+
+// No fix is offered when the expression contains comments.
+delete /* before */ arr[0];
+delete arr[/* inside */ 0];
+delete arr[
+	index // last
+];
+delete arr // array
+[0];
+delete (/* inside */ arr[0]);
+
+// The returned value is used.
+const result = delete arr[0];
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    3 │ declare const index: number;
+    4 │ 
+  > 5 │ delete arr[0];
+      │ ^^^^^^^^^^^^^
+    6 │ delete arr[index];
+    7 │ delete arr[index + 1];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     3  3 │   declare const index: number;
+     4  4 │   
+     5    │ - delete·arr[0];
+        5 │ + arr.splice(0,·1);
+     6  6 │   delete arr[index];
+     7  7 │   delete arr[index + 1];
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    5 │ delete arr[0];
+  > 6 │ delete arr[index];
+      │ ^^^^^^^^^^^^^^^^^
+    7 │ delete arr[index + 1];
+    8 │ delete arr[arr.length - 1];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     4  4 │   
+     5  5 │   delete arr[0];
+     6    │ - delete·arr[index];
+        6 │ + arr.splice(index,·1);
+     7  7 │   delete arr[index + 1];
+     8  8 │   delete arr[arr.length - 1];
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    5 │ delete arr[0];
+    6 │ delete arr[index];
+  > 7 │ delete arr[index + 1];
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    8 │ delete arr[arr.length - 1];
+    9 │ delete (arr[0]);
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     5  5 │   delete arr[0];
+     6  6 │   delete arr[index];
+     7    │ - delete·arr[index·+·1];
+        7 │ + arr.splice(index·+·1,·1);
+     8  8 │   delete arr[arr.length - 1];
+     9  9 │   delete (arr[0]);
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+     6 │ delete arr[index];
+     7 │ delete arr[index + 1];
+   > 8 │ delete arr[arr.length - 1];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ delete (arr[0]);
+    10 │ delete (arr)[0];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     6  6 │   delete arr[index];
+     7  7 │   delete arr[index + 1];
+     8    │ - delete·arr[arr.length·-·1];
+        8 │ + arr.splice(arr.length·-·1,·1);
+     9  9 │   delete (arr[0]);
+    10 10 │   delete (arr)[0];
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+     7 │ delete arr[index + 1];
+     8 │ delete arr[arr.length - 1];
+   > 9 │ delete (arr[0]);
+       │ ^^^^^^^^^^^^^^^
+    10 │ delete (arr)[0];
+    11 │ delete arr?.[0];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     7  7 │   delete arr[index + 1];
+     8  8 │   delete arr[arr.length - 1];
+     9    │ - delete·(arr[0]);
+        9 │ + arr.splice(0,·1);
+    10 10 │   delete (arr)[0];
+    11 11 │   delete arr?.[0];
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+     8 │ delete arr[arr.length - 1];
+     9 │ delete (arr[0]);
+  > 10 │ delete (arr)[0];
+       │ ^^^^^^^^^^^^^^^
+    11 │ delete arr?.[0];
+    12 │ 
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     8  8 │   delete arr[arr.length - 1];
+     9  9 │   delete (arr[0]);
+    10    │ - delete·(arr)[0];
+       10 │ + (arr).splice(0,·1);
+    11 11 │   delete arr?.[0];
+    12 12 │   
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+     9 │ delete (arr[0]);
+    10 │ delete (arr)[0];
+  > 11 │ delete arr?.[0];
+       │ ^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ declare const genericArr: Array<number>;
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+     9  9 │   delete (arr[0]);
+    10 10 │   delete (arr)[0];
+    11    │ - delete·arr?.[0];
+       11 │ + arr?.splice(0,·1);
+    12 12 │   
+    13 13 │   declare const genericArr: Array<number>;
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    13 │ declare const genericArr: Array<number>;
+  > 14 │ delete genericArr[0];
+       │ ^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ declare const tuple: [number, string];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    12 12 │   
+    13 13 │   declare const genericArr: Array<number>;
+    14    │ - delete·genericArr[0];
+       14 │ + genericArr.splice(0,·1);
+    15 15 │   
+    16 16 │   declare const tuple: [number, string];
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    16 │ declare const tuple: [number, string];
+  > 17 │ delete tuple[1];
+       │ ^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ declare const arrayOrTuple: number[] | [boolean, string];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    15 15 │   
+    16 16 │   declare const tuple: [number, string];
+    17    │ - delete·tuple[1];
+       17 │ + tuple.splice(1,·1);
+    18 18 │   
+    19 19 │   declare const arrayOrTuple: number[] | [boolean, string];
+  
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    19 │ declare const arrayOrTuple: number[] | [boolean, string];
+  > 20 │ delete arrayOrTuple[0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ const literalArr = [1, 2, 3];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    18 18 │   
+    19 19 │   declare const arrayOrTuple: number[] | [boolean, string];
+    20    │ - delete·arrayOrTuple[0];
+       20 │ + arrayOrTuple.splice(0,·1);
+    21 21 │   
+    22 22 │   const literalArr = [1, 2, 3];
+  
+
+```
+
+```
+invalid.ts:23:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    22 │ const literalArr = [1, 2, 3];
+  > 23 │ delete literalArr[1];
+       │ ^^^^^^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ declare const obj: { items: number[] };
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    21 21 │   
+    22 22 │   const literalArr = [1, 2, 3];
+    23    │ - delete·literalArr[1];
+       23 │ + literalArr.splice(1,·1);
+    24 24 │   
+    25 25 │   declare const obj: { items: number[] };
+  
+
+```
+
+```
+invalid.ts:26:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    25 │ declare const obj: { items: number[] };
+  > 26 │ delete obj.items[0];
+       │ ^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ declare function getArr(): string[];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    24 24 │   
+    25 25 │   declare const obj: { items: number[] };
+    26    │ - delete·obj.items[0];
+       26 │ + obj.items.splice(0,·1);
+    27 27 │   
+    28 28 │   declare function getArr(): string[];
+  
+
+```
+
+```
+invalid.ts:29:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    28 │ declare function getArr(): string[];
+  > 29 │ delete getArr()[0];
+       │ ^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ // The fix wraps a comma-separated expression in parentheses.
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    27 27 │   
+    28 28 │   declare function getArr(): string[];
+    29    │ - delete·getArr()[0];
+       29 │ + getArr().splice(0,·1);
+    30 30 │   
+    31 31 │   // The fix wraps a comma-separated expression in parentheses.
+  
+
+```
+
+```
+invalid.ts:34:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    32 │ let a = 0;
+    33 │ let b = 1;
+  > 34 │ delete arr[a, b];
+       │ ^^^^^^^^^^^^^^^^
+    35 │ delete arr[(a, b)];
+    36 │ 
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    32 32 │   let a = 0;
+    33 33 │   let b = 1;
+    34    │ - delete·arr[a,·b];
+       34 │ + arr.splice((a,·b),·1);
+    35 35 │   delete arr[(a, b)];
+    36 36 │   
+  
+
+```
+
+```
+invalid.ts:35:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    33 │ let b = 1;
+    34 │ delete arr[a, b];
+  > 35 │ delete arr[(a, b)];
+       │ ^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // Comments before and after the expression are kept.
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    33 33 │   let b = 1;
+    34 34 │   delete arr[a, b];
+    35    │ - delete·arr[(a,·b)];
+       35 │ + arr.splice((a,·b),·1);
+    36 36 │   
+    37 37 │   // Comments before and after the expression are kept.
+  
+
+```
+
+```
+invalid.ts:38:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    37 │ // Comments before and after the expression are kept.
+  > 38 │ delete arr[0] /* after */;
+       │ ^^^^^^^^^^^^^
+    39 │ delete arr[0]; // trailing
+    40 │ /* leading */ delete arr[0];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    36 36 │   
+    37 37 │   // Comments before and after the expression are kept.
+    38    │ - delete·arr[0]·/*·after·*/;
+       38 │ + arr.splice(0,·1)·/*·after·*/;
+    39 39 │   delete arr[0]; // trailing
+    40 40 │   /* leading */ delete arr[0];
+  
+
+```
+
+```
+invalid.ts:39:1 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    37 │ // Comments before and after the expression are kept.
+    38 │ delete arr[0] /* after */;
+  > 39 │ delete arr[0]; // trailing
+       │ ^^^^^^^^^^^^^
+    40 │ /* leading */ delete arr[0];
+    41 │ 
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    37 37 │   // Comments before and after the expression are kept.
+    38 38 │   delete arr[0] /* after */;
+    39    │ - delete·arr[0];·//·trailing
+       39 │ + arr.splice(0,·1);·//·trailing
+    40 40 │   /* leading */ delete arr[0];
+    41 41 │   
+  
+
+```
+
+```
+invalid.ts:40:15 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    38 │ delete arr[0] /* after */;
+    39 │ delete arr[0]; // trailing
+  > 40 │ /* leading */ delete arr[0];
+       │               ^^^^^^^^^^^^^
+    41 │ 
+    42 │ // No fix is offered when the expression contains comments.
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    38 38 │   delete arr[0] /* after */;
+    39 39 │   delete arr[0]; // trailing
+    40    │ - /*·leading·*/·delete·arr[0];
+       40 │ + /*·leading·*/·arr.splice(0,·1);
+    41 41 │   
+    42 42 │   // No fix is offered when the expression contains comments.
+  
+
+```
+
+```
+invalid.ts:43:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    42 │ // No fix is offered when the expression contains comments.
+  > 43 │ delete /* before */ arr[0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ delete arr[/* inside */ 0];
+    45 │ delete arr[
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:44:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    42 │ // No fix is offered when the expression contains comments.
+    43 │ delete /* before */ arr[0];
+  > 44 │ delete arr[/* inside */ 0];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ delete arr[
+    46 │ 	index // last
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:45:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    43 │ delete /* before */ arr[0];
+    44 │ delete arr[/* inside */ 0];
+  > 45 │ delete arr[
+       │ ^^^^^^^^^^^
+  > 46 │ 	index // last
+  > 47 │ ];
+       │ ^
+    48 │ delete arr // array
+    49 │ [0];
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:48:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    46 │ 	index // last
+    47 │ ];
+  > 48 │ delete arr // array
+       │ ^^^^^^^^^^^^^^^^^^^
+  > 49 │ [0];
+       │ ^^^
+    50 │ delete (/* inside */ arr[0]);
+    51 │ 
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:50:1 lint/nursery/noArrayDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    48 │ delete arr // array
+    49 │ [0];
+  > 50 │ delete (/* inside */ arr[0]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 
+    52 │ // The returned value is used.
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:53:16 lint/nursery/noArrayDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the delete operator on array elements.
+  
+    52 │ // The returned value is used.
+  > 53 │ const result = delete arr[0];
+       │                ^^^^^^^^^^^^^
+    54 │ 
+  
+  i Deleting an array element leaves an empty slot in the array and doesn't change its length.
+  
+  i Use splice() to remove the element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use splice() instead.
+  
+    51 51 │   
+    52 52 │   // The returned value is used.
+    53    │ - const·result·=·delete·arr[0];
+       53 │ + const·result·=·arr.splice(0,·1);
+    54 54 │   
+  
+
+```
