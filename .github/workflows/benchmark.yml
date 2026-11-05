@@ -39,6 +39,7 @@ jobs:
       markdown: ${{ steps.outputs.outputs.markdown }}
       grit: ${{ steps.outputs.outputs.grit }}
       tailwind: ${{ steps.outputs.outputs.tailwind }}
+      toml: ${{ steps.outputs.outputs.toml }}
       configuration: ${{ steps.outputs.outputs.configuration }}
       manifests: ${{ steps.outputs.outputs.manifests }}
       module_graph: ${{ steps.outputs.outputs.module_graph }}
@@ -153,6 +154,14 @@ jobs:
               - 'crates/biome_tailwind_*/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_parser/**/*.rs'
+            toml:
+              - '.github/workflows/benchmark.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_toml_*/Cargo.toml'
+              - 'crates/biome_toml_*/benches/**/*'
+              - 'crates/biome_toml_*/**/*.rs'
+              - 'crates/biome_rowan/**/*.rs'
+              - 'crates/biome_parser/**/*.rs'
             configuration:
               - '.github/workflows/benchmark.yml'
               - 'Cargo.lock'
@@ -213,6 +222,7 @@ jobs:
           MARKDOWN: ${{ steps.filter.outputs.markdown }}
           GRIT: ${{ steps.filter.outputs.grit }}
           TAILWIND: ${{ steps.filter.outputs.tailwind }}
+          TOML: ${{ steps.filter.outputs.toml }}
           CONFIGURATION: ${{ steps.filter.outputs.configuration }}
           MANIFESTS: ${{ steps.filter.outputs.manifests }}
           MODULE_GRAPH: ${{ steps.filter.outputs.module_graph }}
@@ -230,6 +240,7 @@ jobs:
             MARKDOWN=true
             GRIT=true
             TAILWIND=true
+            TOML=true
             CONFIGURATION=true
             MANIFESTS=true
             MODULE_GRAPH=true
@@ -247,6 +258,7 @@ jobs:
           echo "markdown=$MARKDOWN" >> "$GITHUB_OUTPUT"
           echo "grit=$GRIT" >> "$GITHUB_OUTPUT"
           echo "tailwind=$TAILWIND" >> "$GITHUB_OUTPUT"
+          echo "toml=$TOML" >> "$GITHUB_OUTPUT"
           echo "configuration=$CONFIGURATION" >> "$GITHUB_OUTPUT"
           echo "manifests=$MANIFESTS" >> "$GITHUB_OUTPUT"
           echo "module_graph=$MODULE_GRAPH" >> "$GITHUB_OUTPUT"
@@ -547,6 +559,20 @@ jobs:
         package:
           - biome_tailwind_parser
           - biome_tailwind_logic
+    steps: *bench_steps
+
+  toml:
+    needs: changes
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.toml == 'true'
+    permissions:
+      contents: read
+      pull-requests: read
+    name: Bench TOML
+    runs-on: depot-ubuntu-24.04-arm-16
+    strategy:
+      matrix:
+        package:
+          - biome_toml_parser
     steps: *bench_steps
 
   configuration:

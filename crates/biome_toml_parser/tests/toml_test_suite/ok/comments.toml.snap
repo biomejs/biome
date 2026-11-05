@@ -1,0 +1,120 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+# This is a full-line comment
+key = "value"  # This is a comment at the end of a line
+another = "# This is not a comment"
+#
+#	tab-indented comment with unicode: ☃
+	indented = 1 # trailing
+[table] # after a header
+# last comment
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..34 "key" [Comments("# This is a full-line ..."), Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@34..36 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@36..85 "\"value\"" [] [Whitespace("  "), Comments("# This is a comment a ...")],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@85..94 "another" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@94..96 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@96..121 "\"# This is not a comment\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@121..175 "indented" [Newline("\n"), Comments("#"), Newline("\n"), Comments("#\ttab-indented commen ..."), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@175..177 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@177..189 "1" [] [Whitespace(" "), Comments("# trailing")],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@189..191 "[" [Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@191..196 "table" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@196..214 "]" [] [Whitespace(" "), Comments("# after a header")],
+            entries: TomlKeyValueList [],
+        },
+    ],
+    eof_token: EOF@214..230 "" [Newline("\n"), Comments("# last comment"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..230
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..214
+    0: TOML_KEY_VALUE@0..85
+      0: TOML_KEY@0..34
+        0: TOML_KEY_PART_LIST@0..34
+          0: TOML_BARE_KEY@0..34
+            0: TOML_BARE_KEY_LITERAL@0..34 "key" [Comments("# This is a full-line ..."), Newline("\n")] [Whitespace(" ")]
+      1: EQ@34..36 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@36..85
+        0: TOML_BASIC_STRING_LITERAL@36..85 "\"value\"" [] [Whitespace("  "), Comments("# This is a comment a ...")]
+    1: TOML_KEY_VALUE@85..121
+      0: TOML_KEY@85..94
+        0: TOML_KEY_PART_LIST@85..94
+          0: TOML_BARE_KEY@85..94
+            0: TOML_BARE_KEY_LITERAL@85..94 "another" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@94..96 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@96..121
+        0: TOML_BASIC_STRING_LITERAL@96..121 "\"# This is not a comment\"" [] []
+    2: TOML_KEY_VALUE@121..189
+      0: TOML_KEY@121..175
+        0: TOML_KEY_PART_LIST@121..175
+          0: TOML_BARE_KEY@121..175
+            0: TOML_BARE_KEY_LITERAL@121..175 "indented" [Newline("\n"), Comments("#"), Newline("\n"), Comments("#\ttab-indented commen ..."), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+      1: EQ@175..177 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@177..189
+        0: TOML_INTEGER_LITERAL@177..189 "1" [] [Whitespace(" "), Comments("# trailing")]
+    3: TOML_TABLE@189..214
+      0: L_BRACK@189..191 "[" [Newline("\n")] []
+      1: TOML_KEY@191..196
+        0: TOML_KEY_PART_LIST@191..196
+          0: TOML_BARE_KEY@191..196
+            0: TOML_BARE_KEY_LITERAL@191..196 "table" [] []
+      2: R_BRACK@196..214 "]" [] [Whitespace(" "), Comments("# after a header")]
+      3: TOML_KEY_VALUE_LIST@214..214
+  2: EOF@214..230 "" [Newline("\n"), Comments("# last comment"), Newline("\n")] []
+
+```

@@ -1,0 +1,193 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+control = "ab"
+del = ""
+comment = 1 # 
+bare_cr = 1next = 2
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..8 "control" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@10..15 "\"a\u{1}b\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@15..20 "del" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@20..22 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@22..25 "\"\u{7f}\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@25..34 "comment" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@34..36 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@36..41 "1" [] [Whitespace(" "), Comments("# \u{2}")],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@41..50 "bare_cr" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@50..52 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@52..53 "1" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@53..59 "next" [Newline("\r")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@59..61 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@61..62 "2" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@62..63 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..63
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..62
+    0: TOML_KEY_VALUE@0..15
+      0: TOML_KEY@0..8
+        0: TOML_KEY_PART_LIST@0..8
+          0: TOML_BARE_KEY@0..8
+            0: TOML_BARE_KEY_LITERAL@0..8 "control" [] [Whitespace(" ")]
+      1: EQ@8..10 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@10..15
+        0: TOML_BASIC_STRING_LITERAL@10..15 "\"a\u{1}b\"" [] []
+    1: TOML_KEY_VALUE@15..25
+      0: TOML_KEY@15..20
+        0: TOML_KEY_PART_LIST@15..20
+          0: TOML_BARE_KEY@15..20
+            0: TOML_BARE_KEY_LITERAL@15..20 "del" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@20..22 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@22..25
+        0: TOML_BASIC_STRING_LITERAL@22..25 "\"\u{7f}\"" [] []
+    2: TOML_KEY_VALUE@25..41
+      0: TOML_KEY@25..34
+        0: TOML_KEY_PART_LIST@25..34
+          0: TOML_BARE_KEY@25..34
+            0: TOML_BARE_KEY_LITERAL@25..34 "comment" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@34..36 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@36..41
+        0: TOML_INTEGER_LITERAL@36..41 "1" [] [Whitespace(" "), Comments("# \u{2}")]
+    3: TOML_KEY_VALUE@41..53
+      0: TOML_KEY@41..50
+        0: TOML_KEY_PART_LIST@41..50
+          0: TOML_BARE_KEY@41..50
+            0: TOML_BARE_KEY_LITERAL@41..50 "bare_cr" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@50..52 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@52..53
+        0: TOML_INTEGER_LITERAL@52..53 "1" [] []
+    4: TOML_KEY_VALUE@53..62
+      0: TOML_KEY@53..59
+        0: TOML_KEY_PART_LIST@53..59
+          0: TOML_BARE_KEY@53..59
+            0: TOML_BARE_KEY_LITERAL@53..59 "next" [Newline("\r")] [Whitespace(" ")]
+      1: EQ@59..61 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@61..62
+        0: TOML_INTEGER_LITERAL@61..62 "2" [] []
+  2: EOF@62..63 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+control_characters.toml:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Control character U+0001 isn't allowed in basic strings.
+  
+  > 1 │ control = "aU+1b"
+      │             
+    2 │ del = "U+7f"
+    3 │ comment = 1 # U+2
+  
+  i Use an escape sequence in a basic string instead.
+  
+control_characters.toml:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Control character U+007F isn't allowed in basic strings.
+  
+    1 │ control = "aU+1b"
+  > 2 │ del = "U+7f"
+      │        
+    3 │ comment = 1 # U+2
+    4 │ bare_cr = 1
+  
+  i Use an escape sequence in a basic string instead.
+  
+control_characters.toml:3:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Control character U+0002 isn't allowed in comments.
+  
+    1 │ control = "aU+1b"
+    2 │ del = "U+7f"
+  > 3 │ comment = 1 # U+2
+      │               
+    4 │ bare_cr = 1
+    5 │ next = 2
+  
+  i Use an escape sequence in a basic string instead.
+  
+control_characters.toml:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A carriage return must be followed by a line feed.
+  
+    2 │ del = "U+7f"
+    3 │ comment = 1 # U+2
+  > 4 │ bare_cr = 1
+      │            
+  > 5 │ next = 2
+      │ 
+    6 │ 
+  
+  i TOML only allows LF and CRLF line endings.
+  
+```

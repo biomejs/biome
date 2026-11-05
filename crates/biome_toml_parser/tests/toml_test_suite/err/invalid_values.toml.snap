@@ -1,0 +1,531 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+unquoted = value
+bool = True
+leading_zero = 012
+underscore = 1__000
+sign_hex = -0xFF
+overflow = 9223372036854775808
+underflow = -9223372036854775809
+hex_overflow = 0x8000000000000000
+float_dot = 1.
+float_exp = 1e
+bad_date = 2023-02-29
+bad_time = 25:00:00
+bad_offset = 1979-05-27T07:32:00+24:00
+nan_case = NaN
+after = "still parsed"
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..9 "unquoted" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@9..11 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@11..16 "value" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@16..22 "bool" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@22..24 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@24..28 "True" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@28..42 "leading_zero" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@42..44 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@44..47 "012" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@47..59 "underscore" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@59..61 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@61..67 "1__000" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@67..77 "sign_hex" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@77..79 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@79..84 "-0xFF" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@84..94 "overflow" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@94..96 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@96..115 "9223372036854775808" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@115..126 "underflow" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@126..128 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@128..148 "-9223372036854775809" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@148..162 "hex_overflow" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@162..164 "=" [] [Whitespace(" ")],
+            value: TomlInteger {
+                value_token: TOML_INTEGER_LITERAL@164..182 "0x8000000000000000" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@182..193 "float_dot" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@193..195 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@195..197 "1." [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@197..208 "float_exp" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@208..210 "=" [] [Whitespace(" ")],
+            value: TomlFloat {
+                value_token: TOML_FLOAT_LITERAL@210..212 "1e" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@212..222 "bad_date" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@222..224 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_LOCAL_DATE_LITERAL@224..234 "2023-02-29" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@234..244 "bad_time" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@244..246 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@246..254 "25:00:00" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@254..266 "bad_offset" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@266..268 "=" [] [Whitespace(" ")],
+            value: TomlDateTime {
+                value_token: TOML_OFFSET_DATE_TIME_LITERAL@268..293 "1979-05-27T07:32:00+24:00" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@293..303 "nan_case" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@303..305 "=" [] [Whitespace(" ")],
+            value: TomlBogusValue {
+                items: [
+                    ERROR_TOKEN@305..308 "NaN" [] [],
+                ],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@308..315 "after" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@315..317 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@317..331 "\"still parsed\"" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@331..332 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..332
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..331
+    0: TOML_KEY_VALUE@0..16
+      0: TOML_KEY@0..9
+        0: TOML_KEY_PART_LIST@0..9
+          0: TOML_BARE_KEY@0..9
+            0: TOML_BARE_KEY_LITERAL@0..9 "unquoted" [] [Whitespace(" ")]
+      1: EQ@9..11 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@11..16
+        0: ERROR_TOKEN@11..16 "value" [] []
+    1: TOML_KEY_VALUE@16..28
+      0: TOML_KEY@16..22
+        0: TOML_KEY_PART_LIST@16..22
+          0: TOML_BARE_KEY@16..22
+            0: TOML_BARE_KEY_LITERAL@16..22 "bool" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@22..24 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@24..28
+        0: ERROR_TOKEN@24..28 "True" [] []
+    2: TOML_KEY_VALUE@28..47
+      0: TOML_KEY@28..42
+        0: TOML_KEY_PART_LIST@28..42
+          0: TOML_BARE_KEY@28..42
+            0: TOML_BARE_KEY_LITERAL@28..42 "leading_zero" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@42..44 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@44..47
+        0: TOML_INTEGER_LITERAL@44..47 "012" [] []
+    3: TOML_KEY_VALUE@47..67
+      0: TOML_KEY@47..59
+        0: TOML_KEY_PART_LIST@47..59
+          0: TOML_BARE_KEY@47..59
+            0: TOML_BARE_KEY_LITERAL@47..59 "underscore" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@59..61 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@61..67
+        0: TOML_INTEGER_LITERAL@61..67 "1__000" [] []
+    4: TOML_KEY_VALUE@67..84
+      0: TOML_KEY@67..77
+        0: TOML_KEY_PART_LIST@67..77
+          0: TOML_BARE_KEY@67..77
+            0: TOML_BARE_KEY_LITERAL@67..77 "sign_hex" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@77..79 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@79..84
+        0: TOML_INTEGER_LITERAL@79..84 "-0xFF" [] []
+    5: TOML_KEY_VALUE@84..115
+      0: TOML_KEY@84..94
+        0: TOML_KEY_PART_LIST@84..94
+          0: TOML_BARE_KEY@84..94
+            0: TOML_BARE_KEY_LITERAL@84..94 "overflow" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@94..96 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@96..115
+        0: TOML_INTEGER_LITERAL@96..115 "9223372036854775808" [] []
+    6: TOML_KEY_VALUE@115..148
+      0: TOML_KEY@115..126
+        0: TOML_KEY_PART_LIST@115..126
+          0: TOML_BARE_KEY@115..126
+            0: TOML_BARE_KEY_LITERAL@115..126 "underflow" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@126..128 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@128..148
+        0: TOML_INTEGER_LITERAL@128..148 "-9223372036854775809" [] []
+    7: TOML_KEY_VALUE@148..182
+      0: TOML_KEY@148..162
+        0: TOML_KEY_PART_LIST@148..162
+          0: TOML_BARE_KEY@148..162
+            0: TOML_BARE_KEY_LITERAL@148..162 "hex_overflow" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@162..164 "=" [] [Whitespace(" ")]
+      2: TOML_INTEGER@164..182
+        0: TOML_INTEGER_LITERAL@164..182 "0x8000000000000000" [] []
+    8: TOML_KEY_VALUE@182..197
+      0: TOML_KEY@182..193
+        0: TOML_KEY_PART_LIST@182..193
+          0: TOML_BARE_KEY@182..193
+            0: TOML_BARE_KEY_LITERAL@182..193 "float_dot" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@193..195 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@195..197
+        0: TOML_FLOAT_LITERAL@195..197 "1." [] []
+    9: TOML_KEY_VALUE@197..212
+      0: TOML_KEY@197..208
+        0: TOML_KEY_PART_LIST@197..208
+          0: TOML_BARE_KEY@197..208
+            0: TOML_BARE_KEY_LITERAL@197..208 "float_exp" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@208..210 "=" [] [Whitespace(" ")]
+      2: TOML_FLOAT@210..212
+        0: TOML_FLOAT_LITERAL@210..212 "1e" [] []
+    10: TOML_KEY_VALUE@212..234
+      0: TOML_KEY@212..222
+        0: TOML_KEY_PART_LIST@212..222
+          0: TOML_BARE_KEY@212..222
+            0: TOML_BARE_KEY_LITERAL@212..222 "bad_date" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@222..224 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@224..234
+        0: TOML_LOCAL_DATE_LITERAL@224..234 "2023-02-29" [] []
+    11: TOML_KEY_VALUE@234..254
+      0: TOML_KEY@234..244
+        0: TOML_KEY_PART_LIST@234..244
+          0: TOML_BARE_KEY@234..244
+            0: TOML_BARE_KEY_LITERAL@234..244 "bad_time" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@244..246 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@246..254
+        0: ERROR_TOKEN@246..254 "25:00:00" [] []
+    12: TOML_KEY_VALUE@254..293
+      0: TOML_KEY@254..266
+        0: TOML_KEY_PART_LIST@254..266
+          0: TOML_BARE_KEY@254..266
+            0: TOML_BARE_KEY_LITERAL@254..266 "bad_offset" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@266..268 "=" [] [Whitespace(" ")]
+      2: TOML_DATE_TIME@268..293
+        0: TOML_OFFSET_DATE_TIME_LITERAL@268..293 "1979-05-27T07:32:00+24:00" [] []
+    13: TOML_KEY_VALUE@293..308
+      0: TOML_KEY@293..303
+        0: TOML_KEY_PART_LIST@293..303
+          0: TOML_BARE_KEY@293..303
+            0: TOML_BARE_KEY_LITERAL@293..303 "nan_case" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@303..305 "=" [] [Whitespace(" ")]
+      2: TOML_BOGUS_VALUE@305..308
+        0: ERROR_TOKEN@305..308 "NaN" [] []
+    14: TOML_KEY_VALUE@308..331
+      0: TOML_KEY@308..315
+        0: TOML_KEY_PART_LIST@308..315
+          0: TOML_BARE_KEY@308..315
+            0: TOML_BARE_KEY_LITERAL@308..315 "after" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@315..317 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@317..331
+        0: TOML_BASIC_STRING_LITERAL@317..331 "\"still parsed\"" [] []
+  2: EOF@331..332 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_values.toml:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid value.
+  
+  > 1 │ unquoted = value
+      │            ^^^^^
+    2 │ bool = True
+    3 │ leading_zero = 012
+  
+  i Strings must be quoted, for example `"value"`.
+  
+invalid_values.toml:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Booleans must be lowercase.
+  
+    1 │ unquoted = value
+  > 2 │ bool = True
+      │        ^^^^
+    3 │ leading_zero = 012
+    4 │ underscore = 1__000
+  
+  i Use `true` or `false`.
+  
+invalid_values.toml:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Leading zeros aren't allowed.
+  
+    1 │ unquoted = value
+    2 │ bool = True
+  > 3 │ leading_zero = 012
+      │                ^^^
+    4 │ underscore = 1__000
+    5 │ sign_hex = -0xFF
+  
+invalid_values.toml:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An underscore must be surrounded by digits.
+  
+    2 │ bool = True
+    3 │ leading_zero = 012
+  > 4 │ underscore = 1__000
+      │              ^^^^^^
+    5 │ sign_hex = -0xFF
+    6 │ overflow = 9223372036854775808
+  
+invalid_values.toml:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Hexadecimal, octal, and binary integers can't have a sign.
+  
+    3 │ leading_zero = 012
+    4 │ underscore = 1__000
+  > 5 │ sign_hex = -0xFF
+      │            ^^^^^
+    6 │ overflow = 9223372036854775808
+    7 │ underflow = -9223372036854775809
+  
+invalid_values.toml:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This integer doesn't fit in a 64-bit signed integer.
+  
+    4 │ underscore = 1__000
+    5 │ sign_hex = -0xFF
+  > 6 │ overflow = 9223372036854775808
+      │            ^^^^^^^^^^^^^^^^^^^
+    7 │ underflow = -9223372036854775809
+    8 │ hex_overflow = 0x8000000000000000
+  
+invalid_values.toml:7:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This integer doesn't fit in a 64-bit signed integer.
+  
+    5 │ sign_hex = -0xFF
+    6 │ overflow = 9223372036854775808
+  > 7 │ underflow = -9223372036854775809
+      │             ^^^^^^^^^^^^^^^^^^^^
+    8 │ hex_overflow = 0x8000000000000000
+    9 │ float_dot = 1.
+  
+invalid_values.toml:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This integer doesn't fit in a 64-bit signed integer.
+  
+     6 │ overflow = 9223372036854775808
+     7 │ underflow = -9223372036854775809
+   > 8 │ hex_overflow = 0x8000000000000000
+       │                ^^^^^^^^^^^^^^^^^^
+     9 │ float_dot = 1.
+    10 │ float_exp = 1e
+  
+invalid_values.toml:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected digits.
+  
+     7 │ underflow = -9223372036854775809
+     8 │ hex_overflow = 0x8000000000000000
+   > 9 │ float_dot = 1.
+       │             ^^
+    10 │ float_exp = 1e
+    11 │ bad_date = 2023-02-29
+  
+  i A decimal point and an exponent must be followed by digits.
+  
+invalid_values.toml:10:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected digits.
+  
+     8 │ hex_overflow = 0x8000000000000000
+     9 │ float_dot = 1.
+  > 10 │ float_exp = 1e
+       │             ^^
+    11 │ bad_date = 2023-02-29
+    12 │ bad_time = 25:00:00
+  
+  i A decimal point and an exponent must be followed by digits.
+  
+invalid_values.toml:11:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The day doesn't exist in this month.
+  
+     9 │ float_dot = 1.
+    10 │ float_exp = 1e
+  > 11 │ bad_date = 2023-02-29
+       │            ^^^^^^^^^^
+    12 │ bad_time = 25:00:00
+    13 │ bad_offset = 1979-05-27T07:32:00+24:00
+  
+invalid_values.toml:12:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The time is out of range.
+  
+    10 │ float_exp = 1e
+    11 │ bad_date = 2023-02-29
+  > 12 │ bad_time = 25:00:00
+       │            ^^^^^^^^
+    13 │ bad_offset = 1979-05-27T07:32:00+24:00
+    14 │ nan_case = NaN
+  
+invalid_values.toml:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid time offset.
+  
+    11 │ bad_date = 2023-02-29
+    12 │ bad_time = 25:00:00
+  > 13 │ bad_offset = 1979-05-27T07:32:00+24:00
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ nan_case = NaN
+    15 │ after = "still parsed"
+  
+invalid_values.toml:14:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Special float values must be lowercase.
+  
+    12 │ bad_time = 25:00:00
+    13 │ bad_offset = 1979-05-27T07:32:00+24:00
+  > 14 │ nan_case = NaN
+       │            ^^^
+    15 │ after = "still parsed"
+    16 │ 
+  
+```

@@ -1,0 +1,622 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+top = "level"
+
+[table-1]
+key1 = "some string"
+key2 = 123
+
+[table-2]
+key1 = "another string"
+key2 = 456
+
+[dog."tater.man"]
+type.name = "pug"
+
+[a.b.c]            # this is best practice
+[ d.e.f ]          # same as [d.e.f]
+[ g .  h  . i ]    # same as [g.h.i]
+[ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l']
+
+# [x] you
+# [x.y] don't
+# [x.y.z] need these
+[x.y.z.w] # for this to work
+
+[x] # defining a super-table afterward is ok
+
+[fruit]
+apple.color = "red"
+apple.taste.sweet = true
+
+[fruit.apple.texture]  # you can add sub-tables
+smooth = true
+
+[empty]
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..4 "top" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@4..6 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@6..13 "\"level\"" [] [],
+            },
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@13..16 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@16..23 "table-1" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@23..24 "]" [] [],
+            entries: TomlKeyValueList [
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@24..30 "key1" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@30..32 "=" [] [Whitespace(" ")],
+                    value: TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@32..45 "\"some string\"" [] [],
+                    },
+                },
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@45..51 "key2" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@51..53 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@53..56 "123" [] [],
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@56..59 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@59..66 "table-2" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@66..67 "]" [] [],
+            entries: TomlKeyValueList [
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@67..73 "key1" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@73..75 "=" [] [Whitespace(" ")],
+                    value: TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@75..91 "\"another string\"" [] [],
+                    },
+                },
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@91..97 "key2" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@97..99 "=" [] [Whitespace(" ")],
+                    value: TomlInteger {
+                        value_token: TOML_INTEGER_LITERAL@99..102 "456" [] [],
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@102..105 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@105..108 "dog" [] [],
+                    },
+                    DOT@108..109 "." [] [],
+                    TomlQuotedKey {
+                        value_token: TOML_BASIC_STRING_LITERAL@109..120 "\"tater.man\"" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@120..121 "]" [] [],
+            entries: TomlKeyValueList [
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@121..126 "type" [Newline("\n")] [],
+                            },
+                            DOT@126..127 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@127..132 "name" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@132..134 "=" [] [Whitespace(" ")],
+                    value: TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@134..139 "\"pug\"" [] [],
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@139..142 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@142..143 "a" [] [],
+                    },
+                    DOT@143..144 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@144..145 "b" [] [],
+                    },
+                    DOT@145..146 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@146..147 "c" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@147..183 "]" [] [Whitespace("            "), Comments("# this is best practice")],
+            entries: TomlKeyValueList [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@183..186 "[" [Newline("\n")] [Whitespace(" ")],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@186..187 "d" [] [],
+                    },
+                    DOT@187..188 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@188..189 "e" [] [],
+                    },
+                    DOT@189..190 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@190..192 "f" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@192..220 "]" [] [Whitespace("          "), Comments("# same as [d.e.f]")],
+            entries: TomlKeyValueList [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@220..223 "[" [Newline("\n")] [Whitespace(" ")],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@223..225 "g" [] [Whitespace(" ")],
+                    },
+                    DOT@225..228 "." [] [Whitespace("  ")],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@228..231 "h" [] [Whitespace("  ")],
+                    },
+                    DOT@231..233 "." [] [Whitespace(" ")],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@233..235 "i" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@235..257 "]" [] [Whitespace("    "), Comments("# same as [g.h.i]")],
+            entries: TomlKeyValueList [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@257..260 "[" [Newline("\n")] [Whitespace(" ")],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@260..262 "j" [] [Whitespace(" ")],
+                    },
+                    DOT@262..264 "." [] [Whitespace(" ")],
+                    TomlQuotedKey {
+                        value_token: TOML_BASIC_STRING_LITERAL@264..269 "\"ʞ\"" [] [Whitespace(" ")],
+                    },
+                    DOT@269..271 "." [] [Whitespace(" ")],
+                    TomlQuotedKey {
+                        value_token: TOML_LITERAL_STRING_LITERAL@271..275 "'l'" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@275..300 "]" [] [Whitespace("  "), Comments("# same as [j.\"ʞ\".'l']")],
+            entries: TomlKeyValueList [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@300..348 "[" [Newline("\n"), Newline("\n"), Comments("# [x] you"), Newline("\n"), Comments("# [x.y] don't"), Newline("\n"), Comments("# [x.y.z] need these"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@348..349 "x" [] [],
+                    },
+                    DOT@349..350 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@350..351 "y" [] [],
+                    },
+                    DOT@351..352 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@352..353 "z" [] [],
+                    },
+                    DOT@353..354 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@354..355 "w" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@355..375 "]" [] [Whitespace(" "), Comments("# for this to work")],
+            entries: TomlKeyValueList [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@375..378 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@378..379 "x" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@379..421 "]" [] [Whitespace(" "), Comments("# defining a super-ta ...")],
+            entries: TomlKeyValueList [],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@421..424 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@424..429 "fruit" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@429..430 "]" [] [],
+            entries: TomlKeyValueList [
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@430..436 "apple" [Newline("\n")] [],
+                            },
+                            DOT@436..437 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@437..443 "color" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@443..445 "=" [] [Whitespace(" ")],
+                    value: TomlString {
+                        value_token: TOML_BASIC_STRING_LITERAL@445..450 "\"red\"" [] [],
+                    },
+                },
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@450..456 "apple" [Newline("\n")] [],
+                            },
+                            DOT@456..457 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@457..462 "taste" [] [],
+                            },
+                            DOT@462..463 "." [] [],
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@463..469 "sweet" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@469..471 "=" [] [Whitespace(" ")],
+                    value: TomlBoolean {
+                        value_token: TRUE_KW@471..475 "true" [] [],
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@475..478 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@478..483 "fruit" [] [],
+                    },
+                    DOT@483..484 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@484..489 "apple" [] [],
+                    },
+                    DOT@489..490 "." [] [],
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@490..497 "texture" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@497..524 "]" [] [Whitespace("  "), Comments("# you can add sub-tables")],
+            entries: TomlKeyValueList [
+                TomlKeyValue {
+                    key: TomlKey {
+                        parts: TomlKeyPartList [
+                            TomlBareKey {
+                                value_token: TOML_BARE_KEY_LITERAL@524..532 "smooth" [Newline("\n")] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                    eq_token: EQ@532..534 "=" [] [Whitespace(" ")],
+                    value: TomlBoolean {
+                        value_token: TRUE_KW@534..538 "true" [] [],
+                    },
+                },
+            ],
+        },
+        TomlTable {
+            l_brack_token: L_BRACK@538..541 "[" [Newline("\n"), Newline("\n")] [],
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@541..546 "empty" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@546..547 "]" [] [],
+            entries: TomlKeyValueList [],
+        },
+    ],
+    eof_token: EOF@547..548 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..548
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..547
+    0: TOML_KEY_VALUE@0..13
+      0: TOML_KEY@0..4
+        0: TOML_KEY_PART_LIST@0..4
+          0: TOML_BARE_KEY@0..4
+            0: TOML_BARE_KEY_LITERAL@0..4 "top" [] [Whitespace(" ")]
+      1: EQ@4..6 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@6..13
+        0: TOML_BASIC_STRING_LITERAL@6..13 "\"level\"" [] []
+    1: TOML_TABLE@13..56
+      0: L_BRACK@13..16 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@16..23
+        0: TOML_KEY_PART_LIST@16..23
+          0: TOML_BARE_KEY@16..23
+            0: TOML_BARE_KEY_LITERAL@16..23 "table-1" [] []
+      2: R_BRACK@23..24 "]" [] []
+      3: TOML_KEY_VALUE_LIST@24..56
+        0: TOML_KEY_VALUE@24..45
+          0: TOML_KEY@24..30
+            0: TOML_KEY_PART_LIST@24..30
+              0: TOML_BARE_KEY@24..30
+                0: TOML_BARE_KEY_LITERAL@24..30 "key1" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@30..32 "=" [] [Whitespace(" ")]
+          2: TOML_STRING@32..45
+            0: TOML_BASIC_STRING_LITERAL@32..45 "\"some string\"" [] []
+        1: TOML_KEY_VALUE@45..56
+          0: TOML_KEY@45..51
+            0: TOML_KEY_PART_LIST@45..51
+              0: TOML_BARE_KEY@45..51
+                0: TOML_BARE_KEY_LITERAL@45..51 "key2" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@51..53 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@53..56
+            0: TOML_INTEGER_LITERAL@53..56 "123" [] []
+    2: TOML_TABLE@56..102
+      0: L_BRACK@56..59 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@59..66
+        0: TOML_KEY_PART_LIST@59..66
+          0: TOML_BARE_KEY@59..66
+            0: TOML_BARE_KEY_LITERAL@59..66 "table-2" [] []
+      2: R_BRACK@66..67 "]" [] []
+      3: TOML_KEY_VALUE_LIST@67..102
+        0: TOML_KEY_VALUE@67..91
+          0: TOML_KEY@67..73
+            0: TOML_KEY_PART_LIST@67..73
+              0: TOML_BARE_KEY@67..73
+                0: TOML_BARE_KEY_LITERAL@67..73 "key1" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@73..75 "=" [] [Whitespace(" ")]
+          2: TOML_STRING@75..91
+            0: TOML_BASIC_STRING_LITERAL@75..91 "\"another string\"" [] []
+        1: TOML_KEY_VALUE@91..102
+          0: TOML_KEY@91..97
+            0: TOML_KEY_PART_LIST@91..97
+              0: TOML_BARE_KEY@91..97
+                0: TOML_BARE_KEY_LITERAL@91..97 "key2" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@97..99 "=" [] [Whitespace(" ")]
+          2: TOML_INTEGER@99..102
+            0: TOML_INTEGER_LITERAL@99..102 "456" [] []
+    3: TOML_TABLE@102..139
+      0: L_BRACK@102..105 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@105..120
+        0: TOML_KEY_PART_LIST@105..120
+          0: TOML_BARE_KEY@105..108
+            0: TOML_BARE_KEY_LITERAL@105..108 "dog" [] []
+          1: DOT@108..109 "." [] []
+          2: TOML_QUOTED_KEY@109..120
+            0: TOML_BASIC_STRING_LITERAL@109..120 "\"tater.man\"" [] []
+      2: R_BRACK@120..121 "]" [] []
+      3: TOML_KEY_VALUE_LIST@121..139
+        0: TOML_KEY_VALUE@121..139
+          0: TOML_KEY@121..132
+            0: TOML_KEY_PART_LIST@121..132
+              0: TOML_BARE_KEY@121..126
+                0: TOML_BARE_KEY_LITERAL@121..126 "type" [Newline("\n")] []
+              1: DOT@126..127 "." [] []
+              2: TOML_BARE_KEY@127..132
+                0: TOML_BARE_KEY_LITERAL@127..132 "name" [] [Whitespace(" ")]
+          1: EQ@132..134 "=" [] [Whitespace(" ")]
+          2: TOML_STRING@134..139
+            0: TOML_BASIC_STRING_LITERAL@134..139 "\"pug\"" [] []
+    4: TOML_TABLE@139..183
+      0: L_BRACK@139..142 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@142..147
+        0: TOML_KEY_PART_LIST@142..147
+          0: TOML_BARE_KEY@142..143
+            0: TOML_BARE_KEY_LITERAL@142..143 "a" [] []
+          1: DOT@143..144 "." [] []
+          2: TOML_BARE_KEY@144..145
+            0: TOML_BARE_KEY_LITERAL@144..145 "b" [] []
+          3: DOT@145..146 "." [] []
+          4: TOML_BARE_KEY@146..147
+            0: TOML_BARE_KEY_LITERAL@146..147 "c" [] []
+      2: R_BRACK@147..183 "]" [] [Whitespace("            "), Comments("# this is best practice")]
+      3: TOML_KEY_VALUE_LIST@183..183
+    5: TOML_TABLE@183..220
+      0: L_BRACK@183..186 "[" [Newline("\n")] [Whitespace(" ")]
+      1: TOML_KEY@186..192
+        0: TOML_KEY_PART_LIST@186..192
+          0: TOML_BARE_KEY@186..187
+            0: TOML_BARE_KEY_LITERAL@186..187 "d" [] []
+          1: DOT@187..188 "." [] []
+          2: TOML_BARE_KEY@188..189
+            0: TOML_BARE_KEY_LITERAL@188..189 "e" [] []
+          3: DOT@189..190 "." [] []
+          4: TOML_BARE_KEY@190..192
+            0: TOML_BARE_KEY_LITERAL@190..192 "f" [] [Whitespace(" ")]
+      2: R_BRACK@192..220 "]" [] [Whitespace("          "), Comments("# same as [d.e.f]")]
+      3: TOML_KEY_VALUE_LIST@220..220
+    6: TOML_TABLE@220..257
+      0: L_BRACK@220..223 "[" [Newline("\n")] [Whitespace(" ")]
+      1: TOML_KEY@223..235
+        0: TOML_KEY_PART_LIST@223..235
+          0: TOML_BARE_KEY@223..225
+            0: TOML_BARE_KEY_LITERAL@223..225 "g" [] [Whitespace(" ")]
+          1: DOT@225..228 "." [] [Whitespace("  ")]
+          2: TOML_BARE_KEY@228..231
+            0: TOML_BARE_KEY_LITERAL@228..231 "h" [] [Whitespace("  ")]
+          3: DOT@231..233 "." [] [Whitespace(" ")]
+          4: TOML_BARE_KEY@233..235
+            0: TOML_BARE_KEY_LITERAL@233..235 "i" [] [Whitespace(" ")]
+      2: R_BRACK@235..257 "]" [] [Whitespace("    "), Comments("# same as [g.h.i]")]
+      3: TOML_KEY_VALUE_LIST@257..257
+    7: TOML_TABLE@257..300
+      0: L_BRACK@257..260 "[" [Newline("\n")] [Whitespace(" ")]
+      1: TOML_KEY@260..275
+        0: TOML_KEY_PART_LIST@260..275
+          0: TOML_BARE_KEY@260..262
+            0: TOML_BARE_KEY_LITERAL@260..262 "j" [] [Whitespace(" ")]
+          1: DOT@262..264 "." [] [Whitespace(" ")]
+          2: TOML_QUOTED_KEY@264..269
+            0: TOML_BASIC_STRING_LITERAL@264..269 "\"ʞ\"" [] [Whitespace(" ")]
+          3: DOT@269..271 "." [] [Whitespace(" ")]
+          4: TOML_QUOTED_KEY@271..275
+            0: TOML_LITERAL_STRING_LITERAL@271..275 "'l'" [] [Whitespace(" ")]
+      2: R_BRACK@275..300 "]" [] [Whitespace("  "), Comments("# same as [j.\"ʞ\".'l']")]
+      3: TOML_KEY_VALUE_LIST@300..300
+    8: TOML_TABLE@300..375
+      0: L_BRACK@300..348 "[" [Newline("\n"), Newline("\n"), Comments("# [x] you"), Newline("\n"), Comments("# [x.y] don't"), Newline("\n"), Comments("# [x.y.z] need these"), Newline("\n")] []
+      1: TOML_KEY@348..355
+        0: TOML_KEY_PART_LIST@348..355
+          0: TOML_BARE_KEY@348..349
+            0: TOML_BARE_KEY_LITERAL@348..349 "x" [] []
+          1: DOT@349..350 "." [] []
+          2: TOML_BARE_KEY@350..351
+            0: TOML_BARE_KEY_LITERAL@350..351 "y" [] []
+          3: DOT@351..352 "." [] []
+          4: TOML_BARE_KEY@352..353
+            0: TOML_BARE_KEY_LITERAL@352..353 "z" [] []
+          5: DOT@353..354 "." [] []
+          6: TOML_BARE_KEY@354..355
+            0: TOML_BARE_KEY_LITERAL@354..355 "w" [] []
+      2: R_BRACK@355..375 "]" [] [Whitespace(" "), Comments("# for this to work")]
+      3: TOML_KEY_VALUE_LIST@375..375
+    9: TOML_TABLE@375..421
+      0: L_BRACK@375..378 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@378..379
+        0: TOML_KEY_PART_LIST@378..379
+          0: TOML_BARE_KEY@378..379
+            0: TOML_BARE_KEY_LITERAL@378..379 "x" [] []
+      2: R_BRACK@379..421 "]" [] [Whitespace(" "), Comments("# defining a super-ta ...")]
+      3: TOML_KEY_VALUE_LIST@421..421
+    10: TOML_TABLE@421..475
+      0: L_BRACK@421..424 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@424..429
+        0: TOML_KEY_PART_LIST@424..429
+          0: TOML_BARE_KEY@424..429
+            0: TOML_BARE_KEY_LITERAL@424..429 "fruit" [] []
+      2: R_BRACK@429..430 "]" [] []
+      3: TOML_KEY_VALUE_LIST@430..475
+        0: TOML_KEY_VALUE@430..450
+          0: TOML_KEY@430..443
+            0: TOML_KEY_PART_LIST@430..443
+              0: TOML_BARE_KEY@430..436
+                0: TOML_BARE_KEY_LITERAL@430..436 "apple" [Newline("\n")] []
+              1: DOT@436..437 "." [] []
+              2: TOML_BARE_KEY@437..443
+                0: TOML_BARE_KEY_LITERAL@437..443 "color" [] [Whitespace(" ")]
+          1: EQ@443..445 "=" [] [Whitespace(" ")]
+          2: TOML_STRING@445..450
+            0: TOML_BASIC_STRING_LITERAL@445..450 "\"red\"" [] []
+        1: TOML_KEY_VALUE@450..475
+          0: TOML_KEY@450..469
+            0: TOML_KEY_PART_LIST@450..469
+              0: TOML_BARE_KEY@450..456
+                0: TOML_BARE_KEY_LITERAL@450..456 "apple" [Newline("\n")] []
+              1: DOT@456..457 "." [] []
+              2: TOML_BARE_KEY@457..462
+                0: TOML_BARE_KEY_LITERAL@457..462 "taste" [] []
+              3: DOT@462..463 "." [] []
+              4: TOML_BARE_KEY@463..469
+                0: TOML_BARE_KEY_LITERAL@463..469 "sweet" [] [Whitespace(" ")]
+          1: EQ@469..471 "=" [] [Whitespace(" ")]
+          2: TOML_BOOLEAN@471..475
+            0: TRUE_KW@471..475 "true" [] []
+    11: TOML_TABLE@475..538
+      0: L_BRACK@475..478 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@478..497
+        0: TOML_KEY_PART_LIST@478..497
+          0: TOML_BARE_KEY@478..483
+            0: TOML_BARE_KEY_LITERAL@478..483 "fruit" [] []
+          1: DOT@483..484 "." [] []
+          2: TOML_BARE_KEY@484..489
+            0: TOML_BARE_KEY_LITERAL@484..489 "apple" [] []
+          3: DOT@489..490 "." [] []
+          4: TOML_BARE_KEY@490..497
+            0: TOML_BARE_KEY_LITERAL@490..497 "texture" [] []
+      2: R_BRACK@497..524 "]" [] [Whitespace("  "), Comments("# you can add sub-tables")]
+      3: TOML_KEY_VALUE_LIST@524..538
+        0: TOML_KEY_VALUE@524..538
+          0: TOML_KEY@524..532
+            0: TOML_KEY_PART_LIST@524..532
+              0: TOML_BARE_KEY@524..532
+                0: TOML_BARE_KEY_LITERAL@524..532 "smooth" [Newline("\n")] [Whitespace(" ")]
+          1: EQ@532..534 "=" [] [Whitespace(" ")]
+          2: TOML_BOOLEAN@534..538
+            0: TRUE_KW@534..538 "true" [] []
+    12: TOML_TABLE@538..547
+      0: L_BRACK@538..541 "[" [Newline("\n"), Newline("\n")] []
+      1: TOML_KEY@541..546
+        0: TOML_KEY_PART_LIST@541..546
+          0: TOML_BARE_KEY@541..546
+            0: TOML_BARE_KEY_LITERAL@541..546 "empty" [] []
+      2: R_BRACK@546..547 "]" [] []
+      3: TOML_KEY_VALUE_LIST@547..547
+  2: EOF@547..548 "" [Newline("\n")] []
+
+```

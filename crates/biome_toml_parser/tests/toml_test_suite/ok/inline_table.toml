@@ -1,0 +1,12 @@
+name = { first = "Tom", last = "Preston-Werner" }
+point = {x=1, y=2}
+animal = { type.name = "pug" }
+empty = {}
+nested = { a = { b = { c = 1 } } }
+multiline = {
+    key1 = "value",
+    # comment
+    key2 = [1, 2],
+}
+trailing_comma = { a = 1, }
+in_array = [ { a = 1 }, { b = [ { c = 2 } ] } ]

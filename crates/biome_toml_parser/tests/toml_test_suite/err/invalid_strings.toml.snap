@@ -1,0 +1,332 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+escape = "\q"
+unicode = "\uD800"
+short_unicode = "\u12"
+tab_is_allowed = "a	b"
+unterminated = "abc
+next = 'unterminated literal
+ml_backslash = """a \ b"""
+too_many_quotes = """a""""""
+after = "still parsed"
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..7 "escape" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@9..13 "\"\\q\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@13..22 "unicode" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@22..24 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@24..32 "\"\\uD800\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@32..47 "short_unicode" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@47..49 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@49..55 "\"\\u12\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@55..71 "tab_is_allowed" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@71..73 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@73..78 "\"a\tb\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@78..92 "unterminated" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@92..94 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@94..98 "\"abc" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@98..104 "next" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@104..106 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_LITERAL_STRING_LITERAL@106..127 "'unterminated literal" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@127..141 "ml_backslash" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@141..143 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_BASIC_STRING_LITERAL@143..154 "\"\"\"a \\ b\"\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@154..171 "too_many_quotes" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@171..173 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_BASIC_STRING_LITERAL@173..183 "\"\"\"a\"\"\"\"\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@183..190 "after" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@190..192 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@192..206 "\"still parsed\"" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@206..207 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..207
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..206
+    0: TOML_KEY_VALUE@0..13
+      0: TOML_KEY@0..7
+        0: TOML_KEY_PART_LIST@0..7
+          0: TOML_BARE_KEY@0..7
+            0: TOML_BARE_KEY_LITERAL@0..7 "escape" [] [Whitespace(" ")]
+      1: EQ@7..9 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@9..13
+        0: TOML_BASIC_STRING_LITERAL@9..13 "\"\\q\"" [] []
+    1: TOML_KEY_VALUE@13..32
+      0: TOML_KEY@13..22
+        0: TOML_KEY_PART_LIST@13..22
+          0: TOML_BARE_KEY@13..22
+            0: TOML_BARE_KEY_LITERAL@13..22 "unicode" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@22..24 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@24..32
+        0: TOML_BASIC_STRING_LITERAL@24..32 "\"\\uD800\"" [] []
+    2: TOML_KEY_VALUE@32..55
+      0: TOML_KEY@32..47
+        0: TOML_KEY_PART_LIST@32..47
+          0: TOML_BARE_KEY@32..47
+            0: TOML_BARE_KEY_LITERAL@32..47 "short_unicode" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@47..49 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@49..55
+        0: TOML_BASIC_STRING_LITERAL@49..55 "\"\\u12\"" [] []
+    3: TOML_KEY_VALUE@55..78
+      0: TOML_KEY@55..71
+        0: TOML_KEY_PART_LIST@55..71
+          0: TOML_BARE_KEY@55..71
+            0: TOML_BARE_KEY_LITERAL@55..71 "tab_is_allowed" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@71..73 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@73..78
+        0: TOML_BASIC_STRING_LITERAL@73..78 "\"a\tb\"" [] []
+    4: TOML_KEY_VALUE@78..98
+      0: TOML_KEY@78..92
+        0: TOML_KEY_PART_LIST@78..92
+          0: TOML_BARE_KEY@78..92
+            0: TOML_BARE_KEY_LITERAL@78..92 "unterminated" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@92..94 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@94..98
+        0: TOML_BASIC_STRING_LITERAL@94..98 "\"abc" [] []
+    5: TOML_KEY_VALUE@98..127
+      0: TOML_KEY@98..104
+        0: TOML_KEY_PART_LIST@98..104
+          0: TOML_BARE_KEY@98..104
+            0: TOML_BARE_KEY_LITERAL@98..104 "next" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@104..106 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@106..127
+        0: TOML_LITERAL_STRING_LITERAL@106..127 "'unterminated literal" [] []
+    6: TOML_KEY_VALUE@127..154
+      0: TOML_KEY@127..141
+        0: TOML_KEY_PART_LIST@127..141
+          0: TOML_BARE_KEY@127..141
+            0: TOML_BARE_KEY_LITERAL@127..141 "ml_backslash" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@141..143 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@143..154
+        0: TOML_ML_BASIC_STRING_LITERAL@143..154 "\"\"\"a \\ b\"\"\"" [] []
+    7: TOML_KEY_VALUE@154..183
+      0: TOML_KEY@154..171
+        0: TOML_KEY_PART_LIST@154..171
+          0: TOML_BARE_KEY@154..171
+            0: TOML_BARE_KEY_LITERAL@154..171 "too_many_quotes" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@171..173 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@173..183
+        0: TOML_ML_BASIC_STRING_LITERAL@173..183 "\"\"\"a\"\"\"\"\"\"" [] []
+    8: TOML_KEY_VALUE@183..206
+      0: TOML_KEY@183..190
+        0: TOML_KEY_PART_LIST@183..190
+          0: TOML_BARE_KEY@183..190
+            0: TOML_BARE_KEY_LITERAL@183..190 "after" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@190..192 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@192..206
+        0: TOML_BASIC_STRING_LITERAL@192..206 "\"still parsed\"" [] []
+  2: EOF@206..207 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid_strings.toml:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid escape sequence.
+  
+  > 1 │ escape = "\q"
+      │           ^^
+    2 │ unicode = "\uD800"
+    3 │ short_unicode = "\u12"
+  
+  i Valid escape sequences are `\b`, `\t`, `\n`, `\f`, `\r`, `\e`, `\"`, `\\`, `\xHH`, `\uHHHH`, and `\UHHHHHHHH`.
+  
+invalid_strings.toml:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × U+D800 isn't a Unicode scalar value.
+  
+    1 │ escape = "\q"
+  > 2 │ unicode = "\uD800"
+      │            ^^^^^^
+    3 │ short_unicode = "\u12"
+    4 │ tab_is_allowed = "a	b"
+  
+  i Surrogate code points and values above U+10FFFF can't be escaped.
+  
+invalid_strings.toml:3:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected 4 hexadecimal digits in this escape sequence.
+  
+    1 │ escape = "\q"
+    2 │ unicode = "\uD800"
+  > 3 │ short_unicode = "\u12"
+      │                  ^^^^
+    4 │ tab_is_allowed = "a	b"
+    5 │ unterminated = "abc
+  
+invalid_strings.toml:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote.
+  
+    3 │ short_unicode = "\u12"
+    4 │ tab_is_allowed = "a	b"
+  > 5 │ unterminated = "abc
+      │                ^^^^
+    6 │ next = 'unterminated literal
+    7 │ ml_backslash = """a \ b"""
+  
+  i The string should be closed with `"` here.
+  
+    3 │ short_unicode = "\u12"
+    4 │ tab_is_allowed = "a	b"
+  > 5 │ unterminated = "abc
+      │                    
+    6 │ next = 'unterminated literal
+    7 │ ml_backslash = """a \ b"""
+  
+invalid_strings.toml:6:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote.
+  
+    4 │ tab_is_allowed = "a	b"
+    5 │ unterminated = "abc
+  > 6 │ next = 'unterminated literal
+      │        ^^^^^^^^^^^^^^^^^^^^^
+    7 │ ml_backslash = """a \ b"""
+    8 │ too_many_quotes = """a""""""
+  
+  i The string should be closed with `'` here.
+  
+    4 │ tab_is_allowed = "a	b"
+    5 │ unterminated = "abc
+  > 6 │ next = 'unterminated literal
+      │                             
+    7 │ ml_backslash = """a \ b"""
+    8 │ too_many_quotes = """a""""""
+  
+invalid_strings.toml:7:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A line-ending backslash must only be followed by whitespace and a newline.
+  
+    5 │ unterminated = "abc
+    6 │ next = 'unterminated literal
+  > 7 │ ml_backslash = """a \ b"""
+      │                     ^^
+    8 │ too_many_quotes = """a""""""
+    9 │ after = "still parsed"
+  
+  i Use `\\` to write a literal backslash.
+  
+invalid_strings.toml:8:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Too many quotes at the end of a multi-line string.
+  
+     6 │ next = 'unterminated literal
+     7 │ ml_backslash = """a \ b"""
+   > 8 │ too_many_quotes = """a""""""
+       │                       ^^^^^^
+     9 │ after = "still parsed"
+    10 │ 
+  
+  i A multi-line string can end with at most two quotes before its closing delimiter.
+  
+```

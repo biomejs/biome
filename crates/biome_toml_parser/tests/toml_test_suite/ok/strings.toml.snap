@@ -1,0 +1,282 @@
+---
+source: crates/biome_toml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```toml
+basic = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
+escapes = "\b\t\n\f\r\e\"\\\x41\u00E9\U0001F600"
+literal = 'C:\Users\nodejs\templates'
+empty_basic = ""
+empty_literal = ''
+multiline_basic = """
+Roses are red
+Violets are blue"""
+line_ending_backslash = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """
+quotes_at_end = """Here are two quotation marks: "". Simple enough.""""
+multiline_literal = '''
+The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+'''
+literal_quotes = '''Here are fifteen quotation marks: """""""""""""""'''
+apostrophes = ''''That,' she said, 'is still pointless.''''
+
+```
+
+## AST
+
+```
+TomlRoot {
+    bom_token: missing (optional),
+    items: TomlRootItemList [
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@0..6 "basic" [] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@8..76 "\"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@76..85 "escapes" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@85..87 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@87..125 "\"\\b\\t\\n\\f\\r\\e\\\"\\\\\\x41\\u00E9\\U0001F600\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@125..134 "literal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@134..136 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_LITERAL_STRING_LITERAL@136..163 "'C:\\Users\\nodejs\\templates'" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@163..176 "empty_basic" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@176..178 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_BASIC_STRING_LITERAL@178..180 "\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@180..195 "empty_literal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@195..197 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_LITERAL_STRING_LITERAL@197..199 "''" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@199..216 "multiline_basic" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@216..218 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_BASIC_STRING_LITERAL@218..255 "\"\"\"\nRoses are red\nViolets are blue\"\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@255..278 "line_ending_backslash" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@278..280 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_BASIC_STRING_LITERAL@280..366 "\"\"\"\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       \"\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@366..381 "quotes_at_end" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@381..383 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_BASIC_STRING_LITERAL@383..438 "\"\"\"Here are two quotation marks: \"\". Simple enough.\"\"\"\"" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@438..457 "multiline_literal" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@457..459 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_LITERAL_STRING_LITERAL@459..552 "'''\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n'''" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@552..568 "literal_quotes" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@568..570 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_LITERAL_STRING_LITERAL@570..625 "'''Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'''" [] [],
+            },
+        },
+        TomlKeyValue {
+            key: TomlKey {
+                parts: TomlKeyPartList [
+                    TomlBareKey {
+                        value_token: TOML_BARE_KEY_LITERAL@625..638 "apostrophes" [Newline("\n")] [Whitespace(" ")],
+                    },
+                ],
+            },
+            eq_token: EQ@638..640 "=" [] [Whitespace(" ")],
+            value: TomlString {
+                value_token: TOML_ML_LITERAL_STRING_LITERAL@640..685 "''''That,' she said, 'is still pointless.''''" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@685..686 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: TOML_ROOT@0..686
+  0: (empty)
+  1: TOML_ROOT_ITEM_LIST@0..685
+    0: TOML_KEY_VALUE@0..76
+      0: TOML_KEY@0..6
+        0: TOML_KEY_PART_LIST@0..6
+          0: TOML_BARE_KEY@0..6
+            0: TOML_BARE_KEY_LITERAL@0..6 "basic" [] [Whitespace(" ")]
+      1: EQ@6..8 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@8..76
+        0: TOML_BASIC_STRING_LITERAL@8..76 "\"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\"" [] []
+    1: TOML_KEY_VALUE@76..125
+      0: TOML_KEY@76..85
+        0: TOML_KEY_PART_LIST@76..85
+          0: TOML_BARE_KEY@76..85
+            0: TOML_BARE_KEY_LITERAL@76..85 "escapes" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@85..87 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@87..125
+        0: TOML_BASIC_STRING_LITERAL@87..125 "\"\\b\\t\\n\\f\\r\\e\\\"\\\\\\x41\\u00E9\\U0001F600\"" [] []
+    2: TOML_KEY_VALUE@125..163
+      0: TOML_KEY@125..134
+        0: TOML_KEY_PART_LIST@125..134
+          0: TOML_BARE_KEY@125..134
+            0: TOML_BARE_KEY_LITERAL@125..134 "literal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@134..136 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@136..163
+        0: TOML_LITERAL_STRING_LITERAL@136..163 "'C:\\Users\\nodejs\\templates'" [] []
+    3: TOML_KEY_VALUE@163..180
+      0: TOML_KEY@163..176
+        0: TOML_KEY_PART_LIST@163..176
+          0: TOML_BARE_KEY@163..176
+            0: TOML_BARE_KEY_LITERAL@163..176 "empty_basic" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@176..178 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@178..180
+        0: TOML_BASIC_STRING_LITERAL@178..180 "\"\"" [] []
+    4: TOML_KEY_VALUE@180..199
+      0: TOML_KEY@180..195
+        0: TOML_KEY_PART_LIST@180..195
+          0: TOML_BARE_KEY@180..195
+            0: TOML_BARE_KEY_LITERAL@180..195 "empty_literal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@195..197 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@197..199
+        0: TOML_LITERAL_STRING_LITERAL@197..199 "''" [] []
+    5: TOML_KEY_VALUE@199..255
+      0: TOML_KEY@199..216
+        0: TOML_KEY_PART_LIST@199..216
+          0: TOML_BARE_KEY@199..216
+            0: TOML_BARE_KEY_LITERAL@199..216 "multiline_basic" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@216..218 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@218..255
+        0: TOML_ML_BASIC_STRING_LITERAL@218..255 "\"\"\"\nRoses are red\nViolets are blue\"\"\"" [] []
+    6: TOML_KEY_VALUE@255..366
+      0: TOML_KEY@255..278
+        0: TOML_KEY_PART_LIST@255..278
+          0: TOML_BARE_KEY@255..278
+            0: TOML_BARE_KEY_LITERAL@255..278 "line_ending_backslash" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@278..280 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@280..366
+        0: TOML_ML_BASIC_STRING_LITERAL@280..366 "\"\"\"\\\n       The quick brown \\\n       fox jumps over \\\n       the lazy dog.\\\n       \"\"\"" [] []
+    7: TOML_KEY_VALUE@366..438
+      0: TOML_KEY@366..381
+        0: TOML_KEY_PART_LIST@366..381
+          0: TOML_BARE_KEY@366..381
+            0: TOML_BARE_KEY_LITERAL@366..381 "quotes_at_end" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@381..383 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@383..438
+        0: TOML_ML_BASIC_STRING_LITERAL@383..438 "\"\"\"Here are two quotation marks: \"\". Simple enough.\"\"\"\"" [] []
+    8: TOML_KEY_VALUE@438..552
+      0: TOML_KEY@438..457
+        0: TOML_KEY_PART_LIST@438..457
+          0: TOML_BARE_KEY@438..457
+            0: TOML_BARE_KEY_LITERAL@438..457 "multiline_literal" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@457..459 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@459..552
+        0: TOML_ML_LITERAL_STRING_LITERAL@459..552 "'''\nThe first newline is\ntrimmed in raw strings.\n   All other whitespace\n   is preserved.\n'''" [] []
+    9: TOML_KEY_VALUE@552..625
+      0: TOML_KEY@552..568
+        0: TOML_KEY_PART_LIST@552..568
+          0: TOML_BARE_KEY@552..568
+            0: TOML_BARE_KEY_LITERAL@552..568 "literal_quotes" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@568..570 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@570..625
+        0: TOML_ML_LITERAL_STRING_LITERAL@570..625 "'''Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'''" [] []
+    10: TOML_KEY_VALUE@625..685
+      0: TOML_KEY@625..638
+        0: TOML_KEY_PART_LIST@625..638
+          0: TOML_BARE_KEY@625..638
+            0: TOML_BARE_KEY_LITERAL@625..638 "apostrophes" [Newline("\n")] [Whitespace(" ")]
+      1: EQ@638..640 "=" [] [Whitespace(" ")]
+      2: TOML_STRING@640..685
+        0: TOML_ML_LITERAL_STRING_LITERAL@640..685 "''''That,' she said, 'is still pointless.''''" [] []
+  2: EOF@685..686 "" [Newline("\n")] []
+
+```

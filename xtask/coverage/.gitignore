@@ -2,4 +2,5 @@ babel/
 sass-spec/
 test262/
 Typescript/
+toml-test/
 yaml-test-suite/

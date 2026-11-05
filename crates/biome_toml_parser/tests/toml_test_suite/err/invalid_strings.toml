@@ -1,0 +1,9 @@
+escape = "\q"
+unicode = "\uD800"
+short_unicode = "\u12"
+tab_is_allowed = "a	b"
+unterminated = "abc
+next = 'unterminated literal
+ml_backslash = """a \ b"""
+too_many_quotes = """a""""""
+after = "still parsed"

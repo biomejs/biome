@@ -1,0 +1,4 @@
+control = "ab"
+del = ""
+comment = 1 # 
+bare_cr = 1next = 2

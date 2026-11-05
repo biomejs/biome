@@ -714,6 +714,8 @@ impl Field {
                     ("{:", LanguageKind::Html) => "sv_curly_colon",
                     ("[(", LanguageKind::Html) => "l_bracket_paren",
                     (")]", LanguageKind::Html) => "r_bracket_paren",
+                    ("[[", LanguageKind::Toml) => "l_double_brack",
+                    ("]]", LanguageKind::Toml) => "r_double_brack",
                     ("'", _) => "single_quote",
                     ("\"", _) => "double_quote",
                     _ => name,

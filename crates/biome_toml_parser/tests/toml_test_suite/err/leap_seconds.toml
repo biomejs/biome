@@ -1,0 +1,6 @@
+not_end_of_day = 2000-01-01T12:30:60Z
+not_last_minute = 2016-12-31T23:58:60Z
+not_end_of_month = 2016-12-30T23:59:60Z
+offset_not_end_of_day = 2016-12-31T23:59:60+01:00
+not_inserted = 1990-11-30T23:59:60Z
+not_inserted_in_2017 = 2017-12-31T23:59:60Z
