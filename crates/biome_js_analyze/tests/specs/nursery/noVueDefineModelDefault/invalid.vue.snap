@@ -1,0 +1,122 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const model = defineModel({ type: String, default: '' })
+const visible = defineModel('visible', { type: Boolean, default() { return false } })
+const quoted = defineModel('quoted', { 'default': 1 })
+const spread = defineModel('spread', { ...base, default: 1 })
+defineModel('statement', { default: 'x' })
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:52 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model modelValue has a default value.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const model = defineModel({ type: String, default: '' })
+      │                                                    ^^
+    4 │ const visible = defineModel('visible', { type: Boolean, default() { return false } })
+    5 │ const quoted = defineModel('quoted', { 'default': 1 })
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:57 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model visible has a default value.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const model = defineModel({ type: String, default: '' })
+  > 4 │ const visible = defineModel('visible', { type: Boolean, default() { return false } })
+      │                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const quoted = defineModel('quoted', { 'default': 1 })
+    6 │ const spread = defineModel('spread', { ...base, default: 1 })
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:51 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model quoted has a default value.
+  
+    3 │ const model = defineModel({ type: String, default: '' })
+    4 │ const visible = defineModel('visible', { type: Boolean, default() { return false } })
+  > 5 │ const quoted = defineModel('quoted', { 'default': 1 })
+      │                                                   ^
+    6 │ const spread = defineModel('spread', { ...base, default: 1 })
+    7 │ defineModel('statement', { default: 'x' })
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:58 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model spread has a default value.
+  
+    4 │ const visible = defineModel('visible', { type: Boolean, default() { return false } })
+    5 │ const quoted = defineModel('quoted', { 'default': 1 })
+  > 6 │ const spread = defineModel('spread', { ...base, default: 1 })
+      │                                                          ^
+    7 │ defineModel('statement', { default: 'x' })
+    8 │ </script>
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:37 lint/nursery/noVueDefineModelDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The model statement has a default value.
+  
+    5 │ const quoted = defineModel('quoted', { 'default': 1 })
+    6 │ const spread = defineModel('spread', { ...base, default: 1 })
+  > 7 │ defineModel('statement', { default: 'x' })
+      │                                     ^^^
+    8 │ </script>
+    9 │ 
+  
+  i When the parent component passes undefined with v-model, this component uses the default value while the parent keeps undefined. The two components then show different values.
+  
+  i Remove the default value, and give the variable an initial value in the parent component instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
