@@ -3,16 +3,13 @@ use hashbrown::hash_map::{RawEntryMut, RawOccupiedEntryMut, RawVacantEntryMut};
 use rustc_hash::FxHasher;
 use std::fmt::{self, Debug, Formatter};
 use std::hash::{BuildHasherDefault, Hash, Hasher};
-use std::marker::PhantomData;
-use std::mem::ManuallyDrop;
-use std::ops::Not;
 use std::ptr::NonNull;
 
 use crate::green::Slot;
 use crate::syntax::{TriviaPiece, TriviaPieceKind};
 use crate::{
     GreenNode, GreenNodeData, GreenToken, GreenTokenData, NodeOrToken, RawSyntaxKind,
-    green::{GreenElementFlags, GreenElementRef},
+    green::{ArenaRef, GreenArena, GreenElementFlags, GreenElementRef},
 };
 
 use super::element::GreenElement;
@@ -20,106 +17,21 @@ use super::trivia::{GreenTrivia, GreenTriviaData};
 
 type HashMap<K, V> = hashbrown::HashMap<K, V, BuildHasherDefault<FxHasher>>;
 
-/// Internal representation for a green pointer and a generation index in the
-/// cache, packed into a single `usize`. This relies on the fact that "green
-/// elements" (tokens, nodes and trivia) have memory alignment constraints that
-/// exceed a single byte (and thus the lower bits of the pointer will always be
-/// zero), while the generation index only needs a single bit of storage.
-struct GenerationalPointer<T: IntoRawPointer> {
-    data: usize,
-    _ty: PhantomData<T>,
-}
-
-impl<T: IntoRawPointer> GenerationalPointer<T> {
-    fn new(value: T, generation: Generation) -> Self {
-        let ptr = value.into_raw();
-        let mut data = ptr as usize;
-        debug_assert!(data & 1 == 0);
-        data |= generation as usize;
-        Self {
-            data,
-            _ty: PhantomData,
-        }
-    }
-
-    fn value(&self) -> &T::Pointee {
-        // SAFETY: This clears the least significant bit from `data`. This bit
-        // should have been set to zero in the original pointer due to the
-        // alignment requirements of the underlying data (this is checked by an
-        // assertion on debug builds), so this essentially extracts the pointer
-        // value from the bit field. Said point is safe to dereference at this
-        // point since we're holding a valid reference to `self` which
-        // guarantees `Drop` has not been called and the memory associated with
-        // the pointer has not been released yet.
-        let data = self.data & !1;
-        let ptr = data as *const T::Pointee;
-        unsafe { &*ptr }
-    }
-
-    fn generation(&self) -> Generation {
-        match self.data & 1 {
-            0 => Generation::A,
-            1 => Generation::B,
-            // SAFETY: The `& 1` operation above ensures only the least
-            // significant bit can be set
-            _ => unreachable!(),
-        }
-    }
-
-    fn set_generation(&mut self, generation: Generation) {
-        let data = self.data & !1;
-        self.data = data | generation as usize;
-    }
-}
-
-impl<T: IntoRawPointer> Debug for GenerationalPointer<T>
-where
-    T::Pointee: Debug,
-{
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
-        fmt.debug_struct("GenerationalPointer")
-            .field("value", self.value())
-            .field("generation", &self.generation())
-            .finish()
-    }
-}
-
-impl<T: IntoRawPointer> Drop for GenerationalPointer<T> {
-    fn drop(&mut self) {
-        let ptr = self.value() as *const _ as *mut _;
-        let value = unsafe { T::from_raw(ptr) };
-        drop(value);
-    }
-}
-
-/// Trait implemented for types that can be turned into a raw pointer, and
-/// reconstructed back from it. Used by [GenerationalPointer] internally.
-trait IntoRawPointer {
-    type Pointee;
-    fn into_raw(self) -> *mut Self::Pointee;
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self;
-}
-
-/// A token stored in the `NodeCache`.
+/// A token stored in the `NodeCache`, in the arena of the cache's build.
 /// Does intentionally not implement `Hash` to have compile-time guarantees that the `NodeCache`
 /// uses the correct hash.
 #[derive(Debug)]
-struct CachedToken(GenerationalPointer<GreenToken>);
+struct CachedToken(NonNull<GreenTokenData>);
 
-impl IntoRawPointer for GreenToken {
-    type Pointee = GreenTokenData;
-
-    fn into_raw(self) -> *mut Self::Pointee {
-        Self::into_raw(self).as_ptr()
-    }
-
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        unsafe { Self::from_raw(NonNull::new(ptr).unwrap()) }
+impl CachedToken {
+    fn value(&self) -> &GreenTokenData {
+        // SAFETY: the cache only holds elements of the arena of its build, which it keeps alive.
+        unsafe { self.0.as_ref() }
     }
 }
 
-/// A node stored in the `NodeCache`. It stores a pre-computed hash
-/// because re-computing the hash requires traversing the whole sub-tree.
+/// A node stored in the `NodeCache`, in the arena of the cache's build. It stores a pre-computed
+/// hash because re-computing the hash requires traversing the whole sub-tree.
 /// The hash also differs from the `GreenNode` hash implementation as it
 /// only hashes occupied slots and excludes empty slots.
 ///
@@ -127,38 +39,28 @@ impl IntoRawPointer for GreenToken {
 /// uses the correct hash.
 #[derive(Debug)]
 struct CachedNode {
-    node: GenerationalPointer<GreenNode>,
+    node: NonNull<GreenNodeData>,
     // Store the hash as it's expensive to re-compute
     // involves re-computing the hash of the whole sub-tree
     hash: u64,
 }
 
-impl IntoRawPointer for GreenNode {
-    type Pointee = GreenNodeData;
-
-    fn into_raw(self) -> *mut Self::Pointee {
-        Self::into_raw(self).as_ptr()
-    }
-
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        unsafe { Self::from_raw(NonNull::new(ptr).unwrap()) }
+impl CachedNode {
+    fn value(&self) -> &GreenNodeData {
+        // SAFETY: the cache only holds elements of the arena of its build, which it keeps alive.
+        unsafe { self.node.as_ref() }
     }
 }
 
 /// A child of a node under construction, as stored by the [crate::TreeBuilder].
 ///
-/// A child with a hash other than [NodeCache::UNCACHED_NODE_HASH] is stored in the
-/// [NodeCache] and doesn't own a reference count: the cache keeps the element alive.
-/// This avoids an atomic increment when the element is retrieved from the cache and
-/// a decrement when it's discarded because its parent is retrieved from the cache
-/// too. The reference count is only incremented by [CacheChild::into_element], when
-/// the child moves into a newly built node.
+/// The element is in the arena of the [NodeCache], and the child doesn't count a reference to
+/// it: the arena keeps it alive, so dropping a child does nothing. A child with a hash other than
+/// [NodeCache::UNCACHED_NODE_HASH] is also stored in the cache; one with that hash isn't, and
+/// only the node under construction will refer to it. [CacheChild::into_element] makes an
+/// uncounted handle of the element when the child moves into a newly built node.
 ///
-/// A child with the [NodeCache::UNCACHED_NODE_HASH] hash owns its element.
-///
-/// A borrowed child must not outlive the [NodeCache] it was retrieved from, and the
-/// cache must not evict entries ([NodeCache::retain_cache]) while borrowed children
-/// exist.
+/// A child must not outlive the arena of the [NodeCache] it was retrieved from.
 ///
 /// The element is stored as a tagged pointer to keep the type at two words, which
 /// lets functions return it in registers.
@@ -173,7 +75,8 @@ pub(crate) struct CacheChild {
 impl CacheChild {
     const TOKEN_TAG: usize = 1;
 
-    /// Creates a child that owns `element`. Its hash is [NodeCache::UNCACHED_NODE_HASH].
+    /// Creates a child of `element`, an uncounted handle to a new element in the arena of the
+    /// cache. Its hash is [NodeCache::UNCACHED_NODE_HASH].
     #[inline]
     pub(crate) fn owned(element: GreenElement) -> Self {
         let element = match element {
@@ -197,9 +100,10 @@ impl CacheChild {
     #[inline]
     unsafe fn cached(hash: u64, element: GreenElementRef<'_>) -> Self {
         if hash == NodeCache::UNCACHED_NODE_HASH {
-            // An element whose hash collides with the uncached hash: own it so that the
-            // hash keeps telling borrowed and owned children apart.
-            return Self::owned(element.to_owned());
+            // An element whose hash collides with the uncached hash: treat it as uncached so
+            // that the node it moves into isn't looked up in the cache.
+            // SAFETY: the handle doesn't count a reference, as the child it becomes.
+            return Self::owned(unsafe { uncounted(element) });
         }
 
         let element = match element {
@@ -210,11 +114,6 @@ impl CacheChild {
         };
 
         Self { hash, element }
-    }
-
-    #[inline]
-    fn is_owned(&self) -> bool {
-        self.hash == NodeCache::UNCACHED_NODE_HASH
     }
 
     #[inline]
@@ -234,32 +133,29 @@ impl CacheChild {
         }
     }
 
-    /// Returns an owned handle to the element.
+    /// Returns an uncounted handle to the element, see [crate::green::arena].
     #[inline]
     pub(crate) fn into_element(self) -> GreenElement {
-        let this = ManuallyDrop::new(self);
-        if this.is_owned() {
-            // SAFETY: The child owns the element and `this` is never dropped.
-            unsafe { this.take_owned() }
-        } else {
-            this.as_element_ref().to_owned()
-        }
+        // SAFETY: the element is in the arena of the running build, and the handle must move
+        // into a node of it or be discarded, as every handle of a child.
+        unsafe { uncounted(self.as_element_ref()) }
     }
+}
 
-    /// # Safety
-    /// The child must own its element, and neither the child nor a copy of its pointer may be
-    /// used afterwards.
-    #[inline]
-    unsafe fn take_owned(&self) -> GreenElement {
-        // SAFETY: The handle created here takes over the reference count owned by the child.
-        unsafe {
-            match self.as_element_ref() {
-                NodeOrToken::Node(node) => {
-                    NodeOrToken::Node(GreenNode::from_raw(NonNull::from(node)))
-                }
-                NodeOrToken::Token(token) => {
-                    NodeOrToken::Token(GreenToken::from_raw(NonNull::from(token)))
-                }
+/// Makes a handle to `element` that doesn't count a reference.
+///
+/// # Safety
+/// The element must be in the arena of the running build, and the handle must not be dropped:
+/// it must move into an element of the arena, be discarded, or be counted, see
+/// [crate::green::arena].
+#[inline]
+unsafe fn uncounted(element: GreenElementRef<'_>) -> GreenElement {
+    // SAFETY: the caller upholds the requirements of the handle.
+    unsafe {
+        match element {
+            NodeOrToken::Node(node) => NodeOrToken::Node(GreenNode::from_raw(NonNull::from(node))),
+            NodeOrToken::Token(token) => {
+                NodeOrToken::Token(GreenToken::from_raw(NonNull::from(token)))
             }
         }
     }
@@ -270,16 +166,6 @@ impl CacheChild {
 unsafe impl Send for CacheChild {}
 // SAFETY: See `Send`.
 unsafe impl Sync for CacheChild {}
-
-impl Drop for CacheChild {
-    #[inline]
-    fn drop(&mut self) {
-        if self.is_owned() {
-            // SAFETY: The child owns the element and it's never accessed again.
-            drop(unsafe { self.take_owned() });
-        }
-    }
-}
 
 impl Debug for CacheChild {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
@@ -309,35 +195,29 @@ impl Debug for CacheChild {
 //
 // To fix that, we additionally wrap the data in `Cached*` wrappers, to make sure
 // we don't accidentally use the wrong hash!
+//
+// The builds with a cache allocate their elements in its arena, so a build can share the elements
+// of earlier ones. The entries are pointers into that arena, which the cache keeps alive. When the
+// arena has grown well past what a build needs, the cache starts a new one and empties itself:
+// the trees of earlier builds keep the old arena alive until they're dropped.
 #[derive(Default, Debug)]
 pub struct NodeCache {
     nodes: HashMap<CachedNode, ()>,
     tokens: HashMap<CachedToken, ()>,
     trivia: TriviaCache,
-    generation: Generation,
+    /// The arena of the builds, which the entries point into.
+    arena: Option<ArenaRef>,
+    /// The bytes the arena held after its first build.
+    first_build_bytes: usize,
+    /// Whether a build is running.
+    building: bool,
 }
 
-/// Represents a "generation" in the garbage collection scheme of the node
-/// cache. For our purpose we only need to track two generations at most (the
-/// previous and next generation) so this is represented as an enum with two
-/// variants.
-#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
-enum Generation {
-    #[default]
-    A = 0,
-    B = 1,
-}
-
-impl Not for Generation {
-    type Output = Self;
-
-    fn not(self) -> Self::Output {
-        match self {
-            Self::A => Self::B,
-            Self::B => Self::A,
-        }
-    }
-}
+// SAFETY: the entries are pointers to immutable elements in the arena, which the cache keeps
+// alive, and only a build of the cache allocates in the arena.
+unsafe impl Send for NodeCache {}
+// SAFETY: see `Send`.
+unsafe impl Sync for NodeCache {}
 
 fn token_hash_of(kind: RawSyntaxKind, text: &str) -> u64 {
     let mut h = FxHasher::default();
@@ -362,16 +242,87 @@ impl NodeCache {
     /// one of its children wasn't cached.
     pub(crate) const UNCACHED_NODE_HASH: u64 = 0;
 
+    /// The cache starts a new arena when the current one holds this many times the bytes of its
+    /// first build. The rest are elements that earlier builds made and later ones mostly don't
+    /// share, which the arena can't free one by one.
+    const REPLACE_FACTOR: usize = 2;
+
+    /// The arena of a small build is kept until it holds this many bytes, so that small builds,
+    /// like class strings, keep sharing their elements.
+    const REPLACE_MIN_BYTES: usize = 1024 * 1024;
+
+    /// Starts a build, in a new arena if the current one has grown past [Self::REPLACE_FACTOR]
+    /// times the bytes of its first build.
+    pub(crate) fn begin_build(&mut self) {
+        assert!(!self.building, "a build is already running");
+        if let Some(arena) = &self.arena {
+            // SAFETY: no build is running.
+            let allocated = unsafe { arena.arena().allocated() };
+            if allocated > Self::REPLACE_MIN_BYTES
+                && allocated > Self::REPLACE_FACTOR * self.first_build_bytes
+            {
+                self.nodes.clear();
+                self.tokens.clear();
+                self.trivia.cache.clear();
+                self.trivia.whitespace = None;
+                self.arena = None;
+            }
+        }
+        let arena = self.arena.get_or_insert_with(|| {
+            self.first_build_bytes = 0;
+            ArenaRef::new()
+        });
+        if self.trivia.whitespace.is_none() {
+            // SAFETY: the build of the arena's cache is starting, and the arena holds the trivia
+            // without counting it.
+            let whitespace =
+                unsafe { GreenTrivia::new_in([TriviaPiece::whitespace(1)], Some(arena.arena())) };
+            self.trivia.whitespace = NonNull::new(whitespace.into_raw());
+        }
+        self.building = true;
+    }
+
+    /// Ends the build, if one is running, and counts a reference for `root`, the uncounted
+    /// handle to the root of the build. The other uncounted handles of the build must be gone,
+    /// see [crate::green::arena].
+    pub(crate) fn end_build(&mut self, root: Option<&GreenNode>) {
+        if !std::mem::take(&mut self.building) {
+            return;
+        }
+        let arena = self.arena.as_ref().expect("a build has an arena").arena();
+        if self.first_build_bytes == 0 {
+            // SAFETY: the build has ended, and no other build of the cache is running.
+            self.first_build_bytes = unsafe { arena.allocated() };
+        }
+        if let Some(root) = root
+            && root.count_field() == arena.tag()
+        {
+            arena.retain();
+        }
+    }
+
     /// Tries to retrieve a node with the given `kind` and `children` from the cache.
     ///
     /// Returns an entry that allows the caller to:
     /// * Retrieve the cached node if it is present in the cache
     /// * Insert a node if it isn't present in the cache
+    ///
+    /// Also returns the arena of the running build, to create the node in.
     pub(crate) fn node(
         &mut self,
         kind: RawSyntaxKind,
         children: &[CacheChild],
-    ) -> NodeCacheNodeEntryMut<'_> {
+    ) -> (NodeCacheNodeEntryMut<'_>, &GreenArena) {
+        assert!(self.building, "the node cache is used outside a build");
+        let arena = self.arena.as_ref().expect("a build has an arena").arena();
+        (Self::node_entry(&mut self.nodes, kind, children), arena)
+    }
+
+    fn node_entry<'a>(
+        nodes: &'a mut HashMap<CachedNode, ()>,
+        kind: RawSyntaxKind,
+        children: &[CacheChild],
+    ) -> NodeCacheNodeEntryMut<'a> {
         if children.len() > 3 {
             return NodeCacheNodeEntryMut::NoCache;
         }
@@ -395,9 +346,9 @@ impl NodeCache {
         // For example, all `#[inline]` in this file share the same green node!
         // For `libsyntax/parse/parser.rs`, measurements show that deduping saves
         // 17% of the memory for green nodes!
-        let entry = self.nodes.raw_entry_mut().from_hash(hash, |no_hash| {
-            no_hash.node.value().kind() == kind && {
-                let lhs = no_hash.node.value().slots().filter_map(|slot| match slot {
+        let entry = nodes.raw_entry_mut().from_hash(hash, |no_hash| {
+            no_hash.value().kind() == kind && {
+                let lhs = no_hash.value().slots().filter_map(|slot| match slot {
                     // Ignore empty slots. The queried node only has the present children
                     Slot::Empty { .. } => None,
                     Slot::Node { node, .. } => Some(element_id(NodeOrToken::Node(node))),
@@ -413,18 +364,14 @@ impl NodeCache {
         });
 
         match entry {
-            RawEntryMut::Occupied(mut entry) => {
-                entry.key_mut().node.set_generation(self.generation);
-                NodeCacheNodeEntryMut::Cached(CachedNodeEntry {
-                    hash,
-                    raw_entry: entry,
-                })
-            }
+            RawEntryMut::Occupied(entry) => NodeCacheNodeEntryMut::Cached(CachedNodeEntry {
+                hash,
+                raw_entry: entry,
+            }),
             RawEntryMut::Vacant(entry) => NodeCacheNodeEntryMut::Vacant(VacantNodeEntry {
                 raw_entry: entry,
                 original_kind: kind,
                 hash,
-                generation: self.generation,
             }),
         }
     }
@@ -442,66 +389,39 @@ impl NodeCache {
     ) -> CacheChild {
         let hash = token_hash_of(kind, text);
 
+        assert!(self.building, "the node cache is used outside a build");
+        let arena = self.arena.as_ref().expect("a build has an arena").arena();
         let entry = self.tokens.raw_entry_mut().from_hash(hash, |token| {
-            token.0.value().kind() == kind && token.0.value().text() == text
+            token.value().kind() == kind && token.value().text() == text
         });
 
         let token = match entry {
-            RawEntryMut::Occupied(mut entry) => {
-                entry.key_mut().0.set_generation(self.generation);
-                entry.into_key().0.value()
-            }
+            RawEntryMut::Occupied(entry) => entry.into_key().value(),
             RawEntryMut::Vacant(entry) => {
-                let (leading, leading_flags) = self.trivia.get(self.generation, leading);
-                let (trailing, trailing_flags) = self.trivia.get(self.generation, trailing);
+                let (leading, leading_flags) = self.trivia.get(arena, leading);
+                let (trailing, trailing_flags) = self.trivia.get(arena, trailing);
 
                 let mut flags = leading_flags;
                 flags.insert(trailing_flags);
-                let token = GreenToken::with_trivia_and_flags(kind, text, leading, trailing, flags);
-                let key = CachedToken(GenerationalPointer::new(token, self.generation));
-                let (key, _) = entry.insert_with_hasher(hash, key, (), |t| token_hash(t.0.value()));
-                key.0.value()
+                // SAFETY: the arena of the running build is open, and this thread runs it.
+                let token = unsafe {
+                    GreenToken::with_trivia_and_flags_in(
+                        kind,
+                        text,
+                        leading,
+                        trailing,
+                        flags,
+                        Some(arena),
+                    )
+                };
+                let key = CachedToken(token.into_raw());
+                let (key, _) = entry.insert_with_hasher(hash, key, (), |t| token_hash(t.value()));
+                key.value()
             }
         };
 
         // SAFETY: The token is stored in the cache.
         unsafe { CacheChild::cached(hash, NodeOrToken::Token(token)) }
-    }
-
-    /// Increment the generation counter of the cache, all cache access from
-    /// this point onward will update the generation of the corresponding entry
-    /// to this new value
-    pub(crate) fn increment_generation(&mut self) {
-        debug_assert!(
-            self.nodes
-                .keys()
-                .all(|entry| entry.node.generation() == self.generation)
-                && self
-                    .tokens
-                    .keys()
-                    .all(|token| token.0.generation() == self.generation)
-                && self
-                    .trivia
-                    .cache
-                    .keys()
-                    .all(|trivia| trivia.0.generation() == self.generation)
-        );
-
-        self.generation = !self.generation;
-    }
-
-    /// Removes nodes, tokens and trivia entries from the cache when their
-    /// generation doesn't match the current generation of the whole cache
-    pub(crate) fn retain_cache(&mut self) {
-        self.nodes
-            .retain(|node, _| node.node.generation() == self.generation);
-
-        self.tokens
-            .retain(|token, _| token.0.generation() == self.generation);
-
-        self.trivia
-            .cache
-            .retain(|trivia, _| trivia.0.generation() == self.generation);
     }
 }
 
@@ -522,7 +442,6 @@ pub(crate) struct VacantNodeEntry<'a> {
     hash: u64,
     original_kind: RawSyntaxKind,
     raw_entry: RawVacantEntryMut<'a, CachedNode, (), BuildHasherDefault<FxHasher>>,
-    generation: Generation,
 }
 
 /// Represents an entry of a cached node.
@@ -535,7 +454,7 @@ impl CachedNodeEntry<'_> {
     /// Returns the cached node as a child of the node under construction.
     #[inline]
     pub fn into_child(self) -> CacheChild {
-        let node = self.raw_entry.into_key().node.value();
+        let node = self.raw_entry.into_key().value();
         // SAFETY: The node is stored in the cache.
         unsafe { CacheChild::cached(self.hash, NodeOrToken::Node(node)) }
     }
@@ -558,61 +477,47 @@ impl VacantNodeEntry<'_> {
             let (key, _) = self.raw_entry.insert_with_hasher(
                 self.hash,
                 CachedNode {
-                    node: GenerationalPointer::new(node, self.generation),
+                    node: node.into_raw(),
                     hash: self.hash,
                 },
                 (),
                 |n| n.hash,
             );
-            let node = key.node.value();
+            let node = key.value();
             // SAFETY: The node is stored in the cache.
             unsafe { CacheChild::cached(self.hash, NodeOrToken::Node(node)) }
         }
     }
 }
 
-/// A cached [GreenTrivia].
+/// A cached [GreenTrivia], in the arena of the cache's build.
 /// Deliberately doesn't implement `Hash` to make sure all
 /// usages go through the custom `FxHasher`.
 #[derive(Debug)]
-struct CachedTrivia(GenerationalPointer<GreenTrivia>);
+struct CachedTrivia(NonNull<GreenTriviaData>);
 
-impl IntoRawPointer for GreenTrivia {
-    type Pointee = GreenTriviaData;
-
-    fn into_raw(self) -> *mut Self::Pointee {
-        Self::into_raw(self)
-    }
-
-    unsafe fn from_raw(ptr: *mut Self::Pointee) -> Self {
-        unsafe { Self::from_raw(ptr) }
+impl CachedTrivia {
+    fn value(&self) -> &GreenTriviaData {
+        // SAFETY: the cache only holds elements of the arena of its build, which it keeps alive.
+        unsafe { self.0.as_ref() }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct TriviaCache {
     /// Generic cache for trivia
     cache: HashMap<CachedTrivia, ()>,
 
-    /// Cached single whitespace trivia.
-    whitespace: GreenTrivia,
-}
-
-impl Default for TriviaCache {
-    fn default() -> Self {
-        Self {
-            cache: Default::default(),
-            whitespace: GreenTrivia::new([TriviaPiece::whitespace(1)]),
-        }
-    }
+    /// Cached single whitespace trivia, in the arena of the cache.
+    whitespace: Option<NonNull<GreenTriviaData>>,
 }
 
 impl TriviaCache {
-    /// Tries to retrieve a [GreenTrivia] with the given pieces from the cache or creates a new one and caches
-    /// it for further calls.
+    /// Tries to retrieve a [GreenTrivia] with the given pieces from the cache or creates a new one
+    /// in `arena`, the arena of the cache's build, and caches it for further calls.
     fn get(
         &mut self,
-        generation: Generation,
+        arena: &GreenArena,
         pieces: &[TriviaPiece],
     ) -> (GreenTrivia, GreenElementFlags) {
         match pieces {
@@ -623,7 +528,11 @@ impl TriviaCache {
                     length,
                 },
             ] if *length == TextSize::from(1) => {
-                (self.whitespace.clone(), GreenElementFlags::default())
+                let whitespace = self.whitespace.expect("a build has the whitespace trivia");
+                // SAFETY: the trivia is in the arena of the running build, and the handle moves
+                // into a token of it.
+                let whitespace = unsafe { GreenTrivia::from_raw(whitespace.as_ptr()) };
+                (whitespace, GreenElementFlags::default())
             }
 
             _ => {
@@ -632,20 +541,26 @@ impl TriviaCache {
                 let entry = self
                     .cache
                     .raw_entry_mut()
-                    .from_hash(hash, |trivia| trivia.0.value().pieces() == pieces);
+                    .from_hash(hash, |trivia| trivia.value().pieces() == pieces);
 
                 match entry {
-                    RawEntryMut::Occupied(mut entry) => {
-                        entry.key_mut().0.set_generation(generation);
-                        (entry.key().0.value().to_owned(), flags)
+                    RawEntryMut::Occupied(entry) => {
+                        let trivia = NonNull::from(entry.key().value());
+                        // SAFETY: as for the whitespace above.
+                        (unsafe { GreenTrivia::from_raw(trivia.as_ptr()) }, flags)
                     }
                     RawEntryMut::Vacant(entry) => {
-                        let trivia = GreenTrivia::new(pieces.iter().copied());
+                        // SAFETY: the arena is the one of the running build, and the handle moves
+                        // into a token of it.
+                        let trivia =
+                            unsafe { GreenTrivia::new_in(pieces.iter().copied(), Some(arena)) };
+                        // SAFETY: the copy is never dropped.
+                        let cached = unsafe { super::arena::duplicate(&trivia) }.into_raw();
                         entry.insert_with_hasher(
                             hash,
-                            CachedTrivia(GenerationalPointer::new(trivia.clone(), generation)),
+                            CachedTrivia(NonNull::new(cached).expect("the trivia isn't empty")),
                             (),
-                            |cached| Self::trivia_hash::<false>(cached.0.value().pieces()).0,
+                            |cached| Self::trivia_hash::<false>(cached.value().pieces()).0,
                         );
                         (trivia, flags)
                     }
@@ -717,6 +632,7 @@ mod tests {
     #[test]
     fn cached_token_preserves_trivia_flags() {
         let mut cache = NodeCache::default();
+        cache.begin_build();
         let kind = RawSyntaxKind(0);
         let leading = [TriviaPiece::new(TriviaPieceKind::Skipped, 1)];
         let trailing = [TriviaPiece::single_line_comment(2)];
@@ -735,6 +651,10 @@ mod tests {
         assert!(std::ptr::eq::<GreenTokenData>(&*token, &*cached));
         assert!(cached.flags().contains(GreenElementFlags::HAS_COMMENTS));
         assert!(cached.flags().contains(GreenElementFlags::HAS_SKIPPED));
+
+        // The handles of a build don't count references.
+        std::mem::forget((token, cached));
+        cache.end_build(None);
     }
 
     #[test]

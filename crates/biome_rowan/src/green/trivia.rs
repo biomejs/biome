@@ -1,9 +1,8 @@
 use crate::TriviaPiece;
 use crate::arc::{Arc, HeaderSlice, ThinArc};
-use crate::green::GreenElementFlags;
+use crate::green::{GreenArena, GreenElementFlags};
 use biome_text_size::TextSize;
 use std::fmt::Formatter;
-use std::mem::ManuallyDrop;
 use std::{fmt, mem, ptr};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -34,15 +33,6 @@ impl GreenTriviaData {
     #[inline]
     pub fn pieces(&self) -> &[TriviaPiece] {
         self.data.slice()
-    }
-
-    #[inline]
-    pub(crate) fn to_owned(&self) -> GreenTrivia {
-        unsafe {
-            let green = GreenTrivia::from_raw(self as *const _ as *mut _);
-            let green = ManuallyDrop::new(green);
-            GreenTrivia::clone(&green)
-        }
     }
 }
 
@@ -96,15 +86,44 @@ impl GreenTrivia {
         I: IntoIterator<Item = TriviaPiece>,
         I::IntoIter: ExactSizeIterator,
     {
-        let data = ThinArc::from_header_and_iter(
-            GreenTriviaHead {
-                #[cfg(feature = "countme")]
-                _c: countme::Count::new(),
-            },
-            pieces.into_iter(),
-        );
+        // SAFETY: there's no arena.
+        unsafe { Self::new_in(pieces, None) }
+    }
+
+    /// Creates a trivia, in `arena` if there is one.
+    ///
+    /// # Safety
+    /// The caller must be the thread that runs the build of `arena`, while it's open.
+    pub(crate) unsafe fn new_in<I>(pieces: I, arena: Option<&GreenArena>) -> Self
+    where
+        I: IntoIterator<Item = TriviaPiece>,
+        I::IntoIter: ExactSizeIterator,
+    {
+        // SAFETY: the caller upholds the requirements of the arena.
+        let data = unsafe {
+            ThinArc::from_header_and_iter_in(
+                GreenTriviaHead {
+                    #[cfg(feature = "countme")]
+                    _c: countme::Count::new(),
+                },
+                pieces.into_iter(),
+                arena,
+            )
+        };
+        #[cfg(feature = "countme")]
+        if let Some(arena) = arena {
+            // SAFETY: the caller upholds the requirements of the arena, and the trivia never
+            // drops its count, as it's in the arena.
+            unsafe { arena.adopt_count(super::arena::duplicate(&data.header._c)) };
+        }
 
         Self { ptr: Some(data) }
+    }
+
+    /// The count field of the trivia, see [ThinArc::count_field], unless it's empty.
+    #[inline]
+    pub(crate) fn count_field(&self) -> Option<usize> {
+        self.ptr.as_ref().map(ThinArc::count_field)
     }
 
     /// Creates an empty trivia

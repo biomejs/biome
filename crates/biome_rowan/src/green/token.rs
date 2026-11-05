@@ -9,7 +9,7 @@ use crate::green::trivia::GreenTrivia;
 use crate::{
     TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
-    green::{GreenElementFlags, RawSyntaxKind},
+    green::{GreenArena, GreenElementFlags, RawSyntaxKind, arena::duplicate},
 };
 
 #[derive(PartialEq, Eq, Hash)]
@@ -179,6 +179,23 @@ impl GreenToken {
         trailing: GreenTrivia,
         flags: GreenElementFlags,
     ) -> Self {
+        // SAFETY: there's no arena.
+        unsafe { Self::with_trivia_and_flags_in(kind, text, leading, trailing, flags, None) }
+    }
+
+    /// Creates a token, in `arena` if there is one.
+    ///
+    /// # Safety
+    /// The caller must be the thread that runs the build of `arena`, while it's open.
+    #[inline]
+    pub(crate) unsafe fn with_trivia_and_flags_in(
+        kind: RawSyntaxKind,
+        text: &str,
+        leading: GreenTrivia,
+        trailing: GreenTrivia,
+        flags: GreenElementFlags,
+        arena: Option<&GreenArena>,
+    ) -> Self {
         let head = GreenTokenHead {
             kind,
             flags,
@@ -187,8 +204,31 @@ impl GreenToken {
             #[cfg(feature = "countme")]
             _c: countme::Count::new(),
         };
-        let ptr = ThinArc::from_header_and_iter(head, text.bytes());
-        Self { ptr }
+        // SAFETY: the caller upholds the requirements of the arena.
+        let ptr = unsafe { ThinArc::from_header_and_iter_in(head, text.bytes(), arena) };
+        let token = Self { ptr };
+        if let Some(arena) = arena {
+            let tag = arena.tag();
+            let head = &token.data.header;
+            // SAFETY: the caller upholds the requirements of the arena, and the token never
+            // drops its trivia or its count, as it's in the arena.
+            unsafe {
+                for trivia in [&head.leading, &head.trailing] {
+                    if trivia.count_field().is_some_and(|count| count != tag) {
+                        arena.adopt_foreign_trivia(duplicate(trivia));
+                    }
+                }
+                #[cfg(feature = "countme")]
+                arena.adopt_count(duplicate(&head._c));
+            }
+        }
+        token
+    }
+
+    /// The count field of the token, see [ThinArc::count_field].
+    #[inline]
+    pub(crate) fn count_field(&self) -> usize {
+        self.ptr.count_field()
     }
 
     #[inline]

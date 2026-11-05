@@ -15,7 +15,7 @@ use crate::utility_types::static_assert;
 use crate::{
     GreenToken, NodeOrToken, TextRange, TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
-    green::{GreenElement, GreenElementFlags, GreenElementRef, RawSyntaxKind},
+    green::{GreenArena, GreenElement, GreenElementFlags, GreenElementRef, RawSyntaxKind},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -352,6 +352,24 @@ impl GreenNode {
         I: IntoIterator<Item = Option<GreenElement>>,
         I::IntoIter: ExactSizeIterator,
     {
+        // SAFETY: there's no arena.
+        unsafe { Self::new_in(kind, slots, None) }
+    }
+
+    /// Creates a node, in `arena` if there is one.
+    ///
+    /// # Safety
+    /// The caller must be the thread that runs the build of `arena`, while it's open.
+    #[inline]
+    pub(crate) unsafe fn new_in<I>(
+        kind: RawSyntaxKind,
+        slots: I,
+        arena: Option<&GreenArena>,
+    ) -> Self
+    where
+        I: IntoIterator<Item = Option<GreenElement>>,
+        I::IntoIter: ExactSizeIterator,
+    {
         let mut text_len: TextSize = 0.into();
         let mut flags = GreenElementFlags::default();
         let slots = slots.into_iter().map(|el| {
@@ -376,29 +394,72 @@ impl GreenNode {
             }
         });
 
-        let data = ThinArc::from_header_and_iter(
-            GreenNodeHead {
-                kind,
-                flags: GreenElementFlags::default(),
-                text_len: 0.into(),
-                #[cfg(feature = "countme")]
-                _c: countme::Count::new(),
-            },
-            slots,
-        );
+        // SAFETY: the caller upholds the requirements of the arena.
+        let mut data = unsafe {
+            ThinArc::from_header_and_iter_in(
+                GreenNodeHead {
+                    kind,
+                    flags: GreenElementFlags::default(),
+                    text_len: 0.into(),
+                    #[cfg(feature = "countme")]
+                    _c: countme::Count::new(),
+                },
+                slots,
+                arena,
+            )
+        };
 
         // XXX: fix up aggregate data after construction, because we can't
         // iterate `slots` twice.
-        let data = {
-            let mut data = Arc::from_thin(data);
-            debug_assert!(data.is_unique());
-            let head = &mut Arc::get_mut(&mut data).unwrap().header;
-            head.text_len = text_len;
-            head.flags = flags;
-            Arc::into_thin(data)
-        };
+        // SAFETY: the node was just created, so no other handle to it exists.
+        let head = unsafe { data.header_mut() };
+        head.text_len = text_len;
+        head.flags = flags;
 
-        Self { ptr: data }
+        let node = Self { ptr: data };
+        if let Some(arena) = arena {
+            // SAFETY: the caller upholds the requirements of the arena, and the node never
+            // drops its children or its count, as it's in the arena.
+            unsafe { node.adopt_into(arena) };
+        }
+        node
+    }
+
+    /// Hands the arena of this new node the children that aren't in it, and its count.
+    ///
+    /// # Safety
+    /// As [GreenArena::adopt_foreign_element], for the node's children.
+    unsafe fn adopt_into(&self, arena: &GreenArena) {
+        let tag = arena.tag();
+        for slot in self.slice() {
+            // SAFETY: the node never drops its slots.
+            unsafe {
+                match slot {
+                    Slot::Node { node, .. } if node.ptr.count_field() != tag => {
+                        arena.adopt_foreign_element(NodeOrToken::Node(super::arena::duplicate(
+                            node,
+                        )));
+                    }
+                    Slot::Token { token, .. } if token.count_field() != tag => {
+                        arena.adopt_foreign_element(NodeOrToken::Token(super::arena::duplicate(
+                            token,
+                        )));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        #[cfg(feature = "countme")]
+        // SAFETY: the node never drops its header.
+        unsafe {
+            arena.adopt_count(super::arena::duplicate(&self.header()._c));
+        }
+    }
+
+    /// The count field of the node, see [ThinArc::count_field].
+    #[inline]
+    pub(crate) fn count_field(&self) -> usize {
+        self.ptr.count_field()
     }
 
     #[inline]

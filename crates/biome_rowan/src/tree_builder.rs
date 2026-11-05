@@ -1,7 +1,7 @@
 use crate::{
     GreenNode, Language, NodeOrToken, ParsedChildren, SyntaxFactory, SyntaxKind, SyntaxNode,
     cow_mut::CowMut,
-    green::{CacheChild, NodeCache, NodeCacheNodeEntryMut},
+    green::{CacheChild, CurrentArena, NodeCache, NodeCacheNodeEntryMut},
     syntax::TriviaPiece,
 };
 use std::{marker::PhantomData, num::NonZeroUsize};
@@ -21,6 +21,9 @@ impl Checkpoint {
 }
 
 /// A builder for a syntax tree.
+///
+/// The builder allocates the elements of the tree in the arena of its node cache, which the tree
+/// keeps alive. See `green/arena.rs`.
 #[derive(Debug)]
 pub struct TreeBuilder<'cache, L: Language, S: SyntaxFactory<Kind = L::Kind>> {
     /// Declared before `cache` so that the children drop before an owned cache, which
@@ -33,8 +36,10 @@ pub struct TreeBuilder<'cache, L: Language, S: SyntaxFactory<Kind = L::Kind>> {
 
 impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> Default for TreeBuilder<'_, L, S> {
     fn default() -> Self {
+        let mut cache: CowMut<'_, NodeCache> = CowMut::default();
+        cache.begin_build();
         Self {
-            cache: CowMut::default(),
+            cache,
             parents: Vec::default(),
             children: Vec::default(),
             ph: PhantomData,
@@ -51,7 +56,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     /// Reusing `NodeCache` between different [TreeBuilder]s saves memory.
     /// It allows to structurally share underlying trees.
     pub fn with_cache(cache: &mut NodeCache) -> TreeBuilder<'_, L, S> {
-        cache.increment_generation();
+        cache.begin_build();
         TreeBuilder {
             cache: CowMut::Borrowed(cache),
             parents: Vec::new(),
@@ -118,11 +123,12 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
         let raw_kind = kind.to_raw();
 
         let slots = &self.children[first_child..];
-        let node_entry = self.cache.node(raw_kind, slots);
+        let (node_entry, arena) = self.cache.node(raw_kind, slots);
 
         let mut build_node = || {
             let children = ParsedChildren::new(&mut self.children, first_child);
 
+            let _current = CurrentArena::enter(arena);
             S::make_syntax(kind, children).into_green()
         };
 
@@ -201,19 +207,33 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     #[inline]
     #[must_use]
     pub fn finish(mut self) -> SyntaxNode<L> {
-        let root = SyntaxNode::new_root(self.finish_green());
-        self.cache.retain_cache();
-        root
+        SyntaxNode::new_root(self.finish_green())
     }
 
-    // For tests
+    /// Ends the build and returns the root, which keeps the arena of the build alive.
     #[must_use]
     pub(crate) fn finish_green(&mut self) -> GreenNode {
         assert_eq!(self.children.len(), 1);
-        match self.children.pop().unwrap().into_element() {
+        let root = match self.children.pop().unwrap().into_element() {
             NodeOrToken::Node(node) => node,
-            _ => panic!(),
-        }
+            token => {
+                // The handle isn't counted.
+                std::mem::forget(token);
+                panic!("the root of a tree must be a node")
+            }
+        };
+        // The handles of the build aren't counted; the root is the only one left outside its
+        // elements.
+        self.cache.end_build(Some(&root));
+        root
+    }
+}
+
+impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> Drop for TreeBuilder<'_, L, S> {
+    fn drop(&mut self) {
+        // The children don't count references, so an unfinished build just discards them.
+        self.children.clear();
+        self.cache.end_build(None);
     }
 }
 

@@ -6,9 +6,13 @@ use std::marker::PhantomData;
 ///
 /// Allows third-party crates to access limited information about a `GreenNode` or construct
 /// a `GreenNode` in a limited places.
+///
+/// While a factory makes a node, the handle doesn't count a reference to its element, see
+/// `green/arena.rs`, so a node the factory drops is discarded instead.
 #[derive(Debug)]
 pub struct RawSyntaxNode<K: SyntaxKind> {
-    raw: GreenNode,
+    /// Only `None` once moved out.
+    raw: Option<GreenNode>,
     ph: PhantomData<K>,
 }
 
@@ -20,26 +24,37 @@ impl<K: SyntaxKind> RawSyntaxNode<K> {
         I: IntoIterator<Item = Option<RawSyntaxElement<K>>>,
         I::IntoIter: ExactSizeIterator,
     {
-        Self {
-            raw: GreenNode::new(
-                kind.to_raw(),
-                slots
-                    .into_iter()
-                    .map(|slot| slot.map(|element| element.into_green())),
-            ),
-            ph: PhantomData,
-        }
+        let slots = slots
+            .into_iter()
+            .map(|slot| slot.map(|element| element.into_green()));
+        // A tree builder makes its arena current while a factory makes a node.
+        let raw = crate::green::new_node_in_current(kind.to_raw(), slots);
+        Self::from(raw)
     }
 
     #[inline]
     pub fn kind(&self) -> K {
-        K::from_raw(self.raw.kind())
+        K::from_raw(self.green().kind())
+    }
+
+    #[inline]
+    fn green(&self) -> &GreenNode {
+        self.raw.as_ref().expect("the node was moved out")
     }
 
     /// Unwraps this raw syntax into it's underlying green node.
     #[inline]
-    pub(crate) fn into_green(self) -> GreenNode {
-        self.raw
+    pub(crate) fn into_green(mut self) -> GreenNode {
+        self.raw.take().expect("the node was moved out")
+    }
+}
+
+impl<K: SyntaxKind> Drop for RawSyntaxNode<K> {
+    #[inline]
+    fn drop(&mut self) {
+        if let Some(node) = self.raw.take() {
+            crate::green::discard_element(NodeOrToken::Node(node));
+        }
     }
 }
 
@@ -47,7 +62,7 @@ impl<K: SyntaxKind> From<GreenNode> for RawSyntaxNode<K> {
     #[inline]
     fn from(node: GreenNode) -> Self {
         Self {
-            raw: node,
+            raw: Some(node),
             ph: PhantomData,
         }
     }
@@ -55,23 +70,40 @@ impl<K: SyntaxKind> From<GreenNode> for RawSyntaxNode<K> {
 
 /// New-type wrapper around a `GreenToken`. Allows third-party crates to access limited information
 /// on not yet fully constructed nodes.
+///
+/// As [RawSyntaxNode], a token a factory drops is discarded.
 #[derive(Debug)]
 pub struct RawSyntaxToken<K: SyntaxKind> {
-    raw: GreenToken,
+    /// Only `None` once moved out.
+    raw: Option<GreenToken>,
     ph: PhantomData<K>,
 }
 
 impl<K: SyntaxKind> RawSyntaxToken<K> {
     #[inline]
     pub fn kind(&self) -> K {
-        K::from_raw(self.raw.kind())
+        K::from_raw(self.raw.as_ref().expect("the token was moved out").kind())
+    }
+
+    #[inline]
+    fn into_green(mut self) -> GreenToken {
+        self.raw.take().expect("the token was moved out")
+    }
+}
+
+impl<K: SyntaxKind> Drop for RawSyntaxToken<K> {
+    #[inline]
+    fn drop(&mut self) {
+        if let Some(token) = self.raw.take() {
+            crate::green::discard_element(NodeOrToken::Token(token));
+        }
     }
 }
 
 impl<K: SyntaxKind> From<GreenToken> for RawSyntaxToken<K> {
     fn from(token: GreenToken) -> Self {
         Self {
-            raw: token,
+            raw: Some(token),
             ph: PhantomData,
         }
     }
@@ -91,8 +123,8 @@ impl<K: SyntaxKind> RawSyntaxElement<K> {
     #[inline]
     fn into_green(self) -> GreenElement {
         match self {
-            Self::Node(node) => NodeOrToken::Node(node.raw),
-            Self::Token(token) => NodeOrToken::Token(token.raw),
+            Self::Node(node) => NodeOrToken::Node(node.into_green()),
+            Self::Token(token) => NodeOrToken::Token(token.into_green()),
         }
     }
 }
