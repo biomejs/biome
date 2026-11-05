@@ -266,8 +266,6 @@ pub struct Rule {
     pub(crate) declarations: Vec<CssModelDeclaration>,
     /// The id of the parent rule
     pub(crate) parent_id: Option<RuleId>,
-    /// The ids of the child rules
-    pub(crate) child_ids: Vec<RuleId>,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
@@ -278,7 +276,7 @@ impl PartialEq for Rule {
         self.specificity == other.specificity
             && self.id == other.id
             && self.parent_id == other.parent_id
-            && self.child_ids == other.child_ids
+            && self.child_ids() == other.child_ids()
             && self.selectors.len() == other.selectors.len()
             && self
                 .selectors
@@ -317,7 +315,6 @@ impl Rule {
             selectors,
             declarations,
             parent_id: rule.parent_id,
-            child_ids: rule.child_ids.clone(),
             specificity: rule.specificity,
         }
     }
@@ -347,7 +344,7 @@ impl Rule {
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
-        &self.child_ids
+        &self.data.all_rules[self.id.index()].child_ids
     }
 
     pub fn specificity(&self) -> Specificity {

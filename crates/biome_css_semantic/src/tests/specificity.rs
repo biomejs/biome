@@ -350,7 +350,7 @@ fn test_specificity_deeply_nested_rules() {
         .expect("Expected to find parent rule with selector 'a'");
 
     let div_rule_id = parent_rule
-        .child_ids
+        .child_ids()
         .first()
         .expect("Expected 'div' child rule");
     let div_rule = model
@@ -358,7 +358,7 @@ fn test_specificity_deeply_nested_rules() {
         .expect("Expected to retrieve 'div' rule");
 
     let class_rule_id = div_rule
-        .child_ids
+        .child_ids()
         .first()
         .expect("Expected '.class' child rule");
     let class_rule = model
@@ -366,7 +366,7 @@ fn test_specificity_deeply_nested_rules() {
         .expect("Expected to retrieve 'span.class' rule");
 
     let id_rule_id = class_rule
-        .child_ids
+        .child_ids()
         .first()
         .expect("Expected '#id' child rule");
     let id_rule = model
@@ -410,7 +410,10 @@ fn test_specificity_scss_partial_combinator_selector() {
     let partial = rules.first().expect("expected the partial selector rule");
     assert_eq!(partial.selectors[0].specificity(), Specificity(0, 1, 0));
 
-    let child_id = partial.child_ids.first().expect("expected the nested rule");
+    let child_id = partial
+        .child_ids()
+        .first()
+        .expect("expected the nested rule");
     let child = model
         .get_rule_by_id(child_id)
         .expect("expected the nested rule in the semantic model");
