@@ -1,5 +1,6 @@
 mod builder;
 mod model;
+mod server;
 mod snippets;
 mod table;
 
@@ -24,18 +25,23 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
         declaration: TextRange::empty(host_start),
         snippet: None,
         scope: builtins,
-        namespace: Namespace::Binding,
+        namespace: Namespace::Value,
         kind: SymbolKind::Builtin,
         origin: Origin::AstroBuiltin,
-        type_only: false,
+        declares_value: true,
+        declares_type: false,
+        declares_namespace: false,
     });
 
     let frontmatter = host.frontmatter().map(|frontmatter| {
         let scope = builder.add_scope(ScopeKind::Module(None), Some(builtins));
         let content = frontmatter
             .syntax()
-            .descendants()
-            .find_map(AstroEmbeddedContent::cast)
+            .preorder_of_kinds(AstroEmbeddedContent::KIND_SET)
+            .find_map(|event| match event {
+                WalkEvent::Enter(node) => AstroEmbeddedContent::cast(node),
+                WalkEvent::Leave(_) => None,
+            })
             .and_then(|content| content.content_token())
             .map(|token| token.text_trimmed_range());
         let block = builder.add_block(
@@ -60,12 +66,16 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
         }
     }
 
+    let server_scope = frontmatter
+        .and_then(|block| builder.data.blocks[block].scope)
+        .unwrap_or(builtins);
     let mut snippet_order: Vec<_> = (0..snippets.len()).collect();
     snippet_order.sort_by_key(|index| snippets[*index].content_range.start());
+    let mut snippet_ids = vec![SnippetId::new(0); snippets.len()];
     for index in snippet_order {
         let snippet = &snippets[index];
         let embedding = snippet.source.as_embedding_kind();
-        let host = if embedding.is_astro_frontmatter() {
+        let snippet_host = if embedding.is_astro_frontmatter() {
             frontmatter.map_or(SnippetHost::Unknown, SnippetHost::Frontmatter)
         } else if embedding.is_astro_template() {
             SnippetHost::Expression
@@ -85,14 +95,33 @@ pub fn astro_model(host: &HtmlRoot, snippets: &[AstroSnippet]) -> AstroSemanticM
                     SnippetHost::Script(BlockId::new(index))
                 })
         };
-        builder.add_snippet(
+        let scope = match snippet_host {
+            SnippetHost::Frontmatter(block) | SnippetHost::Script(block) => {
+                builder.data.blocks[block].scope
+            }
+            SnippetHost::Expression if snippet.has_errors => {
+                Some(builder.add_scope(ScopeKind::Expression, Some(server_scope)))
+            }
+            SnippetHost::Expression => Some(server_scope),
+            SnippetHost::Unknown => None,
+        };
+        if snippet.has_errors
+            && let Some(scope) = scope
+        {
+            for namespace in [Namespace::Value, Namespace::Type, Namespace::Namespace] {
+                builder.open(scope, namespace, OpenReason::ParseError);
+            }
+        }
+        snippet_ids[index] = builder.add_snippet(
             snippet.content_range,
             snippet.content_offset,
             snippet.source,
-            host,
+            snippet_host,
+            scope,
         );
     }
 
+    server::collect_server_semantics(&mut builder, host, snippets, &snippet_ids, server_scope);
     builder.finish()
 }
 
@@ -104,11 +133,16 @@ fn add_element_block(builder: &mut ModelBuilder, element: &HtmlElement) {
     } else {
         return;
     };
-    let content = element.children().syntax().descendants().find_map(|node| {
-        HtmlEmbeddedContent::cast(node)
-            .and_then(|content| content.value_token().ok())
-            .map(|token| token.text_range())
-    });
+    let content = element
+        .children()
+        .syntax()
+        .preorder_of_kinds(HtmlEmbeddedContent::KIND_SET)
+        .find_map(|event| match event {
+            WalkEvent::Enter(node) => HtmlEmbeddedContent::cast(node),
+            WalkEvent::Leave(_) => None,
+        })
+        .and_then(|content| content.value_token().ok())
+        .map(|token| token.text_range());
     let module_scope =
         kind == BlockKind::Script && element.is_javascript_tag() && !element.has_astro_is_raw();
     add_block(builder, kind, element.range(), content, module_scope);

@@ -15,4 +15,6 @@ pub struct AstroSnippet<'a> {
     pub content_range: TextRange,
     /// The host-document offset of guest coordinate zero.
     pub content_offset: TextSize,
+    /// Whether parsing the guest tree produced an error diagnostic.
+    pub has_errors: bool,
 }
