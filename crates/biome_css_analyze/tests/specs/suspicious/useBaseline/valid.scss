@@ -3,3 +3,15 @@
 :#{$name}-foo { color: red; }
 ::foo-#{$name} { color: red; }
 ::#{$name}-foo { color: red; }
+
+$offset: -2px;
+
+.sass-evaluated {
+  width: round(1.6px, 1px);
+  height: abs($offset);
+  margin: mod(7px, 3px);
+  padding: pow(2, 3) * 1px;
+  border-width: hypot(3px, 4mm);
+  font-size: round(1.5em, 1em);
+  inset: mod(10%, 3%);
+}

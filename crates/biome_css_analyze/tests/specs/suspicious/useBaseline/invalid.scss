@@ -2,3 +2,15 @@
 @mixin theme {
   accent-color: auto;
 }
+
+$size: 1.6px;
+
+.emitted-by-sass {
+  width: abs(var(--offset));
+  height: round(up, env(safe-area-inset-top), 1px);
+  margin: abs(20% - 100px);
+  padding: mod(100vw, 7px);
+  border-width: hypot(3px, 4em);
+  inset: abs(#{$size});
+  top: round(1.6PX, 1px);
+}
