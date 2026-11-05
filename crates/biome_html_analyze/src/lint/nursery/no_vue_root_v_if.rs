@@ -55,7 +55,7 @@ impl Rule for NoVueRootVIf {
             return None;
         }
 
-        let template = ctx.query().html().iter().find_map(|element| match element {
+        let template = ctx.query().elements().find_map(|element| match element {
             AnyHtmlElement::HtmlElement(element)
                 if element
                     .opening_element()
