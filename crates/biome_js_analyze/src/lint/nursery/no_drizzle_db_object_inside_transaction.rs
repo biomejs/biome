@@ -4,7 +4,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsMemberExpression, JsCallArguments, JsCallExpression, JsReferenceIdentifier, JsSyntaxKind,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::no_drizzle_db_object_inside_transaction::NoDrizzleDbObjectInsideTransactionOptions;
 
 use crate::services::semantic::Semantic;
@@ -89,9 +89,16 @@ impl Rule for NoDrizzleDbObjectInsideTransaction {
             .ancestors()
             .filter_map(JsCallArguments::cast)
             .any(|arguments| {
-                transaction_object(&arguments).is_some_and(|object| {
-                    object.has_name(name) && model.binding(&object) == model.binding(reference)
-                })
+                // Only the callback runs inside the transaction; a trailing config argument doesn't.
+                let in_callback = arguments
+                    .args()
+                    .first()
+                    .and_then(Result::ok)
+                    .is_some_and(|callback| callback.range().contains_range(reference.range()));
+                in_callback
+                    && transaction_object(&arguments).is_some_and(|object| {
+                        object.has_name(name) && model.binding(&object) == model.binding(reference)
+                    })
             })
             .then_some(())
     }

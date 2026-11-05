@@ -38,5 +38,8 @@ await orm.transaction(async (tx) => {
 	await orm.select().from(users);
 });
 
+// transaction config argument runs outside the callback
+await db.transaction(async (tx) => {}, { isolationLevel: chooseLevel(db) });
+
 // not a transaction call
 await db.batch([db.select().from(users)]);
