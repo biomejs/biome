@@ -9,7 +9,7 @@ use biome_css_syntax::{
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_type_selector::NoUnknownTypeSelectorOptions;
 
 use crate::utils::is_known_type_selector;
@@ -55,22 +55,21 @@ fn is_keyframe_selector_in_scss_block(type_selector: &CssTypeSelector, name: &st
     {
         return false;
     }
-    let Some(compound) = type_selector
-        .syntax()
-        .parent()
-        .and_then(CssCompoundSelector::cast)
-    else {
+    // Equal ranges rule out sibling selectors and combinators without allocating child nodes.
+    let range = type_selector.syntax().text_trimmed_range();
+    let Some(mut selector) = type_selector.syntax().parent().filter(|node| {
+        CssCompoundSelector::can_cast(node.kind()) && node.text_trimmed_range() == range
+    }) else {
         return false;
     };
-    if !compound.nesting_selectors().is_empty() || !compound.sub_selectors().is_empty() {
-        return false;
-    }
-    let mut selector = compound.into_syntax();
-    if let Some(relative) = selector.parent().and_then(CssRelativeSelector::cast) {
-        if relative.combinator().is_some() {
+    if let Some(relative) = selector
+        .parent()
+        .filter(|node| CssRelativeSelector::can_cast(node.kind()))
+    {
+        if relative.text_trimmed_range() != range {
             return false;
         }
-        selector = relative.into_syntax();
+        selector = relative;
     }
     let Some(rule) = selector
         .grand_parent()
