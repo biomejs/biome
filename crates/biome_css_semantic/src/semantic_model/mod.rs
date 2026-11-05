@@ -234,6 +234,7 @@ mod tests {
             r#".a {
   --color-#{$name}: red;
   --#{$name}: blue;
+  --size-/* comment */#{$name}: 1px;
 }"#,
             CssFileSource::scss(),
             CssParserOptions::default(),
@@ -246,7 +247,7 @@ mod tests {
             .map(|(prefix, _)| prefix.text())
             .collect();
 
-        assert_eq!(prefixes, ["--color-", "--"]);
+        assert_eq!(prefixes, ["--color-", "--", "--size-"]);
     }
 
     #[test]
