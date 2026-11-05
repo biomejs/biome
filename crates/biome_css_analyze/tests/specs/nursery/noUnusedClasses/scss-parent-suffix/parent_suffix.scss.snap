@@ -1,0 +1,304 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: parent_suffix.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$state: active;
+
+.block {
+  color: red;
+
+  &__used {
+    color: red;
+  }
+
+  &__unused {
+    color: red;
+  }
+
+  &--used {
+    color: red;
+
+    &__deep {
+      color: red;
+    }
+  }
+
+  &-#{$state} {
+    color: red;
+  }
+
+  @at-root &__root {
+    color: red;
+  }
+}
+
+.first,
+.second {
+  &-suffix {
+    color: red;
+  }
+}
+
+@mixin element {
+  &__mixin {
+    color: red;
+  }
+}
+
+.parent {
+  @at-root .other {
+    &-child {
+      color: red;
+    }
+  }
+
+  @at-root &__root {
+    &--modifier {
+      color: red;
+    }
+  }
+}
+
+@mixin modifier($name) {
+  &--#{$name} {
+    @content;
+  }
+}
+
+.card {
+  @include modifier(big) {
+    &__title {
+      color: red;
+    }
+  }
+}
+
+div {
+  &-type {
+    color: red;
+  }
+}
+
+#id {
+  &-id {
+    color: red;
+  }
+}
+
+.hover:hover {
+  &-pseudo {
+    color: red;
+  }
+}
+
+.one.two,
+span {
+  &-mixed {
+    color: red;
+  }
+}
+
+.btn,
+.theme-dark .btn {
+  &__icon {
+    color: red;
+  }
+}
+
+.outer {
+  .inner {
+    @supports selector(&-supported) {
+      color: red;
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+parent_suffix.scss:11:3 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class block__unused is not referenced in any HTML or JSX file.
+  
+     9 │   }
+    10 │ 
+  > 11 │   &__unused {
+       │   ^^^^^^^^^
+    12 │     color: red;
+    13 │   }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:18:5 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class block--used__deep is not referenced in any HTML or JSX file.
+  
+    16 │     color: red;
+    17 │ 
+  > 18 │     &__deep {
+       │     ^^^^^^^
+    19 │       color: red;
+    20 │     }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:27:12 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class block__root is not referenced in any HTML or JSX file.
+  
+    25 │   }
+    26 │ 
+  > 27 │   @at-root &__root {
+       │            ^^^^^^^
+    28 │     color: red;
+    29 │   }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:34:3 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class second-suffix is not referenced in any HTML or JSX file.
+  
+    32 │ .first,
+    33 │ .second {
+  > 34 │   &-suffix {
+       │   ^^^^^^^^
+    35 │     color: red;
+    36 │   }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:47:5 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class other-child is not referenced in any HTML or JSX file.
+  
+    45 │ .parent {
+    46 │   @at-root .other {
+  > 47 │     &-child {
+       │     ^^^^^^^
+    48 │       color: red;
+    49 │     }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:53:5 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class parent__root--modifier is not referenced in any HTML or JSX file.
+  
+    52 │   @at-root &__root {
+  > 53 │     &--modifier {
+       │     ^^^^^^^^^^^
+    54 │       color: red;
+    55 │     }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:93:3 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class two-mixed is not referenced in any HTML or JSX file.
+  
+    91 │ .one.two,
+    92 │ span {
+  > 93 │   &-mixed {
+       │   ^^^^^^^
+    94 │     color: red;
+    95 │   }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+parent_suffix.scss:100:3 lint/nursery/noUnusedClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class btn__icon is not referenced in any HTML or JSX file.
+  
+     98 │ .btn,
+     99 │ .theme-dark .btn {
+  > 100 │   &__icon {
+        │   ^^^^^^^
+    101 │     color: red;
+    102 │   }
+  
+  i Unused CSS classes add dead weight to your stylesheet, increase bundle size, and make the codebase harder to maintain.
+  
+  i Either use this class somewhere or remove the selector.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
