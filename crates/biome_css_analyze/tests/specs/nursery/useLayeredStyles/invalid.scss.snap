@@ -10,6 +10,45 @@ $color: red;
   color: $color;
 }
 
+@mixin card {
+  .card {
+    color: red;
+  }
+}
+
+@mixin dashed_name {
+  .dashed {
+    color: red;
+  }
+}
+
+@include card;
+@include dashed-name;
+
+@mixin base-card {
+  .base {
+    color: red;
+  }
+}
+
+@mixin wrapped-card {
+  @include base-card;
+}
+
+@include wrapped-card;
+
+@mixin wrapper {
+  @include defined-after;
+}
+
+@mixin defined-after {
+  .after {
+    color: red;
+  }
+}
+
+@include wrapper;
+
 ```
 
 # Diagnostics
@@ -26,10 +65,93 @@ invalid.scss:3:1 lint/nursery/useLayeredStyles ━━━━━━━━━━━
   > 5 │ }
       │ ^
     6 │ 
+    7 │ @mixin card {
   
   i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
   
   i Wrap the style rule in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:19:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This include emits style rules outside of a cascade layer.
+  
+    17 │ }
+    18 │ 
+  > 19 │ @include card;
+       │  ^^^^^^^^^^^^^
+    20 │ @include dashed-name;
+    21 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the include in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:20:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This include emits style rules outside of a cascade layer.
+  
+    19 │ @include card;
+  > 20 │ @include dashed-name;
+       │  ^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ @mixin base-card {
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the include in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:32:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This include emits style rules outside of a cascade layer.
+  
+    30 │ }
+    31 │ 
+  > 32 │ @include wrapped-card;
+       │  ^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ @mixin wrapper {
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the include in a @layer block to control its place in the cascade.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:44:2 lint/nursery/useLayeredStyles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This include emits style rules outside of a cascade layer.
+  
+    42 │ }
+    43 │ 
+  > 44 │ @include wrapper;
+       │  ^^^^^^^^^^^^^^^^
+    45 │ 
+  
+  i Style rules outside a cascade layer always take precedence over layered styles, which makes the cascade harder to predict and override.
+  
+  i Wrap the include in a @layer block to control its place in the cascade.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
