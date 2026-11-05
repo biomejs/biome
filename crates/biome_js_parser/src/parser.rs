@@ -7,15 +7,22 @@ use biome_parser::*;
 pub(crate) mod rewrite_parser;
 pub(crate) mod single_token_parse_recovery;
 
+#[cfg(feature = "bulk_lexer")]
+pub(crate) use crate::bulk_lexer::{
+    BulkTokenSource as ParserTokenSource, BulkTokenSourceCheckpoint as ParserTokenSourceCheckpoint,
+};
 use crate::lexer::JsReLexContext;
 pub(crate) use crate::parser::parse_recovery::{
     ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
 };
 use crate::prelude::*;
+use crate::state::JsParserStateCheckpoint;
 use crate::state::{ChangeParserState, ParserStateGuard};
-use crate::token_source::JsTokenSourceCheckpoint;
+#[cfg(not(feature = "bulk_lexer"))]
+pub(crate) use crate::token_source::{
+    JsTokenSource as ParserTokenSource, JsTokenSourceCheckpoint as ParserTokenSourceCheckpoint,
+};
 use crate::*;
-use crate::{state::JsParserStateCheckpoint, token_source::JsTokenSource};
 use biome_js_syntax::JsSyntaxKind::{self};
 use biome_languages::JsFileSource;
 use biome_parser::diagnostic::merge_diagnostics;
@@ -33,7 +40,7 @@ pub struct JsParser<'source> {
     pub(super) state: JsParserState,
     pub source_type: JsFileSource,
     context: ParserContext<JsSyntaxKind>,
-    source: JsTokenSource<'source>,
+    source: ParserTokenSource<'source>,
     options: JsParserOptions,
 }
 
@@ -51,7 +58,10 @@ impl<'source> JsParser<'source> {
         options: JsParserOptions,
         metavariables: &'source [TextRange],
     ) -> Self {
-        let source = JsTokenSource::from_str(source, metavariables);
+        #[cfg(feature = "bulk_lexer")]
+        let source = ParserTokenSource::new(source, &source_type, metavariables);
+        #[cfg(not(feature = "bulk_lexer"))]
+        let source = ParserTokenSource::from_str(source, metavariables);
 
         JsParser {
             state: JsParserState::new(&source_type),
@@ -162,7 +172,7 @@ impl<'source> JsParser<'source> {
 
 impl<'source> Parser for JsParser<'source> {
     type Kind = JsSyntaxKind;
-    type Source = JsTokenSource<'source>;
+    type Source = ParserTokenSource<'source>;
 
     fn context(&self) -> &ParserContext<Self::Kind> {
         &self.context
@@ -221,7 +231,7 @@ impl<'source> Parser for JsParser<'source> {
 
 pub struct JsParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
-    pub(super) source: JsTokenSourceCheckpoint,
+    pub(super) source: ParserTokenSourceCheckpoint,
     state: JsParserStateCheckpoint,
 }
 
