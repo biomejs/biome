@@ -198,6 +198,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_conditional_expect::NoConditionalExpectOptions>(),
     ));
     result.push((
+        "nursery",
+        "noConfusingArraySplice",
+        TypeId::of::<biome_rule_options::no_confusing_array_splice::NoConfusingArraySpliceOptions>(
+        ),
+    ));
+    result.push((
         "suspicious",
         "noConfusingLabels",
         TypeId::of::<biome_rule_options::no_confusing_labels::NoConfusingLabelsOptions>(),
