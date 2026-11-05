@@ -111,7 +111,7 @@ impl SemanticModelBuilder {
         let Some(parent_rule) = self.get_last_parent_selector_rule() else {
             return false;
         };
-        let parent_range = parent_rule.range(&self.root);
+        let parent_range = parent_rule.range;
 
         node.syntax()
             .ancestors()
@@ -149,6 +149,7 @@ impl SemanticModelBuilder {
                 let new_rule = RuleData {
                     id: new_rule_id,
                     node: AstPtr::new(&node),
+                    range: node.text_trimmed_range(),
                     selectors: Vec::new(),
                     declarations: Vec::new(),
                     parent_id,
@@ -167,7 +168,7 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::RuleEnd => {
                 if let Some(completed_rule_id) = self.current_rule_stack.pop() {
-                    let range = self.all_rules[completed_rule_id.index()].range(&self.root);
+                    let range = self.all_rules[completed_rule_id.index()].range;
                     self.range_to_rule_id.insert(range, completed_rule_id);
 
                     if self.current_rule_stack.is_empty() {
@@ -215,10 +216,12 @@ impl SemanticModelBuilder {
 
                     let current_rule = &mut self.all_rules[current_rule_id.index()];
                     let combined = parent_specificity + specificity;
+                    let range = node.syntax().text_trimmed_range();
 
                     for resolved in resolved_selectors {
                         current_rule.selectors.push(SelectorData {
                             node: AstPtr::new(&node),
+                            range,
                             resolved,
                             specificity: combined,
                         });
