@@ -1,0 +1,26 @@
+(a = b).c;
+(a, b) + c;
+(a) ? b : c;
+async (a = b);
+(a = /\)/) => a;
+(a = `)`) => a;
+(a = b): c => a;
+x ? (a = b) : c;
+<T>x;
+<any>this.y;
+<T>(a: T) => a;
+i < n;
+f(a < b, c > d);
+a < b ? c : d;
+a < 1 === b;
+f<T>(a);
+type F = (a: string) => void;
+type G = (a) => void;
+type H = (this: Window) => void;
+type I = ({ a }: B) => void;
+type J = (A);
+export { a, "b" as c, type d } from "e";
+export type { f, g as default } from "h";
+export { i };
+export { j }
+from "k";

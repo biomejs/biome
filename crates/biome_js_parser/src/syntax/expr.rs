@@ -234,6 +234,8 @@ pub(super) fn parse_literal_expression(p: &mut JsParser) -> ParsedSyntax {
         JsSyntaxKind::TRUE_KW | JsSyntaxKind::FALSE_KW => {
             JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION
         }
+        JS_REGEX_LITERAL => JS_REGEX_LITERAL_EXPRESSION,
+        // The bulk lexer read a division where the grammar expects an expression.
         T![/] | T![/=] if p.re_lex(JsReLexContext::Regex) == JS_REGEX_LITERAL => {
             JS_REGEX_LITERAL_EXPRESSION
         }
@@ -241,7 +243,8 @@ pub(super) fn parse_literal_expression(p: &mut JsParser) -> ParsedSyntax {
     };
 
     let m = p.start();
-    p.bump_any();
+    // Not `bump_any`, which re-lexes a regex as a division.
+    p.bump(p.cur());
     Present(m.complete(p, literal_kind))
 }
 
@@ -510,11 +513,14 @@ fn parse_conditional_expr_consequent(p: &mut JsParser, context: ExpressionContex
     let checkpoint = p.checkpoint();
 
     let arrow_expression = parse_arrow_function_expression(p, context);
-    if arrow_expression.is_present() && p.at(T![:]) {
-        return arrow_expression;
+    if arrow_expression.is_present() {
+        if p.at(T![:]) {
+            return arrow_expression;
+        }
+        p.rewind(checkpoint);
     }
 
-    p.rewind(checkpoint);
+    // An absent arrow function consumed nothing, so there's nothing to rewind.
     parse_assignment_expression_or_higher_base(p, context)
 }
 
@@ -523,6 +529,9 @@ pub(crate) fn is_at_binary_operator(p: &JsParser, context: ExpressionContext) ->
 
     match cur_kind {
         T![in] => context.is_in_included(),
+        // A regex that the bulk lexer read where an operator goes is a division, unless it starts
+        // with the `/=` assignment operator.
+        JS_REGEX_LITERAL => !p.cur_text().starts_with("/="),
         kind => OperatorPrecedence::try_from_binary_operator(kind).is_some(),
     }
 }
@@ -551,7 +560,7 @@ fn parse_binary_or_logical_expression(
         // current operator has the same or a lower precedence than the left-hand side expression. Thus,
         // the algorithm goes at most `count(OperatorPrecedence)` levels deep.
         loop {
-            let op = p.re_lex(JsReLexContext::BinaryOperator);
+            let op = p.re_lex_binary_operator();
 
             if (op == T![as] && p.has_preceding_line_break())
                 || (op == T![satisfies] && p.has_preceding_line_break())
@@ -1266,6 +1275,7 @@ pub(crate) fn is_nth_at_expression(p: &mut JsParser, n: usize) -> bool {
         | T![<]
         | T![/]
         | T![/=]
+        | JS_REGEX_LITERAL
         | BACKTICK
         | TRUE_KW
         | FALSE_KW

@@ -13,6 +13,8 @@ pub(super) struct Block {
     pub(super) starts: u64,
     /// `\n` and `\r`.
     pub(super) line_break: u64,
+    /// The bytes that start whitespace or line break tokens.
+    pub(super) whitespace: u64,
     /// Bytes of non-ASCII chars.
     pub(super) non_ascii: u64,
     /// Bytes that need a closer look than their class gives: quotes, the backtick, `/`, `\`, `#`,
@@ -177,6 +179,7 @@ impl StartTracker {
         let block = Block {
             starts,
             line_break: lf | cr,
+            whitespace: space | lf | cr,
             non_ascii: classes.non_ascii & valid,
             special: classes.special & valid,
             brace: classes.brace & valid,

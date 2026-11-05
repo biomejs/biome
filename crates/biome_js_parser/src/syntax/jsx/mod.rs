@@ -685,7 +685,8 @@ impl ParseNodeList for JsxAttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
-        matches!(p.cur(), T![>] | T![/] | T![<])
+        // No attribute starts with a regex: it's the `/` that ends the tag.
+        matches!(p.re_lex_regex_as_slash(), T![>] | T![/] | T![<])
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {

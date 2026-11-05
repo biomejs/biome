@@ -1,4 +1,4 @@
-use crate::parser::{JsParser, ParserTokenSourceCheckpoint};
+use crate::parser::{BulkTokenSourceCheckpoint, JsParser};
 
 use crate::prelude::*;
 use biome_console::fmt::Display;
@@ -28,30 +28,30 @@ pub(crate) struct RewriteParser<'parser, 'source> {
 
     inner: &'parser mut JsParser<'source>,
 
-    /// Offset to the next not yet processed trivia in [TokenSource::trivia_list].
-    trivia_offset: usize,
+    /// Index of the first token of the token source that the rewriter hasn't passed yet.
+    token: usize,
 }
 
 impl<'parser, 'source> RewriteParser<'parser, 'source> {
-    pub fn new(p: &'parser mut JsParser<'source>, checkpoint: ParserTokenSourceCheckpoint) -> Self {
+    pub fn new(p: &'parser mut JsParser<'source>, checkpoint: BulkTokenSourceCheckpoint) -> Self {
         Self {
             inner: p,
             offset: checkpoint.current_start(),
-            trivia_offset: checkpoint.trivia_position(),
+            token: checkpoint.token_index(),
         }
     }
 
     /// Starts a marker for a new node.
     pub fn start(&mut self) -> RewriteMarker {
         let pos = self.inner.context().events().len() as u32;
-        self.skip_trivia(false);
+        self.skip_trivia();
         self.inner.context_mut().push_event(Event::tombstone());
         RewriteMarker(Marker::new(pos, self.offset))
     }
 
     /// Bumps the passed in token
     pub fn bump(&mut self, token: RewriteToken) {
-        self.skip_trivia(false);
+        self.skip_trivia();
         debug_assert!(self.offset < token.end);
         self.inner.context_mut().push_token(token.kind, token.end);
 
@@ -60,18 +60,20 @@ impl<'parser, 'source> RewriteParser<'parser, 'source> {
         // class Test {}
 
         self.offset = token.end;
-        self.skip_trivia(true);
     }
 
-    fn skip_trivia(&mut self, trailing: bool) {
-        let remaining_trivia = &self.inner.source().trivia_list[self.trivia_offset..];
-        for trivia in remaining_trivia {
-            if trailing != trivia.trailing() || self.offset != trivia.offset() {
-                break;
+    /// Moves `offset` past the trivia, and the tokens skipped as trivia, to the start of the next
+    /// token.
+    fn skip_trivia(&mut self) {
+        let source = self.inner.source();
+        while self.token < source.token_count() {
+            let range = source.token_range(self.token);
+            if range.end() <= self.offset || source.is_skipped(self.token) {
+                self.token += 1;
+                continue;
             }
-
-            self.trivia_offset += 1;
-            self.offset += trivia.len();
+            self.offset = self.offset.max(range.start());
+            break;
         }
     }
 
@@ -80,7 +82,7 @@ impl<'parser, 'source> RewriteParser<'parser, 'source> {
     /// ## Panics
     /// If not all tokens have been consumed or if they have been consumed out of order
     pub fn finish(mut self) {
-        self.skip_trivia(false); // Skip the leading trivia up to the current token.
+        self.skip_trivia();
         assert_eq!(
             self.offset,
             self.inner.source().position(),

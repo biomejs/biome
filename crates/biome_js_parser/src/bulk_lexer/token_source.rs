@@ -1,6 +1,18 @@
+//! The parser's token source: the non-trivia tokens that [BulkTokens] decided on, in flat arrays
+//! that the parser moves through by index.
+//!
+//! The parser reads the tokens as the bulk pass decided them, a regex included. Where its grammar
+//! needs a token in a lexing context that the stream's token doesn't fit, or re-lexes a token,
+//! the token source lexes with [JsLexer] from there and splices the tokens it gets into the
+//! stream, up to where they meet the stream's tokens again.
+//!
+//! The trivia isn't tracked while parsing: [BulkTokenSource::finish] collects it from the gaps
+//! between the tokens of the final stream.
+
+use super::stream::{Stream, Token};
 use super::{
-    BulkLexOptions, BulkTokens, DIAGNOSTICS, JSX_ATTRIBUTE_VALUE, REGULAR, TokenDiagnostic,
-    UNICODE_ESCAPE, context_flag, kind,
+    BulkLexOptions, BulkTokens, CONTEXTS, DIAGNOSTICS, GAP_DIAGNOSTICS, GAP_SHIFT,
+    JSX_ATTRIBUTE_VALUE, LINE_BREAK, REGULAR, TokenDiagnostic, UNICODE_ESCAPE, context_flag, kind,
 };
 use crate::lexer::{JsLexContext, JsLexer, JsReLexContext, TextRange};
 use crate::prelude::*;
@@ -11,79 +23,13 @@ use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::JsFileSource;
 use biome_parser::lexer::{Lexer, TokenFlags};
 use biome_parser::token_source::Trivia;
-use biome_rowan::{SyntaxKind, TextSize, TriviaPieceKind};
+use biome_rowan::{TextSize, TriviaPieceKind};
 
-/// Token source for the parser over [BulkTokens], which skips over any non-trivia token.
-///
-/// The parser's lexing contexts and re-lexing pick among the tokens that [BulkTokens] decided
-/// on: a regex reads as the `/` or `/=` that [JsLexer] returns, until the parser re-lexes it.
-/// Where the parser asks for a token that the bulk tokens don't have, at an offset where no bulk
-/// token starts or in a context they didn't predict, the token source lexes with [JsLexer] until
-/// it reaches a bulk token that fits again.
-pub struct BulkTokenSource<'l> {
-    lexer: JsLexer<'l>,
-    tokens: BulkTokens,
-
-    current: JsSyntaxKind,
-    current_start: TextSize,
-    current_end: TextSize,
-    current_has_line_break: bool,
-    current_has_unicode_escape: bool,
-    /// The length of `diagnostics` before the diagnostics of the current token.
-    current_diagnostics: u32,
-
-    /// Index of the bulk token that starts at `current_end`, or [NO_TOKEN] if none does.
-    ///
-    /// Not an `Option`: writing an `Option<u32>` takes two stores, which the next read can't
-    /// forward from.
-    next: u32,
-
-    /// When the current token is the `/` or `/=` of a regex that the bulk tokens decided on,
-    /// the index of that regex, else [NO_TOKEN].
-    regex: u32,
-
-    /// Whether a line break separates the last non-trivia token from `current_end`.
-    after_newline: bool,
-
-    /// The index of a bulk token at or before `current_end`, where [BulkTokens::find_from]
-    /// starts searching when the token source lexes with [JsLexer].
-    resync_hint: u32,
-
-    /// The last token that [Self::lookahead] returned, so that scanning ahead one token at a
-    /// time doesn't start over from the current token for every token.
-    lookahead: LookaheadCursor,
-
-    /// The diagnostics of the tokens up to the current one.
-    diagnostics: Vec<ParseDiagnostic>,
-
-    /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
-    pub(crate) trivia_list: Vec<Trivia>,
-}
-
-/// The value of [BulkTokenSource::next] when no bulk token starts at the current token's end.
-const NO_TOKEN: u32 = u32::MAX;
-
-/// Where [BulkTokenSource::lookahead] stopped. Lookahead reads the tokens after the current one
-/// as [JsLexContext::Regular] does, so it depends only on where the current token ends.
-#[derive(Clone, Copy)]
-struct LookaheadCursor {
-    /// The end of the current token when the lookahead ran.
-    from: TextSize,
-    /// How many non-trivia tokens after the current one the lookahead read, or zero if none.
-    count: usize,
-    /// The last of those tokens.
-    token: LookaheadToken,
-    /// Index of the bulk token after it, or [NO_TOKEN].
-    next: u32,
-}
-
-/// A token returned by lookahead.
-#[derive(Clone, Copy)]
-struct LookaheadToken {
-    kind: JsSyntaxKind,
-    range: TextRange,
-    has_preceding_line_break: bool,
-}
+/// The token source lexed the token with [JsLexer]; its diagnostics, and those of the trivia
+/// before it, are in [BulkTokenSource::lexed_diagnostics].
+const LEXED: u32 = 1 << 22;
+/// The parser skipped the token as trivia.
+const SKIPPED: u32 = 1 << 23;
 
 /// Returns the trivia kind of `kind`, if it's trivia.
 #[inline(always)]
@@ -97,6 +43,65 @@ fn trivia_kind(kind: JsSyntaxKind) -> Option<TriviaPieceKind> {
     }
 }
 
+/// Returns the bits that a word needs for its token and the trivia before it to fit `context`, or
+/// `None` for a context that no stream token is known to fit.
+#[inline(always)]
+fn needed(context: JsLexContext) -> Option<u32> {
+    context_flag(context).map(|flag| {
+        let flag = u32::from(flag);
+        flag | flag << GAP_SHIFT
+    })
+}
+
+/// A splice of the stream, which a rewind undoes.
+struct Splice {
+    pos: usize,
+    /// How many tokens the splice put in.
+    inserted: usize,
+    /// The tokens that it took out.
+    removed: Vec<Token>,
+}
+
+/// Token source for the parser over the stream of [BulkTokens].
+pub struct BulkTokenSource<'l> {
+    lexer: JsLexer<'l>,
+    /// The diagnostics of the bulk pass.
+    bulk: BulkTokens,
+
+    /// The non-trivia tokens, ending with [EOF].
+    stream: Stream,
+    /// Index of the current token, which is never before the gap of `stream`.
+    pos: usize,
+    /// The token at `pos`, and its kind.
+    current: Token,
+    current_kind: JsSyntaxKind,
+
+    /// The length of `diagnostics` before the diagnostics of the token at `current_diagnostics_pos`.
+    /// Any other current token arrived without diagnostics.
+    current_diagnostics: u32,
+    current_diagnostics_pos: usize,
+    /// The diagnostics of the tokens up to the current one.
+    diagnostics: Vec<ParseDiagnostic>,
+    /// The diagnostics of the tokens marked [LEXED] and the trivia before them, by token start,
+    /// with the index at which the diagnostics of each lexing of a token start: the latest lexing
+    /// of the token at a start is the one in the stream.
+    lexed_diagnostics: Vec<(u32, u32, ParseDiagnostic)>,
+
+    /// The splices since the start, for rewinds to undo.
+    splices: Vec<Splice>,
+
+    /// The indices of the tokens that the parser skipped as trivia, in order.
+    skipped: Vec<u32>,
+    /// The trivia between the tokens of the bulk pass.
+    trivia: Vec<Trivia>,
+    /// Whether the trivia between the tokens of the stream may differ from `trivia`.
+    trivia_changed: bool,
+    /// The trivia that [JsLexer] lexed, in the contexts that the parser asked for, and the tokens
+    /// that re-lexing turned into trivia. Later re-lexing can bring tokens back where such trivia
+    /// was, so [Self::trivia] only takes the latest trivia in the gaps of the final stream.
+    relexed_trivia: Vec<Trivia>,
+}
+
 impl<'l> BulkTokenSource<'l> {
     /// Creates a new token source for the given string, lexing the given source ranges as Grit
     /// metavariables.
@@ -106,470 +111,385 @@ impl<'l> BulkTokenSource<'l> {
         metavariables: &'l [TextRange],
     ) -> Self {
         let mut lexer = JsLexer::from_str(source).with_metavariables(metavariables);
-        // `BulkTokens` doesn't lex metavariables, so the lexer lexes every token around them.
-        let tokens = if metavariables.is_empty() {
-            BulkTokens::new(&mut lexer, BulkLexOptions::new(source_type))
+        let mut source = if metavariables.is_empty() {
+            let bulk = BulkTokens::new(&mut lexer, BulkLexOptions::new(source_type));
+            Self::from_bulk(lexer, bulk)
         } else {
-            BulkTokens::new_empty(TextSize::of(source))
+            // `BulkTokens` doesn't lex metavariables, so the lexer lexes every token.
+            Self::lexed(lexer)
         };
-
-        let mut source = Self {
-            lexer,
-            next: if tokens.start(0) == 0 { 0 } else { NO_TOKEN },
-            tokens,
-            current: JsSyntaxKind::TOMBSTONE,
-            current_start: TextSize::from(0),
-            current_end: TextSize::from(0),
-            current_has_line_break: false,
-            current_has_unicode_escape: false,
-            current_diagnostics: 0,
-            regex: NO_TOKEN,
-            after_newline: false,
-            resync_hint: 0,
-            lookahead: LookaheadCursor {
-                from: TextSize::from(0),
-                count: 0,
-                token: LookaheadToken {
-                    kind: EOF,
-                    range: TextRange::default(),
-                    has_preceding_line_break: false,
-                },
-                next: NO_TOKEN,
-            },
-            diagnostics: Vec::new(),
-            trivia_list: vec![],
-        };
-
-        source.next_non_trivia_token(JsLexContext::default(), true);
+        source.arrive(JsLexContext::Regular);
         source
     }
 
-    /// Whether the parser can take the bulk token `raw` as is when it asks for a token in
-    /// `context`.
+    /// Creates a token source over the tokens of `bulk`.
+    fn from_bulk(lexer: JsLexer<'l>, mut bulk: BulkTokens) -> Self {
+        let (tokens, trivia) = bulk.take_tokens();
+        Self {
+            lexer,
+            bulk,
+            stream: Stream::new(tokens),
+            pos: 0,
+            current: Token::default(),
+            current_kind: EOF,
+            current_diagnostics: 0,
+            current_diagnostics_pos: 0,
+            diagnostics: Vec::new(),
+            lexed_diagnostics: Vec::new(),
+            splices: Vec::new(),
+            skipped: Vec::new(),
+            trivia,
+            trivia_changed: false,
+            relexed_trivia: Vec::new(),
+        }
+    }
+
+    /// Creates a token source whose tokens [JsLexer] lexes in [JsLexContext::Regular].
+    fn lexed(lexer: JsLexer<'l>) -> Self {
+        let mut source = Self::from_bulk(lexer, BulkTokens::new_empty());
+        source.lex_tokens(None, 0, JsLexContext::Regular);
+        source.trivia_changed = true;
+        source
+    }
+
     #[inline(always)]
-    fn accepts(&self, raw: u16, context: JsLexContext) -> bool {
+    fn word(&self) -> u32 {
+        self.current.word
+    }
+
+    /// Reads the token at `pos` into `current`.
+    #[inline(always)]
+    fn load_current(&mut self) {
+        self.current = *self.stream.ahead(self.pos);
+        self.current_kind = kind(self.current.word as u16);
+    }
+
+    /// The end of the token before the current one, where the trivia before it starts.
+    #[inline(always)]
+    fn gap_start(&self) -> u32 {
+        if self.pos == 0 {
+            0
+        } else {
+            self.stream.get(self.pos - 1).end
+        }
+    }
+
+    /// The length of `diagnostics` before the diagnostics of the current token.
+    fn current_diagnostics(&self) -> usize {
+        if self.current_diagnostics_pos == self.pos {
+            self.current_diagnostics as usize
+        } else {
+            self.diagnostics.len()
+        }
+    }
+
+    fn set_current_diagnostics(&mut self, len: usize) {
+        self.current_diagnostics = len as u32;
+        self.current_diagnostics_pos = self.pos;
+    }
+
+    /// Makes the token at `pos` the current token, as lexed in `context`.
+    #[inline(always)]
+    fn arrive(&mut self, context: JsLexContext) {
+        self.load_current();
+        let word = self.word();
+        if let Some(needed) = needed(context)
+            && word & needed == needed
+            && word & (u32::from(DIAGNOSTICS) | GAP_DIAGNOSTICS | LEXED) == 0
+        {
+            return;
+        }
+        self.arrive_slow(context);
+    }
+
+    #[inline(never)]
+    fn arrive_slow(&mut self, context: JsLexContext) {
+        if !self.fits(context) {
+            self.lex_tokens(None, self.gap_start(), context);
+        }
+        self.take_diagnostics(context);
+    }
+
+    /// Whether the current token and the trivia before it are what [JsLexer] returns in
+    /// `context`.
+    fn fits(&self, context: JsLexContext) -> bool {
+        let word = self.word();
         match context_flag(context) {
             Some(JSX_ATTRIBUTE_VALUE) => {
                 // An attribute value that isn't quoted lexes as in the regular context.
-                raw & JSX_ATTRIBUTE_VALUE != 0
-                    || (raw & REGULAR != 0
-                        && !matches!(
-                            self.lexer
-                                .source()
-                                .as_bytes()
-                                .get(usize::from(self.current_end)),
-                            Some(b'"' | b'\'')
-                        ))
+                let either = u32::from(JSX_ATTRIBUTE_VALUE | REGULAR);
+                let quoted = matches!(
+                    self.lexer
+                        .source()
+                        .as_bytes()
+                        .get(self.current.start as usize),
+                    Some(b'"' | b'\'')
+                );
+                (word & u32::from(JSX_ATTRIBUTE_VALUE) != 0
+                    || (word & u32::from(REGULAR) != 0 && !quoted))
+                    && word & either << GAP_SHIFT != 0
             }
-            Some(flag) => raw & flag != 0,
+            Some(flag) => {
+                let flag = u32::from(flag);
+                word & (flag | flag << GAP_SHIFT) == flag | flag << GAP_SHIFT
+            }
             None => false,
         }
     }
 
-    #[inline]
-    fn next_non_trivia_token(&mut self, context: JsLexContext, first_token: bool) {
-        let mut trailing = !first_token;
-        let flag = context_flag(context).unwrap_or(0);
-
-        loop {
-            // Take the bulk tokens that fit, without going through `self` for each.
-            let mut index = self.next;
-            let mut position = self.current_end;
-            let mut after_newline = self.after_newline;
-            while let Some(raw) = self.tokens.get(index)
-                && raw & flag != 0
-                && raw & DIAGNOSTICS == 0
-                && kind(raw) != JS_REGEX_LITERAL
-            {
-                let kind = kind(raw);
-                let end = TextSize::from(self.tokens.start(index + 1));
-                index += 1;
-                let Some(trivia_kind) = trivia_kind(kind) else {
-                    self.current = kind;
-                    self.current_start = position;
-                    self.current_end = end;
-                    self.current_has_line_break = after_newline;
-                    self.current_has_unicode_escape = raw & UNICODE_ESCAPE != 0;
-                    self.current_diagnostics = self.diagnostics.len() as u32;
-                    self.regex = NO_TOKEN;
-                    self.next = index;
-                    self.after_newline = false;
-                    return;
-                };
-                // Trivia after and including the newline is considered the leading trivia of the next token
-                if trivia_kind.is_newline() {
-                    trailing = false;
-                }
-                after_newline |= matches!(
-                    trivia_kind,
-                    TriviaPieceKind::Newline | TriviaPieceKind::MultiLineComment
-                );
-                self.trivia_list.push(Trivia::new(
-                    trivia_kind,
-                    TextRange::new(position, end),
-                    trailing,
-                ));
-                position = end;
-            }
-            self.next = index;
-            self.current_end = position;
-            self.after_newline = after_newline;
-
-            let kind = self.next_token_slow(context);
-            let Some(trivia_kind) = trivia_kind(kind) else {
-                return;
-            };
-            if trivia_kind.is_newline() {
-                trailing = false;
-            }
-            self.trivia_list
-                .push(Trivia::new(trivia_kind, self.current_range(), trailing));
-        }
-    }
-
-    /// Moves to the token at `current_end`, lexed in `context`.
-    fn next_token(&mut self, context: JsLexContext) -> JsSyntaxKind {
-        if let Some(raw) = self.tokens.get(self.next)
-            && raw & DIAGNOSTICS == 0
-            && kind(raw) != JS_REGEX_LITERAL
-            && self.accepts(raw, context)
-        {
-            return self.take_bulk_token(raw, context);
-        }
-        self.next_token_slow(context)
-    }
-
-    /// Makes the bulk token `raw` at `next` the current token.
-    fn take_bulk_token(&mut self, raw: u16, context: JsLexContext) -> JsSyntaxKind {
-        let kind = kind(raw);
-        let index = self.next;
-        self.current_start = self.current_end;
-        self.current_has_line_break = self.after_newline;
-        self.current_has_unicode_escape = raw & UNICODE_ESCAPE != 0;
-        self.current_diagnostics = self.diagnostics.len() as u32;
-        if kind == JS_REGEX_LITERAL {
-            // The parser reads the `/` or `/=` until it re-lexes it into the regex.
-            let source = self.lexer.source().as_bytes();
-            let (slash, len) = if source[usize::from(self.current_start) + 1] == b'=' {
-                (T![/=], 2)
-            } else {
-                (T![/], 1)
-            };
-            self.current = slash;
-            self.current_end = self.current_start + TextSize::from(len);
-            self.resync(self.current_end);
-            self.regex = index;
-            self.after_newline = false;
-            return slash;
-        }
-        self.regex = NO_TOKEN;
-        self.current = kind;
-        self.current_end = TextSize::from(self.tokens.start(index + 1));
-        if raw & DIAGNOSTICS != 0 {
-            let tagged = matches!(context, JsLexContext::TemplateElement { tagged: true });
-            let reported = self.tokens.diagnostics_at(self.current_start);
+    /// Adds the diagnostics of the current token and the trivia before it.
+    fn take_diagnostics(&mut self, context: JsLexContext) {
+        let word = self.word();
+        if word & GAP_DIAGNOSTICS != 0 {
             self.diagnostics.extend(
-                reported
+                self.bulk
+                    .diagnostics_in(self.gap_start(), self.current.start)
+                    .iter()
+                    .map(|TokenDiagnostic { diagnostic, .. }| diagnostic.clone()),
+            );
+        }
+        self.set_current_diagnostics(self.diagnostics.len());
+        let start = self.current.start;
+        if word & LEXED != 0
+            && let Some(&(_, lexing, _)) = self
+                .lexed_diagnostics
+                .iter()
+                .rev()
+                .find(|(token_start, ..)| *token_start == start)
+        {
+            self.diagnostics.extend(
+                self.lexed_diagnostics[lexing as usize..]
+                    .iter()
+                    .filter(|(token_start, entry_lexing, _)| {
+                        *token_start == start && *entry_lexing == lexing
+                    })
+                    .map(|(.., diagnostic)| diagnostic.clone()),
+            );
+        }
+        if word & u32::from(DIAGNOSTICS) != 0 {
+            let tagged = matches!(context, JsLexContext::TemplateElement { tagged: true });
+            self.diagnostics.extend(
+                self.bulk
+                    .diagnostics_at(TextSize::from(start))
                     .iter()
                     .filter(|diagnostic| !tagged || diagnostic.in_tagged_template)
                     .map(|TokenDiagnostic { diagnostic, .. }| diagnostic.clone()),
             );
         }
-        self.next = index + 1;
-        if !kind.is_trivia() {
-            self.after_newline = false;
-        } else if matches!(kind, NEWLINE | MULTILINE_COMMENT) {
-            self.after_newline = true;
-        }
-        kind
     }
 
-    /// Moves to the token at `current_end`, lexed in `context`, when it isn't the next bulk
-    /// token without diagnostics.
+    /// Puts tokens that [JsLexer] lexes in place of the stream's tokens from `pos`: `first`, if
+    /// any, then the tokens from `position`, the first non-trivia one in `context` and the rest
+    /// in [JsLexContext::Regular], until the lexer reaches the start of a later stream token.
     #[inline(never)]
-    fn next_token_slow(&mut self, context: JsLexContext) -> JsSyntaxKind {
-        if let Some(raw) = self.tokens.get(self.next)
-            && self.accepts(raw, context)
+    fn lex_tokens(&mut self, first: Option<Token>, mut position: u32, context: JsLexContext) {
+        let mut tokens: Vec<_> = first.into_iter().collect();
+        let mut context = if tokens.is_empty() {
+            context
+        } else {
+            JsLexContext::Regular
+        };
+        let mut gap_flags = 0;
+        let mut gap_diagnostics = Vec::new();
+        let mut next = self.pos;
+        let len = self.stream.len();
+        loop {
+            while next < len && self.stream.get(next).start < position {
+                next += 1;
+            }
+            if !tokens.is_empty()
+                && next > self.pos
+                && self.stream.get(next - 1).end == position
+                && gap_flags == 0
+                && gap_diagnostics.is_empty()
+            {
+                // A replaced token ended here, so the trivia after it and the stream's tokens
+                // from `next` on fit as they are.
+                break;
+            }
+            if !tokens.is_empty() && next < len && self.stream.get(next).start == position {
+                // The stream's tokens fit again from `next` on.
+                let word = &mut self.stream.get_mut(next).word;
+                *word &= !(LINE_BREAK | CONTEXTS << GAP_SHIFT | GAP_DIAGNOSTICS);
+                *word |= gap_flags | u32::from(REGULAR) << GAP_SHIFT;
+                if !gap_diagnostics.is_empty() {
+                    *word |= LEXED;
+                    self.set_lexed_diagnostics(position, gap_diagnostics);
+                }
+                break;
+            }
+            let kind = self
+                .lexer
+                .lex_at(position as usize, gap_flags != 0, context);
+            let range = self.lexer.current_range();
+            gap_diagnostics.extend(self.lexer.take_diagnostics_after(0));
+            let (start, end) = (u32::from(range.start()), u32::from(range.end()));
+            position = end;
+            if let Some(trivia_kind) = trivia_kind(kind) {
+                if matches!(kind, NEWLINE | MULTILINE_COMMENT) {
+                    gap_flags = LINE_BREAK;
+                }
+                self.relexed_trivia
+                    .push(Trivia::new(trivia_kind, range, false));
+                self.trivia_changed = true;
+                continue;
+            }
+            let flags = self.lexer.current_flags();
+            let context_bits = u32::from(context_flag(context).unwrap_or(0));
+            let mut word = kind as u32 | context_bits | context_bits << GAP_SHIFT | gap_flags;
+            if flags.has_unicode_escape() {
+                word |= u32::from(UNICODE_ESCAPE);
+            }
+            if !gap_diagnostics.is_empty() {
+                word |= LEXED;
+                self.set_lexed_diagnostics(start, std::mem::take(&mut gap_diagnostics));
+            }
+            tokens.push(Token { word, start, end });
+            gap_flags = 0;
+            context = JsLexContext::Regular;
+            if kind == EOF {
+                next = len;
+                break;
+            }
+        }
+        let removed = self
+            .stream
+            .splice(self.pos, next.min(len) - self.pos, &tokens);
+        self.load_current();
+        // The replaced tokens had trivia between them, or before the first token of a repair.
+        if removed.windows(2).any(|pair| pair[1].start > pair[0].end)
+            || removed
+                .first()
+                .zip(tokens.first())
+                .is_some_and(|(old, new)| old.start != new.start)
         {
-            return self.take_bulk_token(raw, context);
+            self.trivia_changed = true;
         }
-        let source = self.lexer.source().as_bytes();
-        let at = usize::from(self.current_end);
-        if context == JsLexContext::Regular
-            && source.get(at) == Some(&b'<')
-            && !matches!(source.get(at + 1), Some(b'<' | b'='))
-        {
-            // The second `<` of a `<<` that the parser split for type arguments.
-            self.regex = NO_TOKEN;
-            self.current = T![<];
-            self.current_start = self.current_end;
-            self.current_end = self.current_start + TextSize::from(1);
-            self.current_has_line_break = self.after_newline;
-            self.current_has_unicode_escape = false;
-            self.current_diagnostics = self.diagnostics.len() as u32;
-            self.after_newline = false;
-            self.resync(self.current_end);
-            return T![<];
-        }
-        self.lex_with_lexer(context)
+        self.splices.push(Splice {
+            pos: self.pos,
+            inserted: tokens.len(),
+            removed,
+        });
     }
 
-    /// Lexes the token at `current_end` with [JsLexer].
-    #[inline(never)]
-    fn lex_with_lexer(&mut self, context: JsLexContext) -> JsSyntaxKind {
-        let kind = self
-            .lexer
-            .lex_at(self.current_end.into(), self.after_newline, context);
-        self.current_diagnostics = self.diagnostics.len() as u32;
-        self.take_lexer_token(kind)
+    /// Records the diagnostics of the token lexed at `start`, in place of those of any earlier
+    /// lexing there.
+    fn set_lexed_diagnostics(&mut self, start: u32, diagnostics: Vec<ParseDiagnostic>) {
+        let lexing = self.lexed_diagnostics.len() as u32;
+        self.lexed_diagnostics.extend(
+            diagnostics
+                .into_iter()
+                .map(|diagnostic| (start, lexing, diagnostic)),
+        );
     }
 
-    /// Makes the lexer's current token the current token, with its diagnostics.
-    fn take_lexer_token(&mut self, kind: JsSyntaxKind) -> JsSyntaxKind {
-        self.regex = NO_TOKEN;
-        let range = self.lexer.current_range();
-        self.current = kind;
-        self.current_start = range.start();
-        self.current_end = range.end();
-        let flags = self.lexer.current_flags();
-        self.current_has_line_break = flags.has_preceding_line_break();
-        self.current_has_unicode_escape = flags.has_unicode_escape();
-        self.after_newline = self.lexer.after_newline();
-        self.diagnostics
-            .extend(self.lexer.take_diagnostics_after(0));
-        self.resync(range.end());
-        kind
-    }
-
-    /// Points `next` at the bulk token starting at `offset`, if there's one.
-    fn resync(&mut self, offset: TextSize) {
-        if self.next != NO_TOKEN {
-            self.resync_hint = self.next;
-        }
-        self.next = self
-            .tokens
-            .find_from(offset, self.resync_hint)
-            .unwrap_or(NO_TOKEN);
-        if self.next != NO_TOKEN {
-            self.resync_hint = self.next;
-        }
+    /// Replaces the current token with `kind` over `start..end`, followed by the tokens that
+    /// [JsLexer] lexes after it.
+    fn replace_current(&mut self, kind: JsSyntaxKind, start: u32, end: u32, flags: u32) {
+        let word = kind as u32
+            | u32::from(REGULAR)
+            | (self.word() & (LINE_BREAK | CONTEXTS << GAP_SHIFT))
+            | flags;
+        self.lex_tokens(Some(Token { word, start, end }), end, JsLexContext::Regular);
     }
 
     #[inline(always)]
     pub(crate) fn has_unicode_escape(&self) -> bool {
-        self.current_has_unicode_escape
+        self.word() & u32::from(UNICODE_ESCAPE) != 0
     }
 
     /// Returns `true` if the next token has any preceding trivia (either trailing trivia of the current
     /// token or leading trivia of the next token)
-    pub(crate) fn has_next_preceding_trivia(&mut self) -> bool {
-        if self.current == EOF {
-            return false;
-        }
-        if let Some(raw) = self.tokens.get(self.next)
-            && raw & REGULAR != 0
-        {
-            return kind(raw).is_trivia();
-        }
-        self.lex_lookahead_token(self.current_end, self.after_newline)
-            .0
-            .is_trivia()
+    pub(crate) fn has_next_preceding_trivia(&self) -> bool {
+        self.stream
+            .get_ahead(self.pos + 1)
+            .is_some_and(|next| next.start > self.current.end)
     }
 
-    /// Returns the `n`th non-trivia token after the current one, as [JsLexContext::Regular]
-    /// lexes them: a regex that the bulk tokens decided on reads as its `/` or `/=`.
-    fn lookahead(&mut self, n: usize) -> Option<LookaheadToken> {
-        debug_assert_ne!(n, 0);
-        if self.current == EOF {
-            return None;
-        }
-        let cursor = self.lookahead;
-        let (mut count, mut position, mut index) =
-            if cursor.from == self.current_end && cursor.count != 0 && cursor.count <= n {
-                if cursor.count == n {
-                    return Some(cursor.token);
-                }
-                if cursor.token.kind == EOF {
-                    return None;
-                }
-                (cursor.count, cursor.token.range.end(), cursor.next)
-            } else {
-                (0, self.current_end, self.next)
-            };
-        // The current token isn't trivia, so no line break follows it yet.
-        let mut after_newline = false;
-
-        loop {
-            let (kind, end) = match self.tokens.get(index) {
-                Some(raw) if raw & REGULAR != 0 && kind(raw) != JS_REGEX_LITERAL => {
-                    index += 1;
-                    (kind(raw), TextSize::from(self.tokens.start(index)))
-                }
-                _ => {
-                    let token = self.lex_lookahead_token(position, after_newline);
-                    index = self
-                        .tokens
-                        .find_from(token.1, self.resync_hint)
-                        .unwrap_or(NO_TOKEN);
-                    token
-                }
-            };
-            if let Some(trivia_kind) = trivia_kind(kind) {
-                after_newline |= matches!(
-                    trivia_kind,
-                    TriviaPieceKind::Newline | TriviaPieceKind::MultiLineComment
-                );
-                position = end;
-                continue;
-            }
-            count += 1;
-            let token = LookaheadToken {
-                kind,
-                range: TextRange::new(position, end),
-                has_preceding_line_break: after_newline,
-            };
-            if count == n || kind == EOF {
-                self.lookahead = LookaheadCursor {
-                    from: self.current_end,
-                    count,
-                    token,
-                    next: index,
-                };
-                return (count == n).then_some(token);
-            }
-            after_newline = false;
-            position = end;
-        }
+    /// Returns the number of tokens in the stream.
+    pub(crate) fn token_count(&self) -> usize {
+        self.stream.len()
     }
 
-    /// Lexes the token at `position` in [JsLexContext::Regular] with [JsLexer], dropping its
-    /// diagnostics. Returns its kind and end.
-    #[inline(never)]
-    fn lex_lookahead_token(
-        &mut self,
-        position: TextSize,
-        after_newline: bool,
-    ) -> (JsSyntaxKind, TextSize) {
-        let kind = self
-            .lexer
-            .lex_at(position.into(), after_newline, JsLexContext::Regular);
-        self.lexer.take_diagnostics_after(0);
-        (kind, self.lexer.current_range().end())
+    /// Returns the range of the token at `index`.
+    pub(crate) fn token_range(&self, index: usize) -> TextRange {
+        let token = self.stream.get(index);
+        TextRange::new(TextSize::from(token.start), TextSize::from(token.end))
     }
 
-    /// Returns whether a non-trivia token precedes the current one, walking back
-    /// over the trivia adjacent to it. Trivia with no earlier token must be
-    /// leading, or the tree sink strands it.
-    fn preceding_token_exists(&self) -> bool {
-        let mut position = self.current_range().start();
-        if position == TextSize::from(0) {
-            return false;
-        }
-        for trivia in self.trivia_list.iter().rev() {
-            if trivia.offset() + trivia.len() != position {
-                break;
-            }
-            position = trivia.offset();
-            if position == TextSize::from(0) {
-                return false;
-            }
-        }
-        true
+    /// Whether the parser skipped the token at `index` as trivia.
+    pub(crate) fn is_skipped(&self, index: usize) -> bool {
+        self.stream.get(index).word & SKIPPED != 0
     }
 
     pub(crate) fn re_lex(&mut self, mode: JsReLexContext) -> JsSyntaxKind {
-        let continuation = match mode {
-            JsReLexContext::JsxChild { astro } => JsLexContext::JsxChild { astro },
-            _ => JsLexContext::Regular,
-        };
-
-        let mut kind = match mode {
-            // A regex that the bulk tokens decided on is already one.
-            JsReLexContext::Regex if self.regex != NO_TOKEN => self.take_regex(),
+        match mode {
+            JsReLexContext::Regex => self.re_lex_regex(),
             JsReLexContext::BinaryOperator => self.re_lex_binary_operator(),
             JsReLexContext::TypeArgumentLessThan => self.re_lex_type_argument_less_than(),
             JsReLexContext::JsxIdentifier => self.re_lex_jsx_identifier(),
             JsReLexContext::AstroJsxAttributeName => self.re_lex_astro_jsx_attribute_name(),
             _ => self.re_lex_with_lexer(mode),
-        };
-        // Astro HTML comments re-lex into trivia, which the parser must never see as current.
-        if TriviaPieceKind::try_from(kind).is_ok() {
-            let mut trailing = self.preceding_token_exists() && !self.current_has_line_break;
-            while let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) {
-                if trivia_kind.is_newline() {
-                    trailing = false;
-                }
-                self.trivia_list
-                    .push(Trivia::new(trivia_kind, self.current_range(), trailing));
-                kind = self.next_token(continuation);
-            }
         }
-
-        kind
     }
 
-    /// Makes the regex that the bulk tokens decided on the current token, in place of its `/`
-    /// or `/=`.
-    fn take_regex(&mut self) -> JsSyntaxKind {
-        let index = self.regex;
-        self.regex = NO_TOKEN;
-        self.current = JS_REGEX_LITERAL;
-        self.current_end = TextSize::from(self.tokens.start(index + 1));
-        let reported = self.tokens.diagnostics_at(self.current_start);
-        self.diagnostics.extend(
-            reported
-                .iter()
-                .map(|TokenDiagnostic { diagnostic, .. }| diagnostic.clone()),
-        );
-        self.next = index + 1;
-        JS_REGEX_LITERAL
+    /// Re-lexes a `/` or `/=` as a regex, unless the bulk pass already decided on one.
+    fn re_lex_regex(&mut self) -> JsSyntaxKind {
+        if matches!(self.current(), T![/] | T![/=]) {
+            self.re_lex_with_lexer(JsReLexContext::Regex)
+        } else {
+            self.current()
+        }
     }
 
-    /// Re-lexes `>` as one of `>>`, `>>>`, `>=`, `>>=` or `>>>=`, as [JsLexer] does, by joining
-    /// the bulk tokens that make it up.
+    /// Re-lexes `>` as one of `>>`, `>>>`, `>=`, `>>=` or `>>>=`, as [JsLexer] does, and a regex
+    /// that the bulk pass decided on as the `/` or `/=` that starts it.
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
         let source = self.lexer.source().as_bytes();
-        let start = usize::from(self.current_start);
-        let byte = |offset: usize| source.get(start + offset).copied();
-        if byte(0) != Some(b'>') {
-            return self.current;
-        }
-        let (kind, len) = match (byte(1), byte(2), byte(3)) {
-            (Some(b'>'), Some(b'>'), Some(b'=')) => (T![>>>=], 4),
-            (Some(b'>'), Some(b'>'), _) => (T![>>>], 3),
-            (Some(b'>'), Some(b'='), _) => (T![>>=], 3),
-            (Some(b'>'), _, _) => (T![>>], 2),
-            (Some(b'='), _, _) => (T![>=], 2),
-            _ => (T![>], 1),
+        let start = self.current.start;
+        let byte = |offset: u32| source.get((start + offset) as usize).copied();
+        let (kind, len) = match self.current() {
+            T![>] => match (byte(1), byte(2), byte(3)) {
+                (Some(b'>'), Some(b'>'), Some(b'=')) => (T![>>>=], 4),
+                (Some(b'>'), Some(b'>'), _) => (T![>>>], 3),
+                (Some(b'>'), Some(b'='), _) => (T![>>=], 3),
+                (Some(b'>'), _, _) => (T![>>], 2),
+                (Some(b'='), _, _) => (T![>=], 2),
+                _ => return T![>],
+            },
+            JS_REGEX_LITERAL => {
+                // The regex's diagnostics don't apply to the operator.
+                self.diagnostics.truncate(self.current_diagnostics());
+                if byte(1) == Some(b'=') {
+                    (T![/=], 2)
+                } else {
+                    (T![/], 1)
+                }
+            }
+            kind => return kind,
         };
-        if kind != self.current {
-            self.regex = NO_TOKEN;
-            self.current = kind;
-            self.current_end = self.current_start + TextSize::from(len);
-            self.resync(self.current_end);
-        }
+        self.replace_current(kind, start, start + len, 0);
         kind
     }
 
     /// Re-lexes `<<` as `<`, as [JsLexer] does.
     fn re_lex_type_argument_less_than(&mut self) -> JsSyntaxKind {
-        if self.current == T![<<] {
-            self.regex = NO_TOKEN;
-            self.current = T![<];
-            self.current_end = self.current_start + TextSize::from(1);
-            self.resync(self.current_end);
+        if self.current() == T![<<] {
+            let start = self.current.start;
+            self.replace_current(T![<], start, start + 1, 0);
         }
-        self.current
+        self.current()
     }
 
     /// Re-lexes an identifier or keyword as a JSX identifier, which continues with `-` and more
-    /// identifier parts, as [JsLexer] does, by joining the bulk tokens that make it up.
+    /// identifier parts, as [JsLexer] does.
     fn re_lex_jsx_identifier(&mut self) -> JsSyntaxKind {
-        if !(self.current.is_keyword() || self.current == IDENT) {
-            return self.current;
+        let current = self.current();
+        if !(current.is_keyword() || current == IDENT) {
+            return current;
         }
         let source = self.lexer.source().as_bytes();
-        let mut end = usize::from(self.current_end);
+        let mut end = self.current.end as usize;
         while let Some(&byte) = source.get(end) {
             match byte {
                 b'-' => end += 1,
@@ -579,10 +499,9 @@ impl<'l> BulkTokenSource<'l> {
                 _ => break,
             }
         }
-        self.regex = NO_TOKEN;
-        self.current = JSX_IDENT;
-        self.current_end = TextSize::from(end as u32);
-        self.resync(self.current_end);
+        let escape = self.word() & u32::from(UNICODE_ESCAPE);
+        let start = self.current.start;
+        self.replace_current(JSX_IDENT, start, end as u32, escape);
         JSX_IDENT
     }
 
@@ -592,109 +511,219 @@ impl<'l> BulkTokenSource<'l> {
     /// which includes an empty one that the previous token reported at its end.
     fn re_lex_astro_jsx_attribute_name(&mut self) -> JsSyntaxKind {
         let source = self.lexer.source().as_bytes();
-        if source
-            .get(usize::from(self.current_start))
-            .is_some_and(|&byte| {
-                !matches!(byte, b'=' | b'>' | b'/' | b'{' | b'}' | b'<')
-                    && !byte.is_ascii_whitespace()
-            })
-        {
-            let start = self.current_start;
+        let start = self.current.start;
+        if source.get(start as usize).is_some_and(|&byte| {
+            !matches!(byte, b'=' | b'>' | b'/' | b'{' | b'}' | b'<') && !byte.is_ascii_whitespace()
+        }) {
+            let start = TextSize::from(start);
             while self.diagnostics.last().is_some_and(|diagnostic| {
                 diagnostic.span().is_some_and(|span| span.start() >= start)
             }) {
                 self.diagnostics.pop();
             }
-            self.current_diagnostics = self.current_diagnostics.min(self.diagnostics.len() as u32);
+            let len = self.current_diagnostics().min(self.diagnostics.len());
+            self.set_current_diagnostics(len);
         }
         self.re_lex_with_lexer(JsReLexContext::AstroJsxAttributeName)
     }
 
     #[inline(never)]
     fn re_lex_with_lexer(&mut self, mode: JsReLexContext) -> JsSyntaxKind {
+        let current = self.current();
+        let range = self.current_range();
         let mut flags = TokenFlags::empty();
         flags.set(
             TokenFlags::PRECEDING_LINE_BREAK,
-            self.current_has_line_break,
+            self.has_preceding_line_break(),
         );
-        flags.set(TokenFlags::UNICODE_ESCAPE, self.current_has_unicode_escape);
+        flags.set(TokenFlags::UNICODE_ESCAPE, self.has_unicode_escape());
         // Some re-lexing drops the diagnostics of the token it replaces, from the lexer's.
-        for diagnostic in self.diagnostics.drain(self.current_diagnostics as usize..) {
+        let current_diagnostics = self.current_diagnostics();
+        for diagnostic in self.diagnostics.drain(current_diagnostics..) {
             self.lexer.push_diagnostic(diagnostic);
         }
-        let kind = self
-            .lexer
-            .re_lex_at(self.current_range(), self.current, flags, mode);
-        if kind == self.current && self.lexer.current_range() == self.current_range() {
-            // Unchanged: the lexer may still have reported diagnostics, which it keeps.
-            self.diagnostics
-                .extend(self.lexer.take_diagnostics_after(0));
+        let kind = self.lexer.re_lex_at(range, current, flags, mode);
+        let new_range = self.lexer.current_range();
+        let diagnostics = self.lexer.take_diagnostics_after(0);
+        self.diagnostics.extend(diagnostics.iter().cloned());
+        if kind == current && new_range == range {
             return kind;
         }
-        self.take_lexer_token(kind)
+        let (start, end) = (u32::from(new_range.start()), u32::from(new_range.end()));
+        let mut extra = if self.lexer.current_flags().has_unicode_escape() {
+            u32::from(UNICODE_ESCAPE)
+        } else {
+            0
+        };
+        if !diagnostics.is_empty() {
+            extra |= LEXED;
+            self.set_lexed_diagnostics(start, diagnostics);
+        }
+        if let Some(trivia_kind) = trivia_kind(kind) {
+            // An Astro HTML comment, which the parser must never see as current.
+            let continuation = match mode {
+                JsReLexContext::JsxChild { astro } => JsLexContext::JsxChild { astro },
+                _ => JsLexContext::Regular,
+            };
+            self.relexed_trivia
+                .push(Trivia::new(trivia_kind, new_range, false));
+            self.trivia_changed = true;
+            self.lex_tokens(None, end, continuation);
+            self.take_diagnostics(continuation);
+            return self.current();
+        }
+        self.replace_current(kind, start, end, extra);
+        kind
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
     pub(crate) fn checkpoint(&self) -> BulkTokenSourceCheckpoint {
         BulkTokenSourceCheckpoint {
-            current: self.current,
-            current_start: self.current_start,
-            current_end: self.current_end,
-            current_has_line_break: self.current_has_line_break,
-            current_has_unicode_escape: self.current_has_unicode_escape,
-            current_diagnostics: self.current_diagnostics,
-            regex: self.regex,
-            next: self.next,
-            after_newline: self.after_newline,
-            trivia_len: self.trivia_list.len() as u32,
+            pos: self.pos as u32,
+            start: self.current.start,
+            current_diagnostics: self.current_diagnostics() as u32,
             diagnostics_len: self.diagnostics.len() as u32,
+            lexed_diagnostics_len: self.lexed_diagnostics.len() as u32,
+            skipped_len: self.skipped.len() as u32,
+            splices_len: self.splices.len() as u32,
+            relexed_trivia_len: self.relexed_trivia.len() as u32,
         }
     }
 
-    /// Restores the token source to a previous state
+    /// Restores the token source to a previous state, undoing the splices since.
     pub(crate) fn rewind(&mut self, checkpoint: BulkTokenSourceCheckpoint) {
-        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
-        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        for index in self.skipped.drain(checkpoint.skipped_len as usize..) {
+            self.stream.get_mut(index as usize).word &= !SKIPPED;
+        }
+        while self.splices.len() > checkpoint.splices_len as usize {
+            let Some(Splice {
+                pos,
+                inserted,
+                removed,
+            }) = self.splices.pop()
+            else {
+                break;
+            };
+            self.stream.splice(pos, inserted, &removed);
+        }
+        self.relexed_trivia
+            .truncate(checkpoint.relexed_trivia_len as usize);
+        self.lexed_diagnostics
+            .truncate(checkpoint.lexed_diagnostics_len as usize);
         self.diagnostics
             .truncate(checkpoint.diagnostics_len as usize);
-        self.current = checkpoint.current;
-        self.current_start = checkpoint.current_start;
-        self.current_end = checkpoint.current_end;
-        self.current_has_line_break = checkpoint.current_has_line_break;
-        self.current_has_unicode_escape = checkpoint.current_has_unicode_escape;
-        self.current_diagnostics = checkpoint.current_diagnostics;
-        self.regex = checkpoint.regex;
-        self.next = checkpoint.next;
-        self.after_newline = checkpoint.after_newline;
+        self.pos = checkpoint.pos as usize;
+        self.set_current_diagnostics(checkpoint.current_diagnostics as usize);
+        self.stream.keep_gap_before(self.pos);
+        self.load_current();
+    }
+
+    /// Collects the trivia between the tokens of the stream, and the tokens that the parser
+    /// skipped.
+    fn trivia(&mut self) -> Vec<Trivia> {
+        let mut trivia = Vec::with_capacity(self.trivia.len() + self.skipped.len());
+        // The latest trivia at each offset.
+        let mut latest: Vec<_> = self.relexed_trivia.iter().copied().enumerate().collect();
+        latest.sort_unstable_by_key(|(order, piece)| (piece.offset(), std::cmp::Reverse(*order)));
+        latest.dedup_by_key(|(_, piece)| piece.offset());
+        self.relexed_trivia = latest.into_iter().map(|(_, piece)| piece).collect();
+        let mut bulk = 0;
+        let mut relexed = 0;
+        let mut gap_start = 0;
+        let mut trailing = false;
+        for index in 0..self.stream.len() {
+            let Token { word, start, end } = self.stream.get(index);
+            let mut position = gap_start;
+            while position < start {
+                while self
+                    .relexed_trivia
+                    .get(relexed)
+                    .is_some_and(|piece| u32::from(piece.offset()) < position)
+                {
+                    relexed += 1;
+                }
+                let piece = if let Some(piece) = self.relexed_trivia.get(relexed)
+                    && u32::from(piece.offset()) == position
+                {
+                    relexed += 1;
+                    (piece.kind(), u32::from(piece.end_offset()))
+                } else {
+                    while self
+                        .trivia
+                        .get(bulk)
+                        .is_some_and(|piece| u32::from(piece.offset()) < position)
+                    {
+                        bulk += 1;
+                    }
+                    match self.trivia.get(bulk) {
+                        Some(piece)
+                            if u32::from(piece.offset()) == position
+                                && u32::from(piece.end_offset()) <= start =>
+                        {
+                            (piece.kind(), u32::from(piece.end_offset()))
+                        }
+                        _ => {
+                            let kind =
+                                self.lexer
+                                    .lex_at(position as usize, false, JsLexContext::Regular);
+                            self.lexer.take_diagnostics_after(0);
+                            let end = u32::from(self.lexer.current_range().end()).min(start);
+                            (
+                                trivia_kind(kind).unwrap_or(TriviaPieceKind::Skipped),
+                                end.max(position + 1),
+                            )
+                        }
+                    }
+                };
+                if piece.0.is_newline() {
+                    trailing = false;
+                }
+                trivia.push(Trivia::new(
+                    piece.0,
+                    TextRange::new(TextSize::from(position), TextSize::from(piece.1)),
+                    trailing,
+                ));
+                position = piece.1;
+            }
+            if word & SKIPPED != 0 {
+                trivia.push(Trivia::new(
+                    TriviaPieceKind::Skipped,
+                    TextRange::new(TextSize::from(start), TextSize::from(end)),
+                    false,
+                ));
+                trailing = false;
+            } else {
+                trailing = true;
+            }
+            gap_start = end;
+        }
+        trivia
     }
 }
 
 /// A position of [BulkTokenSource] to which it can return.
 #[derive(Debug)]
 pub struct BulkTokenSourceCheckpoint {
-    current: JsSyntaxKind,
-    current_start: TextSize,
-    current_end: TextSize,
-    current_has_line_break: bool,
-    current_has_unicode_escape: bool,
+    pos: u32,
+    /// The start of the current token.
+    start: u32,
     current_diagnostics: u32,
-    regex: u32,
-    next: u32,
-    after_newline: bool,
-    trivia_len: u32,
     diagnostics_len: u32,
+    lexed_diagnostics_len: u32,
+    skipped_len: u32,
+    splices_len: u32,
+    relexed_trivia_len: u32,
 }
 
-#[cfg(feature = "bulk_lexer")]
 impl BulkTokenSourceCheckpoint {
     /// Returns the start of the current token.
     pub(crate) fn current_start(&self) -> TextSize {
-        self.current_start
+        TextSize::from(self.start)
     }
 
-    /// Returns the length of the trivia list.
-    pub(crate) fn trivia_position(&self) -> usize {
-        self.trivia_len as usize
+    /// Returns the index of the current token.
+    pub(crate) fn token_index(&self) -> usize {
+        self.pos as usize
     }
 }
 
@@ -704,13 +733,16 @@ impl<'source> TokenSource for BulkTokenSource<'source> {
     /// Returns the kind of the current non-trivia token
     #[inline(always)]
     fn current(&self) -> JsSyntaxKind {
-        self.current
+        self.current_kind
     }
 
     /// Returns the range of the current non-trivia token
     #[inline(always)]
     fn current_range(&self) -> TextRange {
-        TextRange::new(self.current_start, self.current_end)
+        TextRange::new(
+            TextSize::from(self.current.start),
+            TextSize::from(self.current.end),
+        )
     }
 
     #[inline(always)]
@@ -720,13 +752,13 @@ impl<'source> TokenSource for BulkTokenSource<'source> {
 
     #[inline(always)]
     fn position(&self) -> TextSize {
-        self.current_start
+        TextSize::from(self.current.start)
     }
 
     /// Returns true if the current token is preceded by a line break
     #[inline(always)]
     fn has_preceding_line_break(&self) -> bool {
-        self.current_has_line_break
+        self.word() & LINE_BREAK != 0
     }
 
     #[inline(always)]
@@ -738,8 +770,13 @@ impl<'source> TokenSource for BulkTokenSource<'source> {
         self.skip_as_trivia_with_context(JsLexContext::Regular)
     }
 
-    fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
-        (self.trivia_list, self.diagnostics)
+    fn finish(mut self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
+        let trivia = if self.trivia_changed || !self.skipped.is_empty() {
+            self.trivia()
+        } else {
+            std::mem::take(&mut self.trivia)
+        };
+        (trivia, self.diagnostics)
     }
 }
 
@@ -749,51 +786,48 @@ impl BumpWithContext for BulkTokenSource<'_> {
     #[inline(always)]
     fn bump_with_context(&mut self, context: Self::Context) {
         if self.current() != EOF {
-            self.next_non_trivia_token(context, false);
+            self.pos += 1;
+            self.arrive(context);
         }
     }
 
     /// Skips the current token as skipped token trivia
     fn skip_as_trivia_with_context(&mut self, context: JsLexContext) {
         if self.current() != EOF {
-            self.trivia_list.push(Trivia::new(
-                TriviaPieceKind::Skipped,
-                self.current_range(),
-                false,
-            ));
-
-            self.next_non_trivia_token(context, true)
+            self.stream.ahead_mut(self.pos).word |= SKIPPED;
+            self.current.word |= SKIPPED;
+            self.skipped.push(self.pos as u32);
+            self.pos += 1;
+            self.arrive(context);
         }
     }
 }
 
 impl<'source> NthToken<JsLexer<'source>> for BulkTokenSource<'source> {
     /// Gets the kind of the nth non-trivia token
+    #[inline(always)]
     fn nth(&mut self, n: usize) -> JsSyntaxKind {
         if n == 0 {
-            self.current()
-        } else {
-            self.lookahead(n).map_or(EOF, |token| token.kind)
+            return self.current_kind;
+        }
+        match self.stream.get_ahead(self.pos + n) {
+            Some(token) => kind(token.word as u16),
+            None => EOF,
         }
     }
 
     /// Gets the range of the nth non-trivia token.
     fn nth_range(&mut self, n: usize) -> Option<TextRange> {
-        if n == 0 {
-            Some(self.current_range())
-        } else {
-            self.lookahead(n).map(|token| token.range)
-        }
+        self.stream
+            .get_ahead(self.pos + n)
+            .map(|token| TextRange::new(TextSize::from(token.start), TextSize::from(token.end)))
     }
 
     /// Returns true if the nth non-trivia token is preceded by a line break
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool {
-        if n == 0 {
-            self.has_preceding_line_break()
-        } else {
-            self.lookahead(n)
-                .is_some_and(|token| token.has_preceding_line_break)
-        }
+        self.stream
+            .get_ahead(self.pos + n)
+            .is_some_and(|token| token.word & LINE_BREAK != 0)
     }
 
     /// Returns true if the nth non-trivia token is preceded by whitespace trivia, which the
@@ -802,6 +836,3 @@ impl<'source> NthToken<JsLexer<'source>> for BulkTokenSource<'source> {
         false
     }
 }
-
-#[cfg(all(test, not(feature = "bulk_lexer")))]
-mod tests;

@@ -7,10 +7,7 @@ use biome_parser::*;
 pub(crate) mod rewrite_parser;
 pub(crate) mod single_token_parse_recovery;
 
-#[cfg(feature = "bulk_lexer")]
-pub(crate) use crate::bulk_lexer::{
-    BulkTokenSource as ParserTokenSource, BulkTokenSourceCheckpoint as ParserTokenSourceCheckpoint,
-};
+pub(crate) use crate::bulk_lexer::{BulkTokenSource, BulkTokenSourceCheckpoint};
 use crate::lexer::JsReLexContext;
 pub(crate) use crate::parser::parse_recovery::{
     ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
@@ -18,12 +15,9 @@ pub(crate) use crate::parser::parse_recovery::{
 use crate::prelude::*;
 use crate::state::JsParserStateCheckpoint;
 use crate::state::{ChangeParserState, ParserStateGuard};
-#[cfg(not(feature = "bulk_lexer"))]
-pub(crate) use crate::token_source::{
-    JsTokenSource as ParserTokenSource, JsTokenSourceCheckpoint as ParserTokenSourceCheckpoint,
-};
 use crate::*;
-use biome_js_syntax::JsSyntaxKind::{self};
+use biome_js_syntax::JsSyntaxKind::{self, JS_REGEX_LITERAL};
+use biome_js_syntax::T;
 use biome_languages::JsFileSource;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
@@ -40,7 +34,7 @@ pub struct JsParser<'source> {
     pub(super) state: JsParserState,
     pub source_type: JsFileSource,
     context: ParserContext<JsSyntaxKind>,
-    source: ParserTokenSource<'source>,
+    source: BulkTokenSource<'source>,
     options: JsParserOptions,
 }
 
@@ -58,10 +52,7 @@ impl<'source> JsParser<'source> {
         options: JsParserOptions,
         metavariables: &'source [TextRange],
     ) -> Self {
-        #[cfg(feature = "bulk_lexer")]
-        let source = ParserTokenSource::new(source, &source_type, metavariables);
-        #[cfg(not(feature = "bulk_lexer"))]
-        let source = ParserTokenSource::from_str(source, metavariables);
+        let source = BulkTokenSource::new(source, &source_type, metavariables);
 
         JsParser {
             state: JsParserState::new(&source_type),
@@ -97,6 +88,36 @@ impl<'source> JsParser<'source> {
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
     pub fn re_lex(&mut self, context: JsReLexContext) -> JsSyntaxKind {
         self.source_mut().re_lex(context)
+    }
+
+    /// Re-lexes the current token where a binary operator goes: a `>` as the operator that
+    /// starts with it, such as `>>` or `>=`, and a regex as the `/` or `/=` that starts it.
+    /// Returns the current token's kind.
+    pub(crate) fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
+        match self.cur() {
+            T![>] | JS_REGEX_LITERAL => self.re_lex(JsReLexContext::BinaryOperator),
+            kind => kind,
+        }
+    }
+
+    /// Re-lexes a regex that the bulk lexer decided on as the `/` or `/=` that starts it, where the
+    /// grammar doesn't allow a regex. Returns the current token's kind.
+    pub(crate) fn re_lex_regex_as_slash(&mut self) -> JsSyntaxKind {
+        if self.at(JS_REGEX_LITERAL) {
+            self.re_lex(JsReLexContext::BinaryOperator)
+        } else {
+            self.cur()
+        }
+    }
+
+    /// Re-lexes a `<<` as the `<` that opens type arguments, and returns the current token's
+    /// kind. No other token re-lexes differently there, so this re-lexes nothing else.
+    pub(crate) fn re_lex_type_argument_less_than(&mut self) -> JsSyntaxKind {
+        if self.at(T![<<]) {
+            self.re_lex(JsReLexContext::TypeArgumentLessThan)
+        } else {
+            self.cur()
+        }
     }
 
     /// Stores the parser state and position before calling the function and restores the state
@@ -172,7 +193,7 @@ impl<'source> JsParser<'source> {
 
 impl<'source> Parser for JsParser<'source> {
     type Kind = JsSyntaxKind;
-    type Source = ParserTokenSource<'source>;
+    type Source = BulkTokenSource<'source>;
 
     fn context(&self) -> &ParserContext<Self::Kind> {
         &self.context
@@ -227,11 +248,43 @@ impl<'source> Parser for JsParser<'source> {
     fn do_bump(&mut self, kind: Self::Kind) {
         self.do_bump_with_context(kind, JsLexContext::Regular)
     }
+
+    /// Consumes the current token if it's `kind`. A regex that the bulk lexer decided on is the
+    /// `/` or `/=` that the grammar asks for here.
+    #[inline]
+    fn eat(&mut self, kind: JsSyntaxKind) -> bool {
+        if matches!(kind, T![/] | T![/=]) {
+            self.re_lex_regex_as_slash();
+        }
+        if !self.at(kind) {
+            return false;
+        }
+        self.do_bump(kind);
+        true
+    }
+
+    /// Bumps the current token regardless of its kind, as error recovery does.
+    ///
+    /// The literal expression is the only syntax that takes a regex that the bulk lexer decided
+    /// on, so anywhere else the regex is the `/` or `/=` that starts it.
+    fn bump_any(&mut self) {
+        let kind = self.re_lex_regex_as_slash();
+        assert_ne!(kind, JsSyntaxKind::EOF);
+        self.do_bump(kind);
+    }
+
+    /// Bumps the current token regardless of its kind using the new context, re-lexing a regex as
+    /// [Self::bump_any] does.
+    fn bump_any_with_context(&mut self, context: <Self::Source as BumpWithContext>::Context) {
+        let kind = self.re_lex_regex_as_slash();
+        assert_ne!(kind, JsSyntaxKind::EOF);
+        self.do_bump_with_context(kind, context);
+    }
 }
 
 pub struct JsParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
-    pub(super) source: ParserTokenSourceCheckpoint,
+    pub(super) source: BulkTokenSourceCheckpoint,
     state: JsParserStateCheckpoint,
 }
 
