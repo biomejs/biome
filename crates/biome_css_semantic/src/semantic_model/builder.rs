@@ -12,6 +12,7 @@ use super::model::{
     RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity,
     compare_scss_function_names, selector_tokens,
 };
+use super::{SemanticModelOptions, SyntheticCustomProperty};
 use crate::events::SemanticEvent;
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
 
@@ -29,6 +30,8 @@ const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
+    synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    custom_properties_open: bool,
     /// All rules, indexed by RuleId
     all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
@@ -51,6 +54,8 @@ impl SemanticModelBuilder {
     pub fn new(root: AnyCssRoot) -> Self {
         Self {
             root,
+            synthetic_custom_properties: Vec::new(),
+            custom_properties_open: false,
             all_rules: Vec::new(),
             top_level_rule_ids: Vec::new(),
             root_declarations: Vec::new(),
@@ -62,6 +67,21 @@ impl SemanticModelBuilder {
             scss_function_names: Vec::new(),
             range_to_rule_id: BTreeMap::default(),
             is_in_root_selector: false,
+        }
+    }
+
+    pub fn set_options(&mut self, options: SemanticModelOptions) {
+        self.custom_properties_open = options.custom_properties_open;
+        self.synthetic_custom_properties.clear();
+        for property in options.synthetic_custom_properties {
+            if self
+                .synthetic_custom_properties
+                .iter()
+                .any(|existing| existing.name() == property.name())
+            {
+                continue;
+            }
+            self.synthetic_custom_properties.push(property);
         }
     }
 
@@ -125,6 +145,8 @@ impl SemanticModelBuilder {
             .sort_by(|left, right| compare_scss_function_names(left.text(), right.text()));
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            synthetic_custom_properties: self.synthetic_custom_properties,
+            custom_properties_open: self.custom_properties_open,
             all_rules: self.all_rules,
             top_level_rule_ids: self.top_level_rule_ids,
             root_declarations: self.root_declarations,

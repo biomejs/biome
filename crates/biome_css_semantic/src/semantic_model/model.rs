@@ -17,6 +17,8 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
+use super::SyntheticCustomProperty;
+
 /// The façade for all semantic information of a CSS document.
 ///
 /// This struct provides access to the root, rules, and individual nodes of the CSS document.
@@ -35,6 +37,16 @@ impl SemanticModel {
 
     pub fn root(&self) -> AnyCssRoot {
         self.data.root()
+    }
+
+    /// Returns custom properties supplied by the embedding host.
+    pub fn synthetic_custom_properties(&self) -> &[SyntheticCustomProperty] {
+        &self.data.synthetic_custom_properties
+    }
+
+    /// Whether the host may supply additional custom properties.
+    pub fn custom_properties_are_open(&self) -> bool {
+        self.data.custom_properties_open
     }
 
     /// Returns all top-level rules in the CSS document.
@@ -145,6 +157,8 @@ impl SemanticModel {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: SendNode,
+    pub(crate) synthetic_custom_properties: Vec<SyntheticCustomProperty>,
+    pub(crate) custom_properties_open: bool,
     /// Single source of truth for all rules, indexed by RuleId
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
@@ -186,7 +200,15 @@ impl PartialEq for SemanticModel {
         let self_root = self.data.root();
         let other_root = other.data.root();
 
-        self_rules.len() == other_rules.len()
+        self.data.synthetic_custom_properties.len() == other.data.synthetic_custom_properties.len()
+            && self
+                .data
+                .synthetic_custom_properties
+                .iter()
+                .zip(&other.data.synthetic_custom_properties)
+                .all(|(this, other)| this.name() == other.name())
+            && self.data.custom_properties_open == other.data.custom_properties_open
+            && self_rules.len() == other_rules.len()
             && self_rules
                 .iter()
                 .zip(other_rules.iter())
@@ -1221,6 +1243,10 @@ impl CustomProperty {
 }
 
 /// A view over global custom properties indexed by name.
+///
+/// Properties supplied by the embedding host, listed by
+/// [`SemanticModel::synthetic_custom_properties`], are visible only through
+/// [`Self::contains_key`].
 #[derive(Debug)]
 pub struct GlobalCustomVariables<'a> {
     pub(crate) data: &'a Arc<SemanticModelData>,
@@ -1243,11 +1269,17 @@ impl<'a> GlobalCustomVariables<'a> {
             })
     }
 
-    /// Returns whether a custom property with `name` is present.
+    /// Returns whether the stylesheet declares a custom property with `name`,
+    /// or the embedding host supplies one.
     pub fn contains_key(&self, name: impl AsRef<str>) -> bool {
-        self.data
-            .global_custom_variables
-            .contains_key(name.as_ref())
+        let name = name.as_ref();
+        self.data.global_custom_variables.contains_key(name)
+            || name.strip_prefix("--").is_some_and(|name| {
+                self.data
+                    .synthetic_custom_properties
+                    .iter()
+                    .any(|property| property.name().text() == name)
+            })
     }
 
     /// Returns the number of custom properties.

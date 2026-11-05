@@ -2,17 +2,59 @@ use crate::db::ModuleDb;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::traverse::{UpwardTraversalAction, UpwardTraversalVisitor};
 use crate::{CssPropertyDefinition, HtmlImport, JsImportPath, JsImportPhase, JsModuleInfo};
+use biome_astro_semantic::{BlockKind, astro_model_from_source};
 use biome_console::markup;
 use biome_css_semantic::db::{
-    css_property_definitions_from_snippet, css_property_definitions_from_source,
+    css_property_definitions_from_model, css_property_definitions_from_snippet,
+    css_property_definitions_from_source,
 };
+use biome_css_semantic::{
+    SemanticModelOptions, SyntheticCustomProperty, semantic_model_with_options,
+};
+use biome_css_syntax::{AnyCssRoot, decode_css_identifier};
 use biome_fs::normalize_path;
-use biome_parser::db::SourceExt;
+use biome_parser::db::{SourceExt, TrackedSnippet};
 use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
 use std::rc::Rc;
+
+#[salsa::tracked]
+fn css_property_definitions_from_embedded_snippet<'db>(
+    db: &'db dyn ModuleDb,
+    snippet: TrackedSnippet<'db>,
+) -> Vec<biome_css_semantic::db::CssPropertyDefinition> {
+    let Some(file_source) = db
+        .source_from_index(snippet.document_source_index(db))
+        .and_then(|source| source.to_css_file_source())
+    else {
+        return Vec::new();
+    };
+    if !file_source.as_embedding_kind().is_astro() {
+        return css_property_definitions_from_snippet(db, snippet).clone();
+    }
+    let mut options = SemanticModelOptions::default();
+
+    let astro_model = astro_model_from_source(db, snippet.source(db));
+    if let Some(block) = astro_model.blocks().find(|block| {
+        block.kind() == BlockKind::Style
+            && block
+                .content_range()
+                .is_some_and(|range| range.contains_range(snippet.content_range(db)))
+    }) {
+        options.synthetic_custom_properties = block
+            .define_vars()
+            .map(|variable| {
+                SyntheticCustomProperty::new(variable.semantic_name().clone())
+                    .with_host_range(variable.host_range())
+            })
+            .collect();
+    }
+    let root: AnyCssRoot = snippet.parsed(db).tree();
+    let model = semantic_model_with_options(&root, options);
+    css_property_definitions_from_model(&model)
+}
 
 /// Minimal step for efficient CSS class checking during traversal.
 /// Used in the happy path where we're just checking if classes exist.
@@ -450,6 +492,46 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .collect::<Vec<_>>();
 
         if let Some(source) = self.db.parsed_source_for_path(path) {
+            let astro_model = self
+                .db
+                .source_from_index(source.document_source_index(self.db))
+                .and_then(|source_type| {
+                    source_type
+                        .to_html_file_source()
+                        .filter(|html| html.is_astro())
+                })
+                .map(|_| astro_model_from_source(self.db, source));
+            if let Some(astro_model) = astro_model {
+                let name = decode_css_identifier(self.name);
+                let semantic_name = name.strip_prefix("--");
+                contexts.extend(astro_model.blocks().filter_map(|block| {
+                    if block.kind() != BlockKind::Style
+                        || (only_global && !block.is_globally_scoped())
+                    {
+                        return None;
+                    }
+                    let semantic_name = semantic_name?;
+                    let range = block
+                        .define_vars()
+                        .find(|variable| {
+                            decode_css_identifier(variable.semantic_name()) == semantic_name
+                        })
+                        .map(|variable| variable.host_range())
+                        .or_else(|| {
+                            // Keys that can't be listed, such as a spread, may
+                            // declare any custom property.
+                            (!block.define_vars_open_reasons().is_empty())
+                                .then(|| block.host_range())
+                        })?;
+                    Some(HtmlPropertyContext {
+                        position: range.start(),
+                        kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {
+                            module_path: normalize_path(path),
+                            range,
+                        }),
+                    })
+                }));
+            }
             for snippet in source.snippets(self.db) {
                 let Some(file_source) = self
                     .db
@@ -462,8 +544,9 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                     continue;
                 }
                 let snippet_is_global = file_source.embedding_applicability().is_global();
+                let definitions = css_property_definitions_from_embedded_snippet(self.db, *snippet);
                 contexts.extend(
-                    css_property_definitions_from_snippet(self.db, *snippet)
+                    definitions
                         .iter()
                         .filter(|definition| {
                             definition.matches(self.name)
@@ -472,8 +555,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                                     || definition.is_globally_scoped())
                         })
                         .map(|definition| {
-                            // Parsed snippet trees exclude their parser base offset.
-                            let range = definition.range() + snippet.content_offset(self.db);
+                            let range = definition.range_in_host(snippet.content_offset(self.db));
                             HtmlPropertyContext {
                                 position: range.start(),
                                 kind: HtmlPropertyContextKind::Definition(CssPropertyDefinition {

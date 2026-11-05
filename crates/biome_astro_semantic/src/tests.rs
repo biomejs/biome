@@ -859,6 +859,176 @@ configuredGlobal;
 }
 
 #[test]
+fn excludes_define_vars_proto_setters() {
+    let source = r#"---
+---
+<script define:vars={{ __proto__: null }}>
+console.log(__proto__);
+</script>
+<script define:vars={{ ["__proto__"]: 1 }}>
+console.log(__proto__);
+</script>
+<style define:vars={{ __proto__: null }}>
+.card { color: var(--__proto__); }
+</style>
+<style define:vars={{ ["__proto__"]: 1 }}>
+.card { color: var(--__proto__); }
+</style>
+"#;
+    let model = model(source);
+    let scripts: Vec<_> = model
+        .blocks()
+        .filter(|block| block.kind() == BlockKind::Script)
+        .collect();
+    let first_scope = scripts[0].scope().expect("first script scope");
+    let second_scope = scripts[1].scope().expect("second script scope");
+    assert!(first_scope.lookup(Namespace::Value, "__proto__").is_none());
+    assert!(model.references().any(|reference| {
+        reference.name() == "__proto__"
+            && reference.scope() == Some(first_scope.clone())
+            && reference.resolution() == Resolution::Unresolved
+    }));
+    assert_eq!(
+        second_scope
+            .lookup(Namespace::Value, "__proto__")
+            .expect("computed __proto__ binding")
+            .origin(),
+        Origin::DefineVars
+    );
+
+    let styles: Vec<_> = model
+        .blocks()
+        .filter(|block| block.kind() == BlockKind::Style)
+        .collect();
+    assert!(styles[0].define_vars().next().is_none());
+    assert!(styles[0].define_vars_open_reasons().is_empty());
+    assert_eq!(
+        styles[1]
+            .define_vars()
+            .next()
+            .expect("computed __proto__ style key")
+            .semantic_name()
+            .text(),
+        "__proto__"
+    );
+
+    insta::assert_snapshot!(semantic_snapshot(source, &model));
+}
+
+#[test]
+fn records_style_define_vars() {
+    let source = r#"---
+const foreground = "red";
+const vars = { dynamic: "blue" };
+---
+<style define:vars={{ foreground, accent: "blue", "\x66oo": 1, 1e2: "a", 0x64: "b", [0x64n]: "c", 0x100000000000000000000000000000000: "large", [-1]: "negative", [-1n]: "negativeBigint" }}>
+.card { color: var(--foreground); border-color: var(--100); outline-color: var(---1); }
+</style>
+<style define:vars={{ ...vars }}>
+.card { color: var(--maybe); }
+</style>
+<style define:vars={vars}>
+.card { color: var(--unknown); }
+</style>
+<style define:vars>
+.card { color: var(--missing); }
+</style>
+<style define:vars={{ [/x/]: "regex" }}>
+.card { color: var(--regex); }
+</style>
+<style is:raw define:vars={{ ignored: foreground }}>
+.card { color: var(--ignored); }
+</style>
+"#;
+    let model = model(source);
+    let styles: Vec<_> = model
+        .blocks()
+        .filter(|block| block.kind() == BlockKind::Style)
+        .collect();
+    assert_eq!(styles.len(), 6);
+    let names = styles[0]
+        .define_vars()
+        .map(|variable| variable.semantic_name().to_string())
+        .collect::<Vec<_>>();
+    assert_eq!(&names[..4], ["foreground", "accent", "foo", "100"]);
+    assert_eq!(names.len(), 6);
+    let numeric = styles[0]
+        .define_vars()
+        .find(|variable| variable.semantic_name().text() == "100")
+        .expect("numeric define:vars key");
+    assert_eq!(numeric.name(), "0x64n");
+    let large = styles[0]
+        .define_vars()
+        .find(|variable| variable.name() == "0x100000000000000000000000000000000")
+        .expect("large numeric define:vars key");
+    assert_eq!(large.semantic_name().text(), "3.402823669209385e+38");
+    let negative = styles[0]
+        .define_vars()
+        .find(|variable| variable.semantic_name().text() == "-1")
+        .expect("negative define:vars key");
+    assert_eq!(negative.name(), "-1n");
+    assert!(styles[0].define_vars_open_reasons().is_empty());
+    assert!(
+        styles[1]
+            .define_vars_open_reasons()
+            .contains(OpenReason::Spread)
+    );
+    assert!(
+        styles[2]
+            .define_vars_open_reasons()
+            .contains(OpenReason::NonLiteral)
+    );
+    assert!(
+        styles[3]
+            .define_vars_open_reasons()
+            .contains(OpenReason::ParseError)
+    );
+    assert!(
+        styles[4]
+            .define_vars_open_reasons()
+            .contains(OpenReason::Computed)
+    );
+    assert!(styles[5].define_vars().next().is_none());
+    assert!(styles[5].define_vars_open_reasons().is_empty());
+
+    let foreground = model
+        .symbols()
+        .find(|symbol| symbol.name() == "foreground")
+        .expect("foreground declaration");
+    let vars = model
+        .symbols()
+        .find(|symbol| symbol.name() == "vars")
+        .expect("vars declaration");
+    assert_eq!(foreground.uses().count(), 1);
+    assert_eq!(vars.uses().count(), 2);
+
+    insta::assert_snapshot!(semantic_snapshot(source, &model));
+}
+
+#[test]
+fn handles_long_numeric_define_vars_key() {
+    let digits = "f".repeat(20_000);
+    let source = format!("---\n---\n<script define:vars={{{{ 0x{digits}: 1 }}}}></script>\n");
+    let model = model(&source);
+    let block = model
+        .blocks()
+        .find(|block| block.kind() == BlockKind::Script)
+        .expect("script block");
+    let binding = block
+        .scope()
+        .and_then(|scope| scope.lookup(Namespace::Value, "Infinity"))
+        .expect("infinite numeric key");
+    assert_eq!(binding.origin(), Origin::DefineVars);
+    assert!(
+        block
+            .scope()
+            .expect("script scope")
+            .open_reasons(Namespace::Value)
+            .is_empty()
+    );
+}
+
+#[test]
 fn classifies_external_and_inline_src_scripts() {
     let model = model(
         r#"<script src></script>

@@ -306,6 +306,10 @@ pub fn traverse_import_tree_for_html_classes(
 /// imports in document order. Every importer is then traversed as an independent
 /// branch. A branch stops at its first visible definition. Component-scoped
 /// styles do not escape an HTML-like importer.
+/// In an Astro document, each key of a `<style define:vars>` directive defines
+/// a custom property at the key. When the directive's keys can't all be listed,
+/// such as with a spread, its `<style>` element counts as a definition of every
+/// custom property.
 /// Definitions reached through the same authored rule are deduplicated, while
 /// definitions from separate branches remain separate. Result order is
 /// unspecified.

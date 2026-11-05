@@ -1,0 +1,19 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+import Child from "./invalid.astro";
+const localColor = "red";
+const globalColor = "blue";
+---
+<!-- should not generate diagnostics -->
+
+<style define:vars={{ localColor }}></style>
+<style is:global define:vars={{ globalColor }}></style>
+
+<Child />
+
+```

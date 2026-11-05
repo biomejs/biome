@@ -31,6 +31,11 @@ impl CssEmbeddingKind {
     pub fn is_html_style_attribute(self) -> bool {
         matches!(self, Self::HtmlStyleAttribute)
     }
+
+    /// Whether the CSS is the content of a `<style>` element in an Astro file.
+    pub fn is_astro(self) -> bool {
+        matches!(self, Self::Html(EmbeddingHtmlKind::Astro { .. }))
+    }
 }
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
