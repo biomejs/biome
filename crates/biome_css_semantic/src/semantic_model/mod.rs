@@ -521,6 +521,42 @@ or>";
     }
 
     #[test]
+    fn test_root_declarations_in_styled_snippet() {
+        let source =
+            "color: red; --size: 1px; &:hover { color: blue; } @font-face { font-family: x; }";
+        let parse = parse_css(
+            source,
+            CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Styled),
+            CssParserOptions::default(),
+        );
+        let model = super::semantic_model(&parse.tree());
+        let names = |declarations: Vec<super::model::CssModelDeclaration>| {
+            declarations
+                .iter()
+                .map(|declaration| declaration.name().text().to_string())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            names(model.root_declarations().collect()),
+            ["color", "--size"]
+        );
+
+        let top_level = TextRange::at(TextSize::from(0), TextSize::from(10));
+        assert_eq!(
+            names(model.get_declarations_by_range(top_level)),
+            ["color", "--size"]
+        );
+
+        let hover_start = source.find("color: blue").unwrap() as u32;
+        let hover = TextRange::at(TextSize::from(hover_start), TextSize::from(11));
+        assert_eq!(names(model.get_declarations_by_range(hover)), ["color"]);
+        assert_eq!(
+            names(model.get_ancestor_declarations_by_range(hover).collect()),
+            ["color", "color", "--size"]
+        );
+    }
+
+    #[test]
     fn test_last_valid_at_property_rule_wins() {
         let parse = parse_css(
             r#"@property --color {

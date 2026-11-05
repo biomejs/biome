@@ -60,11 +60,11 @@ impl Rule for NoDuplicateCustomProperties {
         let node = ctx.query();
         let model = ctx.model();
 
-        let rule = model.get_rule_by_range(node.range())?;
+        let declarations = model.get_declarations_by_range(node.range());
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
-        for declaration in rule.declarations().iter().filter(|declaration| {
+        for declaration in declarations.iter().filter(|declaration| {
             declaration
                 .declaration()
                 .syntax()

@@ -74,6 +74,14 @@ a {
     }
 };
 
+:root {
+  --page-margin: 1in;
+}
+
+@page {
+  margin: --page-margin;
+}
+
 ```
 
 _Note: The parser emitted 2 diagnostics which are not shown here._
@@ -284,6 +292,24 @@ invalid.css:67:14 lint/correctness/noMissingVarFunction ━━━━━━━━
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
   i Wrap the variable in 'var()', for example var(--foo).
+  
+
+```
+
+```
+invalid.css:76:11 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--page-margin' is used without the 'var()' function
+  
+    75 │ @page {
+  > 76 │   margin: --page-margin;
+       │           ^^^^^^^^^^^^^
+    77 │ }
+    78 │ 
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--page-margin).
   
 
 ```

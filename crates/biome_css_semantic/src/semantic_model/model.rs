@@ -50,6 +50,15 @@ impl SemanticModel {
         GlobalCustomVariables { data: &self.data }
     }
 
+    /// Returns the declarations of the root's own declaration block, such as a `style` attribute
+    /// or the top level of a CSS-in-JS template. A stylesheet has none.
+    pub fn root_declarations(&self) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        self.data
+            .root_declarations
+            .iter()
+            .map(|declaration| CssModelDeclaration::from_data(self.data.clone(), declaration))
+    }
+
     /// Returns declarations that assign values to custom properties.
     pub fn custom_property_declarations(&self) -> impl Iterator<Item = CssModelDeclaration> + '_ {
         self.data
@@ -97,6 +106,29 @@ impl SemanticModel {
                 .map(|(_, id)| id)
         };
         rule_id.and_then(|id| self.rule(*id))
+    }
+
+    /// Returns the declarations of the rule that contains the given range, or the
+    /// [root declarations](Self::root_declarations) when no rule contains it.
+    pub fn get_declarations_by_range(&self, target_range: TextRange) -> Vec<CssModelDeclaration> {
+        match self.get_rule_by_range(target_range) {
+            Some(rule) => rule.declarations,
+            None => self.root_declarations().collect(),
+        }
+    }
+
+    /// Returns the declarations in scope at the given range: those of the rule that contains
+    /// it, then those of each ancestor rule from the innermost outwards, then the
+    /// [root declarations](Self::root_declarations).
+    pub fn get_ancestor_declarations_by_range(
+        &self,
+        target_range: TextRange,
+    ) -> impl Iterator<Item = CssModelDeclaration> + '_ {
+        std::iter::successors(self.get_rule_by_range(target_range), |rule| {
+            rule.parent_id().and_then(|id| self.rule(id))
+        })
+        .flat_map(|rule| rule.declarations)
+        .chain(self.root_declarations())
     }
 
     /// Returns an iterator over the specificity of all rules in source order.
@@ -149,7 +181,8 @@ pub(crate) struct SemanticModelData {
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Declarations parsed outside a rule, such as declarations in a `style` attribute.
+    /// Declarations parsed outside a rule, such as declarations in a `style` attribute or at the
+    /// top level of a CSS-in-JS template.
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
     /// Custom property names declared in `:root` or by an `@property` rule.
     ///
