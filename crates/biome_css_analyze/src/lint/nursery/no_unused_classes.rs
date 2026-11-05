@@ -5,8 +5,9 @@ use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{
     AnyCssNestedSelector, AnyCssRelativeSelector, AnyCssSelector, CssClassSelector,
     CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, ScssAtRootAtRule,
-    ScssParentSelector,
+    ScssExtendAtRule, ScssParentSelector,
 };
+use biome_languages::CssFileSource;
 use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, TokenText, declare_node_union};
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
@@ -28,9 +29,9 @@ declare_lint_rule! {
     /// `.block { &__element {} }`, is checked under the class name Sass builds (`block__element`)
     /// for each parent selector that ends in a class. Interpolated class names are ignored, and so
     /// are parent selector suffixes whose parent a mixin decides, as in a mixin body or an
-    /// `@include` content block. `@extend` references
-    /// are not treated as class references. Statically named classes inside mixin bodies are
-    /// checked as authored even when the mixin is not included.
+    /// `@include` content block. A class that the same file extends with `@extend` counts as used,
+    /// because Sass applies its styles to the extending selector. Statically named classes inside
+    /// mixin bodies are checked as authored even when the mixin is not included.
     ///
     /// ## Examples
     ///
@@ -94,8 +95,10 @@ impl Rule for NoUnusedClasses {
         let Some(module) = db.module_for_path(ctx.file_path()) else {
             return Vec::new();
         };
+        let is_scss = ctx.source_type::<CssFileSource>().is_scss();
         let is_unused = |class_name: &str| {
             !is_class_referenced_by_importers(db, SymbolFromModuleInfo::new(db, class_name, module))
+                && !(is_scss && is_extended(node.syntax(), class_name))
         };
 
         match node {
@@ -273,6 +276,25 @@ fn push_trailing_class_name(
             Some(())
         }
     }
+}
+
+/// Returns `true` if a Sass `@extend` in the file of `node` extends the class `class_name`. Sass
+/// then adds the extending selector to every rule of the class, so the class's styles are used
+/// wherever the extending selector is.
+fn is_extended(node: &CssSyntaxNode, class_name: &str) -> bool {
+    node.ancestors().last().is_some_and(|root| {
+        root.descendants()
+            .filter_map(ScssExtendAtRule::cast)
+            .flat_map(|extend| {
+                extend
+                    .syntax()
+                    .descendants()
+                    .filter_map(CssClassSelector::cast)
+            })
+            .any(|selector| {
+                class_selector_name(&selector).is_some_and(|name| name.text() == class_name)
+            })
+    })
 }
 
 /// Returns `true` if `node` is a descendant of a `:global(...)` pseudo-class function selector.
