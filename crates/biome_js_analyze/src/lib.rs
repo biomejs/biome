@@ -320,7 +320,12 @@ where
         // A path can have a different document for each client of the
         // workspace, so the embedded content comes from the analyzed document
         // rather than from its path.
-        services.insert_service(EmbeddedService::new(embedded_db, document, snippet_offset));
+        services.insert_service(EmbeddedService::new_with_globals(
+            embedded_db,
+            document,
+            snippet_offset,
+            options.globals(),
+        ));
     }
 
     let ctx = AnalyzerContext {
