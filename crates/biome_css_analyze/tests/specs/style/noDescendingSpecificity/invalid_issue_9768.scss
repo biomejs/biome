@@ -107,3 +107,8 @@ span { color: blue; }
 }
 
 .c12--x { color: blue; }
+
+// A `%` inside a quoted attribute value isn't a placeholder, so `[data-c13="50%"]` is reported.
+.c13 [data-c13="50%"] { color: red; }
+
+[data-c13="50%"] { color: blue; }

@@ -795,3 +795,17 @@ fn test_resolve_scss_partial_combinator_with_nesting_selector() {
     let resolved = resolved_deepest_scss_selector(".navbar { & ~ { .container {} } }", 2);
     assert_eq!(resolved, ".navbar ~ .container");
 }
+
+#[test]
+fn test_requires_scss_evaluation() {
+    let requires = |source| {
+        deepest_scss_selector(source, 0)
+            .resolved()
+            .requires_scss_evaluation()
+    };
+    assert!(requires("%placeholder {}"));
+    assert!(requires(".a-#{$b} {}"));
+    assert!(requires("[title=\"#{$x}\"] {}"));
+    assert!(!requires("[data-x=\"50%\"] {}"));
+    assert!(!requires("#id {}"));
+}

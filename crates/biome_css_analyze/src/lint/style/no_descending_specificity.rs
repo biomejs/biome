@@ -346,9 +346,8 @@ fn find_descending_selector(
 
     for selector in rule.selectors() {
         let resolved_selector = selector.resolved();
-        let resolved_selector_text = resolved_selector.to_string();
         // SCSS placeholders may not emit CSS, and interpolation prevents static specificity.
-        if resolved_selector_text.contains('%') || resolved_selector_text.contains("#{") {
+        if resolved_selector.requires_scss_evaluation() {
             continue;
         }
         if !subject_key(resolved_selector, &mut parts, key) {
