@@ -106,7 +106,7 @@ fn collect_property_definitions(model: &SemanticModel) -> Vec<CssPropertyDefinit
             model
                 .custom_property_prefixes()
                 .map(|(prefix, range)| CssPropertyDefinition {
-                    name: prefix.to_string().into(),
+                    name: prefix.clone(),
                     range,
                     globally_scoped: false,
                     is_prefix: true,

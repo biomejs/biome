@@ -12,7 +12,7 @@ use biome_css_syntax::{
     },
     single_expression_item,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -69,7 +69,7 @@ pub enum SemanticEvent {
     /// A custom property declaration whose name is interpolated after a static prefix, such as
     /// `--color-#{$name}: red`, which declares custom properties that start with `--color-`.
     CustomPropertyPrefixDeclaration {
-        prefix: String,
+        prefix: Text,
         range: TextRange,
     },
 }
@@ -436,12 +436,20 @@ fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {
 
 /// Returns the static part of an interpolated custom property name before its first interpolation,
 /// such as `--color-` for `--color-#{$name}`, or `None` if the name isn't a custom property.
-fn custom_property_prefix(name: &ScssInterpolatedDashedIdentifier) -> Option<String> {
-    let prefix: String = name
-        .items()
-        .iter()
-        .take_while(|part| part.as_scss_interpolation().is_none())
-        .map(|part| part.syntax().text_trimmed().to_string())
-        .collect();
+fn custom_property_prefix(name: &ScssInterpolatedDashedIdentifier) -> Option<Text> {
+    let interpolation_start = name.items().iter().find_map(|part| {
+        Some(
+            part.as_scss_interpolation()?
+                .syntax()
+                .text_trimmed_range()
+                .start(),
+        )
+    })?;
+    let name_start = name.syntax().text_trimmed_range().start();
+    let prefix = name
+        .syntax()
+        .text_trimmed()
+        .slice(..interpolation_start - name_start)
+        .into_text();
     prefix.starts_with("--").then_some(prefix)
 }

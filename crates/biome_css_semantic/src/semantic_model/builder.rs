@@ -3,7 +3,7 @@ use biome_css_syntax::{
     CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule,
     ScssIncludeAtRule, ScssMixinAtRule, T, single_expression_item,
 };
-use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 use std::{collections::BTreeMap, sync::LazyLock};
 
@@ -34,7 +34,7 @@ pub struct SemanticModelBuilder {
     /// IDs of top-level rules only
     top_level_rule_ids: Vec<RuleId>,
     root_declarations: Vec<CssModelDeclarationData>,
-    custom_property_prefixes: Vec<(String, TextRange)>,
+    custom_property_prefixes: Vec<(Text, TextRange)>,
     global_custom_variables: FxHashMap<TokenText, CssGlobalCustomVariableData>,
     at_property_rules: Vec<CssPropertyAtRuleData>,
     at_property_by_range: FxHashMap<TextRange, usize>,
