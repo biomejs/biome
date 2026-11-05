@@ -16,7 +16,7 @@ export const noConsole = defineRule({
 });
 ```
 
-Grit sequence patterns call `run()` for each matched node, leaf tokens are supported, and patterns containing rewrites are rejected. Plugins using GritQL patterns should report diagnostics from `run()` as usual.
+Grit sequence patterns call `run()` for each matched node; they support leaf tokens, and they reject patterns containing rewrites. Plugins using GritQL patterns should report diagnostics from `run()` as usual.
 
 Plugins using Grit queries can still request the semantic model as
 well:
