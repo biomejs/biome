@@ -9,7 +9,9 @@ use biome_css_syntax::{
 };
 use biome_languages::CssFileSource;
 use biome_module_graph::{SymbolFromModuleInfo, is_class_referenced_by_importers};
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text, TokenText, declare_node_union};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, Text, TokenText, WalkEvent, declare_node_union,
+};
 use biome_rule_options::no_unused_classes::NoUnusedClassesOptions;
 
 declare_lint_rule! {
@@ -283,26 +285,20 @@ fn push_trailing_class_name(
 /// wherever the extending selector is.
 fn is_extended(node: &CssSyntaxNode, class_name: &str) -> bool {
     node.ancestors().last().is_some_and(|root| {
-        // `@extend` is a statement, so the search skips selectors and declarations.
-        root.pruned_descendents(|descendant| {
-            !matches!(
-                descendant.kind(),
-                CssSyntaxKind::CSS_SELECTOR_LIST
-                    | CssSyntaxKind::CSS_RELATIVE_SELECTOR_LIST
-                    | CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON
-                    | CssSyntaxKind::SCSS_VARIABLE_DECLARATION
-            )
-        })
-        .filter_map(ScssExtendAtRule::cast)
-        .flat_map(|extend| {
-            extend
-                .syntax()
-                .descendants()
-                .filter_map(CssClassSelector::cast)
-        })
-        .any(|selector| {
-            class_selector_name(&selector).is_some_and(|name| name.text() == class_name)
-        })
+        root.preorder_of_kinds(ScssExtendAtRule::KIND_SET)
+            .filter_map(|event| match event {
+                WalkEvent::Enter(node) => ScssExtendAtRule::cast(node),
+                WalkEvent::Leave(_) => None,
+            })
+            .flat_map(|extend| {
+                extend
+                    .syntax()
+                    .descendants()
+                    .filter_map(CssClassSelector::cast)
+            })
+            .any(|selector| {
+                class_selector_name(&selector).is_some_and(|name| name.text() == class_name)
+            })
     })
 }
 
