@@ -114,6 +114,11 @@ span { color: blue; }
 
 .c12--x { color: blue; }
 
+// A `%` inside a quoted attribute value isn't a placeholder, so `[data-c13="50%"]` is reported.
+.c13 [data-c13="50%"] { color: red; }
+
+[data-c13="50%"] { color: blue; }
+
 ```
 
 # Diagnostics
@@ -328,6 +333,7 @@ invalid_issue_9768.scss:109:1 lint/style/noDescendingSpecificity ━━━━━
   > 109 │ .c12--x { color: blue; }
         │ ^^^^^^^
     110 │ 
+    111 │ // A `%` inside a quoted attribute value isn't a placeholder, so `[data-c13="50%"]` is reported.
   
   i This selector specificity is (0, 2, 0)
   
@@ -337,6 +343,30 @@ invalid_issue_9768.scss:109:1 lint/style/noDescendingSpecificity ━━━━━
         │   ^^^^^^^^^^
     107 │ }
     108 │ 
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:114:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    112 │ .c13 [data-c13="50%"] { color: red; }
+    113 │ 
+  > 114 │ [data-c13="50%"] { color: blue; }
+        │ ^^^^^^^^^^^^^^^^
+    115 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    111 │ // A `%` inside a quoted attribute value isn't a placeholder, so `[data-c13="50%"]` is reported.
+  > 112 │ .c13 [data-c13="50%"] { color: red; }
+        │ ^^^^^^^^^^^^^^^^^^^^^
+    113 │ 
+    114 │ [data-c13="50%"] { color: blue; }
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   

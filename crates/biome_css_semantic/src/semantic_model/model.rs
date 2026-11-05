@@ -458,6 +458,21 @@ impl ResolvedSelector {
         })
     }
 
+    /// Returns whether the selector contains an SCSS placeholder (`%name`) or interpolation
+    /// (`#{...}`), whose emitted selector depends on SCSS evaluation. A `%` or `#{` inside a plain
+    /// quoted string doesn't count.
+    pub fn requires_scss_evaluation(&self) -> bool {
+        self.0
+            .iter()
+            .any(|(kind, _)| *kind == CssSyntaxKind::PERCENT)
+            || self.0.windows(2).any(|pair| {
+                matches!(
+                    pair,
+                    [(CssSyntaxKind::HASH, _), (CssSyntaxKind::L_CURLY, _)]
+                )
+            })
+    }
+
     /// Returns the last compound selector, which holds the element the selector styles.
     ///
     /// ```css

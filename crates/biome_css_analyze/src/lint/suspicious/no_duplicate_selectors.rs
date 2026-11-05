@@ -171,8 +171,7 @@ impl Rule for NoDuplicateSelectors {
                     }
 
                     let rule_node = rule.node(&root);
-                    let is_at_rule =
-                        INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind());
+                    let is_at_rule = INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind());
 
                     if is_at_rule {
                         let parent_hash = *context_hash_stack.last().unwrap();
@@ -190,10 +189,11 @@ impl Rule for NoDuplicateSelectors {
 
                     // For qualified rules with selectors, check for duplicates.
                     if !is_at_rule && !rule.selectors().is_empty() {
-                        if rule.selectors().iter().any(|selector| {
-                            let selector = selector.resolved().to_string();
-                            selector.contains('%') || selector.contains("#{")
-                        }) {
+                        if rule
+                            .selectors()
+                            .iter()
+                            .any(|selector| selector.resolved().requires_scss_evaluation())
+                        {
                             continue;
                         }
                         let mut normalized_selectors: Vec<String> = rule
