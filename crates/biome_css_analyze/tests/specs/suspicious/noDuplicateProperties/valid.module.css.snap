@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.module.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.button {
+  composes: base from "./base.css";
+  composes: primary from "./theme.css";
+}
+
+```

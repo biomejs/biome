@@ -1,7 +1,9 @@
-use crate::services::semantic::Semantic;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use crate::utils::AnyPropertyStatement;
+use biome_analyze::{
+    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_css_syntax::{AnyCssDeclarationOrRule, CssDeclarationOrRuleList, TwUtilityAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_duplicate_custom_properties::NoDuplicateCustomPropertiesOptions;
@@ -51,44 +53,48 @@ declare_lint_rule! {
 }
 
 impl Rule for NoDuplicateCustomProperties {
-    type Query = Semantic<CssDeclarationOrRuleList>;
+    type Query = Ast<CssDeclarationOrRuleList>;
     type State = (TextRange, (TextRange, TokenText));
     type Signals = Option<Self::State>;
     type Options = NoDuplicateCustomPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let model = ctx.model();
 
-        let declarations = model.get_declarations_by_range(node.range());
+        // Tailwind resolves each `--value()` in a `@utility` and keeps the declarations that resolve,
+        // so repeating a property there is the documented way to write fallbacks.
+        if node
+            .syntax()
+            .ancestors()
+            .any(|ancestor| TwUtilityAtRule::can_cast(ancestor.kind()))
+        {
+            return None;
+        }
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
-        for declaration in declarations.iter().filter(|declaration| {
-            declaration
-                .declaration()
-                .syntax()
-                .parent()
-                .and_then(|parent| parent.parent())
-                .as_ref()
-                == Some(node.syntax())
-        }) {
-            let prop = declaration.property();
-            let prop_text = prop.value().ok()?;
-            let prop_range = prop.range();
+        for item in node {
+            let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration) = item else {
+                continue;
+            };
+            let Some(name) = AnyPropertyStatement::from(declaration).name() else {
+                continue;
+            };
+            let prop_text = name.token_text_trimmed();
 
-            let is_custom_property = prop_text.text().starts_with("--");
-
-            if !is_custom_property {
+            if !prop_text.text().starts_with("--") {
                 continue;
             }
 
-            match seen.entry(prop_text.clone()) {
+            match seen.entry(prop_text) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_text)));
+                    return Some((
+                        *entry.get(),
+                        (name.text_trimmed_range(), entry.key().clone()),
+                    ));
                 }
                 Entry::Vacant(entry) => {
-                    entry.insert(prop_range);
+                    entry.insert(name.text_trimmed_range());
                 }
             }
         }
