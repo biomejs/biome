@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UsePackageJsonEngines {
-        version: "next",
+        version: "2.6.6",
         name: "usePackageJsonEngines",
         language: "json",
         recommended: false,

@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UsePackageJsonCpu {
-        version: "next",
+        version: "2.6.6",
         name: "usePackageJsonCpu",
         language: "json",
         recommended: false,

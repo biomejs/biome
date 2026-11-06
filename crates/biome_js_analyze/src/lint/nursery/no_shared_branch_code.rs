@@ -83,7 +83,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSharedBranchCode {
-        version: "next",
+        version: "2.6.6",
         name: "noSharedBranchCode",
         language: "js",
         recommended: false,
