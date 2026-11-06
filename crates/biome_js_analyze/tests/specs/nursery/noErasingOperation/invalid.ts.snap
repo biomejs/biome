@@ -1,0 +1,140 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+(x as string) * 0;
+x! & 0;
+x! & (0 as number);
+(0 as number) / x;
+x * (0 satisfies number);
+x * <number>0;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noErasingOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This operation always results in zero.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (x as string) * 0;
+      │ ^^^^^^^^^^^^^^^^^
+    3 │ x! & 0;
+    4 │ x! & (0 as number);
+  
+  i Multiplying by zero gives zero, so the other value has no effect on the result.
+  
+  i This is likely a mistake. If the result should be zero, replace the operation with 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noErasingOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This operation always results in zero.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (x as string) * 0;
+  > 3 │ x! & 0;
+      │ ^^^^^^
+    4 │ x! & (0 as number);
+    5 │ (0 as number) / x;
+  
+  i A bitwise AND with zero gives zero, so the other value has no effect on the result.
+  
+  i This is likely a mistake. If the result should be zero, replace the operation with 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noErasingOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This operation always results in zero.
+  
+    2 │ (x as string) * 0;
+    3 │ x! & 0;
+  > 4 │ x! & (0 as number);
+      │ ^^^^^^^^^^^^^^^^^^
+    5 │ (0 as number) / x;
+    6 │ x * (0 satisfies number);
+  
+  i A bitwise AND with zero gives zero, so the other value has no effect on the result.
+  
+  i This is likely a mistake. If the result should be zero, replace the operation with 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noErasingOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This operation always results in zero.
+  
+    3 │ x! & 0;
+    4 │ x! & (0 as number);
+  > 5 │ (0 as number) / x;
+      │ ^^^^^^^^^^^^^^^^^
+    6 │ x * (0 satisfies number);
+    7 │ x * <number>0;
+  
+  i Dividing zero by a number gives zero, so the other value has no effect on the result.
+  
+  i This is likely a mistake. If the result should be zero, replace the operation with 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noErasingOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This operation always results in zero.
+  
+    4 │ x! & (0 as number);
+    5 │ (0 as number) / x;
+  > 6 │ x * (0 satisfies number);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ x * <number>0;
+    8 │ 
+  
+  i Multiplying by zero gives zero, so the other value has no effect on the result.
+  
+  i This is likely a mistake. If the result should be zero, replace the operation with 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noErasingOperation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This operation always results in zero.
+  
+    5 │ (0 as number) / x;
+    6 │ x * (0 satisfies number);
+  > 7 │ x * <number>0;
+      │ ^^^^^^^^^^^^^
+    8 │ 
+  
+  i Multiplying by zero gives zero, so the other value has no effect on the result.
+  
+  i This is likely a mistake. If the result should be zero, replace the operation with 0.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

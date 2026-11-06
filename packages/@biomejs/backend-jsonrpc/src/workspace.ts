@@ -3033,6 +3033,11 @@ export interface Nursery {
 	 */
 	noEagerArrayMethodsInLoops?: NoEagerArrayMethodsInLoopsConfiguration;
 	/**
+	 * Disallow operations with zero that always result in zero.
+	 * See https://biomejs.dev/linter/rules/no-erasing-operation
+	 */
+	noErasingOperation?: NoErasingOperationConfiguration;
+	/**
 	 * Enforce a maximum depth that blocks can be nested.
 	 * See https://biomejs.dev/linter/rules/no-excessive-nested-blocks
 	 */
@@ -6504,6 +6509,9 @@ export type NoDynamicDeleteConfiguration =
 export type NoEagerArrayMethodsInLoopsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEagerArrayMethodsInLoopsOptions;
+export type NoErasingOperationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoErasingOperationOptions;
 export type NoExcessiveNestedBlocksConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveNestedBlocksOptions;
@@ -9432,6 +9440,10 @@ export interface RuleWithNoDynamicDeleteOptions {
 export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
 	level: RulePlainConfiguration;
 	options?: NoEagerArrayMethodsInLoopsOptions;
+}
+export interface RuleWithNoErasingOperationOptions {
+	level: RulePlainConfiguration;
+	options?: NoErasingOperationOptions;
 }
 export interface RuleWithNoExcessiveNestedBlocksOptions {
 	level: RulePlainConfiguration;
@@ -12775,6 +12787,7 @@ export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export type NoDynamicDeleteOptions = {};
 export type NoEagerArrayMethodsInLoopsOptions = {};
+export type NoErasingOperationOptions = {};
 export interface NoExcessiveNestedBlocksOptions {
 	/**
 	 * Names of at-rules whose blocks don't count as a nesting level and are never reported,
@@ -14984,6 +14997,7 @@ export type Category =
 	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noErasingOperation"
 	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"

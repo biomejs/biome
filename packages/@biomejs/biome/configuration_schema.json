@@ -4530,6 +4530,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoErasingOperationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoErasingOperationOptions" }
+			]
+		},
+		"NoErasingOperationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEvolvingTypesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8840,6 +8850,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noErasingOperation": {
+					"description": "Disallow operations with zero that always result in zero.\nSee https://biomejs.dev/linter/rules/no-erasing-operation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoErasingOperationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveNestedBlocks": {
 					"description": "Enforce a maximum depth that blocks can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-blocks",
 					"anyOf": [
@@ -12560,6 +12577,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoEqualsToNullOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoErasingOperationOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoErasingOperationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
