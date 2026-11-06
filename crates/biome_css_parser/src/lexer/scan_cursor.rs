@@ -2,7 +2,7 @@ mod url;
 
 use super::{CssStringQuote, source_cursor::SourceCursor};
 use biome_css_syntax::{TextRange, TextSize, is_css_newline_byte, is_css_whitespace_byte};
-use biome_unicode_table::{Dispatch::*, is_css_non_ascii, lookup_byte};
+use biome_unicode_table::{Dispatch::*, html_quote_reference, is_css_non_ascii, lookup_byte};
 use std::char::REPLACEMENT_CHARACTER;
 
 /// Result of scanning a string body from the current lexer position.
@@ -20,8 +20,9 @@ pub(crate) struct StringBodyScan {
 pub(crate) enum StringBodyScanStop {
     /// An unescaped `#{` starts an interpolation part.
     Interpolation { position: usize },
-    /// The matching quote closes the outer string.
-    ClosingQuote { position: usize },
+    /// The matching quote closes the outer string. The quote is longer than one
+    /// byte when it is an HTML character reference, such as `&quot;`.
+    ClosingQuote { position: usize, len: usize },
     /// A newline terminates the string as malformed input.
     Newline { position: usize, len: usize },
     /// The file ended before a closing quote was found.
@@ -45,6 +46,7 @@ pub(crate) struct CssScanCursor<'src> {
     cursor: SourceCursor<'src>,
     is_scss: bool,
     line_comments_enabled: bool,
+    html_quote_references: bool,
     metavariables: &'src [TextRange],
 }
 
@@ -78,8 +80,30 @@ impl<'src> CssScanCursor<'src> {
             cursor,
             is_scss,
             line_comments_enabled,
+            html_quote_references: false,
             metavariables: &[],
         }
+    }
+
+    /// Treats HTML character references for quotes, such as `&quot;`, as string
+    /// quotes. The source of an HTML `style` attribute is lexed without decoding
+    /// its character references first.
+    pub(crate) const fn with_html_quote_references(self, enabled: bool) -> Self {
+        Self {
+            html_quote_references: enabled,
+            ..self
+        }
+    }
+
+    /// Returns the length and the quote byte of the HTML character reference
+    /// for a quote at the current position, if HTML quote references are
+    /// enabled.
+    pub(crate) fn html_quote_reference(&self) -> Option<(usize, u8)> {
+        if !self.html_quote_references {
+            return None;
+        }
+
+        html_quote_reference(&self.cursor.source().as_bytes()[self.position()..])
     }
 
     /// Skips the given source ranges of Grit metavariables when scanning
@@ -766,8 +790,8 @@ impl<'src> CssScanCursor<'src> {
                         return false;
                     }
                 }
-                StringBodyScanStop::ClosingQuote { position } => {
-                    self.cursor.set_position(position + 1);
+                StringBodyScanStop::ClosingQuote { position, len } => {
+                    self.cursor.set_position(position + len);
                     self.skip_scss_expression_trivia();
                     return self.current_byte() == Some(b'+');
                 }
@@ -818,7 +842,17 @@ impl<'src> ScssStringScanner<'src> {
 
             if byte == quote_byte {
                 return StringBodyScan {
-                    stop: StringBodyScanStop::ClosingQuote { position },
+                    stop: StringBodyScanStop::ClosingQuote { position, len: 1 },
+                    invalid_escape_ranges,
+                };
+            }
+
+            if byte == b'&'
+                && let Some((len, reference_quote)) = self.cursor.html_quote_reference()
+                && reference_quote == quote_byte
+            {
+                return StringBodyScan {
+                    stop: StringBodyScanStop::ClosingQuote { position, len },
                     invalid_escape_ranges,
                 };
             }

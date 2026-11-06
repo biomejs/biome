@@ -255,6 +255,40 @@ fn html_style_attribute_reports_invalid_declaration() {
 }
 
 #[test]
+fn html_style_attribute_decodes_character_references() {
+    for quote in ["&quot;", "&QUOT;", "&#34;", "&#x22;"] {
+        let content = format!(
+            r#"<p style="font-family:RotisSansCyrillic, {quote}Rotis Sans Cyrillic{quote}, sans-serif; font-size:10px;">test</p>"#
+        );
+        assert_no_diagnostics("/project/file.html", &content);
+    }
+    for quote in ["&apos;", "&#39;", "&#x27;"] {
+        let content = format!(r#"<p style="font-family:{quote}Rotis Sans{quote};">test</p>"#);
+        assert_no_diagnostics("/project/file.html", &content);
+    }
+
+    for content in [
+        r#"<p style="content:&quot;a\&quot;b&quot;; color:red">test</p>"#,
+        r#"<p style="content:&quot;a&apos;b&quot;; color:red">test</p>"#,
+        r#"<p style='content:&quot;a"; color:red'>test</p>"#,
+        r#"<p style='content:"a&quot;; color:red'>test</p>"#,
+    ] {
+        assert_no_diagnostics("/project/file.html", content);
+    }
+
+    let svg = r#"<text style="font-family:&quot;Rotis Sans Cyrillic&quot;;">test</text>"#;
+    assert_no_diagnostics("/project/file.svg", svg);
+}
+
+#[test]
+fn html_style_attribute_reports_unclosed_character_reference_quote() {
+    assert_diagnostics(
+        "/project/file.html",
+        r#"<p style="font-family:&quot;Rotis Sans;">test</p>"#,
+    );
+}
+
+#[test]
 fn html_non_style_attribute_is_not_parsed_as_css() {
     assert_no_diagnostics(
         "/project/file.html",

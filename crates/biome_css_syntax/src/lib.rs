@@ -42,6 +42,7 @@ pub use whitespace_ext::{
 
 use crate::CssSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
+use biome_unicode_table::html_quote_reference;
 
 impl From<u16> for CssSyntaxKind {
     fn from(d: u16) -> Self {
@@ -226,12 +227,27 @@ impl TryFrom<CssSyntaxKind> for TriviaPieceKind {
 }
 
 /// Text of `token`, excluding all trivia and removing quotes if `token` is a string literal.
+///
+/// In the source of an HTML `style` attribute, either quote can be an HTML
+/// character reference, such as `&quot;`, which is removed as a whole.
 pub fn inner_string_text(token: &CssSyntaxToken) -> TokenText {
     let mut text = token.token_text_trimmed();
     if token.kind() == CssSyntaxKind::CSS_STRING_LITERAL {
-        // remove string delimiters
         // SAFETY: string literal token have a delimiters at the start and the end of the string
-        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+        let bytes = text.as_bytes();
+        let start = html_quote_reference(bytes).map_or(1, |(len, _)| len);
+        // A reference contains no `&` after its first byte, so a closing
+        // reference starts at the last `&`.
+        let end = bytes
+            .iter()
+            .rposition(|byte| *byte == b'&')
+            .filter(|&ampersand| {
+                ampersand >= start
+                    && html_quote_reference(&bytes[ampersand..])
+                        .is_some_and(|(len, _)| ampersand + len == bytes.len())
+            })
+            .unwrap_or(bytes.len() - 1);
+        let range = TextRange::new(TextSize::from(start as u32), TextSize::from(end as u32));
         text = text.slice(range);
     }
     text
