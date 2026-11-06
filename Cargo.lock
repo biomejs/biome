@@ -636,11 +636,13 @@ dependencies = [
 name = "biome_embeds"
 version = "0.1.0"
 dependencies = [
+ "biome_astro_semantic",
  "biome_db",
  "biome_fs",
  "biome_html_parser",
  "biome_html_syntax",
  "biome_js_parser",
+ "biome_js_semantic",
  "biome_js_syntax",
  "biome_languages",
  "biome_module_graph",

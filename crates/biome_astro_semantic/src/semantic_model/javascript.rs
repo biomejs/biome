@@ -3,8 +3,8 @@ use super::model::*;
 use super::snippets::AstroSnippet;
 use biome_js_semantic::{Binding, JsDeclarationKind};
 use biome_js_syntax::{
-    AnyJsIdentifierReference, AnyJsStatement, JsImport, JsSyntaxKind, TsIdentifierBinding,
-    TsImportEqualsDeclaration, unescape_js_identifier,
+    AnyJsIdentifierReference, AnyJsStatement, JsAssignmentExpression, JsAssignmentOperator,
+    JsImport, JsSyntaxKind, TsIdentifierBinding, TsImportEqualsDeclaration, unescape_js_identifier,
 };
 use biome_rowan::{AstNode, Text, TokenText, WalkEvent};
 
@@ -46,21 +46,7 @@ pub(crate) fn collect_module_bindings(
                 .map_or(range, |node| {
                     to_host(node.text_trimmed_range(), snippet.range_offset())
                 });
-            let declaration_kind = binding.declaration_kind();
-            let type_only = is_type_only_binding(&binding);
-            let declares_value = !type_only
-                && (declaration_kind.declares_value()
-                    || declaration_kind == JsDeclarationKind::Module);
-            let declares_type = type_only || declaration_kind.declares_type();
-            let declares_namespace = declaration_kind.declares_namespace()
-                || matches!(
-                    declaration_kind,
-                    JsDeclarationKind::Enum
-                        | JsDeclarationKind::Import
-                        | JsDeclarationKind::ImportType
-                        | JsDeclarationKind::Module
-                        | JsDeclarationKind::Unknown
-                );
+            let capabilities = binding_capabilities(&binding);
             let symbol = builder.add_symbol(NewSymbol {
                 name,
                 semantic_name,
@@ -68,9 +54,9 @@ pub(crate) fn collect_module_bindings(
                 declaration,
                 snippet: Some(snippet_id),
                 scope,
-                namespace: if declares_value {
+                namespace: if capabilities.value {
                     Namespace::Value
-                } else if declares_type {
+                } else if capabilities.ty {
                     Namespace::Type
                 } else {
                     Namespace::Namespace
@@ -81,9 +67,9 @@ pub(crate) fn collect_module_bindings(
                     SymbolKind::Local
                 },
                 origin: Origin::None,
-                declares_value,
-                declares_type,
-                declares_namespace,
+                declares_value: capabilities.value,
+                declares_type: capabilities.ty,
+                declares_namespace: capabilities.namespace,
             });
             collect_bound_references(builder, snippet, snippet_id, symbol, &binding);
         }
@@ -104,12 +90,16 @@ fn collect_bound_references(
         let Ok(token) = reference_node.value_token() else {
             continue;
         };
+        let namespace = reference_namespace(&reference_node);
+        if !builder.data.symbols[symbol].declares_in(namespace) {
+            continue;
+        }
         builder.add_reference(ReferenceData {
             range: to_host(token.text_trimmed_range(), snippet.range_offset()),
             name: token.token_text_trimmed(),
             snippet: Some(snippet_id),
             site: RefSite::Identifier,
-            namespace: reference_namespace(&reference_node),
+            namespace,
             scope: None,
             base: RefBase::Bare,
             access: access_of(&reference_node, reference.is_write()),
@@ -132,7 +122,6 @@ pub(crate) fn collect_free_references(
     {
         let (reference, token) = if let WalkEvent::Enter(node) = event
             && let Some(reference) = AnyJsIdentifierReference::cast_ref(&node)
-            && snippet.js.binding(&reference).is_none()
             && let Ok(token) = reference.value_token()
         {
             (reference, token)
@@ -141,20 +130,31 @@ pub(crate) fn collect_free_references(
         };
         let name = token.token_text_trimmed();
         let namespace = reference_namespace(&reference);
-        let resolution = match lookup(builder, scope, namespace, name.text()) {
-            Lookup::Symbol(symbol) => Resolution::Symbol(symbol),
-            Lookup::Unknowable => Resolution::Unknowable,
-            Lookup::Missing
-                if namespace == Namespace::Value
-                    && (snippet.js.is_global_reference(&reference)
-                        || additional_globals.iter().any(|global| {
-                            unescape_js_identifier(name.text()).as_ref() == global.as_ref()
-                        })) =>
-            {
-                Resolution::Global
+        let resolution = if let Some(binding) = snippet.js.binding(&reference) {
+            if binding_capabilities(&binding).declares_in(namespace) {
+                continue;
             }
-            Lookup::Missing if namespace != Namespace::Value => Resolution::Unknowable,
-            Lookup::Missing => Resolution::Unresolved,
+            if namespace == Namespace::Value {
+                Resolution::Unresolved
+            } else {
+                Resolution::Unknowable
+            }
+        } else {
+            match lookup(builder, scope, namespace, name.text()) {
+                Lookup::Symbol(symbol) => Resolution::Symbol(symbol),
+                Lookup::Unknowable => Resolution::Unknowable,
+                Lookup::Missing
+                    if namespace == Namespace::Value
+                        && (snippet.js.is_global_reference(&reference)
+                            || additional_globals.iter().any(|global| {
+                                unescape_js_identifier(name.text()).as_ref() == global.as_ref()
+                            })) =>
+                {
+                    Resolution::Global
+                }
+                Lookup::Missing if namespace != Namespace::Value => Resolution::Unknowable,
+                Lookup::Missing => Resolution::Unresolved,
+            }
         };
         builder.add_reference(ReferenceData {
             range: to_host(token.text_trimmed_range(), snippet.range_offset()),
@@ -207,6 +207,42 @@ pub(crate) fn lookup(
     }
 }
 
+#[derive(Clone, Copy)]
+struct BindingCapabilities {
+    value: bool,
+    ty: bool,
+    namespace: bool,
+}
+
+impl BindingCapabilities {
+    fn declares_in(self, namespace: Namespace) -> bool {
+        match namespace {
+            Namespace::Value => self.value,
+            Namespace::Type => self.ty,
+            Namespace::Namespace => self.namespace,
+        }
+    }
+}
+
+fn binding_capabilities(binding: &Binding) -> BindingCapabilities {
+    let declaration_kind = binding.declaration_kind();
+    let type_only = is_type_only_binding(binding);
+    BindingCapabilities {
+        value: !type_only
+            && (declaration_kind.declares_value() || declaration_kind == JsDeclarationKind::Module),
+        ty: type_only || declaration_kind.declares_type(),
+        namespace: declaration_kind.declares_namespace()
+            || matches!(
+                declaration_kind,
+                JsDeclarationKind::Enum
+                    | JsDeclarationKind::Import
+                    | JsDeclarationKind::ImportType
+                    | JsDeclarationKind::Module
+                    | JsDeclarationKind::Unknown
+            ),
+    }
+}
+
 pub(crate) fn identifier_semantic_name(name: TokenText) -> Text {
     let decoded = match unescape_js_identifier(name.text()) {
         std::borrow::Cow::Borrowed(_) => None,
@@ -247,10 +283,31 @@ fn access_of(reference: &AnyJsIdentifierReference, is_write: bool) -> Access {
             AnyJsIdentifierReference::JsIdentifierAssignment(_)
         )
     {
-        Access::Write
+        if is_mutating_reference(reference) {
+            Access::Mutate
+        } else {
+            Access::Write
+        }
     } else {
         Access::Read
     }
+}
+
+fn is_mutating_reference(reference: &AnyJsIdentifierReference) -> bool {
+    reference
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(|ancestor| match ancestor.kind() {
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => JsAssignmentExpression::cast(ancestor)
+                .and_then(|assignment| assignment.operator().ok())
+                .map(|operator| operator != JsAssignmentOperator::Assign),
+            JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION => {
+                Some(true)
+            }
+            _ => None,
+        })
+        .unwrap_or(false)
 }
 
 fn is_type_only_binding(binding: &Binding) -> bool {

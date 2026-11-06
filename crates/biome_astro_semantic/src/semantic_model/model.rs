@@ -485,6 +485,25 @@ impl AstroSemanticModel {
         })
     }
 
+    /// Returns the reference whose name occupies exactly `range`.
+    pub fn reference_at(&self, range: TextRange) -> Option<Reference> {
+        let index = self
+            .data
+            .references
+            .binary_search_by(|reference| {
+                reference
+                    .range
+                    .start()
+                    .cmp(&range.start())
+                    .then_with(|| reference.range.end().cmp(&range.end()))
+            })
+            .ok()?;
+        Some(Reference {
+            data: self.data.clone(),
+            id: ReferenceId::new(index),
+        })
+    }
+
     /// Returns the declaration with the given id.
     ///
     /// # Panics
@@ -635,6 +654,11 @@ impl Scope {
             data: self.data.clone(),
             id: *id,
         })
+    }
+
+    /// Returns the symbol whose declared name occupies exactly `range` in this scope.
+    pub fn symbol_at(&self, range: TextRange) -> Option<Symbol> {
+        self.symbols().find(|symbol| symbol.host_range() == range)
     }
 
     /// Returns this scope followed by each enclosing scope.
