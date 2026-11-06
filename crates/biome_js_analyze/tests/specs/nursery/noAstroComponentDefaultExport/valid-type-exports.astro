@@ -1,0 +1,9 @@
+---
+type Props = { title: string };
+type Other = { count: number };
+export type { Props as default };
+export { type Other as default };
+export type { External as default } from "./types";
+export { type Another as default } from "./types";
+---
+<!-- should not generate diagnostics -->
