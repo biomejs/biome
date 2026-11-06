@@ -99,7 +99,7 @@ fn collect_component_references(builder: &mut ModelBuilder, host: &HtmlRoot, sco
             continue;
         };
         let name = token.token_text_trimmed();
-        let resolution = match lookup(builder, scope, Namespace::Value, name.text()) {
+        let resolution = match lookup(builder, scope, Namespace::Value, name.text(), Access::Read) {
             Lookup::Symbol(symbol) => Resolution::Symbol(symbol),
             Lookup::Unknowable => Resolution::Unknowable,
             Lookup::Missing => Resolution::Unresolved,

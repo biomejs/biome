@@ -28,7 +28,7 @@ const recursiveClient = () => recursiveClient();
 
 # Diagnostics
 ```
-invalid-astro-resolved-uses.astro:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+invalid-astro-resolved-uses.astro:2:5 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable writtenOnly is unused.
   
@@ -39,13 +39,6 @@ invalid-astro-resolved-uses.astro:2:5 lint/correctness/noUnusedVariables  FIXABL
     4 │ const unused = 1;
   
   i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
-  
-  i Unsafe fix: If this is intentional, prepend writtenOnly with an underscore.
-  
-    1   │ - let·writtenOnly·=·0;
-      1 │ + let·_writtenOnly·=·0;
-    2 2 │   let mutated = 0;
-    3 3 │   const unused = 1;
   
 
 ```

@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-type-uses.astro
+---
+# Input
+```astro
+---
+import { Mixed, TypeOnly, TypeQuery } from "./types";
+import * as Namespace from "./namespace";
+---
+<!-- should generate diagnostics -->
+{null as TypeOnly}
+{null as Namespace.Member}
+{null as typeof TypeQuery}
+{Mixed}
+{null as Mixed}
+
+```
+
+# Diagnostics
+```
+invalid-astro-type-uses.astro:2:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+    1 │ ---
+  > 2 │ import { Mixed, TypeOnly, TypeQuery } from "./types";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import * as Namespace from "./namespace";
+    4 │ ---
+  
+  i This import is only used as a type.
+  
+    1 │ ---
+  > 2 │ import { Mixed, TypeOnly, TypeQuery } from "./types";
+      │                 ^^^^^^^^
+    3 │ import * as Namespace from "./namespace";
+    4 │ ---
+  
+  i This import is only used as a type.
+  
+    1 │ ---
+  > 2 │ import { Mixed, TypeOnly, TypeQuery } from "./types";
+      │                           ^^^^^^^^^
+    3 │ import * as Namespace from "./namespace";
+    4 │ ---
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Add inline type keywords.
+  
+    1 │ import·{·Mixed,·type·TypeOnly,·type·TypeQuery·}·from·"./types";
+      │                 +++++          +++++                           
+
+```
+
+```
+invalid-astro-type-uses.astro:3:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    1 │ ---
+    2 │ import { Mixed, TypeOnly, TypeQuery } from "./types";
+  > 3 │ import * as Namespace from "./namespace";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ ---
+    5 │ <!-- should generate diagnostics -->
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    2 │ import·type·*·as·Namespace·from·"./namespace";
+      │        +++++                                  
+
+```

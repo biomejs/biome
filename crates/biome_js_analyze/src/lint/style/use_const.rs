@@ -1,4 +1,7 @@
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{
+    JsRuleAction,
+    services::{embedded::EmbeddedService, semantic::Semantic},
+};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,7 +10,7 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScopeExtensions};
 use biome_js_syntax::*;
-use biome_languages::JsFileSource;
+use biome_languages::{JsFileSource, javascript::JsEmbeddingKind};
 use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_const::UseConstOptions;
 
@@ -109,9 +112,17 @@ impl Rule for UseConst {
         let declaration = ctx.query();
         let model = ctx.model();
 
-        // `let` declarations inside snippets are allowed
+        // Other framework source snippets may have writes the local JavaScript model cannot see.
+        // Astro frontmatter uses the resolved host model below.
         let file_source = ctx.source_type::<JsFileSource>();
-        if file_source.is_embedded_source() && declaration.is_let() {
+        let is_astro_frontmatter = matches!(
+            file_source.as_embedding_kind(),
+            JsEmbeddingKind::Astro {
+                frontmatter: true,
+                ..
+            }
+        );
+        if file_source.is_embedded_source() && !is_astro_frontmatter && declaration.is_let() {
             return None;
         }
 
@@ -120,7 +131,12 @@ impl Rule for UseConst {
             return None;
         }
 
-        ConstBindings::new(declaration, model)
+        let embedded = if is_astro_frontmatter {
+            Some(ctx.get_service::<EmbeddedService>()?)
+        } else {
+            None
+        };
+        ConstBindings::new(declaration, model, embedded)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -194,7 +210,11 @@ enum ConstCheckResult {
 }
 
 impl ConstBindings {
-    pub fn new(declaration: &AnyJsVariableDeclaration, model: &SemanticModel) -> Option<Self> {
+    pub fn new(
+        declaration: &AnyJsVariableDeclaration,
+        model: &SemanticModel,
+        embedded: Option<&EmbeddedService>,
+    ) -> Option<Self> {
         let mut state = Self {
             can_be_const: Vec::new(),
             can_fix: true,
@@ -208,8 +228,13 @@ impl ConstBindings {
             bindings += 1;
 
             let has_initializer = declarator.initializer().is_some();
-            let fix =
-                check_binding_can_be_const(&binding, in_for_in_or_of_loop, has_initializer, model);
+            let fix = check_binding_can_be_const(
+                &binding,
+                in_for_in_or_of_loop,
+                has_initializer,
+                model,
+                embedded,
+            );
             match fix {
                 Some(ConstCheckResult::Fix) => state.can_be_const.push(binding),
                 Some(ConstCheckResult::Report) => {
@@ -231,7 +256,16 @@ fn check_binding_can_be_const(
     in_for_in_or_of_loop: bool,
     has_initializer: bool,
     model: &SemanticModel,
+    embedded: Option<&EmbeddedService>,
 ) -> Option<ConstCheckResult> {
+    if let Some(embedded) = embedded {
+        let token = binding.name_token().ok()?;
+        let usage = embedded.binding_usage(&token)?;
+        if !usage.writes_are_known() || usage.is_written() {
+            return None;
+        }
+    }
+
     let mut writes = binding.all_writes(model);
 
     // In a for-in or for-of loop or if it has an initializer

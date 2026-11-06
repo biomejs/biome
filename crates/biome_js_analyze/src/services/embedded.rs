@@ -26,8 +26,7 @@ pub struct EmbeddedService {
     semantic_model: Option<EmbeddedSemanticModel>,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: TextSize,
-    /// The analyzed snippet's current length, which changes across fix passes.
-    snippet_len: TextSize,
+    semantic_model_is_current: bool,
 }
 
 #[derive(Clone)]
@@ -45,6 +44,42 @@ enum EmbeddedSource {
 enum EmbeddedSemanticModel {
     Astro(AstroSemanticModel),
     // TODO: Add Vue and Svelte when their analyzer integrations use native semantic models.
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct EmbeddedBindingUsage {
+    any: bool,
+    read: bool,
+    write: bool,
+    writes_known: bool,
+    value: bool,
+    ty: bool,
+}
+
+impl EmbeddedBindingUsage {
+    pub(crate) fn any(self) -> bool {
+        self.any
+    }
+
+    pub(crate) fn is_read(self) -> bool {
+        self.read
+    }
+
+    pub(crate) fn is_written(self) -> bool {
+        self.write
+    }
+
+    pub(crate) fn writes_are_known(self) -> bool {
+        self.writes_known
+    }
+
+    pub(crate) fn is_used_as_value(self) -> bool {
+        self.value
+    }
+
+    pub(crate) fn is_used_as_type(self) -> bool {
+        self.ty
+    }
 }
 
 fn astro_contains_binding(snippet: Option<&Snippet>, name: &str) -> bool {
@@ -94,21 +129,16 @@ fn astro_symbol(
         .symbol_at(token.text_trimmed_range() + snippet_offset)
 }
 
-fn astro_snippet_is_current(snippet: Option<&Snippet>, snippet_len: TextSize) -> bool {
-    snippet.is_some_and(|snippet| snippet.host_range().len() == snippet_len)
-}
-
 impl EmbeddedSemanticModel {
     fn is_known_unresolved_reference(
         &self,
         snippet_offset: TextSize,
-        snippet_len: TextSize,
+        semantic_model_is_current: bool,
         range: TextRange,
     ) -> bool {
         match self {
             Self::Astro(model) => {
-                let snippet = model.snippet_at_offset(snippet_offset);
-                if !astro_snippet_is_current(snippet.as_ref(), snippet_len) {
+                if !semantic_model_is_current || model.snippet_at_offset(snippet_offset).is_none() {
                     return false;
                 }
                 model
@@ -118,10 +148,72 @@ impl EmbeddedSemanticModel {
         }
     }
 
-    fn contains_binding(&self, snippet_offset: TextSize, name: &str) -> bool {
+    fn contains_binding(
+        &self,
+        snippet_offset: TextSize,
+        semantic_model_is_current: bool,
+        name: &str,
+    ) -> bool {
+        if !semantic_model_is_current {
+            return true;
+        }
         match self {
             Self::Astro(model) => {
                 astro_contains_binding(model.snippet_at_offset(snippet_offset).as_ref(), name)
+            }
+        }
+    }
+
+    fn binding_usage(
+        &self,
+        snippet_offset: TextSize,
+        semantic_model_is_current: bool,
+        binding: &JsSyntaxToken,
+    ) -> Option<EmbeddedBindingUsage> {
+        match self {
+            Self::Astro(model) => {
+                if !semantic_model_is_current {
+                    return None;
+                }
+                let snippet = model.snippet_at_offset(snippet_offset)?;
+                let scope = snippet.scope()?;
+                if [Namespace::Value, Namespace::Type, Namespace::Namespace]
+                    .into_iter()
+                    .any(|namespace| scope.is_open(namespace))
+                {
+                    return Some(EmbeddedBindingUsage {
+                        any: true,
+                        read: true,
+                        write: true,
+                        writes_known: false,
+                        value: true,
+                        ty: true,
+                    });
+                }
+                let Some(symbol) = astro_symbol(Some(&snippet), binding, snippet_offset) else {
+                    return Some(EmbeddedBindingUsage {
+                        writes_known: true,
+                        ..EmbeddedBindingUsage::default()
+                    });
+                };
+                let mut usage = EmbeddedBindingUsage {
+                    writes_known: true,
+                    ..EmbeddedBindingUsage::default()
+                };
+                for reference in symbol
+                    .uses()
+                    .filter(|reference| is_cross_language_use(reference, &snippet))
+                {
+                    usage.any = true;
+                    usage.read |= reference.access() != Access::Write;
+                    usage.write |= matches!(reference.access(), Access::Write | Access::Mutate);
+                    if reference.access() == Access::Type {
+                        usage.ty = true;
+                    } else {
+                        usage.value = true;
+                    }
+                }
+                Some(usage)
             }
         }
     }
@@ -135,53 +227,32 @@ impl EmbeddedSemanticModel {
     fn is_binding_used(
         &self,
         snippet_offset: TextSize,
-        snippet_len: TextSize,
+        semantic_model_is_current: bool,
         binding: &JsSyntaxToken,
     ) -> bool {
-        match self {
-            Self::Astro(model) => {
-                let snippet = model.snippet_at_offset(snippet_offset);
-                if !astro_snippet_is_current(snippet.as_ref(), snippet_len) {
-                    return true;
-                }
-                let Some(symbol) = astro_symbol(snippet.as_ref(), binding, snippet_offset) else {
-                    return false;
-                };
-                symbol.uses().any(|reference| {
-                    snippet
-                        .as_ref()
-                        .is_some_and(|snippet| is_cross_language_use(&reference, snippet))
-                })
-            }
-        }
+        self.binding_usage(snippet_offset, semantic_model_is_current, binding)
+            .is_none_or(EmbeddedBindingUsage::any)
     }
 
     fn is_binding_read(
         &self,
         snippet_offset: TextSize,
-        snippet_len: TextSize,
+        semantic_model_is_current: bool,
         binding: &JsSyntaxToken,
     ) -> bool {
-        match self {
-            Self::Astro(model) => {
-                let snippet = model.snippet_at_offset(snippet_offset);
-                if !astro_snippet_is_current(snippet.as_ref(), snippet_len) {
-                    return true;
-                }
-                let Some(symbol) = astro_symbol(snippet.as_ref(), binding, snippet_offset) else {
-                    return false;
-                };
-                symbol.uses().any(|reference| {
-                    snippet
-                        .as_ref()
-                        .is_some_and(|snippet| is_cross_language_use(&reference, snippet))
-                        && reference.access() != Access::Write
-                })
-            }
-        }
+        self.binding_usage(snippet_offset, semantic_model_is_current, binding)
+            .is_none_or(EmbeddedBindingUsage::is_read)
     }
 
-    fn is_used_as_value(&self, snippet_offset: TextSize, name: &str) -> bool {
+    fn is_used_as_value(
+        &self,
+        snippet_offset: TextSize,
+        semantic_model_is_current: bool,
+        name: &str,
+    ) -> bool {
+        if !semantic_model_is_current {
+            return true;
+        }
         match self {
             Self::Astro(model) => astro_is_used(
                 model.snippet_at_offset(snippet_offset).as_ref(),
@@ -191,7 +262,15 @@ impl EmbeddedSemanticModel {
         }
     }
 
-    fn is_used_as_type(&self, snippet_offset: TextSize, name: &str) -> bool {
+    fn is_used_as_type(
+        &self,
+        snippet_offset: TextSize,
+        semantic_model_is_current: bool,
+        name: &str,
+    ) -> bool {
+        if !semantic_model_is_current {
+            return true;
+        }
         match self {
             Self::Astro(model) => astro_is_used(
                 model.snippet_at_offset(snippet_offset).as_ref(),
@@ -201,7 +280,15 @@ impl EmbeddedSemanticModel {
         }
     }
 
-    fn is_used(&self, snippet_offset: TextSize, name: &str) -> bool {
+    fn is_used(
+        &self,
+        snippet_offset: TextSize,
+        semantic_model_is_current: bool,
+        name: &str,
+    ) -> bool {
+        if !semantic_model_is_current {
+            return true;
+        }
         match self {
             Self::Astro(model) => astro_is_used(
                 model.snippet_at_offset(snippet_offset).as_ref(),
@@ -231,7 +318,7 @@ impl EmbeddedService {
         db: Rc<dyn LanguageDb>,
         document: Option<Source>,
         snippet_offset: TextSize,
-        snippet_len: TextSize,
+        semantic_model_is_current: bool,
         globals: &[Box<str>],
     ) -> Self {
         let is_astro = document.is_some_and(|document| {
@@ -263,14 +350,14 @@ impl EmbeddedService {
             source,
             semantic_model,
             snippet_offset,
-            snippet_len,
+            semantic_model_is_current,
         }
     }
 
     pub(crate) fn from_data(
         data: Arc<EmbeddedData>,
         snippet_offset: TextSize,
-        snippet_len: TextSize,
+        semantic_model_is_current: bool,
     ) -> Self {
         let semantic_model = data
             .astro_model()
@@ -280,13 +367,17 @@ impl EmbeddedService {
             source: EmbeddedSource::Interned(data),
             semantic_model,
             snippet_offset,
-            snippet_len,
+            semantic_model_is_current,
         }
     }
 
     pub(crate) fn is_known_unresolved_reference(&self, range: TextRange) -> Option<bool> {
         self.semantic_model.as_ref().map(|model| {
-            model.is_known_unresolved_reference(self.snippet_offset, self.snippet_len, range)
+            model.is_known_unresolved_reference(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                range,
+            )
         })
     }
 
@@ -297,23 +388,51 @@ impl EmbeddedService {
         )
     }
 
+    pub(crate) fn binding_usage(&self, binding: &JsSyntaxToken) -> Option<EmbeddedBindingUsage> {
+        if let Some(model) = &self.semantic_model {
+            return model.binding_usage(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                binding,
+            );
+        }
+        let name = binding.token_text_trimmed();
+        let value = self.is_used_as_value(name.clone());
+        let ty = self.is_used_as_type(name.clone());
+        Some(EmbeddedBindingUsage {
+            any: value || ty,
+            read: value || ty,
+            value,
+            ty,
+            ..EmbeddedBindingUsage::default()
+        })
+    }
+
     pub(crate) fn is_binding_used(&self, binding: &JsSyntaxToken) -> bool {
         self.semantic_model.as_ref().map_or_else(
             || self.is_used(binding.token_text_trimmed()),
-            |model| model.is_binding_used(self.snippet_offset, self.snippet_len, binding),
+            |model| {
+                model.is_binding_used(self.snippet_offset, self.semantic_model_is_current, binding)
+            },
         )
     }
 
     pub(crate) fn is_binding_read(&self, binding: &JsSyntaxToken) -> bool {
         self.semantic_model.as_ref().map_or_else(
             || self.is_used(binding.token_text_trimmed()),
-            |model| model.is_binding_read(self.snippet_offset, self.snippet_len, binding),
+            |model| {
+                model.is_binding_read(self.snippet_offset, self.semantic_model_is_current, binding)
+            },
         )
     }
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         if let Some(model) = &self.semantic_model {
-            return model.contains_binding(self.snippet_offset, binding.text());
+            return model.contains_binding(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                binding.text(),
+            );
         }
         match &self.source {
             EmbeddedSource::Empty => false,
@@ -328,7 +447,11 @@ impl EmbeddedService {
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         if let Some(model) = &self.semantic_model {
-            return model.contains_binding(self.snippet_offset, binding);
+            return model.contains_binding(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                binding,
+            );
         }
         match &self.source {
             EmbeddedSource::Empty => false,
@@ -343,7 +466,11 @@ impl EmbeddedService {
 
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         if let Some(model) = &self.semantic_model {
-            return model.is_used_as_value(self.snippet_offset, identifier.text());
+            return model.is_used_as_value(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                identifier.text(),
+            );
         }
         match &self.source {
             EmbeddedSource::Empty => false,
@@ -357,7 +484,11 @@ impl EmbeddedService {
 
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
         if let Some(model) = &self.semantic_model {
-            return model.is_used_as_type(self.snippet_offset, identifier.text());
+            return model.is_used_as_type(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                identifier.text(),
+            );
         }
         match &self.source {
             EmbeddedSource::Empty => false,
@@ -371,7 +502,11 @@ impl EmbeddedService {
 
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         if let Some(model) = &self.semantic_model {
-            return model.is_used(self.snippet_offset, identifier.text());
+            return model.is_used(
+                self.snippet_offset,
+                self.semantic_model_is_current,
+                identifier.text(),
+            );
         }
         match &self.source {
             EmbeddedSource::Empty => false,
@@ -549,7 +684,7 @@ mod tests {
             Rc::new(db),
             Some(document),
             TextSize::default(),
-            TextSize::of(source),
+            true,
             &[],
         );
         (service, events)
@@ -692,7 +827,7 @@ mod tests {
             Rc::new(db),
             Some(document),
             frontmatter_offset,
-            TextSize::of(FRONTMATTER),
+            true,
             &[],
         );
 
@@ -754,16 +889,11 @@ interface Props {}"#;
             db.clone(),
             Some(document),
             frontmatter_offset,
-            TextSize::of(FRONTMATTER),
+            true,
             &[],
         );
-        let expression = EmbeddedService::new_with_globals(
-            db,
-            Some(document),
-            expression_offset,
-            TextSize::of(EXPRESSION),
-            &[],
-        );
+        let expression =
+            EmbeddedService::new_with_globals(db, Some(document), expression_offset, true, &[]);
 
         let Some(EmbeddedSemanticModel::Astro(model)) = &frontmatter.semantic_model else {
             panic!("expected Astro semantics");
@@ -857,10 +987,8 @@ interface Props {}"#;
                 ),
             ],
         ));
-        let service =
-            EmbeddedService::from_data(data.clone(), frontmatter_offset, TextSize::of(FRONTMATTER));
-        let missing_service =
-            EmbeddedService::from_data(data.clone(), missing_offset, TextSize::of(MISSING));
+        let service = EmbeddedService::from_data(data.clone(), frontmatter_offset, true);
+        let missing_service = EmbeddedService::from_data(data.clone(), missing_offset, true);
 
         let root: AnyJsRoot = parse(
             FRONTMATTER,
@@ -874,7 +1002,14 @@ interface Props {}"#;
                 .find(|token| token.text_trimmed() == name)
                 .unwrap()
         };
-        assert!(service.is_binding_read(&binding("used")));
+        let used = binding("used");
+        let usage = service.binding_usage(&used).unwrap();
+        assert!(usage.any());
+        assert!(usage.is_read());
+        assert!(!usage.is_written());
+        assert!(usage.is_used_as_value());
+        assert!(!usage.is_used_as_type());
+        assert!(service.is_binding_read(&used));
         assert!(!service.is_binding_read(&binding("unused")));
         assert!(!service.is_binding_read(&binding("recursive")));
         assert!(service.is_binding_read(&binding("Props")));
@@ -886,30 +1021,47 @@ interface Props {}"#;
             missing_service.is_known_unresolved_reference(missing_token.text_trimmed_range()),
             Some(true)
         );
-        let stale_missing_service =
-            EmbeddedService::from_data(data.clone(), missing_offset, TextSize::of("missingx"));
+        let stale_missing_service = EmbeddedService::from_data(data.clone(), missing_offset, false);
         assert_eq!(
             stale_missing_service.is_known_unresolved_reference(missing_token.text_trimmed_range()),
             Some(false)
         );
+        assert!(stale_missing_service.contains_binding(token_text(MISSING)));
+        assert!(stale_missing_service.is_used_as_value(token_text(MISSING)));
+        assert!(stale_missing_service.is_used_as_type(token_text(MISSING)));
+        assert!(stale_missing_service.is_used(token_text(MISSING)));
 
-        let mutated_frontmatter = FRONTMATTER.replace("const unused", "const _unused");
+        let lengthened_frontmatter = FRONTMATTER.replace("const unused", "const _unused");
+        let lengthened_root: AnyJsRoot = parse(
+            &lengthened_frontmatter,
+            JsFileSource::astro(),
+            JsParserOptions::default(),
+        )
+        .tree();
+        let shifted_used = lengthened_root
+            .syntax()
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.text_trimmed() == "used")
+            .unwrap();
+        let lengthened_service =
+            EmbeddedService::from_data(data.clone(), frontmatter_offset, false);
+        assert!(lengthened_service.binding_usage(&shifted_used).is_none());
+        assert!(lengthened_service.is_binding_read(&shifted_used));
+
+        let mutated_frontmatter = FRONTMATTER.replace("const unused", "const alterd");
         let mutated_root: AnyJsRoot = parse(
             &mutated_frontmatter,
             JsFileSource::astro(),
             JsParserOptions::default(),
         )
         .tree();
-        let shifted_used = mutated_root
+        let stale_used = mutated_root
             .syntax()
             .descendants_tokens(Direction::Next)
             .find(|token| token.text_trimmed() == "used")
             .unwrap();
-        let stale_service = EmbeddedService::from_data(
-            data,
-            frontmatter_offset,
-            TextSize::of(mutated_frontmatter.as_str()),
-        );
-        assert!(stale_service.is_binding_read(&shifted_used));
+        let stale_service = EmbeddedService::from_data(data, frontmatter_offset, false);
+        assert!(stale_service.binding_usage(&stale_used).is_none());
+        assert!(stale_service.is_binding_read(&stale_used));
     }
 }

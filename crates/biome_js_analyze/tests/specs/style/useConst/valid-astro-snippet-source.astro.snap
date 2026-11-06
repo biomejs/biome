@@ -10,6 +10,7 @@ let hello = "Hello World";
 <!-- should not generate diagnostics -->
 
 <html>
+    <span>{hello = "Hello again"}</span>
     <span>{hello}</span>
 </html>
 
