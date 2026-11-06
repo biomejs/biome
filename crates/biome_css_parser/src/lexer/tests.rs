@@ -965,7 +965,10 @@ fn css_scan_cursor_treats_backslash_form_feed_as_line_continuation() {
 
     assert!(matches!(
         scan.stop,
-        StringBodyScanStop::ClosingQuote { position: 5 }
+        StringBodyScanStop::ClosingQuote {
+            position: 5,
+            len: 1
+        }
     ));
     assert!(scan.invalid_escape_ranges.is_empty());
 }
