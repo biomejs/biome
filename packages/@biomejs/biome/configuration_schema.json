@@ -6663,6 +6663,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteIgnoredUnsubscribeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteIgnoredUnsubscribeOptions" }
+			]
+		},
+		"NoSvelteIgnoredUnsubscribeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteInspectConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9209,6 +9219,13 @@
 					"description": "Disallow declaring Svelte component props with export let.\nSee https://biomejs.dev/linter/rules/no-svelte-export-let",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteExportLetConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteIgnoredUnsubscribe": {
+					"description": "Disallow ignoring the function returned by a store's subscribe() method.\nSee https://biomejs.dev/linter/rules/no-svelte-ignored-unsubscribe",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteIgnoredUnsubscribeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14549,6 +14566,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteExportLetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteIgnoredUnsubscribeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteIgnoredUnsubscribeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
