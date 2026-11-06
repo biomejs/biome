@@ -3973,6 +3973,11 @@ export interface Nursery {
 	 */
 	useObjectFromEntries?: UseObjectFromEntriesConfiguration;
 	/**
+	 * Require the cpu field in package.json.
+	 * See https://biomejs.dev/linter/rules/use-package-json-cpu
+	 */
+	usePackageJsonCpu?: UsePackageJsonCpuConfiguration;
+	/**
 	 * Require the cpu field in package.json to be a valid list of processor types.
 	 * See https://biomejs.dev/linter/rules/use-package-json-valid-cpu
 	 */
@@ -7103,6 +7108,9 @@ export type UseNullishCoalescingConfiguration =
 export type UseObjectFromEntriesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseObjectFromEntriesOptions;
+export type UsePackageJsonCpuConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePackageJsonCpuOptions;
 export type UsePackageJsonValidCpuConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePackageJsonValidCpuOptions;
@@ -10481,6 +10489,10 @@ export interface RuleWithUseObjectFromEntriesOptions {
 	level: RulePlainConfiguration;
 	options?: UseObjectFromEntriesOptions;
 }
+export interface RuleWithUsePackageJsonCpuOptions {
+	level: RulePlainConfiguration;
+	options?: UsePackageJsonCpuOptions;
+}
 export interface RuleWithUsePackageJsonValidCpuOptions {
 	level: RulePlainConfiguration;
 	options?: UsePackageJsonValidCpuOptions;
@@ -13377,6 +13389,7 @@ export interface UseObjectFromEntriesOptions {
 	 */
 	functions?: string[];
 }
+export type UsePackageJsonCpuOptions = {};
 export type UsePackageJsonValidCpuOptions = {};
 export type UsePackageJsonValidEnginesOptions = {};
 export type UsePromiseRejectErrorsOptions = {};
@@ -15294,6 +15307,7 @@ export type Category =
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNextScriptForGoogleAnalytics"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/usePackageJsonCpu"
 	| "lint/nursery/useObjectFromEntries"
 	| "lint/nursery/usePackageJsonValidCpu"
 	| "lint/nursery/usePackageJsonValidEngines"
