@@ -2305,6 +2305,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useCatchErrorName",
+        TypeId::of::<biome_rule_options::use_catch_error_name::UseCatchErrorNameOptions>(),
+    ));
+    result.push((
         "style",
         "useCollapsedElseIf",
         TypeId::of::<biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions>(),
