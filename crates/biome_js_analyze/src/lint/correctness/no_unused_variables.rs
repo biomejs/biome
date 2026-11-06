@@ -18,9 +18,8 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsRestParameter, JsSequenceExpression,
     JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
     TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration, TsEnumMember,
-    TsImportEqualsDeclaration, TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration,
-    TsMappedType, TsPropertyParameter, TsTypeAliasDeclaration, TsTypeParameterList,
-    TsTypeParameters,
+    TsImportEqualsDeclaration, TsIndexSignatureParameter, TsInferType, TsMappedType,
+    TsPropertyParameter, TsTypeParameterList, TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -321,7 +320,7 @@ impl Rule for NoUnusedVariables {
         // binding appear used. Template usage is handled by the reference check.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
             && !file_source.is_svelte_declaration()
-            && embedded.contains_binding(binding_token_text.clone())
+            && embedded.contains_binding_declaration(&binding_name_token)
             && binding
                 .declaration()
                 .map(|d| d.parent_binding_pattern_declaration().unwrap_or(d))
@@ -335,7 +334,7 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+        let is_used_as_reference = embedded.is_binding_read(&binding_name_token)
             || matches!(
                 file_source.as_embedding_kind(),
                 JsEmbeddingKind::Svelte { .. }
@@ -347,17 +346,6 @@ impl Rule for NoUnusedVariables {
             return None;
         }
 
-        // In Astro files, a top-level type/interface `Props` is always ignored as it's implicitly
-        // read by the framework.
-        if binding_name == "Props"
-            && let JsEmbeddingKind::Astro { .. } = file_source.as_embedding_kind()
-            && let AnyJsIdentifierBinding::TsIdentifierBinding(binding) = binding
-            && (TsInterfaceDeclaration::can_cast(binding.syntax().parent()?.kind())
-                || TsTypeAliasDeclaration::can_cast(binding.syntax().parent()?.kind()))
-            && JsModuleItemList::can_cast(binding.syntax().grand_parent()?.kind())
-        {
-            return None;
-        }
 
         if is_unused(model, binding) {
             // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the

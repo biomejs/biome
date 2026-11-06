@@ -1,6 +1,6 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
 use biome_astro_semantic::{
-    AstroSemanticModel, AstroSemanticModelOptions, Namespace, Snippet,
+    Access, AstroSemanticModel, AstroSemanticModelOptions, Namespace, Resolution, Snippet, Symbol,
     astro_model_from_source_with_options,
 };
 use biome_db::Source;
@@ -13,7 +13,7 @@ use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
-use biome_js_syntax::unescape_js_identifier;
+use biome_js_syntax::{JsSyntaxToken, unescape_js_identifier};
 use biome_languages::{DocumentFileSource, LanguageDb, has_embedded_content};
 use biome_parser::db::SourceExt;
 use biome_rowan::{TextRange, TextSize, TokenText};
@@ -26,6 +26,8 @@ pub struct EmbeddedService {
     semantic_model: Option<EmbeddedSemanticModel>,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: TextSize,
+    /// The analyzed snippet's current length, which changes across fix passes.
+    snippet_len: TextSize,
 }
 
 #[derive(Clone)]
@@ -57,11 +59,99 @@ fn astro_contains_binding(snippet: Option<&Snippet>, name: &str) -> bool {
         })
 }
 
+fn astro_symbol(
+    snippet: Option<&Snippet>,
+    token: &JsSyntaxToken,
+    snippet_offset: TextSize,
+) -> Option<Symbol> {
+    snippet?
+        .scope()?
+        .symbol_at(token.text_trimmed_range() + snippet_offset)
+}
+
+fn astro_snippet_is_current(snippet: Option<&Snippet>, snippet_len: TextSize) -> bool {
+    snippet.is_some_and(|snippet| snippet.host_range().len() == snippet_len)
+}
+
 impl EmbeddedSemanticModel {
+    fn is_known_unresolved_reference(
+        &self,
+        snippet_offset: TextSize,
+        snippet_len: TextSize,
+        range: TextRange,
+    ) -> bool {
+        match self {
+            Self::Astro(model) => {
+                let snippet = model.snippet_at_offset(snippet_offset);
+                if !astro_snippet_is_current(snippet.as_ref(), snippet_len) {
+                    return false;
+                }
+                model
+                    .reference_at(range + snippet_offset)
+                    .is_some_and(|reference| reference.resolution() == Resolution::Unresolved)
+            }
+        }
+    }
+
     fn contains_binding(&self, snippet_offset: TextSize, name: &str) -> bool {
         match self {
             Self::Astro(model) => {
                 astro_contains_binding(model.snippet_at_offset(snippet_offset).as_ref(), name)
+            }
+        }
+    }
+
+    fn contains_binding_declaration(&self, _binding: &JsSyntaxToken) -> bool {
+        match self {
+            Self::Astro(_) => false,
+        }
+    }
+
+    fn is_binding_used(
+        &self,
+        snippet_offset: TextSize,
+        snippet_len: TextSize,
+        binding: &JsSyntaxToken,
+    ) -> bool {
+        match self {
+            Self::Astro(model) => {
+                let snippet = model.snippet_at_offset(snippet_offset);
+                if !astro_snippet_is_current(snippet.as_ref(), snippet_len) {
+                    return true;
+                }
+                let Some(symbol) = astro_symbol(snippet.as_ref(), binding, snippet_offset) else {
+                    return false;
+                };
+                symbol.uses().any(|reference| {
+                    snippet
+                        .as_ref()
+                        .is_some_and(|snippet| reference.is_outside(snippet))
+                })
+            }
+        }
+    }
+
+    fn is_binding_read(
+        &self,
+        snippet_offset: TextSize,
+        snippet_len: TextSize,
+        binding: &JsSyntaxToken,
+    ) -> bool {
+        match self {
+            Self::Astro(model) => {
+                let snippet = model.snippet_at_offset(snippet_offset);
+                if !astro_snippet_is_current(snippet.as_ref(), snippet_len) {
+                    return true;
+                }
+                let Some(symbol) = astro_symbol(snippet.as_ref(), binding, snippet_offset) else {
+                    return false;
+                };
+                symbol.uses().any(|reference| {
+                    snippet
+                        .as_ref()
+                        .is_some_and(|snippet| reference.is_outside(snippet))
+                        && reference.access() != Access::Write
+                })
             }
         }
     }
@@ -114,6 +204,7 @@ impl EmbeddedService {
         db: Rc<dyn LanguageDb>,
         document: Option<Source>,
         snippet_offset: TextSize,
+        snippet_len: TextSize,
         globals: &[Box<str>],
     ) -> Self {
         let is_astro = document.is_some_and(|document| {
@@ -145,15 +236,52 @@ impl EmbeddedService {
             source,
             semantic_model,
             snippet_offset,
+            snippet_len,
         }
     }
 
-    pub(crate) fn from_data(data: Arc<EmbeddedData>, snippet_offset: TextSize) -> Self {
+    pub(crate) fn from_data(
+        data: Arc<EmbeddedData>,
+        snippet_offset: TextSize,
+        snippet_len: TextSize,
+    ) -> Self {
+        let semantic_model = data
+            .astro_model()
+            .cloned()
+            .map(EmbeddedSemanticModel::Astro);
         Self {
             source: EmbeddedSource::Interned(data),
-            semantic_model: None,
+            semantic_model,
             snippet_offset,
+            snippet_len,
         }
+    }
+
+    pub(crate) fn is_known_unresolved_reference(&self, range: TextRange) -> Option<bool> {
+        self.semantic_model.as_ref().map(|model| {
+            model.is_known_unresolved_reference(self.snippet_offset, self.snippet_len, range)
+        })
+    }
+
+    pub(crate) fn contains_binding_declaration(&self, binding: &JsSyntaxToken) -> bool {
+        self.semantic_model.as_ref().map_or_else(
+            || self.contains_binding(binding.token_text_trimmed()),
+            |model| model.contains_binding_declaration(binding),
+        )
+    }
+
+    pub(crate) fn is_binding_used(&self, binding: &JsSyntaxToken) -> bool {
+        self.semantic_model.as_ref().map_or_else(
+            || self.is_used(binding.token_text_trimmed()),
+            |model| model.is_binding_used(self.snippet_offset, self.snippet_len, binding),
+        )
+    }
+
+    pub(crate) fn is_binding_read(&self, binding: &JsSyntaxToken) -> bool {
+        self.semantic_model.as_ref().map_or_else(
+            || self.is_used(binding.token_text_trimmed()),
+            |model| model.is_binding_read(self.snippet_offset, self.snippet_len, binding),
+        )
     }
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
@@ -306,12 +434,15 @@ impl FromServices for EmbeddedService {
 mod tests {
     use super::*;
     use biome_db::testing::Events;
+    use biome_embeds::{EmbeddedSnippet, collect_embedded_data};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::{JsParserOptions, parse, parse_js_with_offset};
+    use biome_js_syntax::AnyJsRoot;
     use biome_languages::javascript::JsEmbeddingKind;
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
+    use biome_parser::AnyParse;
     use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
-    use biome_rowan::RawSyntaxKind;
+    use biome_rowan::{AstNode, Direction, RawSyntaxKind};
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{EventKind, Storage};
 
@@ -391,6 +522,7 @@ mod tests {
             Rc::new(db),
             Some(document),
             TextSize::default(),
+            TextSize::of(source),
             &[],
         );
         (service, events)
@@ -529,8 +661,13 @@ mod tests {
             ASTRO_SOURCE,
         );
         db.parsed = Some(document);
-        let service =
-            EmbeddedService::new_with_globals(Rc::new(db), Some(document), frontmatter_offset, &[]);
+        let service = EmbeddedService::new_with_globals(
+            Rc::new(db),
+            Some(document),
+            frontmatter_offset,
+            TextSize::of(FRONTMATTER),
+            &[],
+        );
 
         assert!(service.contains_binding_text("possiblyHidden"));
         assert!(service.is_used(token_text("possiblyHidden")));
@@ -586,10 +723,20 @@ interface Props {}"#;
         );
         db.parsed = Some(document);
         let db: Rc<dyn LanguageDb> = Rc::new(db);
-        let frontmatter =
-            EmbeddedService::new_with_globals(db.clone(), Some(document), frontmatter_offset, &[]);
-        let expression =
-            EmbeddedService::new_with_globals(db, Some(document), expression_offset, &[]);
+        let frontmatter = EmbeddedService::new_with_globals(
+            db.clone(),
+            Some(document),
+            frontmatter_offset,
+            TextSize::of(FRONTMATTER),
+            &[],
+        );
+        let expression = EmbeddedService::new_with_globals(
+            db,
+            Some(document),
+            expression_offset,
+            TextSize::of(EXPRESSION),
+            &[],
+        );
 
         let Some(EmbeddedSemanticModel::Astro(model)) = &frontmatter.semantic_model else {
             panic!("expected Astro semantics");
@@ -617,5 +764,125 @@ interface Props {}"#;
         assert!(expression.contains_binding(token_text("title")));
         assert!(expression.contains_binding(token_text("Astro")));
         assert!(!expression.contains_binding(token_text("missing")));
+    }
+
+    #[test]
+    fn interned_astro_data_uses_host_ranges_and_cross_language_references() {
+        const FRONTMATTER: &str = r#"const unused = 2;
+const used = 1;
+const recursive = () => recursive();
+interface Props {}"#;
+        const USED: &str = "used";
+        const MISSING: &str = "missing";
+        let source = format!("---\n{FRONTMATTER}\n---\n{{{USED}}}\n{{{MISSING}}}\n");
+        let frontmatter_offset = TextSize::from(source.find(FRONTMATTER).unwrap() as u32);
+        let used_offset = TextSize::from(source.rfind(USED).unwrap() as u32);
+        let missing_offset = TextSize::from(source.rfind(MISSING).unwrap() as u32);
+        let frontmatter_range = TextRange::at(frontmatter_offset, TextSize::of(FRONTMATTER));
+        let used_range = TextRange::at(used_offset, TextSize::of(USED));
+        let missing_range = TextRange::at(missing_offset, TextSize::of(MISSING));
+        let expression_source = JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            frontmatter: false,
+            is_class_attribute: false,
+        });
+
+        let host: AnyParse =
+            parse_html(&source, HtmlParserOptions::from(&HtmlFileSource::astro())).into();
+        let frontmatter: AnyParse = parse_js_with_offset(
+            FRONTMATTER,
+            frontmatter_offset,
+            JsFileSource::astro(),
+            JsParserOptions::default(),
+        )
+        .into();
+        let used_expression: AnyParse = parse_js_with_offset(
+            USED,
+            used_offset,
+            expression_source,
+            JsParserOptions::default(),
+        )
+        .into();
+        let missing_expression: AnyParse = parse_js_with_offset(
+            MISSING,
+            missing_offset,
+            expression_source,
+            JsParserOptions::default(),
+        )
+        .into();
+        let data = Arc::new(collect_embedded_data(
+            DocumentFileSource::Html(HtmlFileSource::astro()),
+            &host,
+            vec![
+                EmbeddedSnippet::new(
+                    &frontmatter,
+                    frontmatter_range,
+                    DocumentFileSource::Js(JsFileSource::astro()),
+                ),
+                EmbeddedSnippet::new(
+                    &used_expression,
+                    used_range,
+                    DocumentFileSource::Js(expression_source),
+                ),
+                EmbeddedSnippet::new(
+                    &missing_expression,
+                    missing_range,
+                    DocumentFileSource::Js(expression_source),
+                ),
+            ],
+        ));
+        let service =
+            EmbeddedService::from_data(data.clone(), frontmatter_offset, TextSize::of(FRONTMATTER));
+        let missing_service =
+            EmbeddedService::from_data(data.clone(), missing_offset, TextSize::of(MISSING));
+
+        let root: AnyJsRoot = parse(
+            FRONTMATTER,
+            JsFileSource::astro(),
+            JsParserOptions::default(),
+        )
+        .tree();
+        let binding = |name| {
+            root.syntax()
+                .descendants_tokens(Direction::Next)
+                .find(|token| token.text_trimmed() == name)
+                .unwrap()
+        };
+        assert!(service.is_binding_read(&binding("used")));
+        assert!(!service.is_binding_read(&binding("unused")));
+        assert!(!service.is_binding_read(&binding("recursive")));
+        assert!(service.is_binding_read(&binding("Props")));
+
+        let missing_root: AnyJsRoot =
+            parse(MISSING, expression_source, JsParserOptions::default()).tree();
+        let missing_token = missing_root.syntax().first_token().unwrap();
+        assert_eq!(
+            missing_service.is_known_unresolved_reference(missing_token.text_trimmed_range()),
+            Some(true)
+        );
+        let stale_missing_service =
+            EmbeddedService::from_data(data.clone(), missing_offset, TextSize::of("missingx"));
+        assert_eq!(
+            stale_missing_service.is_known_unresolved_reference(missing_token.text_trimmed_range()),
+            Some(false)
+        );
+
+        let mutated_frontmatter = FRONTMATTER.replace("const unused", "const _unused");
+        let mutated_root: AnyJsRoot = parse(
+            &mutated_frontmatter,
+            JsFileSource::astro(),
+            JsParserOptions::default(),
+        )
+        .tree();
+        let shifted_used = mutated_root
+            .syntax()
+            .descendants_tokens(Direction::Next)
+            .find(|token| token.text_trimmed() == "used")
+            .unwrap();
+        let stale_service = EmbeddedService::from_data(
+            data,
+            frontmatter_offset,
+            TextSize::of(mutated_frontmatter.as_str()),
+        );
+        assert!(stale_service.is_binding_read(&shifted_used));
     }
 }
