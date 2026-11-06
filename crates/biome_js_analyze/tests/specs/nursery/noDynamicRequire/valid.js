@@ -1,0 +1,25 @@
+/* should not generate diagnostics */
+import _ from "lodash";
+require("foo");
+require(`foo`);
+require("./foo");
+require("@scope/foo");
+require();
+require("./foo", "bar" + "okay");
+require(("./foo"));
+var foo = require("foo");
+var bar = require(`foo`);
+
+// `import()` is only checked when `checkDynamicImports` is enabled.
+import("../" + name);
+import(`../${name}`);
+import(name);
+
+// Not the global `require`.
+function load(require, name) {
+	return require(name);
+}
+
+// Not a call to `require`.
+foo.require(name);
+requireModule(name);
