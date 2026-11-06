@@ -428,6 +428,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintTypeScript("keyword-spacing"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("no-extra-parens"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("no-extra-semi"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("no-type-alias"), Deprecated),
     UnsupportedRule(EslintTypeScript("object-curly-spacing"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("prefer-ts-expect-error"), Deprecated),
     UnsupportedRule(EslintTypeScript("quotes"), FormatterOption("quoteStyle")),
@@ -548,6 +549,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintVueJs("valid-v-bind-sync"), Deprecated),
     UnsupportedRule(Stylelint("color-no-invalid-hex"), ParserCovers),
     UnsupportedRule(Stylelint("declaration-empty-line-before"), Stylistic),
+    UnsupportedRule(Stylelint("rule-empty-line-before"), Stylistic),
     UnsupportedRule(HtmlEslint("attrs-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("element-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("indent"), FormatterOption("indentWidth")),
@@ -585,6 +587,50 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintAstro("no-omitted-end-tags"), Deprecated),
     UnsupportedRule(EslintAstro("semi"), FormatterOption("semicolons")),
     UnsupportedRule(EslintAstro("valid-compile"), RequiresExternalTool),
+    UnsupportedRule(
+        StylelintScss("at-else-closing-brace-newline-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-else-closing-brace-space-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(StylelintScss("at-else-empty-line-before"), FormatterCovers),
+    UnsupportedRule(
+        StylelintScss("at-else-if-parentheses-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-function-parentheses-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-if-closing-brace-newline-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-if-closing-brace-space-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("at-mixin-parentheses-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("dollar-variable-colon-newline-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("dollar-variable-colon-space-after"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        StylelintScss("dollar-variable-colon-space-before"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(StylelintScss("operator-no-newline-after"), FormatterCovers),
+    UnsupportedRule(StylelintScss("operator-no-newline-before"), FormatterCovers),
+    UnsupportedRule(StylelintScss("operator-no-unspaced"), FormatterCovers),
 ];
 
 #[cfg(test)]
