@@ -3138,6 +3138,11 @@ export interface Nursery {
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
+	 * Disallow negating the result of Array#some() or Array#every().
+	 * See https://biomejs.dev/linter/rules/no-negated-array-predicate
+	 */
+	noNegatedArrayPredicate?: NoNegatedArrayPredicateConfiguration;
+	/**
 	 * Disallow negated expressions on the left side of an equality check.
 	 * See https://biomejs.dev/linter/rules/no-negation-in-equality-check
 	 */
@@ -6552,6 +6557,9 @@ export type NoMissingThrowConfiguration =
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
+export type NoNegatedArrayPredicateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNegatedArrayPredicateOptions;
 export type NoNegationInEqualityCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegationInEqualityCheckOptions;
@@ -9520,6 +9528,14 @@ export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMisusedPromisesOptions;
+}
+export interface RuleWithNoNegatedArrayPredicateOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoNegatedArrayPredicateOptions;
 }
 export interface RuleWithNoNegationInEqualityCheckOptions {
 	/**
@@ -12808,6 +12824,7 @@ export type NoMisplacedListElementsOptions = {};
 export type NoMissingScssInterpolationOptions = {};
 export type NoMissingThrowOptions = {};
 export type NoMisusedPromisesOptions = {};
+export type NoNegatedArrayPredicateOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
@@ -14963,6 +14980,7 @@ export type Category =
 	| "lint/nursery/noMissingScssInterpolation"
 	| "lint/nursery/noMissingThrow"
 	| "lint/nursery/noMisusedPromises"
+	| "lint/nursery/noNegatedArrayPredicate"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNestedTemplateLiterals"
