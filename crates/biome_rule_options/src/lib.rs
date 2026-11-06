@@ -511,6 +511,7 @@ pub mod use_consistent_block_lang;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_enum_value_type;
+pub mod use_consistent_font_weight_notation;
 pub mod use_consistent_function_style;
 pub mod use_consistent_graphql_descriptions;
 pub mod use_consistent_heading_level;
