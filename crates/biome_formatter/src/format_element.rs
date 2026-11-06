@@ -392,14 +392,26 @@ impl Width {
     }
 }
 
-/// The pre-computed unicode width of single-line text, or a marker for multiline text.
+/// The pre-computed unicode width of single-line text, or a marker for text
+/// that requires special multiline printing.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum TextWidth {
     Width(Width),
     Multiline,
+    /// Prints the text without replacing its source line endings.
+    PreserveLineEndings(Option<Width>),
 }
 
 impl TextWidth {
+    pub fn from_text_preserving_line_endings(text: &str, indent_width: IndentWidth) -> Self {
+        let width = if text.contains(['\r', '\n']) {
+            None
+        } else {
+            Self::from_text(text, indent_width).width()
+        };
+        Self::PreserveLineEndings(width)
+    }
+
     pub fn from_text(text: &str, indent_width: IndentWidth) -> Self {
         const fn is_printable_ascii(byte: u8) -> bool {
             matches!(byte, b' '..=b'~')
@@ -437,12 +449,17 @@ impl TextWidth {
     pub const fn width(self) -> Option<Width> {
         match self {
             Self::Width(width) => Some(width),
+            Self::PreserveLineEndings(width) => width,
             Self::Multiline => None,
         }
     }
 
     pub(crate) const fn is_multiline(self) -> bool {
-        matches!(self, Self::Multiline)
+        matches!(self, Self::Multiline | Self::PreserveLineEndings(None))
+    }
+
+    pub(crate) const fn preserves_line_endings(self) -> bool {
+        matches!(self, Self::PreserveLineEndings(_))
     }
 }
 
@@ -643,8 +660,10 @@ const _: () =
 
 #[cfg(test)]
 mod tests {
-    use crate::IndentWidth;
-    use crate::format_element::{LINE_TERMINATORS, TextWidth, normalize_newlines};
+    use crate::format_element::{
+        FormatElement, FormatElements, LINE_TERMINATORS, TextWidth, Width, normalize_newlines,
+    };
+    use crate::{IndentWidth, PlainSource};
 
     #[test]
     fn text_width() {
@@ -661,6 +680,71 @@ mod tests {
         assert_eq!(width("a寿司b"), Some(6));
         assert_eq!(width("a\u{200b}b"), Some(2));
         assert_eq!(width("a\0\rb"), Some(2));
+    }
+
+    #[test]
+    fn text_width_preserving_line_endings_keeps_the_single_line_width() {
+        let indent_width = IndentWidth::try_from(4).unwrap();
+        let width = |text| {
+            TextWidth::from_text_preserving_line_endings(text, indent_width)
+                .width()
+                .map(Width::value)
+        };
+
+        assert_eq!(
+            TextWidth::from_text_preserving_line_endings("ab", indent_width),
+            TextWidth::PreserveLineEndings(Some(Width::new(2))),
+        );
+        assert_eq!(width(""), Some(0));
+        assert_eq!(width("printable ASCII ~"), Some(17));
+        assert_eq!(width("a\tb"), Some(6));
+        assert_eq!(width("a寿司b"), Some(6));
+    }
+
+    #[test]
+    fn text_width_preserving_line_endings_has_no_width_with_line_breaks() {
+        let indent_width = IndentWidth::try_from(4).unwrap();
+
+        for text in ["a\r\nb", "a\nb", "a\rb", "\r\n", "\n", "\r"] {
+            assert_eq!(
+                TextWidth::from_text_preserving_line_endings(text, indent_width),
+                TextWidth::PreserveLineEndings(None),
+                "{text:?}",
+            );
+        }
+    }
+
+    #[test]
+    fn preserved_text_is_multiline_only_without_a_width() {
+        assert!(TextWidth::PreserveLineEndings(None).is_multiline());
+        assert!(!TextWidth::PreserveLineEndings(Some(Width::new(1))).is_multiline());
+    }
+
+    #[test]
+    fn preserved_text_will_break_only_with_a_line_break() {
+        fn will_break(text: &str) -> bool {
+            FormatElement::<PlainSource>::Text {
+                text: text.into(),
+                text_width: TextWidth::from_text_preserving_line_endings(
+                    text,
+                    IndentWidth::default(),
+                ),
+            }
+            .will_break()
+        }
+
+        assert!(will_break("a\r\nb"));
+        assert!(will_break("a\nb"));
+        assert!(will_break("a\rb"));
+        assert!(!will_break("a"));
+    }
+
+    #[test]
+    fn only_preserved_text_preserves_line_endings() {
+        assert!(TextWidth::PreserveLineEndings(None).preserves_line_endings());
+        assert!(TextWidth::PreserveLineEndings(Some(Width::new(1))).preserves_line_endings());
+        assert!(!TextWidth::Multiline.preserves_line_endings());
+        assert!(!TextWidth::Width(Width::new(1)).preserves_line_endings());
     }
 
     #[test]
