@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-malformed-frontmatter.astro
+---
+# Input
+```astro
+---
+const possiblyUsed = 1;
+const broken =
+---
+
+```
+
+# Diagnostics
+```
+invalid-astro-malformed-frontmatter.astro:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found the end of the file.
+  
+    2 │ const possiblyUsed = 1;
+    3 │ const broken =
+  > 4 │ ---
+      │ 
+    5 │ 
+  
+  i Expected an expression, or an assignment here.
+  
+    2 │ const possiblyUsed = 1;
+    3 │ const broken =
+  > 4 │ ---
+      │ 
+    5 │ 
+  
+
+```

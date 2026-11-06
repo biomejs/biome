@@ -1,5 +1,6 @@
 use crate::{
-    JsRuleAction, services::control_flow::AnyJsControlFlowRoot, services::semantic::Semantic,
+    JsRuleAction,
+    services::{control_flow::AnyJsControlFlowRoot, embedded::EmbeddedService, semantic::Semantic},
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -10,6 +11,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsVariableDeclaration, JsModule, JsScript, JsSyntaxKind, TsGlobalDeclaration,
 };
+use biome_languages::{JsFileSource, javascript::JsEmbeddingKind};
 use biome_rule_options::no_var::NoVarOptions;
 
 use crate::lint::style::use_const::ConstBindings;
@@ -108,7 +110,20 @@ impl Rule for NoVar {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let declaration = ctx.query();
         let model = ctx.model();
-        let maybe_const = ConstBindings::new(declaration, model);
+        let file_source = ctx.source_type::<JsFileSource>();
+        let is_astro_frontmatter = matches!(
+            file_source.as_embedding_kind(),
+            JsEmbeddingKind::Astro {
+                frontmatter: true,
+                ..
+            }
+        );
+        let maybe_const = if is_astro_frontmatter {
+            ctx.get_service::<EmbeddedService>()
+                .and_then(|embedded| ConstBindings::new(declaration, model, Some(embedded)))
+        } else {
+            ConstBindings::new(declaration, model, None)
+        };
         // When a `var` is initialized and re-assigned `maybe_const` is `None`.
         // In this case we fall back to `let`.
         // Otherwise, we check if the `var` can be "fixed" to a `const`.
