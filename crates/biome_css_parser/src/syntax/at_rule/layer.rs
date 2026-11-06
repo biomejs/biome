@@ -61,6 +61,12 @@ impl ParseSeparatedList for LayerReferenceList {
     const LIST_KIND: Self::Kind = CSS_LAYER_REFERENCE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // `LayerNameList` ends at `)` for `@import layer(...)`, so here it would
+        // consume nothing; report the element as absent so the list recovers.
+        if p.at(T![')']) {
+            return Absent;
+        }
+
         LayerNameList.parse_list(p).into()
     }
 

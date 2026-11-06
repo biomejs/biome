@@ -1,0 +1,11 @@
+@layer){}
+
+@layer a b) {}
+
+@layer a, b);
+
+.a {
+	color: red;
+}
+
+@layer)

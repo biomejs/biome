@@ -1,0 +1,360 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@layer){}
+
+@layer a b) {}
+
+@layer a, b);
+
+.a {
+	color: red;
+}
+
+@layer)
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1..6 "layer" [] [],
+                layer: CssBogusLayer {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        R_PAREN@6..7 ")" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        CssRuleBlock {
+                            l_curly_token: L_CURLY@7..8 "{" [] [],
+                            rules: CssRuleList [],
+                            r_curly_token: R_CURLY@8..9 "}" [] [],
+                        },
+                    ],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@9..12 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@12..18 "layer" [] [Whitespace(" ")],
+                layer: CssBogusLayer {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@18..20 "a" [] [Whitespace(" ")],
+                                    },
+                                    missing separator,
+                                    CssIdentifier {
+                                        value_token: IDENT@20..21 "b" [] [],
+                                    },
+                                ],
+                                CssBogus {
+                                    items: [
+                                        R_PAREN@21..23 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                        CssRuleBlock {
+                            l_curly_token: L_CURLY@23..24 "{" [] [],
+                            rules: CssRuleList [],
+                            r_curly_token: R_CURLY@24..25 "}" [] [],
+                        },
+                    ],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@25..28 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@28..34 "layer" [] [Whitespace(" ")],
+                layer: CssBogusLayer {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@34..35 "a" [] [],
+                                    },
+                                ],
+                                COMMA@35..37 "," [] [Whitespace(" ")],
+                                CssLayerNameList [
+                                    CssIdentifier {
+                                        value_token: IDENT@37..38 "b" [] [],
+                                    },
+                                ],
+                                CssBogus {
+                                    items: [
+                                        R_PAREN@38..39 ")" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        SEMICOLON@39..40 ";" [] [],
+                    ],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@40..43 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@43..45 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@45..46 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@46..53 "color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@53..55 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@55..58 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@58..59 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@59..61 "}" [Newline("\n")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@61..64 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@64..69 "layer" [] [],
+                layer: CssBogusLayer {
+                    items: [
+                        CssBogus {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        R_PAREN@69..70 ")" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..71
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..70
+    0: CSS_AT_RULE@0..9
+      0: AT@0..1 "@" [] []
+      1: CSS_LAYER_AT_RULE@1..9
+        0: LAYER_KW@1..6 "layer" [] []
+        1: CSS_BOGUS_LAYER@6..9
+          0: CSS_BOGUS@6..7
+            0: CSS_BOGUS@6..7
+              0: R_PAREN@6..7 ")" [] []
+          1: CSS_RULE_BLOCK@7..9
+            0: L_CURLY@7..8 "{" [] []
+            1: CSS_RULE_LIST@8..8
+            2: R_CURLY@8..9 "}" [] []
+    1: CSS_AT_RULE@9..25
+      0: AT@9..12 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@12..25
+        0: LAYER_KW@12..18 "layer" [] [Whitespace(" ")]
+        1: CSS_BOGUS_LAYER@18..25
+          0: CSS_BOGUS@18..23
+            0: CSS_LAYER_NAME_LIST@18..21
+              0: CSS_IDENTIFIER@18..20
+                0: IDENT@18..20 "a" [] [Whitespace(" ")]
+              1: (empty)
+              2: CSS_IDENTIFIER@20..21
+                0: IDENT@20..21 "b" [] []
+            1: CSS_BOGUS@21..23
+              0: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+          1: CSS_RULE_BLOCK@23..25
+            0: L_CURLY@23..24 "{" [] []
+            1: CSS_RULE_LIST@24..24
+            2: R_CURLY@24..25 "}" [] []
+    2: CSS_AT_RULE@25..40
+      0: AT@25..28 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@28..40
+        0: LAYER_KW@28..34 "layer" [] [Whitespace(" ")]
+        1: CSS_BOGUS_LAYER@34..40
+          0: CSS_BOGUS@34..39
+            0: CSS_LAYER_NAME_LIST@34..35
+              0: CSS_IDENTIFIER@34..35
+                0: IDENT@34..35 "a" [] []
+            1: COMMA@35..37 "," [] [Whitespace(" ")]
+            2: CSS_LAYER_NAME_LIST@37..38
+              0: CSS_IDENTIFIER@37..38
+                0: IDENT@37..38 "b" [] []
+            3: CSS_BOGUS@38..39
+              0: R_PAREN@38..39 ")" [] []
+          1: SEMICOLON@39..40 ";" [] []
+    3: CSS_QUALIFIED_RULE@40..61
+      0: CSS_SELECTOR_LIST@40..45
+        0: CSS_COMPOUND_SELECTOR@40..45
+          0: CSS_NESTED_SELECTOR_LIST@40..40
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@40..45
+            0: CSS_CLASS_SELECTOR@40..45
+              0: DOT@40..43 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@43..45
+                0: IDENT@43..45 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@45..61
+        0: L_CURLY@45..46 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@46..59
+          0: CSS_DECLARATION_WITH_SEMICOLON@46..59
+            0: CSS_DECLARATION@46..58
+              0: CSS_GENERIC_PROPERTY@46..58
+                0: CSS_IDENTIFIER@46..53
+                  0: IDENT@46..53 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@53..55 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@55..58
+                  0: CSS_IDENTIFIER@55..58
+                    0: IDENT@55..58 "red" [] []
+              1: (empty)
+            1: SEMICOLON@58..59 ";" [] []
+        2: R_CURLY@59..61 "}" [Newline("\n")] []
+    4: CSS_AT_RULE@61..70
+      0: AT@61..64 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@64..70
+        0: LAYER_KW@64..69 "layer" [] []
+        1: CSS_BOGUS_LAYER@69..70
+          0: CSS_BOGUS@69..70
+            0: CSS_BOGUS@69..70
+              0: R_PAREN@69..70 ")" [] []
+  2: EOF@70..71 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_layer_r_paren.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ')'.
+  
+  > 1 │ @layer){}
+      │       ^
+    2 │ 
+    3 │ @layer a b) {}
+  
+  i Expected an identifier here.
+  
+  > 1 │ @layer){}
+      │       ^
+    2 │ 
+    3 │ @layer a b) {}
+  
+at_rule_layer_r_paren.css:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `.` but instead found `b`
+  
+    1 │ @layer){}
+    2 │ 
+  > 3 │ @layer a b) {}
+      │          ^
+    4 │ 
+    5 │ @layer a, b);
+  
+  i Remove b
+  
+at_rule_layer_r_paren.css:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    1 │ @layer){}
+    2 │ 
+  > 3 │ @layer a b) {}
+      │           ^
+    4 │ 
+    5 │ @layer a, b);
+  
+  i Remove )
+  
+at_rule_layer_r_paren.css:5:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `)`
+  
+    3 │ @layer a b) {}
+    4 │ 
+  > 5 │ @layer a, b);
+      │            ^
+    6 │ 
+    7 │ .a {
+  
+  i Remove )
+  
+at_rule_layer_r_paren.css:11:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ')'.
+  
+     9 │ }
+    10 │ 
+  > 11 │ @layer)
+       │       ^
+    12 │ 
+  
+  i Expected an identifier here.
+  
+     9 │ }
+    10 │ 
+  > 11 │ @layer)
+       │       ^
+    12 │ 
+  
+at_rule_layer_r_paren.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead the file ends
+  
+    11 │ @layer)
+  > 12 │ 
+       │ 
+  
+  i the file ends here
+  
+    11 │ @layer)
+  > 12 │ 
+       │ 
+  
+```
