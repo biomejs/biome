@@ -281,6 +281,7 @@ define_categories! {
     "lint/nursery/noNewRequire": "https://biomejs.dev/linter/rules/no-new-require",
     "lint/nursery/noNonScalableViewport": "https://biomejs.dev/linter/rules/no-non-scalable-viewport",
     "lint/nursery/noNull": "https://biomejs.dev/linter/rules/no-null",
+    "lint/nursery/noNumberArgumentOutOfRange": "https://biomejs.dev/linter/rules/no-number-argument-out-of-range",
     "lint/nursery/noObjectConstructor": "https://biomejs.dev/linter/rules/no-object-constructor",
     "lint/nursery/noObjectLiteralComparison": "https://biomejs.dev/linter/rules/no-object-literal-comparison",
     "lint/nursery/noObsoleteAttributes": "https://biomejs.dev/linter/rules/no-obsolete-attributes",

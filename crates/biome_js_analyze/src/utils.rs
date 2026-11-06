@@ -1,4 +1,6 @@
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
+use biome_js_syntax::{
+    AnyJsExpression, JsBinaryExpression, JsSyntaxNode, JsUnaryOperator, inner_string_text,
+};
 use biome_rowan::{AstNode, Direction, WalkEvent};
 use rustc_hash::FxHasher;
 use std::hash::{Hash, Hasher};
@@ -146,6 +148,25 @@ pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
         None
     } else {
         Some(path)
+    }
+}
+
+/// Returns the value of a number literal, looking through parentheses, TypeScript type
+/// wrappers, and unary `+` and `-`.
+pub(crate) fn static_number_value(expression: &AnyJsExpression) -> Option<f64> {
+    match expression.clone().omit_type_wrappers()? {
+        AnyJsExpression::AnyJsLiteralExpression(literal) => {
+            literal.as_js_number_literal_expression()?.as_number()
+        }
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            let value = static_number_value(&unary.argument().ok()?)?;
+            match unary.operator().ok()? {
+                JsUnaryOperator::Minus => Some(-value),
+                JsUnaryOperator::Plus => Some(value),
+                _ => None,
+            }
+        }
+        _ => None,
     }
 }
 
