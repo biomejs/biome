@@ -1,6 +1,7 @@
 use crate::{
-    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategory, RuleGroup,
-    RuleKey, RuleMetadata, ServiceBag, SignalEntry, SignalRuleKey, Visitor,
+    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategory,
+    RuleExecutionContext, RuleGroup, RuleKey, RuleMetadata, ServiceBag, SignalEntry, SignalRuleKey,
+    Visitor,
     context::RuleContext,
     diagnostics::AnalyzerPanicDiagnostic,
     matcher::{GroupKey, MatchQueryParams},
@@ -121,6 +122,7 @@ impl<L: Language + Default> RuleRegistry<L> {
                 phase_rules: Default::default(),
                 panicked: false,
             },
+            execution_context: RuleExecutionContext::default(),
             visitors: BTreeMap::default(),
             services: ServiceBag::default(),
             diagnostics: Vec::new(),
@@ -149,6 +151,9 @@ pub struct RuleRegistryBuilder<'a, L: Language> {
     root: &'a L::Root,
     // Rule Registry
     registry: RuleRegistry<L>,
+    /// The execution scopes of the rules to register. A rule whose scope is
+    /// outside the context is skipped, as if the filter excluded it.
+    execution_context: RuleExecutionContext,
     // Analyzer Visitors
     visitors: BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
     // Service Bag
@@ -174,7 +179,8 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
     where
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
-        if !self.filter.match_rule::<R>() {
+        if !self.filter.match_rule::<R>() || !self.execution_context.includes(R::execution_scope())
+        {
             return;
         }
 
@@ -262,6 +268,11 @@ type BuilderResult<L> = (
 );
 
 impl<L: Language> RuleRegistryBuilder<'_, L> {
+    pub fn with_execution_context(mut self, execution_context: RuleExecutionContext) -> Self {
+        self.execution_context = execution_context;
+        self
+    }
+
     pub fn build(self) -> BuilderResult<L> {
         (
             self.registry,
@@ -534,8 +545,8 @@ impl<L: Language + Default> RegistryRule<L> {
 mod tests {
     use super::*;
     use crate::{
-        AnalysisFilter, AnalyzerOptions, ApplySuppression, Ast, GroupCategory, RuleMeta,
-        SuppressionAction, context::RuleContext, matcher::Query,
+        AnalysisFilter, AnalyzerOptions, ApplySuppression, Ast, GroupCategory, RuleExecutionScope,
+        RuleMeta, SuppressionAction, context::RuleContext, matcher::Query,
     };
     use biome_diagnostics::{
         Diagnostic, DiagnosticExt, Error, category, print_diagnostic_to_string,
@@ -583,6 +594,43 @@ mod tests {
         }
     }
 
+    macro_rules! declare_execution_rule {
+        ($name:ident, $rule_name:literal $(, $scope:expr)?) => {
+            enum $name {}
+
+            impl RuleMeta for $name {
+                type Group = TestGroup;
+                const METADATA: RuleMetadata =
+                    RuleMetadata::new("next", $rule_name, "Test rule.", "raw");
+            }
+
+            impl Rule for $name {
+                type Query = Ast<RawLanguageRoot>;
+                type State = ();
+                type Signals = Option<Self::State>;
+                type Options = ();
+
+                $(
+                    fn execution_scope() -> RuleExecutionScope {
+                        $scope
+                    }
+                )?
+
+                fn run(_: &RuleContext<Self>) -> Self::Signals {
+                    None
+                }
+            }
+        };
+    }
+
+    declare_execution_rule!(
+        HostDocumentRule,
+        "hostDocumentRule",
+        RuleExecutionScope::HostDocument
+    );
+    // Keeps the default scope of `Rule::execution_scope`.
+    declare_execution_rule!(SnippetRule, "snippetRule");
+
     struct TestSuppressionAction;
 
     impl SuppressionAction for TestSuppressionAction {
@@ -616,6 +664,47 @@ mod tests {
         fn suppression_top_level_comment(&self, _: &str) -> String {
             String::new()
         }
+    }
+
+    #[test]
+    fn filters_rules_by_execution_context() {
+        assert_eq!(SnippetRule::execution_scope(), RuleExecutionScope::Snippet);
+
+        fn registered_rule_count(context: RuleExecutionContext) -> usize {
+            let root = RawLanguageRoot::unwrap_cast(RawSyntaxTreeBuilder::wrap_with_node(
+                RawLanguageKind::ROOT,
+                |builder| {
+                    builder.token(RawLanguageKind::NUMBER_TOKEN, "1");
+                },
+            ));
+            let filter = AnalysisFilter::default();
+            let mut builder = RuleRegistry::builder(&filter, &root).with_execution_context(context);
+            builder.record_rule::<HostDocumentRule>();
+            builder.record_rule::<SnippetRule>();
+            let (registry, _, diagnostics, _) = builder.build();
+            assert!(diagnostics.is_empty());
+            registry.phase_rules[Phases::Syntax as usize]
+                .rule_states
+                .len()
+        }
+
+        assert_eq!(registered_rule_count(RuleExecutionContext::new()), 2);
+        assert_eq!(
+            registered_rule_count(RuleExecutionContext::new_host_document()),
+            1
+        );
+        assert_eq!(
+            registered_rule_count(RuleExecutionContext::from_scopes(
+                RuleExecutionScope::Snippet
+            )),
+            1
+        );
+        assert_eq!(
+            registered_rule_count(RuleExecutionContext::from_scopes(
+                RuleExecutionScope::Snippet | RuleExecutionScope::HostDocument
+            )),
+            2
+        );
     }
 
     #[test]

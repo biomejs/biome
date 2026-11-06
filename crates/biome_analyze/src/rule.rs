@@ -15,11 +15,77 @@ use biome_diagnostics::{
 };
 use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange, TextSize};
+use enumflags2::{BitFlags, bitflags};
 use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::ops::Add;
 use std::str::FromStr;
+
+/// Selects the syntax trees a rule runs on when a host document embeds
+/// snippets.
+///
+/// Each snippet is a separate syntax tree, and each tree gets its own rule
+/// registry, built with a [`RuleExecutionContext`]. Without a scope, a rule
+/// that reports on the host document as a whole would report once per snippet.
+#[bitflags]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RuleExecutionScope {
+    /// Runs on one syntax tree per host document. Use it for rules that report
+    /// on the document as a whole, such as a check of its file name.
+    HostDocument = 1 << 0,
+    /// Runs on every syntax tree: a standalone file, and each snippet of a host
+    /// document. A rule has this scope unless it overrides
+    /// [`Rule::execution_scope`].
+    Snippet = 1 << 1,
+}
+
+/// The scopes whose rules a registry registers for one syntax tree.
+///
+/// The caller passes the context with
+/// [`RuleRegistryBuilder::with_execution_context`](crate::RuleRegistryBuilder::with_execution_context).
+/// Across the trees it builds for one host document, the caller must include
+/// `HostDocument` in exactly one context, so that document-level rules report
+/// once.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RuleExecutionContext {
+    /// The scopes whose rules are registered. A rule is registered when its
+    /// scope is in the set.
+    scopes: BitFlags<RuleExecutionScope>,
+}
+
+impl RuleExecutionContext {
+    /// Creates a context that registers the rules of every scope, for a syntax
+    /// tree that isn't a snippet of a host document.
+    pub fn new() -> Self {
+        Self::from_scopes(BitFlags::all())
+    }
+
+    /// Creates a context that registers only the rules of `scopes`.
+    pub fn from_scopes(scopes: impl Into<BitFlags<RuleExecutionScope>>) -> Self {
+        Self {
+            scopes: scopes.into(),
+        }
+    }
+
+    /// Creates a context that registers only `HostDocument` rules, for a syntax
+    /// tree built only to run them, such as an empty tree when the host document
+    /// has no snippet that can run them.
+    pub fn new_host_document() -> Self {
+        Self::from_scopes(RuleExecutionScope::HostDocument)
+    }
+
+    pub(crate) fn includes(self, scope: RuleExecutionScope) -> bool {
+        self.scopes.contains(scope)
+    }
+}
+
+impl Default for RuleExecutionContext {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -1372,6 +1438,13 @@ pub trait Rule: RuleMeta + Sized {
 
     fn phase() -> Phases {
         <<<Self as Rule>::Query as Queryable>::Services as Phase>::phase()
+    }
+
+    /// Returns the [`RuleExecutionScope`] of the rule: the syntax trees it runs
+    /// on when a host document embeds snippets. The default, `Snippet`, runs
+    /// it on every tree.
+    fn execution_scope() -> RuleExecutionScope {
+        RuleExecutionScope::Snippet
     }
 
     /// This function is called once for each node matching `Query` in the tree
