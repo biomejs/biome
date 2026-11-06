@@ -1,5 +1,5 @@
 use biome_css_syntax::{
-    AnyCssRoot, CssContainerAtRule, CssLanguage, CssMediaAtRule, CssScopeAtRule,
+    AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssMediaAtRule, CssScopeAtRule,
     CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T,
     single_expression_item,
 };
@@ -118,6 +118,22 @@ impl SemanticModelBuilder {
             .take_while(|ancestor| ancestor.text_trimmed_range() != parent_range)
             .filter_map(ScssAtRootAtRule::cast)
             .any(|at_root| at_root_excludes_style_rules(&at_root))
+    }
+
+    /// Returns whether `node`, which is outside every rule, belongs to the root's own declaration
+    /// block, such as a `style` attribute or the top level of a CSS-in-JS template.
+    fn is_root_declaration(&self, node: &CssDeclaration) -> bool {
+        match &self.root {
+            AnyCssRoot::CssRoot(_) => false,
+            AnyCssRoot::CssDeclarationSnippetRoot(_) => true,
+            // Declarations inside at-rules that don't start a rule, such as `@font-face`, belong
+            // to that at-rule instead of the root.
+            AnyCssRoot::CssSnippetRoot(_) => node
+                .syntax()
+                .grand_parent()
+                .and_then(|list| list.parent())
+                .is_some_and(|parent| &parent == self.root.syntax()),
+        }
     }
 
     pub fn build(mut self) -> SemanticModel {
@@ -258,7 +274,7 @@ impl SemanticModelBuilder {
                         self.all_rules[current_rule_id.index()]
                             .declarations
                             .push(declaration);
-                    } else if self.root.as_css_declaration_snippet_root().is_some() {
+                    } else if self.is_root_declaration(&node) {
                         self.root_declarations.push(declaration);
                     }
                 }
