@@ -51,7 +51,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoErasingOperation {
-        version: "next",
+        version: "2.6.6",
         name: "noErasingOperation",
         language: "js",
         sources: &[

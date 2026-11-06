@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// - To disallow the use of `arguments` entirely, see [`noArguments`](https://biomejs.dev/linter/rules/no-arguments/).
     ///
     pub NoArrayMethodsOnArguments {
-        version: "next",
+        version: "2.6.6",
         name: "noArrayMethodsOnArguments",
         language: "js",
         sources: &[RuleSource::Oxc("bad-array-method-on-arguments").same()],

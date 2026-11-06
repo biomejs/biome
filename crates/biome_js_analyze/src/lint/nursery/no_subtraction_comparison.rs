@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSubtractionComparison {
-        version: "next",
+        version: "2.6.6",
         name: "noSubtractionComparison",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-subtraction-comparison").same()],

@@ -1,5 +1,135 @@
 # @biomejs/biome
 
+## 2.6.6
+
+### Patch Changes
+
+- [#12887](https://github.com/biomejs/biome/pull/12887) [`da0422e`](https://github.com/biomejs/biome/commit/da0422e5201555239e49f81e5236068935b9445a) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noArrayMethodsOnArguments`](https://biomejs.dev/linter/rules/no-array-methods-on-arguments/). It reports calls to array methods on the `arguments` object, which isn't an array, so these calls throw a `TypeError` when the code runs.
+  
+  ```js
+  function sum() {
+    return arguments.reduce((total, value) => total + value, 0);
+  }
+  ```
+
+- [#12877](https://github.com/biomejs/biome/pull/12877) [`cd9e10f`](https://github.com/biomejs/biome/commit/cd9e10f1510d043ee2b5148a5e069fee3638ad65) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noConstantComparisons`](https://biomejs.dev/linter/rules/no-constant-comparisons/), which reports `&&` and `||` conditions that can never be true, are always true, or contain a check with no effect.
+  
+  ```js
+  if (statusCode <= 400 && statusCode > 500) {}
+  ```
+
+- [#12876](https://github.com/biomejs/biome/pull/12876) [`a7c9586`](https://github.com/biomejs/biome/commit/a7c9586a6ff00e455a1d647d8707036bd705bcda) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noErasingOperation`](https://biomejs.dev/linter/rules/no-erasing-operation/), which disallows operations with `0` that always result in zero: multiplying by `0`, a bitwise AND with `0`, and dividing `0` by a number. The other value in these operations has no effect on the result, which usually means the code has a mistake.
+  
+  ```js
+  const total = price * 0;
+  ```
+
+- [#12841](https://github.com/biomejs/biome/pull/12841) [`e954f55`](https://github.com/biomejs/biome/commit/e954f55b09f271ab97a79c732be53c7523b7f2bc) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noNegatedArrayPredicate`](https://biomejs.dev/linter/rules/no-negated-array-predicate/), which reports negated calls to `Array#some()` and `Array#every()` and suggests moving the negation into the callback function.
+  
+  ```js
+  // Invalid: use `array.every((item) => !isUnicorn(item))` instead.
+  const isMissing = !array.some((item) => isUnicorn(item));
+  ```
+
+- [#12888](https://github.com/biomejs/biome/pull/12888) [`15039f7`](https://github.com/biomejs/biome/commit/15039f762513ec3e20eb0f5d8c4584aba76c7d38) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noNumberArgumentOutOfRange`](https://biomejs.dev/linter/rules/no-number-argument-out-of-range/), which reports number literal arguments of `toString()`, `toFixed()`, `toExponential()` and `toPrecision()` that are outside the range the method accepts. These calls throw a `RangeError` at runtime.
+  
+  ```js
+  value.toString(64);
+  ```
+
+- [#12889](https://github.com/biomejs/biome/pull/12889) [`1cd7520`](https://github.com/biomejs/biome/commit/1cd7520c8eda7409db0b5648493370cb95aa5f23) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noSharedBranchCode`](https://biomejs.dev/linter/rules/no-shared-branch-code/), which reports code that is repeated at the start or end of every branch of an `if` statement. That code runs no matter which branch is taken, so it can be moved before or after the `if` statement.
+  
+  ```js
+  if (condition) {
+    doSomething();
+    cleanup();
+  } else {
+    doSomethingElse();
+    cleanup();
+  }
+  ```
+
+- [#12842](https://github.com/biomejs/biome/pull/12842) [`d47fcfd`](https://github.com/biomejs/biome/commit/d47fcfd99c36c19751eb785cae6fb7b655a2432b) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noSubtractionComparison`](https://biomejs.dev/linter/rules/no-subtraction-comparison/), which reports subtracting two values only to compare the difference with `0`, and suggests comparing the values directly.
+  
+  ```js
+  if (a - b > 0) {}
+  ```
+
+- [#12866](https://github.com/biomejs/biome/pull/12866) [`7c1cd5f`](https://github.com/biomejs/biome/commit/7c1cd5f09604b9762e2cc91e5f96ee0ddc04d485) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noSvelteIgnoredUnsubscribe`](https://biomejs.dev/linter/rules/no-svelte-ignored-unsubscribe/), which reports calls to a store's `subscribe()` method when the returned function is ignored. Without that function, the subscription can never be stopped, which causes a memory leak.
+  
+  ```svelte
+  <script>
+    import { count } from "./stores.js";
+  
+    count.subscribe((value) => console.log(value));
+  </script>
+  ```
+
+- [#12890](https://github.com/biomejs/biome/pull/12890) [`6b73fcf`](https://github.com/biomejs/biome/commit/6b73fcfa5a0177ae03550d510bf97daaf640b058) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noUninvokedArrayCallback`](https://biomejs.dev/linter/rules/no-uninvoked-array-callback/), which reports array methods such as `map()` and `forEach()` called with a callback on an array that only has empty slots. The callback never runs in this case.
+  
+  ```js
+  const list = new Array(5).map(() => createElement());
+  ```
+
+- [#12886](https://github.com/biomejs/biome/pull/12886) [`3bb18d8`](https://github.com/biomejs/biome/commit/3bb18d85ca16f9cd18bc84810b69bbb04b2136ca) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`useNextScriptForGoogleAnalytics`](https://biomejs.dev/linter/rules/use-next-script-for-google-analytics/), which reports `<script>` elements that load Google Analytics or Google Tag Manager. Use the `GoogleAnalytics` and `GoogleTagManager` components from `@next/third-parties/google` instead, which load these scripts after the page becomes interactive.
+  
+  ```jsx
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XYZ" />
+  ```
+  
+  The rule belongs to the `next` domain.
+
+- [#12309](https://github.com/biomejs/biome/pull/12309) [`0538e30`](https://github.com/biomejs/biome/commit/0538e30afeaf0eb9fd97170e8bcbe05b67d9bb57) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`usePackageJsonCpu`](https://biomejs.dev/linter/rules/use-package-json-cpu/), which reports `package.json` files that have no `cpu` field. The `cpu` field lists the processor types that the package supports.
+  
+  The following `package.json` file satisfies the rule:
+  
+  ```json
+  {
+    "name": "my-package",
+    "version": "1.0.0",
+    "cpu": ["x64", "arm64"]
+  }
+  ```
+
+- [#12310](https://github.com/biomejs/biome/pull/12310) [`191111d`](https://github.com/biomejs/biome/commit/191111d99b6c8e0638cc8b9fc7950d55ad18d654) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`usePackageJsonEngines`](https://biomejs.dev/linter/rules/use-package-json-engines/), which reports `package.json` files that have no `engines` field.
+  
+  A `package.json` passes the rule once it declares the field:
+  
+  ```json
+  {
+    "name": "my-package",
+    "engines": {
+      "node": ">=20"
+    }
+  }
+  ```
+
+- [#12986](https://github.com/biomejs/biome/pull/12986) [`cc929af`](https://github.com/biomejs/biome/commit/cc929aff46bd49ae0bfc5c02a6f7b093caa82d25) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#12954](https://github.com/biomejs/biome/issues/12954), where configuring rules in groups with more than 256 rules could enable or disable the wrong rule.
+
+- [#12931](https://github.com/biomejs/biome/pull/12931) [`fe9248e`](https://github.com/biomejs/biome/commit/fe9248e58613d2326d17b3de9c80859e7f0d8d71) Thanks [@dyc3](https://github.com/dyc3)! - Improved the performance of linting. Each lint pass now spends less time stepping over syntax nodes that no enabled rule looks at.
+
+- [#12969](https://github.com/biomejs/biome/pull/12969) [`22d27e8`](https://github.com/biomejs/biome/commit/22d27e8e49965757087c8284ddcab1f207d20ed9) Thanks [@vibbix](https://github.com/vibbix)! - Improved the performance of CSS linting. Rules that compare selectors, such as [`noDescendingSpecificity`](https://biomejs.dev/linter/rules/no-descending-specificity/) and [`noDuplicateSelectors`](https://biomejs.dev/linter/rules/no-duplicate-selectors/), now make fewer memory allocations.
+
+- [#12973](https://github.com/biomejs/biome/pull/12973) [`5a06df5`](https://github.com/biomejs/biome/commit/5a06df57d0dd2a84b1930c56cbf4495fc82db55d) Thanks [@vibbix](https://github.com/vibbix)! - Fixed [`useGenericFontNames`](https://biomejs.dev/linter/rules/use-generic-font-names/) reporting `font-family` inside `@font-palette-values`. There, `font-family` names the font families the palette applies to, so it doesn't take a generic family.
+  
+  ```css
+  @font-palette-values --palette {
+    font-family: Bixa;
+    override-colors: 0 red;
+  }
+  ```
+
+- [#12930](https://github.com/biomejs/biome/pull/12930) [`ce71284`](https://github.com/biomejs/biome/commit/ce7128402663d4af0a2d22e0731a0d6127e21489) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#12073](https://github.com/biomejs/biome/issues/12073): [`useExhaustiveSwitchCases`](https://biomejs.dev/linter/rules/use-exhaustive-switch-cases/) now reports non-exhaustive switches over values read from `for...of` loops over `Array.prototype.entries()`, `Map`, and `Set`, and over properties of array elements indexed by a `number` variable.
+  
+  [`noMisusedPromises`](https://biomejs.dev/linter/rules/no-misused-promises/) now also reports Promise-returning callbacks passed to array methods such as `find` and `every`.
+
+- [#12983](https://github.com/biomejs/biome/pull/12983) [`2987b54`](https://github.com/biomejs/biome/commit/2987b54ef12d6949fefe97363fd8df8bedfa34f9) Thanks [@ashokram-si](https://github.com/ashokram-si)! - Fixed [#12957](https://github.com/biomejs/biome/issues/12957): Biome now correctly parses SCSS negative interpolation list items as separate values instead of an invalid subtraction operator.
+  
+  ```diff
+  -margin: -#{$s} - #{$s} - #{$s} auto;
+  +margin: -#{$s} -#{$s} -#{$s} auto;
+  ```
+
 ## 2.6.5
 
 ### Patch Changes

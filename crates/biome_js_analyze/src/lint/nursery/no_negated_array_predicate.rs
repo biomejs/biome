@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNegatedArrayPredicate {
-        version: "next",
+        version: "2.6.6",
         name: "noNegatedArrayPredicate",
         language: "js",
         recommended: true,

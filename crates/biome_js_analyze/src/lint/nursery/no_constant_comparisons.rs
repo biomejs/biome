@@ -86,7 +86,7 @@ declare_lint_rule! {
     ///   [`noSelfCompare`](https://biomejs.dev/linter/rules/no-self-compare/).
     ///
     pub NoConstantComparisons {
-        version: "next",
+        version: "2.6.6",
         name: "noConstantComparisons",
         language: "js",
         sources: &[RuleSource::Oxc("const-comparisons").inspired()],

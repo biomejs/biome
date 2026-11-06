@@ -61,7 +61,7 @@ declare_lint_rule! {
     /// It doesn't check the type of the value the method is called on.
     ///
     pub NoNumberArgumentOutOfRange {
-        version: "next",
+        version: "2.6.6",
         name: "noNumberArgumentOutOfRange",
         language: "js",
         sources: &[RuleSource::Oxc("number-arg-out-of-range").inspired()],

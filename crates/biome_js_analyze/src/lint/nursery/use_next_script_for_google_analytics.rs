@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseNextScriptForGoogleAnalytics {
-        version: "next",
+        version: "2.6.6",
         name: "useNextScriptForGoogleAnalytics",
         language: "jsx",
         sources: &[RuleSource::EslintNext("next-script-for-ga").inspired()],

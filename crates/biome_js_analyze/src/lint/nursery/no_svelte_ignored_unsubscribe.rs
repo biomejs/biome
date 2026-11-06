@@ -52,7 +52,7 @@ declare_lint_rule! {
     ///
     /// - [Svelte stores](https://svelte.dev/docs/svelte/stores)
     pub NoSvelteIgnoredUnsubscribe {
-        version: "next",
+        version: "2.6.6",
         name: "noSvelteIgnoredUnsubscribe",
         language: "js",
         domains: &[RuleDomain::Svelte],

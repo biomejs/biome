@@ -53,7 +53,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUninvokedArrayCallback {
-        version: "next",
+        version: "2.6.6",
         name: "noUninvokedArrayCallback",
         language: "js",
         sources: &[RuleSource::Oxc("uninvoked-array-callback").inspired()],
