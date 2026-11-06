@@ -224,6 +224,7 @@ impl PartialEq for SemanticModel {
 pub(crate) struct RuleData {
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<SelectorData>,
     /// The declarations within this rule.
@@ -235,15 +236,6 @@ pub(crate) struct RuleData {
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
-}
-
-impl RuleData {
-    pub(crate) fn range(&self, css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(css_root.syntax())
-            .syntax()
-            .text_trimmed_range()
-    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -267,14 +259,13 @@ pub struct Rule {
     pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
     pub(crate) declarations: Vec<CssModelDeclaration>,
     /// The id of the parent rule
     pub(crate) parent_id: Option<RuleId>,
-    /// The ids of the child rules
-    pub(crate) child_ids: Vec<RuleId>,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
@@ -285,7 +276,7 @@ impl PartialEq for Rule {
         self.specificity == other.specificity
             && self.id == other.id
             && self.parent_id == other.parent_id
-            && self.child_ids == other.child_ids
+            && self.child_ids() == other.child_ids()
             && self.selectors.len() == other.selectors.len()
             && self
                 .selectors
@@ -320,10 +311,10 @@ impl Rule {
             data,
             id: rule.id,
             node: rule.node.clone(),
+            range: rule.range,
             selectors,
             declarations,
             parent_id: rule.parent_id,
-            child_ids: rule.child_ids.clone(),
             specificity: rule.specificity,
         }
     }
@@ -337,10 +328,7 @@ impl Rule {
     }
 
     pub fn range(&self, _css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.range
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -356,7 +344,7 @@ impl Rule {
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
-        &self.child_ids
+        &self.data.all_rules[self.id.index()].child_ids
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -579,6 +567,7 @@ impl std::fmt::Display for ResolvedSelector {
 #[derive(Debug, Clone)]
 pub(crate) struct SelectorData {
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    pub(crate) range: TextRange,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
     /// For nested selectors each `&` is replaced by the parent token sequence,
@@ -599,56 +588,49 @@ pub(crate) struct SelectorData {
 #[derive(Debug, Clone)]
 pub struct Selector {
     pub(crate) data: Arc<SemanticModelData>,
-    pub(crate) node: AstPtr<AnyCssSelectorLike>,
-    /// The resolved selector, accounting for nesting and `&` references.
-    /// For top-level selectors this is the token sequence from the source.
-    /// For nested selectors each `&` is replaced by the parent token sequence,
-    /// and a space-literal token is inserted when there is no `&`.
-    pub(crate) resolved: ResolvedSelector,
-    /// The specificity of the selector.
-    pub(crate) specificity: Specificity,
+    rule_id: RuleId,
+    index: usize,
 }
 
 impl Selector {
     fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
-        let selector = &data.all_rules[rule_id.index()].selectors[index];
-        let node = selector.node.clone();
-        let resolved = selector.resolved.clone();
-        let specificity = selector.specificity;
         Self {
             data,
-            node,
-            resolved,
-            specificity,
+            rule_id,
+            index,
         }
+    }
+
+    fn selector_data(&self) -> &SelectorData {
+        &self.data.all_rules[self.rule_id.index()].selectors[self.index]
     }
 }
 
 impl PartialEq for Selector {
     fn eq(&self, other: &Self) -> bool {
-        self.specificity == other.specificity && self.resolved == other.resolved
+        self.specificity() == other.specificity() && self.resolved() == other.resolved()
     }
 }
 
 impl Selector {
     pub fn node(&self) -> AnyCssSelectorLike {
-        self.node.to_node(self.data.root().syntax())
+        self.selector_data().node.to_node(self.data.root().syntax())
     }
 
     /// Returns the resolved selector, accounting for CSS nesting and `&` references.
+    /// For top-level selectors this is the token sequence from the source.
+    /// For nested selectors each `&` is replaced by the parent token sequence,
+    /// and a space-literal token is inserted when there is no `&`.
     pub fn resolved(&self) -> &ResolvedSelector {
-        &self.resolved
+        &self.selector_data().resolved
     }
 
     pub fn range(&self) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.selector_data().range
     }
 
     pub fn specificity(&self) -> Specificity {
-        self.specificity
+        self.selector_data().specificity
     }
 }
 

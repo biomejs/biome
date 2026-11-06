@@ -62,7 +62,7 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
-        assert_eq!(rule.child_ids.len(), 0);
+        assert_eq!(rule.child_ids().len(), 0);
         assert_eq!(rule.parent_id, None);
     }
 
@@ -106,14 +106,14 @@ mod tests {
         let rule = rules.first().unwrap();
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
 
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -136,13 +136,13 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
@@ -165,13 +165,13 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.child_ids.len(), 1);
+        assert_eq!(rule.child_ids().len(), 1);
 
-        let child_id = rule.child_ids.first().unwrap();
+        let child_id = rule.child_ids().first().unwrap();
         let child = model.get_rule_by_id(child_id).unwrap();
         assert_eq!(child.selectors.len(), 0);
         assert_eq!(child.declarations.len(), 1);
-        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.child_ids().len(), 0);
         assert_eq!(child.parent_id, Some(rule.id));
     }
 
