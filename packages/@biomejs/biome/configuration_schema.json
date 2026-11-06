@@ -6371,6 +6371,16 @@
 			]
 		},
 		"NoScriptUrlOptions": { "type": "object", "additionalProperties": false },
+		"NoScssNullComparisonConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoScssNullComparisonOptions" }
+			]
+		},
+		"NoScssNullComparisonOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSecretsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9103,6 +9113,13 @@
 					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noScssNullComparison": {
+					"description": "Disallow comparing values to null in Sass @if conditions.\nSee https://biomejs.dev/linter/rules/no-scss-null-comparison",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoScssNullComparisonConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14217,6 +14234,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoScriptUrlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoScssNullComparisonOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoScssNullComparisonOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
