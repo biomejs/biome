@@ -358,7 +358,15 @@ impl Rule for NoUnusedVariables {
             {
                 return None;
             }
-            suggested_fix_if_unused(model, binding, ctx.options())
+            let suggestion = suggested_fix_if_unused(model, binding, ctx.options())?;
+            if embedded
+                .binding_usage(&binding_name_token)
+                .is_some_and(|usage| usage.any())
+            {
+                Some(SuggestedFix::NoSuggestion)
+            } else {
+                Some(suggestion)
+            }
         } else {
             None
         }

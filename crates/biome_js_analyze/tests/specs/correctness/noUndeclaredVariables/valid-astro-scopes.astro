@@ -1,10 +1,11 @@
 ---
+import type { TypeQuery } from "./types";
 const title = "Hello";
 const vars = {};
 Astro.url;
 ---
 <!-- should not generate diagnostics -->
-<h1>{title} {Astro.url}</h1>
+<h1>{title} {Astro.url} {null as typeof TypeQuery}</h1>
 <script define:vars={{ title }}>
 title;
 </script>

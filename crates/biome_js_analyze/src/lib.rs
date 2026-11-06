@@ -29,7 +29,7 @@ use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{AstNode, TextSize};
+use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
 use std::ops::Deref;
@@ -71,6 +71,11 @@ pub struct JsAnalyzerServices {
     /// no longer matches `parsed_source`.
     document: Option<Source>,
     embedded_data: Option<Arc<EmbeddedData>>,
+    /// Whether the analyzed tree was edited after `document` was parsed, for
+    /// example by fixes applied to the tree without updating the document.
+    /// The framework model of `document` then describes the text before the
+    /// edits, and the embedded service stops answering from it.
+    tree_is_edited: bool,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: Option<TextSize>,
     project_layout: Arc<ProjectLayout>,
@@ -101,6 +106,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             parsed_source: None,
             document: None,
             embedded_data: None,
+            tree_is_edited: false,
             snippet_offset: None,
             project_layout,
             source_type,
@@ -116,6 +122,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             parsed_source: None,
             document: None,
             embedded_data: None,
+            tree_is_edited: false,
             snippet_offset: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
@@ -153,6 +160,14 @@ impl JsAnalyzerServices {
 
     pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
         self.embedded_data = embedded_data;
+        self
+    }
+
+    /// Sets whether the analyzed tree was edited after its host document was
+    /// parsed, for example by fixes applied to the tree without updating the
+    /// document.
+    pub fn with_tree_edited(mut self, tree_is_edited: bool) -> Self {
+        self.tree_is_edited = tree_is_edited;
         self
     }
 
@@ -230,6 +245,7 @@ where
         parsed_source,
         document,
         embedded_data,
+        tree_is_edited,
         snippet_offset,
         project_layout,
         source_type,
@@ -314,12 +330,11 @@ where
         services.insert_service(db.clone());
     }
     let snippet_offset = snippet_offset.unwrap_or_default();
-    let snippet_len = root.syntax().text_range_with_trivia().len();
     if let Some(embedded_data) = embedded_data {
         services.insert_service(EmbeddedService::from_data(
             embedded_data,
             snippet_offset,
-            snippet_len,
+            tree_is_edited,
         ));
     } else if let Some(embedded_db) = embedded_db {
         // A path can have a different document for each client of the
@@ -329,7 +344,7 @@ where
             embedded_db,
             document,
             snippet_offset,
-            snippet_len,
+            tree_is_edited,
             options.globals(),
         ));
     }
