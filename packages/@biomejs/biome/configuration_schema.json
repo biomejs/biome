@@ -6593,6 +6593,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteAsyncStoreConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteAsyncStoreOptions" }
+			]
+		},
+		"NoSvelteAsyncStoreOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteAtDebugTagsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9138,6 +9148,13 @@
 					"description": "Disallow addEventListener in Svelte files.\nSee https://biomejs.dev/linter/rules/no-svelte-add-event-listener",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteAddEventListenerConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteAsyncStore": {
+					"description": "Disallow passing async functions to Svelte stores.\nSee https://biomejs.dev/linter/rules/no-svelte-async-store",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteAsyncStoreConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14434,6 +14451,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteAddEventListenerOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteAsyncStoreOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteAsyncStoreOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
