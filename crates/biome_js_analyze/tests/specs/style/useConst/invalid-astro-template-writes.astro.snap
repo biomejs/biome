@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-template-writes.astro
+---
+# Input
+```astro
+---
+let constant = "constant";
+let written = "before";
+let mutated = 0;
+let assignedLater;
+function nested() {
+    let nestedConstant = "nested";
+    return nestedConstant;
+}
+---
+<!-- should generate diagnostics -->
+{constant}
+{written = "after"}
+{mutated += 1}
+{assignedLater = "later"}
+
+```
+
+# Diagnostics
+```
+invalid-astro-template-writes.astro:2:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+    1 │ ---
+  > 2 │ let constant = "constant";
+      │ ^^^
+    3 │ let written = "before";
+    4 │ let mutated = 0;
+  
+  i 'constant' is never reassigned.
+  
+    1 │ ---
+  > 2 │ let constant = "constant";
+      │     ^^^^^^^^
+    3 │ let written = "before";
+    4 │ let mutated = 0;
+  
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
+  i Safe fix: Use const instead.
+  
+    1   │ - let·constant·=·"constant";
+      1 │ + const·constant·=·"constant";
+    2 2 │   let written = "before";
+    3 3 │   let mutated = 0;
+  
+
+```
+
+```
+invalid-astro-template-writes.astro:7:5 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This let declares a variable that is only assigned once.
+  
+    5 │ let assignedLater;
+    6 │ function nested() {
+  > 7 │     let nestedConstant = "nested";
+      │     ^^^
+    8 │     return nestedConstant;
+    9 │ }
+  
+  i 'nestedConstant' is never reassigned.
+  
+    5 │ let assignedLater;
+    6 │ function nested() {
+  > 7 │     let nestedConstant = "nested";
+      │         ^^^^^^^^^^^^^^
+    8 │     return nestedConstant;
+    9 │ }
+  
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
+  i Safe fix: Use const instead.
+  
+    4 4 │   let assignedLater;
+    5 5 │   function nested() {
+    6   │ - ····let·nestedConstant·=·"nested";
+      6 │ + ····const·nestedConstant·=·"nested";
+    7 7 │       return nestedConstant;
+    8 8 │   }
+  
+
+```

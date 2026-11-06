@@ -500,6 +500,39 @@ function check() {
 }
 
 #[test]
+fn resolves_type_queries_to_type_only_imports() {
+    let source = r#"---
+import type { TypeQuery } from "./types";
+type Query = typeof TypeQuery;
+TypeQuery;
+---
+{null as typeof TypeQuery}
+"#;
+    let model = model(source);
+    let symbol = model
+        .symbols()
+        .find(|symbol| symbol.name() == "TypeQuery")
+        .unwrap();
+
+    assert_eq!(
+        model
+            .references()
+            .filter(|reference| {
+                reference.name() == "TypeQuery"
+                    && reference.access() == Access::Type
+                    && reference.resolution() == Resolution::Symbol(symbol.id())
+            })
+            .count(),
+        2
+    );
+    assert!(model.references().any(|reference| {
+        reference.name() == "TypeQuery"
+            && reference.access() == Access::Read
+            && reference.resolution() == Resolution::Unresolved
+    }));
+}
+
+#[test]
 fn distinguishes_template_writes_from_mutations() {
     let source = r#"---
 let assigned = 0;

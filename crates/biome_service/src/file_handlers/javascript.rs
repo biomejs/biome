@@ -1249,6 +1249,7 @@ fn js_analyzer_services_for_fix(
     parsed_source: Option<&AnalyzedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
+    embedded_model_is_current: bool,
 ) -> JsAnalyzerServices {
     let services = js_analyzer_services(
         root,
@@ -1259,7 +1260,8 @@ fn js_analyzer_services_for_fix(
         params.project_layout.clone(),
         source_type,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    .with_snippet_offset(params.parsed_source.diagnostic_offset())
+    .with_embedded_model_current(embedded_model_is_current);
     // The fixes change the analyzed tree but not its host document, so the
     // services keep reading the embedded content of the document.
     let services = match params.parsed_source.document() {
@@ -1552,6 +1554,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         super::ParsedOrigin::Workspace(source) => Some(source),
         super::ParsedOrigin::Interned { .. } => None,
     };
+    let mut embedded_model_is_current = true;
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1596,7 +1599,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+            let services = js_analyzer_services_for_fix(
+                &tree,
+                parsed_source,
+                &params,
+                file_source,
+                embedded_model_is_current,
+            );
 
             let mut pending_actions = Vec::new();
 
@@ -1621,6 +1630,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     None => return None,
                 };
                 parsed_source = None;
+                embedded_model_is_current = false;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
@@ -1642,7 +1652,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            embedded_model_is_current,
+        );
 
         let mut pending_actions = Vec::new();
 
@@ -1670,6 +1686,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 None => return None,
             };
             parsed_source = None;
+            embedded_model_is_current = false;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1687,6 +1704,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     let parse = biome_js_parser::parse(&new_text, file_source, options);
                     tree = parse.tree();
                     parsed_source = None;
+                    embedded_model_is_current = false;
                     continue;
                 }
             }
@@ -1697,7 +1715,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     if params.collect_final_diagnostics {
-        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
+        let services = js_analyzer_services_for_fix(
+            &tree,
+            parsed_source,
+            &params,
+            file_source,
+            embedded_model_is_current,
+        );
 
         let (_, _) = analyze(
             &tree,
