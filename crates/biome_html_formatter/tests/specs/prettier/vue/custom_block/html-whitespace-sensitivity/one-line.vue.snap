@@ -24,7 +24,7 @@ info: vue/custom_block/html-whitespace-sensitivity/one-line.vue
 -<docs lang="unknown" style="display: inline"></docs>
 +<docs lang="unknown"></docs
 +><docs lang="unknown"></docs><!-- display: inline --><docs lang="unknown"></docs
-+><docs lang="unknown" style="display: inline"></docs>
++><docs lang="unknown" style="display: inline;"></docs>
 ```
 
 # Output
@@ -32,5 +32,5 @@ info: vue/custom_block/html-whitespace-sensitivity/one-line.vue
 ```vue
 <docs lang="unknown"></docs
 ><docs lang="unknown"></docs><!-- display: inline --><docs lang="unknown"></docs
-><docs lang="unknown" style="display: inline"></docs>
+><docs lang="unknown" style="display: inline;"></docs>
 ```

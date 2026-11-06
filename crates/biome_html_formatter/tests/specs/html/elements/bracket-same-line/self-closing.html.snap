@@ -34,7 +34,7 @@ info: elements/bracket-same-line/self-closing.html
 <selfclosing
 	id="hello"
 	class="world"
-	style="color: red"
+	style="color: red;"
 	data-foo="bar"
 	data-bar="foo" />
 
