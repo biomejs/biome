@@ -2,7 +2,9 @@ use crate::lexer::CssReLexContext;
 use crate::parser::CssParser;
 use crate::syntax::is_nth_at_identifier;
 use crate::syntax::parse_error::expected_component_value;
-use crate::syntax::scss::is_at_scss_interpolated_dashed_identifier;
+use crate::syntax::scss::{
+    is_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolation, is_nth_source_tight,
+};
 use crate::syntax::value::dimension::is_at_any_dimension;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL, CSS_PERCENTAGE_VALUE, CSS_STRING_LITERAL,
@@ -164,7 +166,7 @@ pub(crate) fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
 pub(super) fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
     re_lex_signed_numeric_as_scss_operator(p);
 
-    if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) {
+    if !p.at_ts(SCSS_BINARY_OPERATOR_TOKEN_SET) || is_at_scss_negated_interpolation_list_item(p) {
         return None;
     }
 
@@ -177,6 +179,23 @@ pub(super) fn scss_binary_precedence(p: &mut CssParser) -> Option<u8> {
         T![*] | T![/] | T![%] => 6,
         _ => return None,
     })
+}
+
+/// Returns whether the current `-` starts the next item of a space-separated
+/// list instead of subtracting: it follows whitespace and is written directly
+/// against an interpolation.
+///
+/// Sass reads a `-` followed by `#{` as the start of an interpolated
+/// identifier, so `-#{$s} -#{$s}` is a two-item list (`-8px -8px`), while
+/// `$a - #{$b}` subtracts.
+///
+/// Docs: https://sass-lang.com/documentation/operators/numeric/#unary-operators
+#[inline]
+fn is_at_scss_negated_interpolation_list_item(p: &mut CssParser) -> bool {
+    p.at(T![-])
+        && (p.has_nth_preceding_whitespace(0) || p.has_nth_preceding_line_break(0))
+        && is_nth_at_scss_interpolation(p, 1)
+        && is_nth_source_tight(p, 1)
 }
 
 /// Returns whether the current token is a SCSS binary operator, re-lexing tight

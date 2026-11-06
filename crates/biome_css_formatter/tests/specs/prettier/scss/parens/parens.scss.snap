@@ -363,7 +363,7 @@ a {
 +  prop25-3: #{$width} + #{$width} #{$width} + #{$width} #{$width} + #{$width}
      #{$width} + #{$width};
 -  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width}- #{$width}
-+  prop25-4: #{$width}-#{$width} #{$width} - #{$width} #{$width} - #{$width}
++  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width} - #{$width}
      #{$width} - #{$width};
 -  prop26: 8px/2px 8px /1 1/ 2px 1 / 2;
 -  prop27: 8px/2px 8px/1 1/2px 1/2;
@@ -533,7 +533,7 @@ a {
     #{$width} * #{$width};
   prop25-3: #{$width} + #{$width} #{$width} + #{$width} #{$width} + #{$width}
     #{$width} + #{$width};
-  prop25-4: #{$width}-#{$width} #{$width} - #{$width} #{$width} - #{$width}
+  prop25-4: #{$width}-#{$width} #{$width} -#{$width} #{$width} - #{$width}
     #{$width} - #{$width};
   prop26: 8px / 2px 8px / 1 1 / 2px 1 / 2;
   prop27: 8px / 2px 8px / 1 1 / 2px 1 / 2;
