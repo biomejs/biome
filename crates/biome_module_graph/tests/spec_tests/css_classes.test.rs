@@ -249,12 +249,11 @@ fn css_class_upward_traversal_does_not_revisit_the_start() {
     );
 }
 
-#[test]
-fn css_class_queries_share_module_enumeration() {
-    const MODULE_COUNT: usize = 16;
-
+/// Builds `module_count` JavaScript modules in which each module imports the
+/// previous one, and returns them in chain order.
+fn import_chain(module_count: usize) -> (TestModuleDb, Vec<ModuleInfo>) {
     let fs = MemoryFileSystem::default();
-    let paths = (0..MODULE_COUNT)
+    let paths = (0..module_count)
         .map(|index| format!("/c-{index}.js"))
         .collect::<Vec<_>>();
     for (index, path) in paths.iter().enumerate() {
@@ -267,16 +266,83 @@ fn css_class_queries_share_module_enumeration() {
     }
     let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
     let db = build_js_test_module_db(&fs, &path_refs, false);
+    let modules = paths
+        .iter()
+        .map(|path| db.module_for_path(Utf8Path::new(path)).unwrap())
+        .collect();
+    (db, modules)
+}
+
+#[test]
+fn css_class_queries_share_module_enumeration() {
+    let (db, modules) = import_chain(16);
     db.take_module_enumeration_count();
 
-    for path in &paths {
-        let module = db.module_for_path(Utf8Path::new(path)).unwrap();
-        assert!(traverse_import_tree_for_classes(&db, module).is_empty());
+    for module in &modules {
+        assert!(traverse_import_tree_for_classes(&db, *module).is_empty());
     }
-    let root = db.module_for_path(Utf8Path::new(&paths[0])).unwrap();
-    assert!(build_import_tree_for_js(&db, root).is_some());
+    assert!(build_import_tree_for_js(&db, modules[0]).is_some());
 
-    assert_eq!(db.take_module_enumeration_count(), 1);
+    // The class provider index and the importer index each enumerate once.
+    assert_eq!(db.take_module_enumeration_count(), 2);
+}
+
+#[test]
+fn css_class_traversal_of_every_module_in_a_chain_is_linear() {
+    const MODULE_COUNT: usize = 64;
+
+    let (db, modules) = import_chain(MODULE_COUNT);
+    db.take_module_lookup_count();
+
+    for module in &modules {
+        assert!(traverse_import_tree_for_classes(&db, *module).is_empty());
+    }
+
+    // Walking the importers of every module separately looks up each
+    // importer's imports again, which takes about MODULE_COUNT² / 2 lookups.
+    let lookups = db.take_module_lookup_count();
+    assert!(lookups <= 4 * MODULE_COUNT, "{lookups} module lookups");
+}
+
+#[test]
+fn css_class_traversal_collects_each_reachable_importer_once() {
+    let (_, db) = graph(
+        &[
+            ("/cycle.css", ".cycle{}"),
+            ("/lazy.css", ".lazy{}"),
+            ("/right.css", ".right{}"),
+            ("/top.css", ".top{}"),
+            ("/types.css", ".types{}"),
+        ],
+        &[
+            ("/leaf.js", "export const leaf = true;"),
+            ("/left.js", "import './leaf.js';"),
+            ("/right.js", "import './leaf.js'; import './right.css';"),
+            (
+                "/top.js",
+                "import './left.js'; import './right.js'; import './top.css';",
+            ),
+            (
+                "/lazy.js",
+                "import './lazy.css'; export const load = () => import('./leaf.js');",
+            ),
+            ("/cycle-a.js", "import './leaf.js'; import './cycle-b.js';"),
+            ("/cycle-b.js", "import './cycle-a.js'; import './cycle.css';"),
+            (
+                "/types.ts",
+                "import type { leaf } from './leaf.js'; import './types.css';",
+            ),
+        ],
+    );
+
+    let leaf = db.module_for_path(Utf8Path::new("/leaf.js")).unwrap();
+    assert_eq!(
+        traverse_import_tree_for_classes(&db, leaf)
+            .iter()
+            .map(|step| step.css_path.as_str())
+            .collect::<Vec<_>>(),
+        ["/cycle.css", "/lazy.css", "/right.css", "/top.css"]
+    );
 }
 
 #[test]

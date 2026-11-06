@@ -1,7 +1,9 @@
+use super::js_scc::compute_sccs;
 use super::{SymbolFromModuleInfo, module_importers};
 use crate::css_module_info::TailwindPosition;
 use crate::css_module_info::traverse::{
-    CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
+    CssClassStep, CssPropertyBranch, CssPropertyTraversal, css_class_import_paths,
+    provided_css_class_steps, provides_css_classes,
 };
 use crate::traverse::UpwardTraversalVisitor;
 use crate::{
@@ -11,8 +13,9 @@ use crate::{
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::collections::VecDeque;
+use std::sync::Arc;
 
 // #region EXPORTED TRACKED QUERIES
 
@@ -205,9 +208,7 @@ pub fn traverse_import_tree_for_classes(
         }
     }
 
-    let start = module.path(db);
-    let traversal = CssClassTraversal::new(db, start).into_upward_iter(start.to_path_buf(), ());
-    results.extend(traversal);
+    results.extend(importer_css_class_steps(db, module));
     results
 }
 
@@ -269,10 +270,7 @@ pub fn traverse_import_tree_for_html_classes(
     inline_steps
         .into_iter()
         .chain(linked_steps)
-        .chain(
-            CssClassTraversal::new(db, module.path(db))
-                .into_upward_iter(module.path(db).to_path_buf(), ()),
-        )
+        .chain(importer_css_class_steps(db, module))
         .collect()
 }
 
@@ -458,6 +456,156 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
 // #endregion
 
 // #region QUERY HELPER FUNCTIONS
+
+/// Returns the CSS class steps that the importers of `module` provide to it.
+///
+/// A module sees the classes of every JavaScript or HTML module that reaches
+/// it through imports, directly or through other importers. Each of those
+/// modules contributes once, in path order. `module` doesn't contribute to its
+/// own result, even when an import cycle leads back to it.
+fn importer_css_class_steps(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+) -> impl Iterator<Item = CssClassStep> + '_ {
+    css_class_providers(db, ModuleGraphGeneration::get(db))
+        .providers_of(module)
+        .flat_map(move |provider| provided_css_class_steps(db, provider))
+}
+
+/// The modules that provide CSS classes to each module through importers.
+///
+/// A module reaches the modules it imports through [css_class_import_paths],
+/// and those modules reach the modules they import in turn. Modules that
+/// reach each other through an import cycle form one component and share one
+/// provider list.
+#[derive(Debug, Default, Eq, PartialEq)]
+struct CssClassProviders {
+    /// The indexed modules sorted by path. A module's position is its ID.
+    modules: Box<[ModuleInfo]>,
+
+    /// The component of each module.
+    component_by_module: FxHashMap<ModuleInfo, u32>,
+
+    /// The IDs, in ascending order, of the modules that provide classes and
+    /// reach each component, including providers inside the component.
+    providers_by_component: Box<[Arc<[u32]>]>,
+}
+
+impl CssClassProviders {
+    /// Returns the providers that reach `module`, excluding `module` itself.
+    fn providers_of(&self, module: ModuleInfo) -> impl Iterator<Item = ModuleInfo> + '_ {
+        self.component_by_module
+            .get(&module)
+            .and_then(|component| self.providers_by_component.get(*component as usize))
+            .into_iter()
+            .flat_map(|providers| providers.iter())
+            .filter_map(|id| self.modules.get(*id as usize).copied())
+            .filter(move |provider| *provider != module)
+    }
+}
+
+/// Returns the CSS class providers of every indexed module.
+///
+/// The work is linear in the number of modules and resolved imports, plus the
+/// size of the provider lists. A component that has no providers of its own
+/// and a single importing component shares that component's list, so a long
+/// import chain stores one list.
+#[salsa::tracked(returns(ref))]
+fn css_class_providers(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> CssClassProviders {
+    let _ = generation.value(db);
+
+    let mut modules = Vec::new();
+    db.for_each_module(&mut |module| modules.push(module));
+    // Path order makes the IDs independent of the enumeration order, so an
+    // unchanged graph produces an equal index and dependent queries are reused.
+    modules.sort_unstable_by(|left, right| left.path(db).cmp(right.path(db)));
+    let id_by_path: FxHashMap<_, _> = modules
+        .iter()
+        .enumerate()
+        .map(|(id, module)| (module.path(db).as_path(), id as u32))
+        .collect();
+
+    let imports: Vec<_> = modules
+        .iter()
+        .map(|module| css_class_imports(db, *module))
+        .collect();
+    let edges: Vec<Vec<_>> = imports
+        .iter()
+        .map(|imports| {
+            imports
+                .imported_paths
+                .iter()
+                .filter_map(|path| id_by_path.get(path.as_path()).copied())
+                .collect()
+        })
+        .collect();
+    let (component_by_id, component_sizes) = compute_sccs(&edges);
+
+    let mut own_providers = vec![Vec::new(); component_sizes.len()];
+    let mut importer_components = vec![Vec::new(); component_sizes.len()];
+    for (id, (imported_ids, imports)) in edges.iter().zip(&imports).enumerate() {
+        let component = component_by_id[id];
+        if imports.provides_classes {
+            own_providers[component as usize].push(id as u32);
+        }
+        for imported_id in imported_ids {
+            let imported_component = component_by_id[*imported_id as usize];
+            if imported_component != component {
+                importer_components[imported_component as usize].push(component);
+            }
+        }
+    }
+
+    // `compute_sccs` numbers an importing component before the components it
+    // imports, so the lists of all importing components are already complete.
+    let mut providers_by_component: Vec<Arc<[u32]>> = Vec::with_capacity(component_sizes.len());
+    for (mut providers, mut importers) in own_providers.into_iter().zip(importer_components) {
+        importers.sort_unstable();
+        importers.dedup();
+        let component_providers = match importers.as_slice() {
+            [importer] if providers.is_empty() => {
+                Arc::clone(&providers_by_component[*importer as usize])
+            }
+            _ => {
+                for importer in &importers {
+                    providers.extend(providers_by_component[*importer as usize].iter());
+                }
+                providers.sort_unstable();
+                providers.dedup();
+                Arc::from(providers)
+            }
+        };
+        providers_by_component.push(component_providers);
+    }
+
+    CssClassProviders {
+        component_by_module: modules.iter().copied().zip(component_by_id).collect(),
+        modules: modules.into_boxed_slice(),
+        providers_by_component: providers_by_component.into_boxed_slice(),
+    }
+}
+
+/// The imports through which a module provides CSS classes.
+#[derive(Debug, Default, Eq, PartialEq)]
+struct CssClassImports {
+    /// The paths returned by [css_class_import_paths].
+    imported_paths: Box<[Utf8PathBuf]>,
+
+    /// The result of [provides_css_classes].
+    provides_classes: bool,
+}
+
+/// Returns the imports through which `module` provides CSS classes.
+///
+/// [css_class_providers] reads modules only through this query. An edit that
+/// keeps these imports therefore keeps the provider index valid.
+#[salsa::tracked(returns(ref))]
+fn css_class_imports(db: &dyn ModuleDb, module: ModuleInfo) -> CssClassImports {
+    CssClassImports {
+        imported_paths: css_class_import_paths(db, module).into_boxed_slice(),
+        provides_classes: provides_css_classes(db, module),
+    }
+}
 
 /// Checks if a class is used in a file or any of its imported components (transitively).
 #[salsa::tracked(returns(copy))]
