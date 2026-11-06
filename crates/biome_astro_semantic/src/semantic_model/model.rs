@@ -485,6 +485,25 @@ impl AstroSemanticModel {
         })
     }
 
+    /// Returns the reference whose name occupies exactly `range`.
+    pub fn reference_at(&self, range: TextRange) -> Option<Reference> {
+        let index = self
+            .data
+            .references
+            .binary_search_by(|reference| {
+                reference
+                    .range
+                    .start()
+                    .cmp(&range.start())
+                    .then_with(|| reference.range.end().cmp(&range.end()))
+            })
+            .ok()?;
+        Some(Reference {
+            data: self.data.clone(),
+            id: ReferenceId::new(index),
+        })
+    }
+
     /// Returns the declaration with the given id.
     ///
     /// # Panics
@@ -615,8 +634,10 @@ impl Snippet {
     }
 
     /// Returns whether the declaration that `name` resolves to from this
-    /// snippet has a use in any of `namespaces`.
+    /// snippet is used from outside the snippet, in any of `namespaces`.
     ///
+    /// Uses written in the snippet itself don't count, because the snippet's
+    /// own JavaScript model already sees them; see [`Reference::is_outside`].
     /// `name` is a decoded semantic name, as for [`Scope::lookup`]. A
     /// namespace whose declarations may be incomplete counts as used, because
     /// a declaration the model can't list may be the one in use. Returns
@@ -628,9 +649,9 @@ impl Snippet {
         namespaces.iter().copied().any(|namespace| {
             scope.is_open(namespace)
                 || scope.lookup(namespace, name).is_some_and(|symbol| {
-                    symbol
-                        .uses()
-                        .any(|reference| reference.namespace() == namespace)
+                    symbol.uses().any(|reference| {
+                        reference.namespace() == namespace && reference.is_outside(self)
+                    })
                 })
         })
     }
@@ -656,6 +677,11 @@ impl Scope {
             data: self.data.clone(),
             id: *id,
         })
+    }
+
+    /// Returns the symbol whose declared name occupies exactly `range` in this scope.
+    pub fn symbol_at(&self, range: TextRange) -> Option<Symbol> {
+        self.symbols().find(|symbol| symbol.host_range() == range)
     }
 
     /// Returns this scope followed by each enclosing scope.
@@ -805,6 +831,13 @@ impl Reference {
     /// Returns the source construct containing the reference.
     pub fn site(&self) -> RefSite {
         self.row().site
+    }
+
+    /// Returns whether this reference comes from outside `snippet`: from
+    /// another snippet, from the template, or from Astro itself, such as the
+    /// implicit use of a `Props` type.
+    pub fn is_outside(&self, snippet: &Snippet) -> bool {
+        self.site() == RefSite::Implicit || self.snippet().as_ref() != Some(snippet)
     }
 
     /// Returns the namespace used to resolve the reference.

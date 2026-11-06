@@ -697,7 +697,7 @@ fn is_unused(
     // Used in the template, as a value or a type, which the script's semantic
     // model can't see.
     if let Some(token) = binding_name.as_ref()
-        && (embedded.is_used(token.token_text_trimmed())
+        && (embedded.is_binding_used(token)
             || file_source.as_embedding_kind().is_svelte()
                 && embedded.is_svelte_store_used(token.token_text_trimmed()))
     {
@@ -724,7 +724,7 @@ fn is_unused(
     let is_defined_in_embed = !file_source.is_embedded_source()
         && binding_name
             .as_ref()
-            .is_some_and(|token| embedded.contains_binding(token.token_text_trimmed()));
+            .is_some_and(|token| embedded.contains_binding_declaration(token));
     if is_defined_in_embed {
         return false;
     }

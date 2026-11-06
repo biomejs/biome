@@ -1,0 +1,179 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-resolved-uses.astro
+---
+# Input
+```astro
+---
+let writtenOnly = 0;
+let mutated = 0;
+const unused = 1;
+const shadowed = 1;
+const used = 1;
+const recursive = () => recursive();
+interface Props {}
+interface Props { value?: string }
+---
+<!-- should generate diagnostics -->
+{used}
+{writtenOnly = 1}
+{mutated += 1}
+{((shadowed) => shadowed)(2)}
+<script>
+const unusedClient = 1;
+const recursiveClient = () => recursiveClient();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-astro-resolved-uses.astro:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable writtenOnly is unused.
+  
+    1 │ ---
+  > 2 │ let writtenOnly = 0;
+      │     ^^^^^^^^^^^
+    3 │ let mutated = 0;
+    4 │ const unused = 1;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend writtenOnly with an underscore.
+  
+    1   │ - let·writtenOnly·=·0;
+      1 │ + let·_writtenOnly·=·0;
+    2 2 │   let mutated = 0;
+    3 3 │   const unused = 1;
+  
+
+```
+
+```
+invalid-astro-resolved-uses.astro:4:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable unused is unused.
+  
+    2 │ let writtenOnly = 0;
+    3 │ let mutated = 0;
+  > 4 │ const unused = 1;
+      │       ^^^^^^
+    5 │ const shadowed = 1;
+    6 │ const used = 1;
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unused with an underscore.
+  
+    1 1 │   let writtenOnly = 0;
+    2 2 │   let mutated = 0;
+    3   │ - const·unused·=·1;
+      3 │ + const·_unused·=·1;
+    4 4 │   const shadowed = 1;
+    5 5 │   const used = 1;
+  
+
+```
+
+```
+invalid-astro-resolved-uses.astro:5:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable shadowed is unused.
+  
+    3 │ let mutated = 0;
+    4 │ const unused = 1;
+  > 5 │ const shadowed = 1;
+      │       ^^^^^^^^
+    6 │ const used = 1;
+    7 │ const recursive = () => recursive();
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend shadowed with an underscore.
+  
+    2 2 │   let mutated = 0;
+    3 3 │   const unused = 1;
+    4   │ - const·shadowed·=·1;
+      4 │ + const·_shadowed·=·1;
+    5 5 │   const used = 1;
+    6 6 │   const recursive = () => recursive();
+  
+
+```
+
+```
+invalid-astro-resolved-uses.astro:7:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable recursive is unused.
+  
+    5 │ const shadowed = 1;
+    6 │ const used = 1;
+  > 7 │ const recursive = () => recursive();
+      │       ^^^^^^^^^
+    8 │ interface Props {}
+    9 │ interface Props { value?: string }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend recursive with an underscore.
+  
+    4 4 │   const shadowed = 1;
+    5 5 │   const used = 1;
+    6   │ - const·recursive·=·()·=>·recursive();
+      6 │ + const·_recursive·=·()·=>·_recursive();
+    7 7 │   interface Props {}
+    8 8 │   interface Props { value?: string }
+  
+
+```
+
+```
+invalid-astro-resolved-uses.astro:17:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This variable unusedClient is unused.
+  
+    15 │ {((shadowed) => shadowed)(2)}
+    16 │ <script>
+  > 17 │ const unusedClient = 1;
+       │       ^^^^^^^^^^^^
+    18 │ const recursiveClient = () => recursiveClient();
+    19 │ </script>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unusedClient with an underscore.
+  
+    1 1 │   
+    2   │ - const·unusedClient·=·1;
+      2 │ + const·_unusedClient·=·1;
+    3 3 │   const recursiveClient = () => recursiveClient();
+    4 4 │   
+  
+
+```
+
+```
+invalid-astro-resolved-uses.astro:18:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This variable recursiveClient is unused.
+  
+    16 │ <script>
+    17 │ const unusedClient = 1;
+  > 18 │ const recursiveClient = () => recursiveClient();
+       │       ^^^^^^^^^^^^^^^
+    19 │ </script>
+    20 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend recursiveClient with an underscore.
+  
+    1 1 │   
+    2 2 │   const unusedClient = 1;
+    3   │ - const·recursiveClient·=·()·=>·recursiveClient();
+      3 │ + const·_recursiveClient·=·()·=>·_recursiveClient();
+    4 4 │   
+  
+
+```

@@ -184,6 +184,8 @@ fn snippet_reports_uses_of_visible_declarations() {
         r#"---
 const used = 1;
 const unused = 2;
+const local = 3;
+local;
 interface Props {}
 ---
 <div>{used}</div>
@@ -196,6 +198,7 @@ interface Props {}
 
     assert!(frontmatter.is_used(&[Namespace::Value], "used"));
     assert!(!frontmatter.is_used(&[Namespace::Value], "unused"));
+    assert!(!frontmatter.is_used(&[Namespace::Value], "local"));
     assert!(!frontmatter.is_used(&[Namespace::Value], "Props"));
     assert!(frontmatter.is_used(&[Namespace::Type], "Props"));
     assert!(!frontmatter.is_used(&[Namespace::Value], "missing"));
@@ -281,8 +284,10 @@ fn resolves_frontmatter_declarations_from_template_references() {
 import Card from "./Card.astro";
 import * as UI from "./ui";
 import type { Thing } from "./types";
+import type * as TypeOnlyImport from "./type-only";
 import type Legacy = require("./legacy");
 import LegacyValue = require("./legacy-value");
+TypeOnlyImport;
 const title = "Hello";
 let count = 0;
 const items = [1];
@@ -313,6 +318,7 @@ type StatusMember = Status.Ready;
 type LegacyValueType = LegacyValue;
 type LegacyValueMember = LegacyValue.Member;
 interface Props { name: string }
+interface Props { age?: number }
 ---
 <Card label={title} />
 <UI.Card />
@@ -344,12 +350,13 @@ interface Props { name: string }
     assert_eq!(title.kind(), SymbolKind::Local);
     assert_eq!(title.uses().count(), 7);
 
-    let props = model
+    let props: Vec<_> = model
         .symbols()
-        .find(|symbol| symbol.name() == "Props")
-        .expect("frontmatter Props symbol");
-    assert!(props.is_type_only());
-    assert_eq!(props.uses().count(), 1);
+        .filter(|symbol| symbol.name() == "Props")
+        .collect();
+    assert_eq!(props.len(), 2);
+    assert!(props.iter().all(|symbol| symbol.is_type_only()));
+    assert!(props.iter().all(|symbol| symbol.uses().count() == 1));
 
     let astro = model
         .symbols()
@@ -375,6 +382,11 @@ interface Props { name: string }
             .references()
             .any(|reference| { reference.name() == "Thing" && reference.access() == Access::Type })
     );
+    assert!(model.references().any(|reference| {
+        reference.name() == "TypeOnlyImport"
+            && reference.namespace() == Namespace::Value
+            && reference.resolution() == Resolution::Unresolved
+    }));
     assert_eq!(
         model
             .references()
@@ -508,6 +520,67 @@ interface Props { name: string }
     assert!(ranges.windows(2).all(|ranges| ranges[0] <= ranges[1]));
 
     insta::assert_snapshot!(semantic_snapshot(source, &model));
+}
+
+#[test]
+fn records_nested_namespace_incompatible_references() {
+    let source = r#"---
+function check() {
+    type NestedType = {};
+    NestedType;
+}
+---
+"#;
+    let model = model(source);
+
+    assert!(!model.symbols().any(|symbol| symbol.name() == "NestedType"));
+    assert!(model.references().any(|reference| {
+        reference.name() == "NestedType"
+            && reference.namespace() == Namespace::Value
+            && reference.resolution() == Resolution::Unresolved
+    }));
+}
+
+#[test]
+fn distinguishes_template_writes_from_mutations() {
+    let source = r#"---
+let assigned = 0;
+let compounded = 0;
+let updated = 0;
+let parenthesized = 0;
+let asserted = 0;
+let nonNull = 0;
+let total = 0;
+let item = 0;
+const list = [1];
+---
+{assigned = 1}
+{compounded += 1}
+{updated++}
+{((parenthesized)) += 1}
+{(asserted as number)++}
+{nonNull!--}
+{total += list.map(() => { for (item of list); return 0; }).length}
+"#;
+    let model = model(source);
+    let accesses = |name: &str| -> Vec<_> {
+        model
+            .references()
+            .filter(|reference| reference.name() == name)
+            .map(|reference| reference.access())
+            .collect()
+    };
+
+    assert_eq!(accesses("assigned"), [Access::Write]);
+    assert_eq!(accesses("compounded"), [Access::Mutate]);
+    assert_eq!(accesses("updated"), [Access::Mutate]);
+    assert_eq!(accesses("parenthesized"), [Access::Mutate]);
+    assert_eq!(accesses("asserted"), [Access::Mutate]);
+    assert_eq!(accesses("nonNull"), [Access::Mutate]);
+    assert_eq!(accesses("total"), [Access::Mutate]);
+    // The loop assigns `item` inside the right side of `total += …`, which
+    // doesn't make `item` the target of the compound assignment.
+    assert_eq!(accesses("item"), [Access::Write]);
 }
 
 #[test]
