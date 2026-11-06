@@ -576,6 +576,18 @@ fn vcs_ignore_whitelist_patterns_apply_to_child_paths() {
     assert!(ignored_patterns.is_ignored(Utf8Path::new("repo/tests/file.js"), false, None));
 }
 
+#[test]
+fn vcs_ignore_paths_outside_root_do_not_panic() {
+    // A symlink can point outside the project root. The ignore crate panics
+    // when asked to match such a path, so it must be treated as not ignored.
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(Utf8Path::new("repo"), &["dist/"]).unwrap(),
+        nested: vec![],
+    };
+
+    assert!(!ignored_patterns.is_ignored(Utf8Path::new("/outside/file.js"), false, None));
+}
+
 fn resolve_html_parse_options(
     settings: &Settings,
     parser: &<HtmlLanguage as ServiceLanguage>::ParserSettings,

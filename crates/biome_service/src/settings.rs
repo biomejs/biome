@@ -1520,9 +1520,11 @@ impl VcsIgnoredPatterns {
         path: &Utf8Path,
         is_dir: bool,
     ) -> bool {
-        let root_ignored = {
-            let path = path.strip_prefix(root.path()).unwrap_or(path);
-            root.matched_path_or_any_parents(path, is_dir).is_ignore()
+        // `matched_path_or_any_parents` panics if the path is not under the
+        // root. This happens for symlinks that point outside the project.
+        let root_ignored = match path.strip_prefix(root.path()) {
+            Ok(path) => root.matched_path_or_any_parents(path, is_dir).is_ignore(),
+            Err(_) => false,
         };
 
         let nested_ignored = nested.iter().any(|gitignore| {
