@@ -3008,6 +3008,11 @@ export interface Nursery {
 	 */
 	noConsoleSpaces?: NoConsoleSpacesConfiguration;
 	/**
+	 * Disallow conditions that are always true, can never be true, or contain a check with no effect.
+	 * See https://biomejs.dev/linter/rules/no-constant-comparisons
+	 */
+	noConstantComparisons?: NoConstantComparisonsConfiguration;
+	/**
 	 * Disallow names that start or end with an underscore.
 	 * See https://biomejs.dev/linter/rules/no-dangling-underscore
 	 */
@@ -6494,6 +6499,9 @@ export type NoChainedComparisonConfiguration =
 export type NoConsoleSpacesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConsoleSpacesOptions;
+export type NoConstantComparisonsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConstantComparisonsOptions;
 export type NoDanglingUnderscoreConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDanglingUnderscoreOptions;
@@ -9416,6 +9424,10 @@ export interface RuleWithNoConsoleSpacesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoConsoleSpacesOptions;
+}
+export interface RuleWithNoConstantComparisonsOptions {
+	level: RulePlainConfiguration;
+	options?: NoConstantComparisonsOptions;
 }
 export interface RuleWithNoDanglingUnderscoreOptions {
 	level: RulePlainConfiguration;
@@ -12782,6 +12794,7 @@ export type NoBooleanSortComparatorOptions = {};
 export type NoBunModulesOptions = {};
 export type NoChainedComparisonOptions = {};
 export type NoConsoleSpacesOptions = {};
+export type NoConstantComparisonsOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
@@ -14986,6 +14999,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noConsoleSpaces"
+	| "lint/nursery/noConstantComparisons"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"

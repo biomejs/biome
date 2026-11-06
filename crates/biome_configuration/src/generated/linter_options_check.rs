@@ -223,6 +223,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noConstantComparisons",
+        TypeId::of::<biome_rule_options::no_constant_comparisons::NoConstantComparisonsOptions>(),
+    ));
+    result.push((
         "correctness",
         "noConstantCondition",
         TypeId::of::<biome_rule_options::no_constant_condition::NoConstantConditionOptions>(),
