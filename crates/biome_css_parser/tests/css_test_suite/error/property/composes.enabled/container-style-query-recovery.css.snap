@@ -45,15 +45,7 @@ CssRoot {
                                         items: [
                                             CssBogus {
                                                 items: [
-                                                    CssBogus {
-                                                        items: [
-                                                            CssBogus {
-                                                                items: [
-                                                                    CSS_NUMBER_LITERAL@27..30 "123" [] [],
-                                                                ],
-                                                            },
-                                                        ],
-                                                    },
+                                                    CSS_NUMBER_LITERAL@27..30 "123" [] [],
                                                 ],
                                             },
                                         ],
@@ -178,9 +170,7 @@ CssRoot {
                 1: COLON@25..27 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@27..30
                   0: CSS_BOGUS@27..30
-                    0: CSS_BOGUS@27..30
-                      0: CSS_BOGUS@27..30
-                        0: CSS_NUMBER_LITERAL@27..30 "123" [] []
+                    0: CSS_NUMBER_LITERAL@27..30 "123" [] []
               1: (empty)
             3: R_PAREN@30..32 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@32..62
@@ -246,14 +236,7 @@ CssRoot {
 ```
 container-style-query-recovery.css:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found '123'.
-  
-  > 1 │ @container style(composes: 123) {
-      │                            ^^^
-    2 │   .a {
-    3 │     color: red;
-  
-  i Expected an identifier here.
+  × Expected a non-empty list of classes after `composes`.
   
   > 1 │ @container style(composes: 123) {
       │                            ^^^

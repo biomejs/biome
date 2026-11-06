@@ -1,0 +1,23 @@
+.a {
+	composes: 1px;
+}
+
+.b {
+	composes: var(--x);
+}
+
+.c {
+	composes: a(b);
+}
+
+.d {
+	composes: a "s";
+}
+
+.e {
+	composes: a from b(c);
+}
+
+.f {
+	color: red;
+}

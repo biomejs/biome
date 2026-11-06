@@ -178,9 +178,16 @@ fn parse_composes_property_value(
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
+    let class_list_end_set = value_end_set.union(token_set!(T![from], T![,]));
+
+    // A value that can't consume any token must be absent so the list recovers
+    // (or stops during speculative parsing) instead of looping without progress.
+    if !is_at_identifier(p) && !p.at_ts(class_list_end_set) {
+        return Absent;
+    }
+
     let m = p.start();
 
-    let class_list_end_set = value_end_set.union(token_set!(T![from], T![,]));
     let classes = ComposesClassList::new(class_list_end_set, recovery_end_set).parse_list(p);
 
     if classes.range(p).is_empty() {
