@@ -973,6 +973,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noNewArray",
+        TypeId::of::<biome_rule_options::no_new_array::NoNewArrayOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noNewRequire",
         TypeId::of::<biome_rule_options::no_new_require::NoNewRequireOptions>(),
     ));
