@@ -1,10 +1,19 @@
 use crate::prelude::*;
+use crate::verbatim::format_verbatim_skipped_preserving_line_endings;
 use biome_formatter::{format_args, write};
 use biome_html_syntax::HtmlEmbeddedContent;
 use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlEmbeddedContent;
 impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
+    fn fmt_verbatim_embedded_node(
+        &self,
+        node: &HtmlEmbeddedContent,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        format_verbatim_skipped_preserving_line_endings(node.syntax()).fmt(f)
+    }
+
     fn fmt_fields(&self, node: &HtmlEmbeddedContent, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_verbatim_skipped(node.syntax()).fmt(f)
     }

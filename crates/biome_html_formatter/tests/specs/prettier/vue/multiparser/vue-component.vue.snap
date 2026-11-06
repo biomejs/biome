@@ -46,6 +46,18 @@ p { font-size : 2em ; text-align : center ; }
    </script>
  </template>
  
+@@ -23,8 +23,6 @@
+ </style>
+ 
+ <style lang="postcss">
+-p {
+-  font-size: 2em;
+-  text-align: center;
+-}
+-</style>
++p { font-size : 2em ; text-align : center ; }
++
++  </style>
 ```
 
 # Output
@@ -76,9 +88,7 @@ p {
 </style>
 
 <style lang="postcss">
-p {
-  font-size: 2em;
-  text-align: center;
-}
-</style>
+p { font-size : 2em ; text-align : center ; }
+
+  </style>
 ```
