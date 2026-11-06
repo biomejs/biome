@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::verbatim::format_html_source_node_preserving_line_endings;
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_html_syntax::{HtmlString, HtmlStringFields};
 use biome_rowan::TextRange;
@@ -7,6 +8,19 @@ pub(crate) struct FormatHtmlString {
     compact: bool,
 }
 impl FormatNodeRule<HtmlString> for FormatHtmlString {
+    fn fmt_verbatim_embedded_node(
+        &self,
+        node: &HtmlString,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        let value_token = node.value_token()?;
+        if self.compact {
+            format_removed(&value_token).fmt(f)
+        } else {
+            format_html_source_node_preserving_line_endings(node.syntax()).fmt(f)
+        }
+    }
+
     /// The code in a value, such as the expression of a Vue directive, is
     /// written between the quotes. Its formatted code replaces the whole value,
     /// quotes included.
