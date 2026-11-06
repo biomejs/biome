@@ -98,7 +98,13 @@ impl Rule for NoUndeclaredVariables {
             return None;
         }
 
-        if embedded.contains_binding(token_text)
+        if let Some(is_unresolved) =
+            embedded.is_known_unresolved_reference(token.text_trimmed_range())
+        {
+            if !is_unresolved {
+                return None;
+            }
+        } else if embedded.contains_binding(token_text)
             || store_name.is_some_and(|store_name| embedded.contains_binding_text(store_name))
         {
             return None;

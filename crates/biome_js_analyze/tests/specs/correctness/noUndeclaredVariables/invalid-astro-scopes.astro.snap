@@ -1,0 +1,260 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-astro-scopes.astro
+---
+# Input
+```astro
+---
+import type * as TypeOnlyImport from "./types";
+const serverOnly = 1;
+const vars = {};
+interface TypeOnly {}
+TypeOnlyImport;
+function nestedTypeOnlyUse() {
+    type NestedType = {};
+    NestedType;
+}
+missingFrontmatter;
+---
+<!-- should generate diagnostics -->
+<div>{missingTemplate}</div>
+<script>
+serverOnly;
+Astro;
+sibling;
+TypeOnly;
+missingClient;
+</script>
+<script>
+const sibling = 1;
+</script>
+<script define:vars={{ known: serverOnly }}>
+known;
+missingStatic;
+</script>
+<script define:vars={{ ...vars }}>
+anything;
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-astro-scopes.astro:6:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The TypeOnlyImport variable is undeclared.
+  
+    4 │ const vars = {};
+    5 │ interface TypeOnly {}
+  > 6 │ TypeOnlyImport;
+      │ ^^^^^^^^^^^^^^
+    7 │ function nestedTypeOnlyUse() {
+    8 │     type NestedType = {};
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:9:5 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The NestedType variable is undeclared.
+  
+     7 │ function nestedTypeOnlyUse() {
+     8 │     type NestedType = {};
+   > 9 │     NestedType;
+       │     ^^^^^^^^^^
+    10 │ }
+    11 │ missingFrontmatter;
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:11:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missingFrontmatter variable is undeclared.
+  
+     9 │     NestedType;
+    10 │ }
+  > 11 │ missingFrontmatter;
+       │ ^^^^^^^^^^^^^^^^^^
+    12 │ ---
+    13 │ <!-- should generate diagnostics -->
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:14:7 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missingTemplate variable is undeclared.
+  
+    12 │ ---
+    13 │ <!-- should generate diagnostics -->
+  > 14 │ <div>{missingTemplate}</div>
+       │       ^^^^^^^^^^^^^^^
+    15 │ <script>
+    16 │ serverOnly;
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:16:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The serverOnly variable is undeclared.
+  
+    14 │ <div>{missingTemplate}</div>
+    15 │ <script>
+  > 16 │ serverOnly;
+       │ ^^^^^^^^^^
+    17 │ Astro;
+    18 │ sibling;
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:17:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Astro variable is undeclared.
+  
+    15 │ <script>
+    16 │ serverOnly;
+  > 17 │ Astro;
+       │ ^^^^^
+    18 │ sibling;
+    19 │ TypeOnly;
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:18:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The sibling variable is undeclared.
+  
+    16 │ serverOnly;
+    17 │ Astro;
+  > 18 │ sibling;
+       │ ^^^^^^^
+    19 │ TypeOnly;
+    20 │ missingClient;
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:19:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The TypeOnly variable is undeclared.
+  
+    17 │ Astro;
+    18 │ sibling;
+  > 19 │ TypeOnly;
+       │ ^^^^^^^^
+    20 │ missingClient;
+    21 │ </script>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:20:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missingClient variable is undeclared.
+  
+    18 │ sibling;
+    19 │ TypeOnly;
+  > 20 │ missingClient;
+       │ ^^^^^^^^^^^^^
+    21 │ </script>
+    22 │ <script>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-astro-scopes.astro:27:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missingStatic variable is undeclared.
+  
+    25 │ <script define:vars={{ known: serverOnly }}>
+    26 │ known;
+  > 27 │ missingStatic;
+       │ ^^^^^^^^^^^^^
+    28 │ </script>
+    29 │ <script define:vars={{ ...vars }}>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

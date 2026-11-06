@@ -43,37 +43,37 @@ pub(crate) fn collect_server_semantics(
 }
 
 fn add_props_use(builder: &mut ModelBuilder, scope: ScopeId) {
-    // Astro reads a local `interface Props` or `type Props` as the component's
-    // prop contract. Imported types and runtime declarations do not define it.
-    let Some(symbol) = builder.data.scopes[scope]
+    // Astro reads local `interface Props` and `type Props` declarations as the
+    // component's prop contract. Imported types and runtime declarations do not define it.
+    let symbols: Vec<_> = builder.data.scopes[scope]
         .symbols
         .iter()
         .copied()
-        .find(|id| {
+        .filter(|id| {
             let symbol = &builder.data.symbols[*id];
             symbol.semantic_name.text() == "Props"
                 && symbol.kind == SymbolKind::Local
                 && symbol.declares_type
                 && !symbol.declares_value
         })
-    else {
-        return;
-    };
-    let data = &builder.data.symbols[symbol];
-    let range = data.range;
-    let name = data.name.clone();
-    let snippet = data.snippet;
-    builder.add_reference(ReferenceData {
-        range,
-        name,
-        snippet,
-        site: RefSite::Implicit,
-        namespace: Namespace::Type,
-        scope: Some(scope),
-        base: RefBase::Bare,
-        access: Access::Type,
-        resolution: Resolution::Symbol(symbol),
-    });
+        .collect();
+    for symbol in symbols {
+        let data = &builder.data.symbols[symbol];
+        let range = data.range;
+        let name = data.name.clone();
+        let snippet = data.snippet;
+        builder.add_reference(ReferenceData {
+            range,
+            name,
+            snippet,
+            site: RefSite::Implicit,
+            namespace: Namespace::Type,
+            scope: Some(scope),
+            base: RefBase::Bare,
+            access: Access::Type,
+            resolution: Resolution::Symbol(symbol),
+        });
+    }
 }
 
 fn collect_component_references(builder: &mut ModelBuilder, host: &HtmlRoot, scope: ScopeId) {

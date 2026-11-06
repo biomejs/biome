@@ -1,0 +1,13 @@
+---
+const title = "Hello";
+const vars = {};
+Astro.url;
+---
+<!-- should not generate diagnostics -->
+<h1>{title} {Astro.url}</h1>
+<script define:vars={{ title }}>
+title;
+</script>
+<script define:vars={{ ...vars }}>
+anything;
+</script>
