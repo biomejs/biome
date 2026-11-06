@@ -147,13 +147,10 @@ impl Rule for NoUnusedFunctionParameters {
             return None;
         }
 
-        // A snippet parameter can be used in the snippet body, which the
-        // semantic model of the script doesn't see. Matching is by name: the
-        // template is a separate parse with no shared symbols, so a name clash
-        // can hide a real unused parameter — a false negative, never a false
-        // positive on a used one.
+        // A snippet parameter can be used in a separate embedded parse that
+        // the JavaScript semantic model cannot see.
         if let Some(embedded) = ctx.get_service::<EmbeddedService>()
-            && embedded.is_used(name.token_text_trimmed())
+            && embedded.is_binding_read(&name)
         {
             return None;
         }
