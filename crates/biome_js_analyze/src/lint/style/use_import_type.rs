@@ -800,16 +800,12 @@ fn is_only_used_as_type(
     binding: &JsIdentifierBinding,
     references: &EmbeddedService,
 ) -> bool {
-    let name = binding
-        .name_token()
-        .ok()
-        .map(|token| token.token_text_trimmed());
-
-    // Used as a value in the template → not type-only.
-    if name
+    let name = binding.name_token().ok();
+    let embedded_usage = name
         .as_ref()
-        .is_some_and(|name| references.is_used_as_value(name.clone()))
-    {
+        .and_then(|name| references.binding_usage(name));
+
+    if embedded_usage.is_none_or(|usage| usage.is_used_as_value()) {
         return false;
     }
 
@@ -830,7 +826,7 @@ fn is_only_used_as_type(
     }
 
     // No script references: type-only if the template uses it as a type.
-    name.is_some_and(|name| references.is_used_as_type(name))
+    embedded_usage.is_some_and(|usage| usage.is_used_as_type())
 }
 
 #[derive(Debug)]
