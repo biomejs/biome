@@ -3580,6 +3580,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAsyncPromiseFinallyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAsyncPromiseFinallyOptions" }
+			]
+		},
+		"NoAsyncPromiseFinallyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAutofocusConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8733,6 +8743,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAsyncPromiseFinally": {
+					"description": "Disallow async functions as .finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-async-promise-finally",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAsyncPromiseFinallyConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAwaitInPromiseMethods": {
 					"description": "Disallow using await inside the array passed to Promise.all(), Promise.allSettled(), Promise.any(), or Promise.race().\nSee https://biomejs.dev/linter/rules/no-await-in-promise-methods",
 					"anyOf": [
@@ -11605,6 +11622,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAsyncPromiseExecutorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAsyncPromiseFinallyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAsyncPromiseFinallyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
