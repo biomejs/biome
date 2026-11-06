@@ -1,5 +1,7 @@
 use crate::services::semantic::SemanticServices;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleExecutionScope, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -142,6 +144,7 @@ declare_lint_rule! {
         name: "useFilenamingConvention",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("filename-case").inspired()],
+        execution_scope: RuleExecutionScope::HostDocument,
         recommended: false,
         severity: Severity::Information,
     }

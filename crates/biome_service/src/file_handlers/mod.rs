@@ -55,7 +55,7 @@ use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
     AnalyzerSignal, ControlFlow, EmbeddedSignalInspector, FixKind, GroupCategory, Never,
     PLUGIN_GROUP, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError,
-    RuleFilter, RuleGroup, SnippetAnalyzer,
+    RuleExecutionContext, RuleFilter, RuleGroup, SnippetAnalyzer,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::assist::Actions;
@@ -86,7 +86,7 @@ use biome_json_analyze::METADATA as json_metadata;
 use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "lang_js")]
 use biome_languages::javascript::{
-    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteFileKind,
+    JsEmbeddingKind, JsFileSource, Language, LanguageVariant, SvelteEmbeddingKind, SvelteFileKind,
 };
 use biome_languages::{DocumentFileSource, LanguageDb};
 #[cfg(feature = "module_graph")]
@@ -174,6 +174,47 @@ pub(crate) enum ParsedSnippetOrigin {
         content: EmbedContent,
         file_source: DocumentFileSource,
     },
+}
+
+#[cfg(feature = "lang_js")]
+fn is_js_program(source: JsFileSource) -> bool {
+    match source.as_embedding_kind() {
+        JsEmbeddingKind::Astro { frontmatter, .. } => *frontmatter,
+        JsEmbeddingKind::Vue { is_source, .. } => *is_source,
+        JsEmbeddingKind::Svelte { embedding_kind, .. } => {
+            matches!(embedding_kind, SvelteEmbeddingKind::Source)
+        }
+        JsEmbeddingKind::None => true,
+    }
+}
+
+#[cfg(feature = "lang_js")]
+pub(crate) fn js_host_document_snippet_index(
+    snippets: &[ParsedSnippetOrigin],
+    db: &WorkspaceDb,
+) -> Option<usize> {
+    let mut first_js = None;
+    for (index, snippet) in snippets.iter().enumerate() {
+        let Some(source) = snippet
+            .file_source(db)
+            .and_then(|source| source.to_js_file_source())
+        else {
+            continue;
+        };
+        first_js.get_or_insert(index);
+        if is_js_program(source) {
+            return Some(index);
+        }
+    }
+    first_js
+}
+
+#[cfg(feature = "lang_js")]
+pub(crate) fn js_rule_execution_context(
+    source: JsFileSource,
+    host_document: bool,
+) -> RuleExecutionContext {
+    RuleExecutionContext::new_embedded(host_document, is_js_program(source))
 }
 
 impl ParsedSnippetOrigin {
@@ -529,6 +570,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) only: &'a [AnalyzerSelector],
     pub(crate) skip: &'a [AnalyzerSelector],
     pub(crate) categories: RuleCategories,
+    pub(crate) rule_execution: RuleExecutionContext,
     pub(crate) workspace_db: WorkspaceDb,
     #[cfg(feature = "html_embeds")]
     pub(crate) embedded_data: Option<Arc<EmbeddedData>>,
@@ -561,6 +603,7 @@ impl<'a> LintParams<'a> {
             only: self.only,
             skip: self.skip,
             categories: self.categories,
+            rule_execution: self.rule_execution,
             workspace_db: self.workspace_db.clone(),
             #[cfg(feature = "html_embeds")]
             embedded_data: self.embedded_data.clone(),
@@ -576,6 +619,49 @@ impl<'a> LintParams<'a> {
             diagnostic_level: self.diagnostic_level,
             enforce_assist: self.enforce_assist,
         }
+    }
+
+    #[cfg(feature = "lang_js")]
+    pub(crate) fn for_js_host_document(&self, source: JsFileSource) -> Self {
+        let parse = parse("", source, JsParserOptions::default());
+        let parsed_source = ParsedOrigin::interned(
+            AnyParse::from(
+                parse
+                    .syntax()
+                    .as_send()
+                    .expect("the empty JavaScript module is sendable"),
+            ),
+            None,
+        );
+        Self {
+            parsed_source,
+            settings: self.settings,
+            language: DocumentFileSource::Js(source),
+            path: self.path,
+            only: self.only,
+            skip: self.skip,
+            categories: self.categories,
+            rule_execution: RuleExecutionContext::new_host_document(),
+            workspace_db: self.workspace_db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data: self.embedded_data.clone(),
+            #[cfg(feature = "module_graph")]
+            module_db: self.module_db.clone(),
+            project_layout: self.project_layout.clone(),
+            suppression_reason: self.suppression_reason.clone(),
+            enabled_selectors: self.enabled_selectors,
+            plugins: self.plugins.clone(),
+            pull_code_actions: self.pull_code_actions,
+            working_directory: self.working_directory,
+            max_diagnostics: self.max_diagnostics,
+            diagnostic_level: self.diagnostic_level,
+            enforce_assist: self.enforce_assist,
+        }
+    }
+
+    pub(crate) fn with_rule_execution(mut self, rule_execution: RuleExecutionContext) -> Self {
+        self.rule_execution = rule_execution;
+        self
     }
 }
 
