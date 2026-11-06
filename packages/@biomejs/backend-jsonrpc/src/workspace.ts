@@ -3413,6 +3413,11 @@ export interface Nursery {
 	 */
 	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
 	/**
+	 * Disallow array methods with callbacks on arrays that only have empty slots.
+	 * See https://biomejs.dev/linter/rules/no-uninvoked-array-callback
+	 */
+	noUninvokedArrayCallback?: NoUninvokedArrayCallbackConfiguration;
+	/**
 	 * Disallow loop conditions whose variables are never modified in the loop.
 	 * See https://biomejs.dev/linter/rules/no-unmodified-loop-condition
 	 */
@@ -6762,6 +6767,9 @@ export type NoUndeclaredClassesConfiguration =
 export type NoUndeclaredCustomPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredCustomPropertiesOptions;
+export type NoUninvokedArrayCallbackConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUninvokedArrayCallbackOptions;
 export type NoUnmodifiedLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnmodifiedLoopConditionOptions;
@@ -9872,6 +9880,10 @@ export interface RuleWithNoUndeclaredClassesOptions {
 export interface RuleWithNoUndeclaredCustomPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredCustomPropertiesOptions;
+}
+export interface RuleWithNoUninvokedArrayCallbackOptions {
+	level: RulePlainConfiguration;
+	options?: NoUninvokedArrayCallbackOptions;
 }
 export interface RuleWithNoUnmodifiedLoopConditionOptions {
 	level: RulePlainConfiguration;
@@ -13037,6 +13049,7 @@ export type NoThisOutsideOfClassOptions = {};
  */
 export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
+export type NoUninvokedArrayCallbackOptions = {};
 export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnnecessaryStringTrimOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
@@ -15156,6 +15169,7 @@ export type Category =
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
+	| "lint/nursery/noUninvokedArrayCallback"
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"

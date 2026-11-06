@@ -1584,6 +1584,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noUninvokedArrayCallback",
+        TypeId::of::<
+            biome_rule_options::no_uninvoked_array_callback::NoUninvokedArrayCallbackOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noUnknownAtRules",
         TypeId::of::<biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions>(),

@@ -1,0 +1,30 @@
+/* should not generate diagnostics */
+const a = new Array(5).fill().map(_ => {});
+const b = new Array(5).flat();
+const c = new Array(5).concat();
+const d = new Array('x').forEach((x) => console.log(x));
+const e = new Array(1, 2).forEach((x) => console.log(x));
+const f = new Array(...[1, 2, 3]).forEach((x) => console.log(x));
+const g = new Array(5).find((item) => item === undefined);
+const h = new Array(5).findIndex((item) => item === undefined);
+const i = new Array(5).findLast((item) => item === undefined);
+const j = new Array(5).findLastIndex((item) => item === undefined);
+const k = new Array(5).sort();
+const l = new Array(5).map();
+const m = new Array(length).map((item) => item);
+const n = Array.from({ length: 5 }, () => 0);
+const o = [1, 2, 3].map((item) => item);
+const p = new Array(5)[method]((item) => item);
+const q = new Array(5).keys();
+const r = new Foo(5).map((item) => item);
+const s = new Array.Foo(5).map((item) => item);
+const t = new Array.foo(5).map((item) => item);
+const u = foo(() => {}, new Array(5).length);
+const v = new Array(5).fill(0).map((item) => item);
+
+function shadowed(Array) {
+	return new Array(5).map((item) => item);
+}
+const w = new Array(5).sort(undefined);
+const x = new Array(5).toSorted(undefined);
+const y = new Array(5).map(...callbacks);

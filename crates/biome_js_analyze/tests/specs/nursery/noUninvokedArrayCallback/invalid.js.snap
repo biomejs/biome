@@ -1,0 +1,564 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = new Array(5).map(_ => {});
+const b = new Array(5).filter(function (_) {});
+const c = new Array(5)['every'](function (_) {});
+const d = Array(5).map(() => 0);
+new Array(5).forEach((_, index) => console.log(index));
+const e = new Array(3).some(Boolean);
+const f = new Array(3).reduce((acc, item) => acc + item, 0);
+const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+const h = new Array(3).flatMap((item) => [item]);
+const i = new Array(3).sort((x, y) => x - y);
+const j = new Array(3).toSorted((x, y) => x - y);
+const k = (new Array(3)).map((item) => item);
+const l = new Array((3)).map((item) => item);
+const m = new Array(3)?.map((item) => item);
+const n = globalThis.Array(3).map((item) => item);
+const o = new window.Array(3).map((item) => item);
+const p = new Array(0).map((item) => item);
+const q = new Array(5).map(createElement);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = new Array(5).map(_ => {});
+      │                        ^^^
+    3 │ const b = new Array(5).filter(function (_) {});
+    4 │ const c = new Array(5)['every'](function (_) {});
+  
+  i This array only has empty slots.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = new Array(5).map(_ => {});
+      │           ^^^^^^^^^^^^
+    3 │ const b = new Array(5).filter(function (_) {});
+    4 │ const c = new Array(5)['every'](function (_) {});
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to filter() is never called.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = new Array(5).map(_ => {});
+  > 3 │ const b = new Array(5).filter(function (_) {});
+      │                        ^^^^^^
+    4 │ const c = new Array(5)['every'](function (_) {});
+    5 │ const d = Array(5).map(() => 0);
+  
+  i This array only has empty slots.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = new Array(5).map(_ => {});
+  > 3 │ const b = new Array(5).filter(function (_) {});
+      │           ^^^^^^^^^^^^
+    4 │ const c = new Array(5)['every'](function (_) {});
+    5 │ const d = Array(5).map(() => 0);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. filter() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to every() is never called.
+  
+    2 │ const a = new Array(5).map(_ => {});
+    3 │ const b = new Array(5).filter(function (_) {});
+  > 4 │ const c = new Array(5)['every'](function (_) {});
+      │                        ^^^^^^^
+    5 │ const d = Array(5).map(() => 0);
+    6 │ new Array(5).forEach((_, index) => console.log(index));
+  
+  i This array only has empty slots.
+  
+    2 │ const a = new Array(5).map(_ => {});
+    3 │ const b = new Array(5).filter(function (_) {});
+  > 4 │ const c = new Array(5)['every'](function (_) {});
+      │           ^^^^^^^^^^^^
+    5 │ const d = Array(5).map(() => 0);
+    6 │ new Array(5).forEach((_, index) => console.log(index));
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. every() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:20 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    3 │ const b = new Array(5).filter(function (_) {});
+    4 │ const c = new Array(5)['every'](function (_) {});
+  > 5 │ const d = Array(5).map(() => 0);
+      │                    ^^^
+    6 │ new Array(5).forEach((_, index) => console.log(index));
+    7 │ const e = new Array(3).some(Boolean);
+  
+  i This array only has empty slots.
+  
+    3 │ const b = new Array(5).filter(function (_) {});
+    4 │ const c = new Array(5)['every'](function (_) {});
+  > 5 │ const d = Array(5).map(() => 0);
+      │           ^^^^^^^^
+    6 │ new Array(5).forEach((_, index) => console.log(index));
+    7 │ const e = new Array(3).some(Boolean);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:14 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to forEach() is never called.
+  
+    4 │ const c = new Array(5)['every'](function (_) {});
+    5 │ const d = Array(5).map(() => 0);
+  > 6 │ new Array(5).forEach((_, index) => console.log(index));
+      │              ^^^^^^^
+    7 │ const e = new Array(3).some(Boolean);
+    8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+  
+  i This array only has empty slots.
+  
+    4 │ const c = new Array(5)['every'](function (_) {});
+    5 │ const d = Array(5).map(() => 0);
+  > 6 │ new Array(5).forEach((_, index) => console.log(index));
+      │ ^^^^^^^^^^^^
+    7 │ const e = new Array(3).some(Boolean);
+    8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. forEach() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to some() is never called.
+  
+    5 │ const d = Array(5).map(() => 0);
+    6 │ new Array(5).forEach((_, index) => console.log(index));
+  > 7 │ const e = new Array(3).some(Boolean);
+      │                        ^^^^
+    8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+    9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+  
+  i This array only has empty slots.
+  
+    5 │ const d = Array(5).map(() => 0);
+    6 │ new Array(5).forEach((_, index) => console.log(index));
+  > 7 │ const e = new Array(3).some(Boolean);
+      │           ^^^^^^^^^^^^
+    8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+    9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. some() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to reduce() is never called.
+  
+     6 │ new Array(5).forEach((_, index) => console.log(index));
+     7 │ const e = new Array(3).some(Boolean);
+   > 8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+       │                        ^^^^^^
+     9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+  
+  i This array only has empty slots.
+  
+     6 │ new Array(5).forEach((_, index) => console.log(index));
+     7 │ const e = new Array(3).some(Boolean);
+   > 8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+       │           ^^^^^^^^^^^^
+     9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. reduce() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to reduceRight() is never called.
+  
+     7 │ const e = new Array(3).some(Boolean);
+     8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+   > 9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+       │                        ^^^^^^^^^^^
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+  
+  i This array only has empty slots.
+  
+     7 │ const e = new Array(3).some(Boolean);
+     8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+   > 9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+       │           ^^^^^^^^^^^^
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. reduceRight() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to flatMap() is never called.
+  
+     8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+     9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+  > 10 │ const h = new Array(3).flatMap((item) => [item]);
+       │                        ^^^^^^^
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+  
+  i This array only has empty slots.
+  
+     8 │ const f = new Array(3).reduce((acc, item) => acc + item, 0);
+     9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+  > 10 │ const h = new Array(3).flatMap((item) => [item]);
+       │           ^^^^^^^^^^^^
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. flatMap() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to sort() is never called.
+  
+     9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+  > 11 │ const i = new Array(3).sort((x, y) => x - y);
+       │                        ^^^^
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+    13 │ const k = (new Array(3)).map((item) => item);
+  
+  i This array only has empty slots.
+  
+     9 │ const g = new Array(3).reduceRight((acc, item) => acc + item, 0);
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+  > 11 │ const i = new Array(3).sort((x, y) => x - y);
+       │           ^^^^^^^^^^^^
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+    13 │ const k = (new Array(3)).map((item) => item);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. sort() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to toSorted() is never called.
+  
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+  > 12 │ const j = new Array(3).toSorted((x, y) => x - y);
+       │                        ^^^^^^^^
+    13 │ const k = (new Array(3)).map((item) => item);
+    14 │ const l = new Array((3)).map((item) => item);
+  
+  i This array only has empty slots.
+  
+    10 │ const h = new Array(3).flatMap((item) => [item]);
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+  > 12 │ const j = new Array(3).toSorted((x, y) => x - y);
+       │           ^^^^^^^^^^^^
+    13 │ const k = (new Array(3)).map((item) => item);
+    14 │ const l = new Array((3)).map((item) => item);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. toSorted() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:26 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+  > 13 │ const k = (new Array(3)).map((item) => item);
+       │                          ^^^
+    14 │ const l = new Array((3)).map((item) => item);
+    15 │ const m = new Array(3)?.map((item) => item);
+  
+  i This array only has empty slots.
+  
+    11 │ const i = new Array(3).sort((x, y) => x - y);
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+  > 13 │ const k = (new Array(3)).map((item) => item);
+       │           ^^^^^^^^^^^^^^
+    14 │ const l = new Array((3)).map((item) => item);
+    15 │ const m = new Array(3)?.map((item) => item);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:26 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+    13 │ const k = (new Array(3)).map((item) => item);
+  > 14 │ const l = new Array((3)).map((item) => item);
+       │                          ^^^
+    15 │ const m = new Array(3)?.map((item) => item);
+    16 │ const n = globalThis.Array(3).map((item) => item);
+  
+  i This array only has empty slots.
+  
+    12 │ const j = new Array(3).toSorted((x, y) => x - y);
+    13 │ const k = (new Array(3)).map((item) => item);
+  > 14 │ const l = new Array((3)).map((item) => item);
+       │           ^^^^^^^^^^^^^^
+    15 │ const m = new Array(3)?.map((item) => item);
+    16 │ const n = globalThis.Array(3).map((item) => item);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:25 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    13 │ const k = (new Array(3)).map((item) => item);
+    14 │ const l = new Array((3)).map((item) => item);
+  > 15 │ const m = new Array(3)?.map((item) => item);
+       │                         ^^^
+    16 │ const n = globalThis.Array(3).map((item) => item);
+    17 │ const o = new window.Array(3).map((item) => item);
+  
+  i This array only has empty slots.
+  
+    13 │ const k = (new Array(3)).map((item) => item);
+    14 │ const l = new Array((3)).map((item) => item);
+  > 15 │ const m = new Array(3)?.map((item) => item);
+       │           ^^^^^^^^^^^^
+    16 │ const n = globalThis.Array(3).map((item) => item);
+    17 │ const o = new window.Array(3).map((item) => item);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:31 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    14 │ const l = new Array((3)).map((item) => item);
+    15 │ const m = new Array(3)?.map((item) => item);
+  > 16 │ const n = globalThis.Array(3).map((item) => item);
+       │                               ^^^
+    17 │ const o = new window.Array(3).map((item) => item);
+    18 │ const p = new Array(0).map((item) => item);
+  
+  i This array only has empty slots.
+  
+    14 │ const l = new Array((3)).map((item) => item);
+    15 │ const m = new Array(3)?.map((item) => item);
+  > 16 │ const n = globalThis.Array(3).map((item) => item);
+       │           ^^^^^^^^^^^^^^^^^^^
+    17 │ const o = new window.Array(3).map((item) => item);
+    18 │ const p = new Array(0).map((item) => item);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:31 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    15 │ const m = new Array(3)?.map((item) => item);
+    16 │ const n = globalThis.Array(3).map((item) => item);
+  > 17 │ const o = new window.Array(3).map((item) => item);
+       │                               ^^^
+    18 │ const p = new Array(0).map((item) => item);
+    19 │ const q = new Array(5).map(createElement);
+  
+  i This array only has empty slots.
+  
+    15 │ const m = new Array(3)?.map((item) => item);
+    16 │ const n = globalThis.Array(3).map((item) => item);
+  > 17 │ const o = new window.Array(3).map((item) => item);
+       │           ^^^^^^^^^^^^^^^^^^^
+    18 │ const p = new Array(0).map((item) => item);
+    19 │ const q = new Array(5).map(createElement);
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    16 │ const n = globalThis.Array(3).map((item) => item);
+    17 │ const o = new window.Array(3).map((item) => item);
+  > 18 │ const p = new Array(0).map((item) => item);
+       │                        ^^^
+    19 │ const q = new Array(5).map(createElement);
+    20 │ 
+  
+  i This array only has empty slots.
+  
+    16 │ const n = globalThis.Array(3).map((item) => item);
+    17 │ const o = new window.Array(3).map((item) => item);
+  > 18 │ const p = new Array(0).map((item) => item);
+       │           ^^^^^^^^^^^^
+    19 │ const q = new Array(5).map(createElement);
+    20 │ 
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:24 lint/nursery/noUninvokedArrayCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The callback passed to map() is never called.
+  
+    17 │ const o = new window.Array(3).map((item) => item);
+    18 │ const p = new Array(0).map((item) => item);
+  > 19 │ const q = new Array(5).map(createElement);
+       │                        ^^^
+    20 │ 
+  
+  i This array only has empty slots.
+  
+    17 │ const o = new window.Array(3).map((item) => item);
+    18 │ const p = new Array(0).map((item) => item);
+  > 19 │ const q = new Array(5).map(createElement);
+       │           ^^^^^^^^^^^^
+    20 │ 
+  
+  i Calling Array with a single number creates an array with that many empty slots instead of undefined values. map() doesn't call its callback for empty slots.
+  
+  i Fill the array first, for example with new Array(length).fill(), or create it with Array.from({ length }, callback).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
