@@ -4947,6 +4947,16 @@
 			]
 		},
 		"NoHexColorsOptions": { "type": "object", "additionalProperties": false },
+		"NoHtmlLinkForPagesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoHtmlLinkForPagesOptions" }
+			]
+		},
+		"NoHtmlLinkForPagesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoIdenticalTestTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8835,6 +8845,13 @@
 					"description": "Require Promise-like statements to be handled appropriately.\nSee https://biomejs.dev/linter/rules/no-floating-promises",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoFloatingPromisesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHtmlLinkForPages": {
+					"description": "Disallow \\<a> elements that navigate to a page of the Next.js app.\nSee https://biomejs.dev/linter/rules/no-html-link-for-pages",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoHtmlLinkForPagesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12842,6 +12859,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoHexColorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoHtmlLinkForPagesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoHtmlLinkForPagesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

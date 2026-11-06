@@ -11,6 +11,7 @@
 mod css;
 mod dependencies;
 mod js_scc;
+mod next;
 mod type_inference;
 
 use crate::{JsExport, JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfo, ModuleInfoKind};
@@ -22,6 +23,7 @@ pub use css::*;
 pub use dependencies::module_dependencies;
 pub(crate) use dependencies::{css_dependencies, html_dependencies, js_dependencies};
 pub use js_scc::*;
+pub use next::*;
 pub use type_inference::*;
 
 // #region EXPORTED TRACKED QUERIES

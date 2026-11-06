@@ -1,0 +1,328 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+export function Links() {
+	return (
+		<>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/about/">About, with a trailing slash</a>
+			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+			<a href="/pricing">Pricing, in a route group</a>
+			<a href="/blog/hello-world">Blog post</a>
+			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+			<a href="/settings">Settings, in a parallel route slot</a>
+			<a href="/contact">Contact, pages router</a>
+			<a href="/shop">Shop, optional catch-all without segments</a>
+			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+			<a href={"/about"}>About, in an expression</a>
+			<a target="_self" href="/about">About, in the same tab</a>
+		</>
+	);
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:5:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /, a page of this Next.js app.
+  
+    3 │ 	return (
+    4 │ 		<>
+  > 5 │ 			<a href="/">Home</a>
+      │ 			   ^^^^^^^^
+    6 │ 			<a href="/about">About</a>
+    7 │ 			<a href="/about/">About, with a trailing slash</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /about, a page of this Next.js app.
+  
+    4 │ 		<>
+    5 │ 			<a href="/">Home</a>
+  > 6 │ 			<a href="/about">About</a>
+      │ 			   ^^^^^^^^^^^^^
+    7 │ 			<a href="/about/">About, with a trailing slash</a>
+    8 │ 			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /about/, a page of this Next.js app.
+  
+    5 │ 			<a href="/">Home</a>
+    6 │ 			<a href="/about">About</a>
+  > 7 │ 			<a href="/about/">About, with a trailing slash</a>
+      │ 			   ^^^^^^^^^^^^^^
+    8 │ 			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+    9 │ 			<a href="/pricing">Pricing, in a route group</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /about, a page of this Next.js app.
+  
+     6 │ 			<a href="/about">About</a>
+     7 │ 			<a href="/about/">About, with a trailing slash</a>
+   > 8 │ 			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+       │ 			   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 			<a href="/pricing">Pricing, in a route group</a>
+    10 │ 			<a href="/blog/hello-world">Blog post</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /pricing, a page of this Next.js app.
+  
+     7 │ 			<a href="/about/">About, with a trailing slash</a>
+     8 │ 			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+   > 9 │ 			<a href="/pricing">Pricing, in a route group</a>
+       │ 			   ^^^^^^^^^^^^^^^
+    10 │ 			<a href="/blog/hello-world">Blog post</a>
+    11 │ 			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /blog/hello-world, a page of this Next.js app.
+  
+     8 │ 			<a href="/about?tab=team#history">About, with a query and a fragment</a>
+     9 │ 			<a href="/pricing">Pricing, in a route group</a>
+  > 10 │ 			<a href="/blog/hello-world">Blog post</a>
+       │ 			   ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+    12 │ 			<a href="/settings">Settings, in a parallel route slot</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /docs/getting-started/installation, a page of this Next.js app.
+  
+     9 │ 			<a href="/pricing">Pricing, in a route group</a>
+    10 │ 			<a href="/blog/hello-world">Blog post</a>
+  > 11 │ 			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+       │ 			   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 			<a href="/settings">Settings, in a parallel route slot</a>
+    13 │ 			<a href="/contact">Contact, pages router</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /settings, a page of this Next.js app.
+  
+    10 │ 			<a href="/blog/hello-world">Blog post</a>
+    11 │ 			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+  > 12 │ 			<a href="/settings">Settings, in a parallel route slot</a>
+       │ 			   ^^^^^^^^^^^^^^^^
+    13 │ 			<a href="/contact">Contact, pages router</a>
+    14 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /contact, a page of this Next.js app.
+  
+    11 │ 			<a href="/docs/getting-started/installation">Docs, catch-all</a>
+    12 │ 			<a href="/settings">Settings, in a parallel route slot</a>
+  > 13 │ 			<a href="/contact">Contact, pages router</a>
+       │ 			   ^^^^^^^^^^^^^^^
+    14 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+    15 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /shop, a page of this Next.js app.
+  
+    12 │ 			<a href="/settings">Settings, in a parallel route slot</a>
+    13 │ 			<a href="/contact">Contact, pages router</a>
+  > 14 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+       │ 			   ^^^^^^^^^^^^
+    15 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+    16 │ 			<a href={"/about"}>About, in an expression</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /shop/shoes/red, a page of this Next.js app.
+  
+    13 │ 			<a href="/contact">Contact, pages router</a>
+    14 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+  > 15 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+       │ 			   ^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 			<a href={"/about"}>About, in an expression</a>
+    17 │ 			<a target="_self" href="/about">About, in the same tab</a>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:7 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /about, a page of this Next.js app.
+  
+    14 │ 			<a href="/shop">Shop, optional catch-all without segments</a>
+    15 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+  > 16 │ 			<a href={"/about"}>About, in an expression</a>
+       │ 			   ^^^^^^^^^^^^^^^
+    17 │ 			<a target="_self" href="/about">About, in the same tab</a>
+    18 │ 		</>
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:17:22 lint/nursery/noHtmlLinkForPages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This <a> element navigates to /about, a page of this Next.js app.
+  
+    15 │ 			<a href="/shop/shoes/red">Shop, optional catch-all</a>
+    16 │ 			<a href={"/about"}>About, in an expression</a>
+  > 17 │ 			<a target="_self" href="/about">About, in the same tab</a>
+       │ 			                  ^^^^^^^^^^^^^
+    18 │ 		</>
+    19 │ 	);
+  
+  i An <a> element reloads the whole document, so the client loses its state and downloads the page's scripts again.
+  
+  i Use <Link /> from next/link instead, which navigates on the client and prefetches the page.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/7650 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
