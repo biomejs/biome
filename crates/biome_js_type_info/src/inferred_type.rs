@@ -1,7 +1,9 @@
 mod any_type_kind;
 mod boolean_coercion;
+mod spread_misuse;
 pub use any_type_kind::AnyTypeKind;
 pub use boolean_coercion::BooleanCoercion;
+pub use spread_misuse::ObjectSpreadMisuse;
 
 use crate::TypeDb;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData, TypeMember};
