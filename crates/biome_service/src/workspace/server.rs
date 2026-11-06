@@ -1819,7 +1819,7 @@ impl WorkspaceServerWithDb<'_> {
     ) -> Result<biome_analyze::AnalyzerPluginVec, Vec<PluginDiagnostic>> {
         match self.plugin_caches.pin().get(path) {
             Some(cache) => cache.get_analyzer_plugins(plugins),
-            None => Ok(Vec::new()),
+            None => PluginCache::default().get_analyzer_plugins(plugins),
         }
     }
 
@@ -5029,3 +5029,7 @@ mod tests;
 #[cfg(all(test, feature = "md_embeds"))]
 #[path = "md_embeds.tests.rs"]
 mod md_embeds_tests;
+
+#[cfg(all(test, feature = "plugins"))]
+#[path = "server_plugin_cache.tests.rs"]
+mod plugin_cache_tests;
