@@ -17,7 +17,7 @@ use biome_analyze::{
     AddVisitor, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
     AnalyzerSignal, BatchPluginVisitor, ControlFlow, EmbeddedSignalInspector, InspectMatcher,
     LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
-    RuleRegistry, SnippetAnalyzer,
+    RuleExecutionContext, RuleRegistry, SnippetAnalyzer,
 };
 use biome_aria::AriaRoles;
 use biome_db::Source;
@@ -71,6 +71,7 @@ pub struct JsAnalyzerServices {
     document: Option<Source>,
     embedded_data: Option<Arc<EmbeddedData>>,
     embedded_model_is_current: bool,
+    rule_execution: RuleExecutionContext,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: Option<TextSize>,
     project_layout: Arc<ProjectLayout>,
@@ -86,6 +87,7 @@ impl Default for JsAnalyzerServices {
             document: None,
             embedded_data: None,
             embedded_model_is_current: true,
+            rule_execution: RuleExecutionContext::default(),
             snippet_offset: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
@@ -118,6 +120,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             document: None,
             embedded_data: None,
             embedded_model_is_current: true,
+            rule_execution: RuleExecutionContext::default(),
             snippet_offset: None,
             project_layout,
             source_type,
@@ -134,6 +137,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             document: None,
             embedded_data: None,
             embedded_model_is_current: true,
+            rule_execution: RuleExecutionContext::default(),
             snippet_offset: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
@@ -177,6 +181,11 @@ impl JsAnalyzerServices {
 
     pub fn with_embedded_model_current(mut self, is_current: bool) -> Self {
         self.embedded_model_is_current = is_current;
+        self
+    }
+
+    pub fn with_rule_execution(mut self, rule_execution: RuleExecutionContext) -> Self {
+        self.rule_execution = rule_execution;
         self
     }
 
@@ -245,7 +254,8 @@ where
         snippet_inspector,
         snippets,
     } = params;
-    let mut registry = RuleRegistry::builder(&filter, root);
+    let mut registry =
+        RuleRegistry::builder(&filter, root).with_execution_context(services.rule_execution);
     visit_registry(&mut registry);
 
     let JsAnalyzerServices {
@@ -255,6 +265,7 @@ where
         document,
         embedded_data,
         embedded_model_is_current,
+        rule_execution: _,
         snippet_offset,
         project_layout,
         source_type,

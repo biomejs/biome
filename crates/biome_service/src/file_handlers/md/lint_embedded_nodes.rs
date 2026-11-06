@@ -1,5 +1,6 @@
 use crate::file_handlers::{
-    LintParams, LintResults, LintSnippetAnalyzer, css, graphql, html, javascript, json, md, yaml,
+    LintParams, LintResults, LintSnippetAnalyzer, css, graphql, html, javascript,
+    js_host_document_snippet_index, js_rule_execution_context, json, md, yaml,
 };
 use biome_analyze::{Never, SnippetAnalyzer};
 use biome_languages::DocumentFileSource;
@@ -13,7 +14,7 @@ pub(super) fn snippet_analyzers<'a>(
     params: &LintParams<'a>,
 ) -> Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + 'a>> {
     let mut analyzers = Vec::new();
-    for snippet in params
+    let snippets: Vec<_> = params
         .parsed_source
         .snippets(&params.workspace_db)
         .for_analysis(
@@ -23,15 +24,20 @@ pub(super) fn snippet_analyzers<'a>(
             params.path,
             &params.workspace_db,
         )
-    {
+        .collect();
+    let host_document_js_snippet = js_host_document_snippet_index(&snippets, &params.workspace_db);
+    for (index, snippet) in snippets.into_iter().enumerate() {
         let Some(language) = snippet.file_source(&params.workspace_db) else {
             continue;
         };
         let offset = snippet.content_offset();
         let snippet_params = params.for_snippet(&snippet, language);
         let analyzer = match language {
-            DocumentFileSource::Js(_) => LintSnippetAnalyzer::new(
-                snippet_params,
+            DocumentFileSource::Js(source) => LintSnippetAnalyzer::new(
+                snippet_params.with_rule_execution(js_rule_execution_context(
+                    source,
+                    host_document_js_snippet == Some(index),
+                )),
                 offset,
                 &biome_js_analyze::METADATA,
                 javascript::lint_with_inspector,
