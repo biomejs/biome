@@ -1,0 +1,296 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidComments.js
+---
+# Input
+```js
+/* should generate diagnostics */
+// The fix keeps these comments.
+x = ((1 /* keep */ + 2) - 4) > 0;
+(5 - (1 /* keep */ + 2)) === 0;
+(left[/* keep */ key] - right) > 0;
+0 < (left - getRight(/* keep */));
+/* before */ a - b > 0 /* after */;
+
+// The fix would delete these comments, so there is no fix.
+a - /* comment */ b > 0;
+a /* comment */ - b > 0;
+a - b /* comment */ > 0;
+a - b > /* comment */ 0;
+a - b > (/* comment */ 0);
+(/* comment */ a - b) > 0;
+0 /* comment */ < a - b;
+
+```
+
+# Diagnostics
+```
+invalidComments.js:3:5 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    1 │ /* should generate diagnostics */
+    2 │ // The fix keeps these comments.
+  > 3 │ x = ((1 /* keep */ + 2) - 4) > 0;
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ (5 - (1 /* keep */ + 2)) === 0;
+    5 │ (left[/* keep */ key] - right) > 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   // The fix keeps these comments.
+     3    │ - x·=·((1·/*·keep·*/·+·2)·-·4)·>·0;
+        3 │ + x·=·(1·/*·keep·*/·+·2)·>·4;
+     4  4 │   (5 - (1 /* keep */ + 2)) === 0;
+     5  5 │   (left[/* keep */ key] - right) > 0;
+  
+
+```
+
+```
+invalidComments.js:4:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    2 │ // The fix keeps these comments.
+    3 │ x = ((1 /* keep */ + 2) - 4) > 0;
+  > 4 │ (5 - (1 /* keep */ + 2)) === 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ (left[/* keep */ key] - right) > 0;
+    6 │ 0 < (left - getRight(/* keep */));
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     2  2 │   // The fix keeps these comments.
+     3  3 │   x = ((1 /* keep */ + 2) - 4) > 0;
+     4    │ - (5·-·(1·/*·keep·*/·+·2))·===·0;
+        4 │ + 5·===·(1·/*·keep·*/·+·2);
+     5  5 │   (left[/* keep */ key] - right) > 0;
+     6  6 │   0 < (left - getRight(/* keep */));
+  
+
+```
+
+```
+invalidComments.js:5:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    3 │ x = ((1 /* keep */ + 2) - 4) > 0;
+    4 │ (5 - (1 /* keep */ + 2)) === 0;
+  > 5 │ (left[/* keep */ key] - right) > 0;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 0 < (left - getRight(/* keep */));
+    7 │ /* before */ a - b > 0 /* after */;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     3  3 │   x = ((1 /* keep */ + 2) - 4) > 0;
+     4  4 │   (5 - (1 /* keep */ + 2)) === 0;
+     5    │ - (left[/*·keep·*/·key]·-·right)·>·0;
+        5 │ + left[/*·keep·*/·key]·>·right;
+     6  6 │   0 < (left - getRight(/* keep */));
+     7  7 │   /* before */ a - b > 0 /* after */;
+  
+
+```
+
+```
+invalidComments.js:6:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    4 │ (5 - (1 /* keep */ + 2)) === 0;
+    5 │ (left[/* keep */ key] - right) > 0;
+  > 6 │ 0 < (left - getRight(/* keep */));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ /* before */ a - b > 0 /* after */;
+    8 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     4  4 │   (5 - (1 /* keep */ + 2)) === 0;
+     5  5 │   (left[/* keep */ key] - right) > 0;
+     6    │ - 0·<·(left·-·getRight(/*·keep·*/));
+        6 │ + left·>·getRight(/*·keep·*/);
+     7  7 │   /* before */ a - b > 0 /* after */;
+     8  8 │   
+  
+
+```
+
+```
+invalidComments.js:7:14 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    5 │ (left[/* keep */ key] - right) > 0;
+    6 │ 0 < (left - getRight(/* keep */));
+  > 7 │ /* before */ a - b > 0 /* after */;
+      │              ^^^^^^^^^
+    8 │ 
+    9 │ // The fix would delete these comments, so there is no fix.
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     5  5 │   (left[/* keep */ key] - right) > 0;
+     6  6 │   0 < (left - getRight(/* keep */));
+     7    │ - /*·before·*/·a·-·b·>·0·/*·after·*/;
+        7 │ + /*·before·*/·a·>·b·/*·after·*/;
+     8  8 │   
+     9  9 │   // The fix would delete these comments, so there is no fix.
+  
+
+```
+
+```
+invalidComments.js:10:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+     9 │ // The fix would delete these comments, so there is no fix.
+  > 10 │ a - /* comment */ b > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ a /* comment */ - b > 0;
+    12 │ a - b /* comment */ > 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:11:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+     9 │ // The fix would delete these comments, so there is no fix.
+    10 │ a - /* comment */ b > 0;
+  > 11 │ a /* comment */ - b > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ a - b /* comment */ > 0;
+    13 │ a - b > /* comment */ 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:12:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    10 │ a - /* comment */ b > 0;
+    11 │ a /* comment */ - b > 0;
+  > 12 │ a - b /* comment */ > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ a - b > /* comment */ 0;
+    14 │ a - b > (/* comment */ 0);
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:13:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    11 │ a /* comment */ - b > 0;
+    12 │ a - b /* comment */ > 0;
+  > 13 │ a - b > /* comment */ 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ a - b > (/* comment */ 0);
+    15 │ (/* comment */ a - b) > 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:14:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    12 │ a - b /* comment */ > 0;
+    13 │ a - b > /* comment */ 0;
+  > 14 │ a - b > (/* comment */ 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ (/* comment */ a - b) > 0;
+    16 │ 0 /* comment */ < a - b;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:15:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    13 │ a - b > /* comment */ 0;
+    14 │ a - b > (/* comment */ 0);
+  > 15 │ (/* comment */ a - b) > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 0 /* comment */ < a - b;
+    17 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidComments.js:16:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    14 │ a - b > (/* comment */ 0);
+    15 │ (/* comment */ a - b) > 0;
+  > 16 │ 0 /* comment */ < a - b;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,346 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStatementStart.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function returnsComparison() {
+	return(0) < a - b;
+}
+function throwsComparison() {
+	throw(0) < a - b;
+}
+function* yieldsComparison() {
+	yield(0) < a - b;
+}
+function inComparison() {
+	return a - b > (0)in object;
+}
+
+// The fix would change how these statements are parsed, so there is no fix.
+foo()
+0 < (a) - b;
+foo()
+0 < [a][0] - b;
+foo()
+0 < -a - b;
+({ value: 1 }.value - other) > 0;
+(function () {}.length - other) > 0;
+const arrow = () => ({ value: 1 }.value - other) > 0;
+
+// These keep the first token, so the fix is offered.
+const result = ({ value: 1 }.value - other) > 0;
+({ value: 1 }.value) - other > 0;
+foo();
+0 < a - b;
+
+```
+
+# Diagnostics
+```
+invalidStatementStart.js:3:8 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function returnsComparison() {
+  > 3 │ 	return(0) < a - b;
+      │ 	      ^^^^^^^^^^^
+    4 │ }
+    5 │ function throwsComparison() {
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   function returnsComparison() {
+     3    │ - → return(0)·<·a·-·b;
+        3 │ + → return·a·>·b;
+     4  4 │   }
+     5  5 │   function throwsComparison() {
+  
+
+```
+
+```
+invalidStatementStart.js:6:7 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    4 │ }
+    5 │ function throwsComparison() {
+  > 6 │ 	throw(0) < a - b;
+      │ 	     ^^^^^^^^^^^
+    7 │ }
+    8 │ function* yieldsComparison() {
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     4  4 │   }
+     5  5 │   function throwsComparison() {
+     6    │ - → throw(0)·<·a·-·b;
+        6 │ + → throw·a·>·b;
+     7  7 │   }
+     8  8 │   function* yieldsComparison() {
+  
+
+```
+
+```
+invalidStatementStart.js:9:7 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+     7 │ }
+     8 │ function* yieldsComparison() {
+   > 9 │ 	yield(0) < a - b;
+       │ 	     ^^^^^^^^^^^
+    10 │ }
+    11 │ function inComparison() {
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+     7  7 │   }
+     8  8 │   function* yieldsComparison() {
+     9    │ - → yield(0)·<·a·-·b;
+        9 │ + → yield·a·>·b;
+    10 10 │   }
+    11 11 │   function inComparison() {
+  
+
+```
+
+```
+invalidStatementStart.js:12:9 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    10 │ }
+    11 │ function inComparison() {
+  > 12 │ 	return a - b > (0)in object;
+       │ 	       ^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    10 10 │   }
+    11 11 │   function inComparison() {
+    12    │ - → return·a·-·b·>·(0)in·object;
+       12 │ + → return·a·>·b·in·object;
+    13 13 │   }
+    14 14 │   
+  
+
+```
+
+```
+invalidStatementStart.js:17:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    15 │ // The fix would change how these statements are parsed, so there is no fix.
+    16 │ foo()
+  > 17 │ 0 < (a) - b;
+       │ ^^^^^^^^^^^
+    18 │ foo()
+    19 │ 0 < [a][0] - b;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:19:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    17 │ 0 < (a) - b;
+    18 │ foo()
+  > 19 │ 0 < [a][0] - b;
+       │ ^^^^^^^^^^^^^^
+    20 │ foo()
+    21 │ 0 < -a - b;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:21:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    19 │ 0 < [a][0] - b;
+    20 │ foo()
+  > 21 │ 0 < -a - b;
+       │ ^^^^^^^^^^
+    22 │ ({ value: 1 }.value - other) > 0;
+    23 │ (function () {}.length - other) > 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:22:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    20 │ foo()
+    21 │ 0 < -a - b;
+  > 22 │ ({ value: 1 }.value - other) > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ (function () {}.length - other) > 0;
+    24 │ const arrow = () => ({ value: 1 }.value - other) > 0;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:23:1 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    21 │ 0 < -a - b;
+    22 │ ({ value: 1 }.value - other) > 0;
+  > 23 │ (function () {}.length - other) > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ const arrow = () => ({ value: 1 }.value - other) > 0;
+    25 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:24:21 lint/nursery/noSubtractionComparison ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    22 │ ({ value: 1 }.value - other) > 0;
+    23 │ (function () {}.length - other) > 0;
+  > 24 │ const arrow = () => ({ value: 1 }.value - other) > 0;
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ // These keep the first token, so the fix is offered.
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStatementStart.js:27:16 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    26 │ // These keep the first token, so the fix is offered.
+  > 27 │ const result = ({ value: 1 }.value - other) > 0;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ ({ value: 1 }.value) - other > 0;
+    29 │ foo();
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    25 25 │   
+    26 26 │   // These keep the first token, so the fix is offered.
+    27    │ - const·result·=·({·value:·1·}.value·-·other)·>·0;
+       27 │ + const·result·=·{·value:·1·}.value·>·other;
+    28 28 │   ({ value: 1 }.value) - other > 0;
+    29 29 │   foo();
+  
+
+```
+
+```
+invalidStatementStart.js:28:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    26 │ // These keep the first token, so the fix is offered.
+    27 │ const result = ({ value: 1 }.value - other) > 0;
+  > 28 │ ({ value: 1 }.value) - other > 0;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ foo();
+    30 │ 0 < a - b;
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    26 26 │   // These keep the first token, so the fix is offered.
+    27 27 │   const result = ({ value: 1 }.value - other) > 0;
+    28    │ - ({·value:·1·}.value)·-·other·>·0;
+       28 │ + ({·value:·1·}.value)·>·other;
+    29 29 │   foo();
+    30 30 │   0 < a - b;
+  
+
+```
+
+```
+invalidStatementStart.js:30:1 lint/nursery/noSubtractionComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This comparison subtracts two values and compares the difference with 0.
+  
+    28 │ ({ value: 1 }.value) - other > 0;
+    29 │ foo();
+  > 30 │ 0 < a - b;
+       │ ^^^^^^^^^
+    31 │ 
+  
+  i Compare the two values directly instead, which is shorter and states the intent more clearly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Compare the values directly.
+  
+    28 28 │   ({ value: 1 }.value) - other > 0;
+    29 29 │   foo();
+    30    │ - 0·<·a·-·b;
+       30 │ + a·>·b;
+    31 31 │   
+  
+
+```

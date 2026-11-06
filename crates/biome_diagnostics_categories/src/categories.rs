@@ -309,6 +309,7 @@ define_categories! {
     "lint/nursery/noSelfImport": "https://biomejs.dev/linter/rules/no-self-import",
     "lint/nursery/noSelfNestedLayer": "https://biomejs.dev/linter/rules/no-self-nested-layer",
     "lint/nursery/noShortTimeValues": "https://biomejs.dev/linter/rules/no-short-time-values",
+    "lint/nursery/noSubtractionComparison": "https://biomejs.dev/linter/rules/no-subtraction-comparison",
     "lint/nursery/noSinglePromiseInPromiseMethods": "https://biomejs.dev/linter/rules/no-single-promise-in-promise-methods",
     "lint/nursery/noSvelteAddEventListener": "https://biomejs.dev/linter/rules/no-svelte-add-event-listener",
     "lint/nursery/noSvelteAtDebugTags": "https://biomejs.dev/linter/rules/no-svelte-at-debug-tags",
