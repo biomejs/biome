@@ -131,6 +131,9 @@ impl Rule for NoNoninteractiveElementInteractions {
                 },
             )
             .note(markup! {
+                "A non-interactive element has no interactive semantics, so assistive technologies do not present it as something the user can act on."
+            })
+            .note(markup! {
                 "Non-interactive element should not have event handler. Consider replace semantically interactive element like "<Emphasis>"<button/>"</Emphasis>" or "<Emphasis>"<a href/>"</Emphasis>"."
             })
         )

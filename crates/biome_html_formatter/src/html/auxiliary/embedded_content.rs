@@ -1,4 +1,3 @@
-use crate::FormatEmbedded;
 use crate::prelude::*;
 use biome_formatter::{format_args, write};
 use biome_html_syntax::HtmlEmbeddedContent;

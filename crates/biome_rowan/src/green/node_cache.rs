@@ -4,6 +4,7 @@ use rustc_hash::FxHasher;
 use std::fmt::{self, Debug, Formatter};
 use std::hash::{BuildHasherDefault, Hash, Hasher};
 use std::marker::PhantomData;
+use std::mem::ManuallyDrop;
 use std::ops::Not;
 use std::ptr::NonNull;
 
@@ -144,6 +145,151 @@ impl IntoRawPointer for GreenNode {
     }
 }
 
+/// A child of a node under construction, as stored by the [crate::TreeBuilder].
+///
+/// A child with a hash other than [NodeCache::UNCACHED_NODE_HASH] is stored in the
+/// [NodeCache] and doesn't own a reference count: the cache keeps the element alive.
+/// This avoids an atomic increment when the element is retrieved from the cache and
+/// a decrement when it's discarded because its parent is retrieved from the cache
+/// too. The reference count is only incremented by [CacheChild::into_element], when
+/// the child moves into a newly built node.
+///
+/// A child with the [NodeCache::UNCACHED_NODE_HASH] hash owns its element.
+///
+/// A borrowed child must not outlive the [NodeCache] it was retrieved from, and the
+/// cache must not evict entries ([NodeCache::retain_cache]) while borrowed children
+/// exist.
+///
+/// The element is stored as a tagged pointer to keep the type at two words, which
+/// lets functions return it in registers.
+pub(crate) struct CacheChild {
+    hash: u64,
+    /// Pointer to the [GreenNodeData] or the [GreenTokenData]. The lowest bit is
+    /// [CacheChild::TOKEN_TAG] for tokens; it's always free because both types are
+    /// at least pointer-aligned.
+    element: NonNull<()>,
+}
+
+impl CacheChild {
+    const TOKEN_TAG: usize = 1;
+
+    /// Creates a child that owns `element`. Its hash is [NodeCache::UNCACHED_NODE_HASH].
+    #[inline]
+    pub(crate) fn owned(element: GreenElement) -> Self {
+        let element = match element {
+            NodeOrToken::Node(node) => node.into_raw().cast(),
+            NodeOrToken::Token(token) => token
+                .into_raw()
+                .cast::<()>()
+                .map_addr(|addr| addr | Self::TOKEN_TAG),
+        };
+
+        Self {
+            hash: NodeCache::UNCACHED_NODE_HASH,
+            element,
+        }
+    }
+
+    /// Creates a child for an element stored in the cache with `hash`.
+    ///
+    /// # Safety
+    /// `element` must be stored in the cache, see [CacheChild].
+    #[inline]
+    unsafe fn cached(hash: u64, element: GreenElementRef<'_>) -> Self {
+        if hash == NodeCache::UNCACHED_NODE_HASH {
+            // An element whose hash collides with the uncached hash: own it so that the
+            // hash keeps telling borrowed and owned children apart.
+            return Self::owned(element.to_owned());
+        }
+
+        let element = match element {
+            NodeOrToken::Node(node) => NonNull::from(node).cast(),
+            NodeOrToken::Token(token) => NonNull::from(token)
+                .cast::<()>()
+                .map_addr(|addr| addr | Self::TOKEN_TAG),
+        };
+
+        Self { hash, element }
+    }
+
+    #[inline]
+    fn is_owned(&self) -> bool {
+        self.hash == NodeCache::UNCACHED_NODE_HASH
+    }
+
+    #[inline]
+    pub(crate) fn as_element_ref(&self) -> GreenElementRef<'_> {
+        let addr = self.element.addr().get();
+        if addr & Self::TOKEN_TAG == 0 {
+            // SAFETY: The pointer is an untagged pointer to a live `GreenNodeData`.
+            NodeOrToken::Node(unsafe { self.element.cast::<GreenNodeData>().as_ref() })
+        } else {
+            let token = self.element.map_addr(|addr| {
+                // SAFETY: Clearing the tag of a non-null pointer to an aligned value
+                // can't produce zero.
+                unsafe { std::num::NonZeroUsize::new_unchecked(addr.get() & !Self::TOKEN_TAG) }
+            });
+            // SAFETY: The pointer is a pointer to a live `GreenTokenData` once untagged.
+            NodeOrToken::Token(unsafe { token.cast::<GreenTokenData>().as_ref() })
+        }
+    }
+
+    /// Returns an owned handle to the element.
+    #[inline]
+    pub(crate) fn into_element(self) -> GreenElement {
+        let this = ManuallyDrop::new(self);
+        if this.is_owned() {
+            // SAFETY: The child owns the element and `this` is never dropped.
+            unsafe { this.take_owned() }
+        } else {
+            this.as_element_ref().to_owned()
+        }
+    }
+
+    /// # Safety
+    /// The child must own its element, and neither the child nor a copy of its pointer may be
+    /// used afterwards.
+    #[inline]
+    unsafe fn take_owned(&self) -> GreenElement {
+        // SAFETY: The handle created here takes over the reference count owned by the child.
+        unsafe {
+            match self.as_element_ref() {
+                NodeOrToken::Node(node) => {
+                    NodeOrToken::Node(GreenNode::from_raw(NonNull::from(node)))
+                }
+                NodeOrToken::Token(token) => {
+                    NodeOrToken::Token(GreenToken::from_raw(NonNull::from(token)))
+                }
+            }
+        }
+    }
+}
+
+// SAFETY: A child is an owned or a borrowed handle to an immutable green element, which is
+// `Send` and `Sync` like `GreenElement`.
+unsafe impl Send for CacheChild {}
+// SAFETY: See `Send`.
+unsafe impl Sync for CacheChild {}
+
+impl Drop for CacheChild {
+    #[inline]
+    fn drop(&mut self) {
+        if self.is_owned() {
+            // SAFETY: The child owns the element and it's never accessed again.
+            drop(unsafe { self.take_owned() });
+        }
+    }
+}
+
+impl Debug for CacheChild {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CacheChild")
+            .field("hash", &self.hash)
+            .field("element", &self.as_element_ref())
+            .finish()
+    }
+}
+
 /// Interner for GreenTokens and GreenNodes
 // XXX: the impl is a bit tricky. As usual when writing interners, we want to
 // store all values in one HashSet.
@@ -214,7 +360,7 @@ fn element_id(elem: GreenElementRef<'_>) -> *const () {
 impl NodeCache {
     /// Hash used for nodes that haven't been cached because it has too many slots or
     /// one of its children wasn't cached.
-    const UNCACHED_NODE_HASH: u64 = 0;
+    pub(crate) const UNCACHED_NODE_HASH: u64 = 0;
 
     /// Tries to retrieve a node with the given `kind` and `children` from the cache.
     ///
@@ -224,20 +370,20 @@ impl NodeCache {
     pub(crate) fn node(
         &mut self,
         kind: RawSyntaxKind,
-        children: &[(u64, GreenElement)],
+        children: &[CacheChild],
     ) -> NodeCacheNodeEntryMut<'_> {
         if children.len() > 3 {
-            return NodeCacheNodeEntryMut::NoCache(Self::UNCACHED_NODE_HASH);
+            return NodeCacheNodeEntryMut::NoCache;
         }
 
         let hash = {
             let mut h = FxHasher::default();
             kind.hash(&mut h);
-            for &(hash, _) in children {
-                if hash == Self::UNCACHED_NODE_HASH {
-                    return NodeCacheNodeEntryMut::NoCache(Self::UNCACHED_NODE_HASH);
+            for child in children {
+                if child.hash == Self::UNCACHED_NODE_HASH {
+                    return NodeCacheNodeEntryMut::NoCache;
                 }
-                hash.hash(&mut h);
+                child.hash.hash(&mut h);
             }
             h.finish()
         };
@@ -260,7 +406,7 @@ impl NodeCache {
 
                 let rhs = children
                     .iter()
-                    .map(|(_, element)| element_id(element.as_deref()));
+                    .map(|child| element_id(child.as_element_ref()));
 
                 lhs.eq(rhs)
             }
@@ -283,7 +429,7 @@ impl NodeCache {
         }
     }
 
-    pub(crate) fn token(&mut self, kind: RawSyntaxKind, text: &str) -> (u64, GreenToken) {
+    pub(crate) fn token(&mut self, kind: RawSyntaxKind, text: &str) -> CacheChild {
         self.token_with_trivia(kind, text, &[], &[])
     }
 
@@ -293,7 +439,7 @@ impl NodeCache {
         text: &str,
         leading: &[TriviaPiece],
         trailing: &[TriviaPiece],
-    ) -> (u64, GreenToken) {
+    ) -> CacheChild {
         let hash = token_hash_of(kind, text);
 
         let entry = self.tokens.raw_entry_mut().from_hash(hash, |token| {
@@ -303,7 +449,7 @@ impl NodeCache {
         let token = match entry {
             RawEntryMut::Occupied(mut entry) => {
                 entry.key_mut().0.set_generation(self.generation);
-                entry.key().0.value().to_owned()
+                entry.into_key().0.value()
             }
             RawEntryMut::Vacant(entry) => {
                 let (leading, leading_flags) = self.trivia.get(self.generation, leading);
@@ -312,13 +458,14 @@ impl NodeCache {
                 let mut flags = leading_flags;
                 flags.insert(trailing_flags);
                 let token = GreenToken::with_trivia_and_flags(kind, text, leading, trailing, flags);
-                let key = CachedToken(GenerationalPointer::new(token.clone(), self.generation));
-                entry.insert_with_hasher(hash, key, (), |t| token_hash(t.0.value()));
-                token
+                let key = CachedToken(GenerationalPointer::new(token, self.generation));
+                let (key, _) = entry.insert_with_hasher(hash, key, (), |t| token_hash(t.0.value()));
+                key.0.value()
             }
         };
 
-        (hash, token)
+        // SAFETY: The token is stored in the cache.
+        unsafe { CacheChild::cached(hash, NodeOrToken::Token(token)) }
     }
 
     /// Increment the generation counter of the cache, all cache access from
@@ -362,7 +509,7 @@ pub(crate) enum NodeCacheNodeEntryMut<'a> {
     Cached(CachedNodeEntry<'a>),
 
     /// A node that should not be cached
-    NoCache(u64),
+    NoCache,
     Vacant(VacantNodeEntry<'a>),
 }
 
@@ -385,30 +532,30 @@ pub(crate) struct CachedNodeEntry<'a> {
 }
 
 impl CachedNodeEntry<'_> {
-    pub fn node(&self) -> &GreenNodeData {
-        self.raw_entry.key().node.value()
-    }
-
-    pub fn hash(&self) -> u64 {
-        self.hash
+    /// Returns the cached node as a child of the node under construction.
+    #[inline]
+    pub fn into_child(self) -> CacheChild {
+        let node = self.raw_entry.into_key().node.value();
+        // SAFETY: The node is stored in the cache.
+        unsafe { CacheChild::cached(self.hash, NodeOrToken::Node(node)) }
     }
 }
 
 impl VacantNodeEntry<'_> {
     /// Inserts the `node` into the cache so that future queries for the same kind and children resolve to the passed `node`.
     ///
-    /// Returns the hash of the node.
+    /// Returns the node as a child of the node under construction.
     ///
     /// The cache does not cache the `node` if the kind doesn't match the `kind` of the queried node because
     /// cache lookups wouldn't be successful because the hash collision prevention check compares the kinds of the
     /// cached and queried node.
-    pub fn cache(self, node: GreenNode) -> u64 {
+    pub fn cache(self, node: GreenNode) -> CacheChild {
         if self.original_kind != node.kind() {
             // The kind has changed since it has been queried. For example, the node has been converted to an
             // unknown node. Never cache these nodes because cache lookups will never match.
-            NodeCache::UNCACHED_NODE_HASH
+            CacheChild::owned(NodeOrToken::Node(node))
         } else {
-            self.raw_entry.insert_with_hasher(
+            let (key, _) = self.raw_entry.insert_with_hasher(
                 self.hash,
                 CachedNode {
                     node: GenerationalPointer::new(node, self.generation),
@@ -417,7 +564,9 @@ impl VacantNodeEntry<'_> {
                 (),
                 |n| n.hash,
             );
-            self.hash
+            let node = key.node.value();
+            // SAFETY: The node is stored in the cache.
+            unsafe { CacheChild::cached(self.hash, NodeOrToken::Node(node)) }
         }
     }
 }
@@ -527,7 +676,9 @@ mod tests {
     use std::mem::size_of;
 
     use crate::green::GreenElementFlags;
-    use crate::green::node_cache::{CachedNode, CachedToken, CachedTrivia, NodeCache, token_hash};
+    use crate::green::node_cache::{
+        CacheChild, CachedNode, CachedToken, CachedTrivia, NodeCache, token_hash,
+    };
     use crate::green::trivia::GreenTrivia;
     use crate::{GreenToken, GreenTokenData, RawSyntaxKind, TriviaPiece, TriviaPieceKind};
     use biome_text_size::TextSize;
@@ -570,8 +721,16 @@ mod tests {
         let leading = [TriviaPiece::new(TriviaPieceKind::Skipped, 1)];
         let trailing = [TriviaPiece::single_line_comment(2)];
 
-        let (_, token) = cache.token_with_trivia(kind, "?value//", &leading, &trailing);
-        let (_, cached) = cache.token_with_trivia(kind, "?value//", &leading, &trailing);
+        let token = cache
+            .token_with_trivia(kind, "?value//", &leading, &trailing)
+            .into_element()
+            .into_token()
+            .unwrap();
+        let cached = cache
+            .token_with_trivia(kind, "?value//", &leading, &trailing)
+            .into_element()
+            .into_token()
+            .unwrap();
 
         assert!(std::ptr::eq::<GreenTokenData>(&*token, &*cached));
         assert!(cached.flags().contains(GreenElementFlags::HAS_COMMENTS));
@@ -583,5 +742,6 @@ mod tests {
         assert_eq!(size_of::<CachedNode>(), 16);
         assert_eq!(size_of::<CachedToken>(), 8);
         assert_eq!(size_of::<CachedTrivia>(), 8);
+        assert_eq!(size_of::<CacheChild>(), 16);
     }
 }

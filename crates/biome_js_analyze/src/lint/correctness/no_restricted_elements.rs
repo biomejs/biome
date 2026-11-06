@@ -94,10 +94,20 @@ impl Rule for NoRestrictedElements {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! { {state} }.to_owned(),
-        ))
+        let node = ctx.query();
+        let name = node.name().ok()?;
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "The "<Emphasis>{format_args!("{}", name.syntax().text_trimmed())}</Emphasis>" element is restricted in this project."
+                },
+            )
+            .note(markup! { {state} })
+            .note(markup! {
+                "Replace the element with an allowed alternative, or update the "<Emphasis>"elements"</Emphasis>" option if the element should be allowed."
+            }),
+        )
     }
 }

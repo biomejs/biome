@@ -1,4 +1,4 @@
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_db::testing::{
     Events, assert_function_query_was_not_run, assert_function_query_was_run,
     function_query_will_execute_count_by_name, function_query_will_execute_position,
@@ -26,6 +26,7 @@ use biome_module_graph::{
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
+use biome_parser::db::{ParseDb, SourceOutput};
 use biome_resolver::{ResolverFsProxy, ResolverPathChange, ResolverPaths, sync_resolver_paths};
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_test_utils::get_added_js_paths;
@@ -33,6 +34,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
 use std::collections::BTreeMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
@@ -76,6 +78,8 @@ mod queries;
 mod requests;
 #[path = "spec_tests/substitutions.test.rs"]
 mod substitutions;
+#[path = "spec_tests/tailwind_stylesheet.test.rs"]
+mod tailwind_stylesheet;
 #[path = "spec_tests/types.test.rs"]
 mod types;
 
@@ -88,10 +92,12 @@ mod snap;
 #[salsa::db]
 struct TestModuleDb {
     fs: MemoryFileSystem,
-    files: BTreeMap<Utf8PathBuf, ParsedSource>,
+    files: BTreeMap<Utf8PathBuf, Source>,
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     resolver_paths: ResolverPaths,
     events: Events,
+    module_enumeration_count: AtomicUsize,
+    module_lookup_count: AtomicUsize,
     storage: Storage<Self>,
 }
 
@@ -108,6 +114,8 @@ impl TestModuleDb {
             files: BTreeMap::new(),
             modules: BTreeMap::new(),
             resolver_paths: ResolverPaths::default(),
+            module_enumeration_count: AtomicUsize::new(0),
+            module_lookup_count: AtomicUsize::new(0),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -128,10 +136,17 @@ impl TestModuleDb {
         self.take_salsa_events();
     }
 
+    fn take_module_enumeration_count(&self) -> usize {
+        self.module_enumeration_count.swap(0, Ordering::Relaxed)
+    }
+
+    fn take_module_lookup_count(&self) -> usize {
+        self.module_lookup_count.swap(0, Ordering::Relaxed)
+    }
+
     /// Indexes a JSON document, such as a manifest, as a parsed source.
     fn insert_json_source(&mut self, path: Utf8PathBuf, source: &str) {
-        let parse = parse_json(source, JsonParserOptions::default());
-        let parsed = ParsedSource::new(self, path.clone(), parse.into(), 0, Vec::new());
+        let parsed = Source::new(self, path.clone(), source.into(), 0);
         self.files.insert(path.clone(), parsed);
         sync_resolver_paths(self, [(path, ResolverPathChange::Content.into())]);
     }
@@ -142,8 +157,17 @@ impl salsa::Database for TestModuleDb {}
 
 #[salsa::db]
 impl biome_db::Db for TestModuleDb {
-    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source> {
         self.files.get(path).copied()
+    }
+}
+
+/// Parses every text as JSON, the only documents the tests index.
+#[salsa::db]
+impl ParseDb for TestModuleDb {
+    fn parse_source(&self, source: Source) -> SourceOutput {
+        let parse = parse_json(source.text(self), JsonParserOptions::default());
+        SourceOutput::new(parse.into(), 0)
     }
 }
 
@@ -188,10 +212,13 @@ impl biome_module_graph::TypeDb for TestModuleDb {
 #[salsa::db]
 impl ModuleDb for TestModuleDb {
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.module_lookup_count.fetch_add(1, Ordering::Relaxed);
         self.modules.get(path).copied()
     }
 
     fn for_each_module(&self, f: &mut dyn FnMut(ModuleInfo)) {
+        self.module_enumeration_count
+            .fetch_add(1, Ordering::Relaxed);
         for module in self.modules.values() {
             f(*module);
         }

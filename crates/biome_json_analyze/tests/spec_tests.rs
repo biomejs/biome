@@ -106,6 +106,10 @@ fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+        return;
+    }
+
     let (source_type, parser_options) = match input_file.extension() {
         Some("json") => (JsonFileSource::json(), JsonParserOptions::default()),
         Some("jsonc") => (

@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCasing.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+defineComponent({
+	name: "InvalidCasing",
+});
+
+defineComponent({
+	name: "invalid-casing",
+});
+
+defineComponent({
+	name: "invalidcasing",
+});
+
+```
+
+# Diagnostics
+```
+invalidCasing.js:5:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "InvalidCasing" doesn't match the file name "invalidCasing".
+  
+    4 │ defineComponent({
+  > 5 │ 	name: "InvalidCasing",
+      │ 	      ^^^^^^^^^^^^^^^
+    6 │ });
+    7 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalidCasing".
+  
+     3  3 │   
+     4  4 │   defineComponent({
+     5    │ - → name:·"InvalidCasing",
+        5 │ + → name:·"invalidCasing",
+     6  6 │   });
+     7  7 │   
+  
+
+```
+
+```
+invalidCasing.js:9:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "invalid-casing" doesn't match the file name "invalidCasing".
+  
+     8 │ defineComponent({
+   > 9 │ 	name: "invalid-casing",
+       │ 	      ^^^^^^^^^^^^^^^^
+    10 │ });
+    11 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalidCasing".
+  
+     7  7 │   
+     8  8 │   defineComponent({
+     9    │ - → name:·"invalid-casing",
+        9 │ + → name:·"invalidCasing",
+    10 10 │   });
+    11 11 │   
+  
+
+```
+
+```
+invalidCasing.js:13:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "invalidcasing" doesn't match the file name "invalidCasing".
+  
+    12 │ defineComponent({
+  > 13 │ 	name: "invalidcasing",
+       │ 	      ^^^^^^^^^^^^^^^
+    14 │ });
+    15 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalidCasing".
+  
+    11 11 │   
+    12 12 │   defineComponent({
+    13    │ - → name:·"invalidcasing",
+       13 │ + → name:·"invalidCasing",
+    14 14 │   });
+    15 15 │   
+  
+
+```

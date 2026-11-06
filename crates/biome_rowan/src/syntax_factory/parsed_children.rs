@@ -1,5 +1,5 @@
 use crate::SyntaxKind;
-use crate::green::GreenElement;
+use crate::green::CacheChild;
 use crate::syntax_factory::raw_syntax::{RawSyntaxElement, RawSyntaxElementRef};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 #[derive(Debug)]
 pub struct ParsedChildren<'a, K> {
     /// Reference to an array containing all children of this node or any of its parents
-    all_children: &'a mut Vec<(u64, GreenElement)>,
+    all_children: &'a mut Vec<CacheChild>,
 
     /// The index of the first child of this node in the `all_children` array
     first_child: usize,
@@ -16,7 +16,7 @@ pub struct ParsedChildren<'a, K> {
 }
 
 impl<'a, K: SyntaxKind> ParsedChildren<'a, K> {
-    pub(crate) fn new(all_children: &'a mut Vec<(u64, GreenElement)>, first_child: usize) -> Self {
+    pub(crate) fn new(all_children: &'a mut Vec<CacheChild>, first_child: usize) -> Self {
         Self {
             all_children,
             first_child,
@@ -47,17 +47,18 @@ impl<'a, K: SyntaxKind> IntoIterator for ParsedChildren<'a, K> {
 
 #[derive(Debug)]
 pub struct ParsedChildrenIntoIterator<'a, K> {
-    inner: std::vec::Drain<'a, (u64, GreenElement)>,
+    inner: std::vec::Drain<'a, CacheChild>,
     ph: PhantomData<K>,
 }
 
 impl<K: SyntaxKind> Iterator for ParsedChildrenIntoIterator<'_, K> {
     type Item = RawSyntaxElement<K>;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
-            .map(|(_, raw)| RawSyntaxElement::from(raw))
+            .map(|child| RawSyntaxElement::from(child.into_element()))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -75,10 +76,11 @@ impl<K: SyntaxKind> ExactSizeIterator for ParsedChildrenIntoIterator<'_, K> {
 }
 
 impl<K: SyntaxKind> DoubleEndedIterator for ParsedChildrenIntoIterator<'_, K> {
+    #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.inner
             .next_back()
-            .map(|(_, raw)| RawSyntaxElement::from(raw))
+            .map(|child| RawSyntaxElement::from(child.into_element()))
     }
 }
 
@@ -96,17 +98,18 @@ impl<'a, K: SyntaxKind> IntoIterator for &'a ParsedChildren<'a, K> {
 
 #[derive(Debug)]
 pub struct ParsedChildrenIterator<'a, K> {
-    inner: std::slice::Iter<'a, (u64, GreenElement)>,
+    inner: std::slice::Iter<'a, CacheChild>,
     ph: PhantomData<K>,
 }
 
 impl<'a, K: SyntaxKind> Iterator for ParsedChildrenIterator<'a, K> {
     type Item = RawSyntaxElementRef<'a, K>;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.inner
             .next()
-            .map(|(_, raw)| RawSyntaxElementRef::from(raw))
+            .map(|child| RawSyntaxElementRef::from(child.as_element_ref()))
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -124,9 +127,10 @@ impl<K: SyntaxKind> ExactSizeIterator for ParsedChildrenIterator<'_, K> {
 }
 
 impl<K: SyntaxKind> DoubleEndedIterator for ParsedChildrenIterator<'_, K> {
+    #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.inner
             .next_back()
-            .map(|(_, raw)| RawSyntaxElementRef::from(raw))
+            .map(|child| RawSyntaxElementRef::from(child.as_element_ref()))
     }
 }

@@ -16,6 +16,8 @@ use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
+use biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions;
+use biome_rule_options::use_consistent_lightness_notation::UseConsistentLightnessNotationOptions;
 
 #[derive(Debug, Default)]
 pub(crate) struct StylelintMigrationResults {
@@ -296,8 +298,63 @@ impl stylelint_stylelint::Rules {
             } else {
                 continue;
             };
-            migrate_stylelint_any_rule(&mut rules, &name, level, options, results);
+            if matches!(
+                data.primary_option,
+                Some(stylelint_stylelint::PrimaryOption::Unsupported)
+            ) {
+                continue;
+            }
+            if migrate_stylelint_any_rule(&mut rules, &name, level, options, results)
+                && let Some(primary_option) = data.primary_option
+            {
+                primary_option.migrate(&mut rules, data.ignore_at_rules);
+            }
         }
         rules
+    }
+}
+
+impl stylelint_stylelint::PrimaryOption {
+    /// Sets the options of the Biome rule that [migrate_stylelint_any_rule] enabled for this
+    /// Stylelint rule, keeping its level.
+    ///
+    /// `ignore_at_rules` holds the plain names of the `ignoreAtRules` secondary option.
+    fn migrate(self, rules: &mut biome_config::Rules, ignore_at_rules: Box<[Box<str>]>) {
+        match self {
+            Self::LightnessNotation(notation) => {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                let rule = group
+                    .unwrap_group_as_mut()
+                    .use_consistent_lightness_notation
+                    .get_or_insert(Default::default());
+                *rule = biome_config::RuleFixConfiguration::WithOptions(
+                    biome_config::RuleWithFixOptions {
+                        level: rule.level(),
+                        fix: None,
+                        options: UseConsistentLightnessNotationOptions {
+                            notation: Some(notation.into()),
+                        },
+                    },
+                );
+            }
+            Self::MaxNestingDepth(max) => {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                let rule = group
+                    .unwrap_group_as_mut()
+                    .no_excessive_nested_blocks
+                    .get_or_insert(Default::default());
+                *rule =
+                    biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
+                        level: rule.level(),
+                        options: NoExcessiveNestedBlocksOptions {
+                            max: Some(max),
+                            ignore_at_rules: (!ignore_at_rules.is_empty())
+                                .then_some(ignore_at_rules),
+                        },
+                    });
+            }
+            // Rules with an unsupported primary option are skipped before they are migrated.
+            Self::Unsupported => {}
+        }
     }
 }

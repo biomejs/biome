@@ -38,10 +38,10 @@ info: vue/interpolation/bitwise-or-operator.vue
 -        | filter3
 -        | filter4
 +      ) |
-+        filter1 |
-+        filter2 |
-+        filter3 |
-+        filter4
++      filter1 |
++      filter2 |
++      filter3 |
++      filter4
      }}
    </div>
  </template>
@@ -59,10 +59,10 @@ info: vue/interpolation/bitwise-or-operator.vue
           operator |
           a_long_long_long_long_long_long_long_long_long_long_variable,
       ) |
-        filter1 |
-        filter2 |
-        filter3 |
-        filter4
+      filter1 |
+      filter2 |
+      filter3 |
+      filter4
     }}
   </div>
 </template>

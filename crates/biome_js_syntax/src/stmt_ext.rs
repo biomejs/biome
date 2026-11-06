@@ -150,6 +150,11 @@ impl AnyJsVariableDeclaration {
         self.variable_kind() == Ok(JsVariableKind::Var)
     }
 
+    /// Whether the declaration is a `using` or `await using` declaration
+    pub fn is_using(&self) -> bool {
+        self.variable_kind() == Ok(JsVariableKind::Using)
+    }
+
     pub fn variable_kind(&self) -> SyntaxResult<JsVariableKind> {
         match self {
             Self::JsForVariableDeclaration(decl) => decl.variable_kind(),

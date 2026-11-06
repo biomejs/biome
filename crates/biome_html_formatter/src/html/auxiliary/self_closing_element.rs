@@ -1,3 +1,4 @@
+use crate::utils::markdown::starts_markdown_block;
 use crate::{
     html::lists::attribute_list::FormatHtmlAttributeListOptions,
     prelude::*,
@@ -42,6 +43,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
         let is_canonical_html_element = name
             .as_html_tag_name()
             .is_some_and(|name| should_lowercase_html_tag(f, name));
+        let is_single_line = starts_markdown_block(node.syntax(), f);
 
         write!(f, [l_angle_token.format(), name.format()])?;
 
@@ -54,6 +56,7 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                     .with_options(FormatHtmlAttributeListOptions {
                         is_canonical_html_element,
                         tag_name: Some(name.clone()),
+                        is_single_line,
                     })
                     .fmt(f)?;
 
@@ -70,6 +73,10 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
 
                     if will_have_slash {
                         write!(f, [hard_space()])?;
+                    }
+                } else if is_single_line {
+                    if self_close_void_elements.is_always() {
+                        write!(f, [space()])?;
                     }
                 } else if attributes.len() >= 1 {
                     if self_close_void_elements.is_always() {

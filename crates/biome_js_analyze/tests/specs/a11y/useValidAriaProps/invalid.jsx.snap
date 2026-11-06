@@ -33,6 +33,8 @@ invalid.jsx:2:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
     3 │ var a = <div aria-="foobar" />;
     4 │ var a = <div aria-labeledby="foobar" />;
   
+  i Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo.
+  
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
@@ -61,6 +63,8 @@ invalid.jsx:3:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
       │              ^^^^^^^^^^^^^^
     4 │ var a = <div aria-labeledby="foobar" />;
     5 │ var a = <div aria-skldjfaria-foo1="foobar" />;
+  
+  i Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo.
   
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
@@ -91,6 +95,8 @@ invalid.jsx:4:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
     5 │ var a = <div aria-skldjfaria-foo1="foobar" />;
     6 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
   
+  i Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo.
+  
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
@@ -120,6 +126,8 @@ invalid.jsx:5:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
     6 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
     7 │ 
   
+  i Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo.
+  
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
@@ -147,6 +155,8 @@ invalid.jsx:6:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
       │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
   
+  i Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo.
+  
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
@@ -173,6 +183,8 @@ invalid.jsx:6:9 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━�
   > 6 │ var a = <div aria-skldjfaria-foo1="foobar" aria-skldjfaria-foo222="foobar" />;
       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
+  
+  i Assistive technologies ignore ARIA attributes that do not exist, so the attribute has no effect. It is often a typo.
   
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.

@@ -42,6 +42,8 @@ Cite the affected path and violated requirement or avoidable cost. A possible bo
 - `run()` decides whether to signal; `action()` constructs a fix. Data used only by the action should not be built in `run()`.
 - Prefer borrows or `Cow` when the source buffer remains available.
 - Report an owning field type once at its definition rather than every allocation it forces.
+- A custom analyzer `Visitor` that returns `None` from `visited_kinds` forces a full walk of its phase for every rule. A set that omits a kind `visit` reads is a correctness bug.
+- A walk that casts most yielded nodes away, or reads tokens only for kind, text, range, or trivia, has a cheaper API in `syntax-text-handling`'s traversal reference.
 - Avoid caches, memoization, and hand-rolled fast paths without benchmark evidence and a correct invalidation strategy.
 
 ## API Shape

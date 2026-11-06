@@ -1,0 +1,2 @@
+h-[calc(100svh-var(--header))] flex p-4
+w-[calc(1px-2px)] w-[calc(100%-1rem)] w-[calc(100-var(--a))] w-[calc((1px)-2px)] w-[calc(1e-2px)] w-[min(10vw-1rem,_2px)]

@@ -33,6 +33,8 @@ invalid_dynamic_access.ts:3:3 lint/correctness/noUnusedPrivateClassMembers  FIXA
     4 │ 
     5 │   constructor() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
      1  1 │   export class Sample {

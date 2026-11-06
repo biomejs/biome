@@ -39,7 +39,8 @@ pub enum ResolutionMode {
     ///
     /// Like in browsers, a specifier without a leading `./`, such as
     /// `theme.css`, is first resolved relative to the importing file, and only
-    /// then as a package. Only `.css` files are resolved.
+    /// then as a package. Package exports use the `style` and `default`
+    /// conditions. Only `.css` extensions are inferred.
     Css,
 
     /// Rules for imports made by `<script>` blocks of HTML-like documents,
@@ -119,6 +120,7 @@ fn resolve_options(mode: ResolutionMode) -> ResolveOptions<'static> {
         },
         ResolutionMode::Css => ResolveOptions {
             assume_relative: true,
+            condition_names: &["style", "default"],
             extensions: &["css"],
             ..Default::default()
         },

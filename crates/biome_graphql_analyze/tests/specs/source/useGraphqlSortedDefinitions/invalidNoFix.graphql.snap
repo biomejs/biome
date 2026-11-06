@@ -1,0 +1,24 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidNoFix.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type b { id: ID! } type a { id: ID! } # a
+
+```
+
+# Diagnostics
+```
+invalidNoFix.graphql:2:1 assist/source/useGraphqlSortedDefinitions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The definitions of this document are not sorted.
+  
+    1 │ # should generate diagnostics
+  > 2 │ type b { id: ID! } type a { id: ID! } # a
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+
+```

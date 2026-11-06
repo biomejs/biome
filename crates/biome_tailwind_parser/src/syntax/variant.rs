@@ -1,4 +1,5 @@
 use crate::parser::TailwindParser;
+use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
 use crate::token_source::TailwindLexContext;
@@ -186,8 +187,11 @@ fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 
 fn parse_css_variable_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.expect(T!['(']);
-    p.expect(TW_VALUE);
+    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    let parameters = parse_css_parameter_list(p);
+    if parameters.range(p).is_empty() {
+        p.error(expected_value(p, p.cur_range()));
+    }
     p.expect(T![')']);
     Present(m.complete(p, TW_CSS_VARIABLE_VARIANT_SEGMENT))
 }

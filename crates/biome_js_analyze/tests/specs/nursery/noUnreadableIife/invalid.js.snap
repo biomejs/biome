@@ -1,0 +1,642 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo1 = (() => (a ? b : c))();
+const foo2 = (() => (
+	a ? b : c
+))();
+const foo3 = (
+	() => (
+		a ? b : c
+	)
+)();
+const foo4 = (() => (/* comment */ a ? b : c))();
+const foo5 = (() => (
+	a, b
+))();
+const foo6 = (() => ({
+	a: b,
+}))();
+const foo7 = (bar => (bar))();
+(async () => ({
+	bar,
+}))();
+const foo8 = (async (bar) => ({
+	bar: await baz(),
+}))();
+(async () => (( {bar} )))();
+const foo9 = (() => (a ? b : c /* comment */))();
+const foo10 = (() => (a /* comment */ ? b : c))();
+const foo11 = (() => (
+	// comment
+	a
+))();
+const foo12 = (() => (
+	a // comment
+))();
+const foo13 = (() => ((/* comment */ a)))();
+const foo14 = ((() => (a)))();
+const foo15 = (() => (a))?.();
+const foo16 = (() => (a))(b)(c);
+const foo17 = (() =>
+	// comment
+	(a))();
+const foo18 = (() => (a) /* comment */)();
+
+```
+
+# Diagnostics
+```
+invalid.js:2:21 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const foo1 = (() => (a ? b : c))();
+      │                     ^^^^^^^^^^^
+    3 │ const foo2 = (() => (
+    4 │ 	a ? b : c
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·foo1·=·(()·=>·(a·?·b·:·c))();
+        2 │ + const·foo1·=·(()·=>·{·return·a·?·b·:·c;·})();
+     3  3 │   const foo2 = (() => (
+     4  4 │   	a ? b : c
+  
+
+```
+
+```
+invalid.js:3:21 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const foo1 = (() => (a ? b : c))();
+  > 3 │ const foo2 = (() => (
+      │                     ^
+  > 4 │ 	a ? b : c
+  > 5 │ ))();
+      │ ^
+    6 │ const foo3 = (
+    7 │ 	() => (
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const foo1 = (() => (a ? b : c))();
+     3    │ - const·foo2·=·(()·=>·(
+     4    │ - → a·?·b·:·c
+     5    │ - ))();
+        3 │ + const·foo2·=·(()·=>·{·return·a·?·b·:·c;·})();
+     6  4 │   const foo3 = (
+     7  5 │     () => (
+  
+
+```
+
+```
+invalid.js:7:8 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+     5 │ ))();
+     6 │ const foo3 = (
+   > 7 │ 	() => (
+       │ 	      ^
+   > 8 │ 		a ? b : c
+   > 9 │ 	)
+       │ 	^
+    10 │ )();
+    11 │ const foo4 = (() => (/* comment */ a ? b : c))();
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+     5  5 │   ))();
+     6  6 │   const foo3 = (
+     7    │ - → ()·=>·(
+     8    │ - → → a·?·b·:·c
+     9    │ - → )
+        7 │ + → ()·=>·{·return·a·?·b·:·c;·}
+    10  8 │   )();
+    11  9 │   const foo4 = (() => (/* comment */ a ? b : c))();
+  
+
+```
+
+```
+invalid.js:11:21 lint/nursery/noUnreadableIife ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+     9 │ 	)
+    10 │ )();
+  > 11 │ const foo4 = (() => (/* comment */ a ? b : c))();
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ const foo5 = (() => (
+    13 │ 	a, b
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:21 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    10 │ )();
+    11 │ const foo4 = (() => (/* comment */ a ? b : c))();
+  > 12 │ const foo5 = (() => (
+       │                     ^
+  > 13 │ 	a, b
+  > 14 │ ))();
+       │ ^
+    15 │ const foo6 = (() => ({
+    16 │ 	a: b,
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    10 10 │   )();
+    11 11 │   const foo4 = (() => (/* comment */ a ? b : c))();
+    12    │ - const·foo5·=·(()·=>·(
+    13    │ - → a,·b
+    14    │ - ))();
+       12 │ + const·foo5·=·(()·=>·{·return·a,·b;·})();
+    15 13 │   const foo6 = (() => ({
+    16 14 │     a: b,
+  
+
+```
+
+```
+invalid.js:15:21 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    13 │ 	a, b
+    14 │ ))();
+  > 15 │ const foo6 = (() => ({
+       │                     ^^
+  > 16 │ 	a: b,
+  > 17 │ }))();
+       │ ^^
+    18 │ const foo7 = (bar => (bar))();
+    19 │ (async () => ({
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    13 13 │   	a, b
+    14 14 │   ))();
+    15    │ - const·foo6·=·(()·=>·({
+       15 │ + const·foo6·=·(()·=>·{·return·{
+    16 16 │   	a: b,
+    17    │ - }))();
+       17 │ + };·})();
+    18 18 │   const foo7 = (bar => (bar))();
+    19 19 │   (async () => ({
+  
+
+```
+
+```
+invalid.js:18:22 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    16 │ 	a: b,
+    17 │ }))();
+  > 18 │ const foo7 = (bar => (bar))();
+       │                      ^^^^^
+    19 │ (async () => ({
+    20 │ 	bar,
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    16 16 │   	a: b,
+    17 17 │   }))();
+    18    │ - const·foo7·=·(bar·=>·(bar))();
+       18 │ + const·foo7·=·(bar·=>·{·return·bar;·})();
+    19 19 │   (async () => ({
+    20 20 │   	bar,
+  
+
+```
+
+```
+invalid.js:19:14 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    17 │ }))();
+    18 │ const foo7 = (bar => (bar))();
+  > 19 │ (async () => ({
+       │              ^^
+  > 20 │ 	bar,
+  > 21 │ }))();
+       │ ^^
+    22 │ const foo8 = (async (bar) => ({
+    23 │ 	bar: await baz(),
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    17 17 │   }))();
+    18 18 │   const foo7 = (bar => (bar))();
+    19    │ - (async·()·=>·({
+       19 │ + (async·()·=>·{·return·{
+    20 20 │   	bar,
+    21    │ - }))();
+       21 │ + };·})();
+    22 22 │   const foo8 = (async (bar) => ({
+    23 23 │   	bar: await baz(),
+  
+
+```
+
+```
+invalid.js:22:30 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    20 │ 	bar,
+    21 │ }))();
+  > 22 │ const foo8 = (async (bar) => ({
+       │                              ^^
+  > 23 │ 	bar: await baz(),
+  > 24 │ }))();
+       │ ^^
+    25 │ (async () => (( {bar} )))();
+    26 │ const foo9 = (() => (a ? b : c /* comment */))();
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    20 20 │   	bar,
+    21 21 │   }))();
+    22    │ - const·foo8·=·(async·(bar)·=>·({
+       22 │ + const·foo8·=·(async·(bar)·=>·{·return·{
+    23 23 │   	bar: await baz(),
+    24    │ - }))();
+       24 │ + };·})();
+    25 25 │   (async () => (( {bar} )))();
+    26 26 │   const foo9 = (() => (a ? b : c /* comment */))();
+  
+
+```
+
+```
+invalid.js:25:14 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    23 │ 	bar: await baz(),
+    24 │ }))();
+  > 25 │ (async () => (( {bar} )))();
+       │              ^^^^^^^^^^^
+    26 │ const foo9 = (() => (a ? b : c /* comment */))();
+    27 │ const foo10 = (() => (a /* comment */ ? b : c))();
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    23 23 │   	bar: await baz(),
+    24 24 │   }))();
+    25    │ - (async·()·=>·((·{bar}·)))();
+       25 │ + (async·()·=>·{·return·{bar};·})();
+    26 26 │   const foo9 = (() => (a ? b : c /* comment */))();
+    27 27 │   const foo10 = (() => (a /* comment */ ? b : c))();
+  
+
+```
+
+```
+invalid.js:26:21 lint/nursery/noUnreadableIife ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    24 │ }))();
+    25 │ (async () => (( {bar} )))();
+  > 26 │ const foo9 = (() => (a ? b : c /* comment */))();
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ const foo10 = (() => (a /* comment */ ? b : c))();
+    28 │ const foo11 = (() => (
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:22 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    25 │ (async () => (( {bar} )))();
+    26 │ const foo9 = (() => (a ? b : c /* comment */))();
+  > 27 │ const foo10 = (() => (a /* comment */ ? b : c))();
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ const foo11 = (() => (
+    29 │ 	// comment
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    25 25 │   (async () => (( {bar} )))();
+    26 26 │   const foo9 = (() => (a ? b : c /* comment */))();
+    27    │ - const·foo10·=·(()·=>·(a·/*·comment·*/·?·b·:·c))();
+       27 │ + const·foo10·=·(()·=>·{·return·a·/*·comment·*/·?·b·:·c;·})();
+    28 28 │   const foo11 = (() => (
+    29 29 │   	// comment
+  
+
+```
+
+```
+invalid.js:28:22 lint/nursery/noUnreadableIife ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    26 │ const foo9 = (() => (a ? b : c /* comment */))();
+    27 │ const foo10 = (() => (a /* comment */ ? b : c))();
+  > 28 │ const foo11 = (() => (
+       │                      ^
+  > 29 │ 	// comment
+  > 30 │ 	a
+  > 31 │ ))();
+       │ ^
+    32 │ const foo12 = (() => (
+    33 │ 	a // comment
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:22 lint/nursery/noUnreadableIife ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    30 │ 	a
+    31 │ ))();
+  > 32 │ const foo12 = (() => (
+       │                      ^
+  > 33 │ 	a // comment
+  > 34 │ ))();
+       │ ^
+    35 │ const foo13 = (() => ((/* comment */ a)))();
+    36 │ const foo14 = ((() => (a)))();
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:22 lint/nursery/noUnreadableIife ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    33 │ 	a // comment
+    34 │ ))();
+  > 35 │ const foo13 = (() => ((/* comment */ a)))();
+       │                      ^^^^^^^^^^^^^^^^^^^
+    36 │ const foo14 = ((() => (a)))();
+    37 │ const foo15 = (() => (a))?.();
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:23 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    34 │ ))();
+    35 │ const foo13 = (() => ((/* comment */ a)))();
+  > 36 │ const foo14 = ((() => (a)))();
+       │                       ^^^
+    37 │ const foo15 = (() => (a))?.();
+    38 │ const foo16 = (() => (a))(b)(c);
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    34 34 │   ))();
+    35 35 │   const foo13 = (() => ((/* comment */ a)))();
+    36    │ - const·foo14·=·((()·=>·(a)))();
+       36 │ + const·foo14·=·((()·=>·{·return·a;·}))();
+    37 37 │   const foo15 = (() => (a))?.();
+    38 38 │   const foo16 = (() => (a))(b)(c);
+  
+
+```
+
+```
+invalid.js:37:22 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    35 │ const foo13 = (() => ((/* comment */ a)))();
+    36 │ const foo14 = ((() => (a)))();
+  > 37 │ const foo15 = (() => (a))?.();
+       │                      ^^^
+    38 │ const foo16 = (() => (a))(b)(c);
+    39 │ const foo17 = (() =>
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    35 35 │   const foo13 = (() => ((/* comment */ a)))();
+    36 36 │   const foo14 = ((() => (a)))();
+    37    │ - const·foo15·=·(()·=>·(a))?.();
+       37 │ + const·foo15·=·(()·=>·{·return·a;·})?.();
+    38 38 │   const foo16 = (() => (a))(b)(c);
+    39 39 │   const foo17 = (() =>
+  
+
+```
+
+```
+invalid.js:38:22 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    36 │ const foo14 = ((() => (a)))();
+    37 │ const foo15 = (() => (a))?.();
+  > 38 │ const foo16 = (() => (a))(b)(c);
+       │                      ^^^
+    39 │ const foo17 = (() =>
+    40 │ 	// comment
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    36 36 │   const foo14 = ((() => (a)))();
+    37 37 │   const foo15 = (() => (a))?.();
+    38    │ - const·foo16·=·(()·=>·(a))(b)(c);
+       38 │ + const·foo16·=·(()·=>·{·return·a;·})(b)(c);
+    39 39 │   const foo17 = (() =>
+    40 40 │   	// comment
+  
+
+```
+
+```
+invalid.js:41:2 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    39 │ const foo17 = (() =>
+    40 │ 	// comment
+  > 41 │ 	(a))();
+       │ 	^^^
+    42 │ const foo18 = (() => (a) /* comment */)();
+    43 │ 
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    39 39 │   const foo17 = (() =>
+    40 40 │     // comment
+    41    │ - → (a))();
+       41 │ + → {·return·a;·})();
+    42 42 │   const foo18 = (() => (a) /* comment */)();
+    43 43 │   
+  
+
+```
+
+```
+invalid.js:42:22 lint/nursery/noUnreadableIife  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This immediately called arrow function has a body wrapped in parentheses.
+  
+    40 │ 	// comment
+    41 │ 	(a))();
+  > 42 │ const foo18 = (() => (a) /* comment */)();
+       │                      ^^^
+    43 │ 
+  
+  i The extra parentheses make the function look like a grouped expression, which hides where the function body starts.
+  
+  i Move the code out of the function, or use a body in braces with a return statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use a body in braces with a return statement.
+  
+    40 40 │   	// comment
+    41 41 │   	(a))();
+    42    │ - const·foo18·=·(()·=>·(a)·/*·comment·*/)();
+       42 │ + const·foo18·=·(()·=>·{·return·a;·}·/*·comment·*/)();
+    43 43 │   
+  
+
+```

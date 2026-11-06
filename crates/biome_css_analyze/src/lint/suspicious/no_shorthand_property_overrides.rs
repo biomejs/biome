@@ -4,10 +4,21 @@ use biome_analyze::{
     Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_css_syntax::{
+    AnyCssDeclarationName, CssDeclarationList, CssDeclarationOrAtRuleList,
+    CssDeclarationOrRuleList, CssGenericProperty, CssLanguage, CssPageAtRuleItemList, CssSyntaxKind,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent};
+use biome_rowan::{
+    AstNode, Language, SyntaxKindSet, SyntaxNode, TextRange, TokenText, WalkEvent,
+};
 use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
+use rustc_hash::FxHashMap;
+
+const DECLARATION_LIST_KINDS: SyntaxKindSet<CssLanguage> = CssDeclarationList::KIND_SET
+    .union(CssDeclarationOrAtRuleList::KIND_SET)
+    .union(CssDeclarationOrRuleList::KIND_SET)
+    .union(CssPageAtRuleItemList::KIND_SET);
 
 declare_lint_rule! {
     /// Disallow shorthand properties that override earlier, more specific properties.
@@ -17,6 +28,11 @@ declare_lint_rule! {
     /// earlier left-side value. Put the shorthand first or use only the specific properties.
     ///
     /// See [MDN's shorthand property guide](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
+    ///
+    /// ## SCSS limitations
+    ///
+    /// Declarations are compared within each authored declaration block. The rule does not expand
+    /// mixins or includes, so overrides introduced only after SCSS expansion are not reported.
     ///
     /// ## Examples
     ///
@@ -144,18 +160,30 @@ fn get_override_props(property: &str) -> Vec<&str> {
     merged
 }
 
-struct PriorProperty {
-    original: TokenText,
-    lowercase: Box<str>,
+/// The declarations seen so far in one declaration list.
+#[derive(Default)]
+struct PriorProperties {
+    props: Vec<TokenText>,
+    /// Indices into `props`, keyed by the vendor prefix and then by the lowercase property name
+    /// without that prefix, so a shorthand looks up only the properties it overrides instead of
+    /// scanning the list.
+    indices_by_name: FxHashMap<&'static str, FxHashMap<Box<str>, Vec<usize>>>,
 }
 
 #[derive(Default)]
 struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
-    prior_props_in_lists: Vec<Vec<PriorProperty>>,
+    prior_props_in_lists: Vec<PriorProperties>,
 }
 
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
     type Language = CssLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<CssLanguage>>,
+    ) -> Option<SyntaxKindSet<CssLanguage>> {
+        Some(CssGenericProperty::KIND_SET.union(DECLARATION_LIST_KINDS))
+    }
 
     fn visit(
         &mut self,
@@ -189,30 +217,42 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                     let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, prop_prefix);
                     let override_props = get_override_props(unprefixed_prop);
 
-                    for prior_prop in prior_props.iter() {
-                        let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
-                        let unprefixed_prior_prop =
-                            remove_vendor_prefix(&prior_prop.lowercase, prior_prop_prefix);
+                    let mut overridden: Vec<_> = prior_props
+                        .indices_by_name
+                        .get(prop_prefix)
+                        .into_iter()
+                        .flat_map(|indices_by_unprefixed_name| {
+                            override_props
+                                .iter()
+                                .filter_map(|name| indices_by_unprefixed_name.get(*name))
+                        })
+                        .flatten()
+                        .copied()
+                        .collect();
+                    // Report the overridden declarations in source order.
+                    overridden.sort_unstable();
+                    overridden.dedup();
 
-                        if prop_prefix == prior_prop_prefix
-                            && override_props.binary_search(&unprefixed_prior_prop).is_ok()
-                        {
-                            ctx.match_query(NoDeclarationBlockShorthandPropertyOverridesQuery {
-                                property_node: property_node.clone(),
-                                target_property: prop.clone(),
-                                override_property: prior_prop.original.clone(),
-                            });
-                        }
+                    for index in overridden {
+                        ctx.match_query(NoDeclarationBlockShorthandPropertyOverridesQuery {
+                            property_node: property_node.clone(),
+                            target_property: prop.clone(),
+                            override_property: prior_props.props[index].clone(),
+                        });
                     }
 
-                    prior_props.push(PriorProperty {
-                        original: prop,
-                        lowercase: prop_lowercase.into(),
-                    });
+                    prior_props
+                        .indices_by_name
+                        .entry(prop_prefix)
+                        .or_default()
+                        .entry(unprefixed_prop.into())
+                        .or_default()
+                        .push(prior_props.props.len());
+                    prior_props.props.push(prop);
                 }
 
                 kind if is_declaration_list(kind) => {
-                    self.prior_props_in_lists.push(Vec::new());
+                    self.prior_props_in_lists.push(PriorProperties::default());
                 }
                 _ => {}
             },
@@ -225,13 +265,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
 }
 
 fn is_declaration_list(kind: CssSyntaxKind) -> bool {
-    matches!(
-        kind,
-        CssSyntaxKind::CSS_DECLARATION_LIST
-            | CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST
-            | CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
-            | CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST
-    )
+    DECLARATION_LIST_KINDS.matches(kind)
 }
 
 fn is_declaration_in_list(node: &SyntaxNode<CssLanguage>) -> bool {

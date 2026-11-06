@@ -16,7 +16,8 @@ use biome_configuration::BiomeDiagnostic;
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
 use biome_deserialize::TextRange;
 use biome_diagnostics::{
-    Advices, CodeFrameAdvice, Diagnostic, Error, LogCategory, PrintDiagnostic, Visit,
+    Advices, CodeFrameAdvice, Diagnostic, Error, LogCategory, MessageAndDescription,
+    PrintDiagnostic, Visit,
 };
 use biome_service::{WorkspaceError, configuration::load_configuration, settings::Settings};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -59,9 +60,6 @@ pub(crate) fn inspect(
 }
 
 /// Owns the inputs and application state for one `inspect config` invocation.
-///
-/// Validation happens during construction so `execute` can run the inspection pipeline without
-/// representing invalid combinations such as `--path` without a configuration key.
 struct ConfigInspectionCommand<'app, 'options> {
     session: CliSession<'app>,
     cli_options: &'options CliOptions,
@@ -70,7 +68,6 @@ struct ConfigInspectionCommand<'app, 'options> {
 }
 
 impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
-    /// Parses the optional key and rejects argument combinations that cannot be executed.
     fn new(
         session: CliSession<'app>,
         cli_options: &'options CliOptions,
@@ -78,10 +75,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         path: Option<String>,
     ) -> Result<Self, CliDiagnostic> {
         let key = key.map(ConfigurationKey::parse).transpose()?;
-
-        if path.is_some() && key.is_none() {
-            return Err(CliDiagnostic::missing_argument("KEY", "inspect config"));
-        }
 
         Ok(Self {
             session,
@@ -124,14 +117,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
                 )
             })?;
 
-        let Some(key) = key else {
-            return Self::print_resolved_configuration(
-                session,
-                configuration_path.as_deref(),
-                &inspector,
-            );
-        };
-
         let matched_path = path.as_deref().map(|path| {
             let path = Utf8PathBuf::from(path);
             let path = path.strip_prefix("./").unwrap_or(&path);
@@ -155,6 +140,24 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
                 .matching_indices(path)
                 .collect::<Vec<_>>()
         });
+
+        let Some(key) = key else {
+            let serialized_configuration = path
+                .as_ref()
+                .map(|_| inspector.serialized_configuration_with_overrides(&matching_overrides))
+                .transpose()?;
+            let serialized_configuration = serialized_configuration
+                .as_ref()
+                .unwrap_or_else(|| inspector.serialized_configuration());
+            return Self::print_resolved_configuration(
+                session,
+                configuration_path.as_deref(),
+                &inspector,
+                serialized_configuration,
+                path.is_none() && inspector.has_overrides(),
+            );
+        };
+
         let inspection =
             inspector.inspect_key(&key, &matching_overrides, matched_path_display.as_deref())?;
 
@@ -175,13 +178,15 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         Ok(())
     }
 
-    /// Renders the structurally resolved configuration without evaluating overrides for a path.
+    /// Renders the resolved configuration, applying matching overrides when a path is provided.
     fn print_resolved_configuration(
         session: CliSession,
         configuration_path: Option<&Utf8Path>,
         inspector: &ConfigurationInspector,
+        serialized_configuration: &serde_json::Value,
+        has_unevaluated_overrides: bool,
     ) -> Result<(), CliDiagnostic> {
-        let output = serde_json::to_string_pretty(inspector.serialized_configuration())
+        let output = serde_json::to_string_pretty(serialized_configuration)
             .map_err(|_| WorkspaceError::from(BiomeDiagnostic::new_serialization_error()))?;
 
         let configuration_paths = inspector.configuration_paths().collect::<Vec<_>>();
@@ -189,7 +194,7 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
             configuration_path,
             &configuration_paths,
             output,
-            inspector.has_overrides(),
+            has_unevaluated_overrides,
         );
         session
             .app
@@ -231,7 +236,8 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
 #[diagnostic(category = "configuration", severity = Information)]
 struct InspectionDiagnostic {
     #[message]
-    message: MarkupBuf,
+    #[description]
+    message: MessageAndDescription,
     #[location(resource)]
     path: Option<String>,
     #[location(span)]
@@ -269,8 +275,10 @@ impl InspectionDiagnostic {
             ));
         }
         Self {
-            message: markup! { "Resolved configuration from "<Emphasis>{path_text}</Emphasis>"." }
-                .to_owned(),
+            message: MessageAndDescription::from(
+                markup! { "Resolved configuration from "<Emphasis>{path_text}</Emphasis>"." }
+                    .to_owned(),
+            ),
             path: path.map(|path| display_path(path).into_owned()),
             span: None,
             source_code: None,
@@ -280,7 +288,9 @@ impl InspectionDiagnostic {
 
     fn absent(key: String) -> Self {
         Self {
-            message: markup! { "The key "<Emphasis>{key}</Emphasis>" doesn't exist." }.to_owned(),
+            message: MessageAndDescription::from(
+                markup! { "The key "<Emphasis>{key}</Emphasis>" doesn't exist." }.to_owned(),
+            ),
             path: None,
             span: None,
             source_code: None,
@@ -303,10 +313,12 @@ impl InspectionDiagnostic {
         });
         let advice = Self::source_advices(sources, root_path);
         Self {
-            message: markup! {
-                "The key "<Emphasis>{key}</Emphasis>" has the following value."
-            }
-            .to_owned(),
+            message: MessageAndDescription::from(
+                markup! {
+                    "The key "<Emphasis>{key}</Emphasis>" has the following value."
+                }
+                .to_owned(),
+            ),
             path: location.as_ref().map(|(path, _, _)| path.clone()),
             span: location.as_ref().and_then(|(_, span, _)| *span),
             source_code: location.map(|(_, _, source)| source),

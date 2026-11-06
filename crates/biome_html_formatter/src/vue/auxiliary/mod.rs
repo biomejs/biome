@@ -7,6 +7,7 @@ pub(crate) mod modifier;
 pub(crate) mod static_argument;
 pub(crate) mod v_bind_shorthand_directive;
 pub(crate) mod v_for_array_binding;
+pub(crate) mod v_for_default_binding;
 pub(crate) mod v_for_identifier_binding;
 pub(crate) mod v_for_in_operator;
 pub(crate) mod v_for_object_binding;

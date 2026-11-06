@@ -7,7 +7,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallExpression, JsStaticMemberExpression, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 use biome_rule_options::no_playwright_wait_for_selector::NoPlaywrightWaitForSelectorOptions;
 
 use crate::JsRuleAction;
@@ -127,8 +127,11 @@ impl Rule for NoPlaywrightWaitForSelector {
             make::js_name(make::ident("locator")).into(),
         );
 
-        let locator_args =
-            make::js_call_arguments(make::token(T!['(']), make_arg_list([selector_arg]), make::token(T![')']));
+        let locator_args = make::js_call_arguments(
+            make::token(T!['(']),
+            make_arg_list([selector_arg]),
+            make::token(T![')']),
+        );
 
         let locator_call = make::js_call_expression(
             AnyJsExpression::JsStaticMemberExpression(locator_member),
@@ -144,7 +147,11 @@ impl Rule for NoPlaywrightWaitForSelector {
         );
 
         let wait_for_args = if let Some(opts) = options_arg {
-            make::js_call_arguments(make::token(T!['(']), make_arg_list([opts.clone()]), make::token(T![')']))
+            make::js_call_arguments(
+                make::token(T!['(']),
+                make_arg_list([opts.clone()]),
+                make::token(T![')']),
+            )
         } else {
             make::js_call_arguments(
                 make::token(T!['(']),
@@ -164,7 +171,8 @@ impl Rule for NoPlaywrightWaitForSelector {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Replace with "<Emphasis>"locator(selector).waitFor()"</Emphasis>"." }.to_owned(),
+            markup! { "Replace with "<Emphasis>"locator(selector).waitFor()"</Emphasis>"." }
+                .to_owned(),
             mutation,
         ))
     }
@@ -182,7 +190,7 @@ fn make_arg_list(
 
     let mut separators = Vec::new();
     for _ in 0..len.saturating_sub(1) {
-        separators.push(make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
+        separators.push(make::token(T![,]).with_trailing_space());
     }
 
     make::js_call_argument_list(args, separators)

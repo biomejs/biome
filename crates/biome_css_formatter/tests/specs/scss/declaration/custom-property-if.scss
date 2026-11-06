@@ -1,0 +1,9 @@
+.card {
+  --short: if(media(print):1;else:2);
+  --long: if(supports(display: grid): calc(100% - var(--gutter-width) * 2 + $gap); media(print): none; else: auto);
+  --empty-branch: if(media(print): ; else: 1);
+  --double-slash: if(media(print): url(//cdn.example/a.svg) // note
+    ; else: 0);
+  --interpolated: if(media(print): #{$gap}; else: 0) $after;
+  --legacy: if($condition,a,b);
+}

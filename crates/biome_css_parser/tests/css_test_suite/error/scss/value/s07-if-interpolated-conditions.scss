@@ -1,0 +1,21 @@
+$condition: "style(--status: complete)";
+
+.empty-interpolation { color: if(#{}: red; else: blue); next: retained; }
+.malformed-expression { color: if(#{1 + }: red; else: blue); next: retained; }
+.missing-interpolation-close { color: if(#{$condition: red; else: blue); next: retained; }
+.missing-colon { color: if(#{$condition} red; else: blue); next: retained; }
+.missing-semicolon { color: if(#{$condition}: red else: blue); next: retained; }
+.missing-outer-close { color: if(#{$condition}: red; else: blue; next: retained; }
+.bare-variable { color: if($condition: red; else: blue); next: retained; }
+
+.branch-missing-operand { width: if(#{$condition}: 1px + ; else: 2px); height: 1px; }
+.branch-missing-colon { width: if(#{$condition}: 0; sass(true) 1px + 2px; else: 0); height: 1px; }
+.branch-missing-map-close { width: if(#{$condition}: (a: 1; else: 2); height: 1px; }
+.branch-missing-list-close { width: if(#{$condition}: (1,2; else: 0); height: 1px; }
+@container card if(#{$condition}: 1px; else: 0) { .css-only { color: red; } }
+@container card if(style(--enabled: true) and #{$condition}: 1px; else: 0) { .css-only-right { color: red; } }
+@container card if(not #{$condition}: 1px; else: 0) { .css-only-not { color: red; } }
+@container card if((#{$condition}): 1px; else: 0) { .css-only-grouped { color: red; } }
+@container card if(style(--enabled: true): if(#{$condition}: 1px; else: 0); else: 0) { .css-only-nested { color: red; } }
+@container card if(style(--enabled: true): 1px; else: 0) { .native { color: red; } }
+.after { display: block; }

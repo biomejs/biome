@@ -28,3 +28,37 @@ and continues with enough words to wrap
 ===
 
 [a-long-reference-label]: https://example.com/a/long/destination "A long reference title"
+
+English
+English
+日本語
+日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語
+日本語
+한국어
+한국어
+中文
+中文！
+한국어
+（中文）
+
+日本語日本語日本語日本語 日本語日本語日本語日本語
+
+**日本**
+語
+
+日
+**本語**
+
+[日本](https://example.com)
+語
+
+`日本`
+語
+
+&#x65E5;
+本
+
+葛&#xFE00;&#xAD;
+&#x200E;福
+
+日本語日本語**日本語** 日本語日本語日本語日本語

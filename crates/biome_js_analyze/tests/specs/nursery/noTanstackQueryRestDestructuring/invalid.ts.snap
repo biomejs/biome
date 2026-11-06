@@ -1,0 +1,165 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { useQueries, useQuery } from "@tanstack/react-query";
+
+function AsExpression() {
+	const { data, ...rest } = useQuery() as { data: string[]; isPending: boolean };
+	return rest;
+}
+
+function NonNullAssertion() {
+	const { data, ...rest } = useQuery()!;
+	return rest;
+}
+
+function TypeArguments() {
+	const { data, ...rest } = useQuery<string[]>();
+	return rest;
+}
+
+function AnnotatedVariable() {
+	const query: { data: string[] } = useQuery();
+	const { data, ...rest } = query;
+	return rest;
+}
+
+function SpreadOfAsExpression() {
+	const query = useQuery();
+	return { ...(query as object) };
+}
+
+function Queries() {
+	const [{ data, ...rest }] = useQueries([]) as { data: string[] }[];
+	return rest;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:16 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    4 │ function AsExpression() {
+  > 5 │ 	const { data, ...rest } = useQuery() as { data: string[]; isPending: boolean };
+      │ 	              ^^^^^^^
+    6 │ 	return rest;
+    7 │ }
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:16 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+     9 │ function NonNullAssertion() {
+  > 10 │ 	const { data, ...rest } = useQuery()!;
+       │ 	              ^^^^^^^
+    11 │ 	return rest;
+    12 │ }
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:16 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    14 │ function TypeArguments() {
+  > 15 │ 	const { data, ...rest } = useQuery<string[]>();
+       │ 	              ^^^^^^^
+    16 │ 	return rest;
+    17 │ }
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:21:16 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    19 │ function AnnotatedVariable() {
+    20 │ 	const query: { data: string[] } = useQuery();
+  > 21 │ 	const { data, ...rest } = query;
+       │ 	              ^^^^^^^
+    22 │ 	return rest;
+    23 │ }
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:27:11 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This spread copies every property of a TanStack Query result.
+  
+    25 │ function SpreadOfAsExpression() {
+    26 │ 	const query = useQuery();
+  > 27 │ 	return { ...(query as object) };
+       │ 	         ^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i A query result only updates the component when a property that the component reads changes. Copying the result reads all of its properties, so the component updates on every change to the query.
+  
+  i Remove the spread and copy the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:17 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rest element collects every remaining property of a TanStack Query result.
+  
+    30 │ function Queries() {
+  > 31 │ 	const [{ data, ...rest }] = useQueries([]) as { data: string[] }[];
+       │ 	               ^^^^^^^
+    32 │ 	return rest;
+    33 │ }
+  
+  i A query result only updates the component when a property that the component reads changes. Collecting the remaining properties reads all of them, so the component updates on every change to the query.
+  
+  i Remove the rest element and list the properties that you need.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

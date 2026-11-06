@@ -1,0 +1,4 @@
+{
+	"name": "example",
+	"engines": "node >=24"
+}

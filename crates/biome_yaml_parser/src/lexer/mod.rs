@@ -501,7 +501,12 @@ impl<'src> YamlLexer<'src> {
         } else if current == b'\'' {
             self.consume_single_quoted_literal().into()
         } else if is_start_of_plain(current, self.peek_byte(), false) {
-            self.consume_plain_literal(current, false).into()
+            let (scalar, trailing_blanks) = self.consume_plain_literal(current, false);
+            let mut tokens = VecDeque::from([scalar]);
+            if let Some(blanks_start) = trailing_blanks {
+                self.push_blank_trivia(blanks_start, &mut tokens);
+            }
+            tokens
         } else {
             VecDeque::new()
         }
@@ -560,6 +565,7 @@ impl<'src> YamlLexer<'src> {
                 append_tokens(&mut collection_tokens, &mut trivia);
                 continue;
             }
+            let mut trailing_blanks = None;
             let token = match (current, self.peek_byte()) {
                 (c, _) if is_space(c) => self.consume_whitespace_token(),
                 (b'#', _) if self.is_at_comment() => self.consume_comment(),
@@ -598,7 +604,9 @@ impl<'src> YamlLexer<'src> {
                 (b'&', _) => self.consume_anchor_property(),
                 (b'!', _) => self.consume_tag_property(),
                 (current, peek) if is_start_of_plain(current, peek, true) => {
-                    self.consume_plain_literal(current, true)
+                    let (scalar, blanks_start) = self.consume_plain_literal(current, true);
+                    trailing_blanks = blanks_start;
+                    scalar
                 }
                 // ':', '?', '-' can be a valid plain token start, so it must be placed after plain
                 (b':', _) => self.consume_byte_as_token(T![:]),
@@ -607,6 +615,9 @@ impl<'src> YamlLexer<'src> {
                 _ => self.consume_unexpected_token(),
             };
             collection_tokens.push_back(token);
+            if let Some(blanks_start) = trailing_blanks {
+                self.push_blank_trivia(blanks_start, &mut collection_tokens);
+            }
             if self.breach_parent_scope() && current_depth == 0 {
                 break;
             }
@@ -619,14 +630,32 @@ impl<'src> YamlLexer<'src> {
 
     // https://yaml.org/spec/1.2.2/#rule-ns-plain
     // TODO: parse multiline plain scalar at current indentation level
-    fn consume_plain_literal(&mut self, current: u8, in_flow_collection: bool) -> LexToken {
+    /// Consumes a plain scalar and returns its token.
+    ///
+    /// When the scalar is followed by blanks and line breaks that were
+    /// consumed with it, also returns where they start. They end at the
+    /// current coordinate, and [Self::push_blank_trivia] must push them after
+    /// the scalar's token.
+    fn consume_plain_literal(
+        &mut self,
+        current: u8,
+        in_flow_collection: bool,
+    ) -> (LexToken, Option<TextCoordinate>) {
         debug_assert!(is_start_of_plain(
             current,
             self.peek_byte(),
             in_flow_collection
         ));
         let start = self.current_coordinate;
+        // Start of the blanks and line breaks consumed since the last content
+        // character, along with the diagnostics count at that point. A scalar
+        // can't end with blanks, so they are excluded from its token
+        let mut trailing_blanks = None;
+        // Whether the scalar ended at a character that isn't a blank, a line
+        // break, or the start of a comment, such as the `:` of an implicit key
+        let mut ended_at_indicator = false;
         while let Some(c) = self.current_byte() {
+            let blanks = trailing_blanks.take();
             if self.is_at_bom() {
                 self.consume_misplaced_bom();
                 continue;
@@ -668,27 +697,78 @@ impl<'src> YamlLexer<'src> {
                 // of the plain literal even though it's "plain safe"
                 self.advance(1); // ':'
             } else if is_space(c) {
-                let might_be_token_end = self.current_coordinate;
+                trailing_blanks =
+                    Some(blanks.unwrap_or((self.current_coordinate, self.diagnostics.len())));
                 self.consume_whitespaces();
                 // A `#` preceded by a blank starts a comment, which ends the
-                // scalar. The blanks belong to the comment's leading trivia
+                // scalar
                 if self.current_byte() == Some(b'#') {
-                    self.current_coordinate = might_be_token_end;
-                    return LexToken::new(PLAIN_LITERAL, start, might_be_token_end);
+                    break;
                 }
             } else if is_break(c) {
-                let might_be_token_end = self.current_coordinate;
+                trailing_blanks =
+                    Some(blanks.unwrap_or((self.current_coordinate, self.diagnostics.len())));
                 // A line whose content starts with `#` is a comment, which can
                 // never be part of a plain scalar
                 if !self.is_scalar_continuation(None) || self.current_byte() == Some(b'#') {
-                    self.current_coordinate = might_be_token_end;
-                    return LexToken::new(PLAIN_LITERAL, start, might_be_token_end);
+                    break;
                 }
             } else {
+                trailing_blanks = blanks;
+                ended_at_indicator = true;
                 break;
             }
         }
-        LexToken::new(PLAIN_LITERAL, start, self.current_coordinate)
+
+        let Some((blanks_start, diagnostics_len)) = trailing_blanks else {
+            return (
+                LexToken::new(PLAIN_LITERAL, start, self.current_coordinate),
+                None,
+            );
+        };
+        let scalar = LexToken::new(PLAIN_LITERAL, start, blanks_start);
+        if ended_at_indicator {
+            // The blanks were already validated while they were consumed as a
+            // potential continuation of the scalar, so they are kept as is.
+            // Lexing them again would apply the stricter indentation rules of
+            // tokens that start a line, which don't hold for the continuation
+            // lines of a flow collection
+            return (scalar, Some(blanks_start));
+        }
+
+        // The blanks are lexed again as trivia, so that the caller sees the
+        // line break that ended the scalar
+        self.current_coordinate = blanks_start;
+        self.diagnostics.truncate(diagnostics_len);
+        (scalar, None)
+    }
+
+    /// Pushes the blanks and line breaks between `start` and the current
+    /// coordinate, which were already consumed, as trivia tokens.
+    fn push_blank_trivia(&self, start: TextCoordinate, tokens: &mut VecDeque<LexToken>) {
+        let bytes = self.source.as_bytes();
+        let end = self.current_coordinate.offset;
+        let mut coordinate = start;
+        while coordinate.offset < end {
+            let token_start = coordinate;
+            let offset = coordinate.offset;
+            if is_break(bytes[offset]) {
+                let len = if bytes[offset] == b'\r' && bytes.get(offset + 1) == Some(&b'\n') {
+                    2
+                } else {
+                    1
+                };
+                coordinate = coordinate.advance(len).enter_new_line();
+                tokens.push_back(LexToken::new(NEWLINE, token_start, coordinate));
+            } else {
+                let len = bytes[offset..end]
+                    .iter()
+                    .position(|&byte| is_break(byte))
+                    .unwrap_or(end - offset);
+                coordinate = coordinate.advance(len);
+                tokens.push_back(LexToken::new(WHITESPACE, token_start, coordinate));
+            }
+        }
     }
 
     // https://yaml.org/spec/1.2.2/#731-double-quoted-style

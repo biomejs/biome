@@ -26,7 +26,7 @@ use std::sync::Arc;
 
 use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
-use biome_fs::{FileSystemDiagnostic, FsErrorKind, ManifestName, normalize_path};
+use biome_fs::{ManifestName, normalize_path};
 use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_manifest::{BiomeManifest, BiomeManifestError, ManifestEntry, ManifestPresets};
 use biome_resolver::{
@@ -91,7 +91,7 @@ impl From<BiomeManifestError> for PluginDiagnostic {
             BiomeManifestError::Invalid(error) => {
                 let (path, source) = error.into_parts();
                 Self::invalid_manifest(
-                    markup!("Cannot load Biome manifest "<Emphasis>{path}</Emphasis>"."),
+                    markup!("The Biome manifest "<Emphasis>{path}</Emphasis>" is invalid."),
                     source,
                 )
             }
@@ -103,7 +103,8 @@ impl BiomePlugin {
     /// Loads a plugin from the given `plugin_path`.
     ///
     /// The base path is used to resolve relative paths.
-    /// The optional `includes` patterns restrict which files the plugin runs on.
+    /// The optional `includes` patterns restrict which files the plugin runs on. They are matched
+    /// against file paths relative to `base_path`.
     /// Note: `Some(&[])` (empty includes) means the plugin never matches any file.
     pub fn load(
         fs: Arc<dyn FsWithResolverProxy>,
@@ -123,6 +124,7 @@ impl BiomePlugin {
         package_specifier: Option<&str>,
     ) -> Result<(Self, Utf8PathBuf), PluginDiagnostic> {
         let resolved = resolve_plugin(fs.as_ref(), plugin_path, base_path, package_specifier)?;
+        let includes = includes.map(|globs| PluginIncludes::new(base_path, globs));
         let analyzer_plugins = match resolved.kind {
             ResolvedPluginKind::Grit => {
                 let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &resolved.path, includes)?;
@@ -142,9 +144,25 @@ impl BiomePlugin {
             ResolvedPluginKind::Manifest { rules, .. } => rules
                 .into_iter()
                 .map(|rule| {
-                    let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?
-                        .with_name(rule.name);
-                    Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
+                    let plugin: Box<dyn AnalyzerPlugin> = match rule.path.extension() {
+                        Some("grit") => Box::new(
+                            AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes.clone())?
+                                .with_name(rule.name),
+                        ),
+                        #[cfg(feature = "js_plugin")]
+                        Some(extension) if is_javascript_plugin_extension(extension) => Box::new(
+                            AnalyzerJsPlugin::load(fs.clone(), &rule.path, includes.clone())?
+                                .with_name(rule.name),
+                        ),
+                        #[cfg(not(feature = "js_plugin"))]
+                        Some(extension) if is_javascript_plugin_extension(extension) => {
+                            return Err(PluginDiagnostic::unsupported_rule_format(markup!(
+                                "Unsupported rule format for plugin rule "<Emphasis>{rule.path.as_str()}</Emphasis>"."
+                            )));
+                        }
+                        _ => unreachable!("manifest rule extensions are validated during resolution"),
+                    };
+                    Ok(Arc::new(plugin))
                 })
                 .collect::<Result<_, PluginDiagnostic>>()?,
         };
@@ -183,7 +201,7 @@ pub fn resolve_plugin(
 
     if plugin_path
         .extension()
-        .is_some_and(|extension| matches!(extension, "js" | "mjs" | "ts" | "mts"))
+        .is_some_and(is_javascript_plugin_extension)
         && !fs.path_is_dir(&plugin_path)
     {
         validate_plugin_file(fs, &plugin_path)?;
@@ -297,24 +315,18 @@ pub fn resolve_plugin(
     })
 }
 
+fn is_javascript_plugin_extension(extension: &str) -> bool {
+    matches!(extension, "js" | "mjs" | "ts" | "mts")
+}
+
 fn validate_plugin_file(
     fs: &dyn FsWithResolverProxy,
     path: &Utf8Path,
 ) -> Result<(), PluginDiagnostic> {
-    fs.path_kind(path)
-        .and_then(|kind| {
-            if kind.is_file() {
-                Ok(())
-            } else {
-                Err(FileSystemDiagnostic {
-                    path: path.to_string(),
-                    severity: biome_diagnostics::Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: None,
-                })
-            }
-        })
-        .map_err(|source| PluginDiagnostic::cant_read_plugin_file(path.to_path_buf(), source))
+    match fs.path_kind(path) {
+        Ok(kind) if kind.is_file() => Ok(()),
+        _ => Err(PluginDiagnostic::plugin_file_not_found(path)),
+    }
 }
 
 struct ManifestRule {
@@ -584,10 +596,7 @@ fn find_biome_manifest(
             return Ok(manifest_path);
         }
     }
-    Err(PluginDiagnostic::cant_resolve(
-        plugin_path.to_path_buf(),
-        None,
-    ))
+    Err(PluginDiagnostic::missing_manifest(plugin_path))
 }
 
 fn resolve_package_manifest(
@@ -689,7 +698,10 @@ fn resolve_manifest_rule_path(
         rule.to_string()
     };
     let rule_path = Utf8Path::new(&rule);
-    if rule_path.extension() != Some("grit") {
+    if !rule_path
+        .extension()
+        .is_some_and(|extension| extension == "grit" || is_javascript_plugin_extension(extension))
+    {
         return Err(PluginDiagnostic::unsupported_rule_format(markup!(
             "Unsupported rule format for plugin rule "<Emphasis>{rule}</Emphasis>"."
         )));
@@ -713,14 +725,40 @@ fn resolve_manifest_rule_path(
     Ok(resolved_path)
 }
 
-/// Checks whether a file path matches the plugin's `includes` globs.
+/// Glob patterns that restrict which files a plugin runs on.
 ///
-/// Returns `true` if `includes` is `None` (no restriction).
-/// When `includes` is `Some`, delegates to `CandidatePath::matches_with_exceptions`.
-pub(crate) fn file_matches_includes(includes: Option<&[NormalizedGlob]>, path: &Utf8Path) -> bool {
-    let Some(includes) = includes else {
-        return true;
-    };
+/// Patterns are written relative to `base_path`, the directory that the `files.includes` patterns
+/// of the same configuration are relative to. An empty list matches no file.
+#[derive(Clone, Debug)]
+pub struct PluginIncludes {
+    base_path: Utf8PathBuf,
+    globs: Box<[NormalizedGlob]>,
+}
+
+impl PluginIncludes {
+    pub fn new(base_path: &Utf8Path, globs: &[NormalizedGlob]) -> Self {
+        Self {
+            base_path: base_path.to_path_buf(),
+            globs: globs.into(),
+        }
+    }
+
+    /// Returns whether `path` matches the globs, including negated globs.
+    pub fn matches(&self, path: &Utf8Path) -> bool {
+        file_matches_includes(&self.globs, &self.base_path, path)
+    }
+}
+
+/// Returns whether `path` matches the `includes` globs of a plugin, including negated globs.
+///
+/// `path` is made relative to `base_path` before matching. A path outside `base_path` is matched
+/// as is.
+pub(crate) fn file_matches_includes(
+    includes: &[NormalizedGlob],
+    base_path: &Utf8Path,
+    path: &Utf8Path,
+) -> bool {
+    let path = path.strip_prefix(base_path).unwrap_or(path);
     CandidatePath::new(path).matches_with_exceptions(includes)
 }
 
@@ -798,7 +836,7 @@ mod test {
         let root = Utf8Path::new(std::path::MAIN_SEPARATOR_STR);
         let error = resolve_plugin(&fs, "./missing.grit", Utf8Path::new("/"), None)
             .expect_err("direct plugin files must exist");
-        assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+        assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
         assert!(
             error
                 .to_string()
@@ -824,7 +862,7 @@ mod test {
                 Some(selection),
             )
             .expect_err("selected plugin files must exist");
-            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
             assert!(
                 error
                     .to_string()
@@ -941,6 +979,67 @@ mod test {
             .expect("Couldn't load plugin");
 
         assert_eq!(plugin.analyzer_plugins.len(), 1);
+    }
+
+    #[test]
+    fn manifest_rules_match_includes_relative_to_base_path() {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/project/my-plugin/biome-manifest.json".into(),
+            r#"{
+    "version": 1,
+    "plugins": {
+        "rules": [{ "one": "rules/1.grit", "two": "rules/2.grit" }],
+        "presets": { "recommended": ["one", "two"] }
+    }
+}"#,
+        );
+        fs.insert("/project/my-plugin/rules/1.grit".into(), r#"`hello`"#);
+        fs.insert("/project/my-plugin/rules/2.grit".into(), r#"`world`"#);
+
+        let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let globs: Vec<NormalizedGlob> = vec!["src/**".parse().unwrap()];
+        let (plugin, _) =
+            BiomePlugin::load(fs, "./my-plugin", Utf8Path::new("/project"), Some(&globs))
+                .expect("Couldn't load plugin");
+
+        assert_eq!(plugin.analyzer_plugins.len(), 2);
+        for rule in &plugin.analyzer_plugins {
+            assert!(rule.applies_to_file(Utf8Path::new("/project/src/main.ts")));
+            assert!(!rule.applies_to_file(Utf8Path::new("/project/packages/src/main.ts")));
+        }
+    }
+
+    fn plugin_includes(globs: &[&str]) -> PluginIncludes {
+        let globs: Vec<NormalizedGlob> = globs.iter().map(|glob| glob.parse().unwrap()).collect();
+        PluginIncludes::new(Utf8Path::new("/project"), &globs)
+    }
+
+    #[test]
+    fn includes_with_globstar_prefix_match_inside_base_path() {
+        let includes = plugin_includes(&["**/src/**"]);
+        assert!(includes.matches(Utf8Path::new("/project/src/main.ts")));
+        assert!(includes.matches(Utf8Path::new("/project/packages/app/src/main.ts")));
+        assert!(!includes.matches(Utf8Path::new("/project/lib/main.ts")));
+    }
+
+    #[test]
+    fn includes_with_absolute_base_path_prefix_do_not_match() {
+        let includes = plugin_includes(&["/project/src/**"]);
+        assert!(!includes.matches(Utf8Path::new("/project/src/main.ts")));
+    }
+
+    #[test]
+    fn paths_outside_base_path_are_matched_as_absolute_paths() {
+        let outside = Utf8Path::new("/other/src/main.ts");
+        assert!(!plugin_includes(&["src/**"]).matches(outside));
+        assert!(plugin_includes(&["**/src/**"]).matches(outside));
+        assert!(plugin_includes(&["/other/src/**"]).matches(outside));
+
+        // A directory whose name only starts with the name of the base directory is outside it.
+        let sibling = Utf8Path::new("/project-old/src/main.ts");
+        assert!(!plugin_includes(&["-old/src/**"]).matches(sibling));
+        assert!(plugin_includes(&["/project-old/src/**"]).matches(sibling));
     }
 
     #[test]
@@ -1719,6 +1818,19 @@ mod test {
     }
 
     #[test]
+    fn load_plugin_from_missing_package() {
+        let fs = Arc::new(MemoryFileSystem::default()) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(
+            fs,
+            "missing-package/presets/recommended",
+            Utf8Path::new("/project"),
+            None,
+        )
+        .expect_err("Plugin loading should've failed");
+        snap_diagnostic("load_plugin_from_missing_package", &[], error.into());
+    }
+
+    #[test]
     fn load_plugin_with_wrong_version() {
         let fs = MemoryFileSystem::default();
         let manifest = r#"{
@@ -1746,7 +1858,7 @@ mod test {
         let manifest = r#"{
     "version": 1,
     "plugins": {
-        "rules": [{ "one": "rules/1.js" }],
+        "rules": [{ "one": "rules/1.txt" }],
         "presets": { "recommended": ["one"] }
     }
 }"#;
@@ -1822,7 +1934,7 @@ mod test {
                 None,
             )
             .expect_err("direct JavaScript plugin files must exist");
-            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
         }
     }
 

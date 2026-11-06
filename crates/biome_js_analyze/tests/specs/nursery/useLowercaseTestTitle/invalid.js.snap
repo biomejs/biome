@@ -1,0 +1,942 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+describe("Foo", () => {});
+describe('Foo', () => {});
+describe(`Foo`, () => {});
+it("Foo MM mm", function () {});
+test(`Foo MM mm`, function () {});
+test("SFC Compile", () => {});
+xit("Foo", () => {});
+fit("Foo", () => {});
+xdescribe("Foo", () => {});
+fdescribe("Foo", () => {});
+it.only("Foo", () => {});
+test.skip("Foo", () => {});
+test.todo("Foo");
+describe.concurrent("Foo", () => {});
+suite("Foo", () => {});
+test.describe("Foo", () => {});
+test.describe.serial("Foo", () => {});
+it.each([1, 2])("Foo %i", (n) => {});
+describe.each([1, 2])("Foo %i", (n) => {});
+test.each`
+	a
+	${1}
+`("Foo $a", () => {});
+test.skipIf(isCI)("Foo", () => {});
+it.runIf(isCI)("Foo", () => {});
+describe.skipIf(isCI)("Foo", () => {});
+bench("Foo", () => {});
+bench.skip("Foo", () => {});
+test("Élan", () => {});
+test("ǅemal", () => {});
+test(/* comment */ "Foo" /* comment */, () => {});
+describe("Outer", () => {
+	it("Inner", () => {});
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:10 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ describe("Foo", () => {});
+      │          ^^^^^
+    3 │ describe('Foo', () => {});
+    4 │ describe(`Foo`, () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - describe("Foo",·()·=>·{});
+        2 │ + describe("foo",·()·=>·{});
+     3  3 │   describe('Foo', () => {});
+     4  4 │   describe(`Foo`, () => {});
+  
+
+```
+
+```
+invalid.js:3:10 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    1 │ /* should generate diagnostics */
+    2 │ describe("Foo", () => {});
+  > 3 │ describe('Foo', () => {});
+      │          ^^^^^
+    4 │ describe(`Foo`, () => {});
+    5 │ it("Foo MM mm", function () {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   describe("Foo", () => {});
+     3    │ - describe('Foo',·()·=>·{});
+        3 │ + describe('foo',·()·=>·{});
+     4  4 │   describe(`Foo`, () => {});
+     5  5 │   it("Foo MM mm", function () {});
+  
+
+```
+
+```
+invalid.js:4:10 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    2 │ describe("Foo", () => {});
+    3 │ describe('Foo', () => {});
+  > 4 │ describe(`Foo`, () => {});
+      │          ^^^^^
+    5 │ it("Foo MM mm", function () {});
+    6 │ test(`Foo MM mm`, function () {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     2  2 │   describe("Foo", () => {});
+     3  3 │   describe('Foo', () => {});
+     4    │ - describe(`Foo`,·()·=>·{});
+        4 │ + describe(`foo`,·()·=>·{});
+     5  5 │   it("Foo MM mm", function () {});
+     6  6 │   test(`Foo MM mm`, function () {});
+  
+
+```
+
+```
+invalid.js:5:4 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    3 │ describe('Foo', () => {});
+    4 │ describe(`Foo`, () => {});
+  > 5 │ it("Foo MM mm", function () {});
+      │    ^^^^^^^^^^^
+    6 │ test(`Foo MM mm`, function () {});
+    7 │ test("SFC Compile", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     3  3 │   describe('Foo', () => {});
+     4  4 │   describe(`Foo`, () => {});
+     5    │ - it("Foo·MM·mm",·function·()·{});
+        5 │ + it("foo·MM·mm",·function·()·{});
+     6  6 │   test(`Foo MM mm`, function () {});
+     7  7 │   test("SFC Compile", () => {});
+  
+
+```
+
+```
+invalid.js:6:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    4 │ describe(`Foo`, () => {});
+    5 │ it("Foo MM mm", function () {});
+  > 6 │ test(`Foo MM mm`, function () {});
+      │      ^^^^^^^^^^^
+    7 │ test("SFC Compile", () => {});
+    8 │ xit("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     4  4 │   describe(`Foo`, () => {});
+     5  5 │   it("Foo MM mm", function () {});
+     6    │ - test(`Foo·MM·mm`,·function·()·{});
+        6 │ + test(`foo·MM·mm`,·function·()·{});
+     7  7 │   test("SFC Compile", () => {});
+     8  8 │   xit("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:7:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    5 │ it("Foo MM mm", function () {});
+    6 │ test(`Foo MM mm`, function () {});
+  > 7 │ test("SFC Compile", () => {});
+      │      ^^^^^^^^^^^^^
+    8 │ xit("Foo", () => {});
+    9 │ fit("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     5  5 │   it("Foo MM mm", function () {});
+     6  6 │   test(`Foo MM mm`, function () {});
+     7    │ - test("SFC·Compile",·()·=>·{});
+        7 │ + test("sFC·Compile",·()·=>·{});
+     8  8 │   xit("Foo", () => {});
+     9  9 │   fit("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+     6 │ test(`Foo MM mm`, function () {});
+     7 │ test("SFC Compile", () => {});
+   > 8 │ xit("Foo", () => {});
+       │     ^^^^^
+     9 │ fit("Foo", () => {});
+    10 │ xdescribe("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     6  6 │   test(`Foo MM mm`, function () {});
+     7  7 │   test("SFC Compile", () => {});
+     8    │ - xit("Foo",·()·=>·{});
+        8 │ + xit("foo",·()·=>·{});
+     9  9 │   fit("Foo", () => {});
+    10 10 │   xdescribe("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+     7 │ test("SFC Compile", () => {});
+     8 │ xit("Foo", () => {});
+   > 9 │ fit("Foo", () => {});
+       │     ^^^^^
+    10 │ xdescribe("Foo", () => {});
+    11 │ fdescribe("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     7  7 │   test("SFC Compile", () => {});
+     8  8 │   xit("Foo", () => {});
+     9    │ - fit("Foo",·()·=>·{});
+        9 │ + fit("foo",·()·=>·{});
+    10 10 │   xdescribe("Foo", () => {});
+    11 11 │   fdescribe("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:10:11 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+     8 │ xit("Foo", () => {});
+     9 │ fit("Foo", () => {});
+  > 10 │ xdescribe("Foo", () => {});
+       │           ^^^^^
+    11 │ fdescribe("Foo", () => {});
+    12 │ it.only("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     8  8 │   xit("Foo", () => {});
+     9  9 │   fit("Foo", () => {});
+    10    │ - xdescribe("Foo",·()·=>·{});
+       10 │ + xdescribe("foo",·()·=>·{});
+    11 11 │   fdescribe("Foo", () => {});
+    12 12 │   it.only("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:11:11 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+     9 │ fit("Foo", () => {});
+    10 │ xdescribe("Foo", () => {});
+  > 11 │ fdescribe("Foo", () => {});
+       │           ^^^^^
+    12 │ it.only("Foo", () => {});
+    13 │ test.skip("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+     9  9 │   fit("Foo", () => {});
+    10 10 │   xdescribe("Foo", () => {});
+    11    │ - fdescribe("Foo",·()·=>·{});
+       11 │ + fdescribe("foo",·()·=>·{});
+    12 12 │   it.only("Foo", () => {});
+    13 13 │   test.skip("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:12:9 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    10 │ xdescribe("Foo", () => {});
+    11 │ fdescribe("Foo", () => {});
+  > 12 │ it.only("Foo", () => {});
+       │         ^^^^^
+    13 │ test.skip("Foo", () => {});
+    14 │ test.todo("Foo");
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    10 10 │   xdescribe("Foo", () => {});
+    11 11 │   fdescribe("Foo", () => {});
+    12    │ - it.only("Foo",·()·=>·{});
+       12 │ + it.only("foo",·()·=>·{});
+    13 13 │   test.skip("Foo", () => {});
+    14 14 │   test.todo("Foo");
+  
+
+```
+
+```
+invalid.js:13:11 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    11 │ fdescribe("Foo", () => {});
+    12 │ it.only("Foo", () => {});
+  > 13 │ test.skip("Foo", () => {});
+       │           ^^^^^
+    14 │ test.todo("Foo");
+    15 │ describe.concurrent("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    11 11 │   fdescribe("Foo", () => {});
+    12 12 │   it.only("Foo", () => {});
+    13    │ - test.skip("Foo",·()·=>·{});
+       13 │ + test.skip("foo",·()·=>·{});
+    14 14 │   test.todo("Foo");
+    15 15 │   describe.concurrent("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:14:11 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    12 │ it.only("Foo", () => {});
+    13 │ test.skip("Foo", () => {});
+  > 14 │ test.todo("Foo");
+       │           ^^^^^
+    15 │ describe.concurrent("Foo", () => {});
+    16 │ suite("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    12 12 │   it.only("Foo", () => {});
+    13 13 │   test.skip("Foo", () => {});
+    14    │ - test.todo("Foo");
+       14 │ + test.todo("foo");
+    15 15 │   describe.concurrent("Foo", () => {});
+    16 16 │   suite("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:15:21 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    13 │ test.skip("Foo", () => {});
+    14 │ test.todo("Foo");
+  > 15 │ describe.concurrent("Foo", () => {});
+       │                     ^^^^^
+    16 │ suite("Foo", () => {});
+    17 │ test.describe("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    13 13 │   test.skip("Foo", () => {});
+    14 14 │   test.todo("Foo");
+    15    │ - describe.concurrent("Foo",·()·=>·{});
+       15 │ + describe.concurrent("foo",·()·=>·{});
+    16 16 │   suite("Foo", () => {});
+    17 17 │   test.describe("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:16:7 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    14 │ test.todo("Foo");
+    15 │ describe.concurrent("Foo", () => {});
+  > 16 │ suite("Foo", () => {});
+       │       ^^^^^
+    17 │ test.describe("Foo", () => {});
+    18 │ test.describe.serial("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    14 14 │   test.todo("Foo");
+    15 15 │   describe.concurrent("Foo", () => {});
+    16    │ - suite("Foo",·()·=>·{});
+       16 │ + suite("foo",·()·=>·{});
+    17 17 │   test.describe("Foo", () => {});
+    18 18 │   test.describe.serial("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:17:15 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    15 │ describe.concurrent("Foo", () => {});
+    16 │ suite("Foo", () => {});
+  > 17 │ test.describe("Foo", () => {});
+       │               ^^^^^
+    18 │ test.describe.serial("Foo", () => {});
+    19 │ it.each([1, 2])("Foo %i", (n) => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    15 15 │   describe.concurrent("Foo", () => {});
+    16 16 │   suite("Foo", () => {});
+    17    │ - test.describe("Foo",·()·=>·{});
+       17 │ + test.describe("foo",·()·=>·{});
+    18 18 │   test.describe.serial("Foo", () => {});
+    19 19 │   it.each([1, 2])("Foo %i", (n) => {});
+  
+
+```
+
+```
+invalid.js:18:22 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    16 │ suite("Foo", () => {});
+    17 │ test.describe("Foo", () => {});
+  > 18 │ test.describe.serial("Foo", () => {});
+       │                      ^^^^^
+    19 │ it.each([1, 2])("Foo %i", (n) => {});
+    20 │ describe.each([1, 2])("Foo %i", (n) => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    16 16 │   suite("Foo", () => {});
+    17 17 │   test.describe("Foo", () => {});
+    18    │ - test.describe.serial("Foo",·()·=>·{});
+       18 │ + test.describe.serial("foo",·()·=>·{});
+    19 19 │   it.each([1, 2])("Foo %i", (n) => {});
+    20 20 │   describe.each([1, 2])("Foo %i", (n) => {});
+  
+
+```
+
+```
+invalid.js:19:17 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    17 │ test.describe("Foo", () => {});
+    18 │ test.describe.serial("Foo", () => {});
+  > 19 │ it.each([1, 2])("Foo %i", (n) => {});
+       │                 ^^^^^^^^
+    20 │ describe.each([1, 2])("Foo %i", (n) => {});
+    21 │ test.each`
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    17 17 │   test.describe("Foo", () => {});
+    18 18 │   test.describe.serial("Foo", () => {});
+    19    │ - it.each([1,·2])("Foo·%i",·(n)·=>·{});
+       19 │ + it.each([1,·2])("foo·%i",·(n)·=>·{});
+    20 20 │   describe.each([1, 2])("Foo %i", (n) => {});
+    21 21 │   test.each`
+  
+
+```
+
+```
+invalid.js:20:23 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    18 │ test.describe.serial("Foo", () => {});
+    19 │ it.each([1, 2])("Foo %i", (n) => {});
+  > 20 │ describe.each([1, 2])("Foo %i", (n) => {});
+       │                       ^^^^^^^^
+    21 │ test.each`
+    22 │ 	a
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    18 18 │   test.describe.serial("Foo", () => {});
+    19 19 │   it.each([1, 2])("Foo %i", (n) => {});
+    20    │ - describe.each([1,·2])("Foo·%i",·(n)·=>·{});
+       20 │ + describe.each([1,·2])("foo·%i",·(n)·=>·{});
+    21 21 │   test.each`
+    22 22 │   	a
+  
+
+```
+
+```
+invalid.js:24:3 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    22 │ 	a
+    23 │ 	${1}
+  > 24 │ `("Foo $a", () => {});
+       │   ^^^^^^^^
+    25 │ test.skipIf(isCI)("Foo", () => {});
+    26 │ it.runIf(isCI)("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    22 22 │   	a
+    23 23 │   	${1}
+    24    │ - `("Foo·$a",·()·=>·{});
+       24 │ + `("foo·$a",·()·=>·{});
+    25 25 │   test.skipIf(isCI)("Foo", () => {});
+    26 26 │   it.runIf(isCI)("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:25:19 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    23 │ 	${1}
+    24 │ `("Foo $a", () => {});
+  > 25 │ test.skipIf(isCI)("Foo", () => {});
+       │                   ^^^^^
+    26 │ it.runIf(isCI)("Foo", () => {});
+    27 │ describe.skipIf(isCI)("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    23 23 │   	${1}
+    24 24 │   `("Foo $a", () => {});
+    25    │ - test.skipIf(isCI)("Foo",·()·=>·{});
+       25 │ + test.skipIf(isCI)("foo",·()·=>·{});
+    26 26 │   it.runIf(isCI)("Foo", () => {});
+    27 27 │   describe.skipIf(isCI)("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:26:16 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    24 │ `("Foo $a", () => {});
+    25 │ test.skipIf(isCI)("Foo", () => {});
+  > 26 │ it.runIf(isCI)("Foo", () => {});
+       │                ^^^^^
+    27 │ describe.skipIf(isCI)("Foo", () => {});
+    28 │ bench("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    24 24 │   `("Foo $a", () => {});
+    25 25 │   test.skipIf(isCI)("Foo", () => {});
+    26    │ - it.runIf(isCI)("Foo",·()·=>·{});
+       26 │ + it.runIf(isCI)("foo",·()·=>·{});
+    27 27 │   describe.skipIf(isCI)("Foo", () => {});
+    28 28 │   bench("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:27:23 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    25 │ test.skipIf(isCI)("Foo", () => {});
+    26 │ it.runIf(isCI)("Foo", () => {});
+  > 27 │ describe.skipIf(isCI)("Foo", () => {});
+       │                       ^^^^^
+    28 │ bench("Foo", () => {});
+    29 │ bench.skip("Foo", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    25 25 │   test.skipIf(isCI)("Foo", () => {});
+    26 26 │   it.runIf(isCI)("Foo", () => {});
+    27    │ - describe.skipIf(isCI)("Foo",·()·=>·{});
+       27 │ + describe.skipIf(isCI)("foo",·()·=>·{});
+    28 28 │   bench("Foo", () => {});
+    29 29 │   bench.skip("Foo", () => {});
+  
+
+```
+
+```
+invalid.js:28:7 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    26 │ it.runIf(isCI)("Foo", () => {});
+    27 │ describe.skipIf(isCI)("Foo", () => {});
+  > 28 │ bench("Foo", () => {});
+       │       ^^^^^
+    29 │ bench.skip("Foo", () => {});
+    30 │ test("Élan", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    26 26 │   it.runIf(isCI)("Foo", () => {});
+    27 27 │   describe.skipIf(isCI)("Foo", () => {});
+    28    │ - bench("Foo",·()·=>·{});
+       28 │ + bench("foo",·()·=>·{});
+    29 29 │   bench.skip("Foo", () => {});
+    30 30 │   test("Élan", () => {});
+  
+
+```
+
+```
+invalid.js:29:12 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    27 │ describe.skipIf(isCI)("Foo", () => {});
+    28 │ bench("Foo", () => {});
+  > 29 │ bench.skip("Foo", () => {});
+       │            ^^^^^
+    30 │ test("Élan", () => {});
+    31 │ test("ǅemal", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    27 27 │   describe.skipIf(isCI)("Foo", () => {});
+    28 28 │   bench("Foo", () => {});
+    29    │ - bench.skip("Foo",·()·=>·{});
+       29 │ + bench.skip("foo",·()·=>·{});
+    30 30 │   test("Élan", () => {});
+    31 31 │   test("ǅemal", () => {});
+  
+
+```
+
+```
+invalid.js:30:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    28 │ bench("Foo", () => {});
+    29 │ bench.skip("Foo", () => {});
+  > 30 │ test("Élan", () => {});
+       │      ^^^^^^
+    31 │ test("ǅemal", () => {});
+    32 │ test(/* comment */ "Foo" /* comment */, () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    28 28 │   bench("Foo", () => {});
+    29 29 │   bench.skip("Foo", () => {});
+    30    │ - test("Élan",·()·=>·{});
+       30 │ + test("élan",·()·=>·{});
+    31 31 │   test("ǅemal", () => {});
+    32 32 │   test(/* comment */ "Foo" /* comment */, () => {});
+  
+
+```
+
+```
+invalid.js:31:6 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    29 │ bench.skip("Foo", () => {});
+    30 │ test("Élan", () => {});
+  > 31 │ test("ǅemal", () => {});
+       │      ^^^^^^^
+    32 │ test(/* comment */ "Foo" /* comment */, () => {});
+    33 │ describe("Outer", () => {
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    29 29 │   bench.skip("Foo", () => {});
+    30 30 │   test("Élan", () => {});
+    31    │ - test("ǅemal",·()·=>·{});
+       31 │ + test("ǆemal",·()·=>·{});
+    32 32 │   test(/* comment */ "Foo" /* comment */, () => {});
+    33 33 │   describe("Outer", () => {
+  
+
+```
+
+```
+invalid.js:32:20 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    30 │ test("Élan", () => {});
+    31 │ test("ǅemal", () => {});
+  > 32 │ test(/* comment */ "Foo" /* comment */, () => {});
+       │                    ^^^^^
+    33 │ describe("Outer", () => {
+    34 │ 	it("Inner", () => {});
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    30 30 │   test("Élan", () => {});
+    31 31 │   test("ǅemal", () => {});
+    32    │ - test(/*·comment·*/·"Foo"·/*·comment·*/,·()·=>·{});
+       32 │ + test(/*·comment·*/·"foo"·/*·comment·*/,·()·=>·{});
+    33 33 │   describe("Outer", () => {
+    34 34 │   	it("Inner", () => {});
+  
+
+```
+
+```
+invalid.js:33:10 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    31 │ test("ǅemal", () => {});
+    32 │ test(/* comment */ "Foo" /* comment */, () => {});
+  > 33 │ describe("Outer", () => {
+       │          ^^^^^^^
+    34 │ 	it("Inner", () => {});
+    35 │ });
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    31 31 │   test("ǅemal", () => {});
+    32 32 │   test(/* comment */ "Foo" /* comment */, () => {});
+    33    │ - describe("Outer",·()·=>·{
+       33 │ + describe("outer",·()·=>·{
+    34 34 │   	it("Inner", () => {});
+    35 35 │   });
+  
+
+```
+
+```
+invalid.js:34:5 lint/nursery/useLowercaseTestTitle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This test title starts with an uppercase letter.
+  
+    32 │ test(/* comment */ "Foo" /* comment */, () => {});
+    33 │ describe("Outer", () => {
+  > 34 │ 	it("Inner", () => {});
+       │ 	   ^^^^^^^
+    35 │ });
+    36 │ 
+  
+  i Test titles that consistently start with a lowercase letter make test reports easier to read.
+  
+  i Change the first letter of the title to lowercase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Lowercase the first letter of the title.
+  
+    32 32 │   test(/* comment */ "Foo" /* comment */, () => {});
+    33 33 │   describe("Outer", () => {
+    34    │ - → it("Inner",·()·=>·{});
+       34 │ + → it("inner",·()·=>·{});
+    35 35 │   });
+    36 36 │   
+  
+
+```

@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/language_options/javascript.md
+---
+
+# Input
+
+```md
+# Language options
+
+```js
+function greet(name){if(name){return `Hello, ${name}`}return "Hello, stranger"}
+```
+
+```
+
+
+# Options
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 4,
+      "lineWidth": 40
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+# Language options
+
+```js
+function greet(name) {
+    if (name) {
+        return `Hello, ${name}`;
+    }
+    return "Hello, stranger";
+}
+```
+
+```

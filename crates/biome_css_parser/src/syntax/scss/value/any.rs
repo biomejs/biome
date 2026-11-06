@@ -3,11 +3,11 @@ use crate::parser::CssParser;
 use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_scss_interpolated_dashed_identifier,
     is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
-    is_at_scss_module_member_access, is_at_scss_parent_selector_value,
+    is_at_scss_module_member_access, is_at_scss_parent_selector_value, is_at_scss_percent_value,
     is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
     parse_scss_function_call_from_name, parse_scss_interpolated_dashed_identifier,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
-    parse_scss_module_member_access, parse_scss_parent_selector_value,
+    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_percent_value,
     parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
 };
 use crate::syntax::{FunctionCallContext, ValueParsingContext};
@@ -24,6 +24,7 @@ pub(crate) fn is_at_any_scss_value(p: &mut CssParser) -> bool {
         || is_at_scss_interpolated_dashed_identifier(p)
         || is_at_scss_interpolated_function_or_value(p)
         || is_at_scss_parent_selector_value(p)
+        || is_at_scss_percent_value(p)
         || is_at_scss_interpolated_string(p)
 }
 
@@ -87,6 +88,8 @@ pub(crate) fn parse_any_scss_value_with_context(
         parse_scss_interpolated_function_or_value(p)
     } else if is_at_scss_parent_selector_value(p) {
         parse_scss_parent_selector_value(p)
+    } else if is_at_scss_percent_value(p) {
+        parse_scss_percent_value(p)
     } else {
         parse_scss_interpolated_string(p, CssLexContext::Regular)
     }

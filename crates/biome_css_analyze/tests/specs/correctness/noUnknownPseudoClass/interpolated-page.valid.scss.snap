@@ -1,0 +1,13 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: interpolated-page.valid.scss
+---
+# Input
+```css
+// should not generate diagnostics
+$pseudo: first;
+@page :#{$pseudo} { margin: 1in; }
+@page report:#{$pseudo} { margin: 1in; }
+@page :fi#{rst} { margin: 1in; }
+
+```

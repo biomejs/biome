@@ -1,0 +1,76 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect config --path=src/file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": { "formatter": { "lineWidth": 100 } },
+  "overrides": [
+    {
+      "includes": ["src/*.js"],
+      "javascript": { "formatter": { "lineWidth": 120 } }
+    },
+    {
+      "includes": ["src/*.js"],
+      "javascript": { "formatter": { "lineWidth": 140 } }
+    }
+  ]
+}
+```
+
+## `src/file.js`
+
+```js
+
+```
+
+# Emitted Messages
+
+```block
+biome.json configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Resolved configuration from biome.json.
+  
+  Configuration files used (merge order):
+    - biome.json
+  
+  {
+    "javascript": {
+      "formatter": {
+        "lineWidth": 140
+      }
+    },
+    "overrides": [
+      {
+        "includes": [
+          "src/*.js"
+        ],
+        "javascript": {
+          "formatter": {
+            "lineWidth": 120
+          }
+        }
+      },
+      {
+        "includes": [
+          "src/*.js"
+        ],
+        "javascript": {
+          "formatter": {
+            "lineWidth": 140
+          }
+        }
+      }
+    ]
+  }
+  
+
+```

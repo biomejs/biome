@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+async function f1() { return await (1 as number); }
+async function f2() { return await ([1, 2]!); }
+async function f3() { return await ([1, 2] as const); }
+async function f4() { return await ([1, 2] satisfies number[]); }
+// No fix: without `await`, these would start a declaration.
+async function f5() { await function () {}!; }
+async function f6() { await class {}!; }
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:30 lint/nursery/noUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ async function f1() { return await (1 as number); }
+      │                              ^^^^^
+    3 │ async function f2() { return await ([1, 2]!); }
+    4 │ async function f3() { return await ([1, 2] as const); }
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove await.
+  
+    2 │ async·function·f1()·{·return·await·(1·as·number);·}
+      │                              ------                
+
+```
+
+```
+invalid.ts:3:30 lint/nursery/noUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ async function f1() { return await (1 as number); }
+  > 3 │ async function f2() { return await ([1, 2]!); }
+      │                              ^^^^^
+    4 │ async function f3() { return await ([1, 2] as const); }
+    5 │ async function f4() { return await ([1, 2] satisfies number[]); }
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove await.
+  
+    3 │ async·function·f2()·{·return·await·([1,·2]!);·}
+      │                              ------            
+
+```
+
+```
+invalid.ts:4:30 lint/nursery/noUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    2 │ async function f1() { return await (1 as number); }
+    3 │ async function f2() { return await ([1, 2]!); }
+  > 4 │ async function f3() { return await ([1, 2] as const); }
+      │                              ^^^^^
+    5 │ async function f4() { return await ([1, 2] satisfies number[]); }
+    6 │ // No fix: without `await`, these would start a declaration.
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove await.
+  
+    4 │ async·function·f3()·{·return·await·([1,·2]·as·const);·}
+      │                              ------                    
+
+```
+
+```
+invalid.ts:5:30 lint/nursery/noUselessAwait  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    3 │ async function f2() { return await ([1, 2]!); }
+    4 │ async function f3() { return await ([1, 2] as const); }
+  > 5 │ async function f4() { return await ([1, 2] satisfies number[]); }
+      │                              ^^^^^
+    6 │ // No fix: without `await`, these would start a declaration.
+    7 │ async function f5() { await function () {}!; }
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove await.
+  
+    5 │ async·function·f4()·{·return·await·([1,·2]·satisfies·number[]);·}
+      │                              ------                              
+
+```
+
+```
+invalid.ts:7:23 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    5 │ async function f4() { return await ([1, 2] satisfies number[]); }
+    6 │ // No fix: without `await`, these would start a declaration.
+  > 7 │ async function f5() { await function () {}!; }
+      │                       ^^^^^
+    8 │ async function f6() { await class {}!; }
+    9 │ 
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:23 lint/nursery/noUselessAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This value is never a promise, so await is unnecessary.
+  
+    6 │ // No fix: without `await`, these would start a declaration.
+    7 │ async function f5() { await function () {}!; }
+  > 8 │ async function f6() { await class {}!; }
+      │                       ^^^^^
+    9 │ 
+  
+  i Awaiting a value that isn't a promise returns the same value, but still delays the code that follows it.
+  
+  i Remove await. To wait for several promises, pass them to Promise.all() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_advice.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<Button className="rounded-none" />;
+<Card className="rounded-none text-sm" />;
+<Other className="rounded-none" />;
+
+```
+
+# Diagnostics
+```
+invalid_advice.jsx:2:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <Button className="rounded-none" />;
+      │                    ^^^^^^^^^^^^
+    3 │ <Card className="rounded-none text-sm" />;
+    4 │ <Other className="rounded-none" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use the variant prop of Button.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_advice.jsx:3:31 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <Button className="rounded-none" />;
+  > 3 │ <Card className="rounded-none text-sm" />;
+      │                               ^^^^^^^
+    4 │ <Other className="rounded-none" />;
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use the size prop of Card.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_advice.jsx:4:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Button className="rounded-none" />;
+    3 │ <Card className="rounded-none text-sm" />;
+  > 4 │ <Other className="rounded-none" />;
+      │                   ^^^^^^^^^^^^
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,20 @@
+$name:b;
+%a%b{c:d}
+%a%b%c{c:d}
+%a:not(%b%c),:is(%a%b),:host(%a%b){c:d}
+%a.card:hover%b,.card%a%b{c:d}
+%a   %b,%a>%b,%a+%b,%a~%b{c:d}
+%a,%b{c:d}
+%#{a}%b,%a%#{$name},%a#{"x"}%b{c:d}
+/*before*/%a%b/*after*/{c:d}
+%a /*descendant*/ %b{c:d}
+%a
+// descendant
+%b{c:d}
+.x{@extend %a}.y{@extend %b}
+// biome-ignore format: preserve the compound rule
+%a%b{ c :   d }
+
+%foo %bar%baz{c:d}
+.parent1{@extend %foo;.child1{@extend %bar}}
+.parent2{@extend %foo;.child2{@extend %baz}}

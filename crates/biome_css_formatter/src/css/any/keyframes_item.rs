@@ -8,7 +8,9 @@ impl FormatRule<AnyCssKeyframesItem> for FormatAnyCssKeyframesItem {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssKeyframesItem, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssKeyframesItem::CssAtRule(node) => node.format().fmt(f),
             AnyCssKeyframesItem::CssBogusKeyframesItem(node) => node.format().fmt(f),
+            AnyCssKeyframesItem::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssKeyframesItem::CssKeyframesItem(node) => node.format().fmt(f),
             AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(node) => node.format().fmt(f),
         }

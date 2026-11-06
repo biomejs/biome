@@ -38,6 +38,8 @@ invalid.js:2:1 lint/suspicious/noLabelVar ━━━━━━━━━━━━�
   
   i Creating a label with the same name as an in-scope variable leads to confusion.
   
+  i Rename the label or the variable so that the two names are different.
+  
 
 ```
 
@@ -61,6 +63,8 @@ invalid.js:7:5 lint/suspicious/noLabelVar ━━━━━━━━━━━━�
     3 │ 
   
   i Creating a label with the same name as an in-scope variable leads to confusion.
+  
+  i Rename the label or the variable so that the two names are different.
   
 
 ```

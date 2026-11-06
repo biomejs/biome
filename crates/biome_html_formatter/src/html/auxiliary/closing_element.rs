@@ -11,6 +11,9 @@ pub(crate) struct FormatHtmlClosingElement {
     /// [FormatHtmlElementList]: crate::html::lists::element_list::FormatHtmlElementList
     /// [HtmlElementList]: biome_html_syntax::HtmlElementList
     tag_borrowed: bool,
+    /// Whether verbatim content owns the leading comments and whitespace before this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    verbatim_children: bool,
     /// Whether or not the closing `>` is borrowed by an adjacent sibling element.
     /// When true, the `>` will be printed by the next sibling element instead of this closing tag.
     r_angle_borrowed: bool,
@@ -18,6 +21,9 @@ pub(crate) struct FormatHtmlClosingElement {
 pub(crate) struct FormatHtmlClosingElementOptions {
     /// Whether or not the `</tag` part of this tag is borrowed, and therefore managed by a different formatter.
     pub tag_borrowed: bool,
+    /// Whether verbatim content owns the leading comments and whitespace before this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    pub verbatim_children: bool,
     /// Whether or not the closing `>` is borrowed by an adjacent sibling element.
     pub r_angle_borrowed: bool,
 }
@@ -27,12 +33,24 @@ impl FormatRuleWithOptions<HtmlClosingElement> for FormatHtmlClosingElement {
 
     fn with_options(mut self, options: Self::Options) -> Self {
         self.tag_borrowed = options.tag_borrowed;
+        self.verbatim_children = options.verbatim_children;
         self.r_angle_borrowed = options.r_angle_borrowed;
         self
     }
 }
 
 impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
+    fn fmt_leading_comments(
+        &self,
+        node: &HtmlClosingElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.verbatim_children {
+            return Ok(());
+        }
+        format_html_leading_comments(node.syntax()).fmt(f)
+    }
+
     fn fmt_fields(&self, node: &HtmlClosingElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlClosingElementFields {
             l_angle_token,
@@ -50,6 +68,7 @@ impl FormatNodeRule<HtmlClosingElement> for FormatHtmlClosingElement {
             // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
             if let Ok(l_angle_token) = &l_angle_token
                 && is_whitespace_sensitive
+                && !self.verbatim_children
                 && l_angle_token.has_leading_whitespace_or_newline()
             {
                 // we can't get rid of the whitespace if the element is whitespace sensitive

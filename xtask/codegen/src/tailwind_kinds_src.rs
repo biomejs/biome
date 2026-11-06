@@ -69,6 +69,7 @@ pub const TAILWIND_KINDS_SRC: KindsSrc = KindsSrc {
         "TW_PERCENTAGE_VALUE",
         "TW_ARBITRARY_VALUE",
         "TW_CSS_VARIABLE_VALUE",
+        "TW_TYPE_HINT",
         "TW_MODIFIER",
         // Bogus nodes
         "TW_BOGUS",

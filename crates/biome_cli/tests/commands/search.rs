@@ -241,3 +241,38 @@ fn search_json_pattern() {
         result,
     ));
 }
+
+#[test]
+fn search_counts_every_match() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let matches_file_path = Utf8Path::new("matches.js");
+    let no_matches_file_path = Utf8Path::new("no_matches.js");
+    fs.insert(matches_file_path.into(), "f(1);\nf(2);\nf(3);\n".as_bytes());
+    fs.insert(no_matches_file_path.into(), "const a = 1;\n".as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "search",
+                "`f($arg)`",
+                matches_file_path.as_str(),
+                no_matches_file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "search_counts_every_match",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -14,6 +14,8 @@ use biome_unicode_table::Dispatch::{self, AMP, *};
 use biome_unicode_table::{is_unicode_punctuation, lookup_byte};
 use std::cell::Cell;
 
+use crate::MarkdownParserOptions;
+use crate::syntax::inline::is_non_emoji_variation_selector;
 use crate::syntax::{
     MAX_BLOCK_PREFIX_INDENT, MAX_ORDERED_LIST_MARKER_DIGITS, MIN_FENCE_RUN_LENGTH,
     MIN_HARD_BREAK_TRAILING_SPACES, MIN_THEMATIC_BREAK_RUN, TAB_STOP_SPACES,
@@ -124,6 +126,13 @@ pub(crate) struct MarkdownLexer<'src> {
     /// span.
     relex_span: Option<(usize, MarkdownSyntaxKind)>,
     frontmatter_fence: Cell<Option<(usize, usize)>>,
+
+    /// Mirrors [MarkdownParserOptions::with_cjk_friendly_emphasis], which
+    /// changes which `_` runs can open emphasis.
+    cjk_friendly_emphasis: bool,
+
+    /// Whether the source is MDX, where `{` opens an expression.
+    mdx: bool,
 }
 
 impl<'src> Lexer<'src> for MarkdownLexer<'src> {
@@ -277,7 +286,29 @@ impl<'src> MarkdownLexer<'src> {
             force_ordered_list_marker: false,
             relex_span: None,
             frontmatter_fence: Cell::new(None),
+            cjk_friendly_emphasis: false,
+            mdx: false,
         }
+    }
+
+    pub(crate) fn with_options(mut self, options: &MarkdownParserOptions) -> Self {
+        self.cjk_friendly_emphasis = options.cjk_friendly_emphasis;
+        self.mdx = options.is_mdx();
+        self
+    }
+
+    /// Returns whether `{` is an `L_CURLY` token in `context`. Only MDX has
+    /// expressions, and they can't start inside code spans or link
+    /// destinations.
+    fn lexes_curly(&self, context: MarkdownLexContext) -> bool {
+        self.mdx
+            && matches!(
+                context,
+                MarkdownLexContext::Regular
+                    | MarkdownLexContext::HeadingContent
+                    | MarkdownLexContext::EmphasisInline
+                    | MarkdownLexContext::Table
+            )
     }
 
     pub fn set_force_ordered_list_marker(&mut self, value: bool) {
@@ -419,6 +450,7 @@ impl<'src> MarkdownLexer<'src> {
             }
             BTO => self.consume_byte(L_BRACK),
             BTC => self.consume_byte(R_BRACK),
+            BEO if self.lexes_curly(context) => self.consume_byte(L_CURLY),
             // `(` and `)` are only syntax inside link destinations and titles,
             // which the parser lexes with the LinkDefinition context.
             // Anywhere else they are plain text.
@@ -1540,6 +1572,7 @@ impl<'src> MarkdownLexer<'src> {
                 | BTC  // ]
                 | BSL  // \
                 => break,
+                BEO if self.lexes_curly(context) => break,
                 // Parens are only syntax in link destinations and titles
                 // (LinkDefinition context); elsewhere they are plain text.
                 PNO | PNC => {
@@ -1700,7 +1733,14 @@ impl<'src> MarkdownLexer<'src> {
     fn is_intraword_underscore_sequence(&self) -> bool {
         let is_word_char = |c: Option<char>| matches!(c, Some(c) if !c.is_whitespace() && !is_unicode_punctuation(c));
 
-        let before = self.source[..self.position].chars().next_back();
+        let mut preceding = self.source[..self.position].chars().rev();
+        let mut before = preceding.next();
+        // The CJK-friendly amendments classify a variation selector by the
+        // character it modifies: in `。` U+FE00 `_`, the `_` follows
+        // punctuation and can open emphasis.
+        if self.cjk_friendly_emphasis && before.is_some_and(is_non_emoji_variation_selector) {
+            before = preceding.next();
+        }
         if !is_word_char(before) {
             return false;
         }

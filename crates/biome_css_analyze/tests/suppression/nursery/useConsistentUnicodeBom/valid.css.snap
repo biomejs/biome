@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+﻿
+/* should not generate diagnostics */
+/* biome-ignore-all lint/nursery/useConsistentUnicodeBom: encoding required */
+p { color: red; }
+
+```

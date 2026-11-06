@@ -7,9 +7,9 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, TokenSet, token_set};
 
+use super::name::parse_dashed_at_rule_name;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::media::MediaQueryList;
-use crate::syntax::parse_dashed_identifier;
 use crate::syntax::parse_error::expected_dashed_identifier;
 
 #[inline]
@@ -44,7 +44,7 @@ fn parse_custom_media_at_rule_declarator(
 
     p.bump(T![custom_media]);
 
-    parse_dashed_identifier(p).or_add_diagnostic(p, expected_dashed_identifier);
+    parse_dashed_at_rule_name(p).or_add_diagnostic(p, expected_dashed_identifier);
 
     if is_at_boolean_media_query(p) {
         parse_boolean_media_query(p).ok();

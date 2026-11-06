@@ -1,0 +1,59 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalidSvgForeignObject.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<svg>
+	<foreignObject>
+		<table bgcolor="#ffffff"></table>
+		<style type="text/css">p { color: red; }</style>
+	</foreignObject>
+</svg>
+
+```
+
+# Diagnostics
+```
+invalidSvgForeignObject.html:4:10 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgcolor attribute on <table> is obsolete.
+  
+    2 │ <svg>
+    3 │ 	<foreignObject>
+  > 4 │ 		<table bgcolor="#ffffff"></table>
+      │ 		       ^^^^^^^^^^^^^^^^^
+    5 │ 		<style type="text/css">p { color: red; }</style>
+    6 │ 	</foreignObject>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSvgForeignObject.html:5:10 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The type attribute on <style> is obsolete.
+  
+    3 │ 	<foreignObject>
+    4 │ 		<table bgcolor="#ffffff"></table>
+  > 5 │ 		<style type="text/css">p { color: red; }</style>
+      │ 		       ^^^^^^^^^^^^^^^
+    6 │ 	</foreignObject>
+    7 │ </svg>
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Remove it. Styles are always CSS. To embed other data, use a <script> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

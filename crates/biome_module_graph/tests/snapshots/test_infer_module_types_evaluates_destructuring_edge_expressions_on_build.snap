@@ -23,7 +23,7 @@ export const { a, ...staticRest } = Derived;
 export const derived: Derived = {} as Derived;
 export const { inherited, ...instanceRest } = derived;
 
-export const tuple = ["value", 1, true];
+export const tuple = ["value", 1, true] as const;
 export const [first, ...tupleRest] = tuple;
 ```
 
@@ -83,7 +83,9 @@ Binding tuple "tuple" => [string: value,
 number: 1,
 bool: true]
 
-Expression "[\"value\", 1, true]" => [string: value,
+Expression "[\"value\", 1, true]" => instanceof Array<string | number | boolean>
+
+Expression "[\"value\", 1, true] as const" => [string: value,
 number: 1,
 bool: true]
 

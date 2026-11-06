@@ -1,0 +1,52 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-compound-placeholders.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+%a%b%c {}
+%a.card:hover%b {}
+.card%a%b {}
+
+%a.card.active%b {}
+.normal-target.active {}
+
+```
+
+# Diagnostics
+```
+parity-compound-placeholders.scss:6:1 lint/complexity/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 2.
+  
+    4 │ .card%a%b {}
+    5 │ 
+  > 6 │ %a.card.active%b {}
+      │ ^^^^^^^^^^^^^^^^
+    7 │ .normal-target.active {}
+    8 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+
+```
+
+```
+parity-compound-placeholders.scss:7:1 lint/complexity/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 1 class selector, but found 2.
+  
+    6 │ %a.card.active%b {}
+  > 7 │ .normal-target.active {}
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+
+```

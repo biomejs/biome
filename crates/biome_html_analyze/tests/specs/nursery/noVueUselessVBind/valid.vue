@@ -1,0 +1,25 @@
+<!-- should not generate diagnostics -->
+<template>
+  <div id="foo" />
+  <div id='foo' />
+  <div id=foo />
+  <div :id="foo" />
+  <div :id="'foo' || 'bar'" />
+  <div :id="'foo' + bar" />
+  <div :id="1" />
+  <div :id />
+  <div :id="null" />
+  <div :id="true" />
+  <div :id="`foo${bar}`" />
+  <div :id="tag`foo`" />
+  <div :id.prop="'foo'" />
+  <div v-bind:id.attr="'foo'" />
+  <div :[name]="'foo'" />
+  <div v-bind="'foo'" />
+  <div v-on:click="'foo'" />
+  <div v-if="'foo'" />
+  <div @click="'foo'" />
+  <div v-pre :id="'foo'">
+    <span :id="'foo'" />
+  </div>
+</template>

@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write '<TEMP_DIR>/does_not_ignore_project_inside_excluded_ancestor_exclusion/nested/.hidden/a/b'
+```
+
+## `nested/.hidden/a/b/biome.json`
+
+```json
+{ "files": { "includes": ["src/**", "!**/.*"] } }
+```
+
+## `nested/.hidden/a/b/src/.hidden/nested/ignored.js`
+
+```js
+  statement(  )  
+```
+
+## `nested/.hidden/a/b/src/index.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. Fixed 2 files.
+```

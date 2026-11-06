@@ -14,19 +14,31 @@ query B {
 query C {
 	field(arg: { f1: {f2: "value", f2: "value" }})
 }
+query D {
+	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+}
 
 ```
 
 # Diagnostics
 ```
-invalid.graphql:3:13 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:15 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate input field name.
+  × The input field name "f1" is used more than once.
   
     1 │ # should generate diagnostics
     2 │ query A {
   > 3 │ 	field(arg: { f1: "value", f1: "value" })
-      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ 	             ^^
+    4 │ }
+    5 │ query B {
+  
+  i The input field "f1" is repeated here.
+  
+    1 │ # should generate diagnostics
+    2 │ query A {
+  > 3 │ 	field(arg: { f1: "value", f1: "value" })
+      │ 	                          ^^
     4 │ }
     5 │ query B {
   
@@ -36,14 +48,32 @@ invalid.graphql:3:13 lint/correctness/noDuplicateInputFieldNames ━━━━━
 ```
 
 ```
-invalid.graphql:6:13 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:15 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate input field name.
+  × The input field name "f1" is used more than once.
   
     4 │ }
     5 │ query B {
   > 6 │ 	field(arg: { f1: "value", f1: "value", f1: "value" })
-      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ 	             ^^
+    7 │ }
+    8 │ query C {
+  
+  i The input field "f1" is repeated here.
+  
+    4 │ }
+    5 │ query B {
+  > 6 │ 	field(arg: { f1: "value", f1: "value", f1: "value" })
+      │ 	                          ^^
+    7 │ }
+    8 │ query C {
+  
+  i The input field "f1" is repeated here.
+  
+    4 │ }
+    5 │ query B {
+  > 6 │ 	field(arg: { f1: "value", f1: "value", f1: "value" })
+      │ 	                                       ^^
     7 │ }
     8 │ query C {
   
@@ -53,16 +83,77 @@ invalid.graphql:6:13 lint/correctness/noDuplicateInputFieldNames ━━━━━
 ```
 
 ```
-invalid.graphql:9:19 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:9:20 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate input field name.
+  × The input field name "f2" is used more than once.
   
      7 │ }
      8 │ query C {
    > 9 │ 	field(arg: { f1: {f2: "value", f2: "value" }})
-       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 	                  ^^
     10 │ }
-    11 │ 
+    11 │ query D {
+  
+  i The input field "f2" is repeated here.
+  
+     7 │ }
+     8 │ query C {
+   > 9 │ 	field(arg: { f1: {f2: "value", f2: "value" }})
+       │ 	                               ^^
+    10 │ }
+    11 │ query D {
+  
+  i A GraphQL input object value is only valid if all supplied fields are uniquely named. Make sure to name every input field differently.
+  
+
+```
+
+```
+invalid.graphql:12:15 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The input field name "a" is used more than once.
+  
+    10 │ }
+    11 │ query D {
+  > 12 │ 	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+       │ 	             ^
+    13 │ }
+    14 │ 
+  
+  i The input field "a" is repeated here.
+  
+    10 │ }
+    11 │ query D {
+  > 12 │ 	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+       │ 	                         ^
+    13 │ }
+    14 │ 
+  
+  i A GraphQL input object value is only valid if all supplied fields are uniquely named. Make sure to name every input field differently.
+  
+
+```
+
+```
+invalid.graphql:12:21 lint/correctness/noDuplicateInputFieldNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The input field name "b" is used more than once.
+  
+    10 │ }
+    11 │ query D {
+  > 12 │ 	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+       │ 	                   ^
+    13 │ }
+    14 │ 
+  
+  i The input field "b" is repeated here.
+  
+    10 │ }
+    11 │ query D {
+  > 12 │ 	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+       │ 	                               ^
+    13 │ }
+    14 │ 
   
   i A GraphQL input object value is only valid if all supplied fields are uniquely named. Make sure to name every input field differently.
   

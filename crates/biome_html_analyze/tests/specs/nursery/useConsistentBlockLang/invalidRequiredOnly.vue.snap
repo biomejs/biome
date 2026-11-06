@@ -1,0 +1,30 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidRequiredOnly.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalidRequiredOnly.vue:1:1 lint/nursery/useConsistentBlockLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This component is missing a <script> block.
+  
+  > 1 │ <!-- should generate diagnostics -->
+      │ 
+    2 │ <template>
+    3 │   <div></div>
+  
+  i This project requires every component to have a <script> block so that every component is written the same way.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

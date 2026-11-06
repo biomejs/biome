@@ -2,11 +2,12 @@
 
 use GraphqlSyntaxKind::*;
 use biome_graphql_syntax::{
-    AnyGraphqlTypeDefinition, AnyGraphqlTypeExtension, GraphqlFragmentDefinition,
-    GraphqlNameBinding, GraphqlNameReference, GraphqlOperationDefinition, GraphqlSyntaxKind,
-    GraphqlSyntaxNode, GraphqlVariableBinding, GraphqlVariableReference, TextRange,
+    AnyGraphqlTypeDefinition, AnyGraphqlTypeExtension, GraphqlFragmentDefinition, GraphqlLanguage,
+    GraphqlNameBinding, GraphqlNameReference, GraphqlOperationDefinition, GraphqlRoot,
+    GraphqlSyntaxKind, GraphqlSyntaxNode, GraphqlVariableBinding, GraphqlVariableReference,
+    TextRange,
 };
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::{AstNode, SyntaxKindSet, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::{HashSet, VecDeque};
 
@@ -147,6 +148,15 @@ struct VariableBindingInfo {
 }
 
 impl SemanticEventExtractor {
+    /// The kinds of the nodes that [Self::enter] and [Self::leave] read.
+    pub const VISITED_KINDS: SyntaxKindSet<GraphqlLanguage> = GraphqlNameBinding::KIND_SET
+        .union(GraphqlNameReference::KIND_SET)
+        .union(GraphqlVariableBinding::KIND_SET)
+        .union(GraphqlVariableReference::KIND_SET)
+        .union(GraphqlOperationDefinition::KIND_SET)
+        .union(GraphqlFragmentDefinition::KIND_SET)
+        .union(GraphqlRoot::KIND_SET);
+
     pub fn new() -> Self {
         Self::default()
     }
@@ -154,6 +164,7 @@ impl SemanticEventExtractor {
     /// See [SemanticEvent] for a more detailed description of which events [GraphqlSyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &GraphqlSyntaxNode) {
+        // If you read a new node kind, add it to [Self::VISITED_KINDS].
         match node.kind() {
             GRAPHQL_NAME_BINDING => {
                 self.enter_identifier_binding(&GraphqlNameBinding::unwrap_cast(node.clone()));

@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-type-alias.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+type Emits = { click: [] };
+interface OtherEmits {
+  (e: "keydown"): void;
+}
+defineEmits<Emits>();
+defineEmits<(OtherEmits)>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-type-alias.vue:3:16 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event click.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ type Emits = { click: [] };
+      │                ^^^^^
+    4 │ interface OtherEmits {
+    5 │   (e: "keydown"): void;
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup-type-alias.vue:5:7 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event keydown.
+  
+    3 │ type Emits = { click: [] };
+    4 │ interface OtherEmits {
+  > 5 │   (e: "keydown"): void;
+      │       ^^^^^^^^^
+    6 │ }
+    7 │ defineEmits<Emits>();
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -11,6 +11,7 @@ impl FormatRule<AnyCssFontFeatureValuesItem> for FormatAnyCssFontFeatureValuesIt
             AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(node) => {
                 node.format().fmt(f)
             }
+            AnyCssFontFeatureValuesItem::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(node) => node.format().fmt(f),
         }
     }

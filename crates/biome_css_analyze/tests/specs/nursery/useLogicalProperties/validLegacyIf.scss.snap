@@ -1,0 +1,13 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validLegacyIf.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.legacy-if {
+  margin-block-start: if(true, null, 1px);
+  margin-block-end: 2px;
+}
+
+```

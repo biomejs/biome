@@ -1,0 +1,19 @@
+# should not generate diagnostics
+%YAML 1.1
+---
+ordinary: value
+yesterday: 1
+nothing: 2
+quoted:
+  "yes": 3
+  'no': 4
+tagged:
+  !!str yes: 5
+aliases:
+  - value: &word "yes"
+  - { *word : aliased }
+values:
+  - yes
+  - no
+merge:
+  <<: { base: value }

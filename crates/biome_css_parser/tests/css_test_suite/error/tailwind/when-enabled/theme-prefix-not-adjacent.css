@@ -1,0 +1,7 @@
+@theme prefix (tw) {
+	--color-brand: red;
+}
+
+@theme PREFIX(tw) {
+	--color-brand: red;
+}

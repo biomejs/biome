@@ -90,20 +90,20 @@ impl schemars::JsonSchema for ManifestPresets {
 }
 
 impl Deserializable for ManifestPresets {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct PresetsVisitor;
-        impl DeserializationVisitor for PresetsVisitor {
+        impl<S> DeserializationVisitor<S> for PresetsVisitor {
             type Output = ManifestPresets;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -149,23 +149,23 @@ pub enum ManifestEntry {
 }
 
 impl Deserializable for ManifestEntry {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Package)
         } else {
             struct NamedEntriesVisitor;
-            impl DeserializationVisitor for NamedEntriesVisitor {
+            impl<S> DeserializationVisitor<S> for NamedEntriesVisitor {
                 type Output = BTreeMap<String, String>;
                 const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
                 fn visit_map(
                     self,
-                    ctx: &mut dyn DeserializationContext,
-                    members: &mut MapMembers<'_>,
+                    ctx: &mut dyn DeserializationContext<State = S>,
+                    members: &mut MapMembers<'_, S>,
                     _range: TextRange,
                     _name: &str,
                 ) -> Option<Self::Output> {
@@ -202,9 +202,9 @@ impl Deserializable for ManifestEntry {
 }
 
 impl DeserializableValidator for BiomeManifest {
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _name: &str,
         range: TextRange,
     ) -> bool {
@@ -390,7 +390,7 @@ impl InvalidBiomeManifest {
 
         Self {
             message: MessageAndDescription::from(
-                markup!("Cannot load Biome manifest "<Emphasis>{path}</Emphasis>".").to_owned(),
+                markup!("The Biome manifest "<Emphasis>{path}</Emphasis>" is invalid.").to_owned(),
             ),
             path,
             source,
@@ -404,8 +404,8 @@ impl InvalidBiomeManifest {
     }
 }
 
-fn supported_version(
-    ctx: &mut dyn DeserializationContext,
+fn supported_version<S>(
+    ctx: &mut dyn DeserializationContext<State = S>,
     value: &u8,
     name: &str,
     range: TextRange,
@@ -415,9 +415,12 @@ fn supported_version(
     } else {
         ctx.report(
             DeserializationDiagnostic::new(markup! {
-                <Emphasis>{name}</Emphasis>" must be 1."
+                "Unsupported "<Emphasis>{name}</Emphasis>" "<Emphasis>{value}</Emphasis>"."
             })
-            .with_range(range),
+            .with_range(range)
+            .with_note(markup! {
+                "Biome manifests must use "<Emphasis>{name}</Emphasis>" "<Emphasis>"1"</Emphasis>"."
+            }),
         );
         false
     }
@@ -447,8 +450,8 @@ fn is_config_package_specifier(specifier: &str) -> bool {
         .is_some_and(is_valid_export_name)
 }
 
-fn report_invalid_export_name(
-    ctx: &mut dyn DeserializationContext,
+fn report_invalid_export_name<S>(
+    ctx: &mut dyn DeserializationContext<State = S>,
     name: &str,
     kind: &str,
     range: TextRange,

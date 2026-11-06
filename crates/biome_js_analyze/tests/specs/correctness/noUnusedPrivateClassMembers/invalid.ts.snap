@@ -65,6 +65,8 @@ invalid.ts:2:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     3 │ 
     4 │ 	private unusedMethod() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
      1  1 │   class TsBioo {
@@ -86,6 +88,8 @@ invalid.ts:4:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
       │ 	        ^^^^^^^^^^^^
     5 │ 
     6 │ 	};
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   
@@ -113,6 +117,8 @@ invalid.ts:10:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     11 │ 
     12 │ 	}
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove private modifier
   
      8  8 │   
@@ -136,6 +142,8 @@ invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     18 │ 
     19 │ 	method() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     15 15 │   
@@ -158,6 +166,8 @@ invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     26 │ 
     27 │ 	method() {
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     23 23 │   
@@ -179,6 +189,8 @@ invalid.ts:33:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
        │ 	            ^^^^^^^^^^^^^^
     34 │ 	private set unusedAccessor(value) { }
     35 │ }
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   
@@ -203,6 +215,8 @@ invalid.ts:34:14 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     35 │ }
     36 │ 
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     32 32 │   class TsAccessor {
@@ -226,6 +240,8 @@ invalid.ts:39:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     40 │ 	private unusedMethod() {}
     41 │ 
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove unused declaration.
   
     37 37 │   // github.com/biomejs/biome/issues/6165
@@ -248,6 +264,8 @@ invalid.ts:40:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
        │ 	        ^^^^^^^^^^^^
     41 │ 
     42 │ 	private usedProperty = 4;
+  
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
   
   i Unsafe fix: Remove unused declaration.
   

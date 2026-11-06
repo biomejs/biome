@@ -16,6 +16,7 @@ impl FormatRule<AnyCssSubSelector> for FormatAnyCssSubSelector {
             AnyCssSubSelector::CssPseudoClassSelector(node) => node.format().fmt(f),
             AnyCssSubSelector::CssPseudoElementSelector(node) => node.format().fmt(f),
             AnyCssSubSelector::ScssInterpolatedSubSelector(node) => node.format().fmt(f),
+            AnyCssSubSelector::ScssPlaceholderSelector(node) => node.format().fmt(f),
         }
     }
 }

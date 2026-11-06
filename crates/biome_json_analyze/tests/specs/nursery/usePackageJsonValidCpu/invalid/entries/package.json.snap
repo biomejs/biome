@@ -1,0 +1,558 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "my-package",
+	"cpu": [
+		"",
+		"  ",
+		true,
+		64,
+		null,
+		{},
+		["x64"],
+		"x86",
+		"X64",
+		"x64 ",
+		"amd64",
+		"ppc",
+		"any",
+		"!x86",
+		"!",
+		"!!arm"
+	]
+}
+
+```
+
+# Diagnostics
+```
+package.json:4:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field is empty or contains only spaces.
+  
+    2 │ 	"name": "my-package",
+    3 │ 	"cpu": [
+  > 4 │ 		"",
+      │ 		^^
+    5 │ 		"  ",
+    6 │ 		true,
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:5:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field is empty or contains only spaces.
+  
+    3 │ 	"cpu": [
+    4 │ 		"",
+  > 5 │ 		"  ",
+      │ 		^^^^
+    6 │ 		true,
+    7 │ 		64,
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:6:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a string.
+  
+    4 │ 		"",
+    5 │ 		"  ",
+  > 6 │ 		true,
+      │ 		^^^^
+    7 │ 		64,
+    8 │ 		null,
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:7:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a string.
+  
+    5 │ 		"  ",
+    6 │ 		true,
+  > 7 │ 		64,
+      │ 		^^
+    8 │ 		null,
+    9 │ 		{},
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:8:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a string.
+  
+     6 │ 		true,
+     7 │ 		64,
+   > 8 │ 		null,
+       │ 		^^^^
+     9 │ 		{},
+    10 │ 		["x64"],
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:9:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a string.
+  
+     7 │ 		64,
+     8 │ 		null,
+   > 9 │ 		{},
+       │ 		^^
+    10 │ 		["x64"],
+    11 │ 		"x86",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:10:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a string.
+  
+     8 │ 		null,
+     9 │ 		{},
+  > 10 │ 		["x64"],
+       │ 		^^^^^^^
+    11 │ 		"x86",
+    12 │ 		"X64",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:11:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+     9 │ 		{},
+    10 │ 		["x64"],
+  > 11 │ 		"x86",
+       │ 		^^^^^
+    12 │ 		"X64",
+    13 │ 		"x64 ",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:12:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    10 │ 		["x64"],
+    11 │ 		"x86",
+  > 12 │ 		"X64",
+       │ 		^^^^^
+    13 │ 		"x64 ",
+    14 │ 		"amd64",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:13:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    11 │ 		"x86",
+    12 │ 		"X64",
+  > 13 │ 		"x64 ",
+       │ 		^^^^^^
+    14 │ 		"amd64",
+    15 │ 		"ppc",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:14:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    12 │ 		"X64",
+    13 │ 		"x64 ",
+  > 14 │ 		"amd64",
+       │ 		^^^^^^^
+    15 │ 		"ppc",
+    16 │ 		"any",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:15:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    13 │ 		"x64 ",
+    14 │ 		"amd64",
+  > 15 │ 		"ppc",
+       │ 		^^^^^
+    16 │ 		"any",
+    17 │ 		"!x86",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:16:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    14 │ 		"amd64",
+    15 │ 		"ppc",
+  > 16 │ 		"any",
+       │ 		^^^^^
+    17 │ 		"!x86",
+    18 │ 		"!",
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:17:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    15 │ 		"ppc",
+    16 │ 		"any",
+  > 17 │ 		"!x86",
+       │ 		^^^^^^
+    18 │ 		"!",
+    19 │ 		"!!arm"
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:18:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    16 │ 		"any",
+    17 │ 		"!x86",
+  > 18 │ 		"!",
+       │ 		^^^
+    19 │ 		"!!arm"
+    20 │ 	]
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```
+
+```
+package.json:19:3 lint/nursery/usePackageJsonValidCpu ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This entry of the cpu field isn't a known processor type.
+  
+    17 │ 		"!x86",
+    18 │ 		"!",
+  > 19 │ 		"!!arm"
+       │ 		^^^^^^^
+    20 │ 	]
+    21 │ }
+  
+  i Package managers compare each entry with the processor type of the machine to decide whether the package can be installed there. An entry that isn't a processor type never matches, so the package may be installed on, or refused by, the wrong machines.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Replace the entry with one of the following processor types, in quotes. To exclude a processor type instead, add ! before its name.
+  
+  - arm
+  - arm64
+  - ia32
+  - loong64
+  - mips
+  - mipsel
+  - ppc64
+  - riscv64
+  - s390
+  - s390x
+  - x64
+  
+
+```

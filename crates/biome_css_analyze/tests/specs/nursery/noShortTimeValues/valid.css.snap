@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+a { animation: none; }
+a { animation: none, my-animation; }
+a { transition: opacity var(--x) var(--y) ease-out; }
+a { transition-delay: 0.1s; }
+a { -webkit-transition-delay: 0.2s; }
+a { tRaNsItIoN-dElAy: 0.2s; }
+a { TRANSITION-DELAY: 0.2s; }
+a { transition-delay: 3s; }
+a { transition-delay: 100ms; }
+a { transition-delay: 100.0ms; }
+a { transition-delay: 5000ms; }
+a { transition-duration: 0.15s; }
+a { -webkit-transition-duration: 0.15s; }
+a { transition-duration: 330ms; }
+a { transition-duration: 1e2ms; }
+a { transition: foo 0.8s linear; }
+a { -webkit-transition: foo 0.8s linear; }
+a { TRANSITION: foo 0.8s linear; }
+a { transition: foo 0.8s ease-in-out 200ms; }
+a { transition: foo 0.8s, bar 0.8s; }
+a { animation-delay: 0.2s; }
+a { -webkit-animation-delay: 200ms; }
+a { animation-duration: 0.15s; }
+a { -webkit-animation-duration: 4700ms; }
+a { animation: foo 0.8s linear; }
+a { animation: foo 0.8s ease-in-out 200ms; }
+a { animation: foo 0.8s, bar 0.8s; }
+
+/* Times of zero or less are allowed. */
+a { animation-delay: -2.5s; }
+a { animation-delay: -20ms; }
+a { animation: foo 0.8s ease-in-out -20ms; }
+a { animation-delay: 0ms; }
+a { animation-delay: 0s; }
+a { animation-delay: 0; }
+a { transition: none 0s; }
+
+/* Only animation and transition properties are checked. */
+a { --transition-duration: 10ms; }
+a { --animation: foo 10ms; }
+a { animation-range-start: 10ms; }
+a { transition-timing-function: linear; }
+a { width: 10ms; }
+a { transition-duration: 10px; }
+a { transition-duration: 10; }
+a { transition-duration: 10%; }
+a { transition-duration: 10foo; }
+
+/* Conditions only test for browser support. */
+@supports (transition-duration: 10ms) {}
+@supports not (transition: opacity 10ms) {}
+@container style(transition-duration: 10ms) {}
+@import url("x.css") supports(transition-duration: 10ms);
+
+```

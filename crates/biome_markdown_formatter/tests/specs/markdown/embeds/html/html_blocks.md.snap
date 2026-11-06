@@ -1,0 +1,79 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/html/html_blocks.md
+---
+
+# Input
+
+```md
+<span>
+label
+</span>
+
+<a href="https://github.com/biomejs/biome/blob/main/crates/biome_markdown_formatter/README.md">
+<img src="logo.png" alt="Logo">
+</a>
+
+<img src="first.png">
+<img src="second.png">
+
+<div><span>one line</span></div>
+
+<div>
+<p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb</p>
+</div>
+
+```html
+<span>
+fenced
+</span>
+```
+
+```
+
+
+# Options
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+<span>
+	label
+</span>
+
+<a href="https://github.com/biomejs/biome/blob/main/crates/biome_markdown_formatter/README.md">
+	<img src="logo.png" alt="Logo">
+</a>
+
+<img src="first.png">
+<img src="second.png">
+
+<div><span>one line</span></div>
+
+<div>
+	<p>
+		aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+		bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+	</p>
+</div>
+
+```html
+<span> fenced </span>
+```
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5: <a href="https://github.com/biomejs/biome/blob/main/crates/biome_markdown_formatter/README.md">
+```

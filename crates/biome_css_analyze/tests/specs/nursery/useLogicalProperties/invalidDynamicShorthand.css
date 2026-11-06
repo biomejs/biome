@@ -1,0 +1,9 @@
+/* should generate diagnostics */
+.dynamic-shorthands {
+	padding: var(--spacing) 2px;
+	margin: calc(var(--spacing)) 2px;
+	inset: env(safe-area-inset-top) 1px;
+	scroll-margin: attr(data-offset) 2px;
+	margin: if(media(width > 1px): 1px 2px; else: 0) 3px;
+	padding: 3px if(media(width > 1px): 1px 2px; else: 0);
+}

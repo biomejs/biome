@@ -1,0 +1,16 @@
+/* should generate diagnostics */
+div {
+  color: red;
+  display: block
+}
+
+.comments {
+  color: red;
+  /* Display comment. */
+  display: block /* Trailing display comment. */
+}
+
+.nested {
+  .child {}
+  color: red
+}

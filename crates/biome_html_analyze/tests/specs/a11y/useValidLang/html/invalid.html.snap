@@ -28,6 +28,8 @@ invalid.html:2:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
     3 │ <HTML lang="lorem"></HTML>
     4 │ <Html lang="lorem"></Html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid languages:
   
   - ab
@@ -60,6 +62,8 @@ invalid.html:3:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
       │            ^^^^^^^
     4 │ <Html lang="lorem"></Html>
     5 │ <html lang="en-babab"></html>
+  
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
   i Some of valid languages:
   
@@ -94,6 +98,8 @@ invalid.html:4:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
     5 │ <html lang="en-babab"></html>
     6 │ <html lang="en-GB-something"></html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid languages:
   
   - ab
@@ -127,6 +133,10 @@ invalid.html:5:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
     6 │ <html lang="en-GB-something"></html>
     7 │ <html lang="zh-Xxxx"></html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
+  i Use a valid language tag, for example en or en-US.
+  
 
 ```
 
@@ -141,6 +151,8 @@ invalid.html:6:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
       │            ^^^^^^^^^^^^^^^^^
     7 │ <html lang="zh-Xxxx"></html>
     8 │ <html lang="zh-Hans-ZZ"></html>
+  
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
   i Some of valid scripts:
   
@@ -175,6 +187,8 @@ invalid.html:7:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
     8 │ <html lang="zh-Hans-ZZ"></html>
     9 │ <html lang="en-US-GB-Extra"></html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid scripts:
   
   - Arab
@@ -208,6 +222,8 @@ invalid.html:8:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
      9 │ <html lang="en-US-GB-Extra"></html>
     10 │ 
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid countries:
   
   - AF
@@ -239,6 +255,10 @@ invalid.html:9:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
    > 9 │ <html lang="en-US-GB-Extra"></html>
        │            ^^^^^^^^^^^^^^^^
     10 │ 
+  
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
+  i Use a valid language tag, for example en or en-US.
   
 
 ```

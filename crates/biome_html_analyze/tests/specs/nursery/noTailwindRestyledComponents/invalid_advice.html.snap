@@ -1,0 +1,80 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_advice.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<my-button class="rounded-none"></my-button>
+<my-card class="rounded-none text-sm"></my-card>
+<my-other class="rounded-none"></my-other>
+
+```
+
+# Diagnostics
+```
+invalid_advice.html:2:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="rounded-none"></my-button>
+      │                   ^^^^^^^^^^^^
+    3 │ <my-card class="rounded-none text-sm"></my-card>
+    4 │ <my-other class="rounded-none"></my-other>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use the variant prop of my-button.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_advice.html:3:30 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <my-button class="rounded-none"></my-button>
+  > 3 │ <my-card class="rounded-none text-sm"></my-card>
+      │                              ^^^^^^^
+    4 │ <my-other class="rounded-none"></my-other>
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use the size prop of my-card.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_advice.html:4:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    2 │ <my-button class="rounded-none"></my-button>
+    3 │ <my-card class="rounded-none text-sm"></my-card>
+  > 4 │ <my-other class="rounded-none"></my-other>
+      │                  ^^^^^^^^^^^^
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

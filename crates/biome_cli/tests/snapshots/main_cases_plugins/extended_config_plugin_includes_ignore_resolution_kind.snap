@@ -1,0 +1,119 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/extended_config_plugin_includes_ignore_resolution_kind'
+```
+
+## `biome.json`
+
+```json
+{ "extends": ["./shared/base.json"] }
+```
+
+## `plugins/default.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Default resolutionKind")
+}
+```
+
+## `plugins/project.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "resolutionKind project")
+}
+```
+
+## `shared/base.json`
+
+```json
+{
+    "plugins": [
+        { "path": "./plugins/default.grit", "includes": ["src/**"] },
+        { "path": "./plugins/project.grit", "resolutionKind": "project", "includes": ["src/**"] },
+        { "path": "./plugins/config.grit", "resolutionKind": "config", "includes": ["src/**"] }
+    ]
+}
+```
+
+## `shared/plugins/config.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "resolutionKind config")
+}
+```
+
+## `shared/src/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `src/file.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Default resolutionKind
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × resolutionKind project
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+src/file.js:1:15 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × resolutionKind config
+  
+  > 1 │ Object.assign({}, value);
+      │               ^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 7 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

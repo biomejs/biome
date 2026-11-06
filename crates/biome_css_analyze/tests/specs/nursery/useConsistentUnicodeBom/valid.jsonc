@@ -1,0 +1,7 @@
+// should not generate diagnostics
+[
+  "",
+  "p { color: red; }",
+  "/* header */\np { color: red; }",
+  "p::before { content: \"\ufeff\"; }"
+]

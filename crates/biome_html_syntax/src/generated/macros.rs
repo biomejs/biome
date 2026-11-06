@@ -433,6 +433,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::VueVForArrayBinding::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::VUE_V_FOR_DEFAULT_BINDING => {
+                    let $pattern = unsafe { $crate::VueVForDefaultBinding::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::VUE_V_FOR_IDENTIFIER_BINDING => {
                     let $pattern = unsafe { $crate::VueVForIdentifierBinding::new_unchecked(node) };
                     $body

@@ -1,0 +1,3 @@
+/* should generate diagnostics */
+@keyframes valid { ; from { opacity: 0 }; ; to { opacity: 1 }; }
+@keyframes invalid { ;; from { opacity: 0 }; ; from { opacity: 1 }; }

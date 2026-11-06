@@ -1,0 +1,43 @@
+/* should not generate diagnostics */
+import path from "node:path";
+
+var fullPath = dirname + "foo.js";
+var fullPath = dirname + "/foo.js";
+var fullPath = __dirname == "foo.js";
+if (fullPath === __dirname) {}
+if (__dirname === fullPath) {}
+var fullPath = "/foo.js" + __filename;
+var fullPath = "/foo.js" + __dirname;
+var fullPath = __filename + ".map";
+var fullPath = `${__filename}.map`;
+var fullPath = __filename + (test ? ".js" : ".ts");
+var fullPath = __filename + (ext || ".js");
+var fullPath = import.meta.dirname + ".map";
+var fullPath = import.meta.filename + ".map";
+var fullUrl = import.meta.url + ".map";
+
+var fullPath = path.join(__dirname, "foo.js");
+var fullPath = path.resolve(import.meta.dirname, "foo.js");
+var fullUrl = new URL("./foo.js", import.meta.url);
+
+var fullPath = `${__dirname}`;
+var fullPath = `/foo.js${__dirname}`;
+var fullPath = `${__dirname}${other}/foo.js`;
+var fullPath = __dirname + other + "/foo.js";
+var fullPath = __dirname - "/foo.js";
+var fullPath = __dirname + ("" + "/foo.js");
+var fullPath = __dirname + (extraPath += "/foo.js");
+var fullPath = __dirname + tag`/foo.js`;
+var fullPath = __dirname + path.delimiter + "foo.js";
+var fullPath = __dirname + other.sep + "foo.js";
+var fullPath = __dirname + sep + "foo.js";
+var fullPath = __dirname + "\nfoo.js";
+var fullPath = `${__dirname}\tfoo.js`;
+var fullPath = __dirname + "\x2Efoo.js";
+const suffix = "/foo.js";
+var fullPath = __dirname + suffix;
+var fullPath = `${__dirname}${suffix}`;
+var value = import.meta.env + "/foo.js";
+var value = meta.url + "/foo.js";
+var value = other.dirname + "/foo.js";
+var value = globalThis.__dirname + "/foo.js";

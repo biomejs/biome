@@ -44,21 +44,20 @@ invalid.vue:15:1 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━
   
   i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
   
-  i Unsafe fix: Reorder macro defineProps.
+  i Unsafe fix: Reorder compiler macros.
   
      9  9 │   
     10 10 │   debugger
        11 │ + /**·Props·*/
        12 │ + defineProps({})
-       13 │ + 
-    11 14 │   
-    12 15 │   // Define the props and emits
+    11 13 │   
+    12 14 │   // Define the props and emits
     13    │ - const·emit·=·defineEmits([])
     14    │ - /**·Props·*/
     15    │ - defineProps({})
-       16 │ + const·emit·=·defineEmits([])
-    16 17 │   
-    17 18 │   const count = ref(0)
+       15 │ + const·emit·=·defineEmits([])
+    16 16 │   
+    17 17 │   const count = ref(0)
   
 
 ```

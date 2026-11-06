@@ -65,6 +65,8 @@ invalid.js:2:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     7 │ 
     8 │ if (a != b) {
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
      1  1 │   // Comment
@@ -98,6 +100,8 @@ invalid.js:8:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
        │ ^
     13 │ 
     14 │ if (a !== b) {
+  
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
   
   i Safe fix: Invert the condition and the blocks.
   
@@ -133,6 +137,8 @@ invalid.js:14:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     19 │ 
     20 │ !condition ? consequent : alternate;
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     12 12 │   }
@@ -162,6 +168,8 @@ invalid.js:20:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     21 │ a != b ? consequent : alternate;
     22 │ a !== b ? consequent : alternate;
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     18 18 │   }
@@ -184,6 +192,8 @@ invalid.js:21:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ a !== b ? consequent : alternate;
     23 │ /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
+  
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
   
   i Safe fix: Invert the condition and the blocks.
   
@@ -209,6 +219,8 @@ invalid.js:22:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     23 │ /*before-not*/!/*after-not*/spaced/*after-test*/ ? /*left-leading*/ left /*left-trailing*/   : /*right-leading*/ right /*right-trailing*/;
     24 │ 
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     20 20 │   !condition ? consequent : alternate;
@@ -232,6 +244,8 @@ invalid.js:23:15 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━
        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 
     25 │ call(
+  
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
   
   i Safe fix: Invert the condition and the blocks.
   
@@ -258,6 +272,8 @@ invalid.js:26:2 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
        │ 		^^^^^^^^^^^
     29 │ );
     30 │ 
+  
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
   
   i Safe fix: Invert the condition and the blocks.
   
@@ -290,6 +306,8 @@ invalid.js:31:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     34 │ 
     35 │ if (!true) something(); else {
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     29 29 │   );
@@ -320,6 +338,8 @@ invalid.js:35:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     38 │ 
     39 │ !-a ? b : c
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     33 33 │   } else something();
@@ -347,6 +367,8 @@ invalid.js:39:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
     40 │ 
     41 │ /*1*/!/*2*/cond/*3*/ ? /*a*/ b /*c*/ : /*d*/ e /*f*/
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
     37 37 │   }
@@ -369,6 +391,8 @@ invalid.js:41:6 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━�
   > 41 │ /*1*/!/*2*/cond/*3*/ ? /*a*/ b /*c*/ : /*d*/ e /*f*/
        │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ 
+  
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
   
   i Safe fix: Invert the condition and the blocks.
   

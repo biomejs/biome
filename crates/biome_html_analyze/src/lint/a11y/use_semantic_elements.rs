@@ -135,6 +135,9 @@ impl Rule for UseSemanticElements {
                     "The elements with this role can be changed to semantic elements."
                 },
             )
+            .note(markup! {
+                "Semantic elements have built-in meaning and behavior, so browsers and assistive technologies handle them correctly without extra ARIA attributes."
+            })
             .footer_list(
                 markup! { "Replace with one of these elements:" },
                 role.base_html_elements()

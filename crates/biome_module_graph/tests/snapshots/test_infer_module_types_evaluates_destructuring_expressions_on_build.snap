@@ -51,8 +51,7 @@ Expression "object" => instanceof Object {
 
 Binding numbers "numbers" => instanceof Array<number>
 
-Expression "[1, 2]" => [number: 1,
-number: 2]
+Expression "[1, 2]" => instanceof Array<number>
 
 Expression "1" => number: 1
 

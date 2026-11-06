@@ -1,0 +1,158 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+export const Options = defineComponent({
+  emits: ["click"],
+  setup(props, { emit }) {
+    emit("keydown");
+  },
+  methods: {
+    onClick() {
+      this.$emit("change");
+    },
+  },
+});
+
+export const Functional = defineComponent(
+  (props, { emit }) => {
+    emit("input");
+  },
+  { emits: ["input"] },
+);
+
+createApp({
+  emits: ["submit"],
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:5:11 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event click.
+  
+    4 │ export const Options = defineComponent({
+  > 5 │   emits: ["click"],
+      │           ^^^^^^^
+    6 │   setup(props, { emit }) {
+    7 │     emit("keydown");
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:7:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event keydown.
+  
+    5 │   emits: ["click"],
+    6 │   setup(props, { emit }) {
+  > 7 │     emit("keydown");
+      │          ^^^^^^^^^
+    8 │   },
+    9 │   methods: {
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:11:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event change.
+  
+     9 │   methods: {
+    10 │     onClick() {
+  > 11 │       this.$emit("change");
+       │                  ^^^^^^^^
+    12 │     },
+    13 │   },
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:18:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event input.
+  
+    16 │ export const Functional = defineComponent(
+    17 │   (props, { emit }) => {
+  > 18 │     emit("input");
+       │          ^^^^^^^
+    19 │   },
+    20 │   { emits: ["input"] },
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:20:13 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event input.
+  
+    18 │     emit("input");
+    19 │   },
+  > 20 │   { emits: ["input"] },
+       │             ^^^^^^^
+    21 │ );
+    22 │ 
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:24:11 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event submit.
+  
+    23 │ createApp({
+  > 24 │   emits: ["submit"],
+       │           ^^^^^^^^
+    25 │ });
+    26 │ 
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

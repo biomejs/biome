@@ -2,7 +2,7 @@ use crate::prelude::CssFormatContext;
 use crate::{CssFormatter, FormatCssSyntaxToken};
 use biome_css_syntax::CssSyntaxToken;
 use biome_formatter::formatter::Formatter;
-use biome_formatter::prelude::{
+use biome_formatter::rowan::prelude::{
     NumberFormatOptions, format_trimmed_number, syntax_token_cow_slice,
 };
 use biome_formatter::trivia::FormatToken;

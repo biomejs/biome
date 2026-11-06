@@ -1,0 +1,17 @@
+/* should generate diagnostics */
+
+/* Duplicate nested selectors inside `@container` */
+.card {
+  @container (min-width: 1px) {
+    & > p {}
+    & > p {}
+  }
+}
+
+/* Duplicate nested selectors inside `@starting-style` */
+.dialog {
+  @starting-style {
+    &:hover {}
+    &:hover {}
+  }
+}

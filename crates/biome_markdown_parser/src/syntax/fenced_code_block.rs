@@ -24,7 +24,9 @@
 
 use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
 use crate::parser::MarkdownParser;
-use crate::syntax::quote::try_bump_quote_marker;
+use crate::syntax::quote::{
+    consume_quote_prefix, list_indent_inside_quote, skip_quote_prefixes_in_line,
+};
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
 use crate::token_source::find_line_start;
 use biome_markdown_syntax::{T, kind::MarkdownSyntaxKind::*};
@@ -173,11 +175,10 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
 
     let m = p.start();
 
+    let list_indent = list_indent_inside_quote(p);
     let mut fence_indent = p.line_start_leading_indent();
-    if p.state().list_item_required_indent > 0
-        && p.state().virtual_line_start == Some(p.cur_range().start())
-    {
-        fence_indent += p.state().list_item_required_indent;
+    if list_indent > 0 && p.state().virtual_line_start == Some(p.cur_range().start()) {
+        fence_indent += list_indent;
     }
     p.emit_line_indent(MAX_BLOCK_PREFIX_INDENT);
 
@@ -200,11 +201,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     if has_closing {
         // Closing fence indent: strip list continuation indent plus the
         // CommonMark-allowed 0-3 spaces before the fence itself.
-        let max = if p.state().list_item_required_indent > 0 {
-            p.state().list_item_required_indent + MAX_BLOCK_PREFIX_INDENT
-        } else {
-            MAX_BLOCK_PREFIX_INDENT
-        };
+        let max = list_indent + MAX_BLOCK_PREFIX_INDENT;
         p.emit_line_indent(max);
         bump_fence(p, is_tilde_fence);
         // Closing-fence whitespace is structural, even when the regular lexer
@@ -470,65 +467,7 @@ fn prepare_next_code_content_token(
 /// Returns `true` if all prefixes were consumed successfully, `false` if
 /// any prefix is missing — the caller should break out of the content loop.
 fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
-    if !has_code_content_quote_prefixes(p, quote_depth) {
-        return false;
-    }
-
-    let prev_virtual = p.state().virtual_line_start;
-    p.state_mut().virtual_line_start = Some(p.cur_range().start());
-    p.emit_indent_tokens(MAX_BLOCK_PREFIX_INDENT);
-    p.state_mut().virtual_line_start = prev_virtual;
-
-    for _ in 0..quote_depth {
-        let consumed = consume_quote_prefix_in_code_content(p);
-        debug_assert!(consumed, "preflight verified all prefixes present");
-    }
-
-    p.set_virtual_line_start();
-    true
-}
-
-/// Consume a single `> ` quote prefix (marker + optional trailing space)
-/// inside fenced code block content, emitting it as an `MdQuotePrefix` CST node.
-///
-/// Returns `true` if the prefix was consumed, `false` if the current token
-/// is not a quote marker.
-fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
-    if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
-        p.force_relex_regular();
-    }
-
-    if !(p.at(T![>]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">")) {
-        return false;
-    }
-
-    let prefix_m = p.start();
-
-    // The initial pre-marker indent is emitted before consuming the prefixes.
-    let indent_list_m = p.start();
-    indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
-
-    let marker_bumped = try_bump_quote_marker(p);
-    debug_assert!(
-        marker_bumped,
-        "consume_quote_prefix_in_code_content: quote marker not found after guard confirmed `>` \
-         token — check that force_relex_regular and the guard condition are in sync"
-    );
-    if !marker_bumped {
-        prefix_m.abandon(p);
-        return false;
-    }
-
-    // Optional post-marker space
-    if p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
-        if text == " " || text == "\t" {
-            p.bump_remap(MD_QUOTE_POST_MARKER_SPACE);
-        }
-    }
-
-    prefix_m.complete(p, MD_QUOTE_PREFIX);
-    true
+    consume_quote_prefix(p, quote_depth)
 }
 
 fn consume_code_newline(p: &mut MarkdownParser) -> bool {
@@ -557,54 +496,19 @@ pub(crate) fn info_string_has_backtick(line: &str, fence_len: usize) -> bool {
         .is_some_and(|info| info.contains('`'))
 }
 
-fn has_code_content_quote_prefixes(p: &MarkdownParser, quote_depth: usize) -> bool {
-    let Some((start, source)) = get_source_context(p) else {
-        return false;
-    };
-    let bytes = source.as_bytes();
-    let Some(mut idx) = consume_indent(bytes, start, MAX_BLOCK_PREFIX_INDENT, false) else {
-        return false;
-    };
-
-    for _ in 0..quote_depth {
-        if bytes.get(idx) != Some(&b'>') {
-            return false;
-        }
-        idx += 1;
-        if matches!(bytes.get(idx), Some(b' ' | b'\t')) {
-            idx += 1;
-        }
-    }
-    true
-}
-
-/// Skip up to `quote_depth` blockquote prefixes (`>` with optional 0-3 leading
-/// spaces and one trailing space/tab) in raw source starting at `idx`.
+/// Skip the `quote_depth` blockquote prefixes of the content line starting at
+/// the current position, each after its quote's container indent plus up to
+/// three columns.
 ///
-/// Returns the index just past the last prefix, or `None` if fewer than
+/// Returns the byte offset just past the last prefix, or `None` if fewer than
 /// `quote_depth` prefixes are present — in which case the missing-prefix path
 /// in [`consume_quote_prefixes_in_code_content`] handles ending the block.
-///
-/// The leading-indent run reuses [`consume_indent`]; the marker is a single
-/// ASCII `>` and the one optional trailing separator is space/tab only (per
-/// CommonMark, narrower than `biome_unicode_table`'s `WHS`), so both stay
-/// explicit byte checks.
-fn skip_quote_prefixes_in_source(
-    bytes: &[u8],
-    mut idx: usize,
-    quote_depth: usize,
-) -> Option<usize> {
-    for _ in 0..quote_depth {
-        idx = consume_indent(bytes, idx, MAX_BLOCK_PREFIX_INDENT, false)?;
-        if bytes.get(idx) != Some(&b'>') {
-            return None;
-        }
-        idx += 1;
-        if matches!(bytes.get(idx), Some(b' ' | b'\t')) {
-            idx += 1;
-        }
-    }
-    Some(idx)
+fn skip_code_content_quote_prefixes(p: &MarkdownParser, quote_depth: usize) -> Option<usize> {
+    let (start, source) = get_source_context(p)?;
+    let line_end = source[start..]
+        .find(['\n', '\r'])
+        .map_or(source.len(), |offset| start + offset);
+    skip_quote_prefixes_in_line(p, start, line_end, quote_depth)
 }
 
 /// At a content line start, returns `true` when the line's leading indent —
@@ -620,17 +524,17 @@ fn skip_quote_prefixes_in_source(
 /// mis-measure indent. Blank lines (only whitespace before the end of line)
 /// are exempt: they stay inside the code block.
 fn line_below_list_item_indent(p: &MarkdownParser, quote_depth: usize) -> bool {
-    let required = p.state().list_item_required_indent;
+    let required = list_indent_inside_quote(p);
     if required == 0 {
         return false;
     }
 
-    let Some((start, source)) = get_source_context(p) else {
+    let Some((_, source)) = get_source_context(p) else {
         return false;
     };
 
     let bytes = source.as_bytes();
-    let Some(content_start) = skip_quote_prefixes_in_source(bytes, start, quote_depth) else {
+    let Some(content_start) = skip_code_content_quote_prefixes(p, quote_depth) else {
         return false;
     };
 
@@ -703,7 +607,7 @@ fn line_has_closing_fence(p: &MarkdownParser, is_tilde_fence: bool, fence_len: u
         return false;
     }
 
-    let list_indent = p.state().list_item_required_indent;
+    let list_indent = list_indent_inside_quote(p);
     closing_fence_from(source, line_start, is_tilde_fence, fence_len, list_indent)
 }
 
@@ -768,8 +672,9 @@ fn is_line_start_within_indent(p: &MarkdownParser, max_indent: usize) -> bool {
             count + if c == '\t' { TAB_STOP_SPACES } else { 1 }
         });
 
-    if p.state().virtual_line_start.is_none() && p.state().list_item_required_indent > 0 {
-        indent = indent.saturating_sub(p.state().list_item_required_indent);
+    let list_indent = list_indent_inside_quote(p);
+    if p.state().virtual_line_start.is_none() && list_indent > 0 {
+        indent = indent.saturating_sub(list_indent);
     }
 
     indent <= max_indent

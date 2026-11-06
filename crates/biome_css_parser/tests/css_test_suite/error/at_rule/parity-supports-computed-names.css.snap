@@ -1,0 +1,512 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@supports ($prefix + $axis: clip) { .scss-name { overflow-x: clip; } }
+.after-scss-name { color: green; }
+
+@import "a.css" supports($prefix + $axis: clip);
+.after-scss-import { color: green; }
+
+@import "b.css" supports(($prefix + $axis: clip));
+.after-grouped-scss-import { color: green; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                    condition: CssBogusSupportsCondition {
+                        items: [
+                            L_PAREN@10..11 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@11..12 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@12..19 "prefix" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    PLUS@19..21 "+" [] [Whitespace(" ")],
+                                                    DOLLAR@21..22 "$" [] [],
+                                                    IDENT@22..26 "axis" [] [],
+                                                    COLON@26..28 ":" [] [Whitespace(" ")],
+                                                    IDENT@28..32 "clip" [] [],
+                                                    R_PAREN@32..34 ")" [] [Whitespace(" ")],
+                                                    L_CURLY@34..36 "{" [] [Whitespace(" ")],
+                                                    DOT@36..37 "." [] [],
+                                                    IDENT@37..47 "scss-name" [] [Whitespace(" ")],
+                                                    L_CURLY@47..49 "{" [] [Whitespace(" ")],
+                                                    IDENT@49..59 "overflow-x" [] [],
+                                                    COLON@59..61 ":" [] [Whitespace(" ")],
+                                                    IDENT@61..65 "clip" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                SEMICOLON@65..67 ";" [] [Whitespace(" ")],
+                R_CURLY@67..69 "}" [] [Whitespace(" ")],
+                R_CURLY@69..70 "}" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@70..72 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@72..88 "after-scss-name" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@88..90 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@90..95 "color" [] [],
+                                },
+                                colon_token: COLON@95..97 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@97..102 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@102..104 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@104..105 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@105..108 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    IMPORT_KW@108..115 "import" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@115..123 "\"a.css\"" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            SUPPORTS_KW@123..131 "supports" [] [],
+                            L_PAREN@131..132 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    DOLLAR@132..133 "$" [] [],
+                                    PREFIX_KW@133..140 "prefix" [] [Whitespace(" ")],
+                                    PLUS@140..142 "+" [] [Whitespace(" ")],
+                                    DOLLAR@142..143 "$" [] [],
+                                    IDENT@143..147 "axis" [] [],
+                                    COLON@147..149 ":" [] [Whitespace(" ")],
+                                    IDENT@149..153 "clip" [] [],
+                                ],
+                            },
+                            R_PAREN@153..154 ")" [] [],
+                        ],
+                    },
+                    CssMediaQueryList [],
+                    SEMICOLON@154..155 ";" [] [],
+                ],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@155..157 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@157..175 "after-scss-import" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@175..177 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@177..182 "color" [] [],
+                                },
+                                colon_token: COLON@182..184 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@184..189 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@189..191 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@191..192 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@192..195 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@195..202 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@202..210 "\"b.css\"" [] [Whitespace(" ")],
+                },
+                layer: missing (optional),
+                supports: CssImportSupports {
+                    supports_token: SUPPORTS_KW@210..218 "supports" [] [],
+                    l_paren_token: L_PAREN@218..219 "(" [] [],
+                    condition: CssBogusSupportsCondition {
+                        items: [
+                            L_PAREN@219..220 "(" [] [],
+                            CssBogus {
+                                items: [
+                                    ScssVariable {
+                                        dollar_token: DOLLAR@220..221 "$" [] [],
+                                        name: CssIdentifier {
+                                            value_token: IDENT@221..228 "prefix" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            CssBogusPropertyValue {
+                                                items: [
+                                                    PLUS@228..230 "+" [] [Whitespace(" ")],
+                                                    DOLLAR@230..231 "$" [] [],
+                                                    IDENT@231..235 "axis" [] [],
+                                                    COLON@235..237 ":" [] [Whitespace(" ")],
+                                                    IDENT@237..241 "clip" [] [],
+                                                    R_PAREN@241..242 ")" [] [],
+                                                    R_PAREN@242..243 ")" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    r_paren_token: missing (required),
+                },
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@243..244 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@244..246 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@246..272 "after-grouped-scss-import" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@272..274 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@274..279 "color" [] [],
+                                },
+                                colon_token: COLON@279..281 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@281..286 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@286..288 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@288..289 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@289..290 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..290
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..289
+    0: CSS_AT_RULE@0..65
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..65
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..65
+          0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+          1: CSS_BOGUS_SUPPORTS_CONDITION@10..65
+            0: L_PAREN@10..11 "(" [] []
+            1: CSS_BOGUS@11..65
+              0: SCSS_VARIABLE@11..19
+                0: DOLLAR@11..12 "$" [] []
+                1: CSS_IDENTIFIER@12..19
+                  0: IDENT@12..19 "prefix" [] [Whitespace(" ")]
+              1: CSS_BOGUS@19..65
+                0: CSS_BOGUS_PROPERTY_VALUE@19..65
+                  0: PLUS@19..21 "+" [] [Whitespace(" ")]
+                  1: DOLLAR@21..22 "$" [] []
+                  2: IDENT@22..26 "axis" [] []
+                  3: COLON@26..28 ":" [] [Whitespace(" ")]
+                  4: IDENT@28..32 "clip" [] []
+                  5: R_PAREN@32..34 ")" [] [Whitespace(" ")]
+                  6: L_CURLY@34..36 "{" [] [Whitespace(" ")]
+                  7: DOT@36..37 "." [] []
+                  8: IDENT@37..47 "scss-name" [] [Whitespace(" ")]
+                  9: L_CURLY@47..49 "{" [] [Whitespace(" ")]
+                  10: IDENT@49..59 "overflow-x" [] []
+                  11: COLON@59..61 ":" [] [Whitespace(" ")]
+                  12: IDENT@61..65 "clip" [] []
+        1: CSS_BOGUS_BLOCK@65..65
+    1: CSS_BOGUS_RULE@65..70
+      0: SEMICOLON@65..67 ";" [] [Whitespace(" ")]
+      1: R_CURLY@67..69 "}" [] [Whitespace(" ")]
+      2: R_CURLY@69..70 "}" [] []
+    2: CSS_QUALIFIED_RULE@70..105
+      0: CSS_SELECTOR_LIST@70..88
+        0: CSS_COMPOUND_SELECTOR@70..88
+          0: CSS_NESTED_SELECTOR_LIST@70..70
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@70..88
+            0: CSS_CLASS_SELECTOR@70..88
+              0: DOT@70..72 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@72..88
+                0: IDENT@72..88 "after-scss-name" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@88..105
+        0: L_CURLY@88..90 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@90..104
+          0: CSS_DECLARATION_WITH_SEMICOLON@90..104
+            0: CSS_DECLARATION@90..102
+              0: CSS_GENERIC_PROPERTY@90..102
+                0: CSS_IDENTIFIER@90..95
+                  0: IDENT@90..95 "color" [] []
+                1: COLON@95..97 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@97..102
+                  0: CSS_IDENTIFIER@97..102
+                    0: IDENT@97..102 "green" [] []
+              1: (empty)
+            1: SEMICOLON@102..104 ";" [] [Whitespace(" ")]
+        2: R_CURLY@104..105 "}" [] []
+    3: CSS_AT_RULE@105..155
+      0: AT@105..108 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@108..155
+        0: IMPORT_KW@108..115 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@115..123
+          0: CSS_STRING_LITERAL@115..123 "\"a.css\"" [] [Whitespace(" ")]
+        2: CSS_BOGUS@123..154
+          0: SUPPORTS_KW@123..131 "supports" [] []
+          1: L_PAREN@131..132 "(" [] []
+          2: CSS_BOGUS@132..153
+            0: DOLLAR@132..133 "$" [] []
+            1: PREFIX_KW@133..140 "prefix" [] [Whitespace(" ")]
+            2: PLUS@140..142 "+" [] [Whitespace(" ")]
+            3: DOLLAR@142..143 "$" [] []
+            4: IDENT@143..147 "axis" [] []
+            5: COLON@147..149 ":" [] [Whitespace(" ")]
+            6: IDENT@149..153 "clip" [] []
+          3: R_PAREN@153..154 ")" [] []
+        3: CSS_MEDIA_QUERY_LIST@154..154
+        4: SEMICOLON@154..155 ";" [] []
+    4: CSS_QUALIFIED_RULE@155..192
+      0: CSS_SELECTOR_LIST@155..175
+        0: CSS_COMPOUND_SELECTOR@155..175
+          0: CSS_NESTED_SELECTOR_LIST@155..155
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@155..175
+            0: CSS_CLASS_SELECTOR@155..175
+              0: DOT@155..157 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@157..175
+                0: IDENT@157..175 "after-scss-import" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@175..192
+        0: L_CURLY@175..177 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@177..191
+          0: CSS_DECLARATION_WITH_SEMICOLON@177..191
+            0: CSS_DECLARATION@177..189
+              0: CSS_GENERIC_PROPERTY@177..189
+                0: CSS_IDENTIFIER@177..182
+                  0: IDENT@177..182 "color" [] []
+                1: COLON@182..184 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@184..189
+                  0: CSS_IDENTIFIER@184..189
+                    0: IDENT@184..189 "green" [] []
+              1: (empty)
+            1: SEMICOLON@189..191 ";" [] [Whitespace(" ")]
+        2: R_CURLY@191..192 "}" [] []
+    5: CSS_AT_RULE@192..244
+      0: AT@192..195 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@195..244
+        0: IMPORT_KW@195..202 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@202..210
+          0: CSS_STRING_LITERAL@202..210 "\"b.css\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_IMPORT_SUPPORTS@210..243
+          0: SUPPORTS_KW@210..218 "supports" [] []
+          1: L_PAREN@218..219 "(" [] []
+          2: CSS_BOGUS_SUPPORTS_CONDITION@219..243
+            0: L_PAREN@219..220 "(" [] []
+            1: CSS_BOGUS@220..243
+              0: SCSS_VARIABLE@220..228
+                0: DOLLAR@220..221 "$" [] []
+                1: CSS_IDENTIFIER@221..228
+                  0: IDENT@221..228 "prefix" [] [Whitespace(" ")]
+              1: CSS_BOGUS@228..243
+                0: CSS_BOGUS_PROPERTY_VALUE@228..243
+                  0: PLUS@228..230 "+" [] [Whitespace(" ")]
+                  1: DOLLAR@230..231 "$" [] []
+                  2: IDENT@231..235 "axis" [] []
+                  3: COLON@235..237 ":" [] [Whitespace(" ")]
+                  4: IDENT@237..241 "clip" [] []
+                  5: R_PAREN@241..242 ")" [] []
+                  6: R_PAREN@242..243 ")" [] []
+          3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@243..243
+        5: SEMICOLON@243..244 ";" [] []
+    6: CSS_QUALIFIED_RULE@244..289
+      0: CSS_SELECTOR_LIST@244..272
+        0: CSS_COMPOUND_SELECTOR@244..272
+          0: CSS_NESTED_SELECTOR_LIST@244..244
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@244..272
+            0: CSS_CLASS_SELECTOR@244..272
+              0: DOT@244..246 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@246..272
+                0: IDENT@246..272 "after-grouped-scss-import" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@272..289
+        0: L_CURLY@272..274 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@274..288
+          0: CSS_DECLARATION_WITH_SEMICOLON@274..288
+            0: CSS_DECLARATION@274..286
+              0: CSS_GENERIC_PROPERTY@274..286
+                0: CSS_IDENTIFIER@274..279
+                  0: IDENT@274..279 "color" [] []
+                1: COLON@279..281 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@281..286
+                  0: CSS_IDENTIFIER@281..286
+                    0: IDENT@281..286 "green" [] []
+              1: (empty)
+            1: SEMICOLON@286..288 ";" [] [Whitespace(" ")]
+        2: R_CURLY@288..289 "}" [] []
+  2: EOF@289..290 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-supports-computed-names.css:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variable supports declaration names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ @supports ($prefix + $axis: clip) { .scss-name { overflow-x: clip; } }
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ .after-scss-name { color: green; }
+    3 │ 
+  
+parity-supports-computed-names.css:1:66 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `;`
+  
+  > 1 │ @supports ($prefix + $axis: clip) { .scss-name { overflow-x: clip; } }
+      │                                                                  ^
+    2 │ .after-scss-name { color: green; }
+    3 │ 
+  
+  i Remove ;
+  
+parity-supports-computed-names.css:4:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │ .after-scss-name { color: green; }
+    3 │ 
+  > 4 │ @import "a.css" supports($prefix + $axis: clip);
+      │                          ^^^^^^^^^^^^^^^^^^^^^
+    5 │ .after-scss-import { color: green; }
+    6 │ 
+  
+  i Expected one of:
+  
+  - not <supports-in-parens>
+  - <supports-in-parens>
+  - <supports-in-parens> and <supports-in-parens>
+  - <supports-in-parens> or <supports-in-parens>
+  
+parity-supports-computed-names.css:7:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS variable supports declaration names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    5 │ .after-scss-import { color: green; }
+    6 │ 
+  > 7 │ @import "b.css" supports(($prefix + $axis: clip));
+      │                          ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ .after-grouped-scss-import { color: green; }
+    9 │ 
+  
+parity-supports-computed-names.css:7:50 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `;`
+  
+    5 │ .after-scss-import { color: green; }
+    6 │ 
+  > 7 │ @import "b.css" supports(($prefix + $axis: clip));
+      │                                                  ^
+    8 │ .after-grouped-scss-import { color: green; }
+    9 │ 
+  
+  i Remove ;
+  
+```

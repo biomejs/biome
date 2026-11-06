@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome search '`f($arg)`' matches.js no_matches.js
+```
+
+## `matches.js`
+
+```js
+f(1);
+f(2);
+f(3);
+
+```
+
+## `no_matches.js`
+
+```js
+const a = 1;
+
+```
+
+# Emitted Messages
+
+```block
+matches.js:1:1 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1 │ f(1);
+
+```
+
+```block
+matches.js:2:1 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  2 │ f(2);
+
+```
+
+```block
+matches.js:3:1 search ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  3 │ f(3);
+
+```
+
+```block
+Searched 2 files in <TIME>. Found 3 matches.
+```

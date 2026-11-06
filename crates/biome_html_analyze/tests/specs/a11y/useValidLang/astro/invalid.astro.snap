@@ -26,6 +26,8 @@ invalid.astro:2:12 lint/a11y/useValidLang ━━━━━━━━━━━━�
     3 │ <html lang="en-babab"></html>
     4 │ <html lang="en-GB-something"></html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid languages:
   
   - ab
@@ -59,6 +61,10 @@ invalid.astro:3:12 lint/a11y/useValidLang ━━━━━━━━━━━━�
     4 │ <html lang="en-GB-something"></html>
     5 │ <html lang="zh-Xxxx"></html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
+  i Use a valid language tag, for example en or en-US.
+  
 
 ```
 
@@ -73,6 +79,8 @@ invalid.astro:4:12 lint/a11y/useValidLang ━━━━━━━━━━━━�
       │            ^^^^^^^^^^^^^^^^^
     5 │ <html lang="zh-Xxxx"></html>
     6 │ <html lang="zh-Hans-ZZ"></html>
+  
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
   i Some of valid scripts:
   
@@ -107,6 +115,8 @@ invalid.astro:5:12 lint/a11y/useValidLang ━━━━━━━━━━━━�
     6 │ <html lang="zh-Hans-ZZ"></html>
     7 │ <html lang="en-US-GB-Extra"></html>
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid scripts:
   
   - Arab
@@ -140,6 +150,8 @@ invalid.astro:6:12 lint/a11y/useValidLang ━━━━━━━━━━━━�
     7 │ <html lang="en-US-GB-Extra"></html>
     8 │ 
   
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
   i Some of valid countries:
   
   - AF
@@ -171,6 +183,10 @@ invalid.astro:7:12 lint/a11y/useValidLang ━━━━━━━━━━━━�
   > 7 │ <html lang="en-US-GB-Extra"></html>
       │            ^^^^^^^^^^^^^^^^
     8 │ 
+  
+  i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
+  
+  i Use a valid language tag, for example en or en-US.
   
 
 ```

@@ -30,6 +30,8 @@ invalid.html:2:2 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Use CSS animations instead.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -46,6 +48,8 @@ invalid.html:3:2 lint/correctness/noRestrictedElements ━━━━━━━━�
     5 │ <Button type="button" />
   
   i Use CSS animations instead.
+  
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
   
 
 ```
@@ -64,6 +68,8 @@ invalid.html:4:2 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Use the Button component instead.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -80,6 +86,8 @@ invalid.html:5:2 lint/correctness/noRestrictedElements ━━━━━━━━�
     7 │ <svg><foreignObject></foreignObject></svg>
   
   i Use the Button component instead.
+  
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
   
 
 ```
@@ -98,6 +106,8 @@ invalid.html:6:2 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Use the new widget instead.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -114,6 +124,8 @@ invalid.html:7:7 lint/correctness/noRestrictedElements ━━━━━━━━�
     9 │ <div><marquee /></div>
   
   i Avoid embedding HTML inside SVG.
+  
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
   
 
 ```
@@ -132,6 +144,8 @@ invalid.html:8:7 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Avoid embedding HTML inside SVG.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -147,6 +161,8 @@ invalid.html:9:7 lint/correctness/noRestrictedElements ━━━━━━━━�
     10 │ 
   
   i Use CSS animations instead.
+  
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
   
 
 ```

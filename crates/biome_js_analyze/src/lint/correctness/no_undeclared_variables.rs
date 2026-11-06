@@ -141,7 +141,14 @@ impl Rule for NoUndeclaredVariables {
             markup! {
                 "The "<Emphasis>{token.text_trimmed()}</Emphasis>" variable is undeclared."
             },
-        ).note(markup! {
+        )
+        .note(markup! {
+            "Using an undeclared variable at runtime can throw a "<Emphasis>"ReferenceError"</Emphasis>". It often points to a typo or a missing import."
+        })
+        .note(markup! {
+            "Declare or import the variable, or fix its name."
+        })
+        .note(markup! {
             "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."
         }))
     }

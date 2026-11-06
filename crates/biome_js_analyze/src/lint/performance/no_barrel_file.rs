@@ -96,9 +96,16 @@ impl Rule for NoBarrelFile {
             rule_category!(),
             span,
             markup! {
-                "Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused."
+                "Avoid barrel files."
             },
-        ).note(
+        )
+        .note(markup! {
+            "Barrel files slow down tools and bundlers. They also create large module graphs that include modules that go unused."
+        })
+        .note(markup! {
+            "Import from the module that defines each export, and remove the re-exports from this file."
+        })
+        .note(
             markup! {
                 "Check "<Hyperlink href="https://marvinh.dev/blog/speeding-up-javascript-ecosystem-part-7/">"this thorough explanation"</Hyperlink>" to better understand the context."
             }))

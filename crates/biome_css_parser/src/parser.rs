@@ -1,7 +1,7 @@
 use crate::lexer::{CssReLexContext, CssStringQuote};
 use crate::state::CssParserState;
 use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
-use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::SCSS_STRING_QUOTE};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::SCSS_STRING_QUOTE, TextRange};
 use biome_languages::CssFileSource;
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
@@ -32,20 +32,9 @@ pub struct CssParserOptions {
     /// Defaults to `false`.
     pub css_modules: CssModulesKind,
 
-    /// Enables parsing of Grit metavariables.
-    /// Defaults to `false`.
-    pub grit_metavariables: bool,
-
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
     /// Defaults to `false`.
     pub tailwind_directives: bool,
-
-    /// Reports SCSS-exclusive syntax diagnostics in CSS files.
-    ///
-    /// This is an internal option for parser/formatter tests and callers that
-    /// want to report SCSS-specific diagnostics in CSS files.
-    #[doc(hidden)]
-    pub report_scss_exclusive_syntax: bool,
 }
 
 #[derive(Default, Debug, Clone, Copy, Eq, PartialEq)]
@@ -71,22 +60,9 @@ impl CssParserOptions {
         self
     }
 
-    /// Enables parsing of Grit metavariables.
-    pub fn allow_metavariables(mut self) -> Self {
-        self.grit_metavariables = true;
-        self
-    }
-
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
     pub fn allow_tailwind_directives(mut self) -> Self {
         self.tailwind_directives = true;
-        self
-    }
-
-    /// Enables reporting of SCSS-exclusive syntax diagnostics in CSS files.
-    #[doc(hidden)]
-    pub fn report_scss_exclusive_syntax(mut self) -> Self {
-        self.report_scss_exclusive_syntax = true;
         self
     }
 
@@ -95,18 +71,9 @@ impl CssParserOptions {
         !self.is_css_modules_enabled()
     }
 
-    /// Checks if parsing of Grit metavariables is enabled.
-    pub fn is_metavariable_enabled(&self) -> bool {
-        self.grit_metavariables
-    }
-
     /// Checks if parsing of Tailwind CSS 4.0 directives is enabled.
     pub fn is_tailwind_directives_enabled(&self) -> bool {
         self.tailwind_directives
-    }
-
-    pub(crate) fn should_report_scss_exclusive_syntax(&self) -> bool {
-        self.report_scss_exclusive_syntax
     }
 
     pub fn is_css_modules_enabled(&self) -> bool {
@@ -122,14 +89,17 @@ impl CssParserOptions {
 }
 
 impl<'source> CssParser<'source> {
-    pub fn new(
+    /// Creates a parser that lexes the given source ranges as Grit
+    /// metavariables.
+    pub fn new_with_metavariables(
         source: &'source str,
         source_type: CssFileSource,
         options: CssParserOptions,
+        metavariables: &'source [TextRange],
     ) -> Self {
         Self {
             context: ParserContext::default(),
-            source: CssTokenSource::from_str(source, options, source_type),
+            source: CssTokenSource::from_str(source, options, source_type, metavariables),
             source_type,
             state: CssParserState::new(),
             options,

@@ -17,8 +17,14 @@ pub(crate) struct JsonTokenSource<'source> {
 }
 
 impl<'source> JsonTokenSource<'source> {
-    pub fn from_str(source: &'source str, options: JsonParserOptions) -> Self {
-        let lexer = Lexer::from_str(source).with_options(options);
+    pub fn from_str(
+        source: &'source str,
+        options: JsonParserOptions,
+        metavariables: &'source [TextRange],
+    ) -> Self {
+        let lexer = Lexer::from_str(source)
+            .with_options(options)
+            .with_metavariables(metavariables);
 
         let mut source = Self {
             lexer,

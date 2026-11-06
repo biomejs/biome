@@ -13,6 +13,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
+use crate::syntax::declaration::{is_at_scss_empty_declaration, parse_empty_declaration};
 use crate::syntax::parse_error::{
     expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
@@ -24,13 +25,14 @@ use crate::syntax::scss::{
     is_at_any_scss_value, is_at_scss_binary_operator, is_at_scss_function,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
-    is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
-    is_at_scss_variable_declaration, parse_scss_bracketed_value_expression_item,
-    parse_scss_expression_from_head, parse_scss_function,
-    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
-    parse_scss_interpolated_string, parse_scss_module_member_access,
-    parse_scss_parent_selector_value, parse_scss_suffixed_interpolated_value_until,
-    parse_scss_variable, parse_scss_variable_declaration,
+    is_at_scss_parent_selector_value, is_at_scss_percent_value,
+    is_at_scss_suffixed_interpolated_value, is_at_scss_variable, is_at_scss_variable_declaration,
+    parse_scss_bracketed_value_expression_item, parse_scss_expression_from_head,
+    parse_scss_function, parse_scss_hash_value_or_color, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_percent_value,
+    parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
+    parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -107,7 +109,10 @@ struct RootItemList;
 
 #[inline]
 pub(crate) fn is_at_root_item_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p)
+        || is_at_scss_variable_declaration(p)
+        || is_at_qualified_rule(p)
+        || is_at_scss_empty_declaration(p)
 }
 
 struct RootItemListParseRecovery;
@@ -141,7 +146,7 @@ impl ParseNodeList for RootItemList {
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
-            Absent
+            CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
         }
     }
 
@@ -170,7 +175,10 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p)
+        || is_at_scss_variable_declaration(p)
+        || is_at_qualified_rule(p)
+        || is_at_scss_empty_declaration(p)
 }
 
 struct RuleListParseRecovery {
@@ -212,7 +220,7 @@ impl ParseNodeList for RuleList {
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
-            Absent
+            CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
         }
     }
 
@@ -605,6 +613,8 @@ pub(crate) fn parse_any_value_with_context(
 ) -> ParsedSyntax {
     if is_at_exclusive_scss_value_with_context(p, context) {
         parse_any_exclusive_scss_value(p)
+    } else if context.is_full_scss_parsing_allowed() && is_at_color(p) {
+        parse_scss_hash_value_or_color(p)
     } else if is_at_any_function_with_context(p, context) {
         parse_any_function_with_context(p, context)
     } else {
@@ -697,6 +707,8 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             parse_scss_parent_selector_value,
             |p, m| scss_only_syntax_error(p, "SCSS parent selector values", m.range(p)),
         )
+    } else if is_at_scss_percent_value(p) {
+        CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_scss_percent_value)
     } else if is_at_scss_interpolated_string(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
@@ -1091,7 +1103,12 @@ mod tests {
     fn exclusive_syntax_kind_applies_only_when_unsupported() {
         for source_type in [CssFileSource::css(), CssFileSource::scss()] {
             for kind in [None, Some(CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER)] {
-                let mut p = CssParser::new("; value", source_type, CssParserOptions::default());
+                let mut p = CssParser::new_with_metavariables(
+                    "; value",
+                    source_type,
+                    CssParserOptions::default(),
+                    &[],
+                );
                 p.bump(T![;]);
                 p.error(p.err_builder("before", TextRange::empty(0.into())));
 
@@ -1136,7 +1153,12 @@ mod tests {
     fn exclusive_syntax_kind_preserves_absent_results() {
         for source_type in [CssFileSource::css(), CssFileSource::scss()] {
             for kind in [None, Some(CssSyntaxKind::CSS_BOGUS_DECLARATION)] {
-                let mut p = CssParser::new("; }", source_type, CssParserOptions::default());
+                let mut p = CssParser::new_with_metavariables(
+                    "; }",
+                    source_type,
+                    CssParserOptions::default(),
+                    &[],
+                );
                 p.bump(T![;]);
                 p.error(p.err_builder("before", TextRange::empty(0.into())));
                 let position = p.cur_range();
@@ -1174,10 +1196,11 @@ mod tests {
 
     #[test]
     fn css_parser_context_allows_scss_exclusive_value_recovery() {
-        let css_parser = CssParser::new(
+        let css_parser = CssParser::new_with_metavariables(
             ".selector { width: 10px; }",
             CssFileSource::css(),
             CssParserOptions::default(),
+            &[],
         );
         assert_eq!(
             ValueParsingContext::new(&css_parser, ValueParsingMode::ScssAware).scss_capability(),
@@ -1192,10 +1215,11 @@ mod tests {
                 .is_scss_qualified_function_recovery_allowed()
         );
 
-        let reporting_css_parser = CssParser::new(
+        let reporting_css_parser = CssParser::new_with_metavariables(
             ".selector { color: $color; }",
             CssFileSource::css(),
-            CssParserOptions::default().report_scss_exclusive_syntax(),
+            CssParserOptions::default(),
+            &[],
         );
         assert_eq!(
             ValueParsingContext::new(&reporting_css_parser, ValueParsingMode::ScssAware)
@@ -1203,10 +1227,11 @@ mod tests {
             ScssCapability::ExclusiveOnly
         );
 
-        let scss_parser = CssParser::new(
+        let scss_parser = CssParser::new_with_metavariables(
             ".selector { color: $color; }",
             CssFileSource::scss(),
             CssParserOptions::default(),
+            &[],
         );
         assert_eq!(
             ValueParsingContext::new(&scss_parser, ValueParsingMode::ScssAware).scss_capability(),
@@ -1216,10 +1241,11 @@ mod tests {
 
     #[test]
     fn try_parse_rewinds_to_checkpoint() {
-        let mut p = CssParser::new(
+        let mut p = CssParser::new_with_metavariables(
             "width: blue;",
             CssFileSource::css(),
             CssParserOptions::default(),
+            &[],
         );
 
         let pre_try_range = p.cur_range();
@@ -1245,10 +1271,11 @@ mod tests {
 
     #[test]
     fn try_parse_preserves_position_on_success() {
-        let mut p = CssParser::new(
+        let mut p = CssParser::new_with_metavariables(
             "width: 100;",
             CssFileSource::css(),
             CssParserOptions::default(),
+            &[],
         );
 
         let pre_try_range = p.cur_range();

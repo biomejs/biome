@@ -1,0 +1,158 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-(--a,var(--b,var(--c,red)))
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@3..4 "(" [] [],
+                    type_hint: missing (optional),
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@4..7 "--a" [] [],
+                                },
+                            ],
+                        },
+                        COMMA@7..8 "," [] [],
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        ident_token: IDENT@8..11 "var" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@11..12 "(" [] [],
+                                    parameters: CssParameterList [
+                                        CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssDashedIdentifier {
+                                                    ident_token: IDENT@12..15 "--b" [] [],
+                                                },
+                                            ],
+                                        },
+                                        COMMA@15..16 "," [] [],
+                                        CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        ident_token: IDENT@16..19 "var" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@19..20 "(" [] [],
+                                                    parameters: CssParameterList [
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssDashedIdentifier {
+                                                                    ident_token: IDENT@20..23 "--c" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        COMMA@23..24 "," [] [],
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssIdentifier {
+                                                                    ident_token: IDENT@24..27 "red" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@27..28 ")" [] [],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@28..29 ")" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@29..30 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@30..30 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..30
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..30
+    0: TW_FULL_CANDIDATE@0..30
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..30
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@3..30
+          0: L_PAREN@3..4 "(" [] []
+          1: (empty)
+          2: CSS_PARAMETER_LIST@4..29
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@4..7
+              0: CSS_COMPONENT_VALUE_LIST@4..7
+                0: CSS_DASHED_IDENTIFIER@4..7
+                  0: IDENT@4..7 "--a" [] []
+            1: COMMA@7..8 "," [] []
+            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@8..29
+              0: CSS_COMPONENT_VALUE_LIST@8..29
+                0: CSS_FUNCTION@8..29
+                  0: CSS_IDENTIFIER@8..11
+                    0: IDENT@8..11 "var" [] []
+                  1: L_PAREN@11..12 "(" [] []
+                  2: CSS_PARAMETER_LIST@12..28
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@12..15
+                      0: CSS_COMPONENT_VALUE_LIST@12..15
+                        0: CSS_DASHED_IDENTIFIER@12..15
+                          0: IDENT@12..15 "--b" [] []
+                    1: COMMA@15..16 "," [] []
+                    2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@16..28
+                      0: CSS_COMPONENT_VALUE_LIST@16..28
+                        0: CSS_FUNCTION@16..28
+                          0: CSS_IDENTIFIER@16..19
+                            0: IDENT@16..19 "var" [] []
+                          1: L_PAREN@19..20 "(" [] []
+                          2: CSS_PARAMETER_LIST@20..27
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@20..23
+                              0: CSS_COMPONENT_VALUE_LIST@20..23
+                                0: CSS_DASHED_IDENTIFIER@20..23
+                                  0: IDENT@20..23 "--c" [] []
+                            1: COMMA@23..24 "," [] []
+                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@24..27
+                              0: CSS_COMPONENT_VALUE_LIST@24..27
+                                0: CSS_IDENTIFIER@24..27
+                                  0: IDENT@24..27 "red" [] []
+                          3: R_PAREN@27..28 ")" [] []
+                  3: R_PAREN@28..29 ")" [] []
+          3: R_PAREN@29..30 ")" [] []
+        3: (empty)
+      4: (empty)
+  3: EOF@30..30 "" [] []
+
+```

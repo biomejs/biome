@@ -31,6 +31,8 @@ invalidBaseExponentLowerPrecedence.js:2:1 lint/style/useExponentiationOperator  
     3 │ Math.pow(a, b * c)
     4 │ Math.pow(a / b, c)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │   // base and exponent with a lower precedence
@@ -53,6 +55,8 @@ invalidBaseExponentLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  
       │ ^^^^^^^^^^^^^^^^^^
     4 │ Math.pow(a / b, c)
     5 │ Math.pow(a, b / c)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -78,6 +82,8 @@ invalidBaseExponentLowerPrecedence.js:4:1 lint/style/useExponentiationOperator  
     5 │ Math.pow(a, b / c)
     6 │ Math.pow(a + b, 3)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      2  2 │   Math.pow(a * b, c)
@@ -101,6 +107,8 @@ invalidBaseExponentLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  
       │ ^^^^^^^^^^^^^^^^^^
     6 │ Math.pow(a + b, 3)
     7 │ Math.pow(2, a - b)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -126,6 +134,8 @@ invalidBaseExponentLowerPrecedence.js:6:1 lint/style/useExponentiationOperator  
     7 │ Math.pow(2, a - b)
     8 │ Math.pow(a + b, c + d)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      4  4 │   Math.pow(a / b, c)
@@ -149,6 +159,8 @@ invalidBaseExponentLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  
       │ ^^^^^^^^^^^^^^^^^^
     8 │ Math.pow(a + b, c + d)
     9 │ Math.pow(a = b, c = d)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -174,6 +186,8 @@ invalidBaseExponentLowerPrecedence.js:8:1 lint/style/useExponentiationOperator  
      9 │ Math.pow(a = b, c = d)
     10 │ Math.pow(a += b, c -= d)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      6  6 │   Math.pow(a + b, 3)
@@ -197,6 +211,8 @@ invalidBaseExponentLowerPrecedence.js:9:1 lint/style/useExponentiationOperator  
        │ ^^^^^^^^^^^^^^^^^^^^^^
     10 │ Math.pow(a += b, c -= d)
     11 │ Math.pow((a, b), (c, d))
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -222,6 +238,8 @@ invalidBaseExponentLowerPrecedence.js:10:1 lint/style/useExponentiationOperator 
     11 │ Math.pow((a, b), (c, d))
     12 │ function *f() { Math.pow(yield, yield) }
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      8  8 │   Math.pow(a + b, c + d)
@@ -246,6 +264,8 @@ invalidBaseExponentLowerPrecedence.js:11:1 lint/style/useExponentiationOperator 
     12 │ function *f() { Math.pow(yield, yield) }
     13 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      9  9 │   Math.pow(a = b, c = d)
@@ -268,6 +288,8 @@ invalidBaseExponentLowerPrecedence.js:12:17 lint/style/useExponentiationOperator
   > 12 │ function *f() { Math.pow(yield, yield) }
        │                 ^^^^^^^^^^^^^^^^^^^^^^
     13 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   

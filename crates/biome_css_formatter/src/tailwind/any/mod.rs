@@ -3,4 +3,5 @@
 pub(crate) mod custom_variant_selector;
 pub(crate) mod custom_variant_shorthand;
 pub(crate) mod source;
+pub(crate) mod theme_option;
 pub(crate) mod utility_name;

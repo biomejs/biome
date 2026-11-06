@@ -32,6 +32,8 @@ invalidParentsWithLowerPrecedence.js:2:5 lint/style/useExponentiationOperator  F
     3 │ Math.pow(a, b) * c;
     4 │ a + Math.pow(b, c);
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │   // parents with a lower precedence
@@ -54,6 +56,8 @@ invalidParentsWithLowerPrecedence.js:3:1 lint/style/useExponentiationOperator  F
       │ ^^^^^^^^^^^^^^
     4 │ a + Math.pow(b, c);
     5 │ Math.pow(a, b)/c;
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -79,6 +83,8 @@ invalidParentsWithLowerPrecedence.js:4:5 lint/style/useExponentiationOperator  F
     5 │ Math.pow(a, b)/c;
     6 │ a < Math.pow(b, c);
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      2  2 │   a * Math.pow(b, c);
@@ -102,6 +108,8 @@ invalidParentsWithLowerPrecedence.js:5:1 lint/style/useExponentiationOperator  F
       │ ^^^^^^^^^^^^^^
     6 │ a < Math.pow(b, c);
     7 │ Math.pow(a, b) > c;
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -127,6 +135,8 @@ invalidParentsWithLowerPrecedence.js:6:5 lint/style/useExponentiationOperator  F
     7 │ Math.pow(a, b) > c;
     8 │ a === Math.pow(b, c);
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      4  4 │   a + Math.pow(b, c);
@@ -150,6 +160,8 @@ invalidParentsWithLowerPrecedence.js:7:1 lint/style/useExponentiationOperator  F
       │ ^^^^^^^^^^^^^^
     8 │ a === Math.pow(b, c);
     9 │ a ? Math.pow(b, c) : d;
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -175,6 +187,8 @@ invalidParentsWithLowerPrecedence.js:8:7 lint/style/useExponentiationOperator  F
      9 │ a ? Math.pow(b, c) : d;
     10 │ a = Math.pow(b, c);
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      6  6 │   a < Math.pow(b, c);
@@ -198,6 +212,8 @@ invalidParentsWithLowerPrecedence.js:9:5 lint/style/useExponentiationOperator  F
        │     ^^^^^^^^^^^^^^
     10 │ a = Math.pow(b, c);
     11 │ a += Math.pow(b, c);
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -223,6 +239,8 @@ invalidParentsWithLowerPrecedence.js:10:5 lint/style/useExponentiationOperator  
     11 │ a += Math.pow(b, c);
     12 │ function *f() { yield Math.pow(a, b) }
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      8  8 │   a === Math.pow(b, c);
@@ -246,6 +264,8 @@ invalidParentsWithLowerPrecedence.js:11:6 lint/style/useExponentiationOperator  
        │      ^^^^^^^^^^^^^^
     12 │ function *f() { yield Math.pow(a, b) }
     13 │ a, Math.pow(b, c), d
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -271,6 +291,8 @@ invalidParentsWithLowerPrecedence.js:12:23 lint/style/useExponentiationOperator 
     13 │ a, Math.pow(b, c), d
     14 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     10 10 │   a = Math.pow(b, c);
@@ -293,6 +315,8 @@ invalidParentsWithLowerPrecedence.js:13:4 lint/style/useExponentiationOperator  
   > 13 │ a, Math.pow(b, c), d
        │    ^^^^^^^^^^^^^^
     14 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   

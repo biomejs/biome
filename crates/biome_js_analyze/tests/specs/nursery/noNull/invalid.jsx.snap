@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<Foo bar={null} />;
+const render = () => null;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:11 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <Foo bar={null} />;
+      │           ^^^^
+    3 │ const render = () => null;
+    4 │ 
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - <Foo·bar={null}·/>;
+      2 │ + <Foo·bar={undefined}·/>;
+    3 3 │   const render = () => null;
+    4 4 │   
+  
+
+```
+
+```
+invalid.jsx:3:22 lint/nursery/noNull  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of null.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <Foo bar={null} />;
+  > 3 │ const render = () => null;
+      │                      ^^^^
+    4 │ 
+  
+  i Using both null and undefined for missing values means code has to check for both.
+  
+  i Use undefined instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with undefined.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   <Foo bar={null} />;
+    3   │ - const·render·=·()·=>·null;
+      3 │ + const·render·=·()·=>·undefined;
+    4 4 │   
+  
+
+```

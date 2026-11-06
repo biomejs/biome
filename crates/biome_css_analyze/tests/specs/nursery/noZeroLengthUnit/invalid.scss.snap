@@ -1,0 +1,211 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+a { top: 0px; }
+a { top: 0px + $offset; }
+a { font: 0px/0px cursive; }
+a { @include border-left-radius($input-top-left-radius: 0px); }
+@mixin foo($x: 0px) { width: $x; }
+@function foo($x: 0px) { @return $x; }
+a { --x: 0px; }
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { top: 0px; }
+      │           ^^
+    3 │ a { top: 0px + $offset; }
+    4 │ a { font: 0px/0px cursive; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - a·{·top:·0px;·}
+      2 │ + a·{·top:·0;·}
+    3 3 │   a { top: 0px + $offset; }
+    4 4 │   a { font: 0px/0px cursive; }
+  
+
+```
+
+```
+invalid.scss:3:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { top: 0px; }
+  > 3 │ a { top: 0px + $offset; }
+      │           ^^
+    4 │ a { font: 0px/0px cursive; }
+    5 │ a { @include border-left-radius($input-top-left-radius: 0px); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   a { top: 0px; }
+    3   │ - a·{·top:·0px·+·$offset;·}
+      3 │ + a·{·top:·0·+·$offset;·}
+    4 4 │   a { font: 0px/0px cursive; }
+    5 5 │   a { @include border-left-radius($input-top-left-radius: 0px); }
+  
+
+```
+
+```
+invalid.scss:4:12 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    2 │ a { top: 0px; }
+    3 │ a { top: 0px + $offset; }
+  > 4 │ a { font: 0px/0px cursive; }
+      │            ^^
+    5 │ a { @include border-left-radius($input-top-left-radius: 0px); }
+    6 │ @mixin foo($x: 0px) { width: $x; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    2 2 │   a { top: 0px; }
+    3 3 │   a { top: 0px + $offset; }
+    4   │ - a·{·font:·0px/0px·cursive;·}
+      4 │ + a·{·font:·0/0px·cursive;·}
+    5 5 │   a { @include border-left-radius($input-top-left-radius: 0px); }
+    6 6 │   @mixin foo($x: 0px) { width: $x; }
+  
+
+```
+
+```
+invalid.scss:5:58 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    3 │ a { top: 0px + $offset; }
+    4 │ a { font: 0px/0px cursive; }
+  > 5 │ a { @include border-left-radius($input-top-left-radius: 0px); }
+      │                                                          ^^
+    6 │ @mixin foo($x: 0px) { width: $x; }
+    7 │ @function foo($x: 0px) { @return $x; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    3 3 │   a { top: 0px + $offset; }
+    4 4 │   a { font: 0px/0px cursive; }
+    5   │ - a·{·@include·border-left-radius($input-top-left-radius:·0px);·}
+      5 │ + a·{·@include·border-left-radius($input-top-left-radius:·0);·}
+    6 6 │   @mixin foo($x: 0px) { width: $x; }
+    7 7 │   @function foo($x: 0px) { @return $x; }
+  
+
+```
+
+```
+invalid.scss:6:17 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    4 │ a { font: 0px/0px cursive; }
+    5 │ a { @include border-left-radius($input-top-left-radius: 0px); }
+  > 6 │ @mixin foo($x: 0px) { width: $x; }
+      │                 ^^
+    7 │ @function foo($x: 0px) { @return $x; }
+    8 │ a { --x: 0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    4 4 │   a { font: 0px/0px cursive; }
+    5 5 │   a { @include border-left-radius($input-top-left-radius: 0px); }
+    6   │ - @mixin·foo($x:·0px)·{·width:·$x;·}
+      6 │ + @mixin·foo($x:·0)·{·width:·$x;·}
+    7 7 │   @function foo($x: 0px) { @return $x; }
+    8 8 │   a { --x: 0px; }
+  
+
+```
+
+```
+invalid.scss:7:20 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    5 │ a { @include border-left-radius($input-top-left-radius: 0px); }
+    6 │ @mixin foo($x: 0px) { width: $x; }
+  > 7 │ @function foo($x: 0px) { @return $x; }
+      │                    ^^
+    8 │ a { --x: 0px; }
+    9 │ 
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    5 5 │   a { @include border-left-radius($input-top-left-radius: 0px); }
+    6 6 │   @mixin foo($x: 0px) { width: $x; }
+    7   │ - @function·foo($x:·0px)·{·@return·$x;·}
+      7 │ + @function·foo($x:·0)·{·@return·$x;·}
+    8 8 │   a { --x: 0px; }
+    9 9 │   
+  
+
+```
+
+```
+invalid.scss:8:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    6 │ @mixin foo($x: 0px) { width: $x; }
+    7 │ @function foo($x: 0px) { @return $x; }
+  > 8 │ a { --x: 0px; }
+      │           ^^
+    9 │ 
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    6 6 │   @mixin foo($x: 0px) { width: $x; }
+    7 7 │   @function foo($x: 0px) { @return $x; }
+    8   │ - a·{·--x:·0px;·}
+      8 │ + a·{·--x:·0;·}
+    9 9 │   
+  
+
+```

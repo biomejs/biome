@@ -1,0 +1,77 @@
+/* should generate diagnostics */
+@keyframes fade {
+  from {
+    opacity: 0;
+    display: block;
+  }
+  50%, 75% {
+    color: red;
+    /* Keep this comment with display. */
+    display: block;
+  }
+  to {
+    color: red;
+    display: block;
+  }
+}
+
+@-webkit-keyframes fade {
+  to {
+    transform: translateX(10px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes slide {
+    to {
+      transform: translateX(10px);
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes unsafe {
+  from {
+    margin-top: 1px;
+    margin: 0;
+  }
+}
+
+@keyframes unchanged {
+  from {
+    display: block;
+    opacity: 0;
+  }
+  50% {
+    color: red;
+    unknown-property: 0;
+    display: block;
+  }
+  to {
+    color: red;
+    color: blue;
+  }
+}
+
+@font-face {
+  font-style: normal;
+  font-family: example;
+}
+
+@keyframes no-semicolon {
+  to {
+    color: red;
+    display: block
+  }
+}
+
+@keyframes duplicates {
+  to {
+    color: red;
+    color: blue;
+    ;
+    display: block;
+    --alpha: 1;
+  }
+}

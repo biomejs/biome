@@ -31,6 +31,8 @@ issue8347.invalid.ts:2:13 lint/style/useConsistentArrowReturn  FIXABLE  ━━�
       │ ^
     8 │ 
   
+  i When the body only returns a value, the braces and the return keyword can be left out, which makes the function shorter.
+  
   i Safe fix: Remove the return statement.
   
     1 1 │   // should generate diagnostics

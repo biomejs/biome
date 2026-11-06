@@ -105,6 +105,8 @@ file.js:2:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
     3 │ /**
     4 │ * biome-ignore-all lint/style/useConst: reason
   
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
   i Safe fix: Use const instead.
   
     1 1 │   
@@ -156,6 +158,8 @@ file.js:8:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
   > 8 │ let bar = 33;
       │     ^^^
   
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
   i Safe fix: Use const instead.
   
     6 6 │   */
@@ -198,6 +202,8 @@ file.js:7:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
   > 7 │ debugger
       │ ^^^^^^^^
     8 │ let bar = 33;
+  
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
   
   i Unsafe fix: Remove debugger statement
   

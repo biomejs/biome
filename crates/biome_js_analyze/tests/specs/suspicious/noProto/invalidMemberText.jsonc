@@ -1,0 +1,21 @@
+// should generate diagnostics
+[
+  "obj['__proto__'];",
+  "obj['__proto__'] = value;",
+  "obj[`__proto__`];",
+  "obj[`__proto__`] = value;",
+  "obj?.__proto__;",
+  "obj?.['__proto__'];",
+  "obj?.[`__proto__`];",
+  "obj. /* member */ __proto__;",
+  "obj. /* member */ __proto__ = value;",
+  "obj[ /* member */ '__proto__' /* member */ ];",
+  "obj[ /* member */ '__proto__' /* member */ ] = value;",
+  "obj[('__proto__')];",
+  "obj[('__proto__')] = value;",
+  "obj[((('__proto__')))];",
+  "obj[(((`__proto__`)))] = value;",
+  "obj[( /* member */ '__proto__' /* member */ )];",
+  "obj[(property, '__proto__')];",
+  "obj[(property, `__proto__`)] = value;"
+]

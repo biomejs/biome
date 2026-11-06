@@ -1,0 +1,204 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidNestedVFor.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-for="i in 5">
+    <div v-for="i in 5"></div>
+  </div>
+  <ul v-for="(item, index) in items">
+    <li v-for="(child, index) in item.children">
+      <span v-for="{ item } in child.entries">{{ item }}</span>
+    </li>
+  </ul>
+  <div v-for="(value, key, position) in record">
+    <div v-for="[key, position] in pairs"></div>
+  </div>
+  <div v-for="(row, row) in rows"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalidNestedVFor.vue:4:17 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable i hides a variable with the same name.
+  
+    2 │ <template>
+    3 │   <div v-for="i in 5">
+  > 4 │     <div v-for="i in 5"></div>
+      │                 ^
+    5 │   </div>
+    6 │   <ul v-for="(item, index) in items">
+  
+  i The hidden i is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-for="i in 5">
+      │               ^
+    4 │     <div v-for="i in 5"></div>
+    5 │   </div>
+  
+  i Inside this element, i refers to the template variable, so the other i can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNestedVFor.vue:7:24 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable index hides a variable with the same name.
+  
+    5 │   </div>
+    6 │   <ul v-for="(item, index) in items">
+  > 7 │     <li v-for="(child, index) in item.children">
+      │                        ^^^^^
+    8 │       <span v-for="{ item } in child.entries">{{ item }}</span>
+    9 │     </li>
+  
+  i The hidden index is declared here.
+  
+    4 │     <div v-for="i in 5"></div>
+    5 │   </div>
+  > 6 │   <ul v-for="(item, index) in items">
+      │                     ^^^^^
+    7 │     <li v-for="(child, index) in item.children">
+    8 │       <span v-for="{ item } in child.entries">{{ item }}</span>
+  
+  i Inside this element, index refers to the template variable, so the other index can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNestedVFor.vue:8:22 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable item hides a variable with the same name.
+  
+     6 │   <ul v-for="(item, index) in items">
+     7 │     <li v-for="(child, index) in item.children">
+   > 8 │       <span v-for="{ item } in child.entries">{{ item }}</span>
+       │                      ^^^^
+     9 │     </li>
+    10 │   </ul>
+  
+  i The hidden item is declared here.
+  
+    4 │     <div v-for="i in 5"></div>
+    5 │   </div>
+  > 6 │   <ul v-for="(item, index) in items">
+      │               ^^^^
+    7 │     <li v-for="(child, index) in item.children">
+    8 │       <span v-for="{ item } in child.entries">{{ item }}</span>
+  
+  i Inside this element, item refers to the template variable, so the other item can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNestedVFor.vue:12:18 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable key hides a variable with the same name.
+  
+    10 │   </ul>
+    11 │   <div v-for="(value, key, position) in record">
+  > 12 │     <div v-for="[key, position] in pairs"></div>
+       │                  ^^^
+    13 │   </div>
+    14 │   <div v-for="(row, row) in rows"></div>
+  
+  i The hidden key is declared here.
+  
+     9 │     </li>
+    10 │   </ul>
+  > 11 │   <div v-for="(value, key, position) in record">
+       │                       ^^^
+    12 │     <div v-for="[key, position] in pairs"></div>
+    13 │   </div>
+  
+  i Inside this element, key refers to the template variable, so the other key can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNestedVFor.vue:12:23 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable position hides a variable with the same name.
+  
+    10 │   </ul>
+    11 │   <div v-for="(value, key, position) in record">
+  > 12 │     <div v-for="[key, position] in pairs"></div>
+       │                       ^^^^^^^^
+    13 │   </div>
+    14 │   <div v-for="(row, row) in rows"></div>
+  
+  i The hidden position is declared here.
+  
+     9 │     </li>
+    10 │   </ul>
+  > 11 │   <div v-for="(value, key, position) in record">
+       │                            ^^^^^^^^
+    12 │     <div v-for="[key, position] in pairs"></div>
+    13 │   </div>
+  
+  i Inside this element, position refers to the template variable, so the other position can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNestedVFor.vue:14:21 lint/nursery/noVueTemplateShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The template variable row hides a variable with the same name.
+  
+    12 │     <div v-for="[key, position] in pairs"></div>
+    13 │   </div>
+  > 14 │   <div v-for="(row, row) in rows"></div>
+       │                     ^^^
+    15 │ </template>
+    16 │ 
+  
+  i The hidden row is declared here.
+  
+    12 │     <div v-for="[key, position] in pairs"></div>
+    13 │   </div>
+  > 14 │   <div v-for="(row, row) in rows"></div>
+       │                ^^^
+    15 │ </template>
+    16 │ 
+  
+  i Inside this element, row refers to the template variable, so the other row can't be used, and the two are easy to confuse.
+  
+  i Rename the template variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

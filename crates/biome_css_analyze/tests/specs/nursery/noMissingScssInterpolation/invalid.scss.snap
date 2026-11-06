@@ -1,0 +1,1055 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@use "sass:math";
+
+$gap: 8px;
+$path: "a.png";
+
+@function double($x) {
+	@return $x * 2;
+}
+
+@function snake_case($x) {
+	@return $x;
+}
+
+@function rem($px) {
+	@return math.div($px, 16px) * 1rem;
+}
+
+:root {
+	--gap: $gap;
+	--pi: math.$pi;
+	--calc: calc($gap * 2);
+	--fallback: var(--x, $gap);
+	--url: url($path);
+	--list: $gap $gap;
+	--braced: {a: $gap};
+	--commented:
+		/* before */ $gap /* after */;
+	--own-line:
+		math.$pi;
+	--url-module: url(t.$path);
+	--sass-call: darken($gap, 10%);
+	--module-call: math.max($gap, 1px);
+	--unknown-call: bpx($gap);
+	--url-interpolated: url($dir/#{$name}.svg);
+	--url-upper: URL($path);
+	--url-expression: url($path + ".png");
+	--if-branch: if(media(print): $gap; else: 0);
+	--if-style-query: if(style(--a: $gap): 1; else: 2);
+	--if-sass: if(sass($flag): 1; else: 2);
+	--if-supports: if(supports(display: $display): 1; else: 2);
+	--if-media: if(media(width > $breakpoint): 1; else: 2);
+	--if-module: if(sass(t.$flag): 1; else: 2);
+	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+	--module: math.div(8px, 2);
+	--own: double(3px);
+	--own-dash: snake-case(1px);
+	--built-in: darken(#fff, 10%);
+	--built-in-underscore: map_get($map, key);
+	--inside-calc: calc(double(3px) + 1px);
+	--outer-only: darken(lighten(#000, 10%), 5%);
+	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+	--legacy-if: if($condition, 1px, 2px);
+	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+	--if-sass-test: if(sass(true): 1; else: 2);
+	--if-sass-branch: if(sass($flag): $gap; else: 0);
+	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+	--own-css-name: rem(24px);
+	--own-css-name-variable: rem($gap);
+	--if-in-call-nested: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+}
+
+@supports (--raw: $gap) {
+	a {
+		color: red;
+	}
+}
+
+@supports (--raw: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
+@container style(--c: $gap) {
+	a {
+		color: red;
+	}
+}
+
+@container style(--c: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:20:9 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    19 │ :root {
+  > 20 │ 	--gap: $gap;
+       │ 	       ^^^^
+    21 │ 	--pi: math.$pi;
+    22 │ 	--calc: calc($gap * 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    20 │ → --gap:·#{$gap};
+       │          ++    + 
+
+```
+
+```
+invalid.scss:21:8 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable math.$pi isn't interpolated, so Sass outputs it unchanged.
+  
+    19 │ :root {
+    20 │ 	--gap: $gap;
+  > 21 │ 	--pi: math.$pi;
+       │ 	      ^^^^^^^^
+    22 │ 	--calc: calc($gap * 2);
+    23 │ 	--fallback: var(--x, $gap);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text math.$pi instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    21 │ → --pi:·#{math.$pi};
+       │         ++        + 
+
+```
+
+```
+invalid.scss:22:15 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    20 │ 	--gap: $gap;
+    21 │ 	--pi: math.$pi;
+  > 22 │ 	--calc: calc($gap * 2);
+       │ 	             ^^^^
+    23 │ 	--fallback: var(--x, $gap);
+    24 │ 	--url: url($path);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    22 │ → --calc:·calc(#{$gap}·*·2);
+       │                ++    +      
+
+```
+
+```
+invalid.scss:23:23 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    21 │ 	--pi: math.$pi;
+    22 │ 	--calc: calc($gap * 2);
+  > 23 │ 	--fallback: var(--x, $gap);
+       │ 	                     ^^^^
+    24 │ 	--url: url($path);
+    25 │ 	--list: $gap $gap;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    23 │ → --fallback:·var(--x,·#{$gap});
+       │                        ++    +  
+
+```
+
+```
+invalid.scss:24:13 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
+  
+    22 │ 	--calc: calc($gap * 2);
+    23 │ 	--fallback: var(--x, $gap);
+  > 24 │ 	--url: url($path);
+       │ 	           ^^^^^
+    25 │ 	--list: $gap $gap;
+    26 │ 	--braced: {a: $gap};
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $path instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:25:10 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    23 │ 	--fallback: var(--x, $gap);
+    24 │ 	--url: url($path);
+  > 25 │ 	--list: $gap $gap;
+       │ 	        ^^^^
+    26 │ 	--braced: {a: $gap};
+    27 │ 	--commented:
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    25 │ → --list:·#{$gap}·$gap;
+       │           ++    +      
+
+```
+
+```
+invalid.scss:25:15 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    23 │ 	--fallback: var(--x, $gap);
+    24 │ 	--url: url($path);
+  > 25 │ 	--list: $gap $gap;
+       │ 	             ^^^^
+    26 │ 	--braced: {a: $gap};
+    27 │ 	--commented:
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    25 │ → --list:·$gap·#{$gap};
+       │                ++    + 
+
+```
+
+```
+invalid.scss:26:16 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    24 │ 	--url: url($path);
+    25 │ 	--list: $gap $gap;
+  > 26 │ 	--braced: {a: $gap};
+       │ 	              ^^^^
+    27 │ 	--commented:
+    28 │ 		/* before */ $gap /* after */;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    26 │ → --braced:·{a:·#{$gap}};
+       │                 ++    +  
+
+```
+
+```
+invalid.scss:28:16 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    26 │ 	--braced: {a: $gap};
+    27 │ 	--commented:
+  > 28 │ 		/* before */ $gap /* after */;
+       │ 		             ^^^^
+    29 │ 	--own-line:
+    30 │ 		math.$pi;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    28 │ → → /*·before·*/·#{$gap}·/*·after·*/;
+       │                  ++    +             
+
+```
+
+```
+invalid.scss:30:3 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable math.$pi isn't interpolated, so Sass outputs it unchanged.
+  
+    28 │ 		/* before */ $gap /* after */;
+    29 │ 	--own-line:
+  > 30 │ 		math.$pi;
+       │ 		^^^^^^^^
+    31 │ 	--url-module: url(t.$path);
+    32 │ 	--sass-call: darken($gap, 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text math.$pi instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    30 │ → → #{math.$pi};
+       │     ++        + 
+
+```
+
+```
+invalid.scss:31:20 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable t.$path isn't interpolated, so Sass outputs it unchanged.
+  
+    29 │ 	--own-line:
+    30 │ 		math.$pi;
+  > 31 │ 	--url-module: url(t.$path);
+       │ 	                  ^^^^^^^
+    32 │ 	--sass-call: darken($gap, 10%);
+    33 │ 	--module-call: math.max($gap, 1px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text t.$path instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:32:15 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    30 │ 		math.$pi;
+    31 │ 	--url-module: url(t.$path);
+  > 32 │ 	--sass-call: darken($gap, 10%);
+       │ 	             ^^^^^^
+    33 │ 	--module-call: math.max($gap, 1px);
+    34 │ 	--unknown-call: bpx($gap);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:33:17 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function math.max() isn't interpolated, so Sass outputs it unchanged.
+  
+    31 │ 	--url-module: url(t.$path);
+    32 │ 	--sass-call: darken($gap, 10%);
+  > 33 │ 	--module-call: math.max($gap, 1px);
+       │ 	               ^^^^^^^^
+    34 │ 	--unknown-call: bpx($gap);
+    35 │ 	--url-interpolated: url($dir/#{$name}.svg);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:34:22 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    32 │ 	--sass-call: darken($gap, 10%);
+    33 │ 	--module-call: math.max($gap, 1px);
+  > 34 │ 	--unknown-call: bpx($gap);
+       │ 	                    ^^^^
+    35 │ 	--url-interpolated: url($dir/#{$name}.svg);
+    36 │ 	--url-upper: URL($path);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:35:26 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $dir isn't interpolated, so Sass outputs it unchanged.
+  
+    33 │ 	--module-call: math.max($gap, 1px);
+    34 │ 	--unknown-call: bpx($gap);
+  > 35 │ 	--url-interpolated: url($dir/#{$name}.svg);
+       │ 	                        ^^^^
+    36 │ 	--url-upper: URL($path);
+    37 │ 	--url-expression: url($path + ".png");
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $dir instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:36:19 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
+  
+    34 │ 	--unknown-call: bpx($gap);
+    35 │ 	--url-interpolated: url($dir/#{$name}.svg);
+  > 36 │ 	--url-upper: URL($path);
+       │ 	                 ^^^^^
+    37 │ 	--url-expression: url($path + ".png");
+    38 │ 	--if-branch: if(media(print): $gap; else: 0);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $path instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:37:24 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
+  
+    35 │ 	--url-interpolated: url($dir/#{$name}.svg);
+    36 │ 	--url-upper: URL($path);
+  > 37 │ 	--url-expression: url($path + ".png");
+       │ 	                      ^^^^^
+    38 │ 	--if-branch: if(media(print): $gap; else: 0);
+    39 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $path instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    37 │ → --url-expression:·url(#{$path}·+·".png");
+       │                         ++     +           
+
+```
+
+```
+invalid.scss:38:32 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    36 │ 	--url-upper: URL($path);
+    37 │ 	--url-expression: url($path + ".png");
+  > 38 │ 	--if-branch: if(media(print): $gap; else: 0);
+       │ 	                              ^^^^
+    39 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+    40 │ 	--if-sass: if(sass($flag): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    38 │ → --if-branch:·if(media(print):·#{$gap};·else:·0);
+       │                                 ++    +           
+
+```
+
+```
+invalid.scss:39:34 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    37 │ 	--url-expression: url($path + ".png");
+    38 │ 	--if-branch: if(media(print): $gap; else: 0);
+  > 39 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+       │ 	                                ^^^^
+    40 │ 	--if-sass: if(sass($flag): 1; else: 2);
+    41 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    39 │ → --if-style-query:·if(style(--a:·#{$gap}):·1;·else:·2);
+       │                                   ++    +               
+
+```
+
+```
+invalid.scss:40:13 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    38 │ 	--if-branch: if(media(print): $gap; else: 0);
+    39 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+  > 40 │ 	--if-sass: if(sass($flag): 1; else: 2);
+       │ 	           ^^
+    41 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+    42 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:41:38 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $display isn't interpolated, so Sass outputs it unchanged.
+  
+    39 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+    40 │ 	--if-sass: if(sass($flag): 1; else: 2);
+  > 41 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+       │ 	                                    ^^^^^^^^
+    42 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+    43 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $display instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:42:31 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $breakpoint isn't interpolated, so Sass outputs it unchanged.
+  
+    40 │ 	--if-sass: if(sass($flag): 1; else: 2);
+    41 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+  > 42 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+       │ 	                             ^^^^^^^^^^^
+    43 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+    44 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $breakpoint instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:43:15 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    41 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+    42 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+  > 43 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+       │ 	             ^^
+    44 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+    45 │ 	--module: math.div(8px, 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:44:16 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    42 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+    43 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+  > 44 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+       │ 	              ^^^^^^
+    45 │ 	--module: math.div(8px, 2);
+    46 │ 	--own: double(3px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:45:12 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function math.div() isn't interpolated, so Sass outputs it unchanged.
+  
+    43 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+    44 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+  > 45 │ 	--module: math.div(8px, 2);
+       │ 	          ^^^^^^^^
+    46 │ 	--own: double(3px);
+    47 │ 	--own-dash: snake-case(1px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:46:9 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    44 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+    45 │ 	--module: math.div(8px, 2);
+  > 46 │ 	--own: double(3px);
+       │ 	       ^^^^^^
+    47 │ 	--own-dash: snake-case(1px);
+    48 │ 	--built-in: darken(#fff, 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:47:14 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function snake-case() isn't interpolated, so Sass outputs it unchanged.
+  
+    45 │ 	--module: math.div(8px, 2);
+    46 │ 	--own: double(3px);
+  > 47 │ 	--own-dash: snake-case(1px);
+       │ 	            ^^^^^^^^^^
+    48 │ 	--built-in: darken(#fff, 10%);
+    49 │ 	--built-in-underscore: map_get($map, key);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:48:14 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    46 │ 	--own: double(3px);
+    47 │ 	--own-dash: snake-case(1px);
+  > 48 │ 	--built-in: darken(#fff, 10%);
+       │ 	            ^^^^^^
+    49 │ 	--built-in-underscore: map_get($map, key);
+    50 │ 	--inside-calc: calc(double(3px) + 1px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:49:25 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function map_get() isn't interpolated, so Sass outputs it unchanged.
+  
+    47 │ 	--own-dash: snake-case(1px);
+    48 │ 	--built-in: darken(#fff, 10%);
+  > 49 │ 	--built-in-underscore: map_get($map, key);
+       │ 	                       ^^^^^^^
+    50 │ 	--inside-calc: calc(double(3px) + 1px);
+    51 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:50:22 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    48 │ 	--built-in: darken(#fff, 10%);
+    49 │ 	--built-in-underscore: map_get($map, key);
+  > 50 │ 	--inside-calc: calc(double(3px) + 1px);
+       │ 	                    ^^^^^^
+    51 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+    52 │ 	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:51:16 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    49 │ 	--built-in-underscore: map_get($map, key);
+    50 │ 	--inside-calc: calc(double(3px) + 1px);
+  > 51 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+       │ 	              ^^^^^^
+    52 │ 	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+    53 │ 	--legacy-if: if($condition, 1px, 2px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:52:38 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    50 │ 	--inside-calc: calc(double(3px) + 1px);
+    51 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+  > 52 │ 	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+       │ 	                                    ^^^^^^
+    53 │ 	--legacy-if: if($condition, 1px, 2px);
+    54 │ 	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:53:15 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    51 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+    52 │ 	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+  > 53 │ 	--legacy-if: if($condition, 1px, 2px);
+       │ 	             ^^
+    54 │ 	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+    55 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:54:33 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    52 │ 	--if-call-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+    53 │ 	--legacy-if: if($condition, 1px, 2px);
+  > 54 │ 	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+       │ 	                               ^^^^^^
+    55 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+    56 │ 	--if-sass-branch: if(sass($flag): $gap; else: 0);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:55:18 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    53 │ 	--legacy-if: if($condition, 1px, 2px);
+    54 │ 	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+  > 55 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+       │ 	                ^^
+    56 │ 	--if-sass-branch: if(sass($flag): $gap; else: 0);
+    57 │ 	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:56:20 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    54 │ 	--if-style-call: if(style(--a: double(1px)): 1; else: 2);
+    55 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+  > 56 │ 	--if-sass-branch: if(sass($flag): $gap; else: 0);
+       │ 	                  ^^
+    57 │ 	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+    58 │ 	--own-css-name: rem(24px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:57:44 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    55 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+    56 │ 	--if-sass-branch: if(sass($flag): $gap; else: 0);
+  > 57 │ 	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+       │ 	                                          ^^
+    58 │ 	--own-css-name: rem(24px);
+    59 │ 	--own-css-name-variable: rem($gap);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:57:71 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    55 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+    56 │ 	--if-sass-branch: if(sass($flag): $gap; else: 0);
+  > 57 │ 	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+       │ 	                                                                     ^^^^
+    58 │ 	--own-css-name: rem(24px);
+    59 │ 	--own-css-name-variable: rem($gap);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    57 │ → --if-nested-sass-condition:·if(style(--m:·if(sass($d):·1;·else:·0)):·#{$gap};·else:·0);
+       │                                                                        ++    +           
+
+```
+
+```
+invalid.scss:58:18 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function rem() isn't interpolated, so Sass outputs it unchanged.
+  
+    56 │ 	--if-sass-branch: if(sass($flag): $gap; else: 0);
+    57 │ 	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+  > 58 │ 	--own-css-name: rem(24px);
+       │ 	                ^^^
+    59 │ 	--own-css-name-variable: rem($gap);
+    60 │ 	--if-in-call-nested: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:59:27 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function rem() isn't interpolated, so Sass outputs it unchanged.
+  
+    57 │ 	--if-nested-sass-condition: if(style(--m: if(sass($d): 1; else: 0)): $gap; else: 0);
+    58 │ 	--own-css-name: rem(24px);
+  > 59 │ 	--own-css-name-variable: rem($gap);
+       │ 	                         ^^^
+    60 │ 	--if-in-call-nested: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+    61 │ }
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:60:23 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    58 │ 	--own-css-name: rem(24px);
+    59 │ 	--own-css-name-variable: rem($gap);
+  > 60 │ 	--if-in-call-nested: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+       │ 	                     ^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:63:19 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    61 │ }
+    62 │ 
+  > 63 │ @supports (--raw: $gap) {
+       │                   ^^^^
+    64 │ 	a {
+    65 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    63 │ @supports·(--raw:·#{$gap})·{
+       │                   ++    +   
+
+```
+
+```
+invalid.scss:69:19 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    67 │ }
+    68 │ 
+  > 69 │ @supports (--raw: double(1px)) {
+       │                   ^^^^^^
+    70 │ 	a {
+    71 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:75:23 lint/nursery/noMissingScssInterpolation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    73 │ }
+    74 │ 
+  > 75 │ @container style(--c: $gap) {
+       │                       ^^^^
+    76 │ 	a {
+    77 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    75 │ @container·style(--c:·#{$gap})·{
+       │                       ++    +   
+
+```
+
+```
+invalid.scss:81:23 lint/nursery/noMissingScssInterpolation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    79 │ }
+    80 │ 
+  > 81 │ @container style(--c: double(1px)) {
+       │                       ^^^^^^
+    82 │ 	a {
+    83 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

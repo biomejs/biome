@@ -70,7 +70,10 @@ declare_lint_rule! {
         name: "useTailwindShorthandClasses",
         language: "html",
         domains: &[RuleDomain::Tailwind],
-        sources: &[RuleSource::EslintBetterTailwindcss("enforce-shorthand-classes").inspired()],
+        sources: &[
+            RuleSource::EslintBetterTailwindcss("enforce-shorthand-classes").inspired(),
+            RuleSource::EslintTailwindcss("enforces-shorthand").same(),
+        ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
         issue_number: Some("11342"),

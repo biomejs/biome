@@ -43,3 +43,10 @@ class Test {
 functionGeneric<void>(undefined);
 
 type Conditional<T> = T extends void ? Record<string, never> : T
+
+function voidNeverReturn(): void | never {
+  throw new Error('Test');
+}
+type voidNeverUnion = void | never;
+type neverVoidUnion = never | void;
+type parenthesizedVoidNeverUnion = (void) | never;

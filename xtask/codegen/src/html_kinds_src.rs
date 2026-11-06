@@ -434,6 +434,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "VUE_V_FOR_ARRAY_BINDING",
         "VUE_V_FOR_BINDING_LIST",
         "VUE_V_FOR_REST_BINDING",
+        "VUE_V_FOR_DEFAULT_BINDING",
         "VUE_V_FOR_TUPLE_BINDING",
         "VUE_V_FOR_TUPLE_ELEMENT",
         // Angular nodes

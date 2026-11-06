@@ -9,7 +9,8 @@ use xtask_codegen::generate_global_types::{
     compare::compare_lowered_globals,
     lower::{
         LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
-        LoweredMemberKind, LoweredTypeData, LoweredTypeReference, lower_global_types,
+        LoweredMemberKind, LoweredReturnKind, LoweredTypeData, LoweredTypeReference,
+        lower_global_types,
     },
     manifest::build_global_manifest,
     render_global_types,
@@ -1315,5 +1316,70 @@ fn regexp_signatures_follow_declarations() -> Result<()> {
         assert!(parameters.last().unwrap().is_optional());
         assert_instance_of(regexp, result, "GLOBAL_REG_EXP_ID");
     }
+    Ok(())
+}
+
+#[test]
+fn predicate_returns_keep_their_narrowed_parameter() -> Result<()> {
+    let lowered = lower(&[source(
+        "predicates.d.ts",
+        "interface Checks<T> {
+            isItem(value: unknown): value is T;
+            isList(): this is T[];
+            keep(predicate: (value: T) => value is T): void;
+        }",
+    )?])?;
+    let checks_global = global(&lowered, "Checks");
+    let checks = interface(&lowered, "Checks");
+    let item = checks.type_parameters()[0].clone();
+    let method = |name: &str| {
+        let LoweredTypeData::Function(function) =
+            local(checks_global, checks.member(name).unwrap().type_reference())
+        else {
+            panic!("expected {name} to be a function")
+        };
+        function
+    };
+
+    let is_item = method("isItem");
+    assert_eq!(
+        is_item.return_kind(),
+        &LoweredReturnKind::Predicate {
+            parameter_name: "value".into()
+        }
+    );
+    assert_eq!(is_item.return_type(), &item);
+
+    let is_list = method("isList");
+    assert_eq!(
+        is_list.return_kind(),
+        &LoweredReturnKind::Predicate {
+            parameter_name: "this".into()
+        }
+    );
+    assert_eq!(
+        local(checks_global, is_list.return_type()),
+        &LoweredTypeData::InstanceOf {
+            ty: generated("GLOBAL_ARRAY_ID"),
+            type_parameters: Box::new([item.clone()]),
+        }
+    );
+
+    let keep = method("keep");
+    let LoweredTypeData::Function(predicate) =
+        local(checks_global, keep.parameters()[0].type_reference())
+    else {
+        panic!("expected the keep callback to be a function")
+    };
+    assert_eq!(
+        predicate.return_kind(),
+        &LoweredReturnKind::Predicate {
+            parameter_name: "value".into()
+        }
+    );
+
+    let rendered = render_global_types(&SourcePin::new("v0.0.0", "0"), &lowered);
+    assert!(rendered.contains("crate::ReturnType::Predicate(Box::new(crate::PredicateReturnType"));
+    assert!(rendered.contains("parameter_name: biome_rowan::Text::new_static(\"this\")"));
     Ok(())
 }

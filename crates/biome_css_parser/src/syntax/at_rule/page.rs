@@ -1,3 +1,4 @@
+use super::name::{is_at_scss_at_rule_prelude_name, parse_scss_at_rule_prelude_name};
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
@@ -96,7 +97,7 @@ impl ParseSeparatedList for PageSelectorList {
 
 #[inline]
 fn is_at_page_selector(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || p.at(T![:])
+    is_at_identifier(p) || p.at(T![:]) || is_at_scss_at_rule_prelude_name(p)
 }
 
 #[inline]
@@ -112,7 +113,11 @@ pub(crate) fn parse_page_selector(p: &mut CssParser) -> ParsedSyntax {
     // Because the selector is formally defined as `<ident>` _and_ also case-
     // sensitive, we use a `<custom-ident>` instead to preserve the casing, but
     // need to allow the CSS-wide keywords that would otherwise be disallowed.
-    parse_custom_identifier_with_keywords(p, CssLexContext::Regular, true).ok();
+    if is_at_scss_at_rule_prelude_name(p) {
+        parse_scss_at_rule_prelude_name(p).ok();
+    } else {
+        parse_custom_identifier_with_keywords(p, CssLexContext::Regular, true).ok();
+    }
     PageSelectorPseudoList.parse_list(p);
 
     Present(m.complete(p, CSS_PAGE_SELECTOR))
@@ -171,7 +176,10 @@ pub(crate) fn parse_page_selector_pseudo(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![:]);
 
-    let kind = if p.at_ts(PAGE_SELECTOR_PSEUDO_SET) {
+    let kind = if is_at_scss_at_rule_prelude_name(p) {
+        parse_scss_at_rule_prelude_name(p).ok();
+        CSS_PAGE_SELECTOR_PSEUDO
+    } else if p.at_ts(PAGE_SELECTOR_PSEUDO_SET) {
         parse_regular_identifier(p).ok();
         CSS_PAGE_SELECTOR_PSEUDO
     } else {

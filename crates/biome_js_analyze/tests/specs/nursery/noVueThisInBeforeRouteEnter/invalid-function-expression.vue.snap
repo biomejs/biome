@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-function-expression.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  beforeRouteEnter: function (to, from, next) {
+    this.method();
+    next();
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-function-expression.vue:5:5 lint/nursery/noVueThisInBeforeRouteEnter ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in beforeRouteEnter, where it is undefined.
+  
+    3 │ export default {
+    4 │   beforeRouteEnter: function (to, from, next) {
+  > 5 │     this.method();
+      │     ^^^^
+    6 │     next();
+    7 │   },
+  
+  i Vue Router calls beforeRouteEnter before it creates the component, so the component can't be reached through this.
+  
+  i Pass a callback to next to use the component once it is created, for example next((vm) => vm.loadData()).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

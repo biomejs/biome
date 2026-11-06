@@ -1,0 +1,16 @@
+---
+source: crates/biome_vue_semantic/src/tests/component.rs
+expression: model.to_string()
+---
+component DefineComponent 56..421 name=MyButton inheritAttrs=No
+  Prop label 128..133 form=Constructor types=String required=No
+  Prop size 143..147 form=Options types=String|Number required=Yes default=Inline@200..201
+  Emit click 217..224 form=ArrayString
+  Data count 247..252 uses=1
+  Data user 257..261
+  Data name 265..269 in=user
+  Computed double 296..302 getter
+  Computed full 333..337 getter setter
+  Method reset 379..384 params=2 rest
+  LifecycleHook mounted 405..412
+ref count 319..324 Binding Identifier Read via=this -> Data count

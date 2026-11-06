@@ -1,0 +1,261 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <VueComponent @custom-event="onEvent" />
+  <VueComponent v-on:custom-event="onEvent" />
+  <VueComponent @update:model-value="onEvent" />
+  <VueComponent @up-date:modelValue="onEvent" />
+  <VueComponent @upDate:model-value="onEvent" />
+  <VueComponent @up-date:model-value="onEvent" />
+  <custom-component @custom-event="onEvent" />
+  <VueComponent @custom--event="onEvent" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name custom-event contains hyphens.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <VueComponent @custom-event="onEvent" />
+      │                  ^^^^^^^^^^^^
+    4 │   <VueComponent v-on:custom-event="onEvent" />
+    5 │   <VueComponent @update:model-value="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to customEvent.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <template>
+     3    │ - ··<VueComponent·@custom-event="onEvent"·/>
+        3 │ + ··<VueComponent·@customEvent="onEvent"·/>
+     4  4 │     <VueComponent v-on:custom-event="onEvent" />
+     5  5 │     <VueComponent @update:model-value="onEvent" />
+  
+
+```
+
+```
+invalid.vue:4:22 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name custom-event contains hyphens.
+  
+    2 │ <template>
+    3 │   <VueComponent @custom-event="onEvent" />
+  > 4 │   <VueComponent v-on:custom-event="onEvent" />
+      │                      ^^^^^^^^^^^^
+    5 │   <VueComponent @update:model-value="onEvent" />
+    6 │   <VueComponent @up-date:modelValue="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to customEvent.
+  
+     2  2 │   <template>
+     3  3 │     <VueComponent @custom-event="onEvent" />
+     4    │ - ··<VueComponent·v-on:custom-event="onEvent"·/>
+        4 │ + ··<VueComponent·v-on:customEvent="onEvent"·/>
+     5  5 │     <VueComponent @update:model-value="onEvent" />
+     6  6 │     <VueComponent @up-date:modelValue="onEvent" />
+  
+
+```
+
+```
+invalid.vue:5:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name update:model-value contains hyphens.
+  
+    3 │   <VueComponent @custom-event="onEvent" />
+    4 │   <VueComponent v-on:custom-event="onEvent" />
+  > 5 │   <VueComponent @update:model-value="onEvent" />
+      │                  ^^^^^^^^^^^^^^^^^^
+    6 │   <VueComponent @up-date:modelValue="onEvent" />
+    7 │   <VueComponent @upDate:model-value="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to update:modelValue.
+  
+     3  3 │     <VueComponent @custom-event="onEvent" />
+     4  4 │     <VueComponent v-on:custom-event="onEvent" />
+     5    │ - ··<VueComponent·@update:model-value="onEvent"·/>
+        5 │ + ··<VueComponent·@update:modelValue="onEvent"·/>
+     6  6 │     <VueComponent @up-date:modelValue="onEvent" />
+     7  7 │     <VueComponent @upDate:model-value="onEvent" />
+  
+
+```
+
+```
+invalid.vue:6:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name up-date:modelValue contains hyphens.
+  
+    4 │   <VueComponent v-on:custom-event="onEvent" />
+    5 │   <VueComponent @update:model-value="onEvent" />
+  > 6 │   <VueComponent @up-date:modelValue="onEvent" />
+      │                  ^^^^^^^^^^^^^^^^^^
+    7 │   <VueComponent @upDate:model-value="onEvent" />
+    8 │   <VueComponent @up-date:model-value="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to upDate:modelValue.
+  
+     4  4 │     <VueComponent v-on:custom-event="onEvent" />
+     5  5 │     <VueComponent @update:model-value="onEvent" />
+     6    │ - ··<VueComponent·@up-date:modelValue="onEvent"·/>
+        6 │ + ··<VueComponent·@upDate:modelValue="onEvent"·/>
+     7  7 │     <VueComponent @upDate:model-value="onEvent" />
+     8  8 │     <VueComponent @up-date:model-value="onEvent" />
+  
+
+```
+
+```
+invalid.vue:7:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name upDate:model-value contains hyphens.
+  
+    5 │   <VueComponent @update:model-value="onEvent" />
+    6 │   <VueComponent @up-date:modelValue="onEvent" />
+  > 7 │   <VueComponent @upDate:model-value="onEvent" />
+      │                  ^^^^^^^^^^^^^^^^^^
+    8 │   <VueComponent @up-date:model-value="onEvent" />
+    9 │   <custom-component @custom-event="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to upDate:modelValue.
+  
+     5  5 │     <VueComponent @update:model-value="onEvent" />
+     6  6 │     <VueComponent @up-date:modelValue="onEvent" />
+     7    │ - ··<VueComponent·@upDate:model-value="onEvent"·/>
+        7 │ + ··<VueComponent·@upDate:modelValue="onEvent"·/>
+     8  8 │     <VueComponent @up-date:model-value="onEvent" />
+     9  9 │     <custom-component @custom-event="onEvent" />
+  
+
+```
+
+```
+invalid.vue:8:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name up-date:model-value contains hyphens.
+  
+     6 │   <VueComponent @up-date:modelValue="onEvent" />
+     7 │   <VueComponent @upDate:model-value="onEvent" />
+   > 8 │   <VueComponent @up-date:model-value="onEvent" />
+       │                  ^^^^^^^^^^^^^^^^^^^
+     9 │   <custom-component @custom-event="onEvent" />
+    10 │   <VueComponent @custom--event="onEvent" />
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to upDate:modelValue.
+  
+     6  6 │     <VueComponent @up-date:modelValue="onEvent" />
+     7  7 │     <VueComponent @upDate:model-value="onEvent" />
+     8    │ - ··<VueComponent·@up-date:model-value="onEvent"·/>
+        8 │ + ··<VueComponent·@upDate:modelValue="onEvent"·/>
+     9  9 │     <custom-component @custom-event="onEvent" />
+    10 10 │     <VueComponent @custom--event="onEvent" />
+  
+
+```
+
+```
+invalid.vue:9:22 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name custom-event contains hyphens.
+  
+     7 │   <VueComponent @upDate:model-value="onEvent" />
+     8 │   <VueComponent @up-date:model-value="onEvent" />
+   > 9 │   <custom-component @custom-event="onEvent" />
+       │                      ^^^^^^^^^^^^
+    10 │   <VueComponent @custom--event="onEvent" />
+    11 │ </template>
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to customEvent.
+  
+     7  7 │     <VueComponent @upDate:model-value="onEvent" />
+     8  8 │     <VueComponent @up-date:model-value="onEvent" />
+     9    │ - ··<custom-component·@custom-event="onEvent"·/>
+        9 │ + ··<custom-component·@customEvent="onEvent"·/>
+    10 10 │     <VueComponent @custom--event="onEvent" />
+    11 11 │   </template>
+  
+
+```
+
+```
+invalid.vue:10:18 lint/nursery/useVueConsistentEventHyphenation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The event name custom--event contains hyphens.
+  
+     8 │   <VueComponent @up-date:model-value="onEvent" />
+     9 │   <custom-component @custom-event="onEvent" />
+  > 10 │   <VueComponent @custom--event="onEvent" />
+       │                  ^^^^^^^^^^^^^
+    11 │ </template>
+    12 │ 
+  
+  i Vue matches event listeners regardless of their casing, so mixing camelCase and kebab-case event names makes templates inconsistent.
+  
+  i This project requires event names without hyphens, such as camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the event to customEvent.
+  
+     8  8 │     <VueComponent @up-date:model-value="onEvent" />
+     9  9 │     <custom-component @custom-event="onEvent" />
+    10    │ - ··<VueComponent·@custom--event="onEvent"·/>
+       10 │ + ··<VueComponent·@customEvent="onEvent"·/>
+    11 11 │   </template>
+    12 12 │   
+  
+
+```

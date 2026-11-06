@@ -11,6 +11,7 @@ impl FormatRule<AnyCssFontFamilyName> for FormatAnyCssFontFamilyName {
             AnyCssFontFamilyName::CssBogusFontFamilyName(node) => node.format().fmt(f),
             AnyCssFontFamilyName::CssFontFamilyName(node) => node.format().fmt(f),
             AnyCssFontFamilyName::CssString(node) => node.format().fmt(f),
+            AnyCssFontFamilyName::ScssInterpolatedString(node) => node.format().fmt(f),
         }
     }
 }

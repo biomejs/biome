@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-destructure-runtime.vue
+---
+# Input
+```vue
+<script setup>
+/* should not generate diagnostics */
+const { foo = 42, bar = 42, baz } = defineProps({
+  foo: Number,
+  bar: { type: Number, required: false },
+  baz: { type: Number, required: true },
+});
+</script>
+
+```

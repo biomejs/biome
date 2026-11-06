@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-references-local.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const definition = { msg: String };
+defineProps(definition);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-references-local.vue:4:13 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineProps() uses definition, which is declared in <script setup>.
+  
+    2 │ <script setup>
+    3 │ const definition = { msg: String };
+  > 4 │ defineProps(definition);
+      │             ^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Vue moves the argument of defineProps() out of the setup code when it compiles the component, so the argument can't use variables declared in <script setup>.
+  
+  i Import the value from another file, or declare it in a plain <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

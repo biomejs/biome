@@ -1,4 +1,4 @@
-use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rowan::{AstNode, Language, SyntaxKindSet, SyntaxNode, WalkEvent};
 use std::marker::PhantomData;
 
 use crate::{
@@ -62,6 +62,13 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
         };
 
         ctx.match_query(node.clone());
+    }
+
+    fn visited_kinds(
+        &self,
+        syntax_query_kinds: Option<SyntaxKindSet<L>>,
+    ) -> Option<SyntaxKindSet<L>> {
+        syntax_query_kinds
     }
 }
 

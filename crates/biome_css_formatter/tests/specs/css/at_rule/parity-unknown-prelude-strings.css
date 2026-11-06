@@ -1,0 +1,5 @@
+@foo   "plain ;{}() string";
+@foo "literal #{'inner'} after";
+@foo 'literal #{"inner"} after';
+@foo "escaped \"quote\""{.item{color:red;}}
+.following{color:green;}

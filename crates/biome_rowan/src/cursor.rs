@@ -58,8 +58,8 @@ use crate::{
 };
 pub(crate) use element::SyntaxElement;
 pub(crate) use node::{
-    Preorder, PreorderTokens, PreorderWithTokens, SyntaxElementChildren, SyntaxNode,
-    SyntaxNodeChildren, SyntaxSlot, SyntaxSlots,
+    Preorder, PreorderMatching, PreorderTokens, PreorderWithTokens, SyntaxElementChildren,
+    SyntaxNode, SyntaxNodeChildren, SyntaxSlot, SyntaxSlots,
 };
 
 #[derive(Debug)]

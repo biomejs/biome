@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-export-default.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  props: {
+    name: {
+      required: false,
+      default: "Hello",
+    },
+    age: {
+      type: Number,
+      required: true,
+    },
+  },
+};
+</script>
+
+```

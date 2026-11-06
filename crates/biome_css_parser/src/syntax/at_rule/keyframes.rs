@@ -10,12 +10,19 @@ use crate::syntax::block::{
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
+use crate::syntax::declaration::{
+    is_at_empty_declaration, is_at_scss_empty_declaration, parse_empty_declaration,
+};
 use crate::syntax::parse_error::{
     expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
 };
 use crate::syntax::scss::{
-    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, is_at_scss_variable_declaration,
-    parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_variable_declaration,
+    ScssBlockParser, is_at_scss_keyframes_name, is_at_scss_keyframes_selector,
+    is_at_scss_variable_declaration, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
+    parse_scss_each_at_rule_with_block, parse_scss_for_at_rule_with_block,
+    parse_scss_if_at_rule_with_block, parse_scss_include_at_rule, parse_scss_keyframes_name,
+    parse_scss_keyframes_selector, parse_scss_variable_declaration,
+    parse_scss_while_at_rule_with_block,
 };
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
@@ -205,11 +212,17 @@ fn parse_keyframes_name(p: &mut CssParser) -> ParsedSyntax {
 
 struct KeyframesBlock;
 
+#[inline]
+fn parse_keyframes_block(p: &mut CssParser) -> CompletedMarker {
+    KeyframesBlock.parse_block_body(p)
+}
+
 impl ParseBlockBody for KeyframesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
-        is_at_any_keyframes_item(p)
+        // A semicolon cannot supply the body when the opening brace is missing.
+        !is_at_empty_declaration(p) && is_at_any_keyframes_item(p)
     }
 
     fn parse_list(&mut self, p: &mut CssParser) {
@@ -255,16 +268,77 @@ impl ParseNodeList for KeyframesItemList {
 
 #[inline]
 fn is_at_any_keyframes_item(p: &mut CssParser) -> bool {
-    is_at_scss_variable_declaration(p) || is_at_keyframes_item_selector(p)
+    is_at_scss_variable_declaration(p)
+        || is_at_scss_keyframes_statement(p)
+        || is_at_keyframes_item_selector(p)
+        || is_at_scss_empty_declaration(p)
 }
 
 #[inline]
 fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_variable_declaration(p) {
-        parse_scss_keyframes_variable_declaration(p)
-    } else {
-        parse_keyframes_item(p)
+    CssSyntaxFeatures::Scss
+        .parse_supported_syntax(p, parse_empty_declaration)
+        .or_else(|| {
+            if is_at_scss_variable_declaration(p) {
+                parse_scss_keyframes_variable_declaration(p)
+            } else if is_at_scss_keyframes_statement(p) {
+                CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+                    p,
+                    parse_scss_keyframes_statement,
+                    |p, marker| {
+                        scss_only_syntax_error(p, "SCSS statements in keyframes", marker.range(p))
+                    },
+                    Some(CSS_BOGUS_KEYFRAMES_ITEM),
+                )
+            } else {
+                parse_keyframes_item(p)
+            }
+        })
+}
+
+const SCSS_KEYFRAMES_STATEMENT_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![at_root],
+    T![include],
+    T![content],
+    T![if],
+    T![for],
+    T![each],
+    T![while]
+);
+const SCSS_KEYFRAMES_CONTROL_HEADER_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}']];
+
+#[inline]
+fn is_at_scss_keyframes_statement(p: &mut CssParser) -> bool {
+    p.at(T![@]) && p.nth_at_ts(1, SCSS_KEYFRAMES_STATEMENT_SET)
+}
+
+#[inline]
+fn parse_scss_keyframes_statement(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_keyframes_statement(p) {
+        return Absent;
     }
+
+    let m = p.start();
+    p.bump(T![@]);
+    let parse_block = ScssBlockParser::new(parse_keyframes_block)
+        .with_additional_header_end_ts(SCSS_KEYFRAMES_CONTROL_HEADER_END_SET);
+
+    match p.cur() {
+        T![at_root] => parse_scss_at_root_at_rule(p),
+        T![include] => parse_scss_include_at_rule(p),
+        T![content] => parse_scss_content_at_rule(p),
+        T![if] => parse_scss_if_at_rule_with_block(p, parse_block),
+        T![for] => parse_scss_for_at_rule_with_block(p, parse_block),
+        T![each] => parse_scss_each_at_rule_with_block(p, parse_block),
+        T![while] => parse_scss_while_at_rule_with_block(p, parse_block),
+        _ => {
+            p.error(expected_keyframes_item(p, p.cur_range()));
+            return Present(m.complete(p, CSS_BOGUS_KEYFRAMES_ITEM));
+        }
+    }
+    .ok();
+
+    Present(m.complete(p, CSS_AT_RULE))
 }
 
 #[inline]
@@ -306,34 +380,10 @@ pub(crate) fn parse_scss_template_keyframes_item(p: &mut CssParser) -> ParsedSyn
         return Absent;
     }
 
-    let marker = if is_at_percentage_dimension(p) {
-        let marker = p.start();
-        KeyframesSelectorList {
-            template: true,
-            has_explicit_percentage: false,
-        }
-        .parse_list(p);
-        marker
-    } else {
-        // An interpolation or `from` can also start an ordinary selector template.
-        let Ok(marker) = try_parse(p, |p| {
-            let marker = p.start();
-            let mut selectors = KeyframesSelectorList {
-                template: true,
-                has_explicit_percentage: false,
-            };
-            selectors.parse_list(p);
-            if selectors.has_explicit_percentage && p.at(T!['{']) {
-                Ok(marker)
-            } else {
-                marker.abandon(p);
-                Err(())
-            }
-        }) else {
-            return Absent;
-        };
-        marker
+    let Present(selectors) = parse_scss_template_keyframes_selector_list(p) else {
+        return Absent;
     };
+    let marker = selectors.precede(p);
 
     if !p.at(T!['{']) {
         p.expect(T!['{']);
@@ -342,6 +392,46 @@ pub(crate) fn parse_scss_template_keyframes_item(p: &mut CssParser) -> ParsedSyn
 
     parse_declaration_or_statement_block(p);
     Present(marker.complete(p, CSS_KEYFRAMES_ITEM))
+}
+
+/// Parses a percentage-bearing header, leaving ordinary selectors unconsumed.
+/// Callers must gate the enclosing SCSS construct.
+///
+/// ```scss
+/// @mixin step($position) {
+///   @at-root from, #{$position}%, to { opacity: 0.5; }
+/// }
+/// ```
+pub(crate) fn parse_scss_template_keyframes_selector_list(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_keyframes_item_selector(p) {
+        return Absent;
+    }
+
+    let mut selectors = KeyframesSelectorList {
+        template: true,
+        has_explicit_percentage: false,
+    };
+    if is_at_percentage_dimension(p) {
+        return Present(selectors.parse_list(p));
+    }
+
+    // `%` can also introduce a placeholder: `@at-root #{"div"}%from {}`.
+    let Ok(selector_list) = try_parse(p, |p| {
+        let diagnostics = p.context().diagnostics().len();
+        let selector_list = selectors.parse_list(p);
+        if selectors.has_explicit_percentage
+            && p.at(T!['{'])
+            && p.context().diagnostics().len() == diagnostics
+        {
+            Ok(selector_list)
+        } else {
+            Err(())
+        }
+    }) else {
+        return Absent;
+    };
+
+    Present(selector_list)
 }
 
 struct KeyframesSelectorListParseRecovery {
@@ -392,7 +482,11 @@ impl ParseSeparatedList for KeyframesSelectorList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         // CSS recovery changes the selector's kind, so identify interpolation before parsing.
         let starts_with_interpolation = is_at_scss_keyframes_selector(p);
-        let selector = parse_keyframes_item_selector(p);
+        let selector = if self.template && starts_with_interpolation {
+            parse_scss_keyframes_selector(p)
+        } else {
+            parse_keyframes_item_selector(p)
+        };
         if let Present(ref selector) = selector {
             let is_literal_percentage = selector.kind(p) == CSS_KEYFRAMES_PERCENTAGE_SELECTOR;
             let has_interpolated_percentage_suffix =

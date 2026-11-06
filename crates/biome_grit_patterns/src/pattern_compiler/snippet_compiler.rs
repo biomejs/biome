@@ -220,7 +220,7 @@ fn pattern_from_node(
         let content = node.text();
         let lang = &context.compilation.lang;
         let pattern = if let Some(regex_pattern) = lang
-            .matches_replaced_metavariable(content)
+            .matches_metavariable(content)
             .then(|| implicit_metavariable_regex(node, context_range, range_map, context))
             .flatten()
         {
@@ -331,7 +331,7 @@ fn implicit_metavariable_regex(
     let source = node.text();
     let capture_string = "(.*)";
     let uncapture_string = ".*";
-    let variable_regex = context.compilation.lang.replaced_metavariable_regex();
+    let variable_regex = context.compilation.lang.metavariable_regex();
     let mut last = 0;
     let mut regex_string = String::new();
     let mut variables: Vec<Variable> = vec![];
@@ -423,7 +423,7 @@ fn node_sub_variables(node: &GritTargetNode, lang: &GritTargetLanguage) -> Vec<B
     }
 
     let source = node.text();
-    let variable_regex = lang.replaced_metavariable_regex();
+    let variable_regex = lang.metavariable_regex();
     let start_byte = node.start_byte() as usize;
     for m in variable_regex.find_iter(source) {
         ranges.push(ByteRange::new(start_byte + m.start(), start_byte + m.end()));
@@ -840,7 +840,7 @@ mod tests {
             &mut diagnostics,
         );
 
-        let snippet_source = "µfn && µfn()";
+        let snippet_source = "$fn && $fn()";
         let range = ByteRange::new(0, snippet_source.len());
         let pattern = parse_snippet_content(snippet_source, range, &mut context, false)
             .expect("cannot parse snippet");
@@ -990,13 +990,39 @@ mod tests {
                         ),
                     ),
                 ],
-                source: "µfn && µfn()",
+                source: "$fn && $fn()",
                 dynamic_snippet: Some(
                     Snippet(
                         DynamicSnippet {
                             parts: [
                                 String(
-                                    "µfn && µfn()",
+                                    "",
+                                ),
+                                Variable(
+                                    Variable {
+                                        internal: Static(
+                                            VariableScope {
+                                                scope: 1,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                ),
+                                String(
+                                    " && ",
+                                ),
+                                Variable(
+                                    Variable {
+                                        internal: Static(
+                                            VariableScope {
+                                                scope: 1,
+                                                index: 0,
+                                            },
+                                        ),
+                                    },
+                                ),
+                                String(
+                                    "()",
                                 ),
                             ],
                         },
@@ -1009,7 +1035,7 @@ mod tests {
 
     #[test]
     fn test_export_named_from_snippet_node() {
-        let snippet = GritJsParser.parse_snippet("", "export { µfoo } from \"source\"", "");
+        let snippet = GritJsParser.parse_snippet("", "export { $foo } from \"source\"", "");
         let node = node_from_tree(&snippet).expect("no node found");
         let formatted = format!("{node:#?}");
 
@@ -1017,22 +1043,22 @@ mod tests {
         GritTargetNode {
             node: JsLanguage(
                 Node(
-                    0: JS_EXPORT@0..30
+                    0: JS_EXPORT@0..29
                       0: JS_DECORATOR_LIST@0..0
                       1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
-                      2: JS_EXPORT_NAMED_FROM_CLAUSE@7..30
+                      2: JS_EXPORT_NAMED_FROM_CLAUSE@7..29
                         0: (empty)
                         1: L_CURLY@7..9 "{" [] [Whitespace(" ")]
-                        2: JS_EXPORT_NAMED_FROM_SPECIFIER_LIST@9..15
-                          0: JS_EXPORT_NAMED_FROM_SPECIFIER@9..15
+                        2: JS_EXPORT_NAMED_FROM_SPECIFIER_LIST@9..14
+                          0: JS_EXPORT_NAMED_FROM_SPECIFIER@9..14
                             0: (empty)
-                            1: JS_METAVARIABLE@9..15
-                              0: GRIT_METAVARIABLE@9..15 "µfoo" [] [Whitespace(" ")]
+                            1: JS_METAVARIABLE@9..14
+                              0: GRIT_METAVARIABLE@9..14 "$foo" [] [Whitespace(" ")]
                             2: (empty)
-                        3: R_CURLY@15..17 "}" [] [Whitespace(" ")]
-                        4: FROM_KW@17..22 "from" [] [Whitespace(" ")]
-                        5: JS_MODULE_SOURCE@22..30
-                          0: JS_STRING_LITERAL@22..30 "\"source\"" [] []
+                        3: R_CURLY@14..16 "}" [] [Whitespace(" ")]
+                        4: FROM_KW@16..21 "from" [] [Whitespace(" ")]
+                        5: JS_MODULE_SOURCE@21..29
+                          0: JS_STRING_LITERAL@21..29 "\"source\"" [] []
                         6: (empty)
                         7: (empty)
                     ,

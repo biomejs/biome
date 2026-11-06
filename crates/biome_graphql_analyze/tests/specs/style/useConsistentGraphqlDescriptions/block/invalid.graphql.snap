@@ -27,6 +27,8 @@ invalid.graphql:2:2 lint/style/useConsistentGraphqlDescriptions ━━━━━�
     3 │ 	BASIC
     4 │ 	"fluent"
   
+  i Using different description styles in the same project makes a schema harder to read and maintain.
+  
   i To stay consistent within the project, write the description block style.
   
 
@@ -44,6 +46,8 @@ invalid.graphql:4:2 lint/style/useConsistentGraphqlDescriptions ━━━━━�
     5 │ 	FLUENT
     6 │ 	"native"
   
+  i Using different description styles in the same project makes a schema harder to read and maintain.
+  
   i To stay consistent within the project, write the description block style.
   
 
@@ -60,6 +64,8 @@ invalid.graphql:6:2 lint/style/useConsistentGraphqlDescriptions ━━━━━�
       │ 	^^^^^^^^
     7 │ 	NATIVE
     8 │ }
+  
+  i Using different description styles in the same project makes a schema harder to read and maintain.
   
   i To stay consistent within the project, write the description block style.
   

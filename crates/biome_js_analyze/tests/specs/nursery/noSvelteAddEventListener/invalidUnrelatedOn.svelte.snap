@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnrelatedOn.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	// `on` is not the one from `svelte/events`: no fix.
+	import { on } from 'some-library';
+	import { off as on2 } from 'svelte/events';
+
+	window.addEventListener('message', handler);
+
+	function shadowed() {
+		const window = {};
+		// The fix would reference the local `window`: no fix.
+		addEventListener('message', handler);
+	}
+</script>
+
+```
+
+# Diagnostics
+```
+invalidUnrelatedOn.svelte:7:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    5 │ 	import { off as on2 } from 'svelte/events';
+    6 │ 
+  > 7 │ 	window.addEventListener('message', handler);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ 	function shadowed() {
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnrelatedOn.svelte:12:3 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    10 │ 		const window = {};
+    11 │ 		// The fix would reference the local `window`: no fix.
+  > 12 │ 		addEventListener('message', handler);
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	}
+    14 │ </script>
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

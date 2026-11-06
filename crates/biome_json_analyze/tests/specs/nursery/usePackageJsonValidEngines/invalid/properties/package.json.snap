@@ -1,0 +1,212 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "example",
+	"engines": {
+		"node": 24,
+		"npm": "",
+		"pnpm": "   ",
+		"yarn": "\t\n",
+		"bun": null,
+		"deno": true,
+		"vscode": ["^1.90.0"],
+		"electron": { "min": "30.0.0" },
+		"": 24
+	}
+}
+
+```
+
+# Diagnostics
+```
+package.json:4:11 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "node" in engines is not a string.
+  
+    2 │ 	"name": "example",
+    3 │ 	"engines": {
+  > 4 │ 		"node": 24,
+      │ 		        ^^
+    5 │ 		"npm": "",
+    6 │ 		"pnpm": "   ",
+  
+  i Package managers compare the installed version of "node" with this value. They can only read a version range that is written as a string.
+  
+  i Write the supported versions as a string, such as ">=24".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:5:10 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "npm" in engines is empty.
+  
+    3 │ 	"engines": {
+    4 │ 		"node": 24,
+  > 5 │ 		"npm": "",
+      │ 		       ^^
+    6 │ 		"pnpm": "   ",
+    7 │ 		"yarn": "\t\n",
+  
+  i An empty version range doesn't tell package managers which versions of "npm" the package supports.
+  
+  i Write the supported versions, such as ">=24", or remove this property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:6:11 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "pnpm" in engines is empty.
+  
+    4 │ 		"node": 24,
+    5 │ 		"npm": "",
+  > 6 │ 		"pnpm": "   ",
+      │ 		        ^^^^^
+    7 │ 		"yarn": "\t\n",
+    8 │ 		"bun": null,
+  
+  i An empty version range doesn't tell package managers which versions of "pnpm" the package supports.
+  
+  i Write the supported versions, such as ">=24", or remove this property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:7:11 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "yarn" in engines is empty.
+  
+    5 │ 		"npm": "",
+    6 │ 		"pnpm": "   ",
+  > 7 │ 		"yarn": "\t\n",
+      │ 		        ^^^^^^
+    8 │ 		"bun": null,
+    9 │ 		"deno": true,
+  
+  i An empty version range doesn't tell package managers which versions of "yarn" the package supports.
+  
+  i Write the supported versions, such as ">=24", or remove this property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:8:10 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "bun" in engines is not a string.
+  
+     6 │ 		"pnpm": "   ",
+     7 │ 		"yarn": "\t\n",
+   > 8 │ 		"bun": null,
+       │ 		       ^^^^
+     9 │ 		"deno": true,
+    10 │ 		"vscode": ["^1.90.0"],
+  
+  i Package managers compare the installed version of "bun" with this value. They can only read a version range that is written as a string.
+  
+  i Write the supported versions as a string, such as ">=24".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:9:11 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "deno" in engines is not a string.
+  
+     7 │ 		"yarn": "\t\n",
+     8 │ 		"bun": null,
+   > 9 │ 		"deno": true,
+       │ 		        ^^^^
+    10 │ 		"vscode": ["^1.90.0"],
+    11 │ 		"electron": { "min": "30.0.0" },
+  
+  i Package managers compare the installed version of "deno" with this value. They can only read a version range that is written as a string.
+  
+  i Write the supported versions as a string, such as ">=24".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:10:13 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "vscode" in engines is not a string.
+  
+     8 │ 		"bun": null,
+     9 │ 		"deno": true,
+  > 10 │ 		"vscode": ["^1.90.0"],
+       │ 		          ^^^^^^^^^^^
+    11 │ 		"electron": { "min": "30.0.0" },
+    12 │ 		"": 24
+  
+  i Package managers compare the installed version of "vscode" with this value. They can only read a version range that is written as a string.
+  
+  i Write the supported versions as a string, such as ">=24".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:11:15 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "electron" in engines is not a string.
+  
+     9 │ 		"deno": true,
+    10 │ 		"vscode": ["^1.90.0"],
+  > 11 │ 		"electron": { "min": "30.0.0" },
+       │ 		            ^^^^^^^^^^^^^^^^^^^
+    12 │ 		"": 24
+    13 │ 	}
+  
+  i Package managers compare the installed version of "electron" with this value. They can only read a version range that is written as a string.
+  
+  i Write the supported versions as a string, such as ">=24".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+package.json:12:7 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The version range for "" in engines is not a string.
+  
+    10 │ 		"vscode": ["^1.90.0"],
+    11 │ 		"electron": { "min": "30.0.0" },
+  > 12 │ 		"": 24
+       │ 		    ^^
+    13 │ 	}
+    14 │ }
+  
+  i Package managers compare the installed version of "" with this value. They can only read a version range that is written as a string.
+  
+  i Write the supported versions as a string, such as ">=24".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

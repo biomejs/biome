@@ -45,3 +45,6 @@ const foo = '\\\u2029';
 /* \u{202f} */ const foo = ' ';
 /* \u{205f} */ const foo = ' ';
 /* \u{3000} */ const foo = '　';
+// \u{a0} in a line comment: after
+/* \u{3000} in a block comment:　after */
+const template = ` ${foo} `;

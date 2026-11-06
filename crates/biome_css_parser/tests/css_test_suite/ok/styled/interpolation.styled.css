@@ -1,0 +1,15 @@
+color: ${(props) => props.color};
+${mixin};
+${truncate}
+@media ${({ theme }) => theme.mobile} {
+	display: none;
+}
+${Button}:hover & {
+	content: "${a ? '"' : "'"}";
+	background: url(${image("logo.png")});
+}
+.child ${Icon} {
+	margin: 0;
+}
+/* ${"*/"} */
+// ${"\n"}

@@ -23,13 +23,15 @@ expression: invalidHtmlAamRoleGeneric.html
 ```
 invalidHtmlAamRoleGeneric.html:2:4 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'b' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'b' element is redundant.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <b role="generic">x</b>
       │    ^^^^^^^^^^^^^^
     3 │ <bdi role="generic">x</bdi>
     4 │ <bdo role="generic">x</bdo>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -41,7 +43,7 @@ invalidHtmlAamRoleGeneric.html:2:4 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:3:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'bdi' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'bdi' element is redundant.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <b role="generic">x</b>
@@ -49,6 +51,8 @@ invalidHtmlAamRoleGeneric.html:3:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
       │      ^^^^^^^^^^^^^^
     4 │ <bdo role="generic">x</bdo>
     5 │ <div role="generic">x</div>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -60,7 +64,7 @@ invalidHtmlAamRoleGeneric.html:3:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:4:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'bdo' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'bdo' element is redundant.
   
     2 │ <b role="generic">x</b>
     3 │ <bdi role="generic">x</bdi>
@@ -68,6 +72,8 @@ invalidHtmlAamRoleGeneric.html:4:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
       │      ^^^^^^^^^^^^^^
     5 │ <div role="generic">x</div>
     6 │ <span role="generic">x</span>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -79,7 +85,7 @@ invalidHtmlAamRoleGeneric.html:4:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:5:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'div' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'div' element is redundant.
   
     3 │ <bdi role="generic">x</bdi>
     4 │ <bdo role="generic">x</bdo>
@@ -87,6 +93,8 @@ invalidHtmlAamRoleGeneric.html:5:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
       │      ^^^^^^^^^^^^^^
     6 │ <span role="generic">x</span>
     7 │ <i role="generic">x</i>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -98,7 +106,7 @@ invalidHtmlAamRoleGeneric.html:5:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:6:7 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'span' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'span' element is redundant.
   
     4 │ <bdo role="generic">x</bdo>
     5 │ <div role="generic">x</div>
@@ -106,6 +114,8 @@ invalidHtmlAamRoleGeneric.html:6:7 lint/a11y/noRedundantRoles  FIXABLE  ━━�
       │       ^^^^^^^^^^^^^^
     7 │ <i role="generic">x</i>
     8 │ <pre role="generic">x</pre>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -117,7 +127,7 @@ invalidHtmlAamRoleGeneric.html:6:7 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:7:4 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'i' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'i' element is redundant.
   
     5 │ <div role="generic">x</div>
     6 │ <span role="generic">x</span>
@@ -125,6 +135,8 @@ invalidHtmlAamRoleGeneric.html:7:4 lint/a11y/noRedundantRoles  FIXABLE  ━━�
       │    ^^^^^^^^^^^^^^
     8 │ <pre role="generic">x</pre>
     9 │ <q role="generic">x</q>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -136,7 +148,7 @@ invalidHtmlAamRoleGeneric.html:7:4 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:8:6 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'pre' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'pre' element is redundant.
   
      6 │ <span role="generic">x</span>
      7 │ <i role="generic">x</i>
@@ -144,6 +156,8 @@ invalidHtmlAamRoleGeneric.html:8:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
        │      ^^^^^^^^^^^^^^
      9 │ <q role="generic">x</q>
     10 │ <samp role="generic">x</samp>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -155,7 +169,7 @@ invalidHtmlAamRoleGeneric.html:8:6 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:9:4 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'q' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'q' element is redundant.
   
      7 │ <i role="generic">x</i>
      8 │ <pre role="generic">x</pre>
@@ -163,6 +177,8 @@ invalidHtmlAamRoleGeneric.html:9:4 lint/a11y/noRedundantRoles  FIXABLE  ━━�
        │    ^^^^^^^^^^^^^^
     10 │ <samp role="generic">x</samp>
     11 │ <small role="generic">x</small>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -174,7 +190,7 @@ invalidHtmlAamRoleGeneric.html:9:4 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:10:7 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'samp' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'samp' element is redundant.
   
      8 │ <pre role="generic">x</pre>
      9 │ <q role="generic">x</q>
@@ -182,6 +198,8 @@ invalidHtmlAamRoleGeneric.html:10:7 lint/a11y/noRedundantRoles  FIXABLE  ━━�
        │       ^^^^^^^^^^^^^^
     11 │ <small role="generic">x</small>
     12 │ <u role="generic">x</u>
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -193,7 +211,7 @@ invalidHtmlAamRoleGeneric.html:10:7 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:11:8 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'small' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'small' element is redundant.
   
      9 │ <q role="generic">x</q>
     10 │ <samp role="generic">x</samp>
@@ -201,6 +219,8 @@ invalidHtmlAamRoleGeneric.html:11:8 lint/a11y/noRedundantRoles  FIXABLE  ━━�
        │        ^^^^^^^^^^^^^^
     12 │ <u role="generic">x</u>
     13 │ 
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -212,13 +232,15 @@ invalidHtmlAamRoleGeneric.html:11:8 lint/a11y/noRedundantRoles  FIXABLE  ━━�
 ```
 invalidHtmlAamRoleGeneric.html:12:4 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'generic' on the 'u' element is redundant, because it is implied by its semantics.
+  × Using the role attribute 'generic' on the 'u' element is redundant.
   
     10 │ <samp role="generic">x</samp>
     11 │ <small role="generic">x</small>
   > 12 │ <u role="generic">x</u>
        │    ^^^^^^^^^^^^^^
     13 │ 
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   

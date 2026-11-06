@@ -1,3 +1,4 @@
+use super::ScssBlockParser;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
@@ -14,8 +15,8 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 
-const SCSS_EACH_BINDING_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![in], T!['{']];
-const SCSS_EACH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T!['{']];
+const SCSS_EACH_BINDING_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set![T![in], T!['{']];
+const SCSS_EACH_VALUE_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']];
 
 /// Parses the SCSS `@each` at-rule.
 ///
@@ -30,6 +31,17 @@ const SCSS_EACH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T!['{
 /// Docs: https://sass-lang.com/documentation/at-rules/control/each/
 #[inline]
 pub(crate) fn parse_scss_each_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_each_at_rule_with_block(
+        p,
+        ScssBlockParser::new(parse_declaration_or_rule_list_block),
+    )
+}
+
+#[inline]
+pub(crate) fn parse_scss_each_at_rule_with_block(
+    p: &mut CssParser,
+    parse_block: ScssBlockParser,
+) -> ParsedSyntax {
     if !is_at_scss_each_at_rule(p) {
         return Absent;
     }
@@ -39,14 +51,15 @@ pub(crate) fn parse_scss_each_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![each]);
 
     let header = p.start();
-    ScssEachBindingList.parse_list(p);
+    ScssEachBindingList::new(parse_block.header_end_ts(SCSS_EACH_BINDING_LIST_END_SET))
+        .parse_list(p);
 
     p.expect(T![in]);
 
-    ScssEachValueList.parse_list(p);
+    ScssEachValueList::new(parse_block.header_end_ts(SCSS_EACH_VALUE_LIST_END_SET)).parse_list(p);
     header.complete(p, SCSS_EACH_HEADER);
 
-    parse_declaration_or_rule_list_block(p);
+    parse_block.parse(p);
 
     Present(m.complete(p, SCSS_EACH_AT_RULE))
 }
@@ -62,7 +75,9 @@ fn expected_scss_each_binding(p: &CssParser, range: biome_rowan::TextRange) -> P
         .with_hint("Add a variable like `$item` before `in`.")
 }
 
-struct ScssEachBindingListParseRecovery;
+struct ScssEachBindingListParseRecovery {
+    end_ts: TokenSet<CssSyntaxKind>,
+}
 
 impl ParseRecovery for ScssEachBindingListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -70,11 +85,19 @@ impl ParseRecovery for ScssEachBindingListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(SCSS_EACH_BINDING_RECOVERY_SET)
+        p.at_ts(self.end_ts.union(token_set![T![,]]))
     }
 }
 
-struct ScssEachBindingList;
+struct ScssEachBindingList {
+    end_ts: TokenSet<CssSyntaxKind>,
+}
+
+impl ScssEachBindingList {
+    fn new(end_ts: TokenSet<CssSyntaxKind>) -> Self {
+        Self { end_ts }
+    }
+}
 
 impl ParseSeparatedList for ScssEachBindingList {
     type Kind = CssSyntaxKind;
@@ -86,7 +109,7 @@ impl ParseSeparatedList for ScssEachBindingList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![in]) || p.at(T!['{'])
+        p.at_ts(self.end_ts)
     }
 
     fn recover(
@@ -96,7 +119,9 @@ impl ParseSeparatedList for ScssEachBindingList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &ScssEachBindingListParseRecovery,
+            &ScssEachBindingListParseRecovery {
+                end_ts: self.end_ts,
+            },
             expected_scss_each_binding,
         )
     }
@@ -114,7 +139,9 @@ impl ParseSeparatedList for ScssEachBindingList {
     }
 }
 
-struct ScssEachValueListParseRecovery;
+struct ScssEachValueListParseRecovery {
+    end_ts: TokenSet<CssSyntaxKind>,
+}
 
 impl ParseRecovery for ScssEachValueListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -122,25 +149,34 @@ impl ParseRecovery for ScssEachValueListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(SCSS_EACH_VALUE_END_SET)
+        p.at_ts(self.end_ts.union(token_set![T![,]]))
     }
 }
 
 /// Parses top-level values after `in`.
 ///
 /// Example: `@each $item in puma, sea-slug {}`
-struct ScssEachValueList;
+struct ScssEachValueList {
+    end_ts: TokenSet<CssSyntaxKind>,
+}
+
+impl ScssEachValueList {
+    fn new(end_ts: TokenSet<CssSyntaxKind>) -> Self {
+        Self { end_ts }
+    }
+}
+
 impl ParseSeparatedList for ScssEachValueList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = SCSS_EACH_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_scss_expression_until(p, SCSS_EACH_VALUE_END_SET)
+        parse_scss_expression_until(p, self.end_ts.union(token_set![T![,]]))
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['{'])
+        p.at_ts(self.end_ts)
     }
 
     fn recover(
@@ -148,7 +184,13 @@ impl ParseSeparatedList for ScssEachValueList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(p, &ScssEachValueListParseRecovery, expected_scss_expression)
+        parsed_element.or_recover(
+            p,
+            &ScssEachValueListParseRecovery {
+                end_ts: self.end_ts,
+            },
+            expected_scss_expression,
+        )
     }
 
     fn allow_empty(&self) -> bool {

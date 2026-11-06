@@ -56,3 +56,5 @@ function shadowed(Math) {
     Math.log(x) * Math.LOG10E;
     Math.sqrt(a ** 2 + b ** 2);
 }
+Math.sqrt(/a/ * /a/);
+Math.sqrt(a["\01"] * a.b);

@@ -1,6 +1,6 @@
 ---
 name: syntax-text-handling
-description: Use this skill when extracting or storing Biome AST/CST source text, working with any `SyntaxNode`, `SyntaxToken`, `TokenText`, quoted strings, token-relative ranges, or embedded-language attribute values, or diagnosing trivia, allocation, range, and temporary-borrow problems. Do not use for parser implementation or formatter comment placement.
+description: Use this skill when reading Biome syntax trees, extracting or storing source text (`SyntaxToken`, `TokenText`, quoted strings, token-relative ranges, embedded-language attribute values), walking a subtree or scanning its tokens and trivia, or implementing an analyzer `Visitor`. Also use it to diagnose trivia, allocation, range, and temporary-borrow problems. Do not use for parser implementation or formatter comment placement.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
@@ -14,16 +14,20 @@ Do not infer an AST shape from source spelling. Inspect the parser quick test fo
 
 Check every relevant union member and framework-specific value representation. Similar source syntax may use different typed nodes.
 
+## Traversal
+
+Before walking a subtree, scanning tokens or trivia, or writing an analyzer `Visitor`, read [references/traversal.md](references/traversal.md). It covers `preorder_of_kinds`, `skip_subtree`, `borrowed_tokens`, and the `visited_kinds` contract every custom `Visitor` implements.
+
 ## Text Accessors
 
-| API | Result | Use |
-| --- | --- | --- |
-| `SyntaxToken::text_trimmed()` | `&str` | Borrow token text without leading or trailing trivia |
-| `SyntaxToken::token_text_trimmed()` | `TokenText` | Retain token-backed text without trivia |
-| `SyntaxToken::text()` | `&str` | Exact source text including trivia |
-| `SyntaxNode::text_trimmed()` | node text | Diagnostics or display where interior trivia is intentional |
-| `inner_string_text(token)` free helper | `TokenText` | Quote-stripped token content |
-| `HtmlString::inner_string_text()` | `SyntaxResult<TokenText>` | Quote-stripped content from a typed HTML string node |
+| API                                    | Result                    | Use                                                         |
+| -------------------------------------- | ------------------------- | ----------------------------------------------------------- |
+| `SyntaxToken::text_trimmed()`          | `&str`                    | Borrow token text without leading or trailing trivia        |
+| `SyntaxToken::token_text_trimmed()`    | `TokenText`               | Retain token-backed text without trivia                     |
+| `SyntaxToken::text()`                  | `&str`                    | Exact source text including trivia                          |
+| `SyntaxNode::text_trimmed()`           | node text                 | Diagnostics or display where interior trivia is intentional |
+| `inner_string_text(token)` free helper | `TokenText`               | Quote-stripped token content                                |
+| `HtmlString::inner_string_text()`      | `SyntaxResult<TokenText>` | Quote-stripped content from a typed HTML string node        |
 
 `SyntaxNode::text_trimmed()` removes only outer trivia. Whitespace and comments between child tokens remain, so it is not a semantic accessor for a multi-token node. Prefer a typed token, typed accessor, or structural match.
 
@@ -85,11 +89,13 @@ Do not solve a temporary-borrow error by converting to `String` unless the value
 Always prefer using specific, strongly typed syntax nodes (like `AnyJsExpression`, `JsCallExpression`) over generic, weakly typed syntax nodes (like `JsSyntaxNode`) in function parameters.
 
 GOOD:
+
 ```rust
 fn is_react_call(node: &JsCallExpression) -> bool { ... }
 ```
 
 BAD:
+
 ```rust
 fn is_react_call(node: &JsSyntaxNode) -> bool { ... }
 ```
@@ -106,11 +112,14 @@ You can use `declare_node_union!` to define custom sets of nodes.
 - Absolute offsets account for quotes exactly once.
 - Every relevant framework or union variant is covered or deliberately excluded.
 - No allocation was introduced solely to satisfy borrowing or comparison.
+- Each walk uses the narrowest API in [references/traversal.md](references/traversal.md), and each custom `Visitor` returns a `visited_kinds` set covering every kind `visit` reads.
 
 ## References
 
 - Token text: `crates/biome_rowan/src/token_text.rs`
 - Syntax tokens: `crates/biome_rowan/src/syntax/token.rs`
 - Syntax nodes: `crates/biome_rowan/src/syntax/node.rs`
+- Borrowed tokens: `crates/biome_rowan/src/syntax/borrowed_token.rs`
+- Analyzer visitors: `crates/biome_analyze/src/visitor.rs`
 - HTML string helpers: `crates/biome_html_syntax/src/string_ext.rs`
 - Language-specific syntax extension modules under `crates/biome_*_syntax/src/`

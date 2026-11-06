@@ -27,8 +27,7 @@ impl TestFormatLanguage for CssTestFormatLanguage {
         let options = CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()
-            .allow_tailwind_directives()
-            .report_scss_exclusive_syntax();
+            .allow_tailwind_directives();
 
         parse_css(text, self.source_type, options).into()
     }

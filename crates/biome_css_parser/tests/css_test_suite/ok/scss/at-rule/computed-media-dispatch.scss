@@ -1,0 +1,5 @@
+@use "breakpoints";
+@media (breakpoints.$feature: 40rem) {}
+@media (breakpoints.$feature >= 40rem) {}
+@media (20rem < breakpoints.$feature <= 80rem) {}
+@import "layout.css" (breakpoints.$feature + "": 40rem);

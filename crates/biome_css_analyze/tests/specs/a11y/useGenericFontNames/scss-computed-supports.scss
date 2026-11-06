@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+@import "fonts.css" supports("font-family": Arial);
+
+@supports ("font-family": Arial) {
+  .valid {
+    font-family: Arial, sans-serif;
+  }
+}
+
+@supports (font-family: Arial) {
+  .invalid {
+    font-family: Arial;
+  }
+}

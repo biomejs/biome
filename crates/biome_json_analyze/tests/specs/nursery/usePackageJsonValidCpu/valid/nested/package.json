@@ -1,0 +1,9 @@
+{
+	"name": "my-package",
+	"config": {
+		"cpu": "x86"
+	},
+	"publishConfig": {
+		"cpu": ["x86", 64]
+	}
+}

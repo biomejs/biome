@@ -1,0 +1,4 @@
+@supports (!important: a) {}
+@import "bare.css" supports(!important: a);
+@import "grouped.css" supports((!important: a));
+.after { color: green; }

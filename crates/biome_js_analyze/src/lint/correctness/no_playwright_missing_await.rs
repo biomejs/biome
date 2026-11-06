@@ -1,16 +1,13 @@
 use biome_diagnostics::Severity;
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind,
-};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
 use biome_rule_options::no_playwright_missing_await::NoPlaywrightMissingAwaitOptions;
 
@@ -168,15 +165,7 @@ impl Rule for NoPlaywrightMissingAwait {
             && !is_call_awaited_or_returned(&promise_combinator)
         {
             let mut mutation = ctx.root().begin();
-            let expression: AnyJsExpression = promise_combinator.clone().into();
-            let trimmed_expression = expression.clone().trim_comments_and_trivia()?;
-            let await_expr = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-                make::token(JsSyntaxKind::AWAIT_KW)
-                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                trimmed_expression,
-            ));
-
-            mutation.replace_node_transfer_trivia(expression, await_expr)?;
+            mutation.wrap_node(AnyJsExpression::from(promise_combinator), await_expression);
 
             return Some(JsRuleAction::new(
                 ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -189,15 +178,7 @@ impl Rule for NoPlaywrightMissingAwait {
 
         // Normal case: fix the call directly
         let mut mutation = ctx.root().begin();
-        let expression: AnyJsExpression = call_expr.clone().into();
-        let trimmed_expression = expression.clone().trim_comments_and_trivia()?;
-        let await_expr = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-            make::token(JsSyntaxKind::AWAIT_KW)
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            trimmed_expression,
-        ));
-
-        mutation.replace_node_transfer_trivia(expression, await_expr)?;
+        mutation.wrap_node(AnyJsExpression::from(call_expr.clone()), await_expression);
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -319,7 +300,9 @@ fn get_async_expect_matcher(
     }
 
     let matcher_text = matcher_name.text();
-    let is_playwright_only = PLAYWRIGHT_ONLY_MATCHERS.binary_search(&matcher_text).is_ok();
+    let is_playwright_only = PLAYWRIGHT_ONLY_MATCHERS
+        .binary_search(&matcher_text)
+        .is_ok();
     let is_overlapping = OVERLAPPING_MATCHERS.binary_search(&matcher_text).is_ok();
 
     if !is_playwright_only && !is_overlapping {
@@ -545,6 +528,13 @@ fn is_promise_combinator(call: &JsCallExpression) -> bool {
         || is_member_call_pattern(call, "Promise", "allSettled")
         || is_member_call_pattern(call, "Promise", "race")
         || is_member_call_pattern(call, "Promise", "any")
+}
+
+fn await_expression(expression: AnyJsExpression) -> AnyJsExpression {
+    AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+        make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
+        expression,
+    ))
 }
 
 #[cfg(test)]

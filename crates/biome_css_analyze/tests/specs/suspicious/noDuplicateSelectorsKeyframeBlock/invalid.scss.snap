@@ -1,12 +1,13 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 154
 expression: invalid.scss
 ---
 # Input
 ```css
 @keyframes fade {
   $stop: 50%;
-
+  @include frames;
   from {}
   from {}
 }
@@ -19,6 +20,7 @@ invalid.scss:5:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━�
 
   × The duplicate keyframe selector is overwritten by later one.
   
+    3 │   @include frames;
     4 │   from {}
   > 5 │   from {}
       │   ^^^^

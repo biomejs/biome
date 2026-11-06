@@ -1,0 +1,51 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.a {
+    @if $theme == dark {
+        color: white;
+    } @else if $theme == light {
+        color: black;
+    } @else {
+        color: gray;
+    }
+}
+
+.a {
+    .b {
+        @include button;
+        @extend %placeholder;
+        color: red;
+    }
+}
+
+@mixin theme {
+    .a {
+        .b {
+            color: red;
+        }
+    }
+}
+
+@function double($value) {
+    @if $value {
+        @return $value * 2;
+    } @else {
+        @return 0;
+    }
+}
+
+@each $name in $names {
+    .icon-#{$name} {
+        &:hover {
+            color: red;
+        }
+    }
+}
+
+```

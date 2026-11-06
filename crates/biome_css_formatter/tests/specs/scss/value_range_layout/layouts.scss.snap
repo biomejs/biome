@@ -47,7 +47,9 @@ $tone: /* theme */ rebeccapurple;
 }
 
 .groups {
-	box-shadow: $x $y 3px $tone, $spread 5px 6px black;
+	box-shadow:
+		$x $y 3px $tone,
+		$spread 5px 6px black;
 	background:
 		url($first-image) center / cover no-repeat,
 		url($second-image) right / contain repeat-x;

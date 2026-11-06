@@ -349,8 +349,8 @@ impl CssParenthesizedExpression {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn expression(&self) -> CssComponentValueList {
-        support::list(&self.syntax, 1usize)
+    pub fn expression(&self) -> Option<AnyCssExpression> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -367,7 +367,7 @@ impl Serialize for CssParenthesizedExpression {
 #[derive(Serialize)]
 pub struct CssParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub expression: CssComponentValueList,
+    pub expression: Option<AnyCssExpression>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -553,7 +553,7 @@ impl CssUnaryExpression {
     pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn argument(&self) -> SyntaxResult<AnyCssValue> {
+    pub fn argument(&self) -> SyntaxResult<AnyCssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -568,7 +568,7 @@ impl Serialize for CssUnaryExpression {
 #[derive(Serialize)]
 pub struct CssUnaryExpressionFields {
     pub operator: SyntaxResult<SyntaxToken>,
-    pub argument: SyntaxResult<AnyCssValue>,
+    pub argument: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownDimension {
@@ -907,18 +907,22 @@ impl TwCssVariableValue {
     pub fn as_fields(&self) -> TwCssVariableValueFields {
         TwCssVariableValueFields {
             l_paren_token: self.l_paren_token(),
-            value_token: self.value_token(),
+            type_hint: self.type_hint(),
+            value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn type_hint(&self) -> Option<TwTypeHint> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> CssParameterList {
+        support::list(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwCssVariableValue {
@@ -932,7 +936,8 @@ impl Serialize for TwCssVariableValue {
 #[derive(Serialize)]
 pub struct TwCssVariableValueFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub type_hint: Option<TwTypeHint>,
+    pub value: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -952,15 +957,15 @@ impl TwCssVariableVariantSegment {
     pub fn as_fields(&self) -> TwCssVariableVariantSegmentFields {
         TwCssVariableVariantSegmentFields {
             l_paren_token: self.l_paren_token(),
-            value_token: self.value_token(),
+            value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn value(&self) -> CssParameterList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -977,7 +982,7 @@ impl Serialize for TwCssVariableVariantSegment {
 #[derive(Serialize)]
 pub struct TwCssVariableVariantSegmentFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub value: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1361,6 +1366,46 @@ pub struct TwStaticCandidateFields {
     pub modifier: Option<AnyTwModifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwTypeHint {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwTypeHint {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwTypeHintFields {
+        TwTypeHintFields {
+            name_token: self.name_token(),
+            colon_token: self.colon_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for TwTypeHint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwTypeHintFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwVariantExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1427,7 +1472,6 @@ impl AnyCssDimension {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssExpression {
     CssBinaryExpression(CssBinaryExpression),
-    CssComponentValueList(CssComponentValueList),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
     CssUnaryExpression(CssUnaryExpression),
@@ -1436,12 +1480,6 @@ impl AnyCssExpression {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
         match &self {
             Self::CssBinaryExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_component_value_list(&self) -> Option<&CssComponentValueList> {
-        match &self {
-            Self::CssComponentValueList(item) => Some(item),
             _ => None,
         }
     }
@@ -2229,7 +2267,10 @@ impl std::fmt::Debug for CssParenthesizedExpression {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("expression", &self.expression())
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -2932,9 +2973,10 @@ impl std::fmt::Debug for TwCssVariableValue {
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
                 .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
+                    "type_hint",
+                    &support::DebugOptionalElement(self.type_hint()),
                 )
+                .field("value", &self.value())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -2989,10 +3031,7 @@ impl std::fmt::Debug for TwCssVariableVariantSegment {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
+                .field("value", &self.value())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -3487,6 +3526,57 @@ impl From<TwStaticCandidate> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TwTypeHint {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_TYPE_HINT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_TYPE_HINT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwTypeHint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwTypeHint")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwTypeHint").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwTypeHint> for SyntaxNode {
+    fn from(n: TwTypeHint) -> Self {
+        n.syntax
+    }
+}
+impl From<TwTypeHint> for SyntaxElement {
+    fn from(n: TwTypeHint) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for TwVariantExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -3604,11 +3694,6 @@ impl From<CssBinaryExpression> for AnyCssExpression {
         Self::CssBinaryExpression(node)
     }
 }
-impl From<CssComponentValueList> for AnyCssExpression {
-    fn from(node: CssComponentValueList) -> Self {
-        Self::CssComponentValueList(node)
-    }
-}
 impl From<CssListOfComponentValuesExpression> for AnyCssExpression {
     fn from(node: CssListOfComponentValuesExpression) -> Self {
         Self::CssListOfComponentValuesExpression(node)
@@ -3627,7 +3712,6 @@ impl From<CssUnaryExpression> for AnyCssExpression {
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
-        .union(CssComponentValueList::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET)
         .union(CssUnaryExpression::KIND_SET);
@@ -3635,7 +3719,6 @@ impl AstNode for AnyCssExpression {
         matches!(
             kind,
             CSS_BINARY_EXPRESSION
-                | CSS_COMPONENT_VALUE_LIST
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
                 | CSS_UNARY_EXPRESSION
@@ -3644,9 +3727,6 @@ impl AstNode for AnyCssExpression {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BINARY_EXPRESSION => Self::CssBinaryExpression(CssBinaryExpression { syntax }),
-            CSS_COMPONENT_VALUE_LIST => {
-                Self::CssComponentValueList(CssComponentValueList::cast(syntax)?)
-            }
             CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 Self::CssListOfComponentValuesExpression(CssListOfComponentValuesExpression {
                     syntax,
@@ -3663,7 +3743,6 @@ impl AstNode for AnyCssExpression {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.syntax(),
-            Self::CssComponentValueList(it) => it.syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
             Self::CssUnaryExpression(it) => it.syntax(),
@@ -3672,7 +3751,6 @@ impl AstNode for AnyCssExpression {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.into_syntax(),
-            Self::CssComponentValueList(it) => it.into_syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
             Self::CssUnaryExpression(it) => it.into_syntax(),
@@ -3683,7 +3761,6 @@ impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssComponentValueList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -3694,7 +3771,6 @@ impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> Self {
         match n {
             AnyCssExpression::CssBinaryExpression(it) => it.into_syntax(),
-            AnyCssExpression::CssComponentValueList(it) => it.into_syntax(),
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
             AnyCssExpression::CssUnaryExpression(it) => it.into_syntax(),
@@ -4792,6 +4868,11 @@ impl std::fmt::Display for TwRoot {
     }
 }
 impl std::fmt::Display for TwStaticCandidate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwTypeHint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

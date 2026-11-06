@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 a { grid-template-areas: "" }
 a { grid-template-areas: "a a"
                          "b b b"; }
@@ -10,8 +11,6 @@ a { grid-template-areas: "a a a"
                          "c c c"
                          "g g g"
                          "z y a"; }
-a { grid-template-areas: "a a a"
-                         "b b b"; }
 a { grid-template-areas: "a a a"
                          "a . a"; }
 a { grid-template-areas: "o o o ,"
@@ -26,3 +25,18 @@ a { grid-template-areas: "a a a"
 a { grid-template-areas: "a a a"
                          "g f f"
                          "b z a"; }
+a { grid-template-areas: "a" "b c"; }
+a { grid-template-areas: "abc" "d e"; }
+a { grid-template-areas: "a b"
+                         "c  d e"; }
+a { grid-template-areas: "s s s"
+                         "a a a"
+                         "v v v"
+                         "a a a"; }
+a { grid-template-areas: "a b"
+                         "b a"; }
+a { grid-template-areas: "a a a"
+                         ". a a"; }
+a { grid-template-areas: "a.b c" "d e"; }
+a { grid-template: "abc" 1fr "d e" 1fr / auto; }
+a { grid: "a b" auto "b a" auto / 1fr 1fr; }

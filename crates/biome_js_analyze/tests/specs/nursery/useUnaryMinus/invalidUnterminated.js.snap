@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidUnterminated.js
+---
+# Input
+```js
+/* should generate diagnostics */
+foo
+x * -1;
+bar()
+x * -1 > 0;
+a--
+x * -1;
+{
+	x * -1;
+}
+
+```
+
+# Diagnostics
+```
+invalidUnterminated.js:3:1 lint/nursery/useUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ foo
+  > 3 │ x * -1;
+      │ ^^^^^^
+    4 │ bar()
+    5 │ x * -1 > 0;
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:5:1 lint/nursery/useUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    3 │ x * -1;
+    4 │ bar()
+  > 5 │ x * -1 > 0;
+      │ ^^^^^^
+    6 │ a--
+    7 │ x * -1;
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:7:1 lint/nursery/useUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    5 │ x * -1 > 0;
+    6 │ a--
+  > 7 │ x * -1;
+      │ ^^^^^^
+    8 │ {
+    9 │ 	x * -1;
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidUnterminated.js:9:2 lint/nursery/useUnaryMinus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+     7 │ x * -1;
+     8 │ {
+   > 9 │ 	x * -1;
+       │ 	^^^^^^
+    10 │ }
+    11 │ 
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the unary minus operator.
+  
+     7  7 │   x * -1;
+     8  8 │   {
+     9    │ - → x·*·-1;
+        9 │ + → -x;
+    10 10 │   }
+    11 11 │   
+  
+
+```

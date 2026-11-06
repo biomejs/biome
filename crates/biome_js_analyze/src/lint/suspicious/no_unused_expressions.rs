@@ -196,6 +196,9 @@ impl Rule for NoUnusedExpressions {
             )
             .note(markup! {
                 "This expression may be unintentionally unused or it might be a function that you forgot to call."
+            })
+            .note(markup! {
+                "Remove the expression, or change it so that it has an effect, for example by assigning its value or calling the function."
             }),
         )
     }

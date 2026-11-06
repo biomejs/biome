@@ -1,0 +1,346 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unlabeledJumpInLabeledLoop.js
+---
+# Input
+```js
+// should generate diagnostics
+function breakInLabeledFor() {
+    outer: for (;;) {
+        break;
+        afterBreak();
+    }
+}
+
+function breakInLabeledForOf(xs) {
+    outer: for (const x of xs) {
+        break;
+        afterBreak();
+    }
+}
+
+function breakInLabeledForIn(o) {
+    outer: for (const k in o) {
+        break;
+        afterBreak();
+    }
+}
+
+function breakInLabeledWhile() {
+    outer: while (true) {
+        break;
+        afterBreak();
+    }
+}
+
+function breakInLabeledDoWhile() {
+    outer: do {
+        break;
+        afterBreak();
+    } while (true);
+}
+
+function breakInLabeledSwitch(x) {
+    outer: switch (x) {
+        case 1:
+            break;
+            afterBreak();
+    }
+}
+
+function breakInLabeledBlockInLoop() {
+    for (;;) {
+        block: {
+            break;
+        }
+        afterBlock();
+    }
+}
+
+function continueInLabeledFor(xs) {
+    outer: for (let i = 0; i < xs.length; i++) {
+        continue;
+        afterContinue();
+    }
+}
+
+function continueInLabeledWhile(x) {
+    outer: while (x) {
+        continue;
+        afterContinue();
+    }
+}
+
+function continueInLabeledDoWhile(x) {
+    outer: do {
+        continue;
+        afterContinue();
+    } while (x);
+}
+
+```
+
+# Diagnostics
+```
+unlabeledJumpInLabeledLoop.js:5:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    3 │     outer: for (;;) {
+    4 │         break;
+  > 5 │         afterBreak();
+      │         ^^^^^^^^^^^^^
+    6 │     }
+    7 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    2 │ function breakInLabeledFor() {
+    3 │     outer: for (;;) {
+  > 4 │         break;
+      │         ^^^^^^
+    5 │         afterBreak();
+    6 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:12:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    10 │     outer: for (const x of xs) {
+    11 │         break;
+  > 12 │         afterBreak();
+       │         ^^^^^^^^^^^^^
+    13 │     }
+    14 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+     9 │ function breakInLabeledForOf(xs) {
+    10 │     outer: for (const x of xs) {
+  > 11 │         break;
+       │         ^^^^^^
+    12 │         afterBreak();
+    13 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:19:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    17 │     outer: for (const k in o) {
+    18 │         break;
+  > 19 │         afterBreak();
+       │         ^^^^^^^^^^^^^
+    20 │     }
+    21 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    16 │ function breakInLabeledForIn(o) {
+    17 │     outer: for (const k in o) {
+  > 18 │         break;
+       │         ^^^^^^
+    19 │         afterBreak();
+    20 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:26:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    24 │     outer: while (true) {
+    25 │         break;
+  > 26 │         afterBreak();
+       │         ^^^^^^^^^^^^^
+    27 │     }
+    28 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    23 │ function breakInLabeledWhile() {
+    24 │     outer: while (true) {
+  > 25 │         break;
+       │         ^^^^^^
+    26 │         afterBreak();
+    27 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:33:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    31 │     outer: do {
+    32 │         break;
+  > 33 │         afterBreak();
+       │         ^^^^^^^^^^^^^
+    34 │     } while (true);
+    35 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    30 │ function breakInLabeledDoWhile() {
+    31 │     outer: do {
+  > 32 │         break;
+       │         ^^^^^^
+    33 │         afterBreak();
+    34 │     } while (true);
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:34:14 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    32 │         break;
+    33 │         afterBreak();
+  > 34 │     } while (true);
+       │              ^^^^
+    35 │ }
+    36 │ 
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    30 │ function breakInLabeledDoWhile() {
+    31 │     outer: do {
+  > 32 │         break;
+       │         ^^^^^^
+    33 │         afterBreak();
+    34 │     } while (true);
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:41:13 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    39 │         case 1:
+    40 │             break;
+  > 41 │             afterBreak();
+       │             ^^^^^^^^^^^^^
+    42 │     }
+    43 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    38 │     outer: switch (x) {
+    39 │         case 1:
+  > 40 │             break;
+       │             ^^^^^^
+    41 │             afterBreak();
+    42 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:50:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    48 │             break;
+    49 │         }
+  > 50 │         afterBlock();
+       │         ^^^^^^^^^^^^^
+    51 │     }
+    52 │ }
+  
+  i ... because this statement will break the flow of the code beforehand
+  
+    46 │     for (;;) {
+    47 │         block: {
+  > 48 │             break;
+       │             ^^^^^^
+    49 │         }
+    50 │         afterBlock();
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:57:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    55 │     outer: for (let i = 0; i < xs.length; i++) {
+    56 │         continue;
+  > 57 │         afterContinue();
+       │         ^^^^^^^^^^^^^^^^
+    58 │     }
+    59 │ }
+  
+  i ... because this statement will continue the loop beforehand
+  
+    54 │ function continueInLabeledFor(xs) {
+    55 │     outer: for (let i = 0; i < xs.length; i++) {
+  > 56 │         continue;
+       │         ^^^^^^^^^
+    57 │         afterContinue();
+    58 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:64:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    62 │     outer: while (x) {
+    63 │         continue;
+  > 64 │         afterContinue();
+       │         ^^^^^^^^^^^^^^^^
+    65 │     }
+    66 │ }
+  
+  i ... because this statement will continue the loop beforehand
+  
+    61 │ function continueInLabeledWhile(x) {
+    62 │     outer: while (x) {
+  > 63 │         continue;
+       │         ^^^^^^^^^
+    64 │         afterContinue();
+    65 │     }
+  
+
+```
+
+```
+unlabeledJumpInLabeledLoop.js:71:9 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    69 │     outer: do {
+    70 │         continue;
+  > 71 │         afterContinue();
+       │         ^^^^^^^^^^^^^^^^
+    72 │     } while (x);
+    73 │ }
+  
+  i ... because this statement will continue the loop beforehand
+  
+    68 │ function continueInLabeledDoWhile(x) {
+    69 │     outer: do {
+  > 70 │         continue;
+       │         ^^^^^^^^^
+    71 │         afterContinue();
+    72 │     } while (x);
+  
+
+```

@@ -1,0 +1,71 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: lineComments.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.compact {color: red;
+  display: block; // Display comment.
+}
+
+.trailing {color: red; // Color comment.
+  display: block;}
+
+```
+
+# Diagnostics
+```
+lineComments.scss:2:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .compact {color: red;
+      │          ^^^^^^^^^^^^
+  > 3 │   display: block; // Display comment.
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ .trailing {color: red; // Color comment.
+  
+  i Safe fix: Sort these properties
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - .compact·{color:·red;
+    3   │ - ··display:·block;·//·Display·comment.
+      2 │ + .compact·{
+      3 │ + ··display:·block;·//·Display·comment.
+      4 │ + color:·red;
+    4 5 │   }
+    5 6 │   
+  
+
+```
+
+```
+lineComments.scss:6:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    4 │ }
+    5 │ 
+  > 6 │ .trailing {color: red; // Color comment.
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 7 │   display: block;}
+      │   ^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Safe fix: Sort these properties
+  
+    4 4 │   }
+    5 5 │   
+    6   │ - .trailing·{color:·red;·//·Color·comment.
+    7   │ - ··display:·block;}
+      6 │ + .trailing·{
+      7 │ + ··display:·block;color:·red;·//·Color·comment.
+      8 │ + }
+    8 9 │   
+  
+
+```

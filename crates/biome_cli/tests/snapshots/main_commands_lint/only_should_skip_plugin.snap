@@ -58,6 +58,8 @@ file.js:2:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
   > 2 │ debugger
       │ ^^^^^^^^
   
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
   i Unsafe fix: Remove debugger statement
   
     1 1 │   const merged = Object.assign({}, a, b);

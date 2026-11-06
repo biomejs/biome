@@ -1,0 +1,5 @@
+/* should generate diagnostics */
+;; @import "early.css";;
+$color: red;; @import "also-early.css";
+.rule { color: $color };;
+@import "late.css";

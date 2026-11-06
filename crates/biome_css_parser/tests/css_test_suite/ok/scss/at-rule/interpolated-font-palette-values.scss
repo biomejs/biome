@@ -1,0 +1,23 @@
+$name: brand;
+
+@font-palette-values --palette-#{$name}2 { font-family: "Bixa"; }
+@font-palette-values --#{$name}2-dark { font-family: "Bixa"; }
+
+@font-palette-values --palette-#{$name} {
+  font-family: "Bixa";
+  override-colors: 0 red;
+}
+
+@font-palette-values --#{$name} {
+  font-family: "Bixa";
+  base-palette: 1;
+}
+
+@font-palette-values --#{$name}-dark {
+  font-family: "Bixa";
+  override-colors: 1 blue;
+}
+
+@font-palette-values --palette-#{$name}-#{$name} {
+  font-family: "Bixa";
+}

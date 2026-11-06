@@ -1,0 +1,93 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_paragraph_after_list_item.md
+---
+
+# Input
+
+```md
+> - item one
+>   continued.
+>
+> Paragraph line one
+> line two.
+
+> - item one
+>
+> Paragraph line one
+> line two.
+
+> 1. item one
+>    continued.
+>
+> Paragraph line one
+> line two.
+
+> > - item one
+> >   continued.
+> >
+> > Paragraph line one
+> > line two.
+
+> paragraph
+> continuation
+>
+> ```
+> code
+> ```
+>
+> after
+> more
+
+- > - item one
+  >   continued.
+  >
+  > Paragraph line one
+  > line two.
+
+```
+
+
+# Formatted
+
+```md
+> - item one
+>   continued.
+>
+> Paragraph line one
+> line two.
+
+> - item one
+>
+> Paragraph line one
+> line two.
+
+> 1. item one
+>    continued.
+>
+> Paragraph line one
+> line two.
+
+> > - item one
+> >   continued.
+> >
+> > Paragraph line one
+> > line two.
+
+> paragraph
+> continuation
+>
+> ```
+> code
+> ```
+>
+> after
+> more
+
+- > - item one
+  >   continued.
+  >
+  > Paragraph line one
+  > line two.
+
+```

@@ -73,6 +73,8 @@ noEmptyBlock.css:2:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
     3 │ a { }
     4 │ a {
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -105,6 +107,8 @@ noEmptyBlock.css:3:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
       │   ^^^
     4 │ a {
     5 │ 
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -143,6 +147,8 @@ noEmptyBlock.css:4:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
     7 │ 
     8 │ .b {}
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -177,6 +183,8 @@ noEmptyBlock.css:8:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
      9 │ .b { }
     10 │ .b {
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -207,6 +215,8 @@ noEmptyBlock.css:9:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
        │    ^^^
     10 │ .b {
     11 │ 
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -243,6 +253,8 @@ noEmptyBlock.css:10:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
     13 │ 
     14 │ /* CssRuleBlock */
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -273,6 +285,8 @@ noEmptyBlock.css:15:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
        │              ^^
     16 │ @media print {
     17 │ 
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -309,6 +323,8 @@ noEmptyBlock.css:16:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
     19 │ @media print { a {} }
     20 │ 
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -340,6 +356,8 @@ noEmptyBlock.css:19:18 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
     20 │ 
     21 │ /* CssDeclarationBlock */
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -370,6 +388,8 @@ noEmptyBlock.css:22:30 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
        │                              ^^
     23 │ @font-face {}
     24 │ 
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -403,6 +423,8 @@ noEmptyBlock.css:23:12 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
     24 │ 
     25 │ /* CssKeyframesBlock */
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -433,6 +455,8 @@ noEmptyBlock.css:26:20 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
        │                    ^^
     27 │ @keyframes slidein {
     28 │     from {
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -467,6 +491,8 @@ noEmptyBlock.css:28:10 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
        │     ^
     30 │ 
     31 │     to {
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -505,6 +531,8 @@ noEmptyBlock.css:38:13 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
     41 │ }
     42 │ 
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -537,6 +565,8 @@ noEmptyBlock.css:44:7 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
        │       ^^
     45 │ @page :right {
     46 │ }
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -571,6 +601,8 @@ noEmptyBlock.css:45:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
        │ ^
     47 │ 
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for this line.
@@ -601,6 +633,8 @@ noEmptyBlock.css:50:28 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
        │                            ^^
     51 │ @page {
     52 │     @top-right {
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   
@@ -635,6 +669,8 @@ noEmptyBlock.css:52:16 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   > 54 │     }
        │     ^
     55 │ }
+  
+  i An empty block has no effect. It often means that styles were forgotten or removed.
   
   i Consider removing the empty block or adding styles inside it.
   

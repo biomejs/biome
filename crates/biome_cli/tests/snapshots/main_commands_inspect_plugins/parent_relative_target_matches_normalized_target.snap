@@ -50,14 +50,12 @@ biome inspect plugins --path=src/../other/file.ts
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 2 rules resolved.
-  
-  Target path: other/file.ts
+  i The configuration enables 2 plugin rules for other/file.ts.
   
   Local plugins
   
-  - base
-  - other-only (includes: [other/**])
+  - base.grit (rule name: base)
+  - other-only.grit (rule name: other-only)
   
 
 ```

@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+var x = new Constructor();
+var x = new a.b.Constructor();
+var x = new a.b['Constructor']();
+var x = new a.b[Constructor]();
+var x = new a.b[constructor]();
+var x = new function(){};
+var x = new _;
+var x = new $;
+var x = new Σ;
+var x = new 𐐀;
+var x = 𐐨();
+var x = new _x;
+var x = new $x;
+var x = new this;
+var x = Array(42);
+var x = Boolean(42);
+var x = Date(42);
+var x = Date.UTC(2000, 0);
+var x = Error('error');
+var x = Function('return 0');
+var x = Number(42);
+var x = Object(null);
+var x = RegExp(42);
+var x = String(42);
+var x = Symbol('symbol');
+var x = BigInt('1n');
+var x = _();
+var x = $();
+var x = bar[Foo](42);
+var x = Foo.bar(42);
+var o = { 1: function() {} }; o[1]();
+var o = { 1: function() {} }; new o[1]();
+foo?.bar();
+(foo?.bar)();
+new (foo?.Bar)();
+Date?.UTC();
+(Date?.UTC)();
+(String)(42);
+globalThis.Array(42);
+globalThis.String(42);
+globalThis['String'](42);
+globalThis?.String(42);
+(globalThis?.String)(42);
+window.String(42);
+self.String(42);
+global.String(42);
+globalThis.Date.UTC(2000, 0);
+globalThis['Date'].UTC(2000, 0);
+globalThis?.Date.UTC(2000, 0);
+globalThis.Date?.UTC(2000, 0);
+window.Date.UTC(2000, 0);
+self.Date.UTC(2000, 0);
+global.Date.UTC(2000, 0);
+class C {
+	#Foo() {}
+	method() {
+		this.#Foo();
+	}
+}
+new new.target();
+
+```

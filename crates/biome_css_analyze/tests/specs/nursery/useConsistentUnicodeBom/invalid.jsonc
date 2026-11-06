@@ -1,0 +1,9 @@
+// should generate diagnostics
+[
+  "\ufeffp { color: red; }",
+  "\ufeff",
+  "\ufeff  p { color: red; }",
+  "\ufeff\np { color: red; }",
+  "\ufeff/* header */\np { color: red; }",
+  "\ufeff@charset \"windows-1252\"; p::before { content: \"\u00e9\"; }"
+]

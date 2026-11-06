@@ -1,0 +1,410 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+#app, #Brand, #ABCG { color: #ABC; }
+.colors {
+  three: #ABC;
+  four: #ABCD;
+  six: #ABCDEF;
+  eight: #ABCDEF12;
+  quoted: "#app" "#ABCG";
+  --raw: #ABC;
+  fragment: url(#app);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssIdSelector {
+                            hash_token: HASH@0..1 "#" [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..4 "app" [] [],
+                            },
+                        },
+                    ],
+                },
+                COMMA@4..6 "," [] [Whitespace(" ")],
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssIdSelector {
+                            hash_token: HASH@6..7 "#" [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@7..12 "Brand" [] [],
+                            },
+                        },
+                    ],
+                },
+                COMMA@12..14 "," [] [Whitespace(" ")],
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssIdSelector {
+                            hash_token: HASH@14..15 "#" [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@15..20 "ABCG" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@20..22 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@22..27 "color" [] [],
+                                },
+                                colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@29..30 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@30..33 "ABC" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@33..35 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@35..36 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@36..38 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@38..45 "colors" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@45..46 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@46..54 "three" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@54..56 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@56..57 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@57..60 "ABC" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@60..61 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@61..68 "four" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@70..71 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@71..75 "ABCD" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@75..76 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@76..82 "six" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@82..84 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@84..85 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@85..91 "ABCDEF" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@91..92 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@92..100 "eight" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@100..102 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@102..103 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@103..111 "ABCDEF12" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@111..112 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@112..121 "quoted" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@121..123 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@123..130 "\"#app\"" [] [Whitespace(" ")],
+                                    },
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@130..137 "\"#ABCG\"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@137..138 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@138..146 "--raw" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@146..148 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssColor {
+                                        hash_token: HASH@148..149 "#" [] [],
+                                        value_token: CSS_COLOR_LITERAL@149..152 "ABC" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@152..153 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@153..164 "fragment" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@164..166 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssUrlFunction {
+                                        name: URL_KW@166..169 "url" [] [],
+                                        l_paren_token: L_PAREN@169..170 "(" [] [],
+                                        value: CssUrlValueRaw {
+                                            value_token: CSS_URL_VALUE_RAW_LITERAL@170..174 "#app" [] [],
+                                        },
+                                        modifiers: CssUrlModifierList [],
+                                        r_paren_token: R_PAREN@174..175 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@175..176 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@176..178 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@178..179 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..179
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..178
+    0: CSS_QUALIFIED_RULE@0..36
+      0: CSS_SELECTOR_LIST@0..20
+        0: CSS_COMPOUND_SELECTOR@0..4
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..4
+            0: CSS_ID_SELECTOR@0..4
+              0: HASH@0..1 "#" [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..4
+                0: IDENT@1..4 "app" [] []
+        1: COMMA@4..6 "," [] [Whitespace(" ")]
+        2: CSS_COMPOUND_SELECTOR@6..12
+          0: CSS_NESTED_SELECTOR_LIST@6..6
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@6..12
+            0: CSS_ID_SELECTOR@6..12
+              0: HASH@6..7 "#" [] []
+              1: CSS_CUSTOM_IDENTIFIER@7..12
+                0: IDENT@7..12 "Brand" [] []
+        3: COMMA@12..14 "," [] [Whitespace(" ")]
+        4: CSS_COMPOUND_SELECTOR@14..20
+          0: CSS_NESTED_SELECTOR_LIST@14..14
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@14..20
+            0: CSS_ID_SELECTOR@14..20
+              0: HASH@14..15 "#" [] []
+              1: CSS_CUSTOM_IDENTIFIER@15..20
+                0: IDENT@15..20 "ABCG" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@20..36
+        0: L_CURLY@20..22 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@22..35
+          0: CSS_DECLARATION_WITH_SEMICOLON@22..35
+            0: CSS_DECLARATION@22..33
+              0: CSS_GENERIC_PROPERTY@22..33
+                0: CSS_IDENTIFIER@22..27
+                  0: IDENT@22..27 "color" [] []
+                1: COLON@27..29 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@29..33
+                  0: CSS_COLOR@29..33
+                    0: HASH@29..30 "#" [] []
+                    1: CSS_COLOR_LITERAL@30..33 "ABC" [] []
+              1: (empty)
+            1: SEMICOLON@33..35 ";" [] [Whitespace(" ")]
+        2: R_CURLY@35..36 "}" [] []
+    1: CSS_QUALIFIED_RULE@36..178
+      0: CSS_SELECTOR_LIST@36..45
+        0: CSS_COMPOUND_SELECTOR@36..45
+          0: CSS_NESTED_SELECTOR_LIST@36..36
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@36..45
+            0: CSS_CLASS_SELECTOR@36..45
+              0: DOT@36..38 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@38..45
+                0: IDENT@38..45 "colors" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@45..178
+        0: L_CURLY@45..46 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@46..176
+          0: CSS_DECLARATION_WITH_SEMICOLON@46..61
+            0: CSS_DECLARATION@46..60
+              0: CSS_GENERIC_PROPERTY@46..60
+                0: CSS_IDENTIFIER@46..54
+                  0: IDENT@46..54 "three" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@54..56 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@56..60
+                  0: CSS_COLOR@56..60
+                    0: HASH@56..57 "#" [] []
+                    1: CSS_COLOR_LITERAL@57..60 "ABC" [] []
+              1: (empty)
+            1: SEMICOLON@60..61 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@61..76
+            0: CSS_DECLARATION@61..75
+              0: CSS_GENERIC_PROPERTY@61..75
+                0: CSS_IDENTIFIER@61..68
+                  0: IDENT@61..68 "four" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@68..70 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@70..75
+                  0: CSS_COLOR@70..75
+                    0: HASH@70..71 "#" [] []
+                    1: CSS_COLOR_LITERAL@71..75 "ABCD" [] []
+              1: (empty)
+            1: SEMICOLON@75..76 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@76..92
+            0: CSS_DECLARATION@76..91
+              0: CSS_GENERIC_PROPERTY@76..91
+                0: CSS_IDENTIFIER@76..82
+                  0: IDENT@76..82 "six" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@82..84 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@84..91
+                  0: CSS_COLOR@84..91
+                    0: HASH@84..85 "#" [] []
+                    1: CSS_COLOR_LITERAL@85..91 "ABCDEF" [] []
+              1: (empty)
+            1: SEMICOLON@91..92 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@92..112
+            0: CSS_DECLARATION@92..111
+              0: CSS_GENERIC_PROPERTY@92..111
+                0: CSS_IDENTIFIER@92..100
+                  0: IDENT@92..100 "eight" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@100..102 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@102..111
+                  0: CSS_COLOR@102..111
+                    0: HASH@102..103 "#" [] []
+                    1: CSS_COLOR_LITERAL@103..111 "ABCDEF12" [] []
+              1: (empty)
+            1: SEMICOLON@111..112 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@112..138
+            0: CSS_DECLARATION@112..137
+              0: CSS_GENERIC_PROPERTY@112..137
+                0: CSS_IDENTIFIER@112..121
+                  0: IDENT@112..121 "quoted" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@121..123 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@123..137
+                  0: CSS_STRING@123..130
+                    0: CSS_STRING_LITERAL@123..130 "\"#app\"" [] [Whitespace(" ")]
+                  1: CSS_STRING@130..137
+                    0: CSS_STRING_LITERAL@130..137 "\"#ABCG\"" [] []
+              1: (empty)
+            1: SEMICOLON@137..138 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@138..153
+            0: CSS_DECLARATION@138..152
+              0: CSS_GENERIC_PROPERTY@138..152
+                0: CSS_DASHED_IDENTIFIER@138..146
+                  0: IDENT@138..146 "--raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@146..148 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@148..152
+                  0: CSS_COLOR@148..152
+                    0: HASH@148..149 "#" [] []
+                    1: CSS_COLOR_LITERAL@149..152 "ABC" [] []
+              1: (empty)
+            1: SEMICOLON@152..153 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@153..176
+            0: CSS_DECLARATION@153..175
+              0: CSS_GENERIC_PROPERTY@153..175
+                0: CSS_IDENTIFIER@153..164
+                  0: IDENT@153..164 "fragment" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@164..166 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@166..175
+                  0: CSS_URL_FUNCTION@166..175
+                    0: URL_KW@166..169 "url" [] []
+                    1: L_PAREN@169..170 "(" [] []
+                    2: CSS_URL_VALUE_RAW@170..174
+                      0: CSS_URL_VALUE_RAW_LITERAL@170..174 "#app" [] []
+                    3: CSS_URL_MODIFIER_LIST@174..174
+                    4: R_PAREN@174..175 ")" [] []
+              1: (empty)
+            1: SEMICOLON@175..176 ";" [] []
+        2: R_CURLY@176..178 "}" [Newline("\n")] []
+  2: EOF@178..179 "" [Newline("\n")] []
+
+```

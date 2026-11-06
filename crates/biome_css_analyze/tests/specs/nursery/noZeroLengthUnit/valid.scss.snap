@@ -1,0 +1,18 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$padding-top-extra-offset: 0px;
+a { $padding-top-base-offset: 5px; $padding-top-extra-offset: 0px; }
+$sizes: (small: 0px, large: 10px);
+a { top: 0; }
+a { top: calc(0px + #{$offset}); }
+a { line-height: 0px; }
+a { font: 16px/0px cursive; }
+a { --x: calc(0px + 1px); }
+a { --gap: max(0px, 1vw); }
+
+```

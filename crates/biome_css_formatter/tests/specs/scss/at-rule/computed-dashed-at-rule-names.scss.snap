@@ -1,0 +1,121 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/computed-dashed-at-rule-names.scss
+---
+
+# Input
+
+```scss
+$name:"--Brand";$prefix:"--";
+@PROPERTY   #{ $name }{syntax:"<color>";inherits:true;initial-value:red}
+@font-palette-values #{ $name }{font-family:"Bixa"}
+@position-try #{ $name }{top:0}
+
+@property #{ $name }-accent{syntax:"*";inherits:false}
+@font-palette-values #{ $prefix }theme{font-family:"Bixa"}
+@position-try #{ $name }2{left:0}
+
+@property /* before */ #{ $name } /* after */ {syntax:"*";inherits:false}
+@font-palette-values /* before */ #{ $name } /* after */ {font-family:"Bixa"}
+@position-try /* before */ #{ $name } /* after */ {top:0}
+@property #{ /* inside */ $name } // before block
+{syntax:"*";inherits:false}
+@font-palette-values #{ $name } // before palette
+{font-family:"Bixa"}
+@position-try #{ $name } // before position
+{top:0}
+@property --static // literal name
+{syntax:"*";inherits:false}
+@property #{ $name } /* biome-ignore format: keep the block */ {syntax:"*";inherits:false}
+
+@each $property,$color in ("--brand":red,"--accent":blue){
+@property #{ $property }{syntax:"<color>";inherits:true;initial-value:$color}
+}
+@custom-media #{ $name } (width > 1px);
+
+// biome-ignore format: keep this registration's layout
+@property   #{ $name } {syntax:"*";inherits:false}
+.following{color:green}
+
+```
+
+
+# Formatted
+
+```scss
+$name: "--Brand";
+$prefix: "--";
+@property #{$name} {
+	syntax: "<color>";
+	inherits: true;
+	initial-value: red;
+}
+@font-palette-values #{$name} {
+	font-family: "Bixa";
+}
+@position-try #{$name} {
+	top: 0;
+}
+
+@property #{$name}-accent {
+	syntax: "*";
+	inherits: false;
+}
+@font-palette-values #{$prefix}theme {
+	font-family: "Bixa";
+}
+@position-try #{$name}2 {
+	left: 0;
+}
+
+@property /* before */ #{$name} /* after */ {
+	syntax: "*";
+	inherits: false;
+}
+@font-palette-values /* before */ #{$name} /* after */ {
+	font-family: "Bixa";
+}
+@position-try /* before */ #{$name} /* after */ {
+	top: 0;
+}
+@property #{/* inside */ $name} // before block
+{
+	syntax: "*";
+	inherits: false;
+}
+@font-palette-values #{$name} // before palette
+{
+	font-family: "Bixa";
+}
+@position-try #{$name} // before position
+{
+	top: 0;
+}
+@property --static // literal name
+{
+	syntax: "*";
+	inherits: false;
+}
+@property #{$name} /* biome-ignore format: keep the block */ {syntax:"*";inherits:false}
+
+@each $property, $color in ("--brand": red, "--accent": blue) {
+	@property #{$property} {
+		syntax: "<color>";
+		inherits: true;
+		initial-value: $color;
+	}
+}
+@custom-media #{$name} (width > 1px);
+
+// biome-ignore format: keep this registration's layout
+@property   #{ $name } {syntax:"*";inherits:false}
+.following {
+	color: green;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   54: @property #{$name} /* biome-ignore format: keep the block */ {syntax:"*";inherits:false}
+```

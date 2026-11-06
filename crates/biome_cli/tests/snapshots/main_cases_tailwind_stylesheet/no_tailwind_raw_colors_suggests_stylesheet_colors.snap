@@ -1,0 +1,142 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/noTailwindRawColors '<TEMP_DIR>/no_tailwind_raw_colors_suggests_stylesheet_colors'
+```
+
+## `biome.json`
+
+```json
+{
+  "tailwind": { "stylesheet": "./src/app.css" },
+  "linter": { "rules": { "nursery": { "noTailwindRawColors": "error" } } }
+}
+```
+
+## `src/App.jsx`
+
+```jsx
+export const pink = <div className="bg-pink-500" />;
+export const gray = <div className="hover:text-slate-100/80" />;
+
+```
+
+## `src/app.css`
+
+```css
+@import "tailwindcss";
+@import "./theme.css";
+```
+
+## `src/index.html`
+
+```html
+<div class="dark:border-t-red-600/50!"></div>
+
+```
+
+## `src/theme.css`
+
+```css
+@theme {
+    --color-brand: #ec4899;
+    --color-danger: oklch(0.58 0.24 27);
+    --color-surface: #fff;
+    --color-muted: oklch(0.97 0 0);
+    --color-primary: var(--primary);
+    --color-pink-400: #f472b6;
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/App.jsx:1:37 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+  > 1 │ export const pink = <div className="bg-pink-500" />;
+      │                                     ^^^^^^^^^^^
+    2 │ export const gray = <div className="hover:text-slate-100/80" />;
+    3 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use a color from your design system. These classes are the closest matches:
+  
+  - bg-brand
+  - bg-danger
+  
+
+```
+
+```block
+src/App.jsx:2:43 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+    1 │ export const pink = <div className="bg-pink-500" />;
+  > 2 │ export const gray = <div className="hover:text-slate-100/80" />;
+      │                                           ^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use a color from your design system. These classes are the closest matches:
+  
+  - text-muted/80
+  - text-surface/80
+  
+
+```
+
+```block
+src/index.html:1:18 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind CSS class uses a raw palette color.
+  
+  > 1 │ <div class="dark:border-t-red-600/50!"></div>
+      │                  ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Use a color from your design system. These classes are the closest matches:
+  
+  - border-t-danger/50
+  - border-t-brand/50
+  
+
+```
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

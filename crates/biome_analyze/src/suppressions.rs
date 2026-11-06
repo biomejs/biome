@@ -446,6 +446,10 @@ impl<'registry> Suppressions<'registry> {
         signal_instances: &[Box<str>],
         text_range: TextRange,
     ) -> bool {
+        if matches!(rule, SignalRuleKey::Internal) {
+            return false;
+        }
+
         if self
             .top_level_suppression
             .suppressed_categories
@@ -468,6 +472,7 @@ impl<'registry> Suppressions<'registry> {
                         .range_suppressions
                         .suppress_plugin(plugin.as_ref(), &text_range)
             }
+            SignalRuleKey::Internal => false,
         };
         if is_suppressed {
             return true;

@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+$theme: red;
+
+.example {
+  color: $theme;
+  display: block;
+}

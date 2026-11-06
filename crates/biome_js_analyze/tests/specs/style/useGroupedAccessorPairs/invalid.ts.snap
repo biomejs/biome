@@ -72,6 +72,8 @@ invalid.ts:2:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━━
     10 │ }
     11 │ 
   
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
+  
 
 ```
 
@@ -96,6 +98,8 @@ invalid.ts:6:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━━
     6 │     get #age() {
     7 │         return 30;
   
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
+  
 
 ```
 
@@ -118,6 +122,8 @@ invalid.ts:13:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
        │         ^^^
     21 │ };
     22 │ 
+  
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
   
 
 ```
@@ -143,6 +149,8 @@ invalid.ts:17:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
     17 │     get name() {
     18 │         return 'John Doe';
   
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
+  
 
 ```
 
@@ -167,6 +175,8 @@ invalid.ts:26:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
     26 │     get name(): string;
     27 │     get age(): number;
   
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
+  
 
 ```
 
@@ -189,6 +199,8 @@ invalid.ts:27:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
        │         ^^^
     25 │     set name(value: string);
     26 │     get name(): string;
+  
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
   
 
 ```
@@ -214,6 +226,8 @@ invalid.ts:33:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
     33 │     get age(): number;
     34 │     get name(): string;
   
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
+  
 
 ```
 
@@ -236,6 +250,8 @@ invalid.ts:34:9 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
        │         ^^^^
     32 │     set age(age: number);
     33 │     get age(): number;
+  
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
   
 
 ```
@@ -261,6 +277,8 @@ invalid.ts:40:13 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
     40 │         get name(): string;
     41 │         set #age(age: number);
   
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
+  
 
 ```
 
@@ -284,6 +302,8 @@ invalid.ts:42:13 lint/style/useGroupedAccessorPairs ━━━━━━━━━�
        │             ^^^^
     42 │         get #age(): number;
     43 │     }
+  
+  i Keeping a getter and its setter next to each other makes it clear that they belong to the same property.
   
 
 ```

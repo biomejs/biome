@@ -690,8 +690,15 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
             }
             GRAPHQL_FRAGMENT_DEFINITION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && GraphqlDescription::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && element.kind() == T![fragment]
                 {
@@ -701,6 +708,13 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element
                     && GraphqlNameBinding::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && GraphqlVariableDefinitions::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1493,8 +1507,15 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
             }
             GRAPHQL_OPERATION_DEFINITION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && GraphqlDescription::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && GraphqlOperationType::can_cast(element.kind())
                 {
@@ -2049,8 +2070,15 @@ impl SyntaxFactory for GraphqlSyntaxFactory {
             }
             GRAPHQL_VARIABLE_DEFINITION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && GraphqlDescription::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
                 if let Some(element) = &current_element
                     && GraphqlVariableBinding::can_cast(element.kind())
                 {

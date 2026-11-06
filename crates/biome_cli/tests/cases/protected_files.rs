@@ -131,14 +131,19 @@ fn not_process_file_from_cli_verbose() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Utf8Path::new("package-lock.json");
-    fs.insert(file_path.into(), r#"{ "name": "test" }"#.as_bytes());
+    let files = [
+        ("package-lock.json", r#"{ "name": "test" }"#),
+        ("pnpm-lock.yaml", "lockfileVersion:    '9.0'\n"),
+        ("packages/app/pnpm-lock.yaml", "lockfileVersion:    '9.0'\n"),
+    ];
+    for (path, content) in files {
+        fs.insert(path.into(), content.as_bytes());
+    }
 
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", "--verbose", file_path.as_str()].as_slice()),
-    );
+    let mut args = vec!["format", "--verbose"];
+    args.extend(files.iter().map(|(path, _)| *path));
+
+    let (fs, result) = run_cli(fs, &mut console, Args::from(args.as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 

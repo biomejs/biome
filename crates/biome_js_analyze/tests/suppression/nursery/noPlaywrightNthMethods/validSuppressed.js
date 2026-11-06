@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+// biome-ignore lint/nursery/noPlaywrightNthMethods: test
+page.locator("button").first();
+
+// biome-ignore lint/nursery/noPlaywrightNthMethods: test
+await page.locator("button").nth(1).click();
+
+page
+	.locator("button")
+	// biome-ignore lint/nursery/noPlaywrightNthMethods: test
+	.last();

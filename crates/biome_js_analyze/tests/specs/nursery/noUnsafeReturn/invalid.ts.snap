@@ -1,0 +1,1086 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const value: any;
+declare const promisedValue: Promise<any>;
+
+function returnsAssertedAny() {
+	return 1 as any;
+}
+
+function returnsObjectCreate() {
+	return Object.create(null);
+}
+
+function returnsJsonParse(text: string) {
+	return JSON.parse(text);
+}
+
+const arrowWithBlock = () => {
+	return 1 as any;
+};
+
+const arrowWithExpression = () => Object.create(null);
+
+function returnsAnyArray() {
+	return [] as any[];
+}
+
+function returnsGenericAnyArray() {
+	return [] as Array<any>;
+}
+
+function returnsReadonlyAnyArray() {
+	return [] as readonly any[];
+}
+
+const arrowReturnsAnyArray = () => [] as any[];
+
+const annotatedArrow = (): string[] => [1, 2, 3] as any[];
+
+function returnsAnyUnion() {
+	return {} as any | string;
+}
+
+function returnsAnyDeclaredPromiseAny(): Promise<any> {
+	return {} as any;
+}
+
+function returnsAnyDeclaredPromiseObject(): Promise<object> {
+	return {} as any;
+}
+
+async function asyncReturnsAny() {
+	return value;
+}
+
+async function asyncReturnsPromiseAny(): Promise<number> {
+	return promisedValue;
+}
+
+async function asyncReturnsAssertedPromiseAny(arg: number) {
+	return arg as Promise<any>;
+}
+
+async function asyncReturnsPromiseResolve(): Promise<object> {
+	return Promise.resolve<any>({});
+}
+
+async function asyncReturnsNestedPromiseAny(): Promise<object> {
+	return {} as Promise<Promise<Promise<Promise<any>>>>;
+}
+
+async function asyncReturnsPromiseAnyUnion() {
+	return {} as Promise<any> | Promise<object>;
+}
+
+async function asyncReturnsPromiseOfAnyUnion() {
+	return {} as Promise<any | object>;
+}
+
+async function asyncReturnsBrandedPromiseAny() {
+	return {} as Promise<any> & { __brand: "any" };
+}
+
+interface PromiseAlias<T> extends Promise<any> {
+	foo: "bar";
+}
+declare const aliased: PromiseAlias<number>;
+async function asyncReturnsExtendedPromiseAny() {
+	return aliased;
+}
+
+declare function takesNullableCallback(arg: null | (() => any)): void;
+takesNullableCallback(() => "foo" as any);
+
+class Container {
+	method() {
+		return value;
+	}
+
+	get getter() {
+		return value;
+	}
+}
+
+const object = {
+	method() {
+		return value;
+	},
+};
+
+function outer(): unknown {
+	return () => value;
+}
+
+function returnsSetOfAny(): Set<string> {
+	return new Set<any>();
+}
+
+function returnsMapOfAny(): Map<string, string> {
+	return new Map<string, any>();
+}
+
+function returnsSetOfAnyArray(): Set<string[]> {
+	return new Set<any[]>();
+}
+
+function returnsNestedSetOfAny(): Set<Set<Set<string>>> {
+	return new Set<Set<Set<any>>>();
+}
+
+class AnyTypeArgument {
+	method(): Set<string> {
+		return new Set<any>();
+	}
+}
+
+type SetFactory = () => Set<string>;
+const annotatedVariableArrow: SetFactory = () => new Set<any>();
+const annotatedVariableFunction: SetFactory = function test() {
+	return new Set<any>();
+};
+
+function receiver(arg: SetFactory) {}
+receiver(() => new Set<any>());
+receiver(function test() {
+	return new Set<any>();
+});
+
+class Box<T> {
+	constructor(public value: T) {}
+}
+function returnsBoxOfAny(): Box<string> {
+	return new Box<any>(1);
+}
+
+const untypedObject = { fn: () => value };
+
+const untypedObjectMethod = {
+	method() {
+		return value;
+	},
+};
+
+class UntypedProperty {
+	callback = () => value;
+}
+
+function returnsReadonlyArrayOfAny() {
+	return [] as ReadonlyArray<any>;
+}
+
+class AnnotatedGetter {
+	get getter(): string {
+		return value;
+	}
+}
+
+const annotatedObjectMethod = {
+	method(): string {
+		return value;
+	},
+};
+
+(() => value)();
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    5 │ function returnsAssertedAny() {
+  > 6 │ 	return 1 as any;
+      │ 	^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+     9 │ function returnsObjectCreate() {
+  > 10 │ 	return Object.create(null);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    13 │ function returnsJsonParse(text: string) {
+  > 14 │ 	return JSON.parse(text);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    17 │ const arrowWithBlock = () => {
+  > 18 │ 	return 1 as any;
+       │ 	^^^^^^^^^^^^^^^^
+    19 │ };
+    20 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:21:35 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    19 │ };
+    20 │ 
+  > 21 │ const arrowWithExpression = () => Object.create(null);
+       │                                   ^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ function returnsAnyArray() {
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any[].
+  
+    23 │ function returnsAnyArray() {
+  > 24 │ 	return [] as any[];
+       │ 	^^^^^^^^^^^^^^^^^^^
+    25 │ }
+    26 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any[].
+  
+    27 │ function returnsGenericAnyArray() {
+  > 28 │ 	return [] as Array<any>;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any[].
+  
+    31 │ function returnsReadonlyAnyArray() {
+  > 32 │ 	return [] as readonly any[];
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:35:36 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any[].
+  
+    33 │ }
+    34 │ 
+  > 35 │ const arrowReturnsAnyArray = () => [] as any[];
+       │                                    ^^^^^^^^^^^
+    36 │ 
+    37 │ const annotatedArrow = (): string[] => [1, 2, 3] as any[];
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:40 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any[].
+  
+    35 │ const arrowReturnsAnyArray = () => [] as any[];
+    36 │ 
+  > 37 │ const annotatedArrow = (): string[] => [1, 2, 3] as any[];
+       │                                        ^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ function returnsAnyUnion() {
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:40:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    39 │ function returnsAnyUnion() {
+  > 40 │ 	return {} as any | string;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:44:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    43 │ function returnsAnyDeclaredPromiseAny(): Promise<any> {
+  > 44 │ 	return {} as any;
+       │ 	^^^^^^^^^^^^^^^^^
+    45 │ }
+    46 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:48:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    47 │ function returnsAnyDeclaredPromiseObject(): Promise<object> {
+  > 48 │ 	return {} as any;
+       │ 	^^^^^^^^^^^^^^^^^
+    49 │ }
+    50 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:52:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    51 │ async function asyncReturnsAny() {
+  > 52 │ 	return value;
+       │ 	^^^^^^^^^^^^^
+    53 │ }
+    54 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:56:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    55 │ async function asyncReturnsPromiseAny(): Promise<number> {
+  > 56 │ 	return promisedValue;
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    57 │ }
+    58 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:60:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    59 │ async function asyncReturnsAssertedPromiseAny(arg: number) {
+  > 60 │ 	return arg as Promise<any>;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:64:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    63 │ async function asyncReturnsPromiseResolve(): Promise<object> {
+  > 64 │ 	return Promise.resolve<any>({});
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ }
+    66 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:68:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    67 │ async function asyncReturnsNestedPromiseAny(): Promise<object> {
+  > 68 │ 	return {} as Promise<Promise<Promise<Promise<any>>>>;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ }
+    70 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:72:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    71 │ async function asyncReturnsPromiseAnyUnion() {
+  > 72 │ 	return {} as Promise<any> | Promise<object>;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ }
+    74 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:76:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    75 │ async function asyncReturnsPromiseOfAnyUnion() {
+  > 76 │ 	return {} as Promise<any | object>;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ }
+    78 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:80:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    79 │ async function asyncReturnsBrandedPromiseAny() {
+  > 80 │ 	return {} as Promise<any> & { __brand: "any" };
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ }
+    82 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:88:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type Promise<any>.
+  
+    86 │ declare const aliased: PromiseAlias<number>;
+    87 │ async function asyncReturnsExtendedPromiseAny() {
+  > 88 │ 	return aliased;
+       │ 	^^^^^^^^^^^^^^^
+    89 │ }
+    90 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:92:29 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    91 │ declare function takesNullableCallback(arg: null | (() => any)): void;
+  > 92 │ takesNullableCallback(() => "foo" as any);
+       │                             ^^^^^^^^^^^^
+    93 │ 
+    94 │ class Container {
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:96:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    94 │ class Container {
+    95 │ 	method() {
+  > 96 │ 		return value;
+       │ 		^^^^^^^^^^^^^
+    97 │ 	}
+    98 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:100:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+     99 │ 	get getter() {
+  > 100 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    101 │ 	}
+    102 │ }
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:106:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    104 │ const object = {
+    105 │ 	method() {
+  > 106 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    107 │ 	},
+    108 │ };
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:111:15 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    110 │ function outer(): unknown {
+  > 111 │ 	return () => value;
+        │ 	             ^^^^^
+    112 │ }
+    113 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:115:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    114 │ function returnsSetOfAny(): Set<string> {
+  > 115 │ 	return new Set<any>();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    116 │ }
+    117 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:119:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    118 │ function returnsMapOfAny(): Map<string, string> {
+  > 119 │ 	return new Map<string, any>();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    120 │ }
+    121 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:123:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    122 │ function returnsSetOfAnyArray(): Set<string[]> {
+  > 123 │ 	return new Set<any[]>();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    124 │ }
+    125 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:127:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    126 │ function returnsNestedSetOfAny(): Set<Set<Set<string>>> {
+  > 127 │ 	return new Set<Set<Set<any>>>();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │ }
+    129 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:132:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    130 │ class AnyTypeArgument {
+    131 │ 	method(): Set<string> {
+  > 132 │ 		return new Set<any>();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 	}
+    134 │ }
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:137:50 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    136 │ type SetFactory = () => Set<string>;
+  > 137 │ const annotatedVariableArrow: SetFactory = () => new Set<any>();
+        │                                                  ^^^^^^^^^^^^^^
+    138 │ const annotatedVariableFunction: SetFactory = function test() {
+    139 │ 	return new Set<any>();
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:139:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    137 │ const annotatedVariableArrow: SetFactory = () => new Set<any>();
+    138 │ const annotatedVariableFunction: SetFactory = function test() {
+  > 139 │ 	return new Set<any>();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    140 │ };
+    141 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:143:16 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    142 │ function receiver(arg: SetFactory) {}
+  > 143 │ receiver(() => new Set<any>());
+        │                ^^^^^^^^^^^^^^
+    144 │ receiver(function test() {
+    145 │ 	return new Set<any>();
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:145:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    143 │ receiver(() => new Set<any>());
+    144 │ receiver(function test() {
+  > 145 │ 	return new Set<any>();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    146 │ });
+    147 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:152:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value that uses any where its return type expects a specific type.
+  
+    150 │ }
+    151 │ function returnsBoxOfAny(): Box<string> {
+  > 152 │ 	return new Box<any>(1);
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    153 │ }
+    154 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Replace any in the type arguments of the returned value with the types that the return type expects.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:155:35 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    153 │ }
+    154 │ 
+  > 155 │ const untypedObject = { fn: () => value };
+        │                                   ^^^^^
+    156 │ 
+    157 │ const untypedObjectMethod = {
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:159:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    157 │ const untypedObjectMethod = {
+    158 │ 	method() {
+  > 159 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    160 │ 	},
+    161 │ };
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:164:19 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    163 │ class UntypedProperty {
+  > 164 │ 	callback = () => value;
+        │ 	                 ^^^^^
+    165 │ }
+    166 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:168:2 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any[].
+  
+    167 │ function returnsReadonlyArrayOfAny() {
+  > 168 │ 	return [] as ReadonlyArray<any>;
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    169 │ }
+    170 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:173:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    171 │ class AnnotatedGetter {
+    172 │ 	get getter(): string {
+  > 173 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    174 │ 	}
+    175 │ }
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:179:3 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    177 │ const annotatedObjectMethod = {
+    178 │ 	method(): string {
+  > 179 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    180 │ 	},
+    181 │ };
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:183:8 lint/nursery/noUnsafeReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function returns a value of type any.
+  
+    181 │ };
+    182 │ 
+  > 183 │ (() => value)();
+        │        ^^^^^
+    184 │ 
+  
+  i TypeScript doesn't check values of type any, so callers can misuse the returned value without any error.
+  
+  i Give the returned value a specific type. If the type isn't known in advance, use unknown instead, which requires callers to check the value before using it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

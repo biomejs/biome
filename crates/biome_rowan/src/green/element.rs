@@ -45,6 +45,7 @@ impl<'a> From<&'a GreenToken> for GreenElementRef<'a> {
 }
 
 impl GreenElementRef<'_> {
+    #[inline]
     pub fn to_owned(self) -> GreenElement {
         match self {
             NodeOrToken::Node(it) => NodeOrToken::Node(it.to_owned()),

@@ -28,6 +28,8 @@ invalidSkipBlankLines.graphql:2:1 lint/style/noExcessiveLinesPerFile ━━━�
       │ ^^^^^^^^^^^^^^^^
     6 │ 
   
+  i Long files are harder to read, navigate, and maintain.
+  
   i Consider splitting this file into smaller files.
   
 

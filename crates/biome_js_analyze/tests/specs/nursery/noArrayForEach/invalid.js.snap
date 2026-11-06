@@ -1,0 +1,542 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+array.forEach((element) => {
+	bar(element);
+});
+
+array?.forEach((element) => bar(element));
+
+array.forEach((element, index) => bar(element, index));
+
+array.forEach((element, index, array) => bar(element, index, array));
+
+array.forEach(bar);
+
+array.forEach();
+
+array.forEach((element) => bar(element), thisArgument);
+
+array["forEach"]((element) => bar(element));
+
+array.forEach?.((element) => bar(element));
+
+(array).forEach((element) => bar(element));
+
+(array.forEach)((element) => bar(element));
+
+foo.bar.forEach((element) => bar(element));
+
+(foo || bar).forEach((element) => log(element));
+
+const result = array.forEach((element) => bar(element));
+
+[1, 2, 3].forEach((element) => bar(element));
+
+const typedArray = new Uint8Array();
+typedArray.forEach((value) => console.log(value));
+
+let map = new Map();
+map.forEach((value) => console.log(value));
+
+foo.React.Children.forEach(bar);
+
+React?.Children.forEach(bar);
+
+NotReact.Children.forEach(bar);
+
+NotChildren.forEach(bar);
+
+const CB = [];
+CB.forEach((element) => console.log(element));
+
+function shadowed(Map) {
+	new Map().forEach((value) => console.log(value));
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:3:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ array.forEach((element) => {
+      │       ^^^^^^^
+    4 │ 	bar(element);
+    5 │ });
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    5 │ });
+    6 │ 
+  > 7 │ array?.forEach((element) => bar(element));
+      │        ^^^^^^^
+    8 │ 
+    9 │ array.forEach((element, index) => bar(element, index));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+     7 │ array?.forEach((element) => bar(element));
+     8 │ 
+   > 9 │ array.forEach((element, index) => bar(element, index));
+       │       ^^^^^^^
+    10 │ 
+    11 │ array.forEach((element, index, array) => bar(element, index, array));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+     9 │ array.forEach((element, index) => bar(element, index));
+    10 │ 
+  > 11 │ array.forEach((element, index, array) => bar(element, index, array));
+       │       ^^^^^^^
+    12 │ 
+    13 │ array.forEach(bar);
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    11 │ array.forEach((element, index, array) => bar(element, index, array));
+    12 │ 
+  > 13 │ array.forEach(bar);
+       │       ^^^^^^^
+    14 │ 
+    15 │ array.forEach();
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    13 │ array.forEach(bar);
+    14 │ 
+  > 15 │ array.forEach();
+       │       ^^^^^^^
+    16 │ 
+    17 │ array.forEach((element) => bar(element), thisArgument);
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    15 │ array.forEach();
+    16 │ 
+  > 17 │ array.forEach((element) => bar(element), thisArgument);
+       │       ^^^^^^^
+    18 │ 
+    19 │ array["forEach"]((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    17 │ array.forEach((element) => bar(element), thisArgument);
+    18 │ 
+  > 19 │ array["forEach"]((element) => bar(element));
+       │       ^^^^^^^^^
+    20 │ 
+    21 │ array.forEach?.((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:7 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    19 │ array["forEach"]((element) => bar(element));
+    20 │ 
+  > 21 │ array.forEach?.((element) => bar(element));
+       │       ^^^^^^^
+    22 │ 
+    23 │ (array).forEach((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:9 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    21 │ array.forEach?.((element) => bar(element));
+    22 │ 
+  > 23 │ (array).forEach((element) => bar(element));
+       │         ^^^^^^^
+    24 │ 
+    25 │ (array.forEach)((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:8 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    23 │ (array).forEach((element) => bar(element));
+    24 │ 
+  > 25 │ (array.forEach)((element) => bar(element));
+       │        ^^^^^^^
+    26 │ 
+    27 │ foo.bar.forEach((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:9 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    25 │ (array.forEach)((element) => bar(element));
+    26 │ 
+  > 27 │ foo.bar.forEach((element) => bar(element));
+       │         ^^^^^^^
+    28 │ 
+    29 │ (foo || bar).forEach((element) => log(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:14 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    27 │ foo.bar.forEach((element) => bar(element));
+    28 │ 
+  > 29 │ (foo || bar).forEach((element) => log(element));
+       │              ^^^^^^^
+    30 │ 
+    31 │ const result = array.forEach((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:22 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    29 │ (foo || bar).forEach((element) => log(element));
+    30 │ 
+  > 31 │ const result = array.forEach((element) => bar(element));
+       │                      ^^^^^^^
+    32 │ 
+    33 │ [1, 2, 3].forEach((element) => bar(element));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:11 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    31 │ const result = array.forEach((element) => bar(element));
+    32 │ 
+  > 33 │ [1, 2, 3].forEach((element) => bar(element));
+       │           ^^^^^^^
+    34 │ 
+    35 │ const typedArray = new Uint8Array();
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:12 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    35 │ const typedArray = new Uint8Array();
+  > 36 │ typedArray.forEach((value) => console.log(value));
+       │            ^^^^^^^
+    37 │ 
+    38 │ let map = new Map();
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    38 │ let map = new Map();
+  > 39 │ map.forEach((value) => console.log(value));
+       │     ^^^^^^^
+    40 │ 
+    41 │ foo.React.Children.forEach(bar);
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:20 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    39 │ map.forEach((value) => console.log(value));
+    40 │ 
+  > 41 │ foo.React.Children.forEach(bar);
+       │                    ^^^^^^^
+    42 │ 
+    43 │ React?.Children.forEach(bar);
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:17 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    41 │ foo.React.Children.forEach(bar);
+    42 │ 
+  > 43 │ React?.Children.forEach(bar);
+       │                 ^^^^^^^
+    44 │ 
+    45 │ NotReact.Children.forEach(bar);
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:19 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    43 │ React?.Children.forEach(bar);
+    44 │ 
+  > 45 │ NotReact.Children.forEach(bar);
+       │                   ^^^^^^^
+    46 │ 
+    47 │ NotChildren.forEach(bar);
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:13 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    45 │ NotReact.Children.forEach(bar);
+    46 │ 
+  > 47 │ NotChildren.forEach(bar);
+       │             ^^^^^^^
+    48 │ 
+    49 │ const CB = [];
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:4 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    49 │ const CB = [];
+  > 50 │ CB.forEach((element) => console.log(element));
+       │    ^^^^^^^
+    51 │ 
+    52 │ function shadowed(Map) {
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:12 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    52 │ function shadowed(Map) {
+  > 53 │ 	new Map().forEach((value) => console.log(value));
+       │ 	          ^^^^^^^
+    54 │ }
+    55 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -81,6 +81,8 @@ invalid.ts:2:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
     3 │ import 'default-allowed';
     4 │ import 'default-forbidden';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -95,6 +97,8 @@ invalid.ts:3:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
       │        ^^^^^^^^^^^^^^^^^
     4 │ import 'default-forbidden';
     5 │ import 'namespace-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'default-allowed' are allowed:
   
@@ -115,6 +119,8 @@ invalid.ts:5:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
     6 │ import 'namespace-forbidden';
     7 │ import 'member-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'namespace-allowed' are allowed:
   
   - *
@@ -133,6 +139,8 @@ invalid.ts:7:8 lint/style/noRestrictedImports ━━━━━━━━━━━�
       │        ^^^^^^^^^^^^^^^^
     8 │ import 'member-forbidden';
     9 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -161,6 +169,8 @@ invalid.ts:10:8 lint/style/noRestrictedImports ━━━━━━━━━━━
     11 │ import * as n2 from 'default-allowed';
     12 │ import * as n3 from 'member-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -174,6 +184,8 @@ invalid.ts:11:8 lint/style/noRestrictedImports ━━━━━━━━━━━
        │        ^
     12 │ import * as n3 from 'member-allowed';
     13 │ import * as n4 from 'bare-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'default-allowed' are allowed:
   
@@ -193,6 +205,8 @@ invalid.ts:12:8 lint/style/noRestrictedImports ━━━━━━━━━━━
        │        ^
     13 │ import * as n4 from 'bare-allowed';
     14 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -221,6 +235,8 @@ invalid.ts:13:8 lint/style/noRestrictedImports ━━━━━━━━━━━
     14 │ 
     15 │ import type d0 from 'default-forbidden';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
@@ -240,6 +256,8 @@ invalid.ts:15:13 lint/style/noRestrictedImports ━━━━━━━━━━�
     16 │ import type d1 from 'member-allowed';
     17 │ import type d2 from 'namespace-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -253,6 +271,8 @@ invalid.ts:16:13 lint/style/noRestrictedImports ━━━━━━━━━━�
        │             ^^
     17 │ import type d2 from 'namespace-allowed';
     18 │ import type d3 from 'bare-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -281,6 +301,8 @@ invalid.ts:17:13 lint/style/noRestrictedImports ━━━━━━━━━━�
     18 │ import type d3 from 'bare-allowed';
     19 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'namespace-allowed' are allowed:
   
   - *
@@ -299,6 +321,8 @@ invalid.ts:18:13 lint/style/noRestrictedImports ━━━━━━━━━━�
        │             ^^
     19 │ 
     20 │ import { type default as d4, type allowed1, type allowed2 as a2 } from 'default-forbidden';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -319,6 +343,8 @@ invalid.ts:20:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     21 │ import { type default as d5, type allowed2, type allowed3 as a3 } from 'member-allowed';
     22 │ import { type default as d6, type allowed3 } from 'namespace-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -332,6 +358,8 @@ invalid.ts:21:15 lint/style/noRestrictedImports ━━━━━━━━━━�
        │               ^^^^^^^
     22 │ import { type default as d6, type allowed3 } from 'namespace-allowed';
     23 │ import { type default as d7, type allowed4 } from 'bare-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -360,6 +388,8 @@ invalid.ts:22:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     23 │ import { type default as d7, type allowed4 } from 'bare-allowed';
     24 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'namespace-allowed' are allowed:
   
   - *
@@ -378,6 +408,8 @@ invalid.ts:22:35 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                   ^^^^^^^^
     23 │ import { type default as d7, type allowed4 } from 'bare-allowed';
     24 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'namespace-allowed' are allowed:
   
@@ -398,6 +430,8 @@ invalid.ts:23:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     24 │ 
     25 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
@@ -416,6 +450,8 @@ invalid.ts:23:35 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                   ^^^^^^^^
     24 │ 
     25 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -436,6 +472,8 @@ invalid.ts:25:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     26 │ import type { default as d9, allowed6, allowed7 as a7 } from 'member-allowed';
     27 │ import type { default as d10, allowed7 } from 'namespace-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -449,6 +487,8 @@ invalid.ts:26:15 lint/style/noRestrictedImports ━━━━━━━━━━�
        │               ^^^^^^^
     27 │ import type { default as d10, allowed7 } from 'namespace-allowed';
     28 │ import type { default as d11, allowed8 } from 'bare-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -477,6 +517,8 @@ invalid.ts:27:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     28 │ import type { default as d11, allowed8 } from 'bare-allowed';
     29 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'namespace-allowed' are allowed:
   
   - *
@@ -495,6 +537,8 @@ invalid.ts:27:31 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                               ^^^^^^^^
     28 │ import type { default as d11, allowed8 } from 'bare-allowed';
     29 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'namespace-allowed' are allowed:
   
@@ -515,6 +559,8 @@ invalid.ts:28:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     29 │ 
     30 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
@@ -533,6 +579,8 @@ invalid.ts:28:31 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                               ^^^^^^^^
     29 │ 
     30 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -553,6 +601,8 @@ invalid.ts:30:36 lint/style/noRestrictedImports ━━━━━━━━━━�
     31 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
     32 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -568,6 +618,8 @@ invalid.ts:30:53 lint/style/noRestrictedImports ━━━━━━━━━━�
     31 │ import { type forbidden2, type forbidden3 as f3 } from 'member-allowed';
     32 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -581,6 +633,8 @@ invalid.ts:31:15 lint/style/noRestrictedImports ━━━━━━━━━━�
        │               ^^^^^^^^^^
     32 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     33 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -607,6 +661,8 @@ invalid.ts:31:32 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                ^^^^^^^^^^
     32 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     33 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -635,6 +691,8 @@ invalid.ts:32:31 lint/style/noRestrictedImports ━━━━━━━━━━�
     33 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
     34 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -650,6 +708,8 @@ invalid.ts:32:43 lint/style/noRestrictedImports ━━━━━━━━━━�
     33 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
     34 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -664,6 +724,8 @@ invalid.ts:33:15 lint/style/noRestrictedImports ━━━━━━━━━━�
        │               ^^^^^^^
     34 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
     35 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -692,6 +754,8 @@ invalid.ts:33:31 lint/style/noRestrictedImports ━━━━━━━━━━�
     34 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
     35 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'member-allowed' are allowed:
   
   - allowed1
@@ -718,6 +782,8 @@ invalid.ts:33:43 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                           ^^^^^^^^^^
     34 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
     35 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'member-allowed' are allowed:
   
@@ -746,6 +812,8 @@ invalid.ts:34:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     35 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     36 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'namespace-allowed' are allowed:
   
   - *
@@ -764,6 +832,8 @@ invalid.ts:34:31 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                               ^^^^^^^^^^
     35 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     36 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'namespace-allowed' are allowed:
   
@@ -784,6 +854,8 @@ invalid.ts:34:43 lint/style/noRestrictedImports ━━━━━━━━━━�
     35 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     36 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'namespace-allowed' are allowed:
   
   - *
@@ -802,6 +874,8 @@ invalid.ts:35:15 lint/style/noRestrictedImports ━━━━━━━━━━�
        │               ^^^^^^^
     36 │ 
     37 │ /* for the `patterns` option */
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
   i Only the following imports from 'bare-allowed' are allowed:
   
@@ -822,6 +896,8 @@ invalid.ts:35:31 lint/style/noRestrictedImports ━━━━━━━━━━�
     36 │ 
     37 │ /* for the `patterns` option */
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
@@ -841,6 +917,8 @@ invalid.ts:35:43 lint/style/noRestrictedImports ━━━━━━━━━━�
     36 │ 
     37 │ /* for the `patterns` option */
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
   i Only the following imports from 'bare-allowed' are allowed:
   
   - Side-effect only import
@@ -859,6 +937,8 @@ invalid.ts:38:8 lint/style/noRestrictedImports ━━━━━━━━━━━
     39 │ import * as alias1 from "namespace-import-forbidden";
     40 │ export * from "namespace-import-forbidden";
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -873,6 +953,8 @@ invalid.ts:39:25 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │ export * from "namespace-import-forbidden";
     41 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -889,6 +971,8 @@ invalid.ts:40:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     41 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
     42 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -903,6 +987,8 @@ invalid.ts:41:10 lint/style/noRestrictedImports ━━━━━━━━━━�
        │          ^^^^^^^
     42 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
     43 │ import defaultExport from "default-import-forbidden";
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -919,6 +1005,8 @@ invalid.ts:42:10 lint/style/noRestrictedImports ━━━━━━━━━━�
     43 │ import defaultExport from "default-import-forbidden";
     44 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -934,20 +1022,7 @@ invalid.ts:43:8 lint/style/noRestrictedImports ━━━━━━━━━━━
     44 │ 
     45 │ import('d-sideeffect-forbidden');
   
-
-```
-
-```
-invalid.ts:43:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Do not import 'default' from 'default-import-forbidden'.
-  
-    41 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
-    42 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
-  > 43 │ import defaultExport from "default-import-forbidden";
-       │        ^^^^^^^^^^^^^
-    44 │ 
-    45 │ import('d-sideeffect-forbidden');
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -963,6 +1038,25 @@ invalid.ts:43:8 lint/style/noRestrictedImports ━━━━━━━━━━━
        │        ^^^^^^^^^^^^^
     44 │ 
     45 │ import('d-sideeffect-forbidden');
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
+
+```
+
+```
+invalid.ts:43:8 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    41 │ import { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+    42 │ export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
+  > 43 │ import defaultExport from "default-import-forbidden";
+       │        ^^^^^^^^^^^^^
+    44 │ 
+    45 │ import('d-sideeffect-forbidden');
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -979,6 +1073,8 @@ invalid.ts:45:8 lint/style/noRestrictedImports ━━━━━━━━━━━
     46 │ await import('d-sideeffect-forbidden');
     47 │ const alias1 = await import('namespace-import-forbidden');
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -992,6 +1088,8 @@ invalid.ts:46:14 lint/style/noRestrictedImports ━━━━━━━━━━�
        │              ^^^^^^^^^^^^^^^^^^^^^^^^
     47 │ const alias1 = await import('namespace-import-forbidden');
     48 │ import('namespace-import-forbidden').then(alias1 => { });
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1008,6 +1106,8 @@ invalid.ts:47:29 lint/style/noRestrictedImports ━━━━━━━━━━�
     48 │ import('namespace-import-forbidden').then(alias1 => { });
     49 │ import('namespace-import-forbidden').then((alias1) => { });
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1022,6 +1122,8 @@ invalid.ts:48:8 lint/style/noRestrictedImports ━━━━━━━━━━━
        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ import('namespace-import-forbidden').then((alias1) => { });
     50 │ import('namespace-import-forbidden').then(function(alias1) { });
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1038,6 +1140,8 @@ invalid.ts:49:8 lint/style/noRestrictedImports ━━━━━━━━━━━
     50 │ import('namespace-import-forbidden').then(function(alias1) { });
     51 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1052,6 +1156,8 @@ invalid.ts:50:8 lint/style/noRestrictedImports ━━━━━━━━━━━
        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     51 │ myFunction(...args, import("namespace-import-forbidden"), ...args)
     52 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1068,6 +1174,8 @@ invalid.ts:51:28 lint/style/noRestrictedImports ━━━━━━━━━━�
     52 │ const { export1, export2: alias2, "string-name": alias3, default: defaultExport } = await import("named-import-forbidden");
     53 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1082,6 +1190,8 @@ invalid.ts:52:9 lint/style/noRestrictedImports ━━━━━━━━━━━
        │         ^^^^^^^
     53 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
     54 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1098,6 +1208,8 @@ invalid.ts:53:42 lint/style/noRestrictedImports ━━━━━━━━━━�
     54 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
     55 │ const { default: defaultExport } = await import('default-import-forbidden')
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1113,35 +1225,7 @@ invalid.ts:54:50 lint/style/noRestrictedImports ━━━━━━━━━━�
     55 │ const { default: defaultExport } = await import('default-import-forbidden')
     56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
   
-
-```
-
-```
-invalid.ts:55:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Do not import 'default' from 'default-import-forbidden'.
-  
-    53 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
-    54 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
-  > 55 │ const { default: defaultExport } = await import('default-import-forbidden')
-       │         ^^^^^^^
-    56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
-    57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
-  
-
-```
-
-```
-invalid.ts:55:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Default import should not be reported unless importNamePattern includes 'default'
-  
-    53 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
-    54 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
-  > 55 │ const { default: defaultExport } = await import('default-import-forbidden')
-       │         ^^^^^^^
-    56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
-    57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1158,6 +1242,42 @@ invalid.ts:55:9 lint/style/noRestrictedImports ━━━━━━━━━━━
     56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
     57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
+
+```
+
+```
+invalid.ts:55:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Default import should not be reported unless importNamePattern includes 'default'
+  
+    53 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+    54 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  > 55 │ const { default: defaultExport } = await import('default-import-forbidden')
+       │         ^^^^^^^
+    56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
+
+```
+
+```
+invalid.ts:55:9 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    53 │ import('named-import-forbidden').then(({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) => { });
+    54 │ import('named-import-forbidden').then(function({ export1, export2: alias2, "string-name": alias3, default: defaultExport }) { });
+  > 55 │ const { default: defaultExport } = await import('default-import-forbidden')
+       │         ^^^^^^^
+    56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+    57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1172,6 +1292,8 @@ invalid.ts:56:44 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                            ^^^^^^^
     57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
     58 │ const defaultExport = require('default-import-forbidden');
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1188,6 +1310,8 @@ invalid.ts:56:44 lint/style/noRestrictedImports ━━━━━━━━━━�
     57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
     58 │ const defaultExport = require('default-import-forbidden');
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1203,20 +1327,7 @@ invalid.ts:56:44 lint/style/noRestrictedImports ━━━━━━━━━━�
     57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
     58 │ const defaultExport = require('default-import-forbidden');
   
-
-```
-
-```
-invalid.ts:57:52 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Do not import 'default' from 'default-import-forbidden'.
-  
-    55 │ const { default: defaultExport } = await import('default-import-forbidden')
-    56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
-  > 57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
-       │                                                    ^^^^^^^
-    58 │ const defaultExport = require('default-import-forbidden');
-    59 │ 
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1232,6 +1343,25 @@ invalid.ts:57:52 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                                    ^^^^^^^
     58 │ const defaultExport = require('default-import-forbidden');
     59 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
+
+```
+
+```
+invalid.ts:57:52 lint/style/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not import 'default' from 'default-import-forbidden'.
+  
+    55 │ const { default: defaultExport } = await import('default-import-forbidden')
+    56 │ import('default-import-forbidden').then(({ default: defaultExport }) => { });
+  > 57 │ import('default-import-forbidden').then(function({ default: defaultExport }) { });
+       │                                                    ^^^^^^^
+    58 │ const defaultExport = require('default-import-forbidden');
+    59 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1247,6 +1377,8 @@ invalid.ts:57:52 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                                                    ^^^^^^^
     58 │ const defaultExport = require('default-import-forbidden');
     59 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1263,6 +1395,8 @@ invalid.ts:58:31 lint/style/noRestrictedImports ━━━━━━━━━━�
     59 │ 
     60 │ import { type export1, type export2 as alias2, type "string-name" as alias3, type default as defaultExport } from "named-import-forbidden";
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1278,6 +1412,8 @@ invalid.ts:58:31 lint/style/noRestrictedImports ━━━━━━━━━━�
     59 │ 
     60 │ import { type export1, type export2 as alias2, type "string-name" as alias3, type default as defaultExport } from "named-import-forbidden";
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1292,6 +1428,8 @@ invalid.ts:58:31 lint/style/noRestrictedImports ━━━━━━━━━━�
        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
     59 │ 
     60 │ import { type export1, type export2 as alias2, type "string-name" as alias3, type default as defaultExport } from "named-import-forbidden";
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1308,6 +1446,8 @@ invalid.ts:60:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     61 │ import type { export1, export2 as alias2, "string-name" as alias3, default as defaultExport } from "named-import-forbidden";
     62 │ import type defaultExport from "default-import-forbidden";
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1322,6 +1462,8 @@ invalid.ts:61:15 lint/style/noRestrictedImports ━━━━━━━━━━�
     62 │ import type defaultExport from "default-import-forbidden";
     63 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1335,6 +1477,8 @@ invalid.ts:62:13 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 62 │ import type defaultExport from "default-import-forbidden";
        │             ^^^^^^^^^^^^^
     63 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```
@@ -1350,6 +1494,8 @@ invalid.ts:62:13 lint/style/noRestrictedImports ━━━━━━━━━━�
        │             ^^^^^^^^^^^^^
     63 │ 
   
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
+  
 
 ```
 
@@ -1363,6 +1509,8 @@ invalid.ts:62:13 lint/style/noRestrictedImports ━━━━━━━━━━�
   > 62 │ import type defaultExport from "default-import-forbidden";
        │             ^^^^^^^^^^^^^
     63 │ 
+  
+  i This import is restricted by the paths or patterns options in your configuration. Use an allowed import, or update the configuration if this import should be allowed.
   
 
 ```

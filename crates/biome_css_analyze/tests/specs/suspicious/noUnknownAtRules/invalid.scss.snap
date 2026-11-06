@@ -1,0 +1,33 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@unknown-rule {
+  $color: red;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:2 lint/suspicious/noUnknownAtRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown at-rule: unknown-rule 
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @unknown-rule {
+      │  ^^^^^^^^^^^^
+    3 │   $color: red;
+    4 │ }
+  
+  i unknown-rule is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
+  
+  i See MDN web docs for a known list of at-rules.
+  
+  i To fix this issue, consider removing the unknown at-rule.
+  
+
+```

@@ -25,7 +25,7 @@ CssRoot {
             at_token: AT@0..84 "@" [Comments("/* From tailwind docs ..."), Newline("\n"), Newline("\n")] [],
             rule: TwThemeAtRule {
                 theme_token: THEME_KW@84..90 "theme" [] [Whitespace(" ")],
-                name: missing (optional),
+                options: TwThemeOptionList [],
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@90..91 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -70,7 +70,7 @@ CssRoot {
       0: AT@0..84 "@" [Comments("/* From tailwind docs ..."), Newline("\n"), Newline("\n")] []
       1: TW_THEME_AT_RULE@84..108
         0: THEME_KW@84..90 "theme" [] [Whitespace(" ")]
-        1: (empty)
+        1: TW_THEME_OPTION_LIST@90..90
         2: CSS_DECLARATION_OR_RULE_BLOCK@90..108
           0: L_CURLY@90..91 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@91..106

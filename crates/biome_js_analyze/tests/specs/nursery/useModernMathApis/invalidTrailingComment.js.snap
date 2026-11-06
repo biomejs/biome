@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTrailingComment.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const log2 = Math.log(x) / Math.LN2 /* trailing */;
+const hypot = Math.sqrt(a ** 2 + b ** 2) /* trailing */;
+
+```
+
+# Diagnostics
+```
+invalidTrailingComment.js:2:14 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const log2 = Math.log(x) / Math.LN2 /* trailing */;
+      │              ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const hypot = Math.sqrt(a ** 2 + b ** 2) /* trailing */;
+    4 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log2() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·log2·=·Math.log(x)·/·Math.LN2·/*·trailing·*/;
+      2 │ + const·log2·=·Math.log2(x)·/*·trailing·*/;
+    3 3 │   const hypot = Math.sqrt(a ** 2 + b ** 2) /* trailing */;
+    4 4 │   
+  
+
+```
+
+```
+invalidTrailingComment.js:3:15 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const log2 = Math.log(x) / Math.LN2 /* trailing */;
+  > 3 │ const hypot = Math.sqrt(a ** 2 + b ** 2) /* trailing */;
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const log2 = Math.log(x) / Math.LN2 /* trailing */;
+    3   │ - const·hypot·=·Math.sqrt(a·**·2·+·b·**·2)·/*·trailing·*/;
+      3 │ + const·hypot·=·Math.hypot(a·,·b)·/*·trailing·*/;
+    4 4 │   
+  
+
+```

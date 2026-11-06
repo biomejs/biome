@@ -1,7 +1,6 @@
-use crate::lexer::CssLexContext;
+use super::name::parse_custom_at_rule_name;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_block;
-use crate::syntax::parse_custom_identifier;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -40,7 +39,7 @@ pub(crate) fn parse_color_profile_at_rule_declarator(p: &mut CssParser) -> Parse
     p.bump(T![color_profile]);
 
     // TODO: This should actually be `<dashed-ident> | device-cmyk`.
-    let decl_kind = if parse_custom_identifier(p, CssLexContext::Regular)
+    let decl_kind = if parse_custom_at_rule_name(p)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS, COLOR_PROFILE_RECOVERY_SET)

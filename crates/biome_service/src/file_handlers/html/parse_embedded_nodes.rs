@@ -12,8 +12,8 @@ use biome_html_syntax::{
     AnySvelteDirectiveInitializerClause, AstroEmbeddedContent, HtmlAttribute,
     HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression, HtmlDoubleTextExpression,
     HtmlElement, HtmlRoot, HtmlSingleTextExpression, HtmlSpreadAttribute, HtmlTextExpression,
-    SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective, VueVForValue,
-    VueVOnShorthandDirective, VueVSlotShorthandDirective,
+    SvelteAttachAttribute, SvelteName, VueDirective, VueVBindShorthandDirective,
+    VueVForDefaultBinding, VueVForValue, VueVOnShorthandDirective, VueVSlotShorthandDirective,
 };
 use biome_js_parser::parse_js_with_offset_and_cache;
 use biome_js_syntax::JsLanguage;
@@ -174,6 +174,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
             let mut css_v_bind_candidates = vec![];
+            let mut generic_candidates = vec![];
             for element in elements {
                 if let Some(candidate) = build_html_candidate(&element)
                     && let Some(parsed) = ctx.detect_and_parse(&candidate, &doc_file_source, None)
@@ -184,6 +185,12 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     } = parsed;
                     if let Some(js_fs) = js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
+
+                        if js_fs.is_typescript()
+                            && let Some(candidate) = build_vue_generic_candidate(&element)
+                        {
+                            generic_candidates.push(candidate);
+                        }
                     }
                     if file_source.to_css_file_source().is_some() {
                         css_v_bind_candidates
@@ -191,6 +198,15 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     }
                     nodes.push((parse, content, file_source));
                 }
+            }
+
+            for candidate in generic_candidates {
+                ctx.parse_and_push(
+                    &candidate,
+                    &doc_file_source,
+                    Some(embedded_file_source),
+                    &mut nodes,
+                );
             }
 
             for candidate in css_v_bind_candidates {
@@ -216,10 +232,20 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 }
             }
 
+            // The iterable of each `v-for`, and the default values of its
+            // bindings, as in `{ item = fallback } in items`.
             for value in v_for_values {
-                if let Ok(expression) = value.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
-                {
+                let iterable = value
+                    .expression()
+                    .ok()
+                    .and_then(|expression| build_text_expression_candidate(&expression));
+                let defaults = value
+                    .syntax()
+                    .descendants()
+                    .filter_map(VueVForDefaultBinding::cast)
+                    .filter_map(|binding| binding.default().ok())
+                    .filter_map(|expression| build_vue_v_for_default_candidate(&expression));
+                for candidate in iterable.into_iter().chain(defaults) {
                     ctx.parse_and_push(
                         &candidate,
                         &doc_file_source,
@@ -348,7 +374,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
                 if let Some(expression) = snippet.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(candidate) = build_svelte_mustache_candidate(&expression)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -400,13 +426,14 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     );
                 }
 
-                // Shorthand attributes: <MyComponent {text} /> (Svelte shorthand syntax)
+                // Shorthand attributes, such as <MyComponent {text} />, and mustaches in
+                // quoted attribute values, such as class="item {text}"
                 if let Some(attr) = HtmlAttributeSingleTextExpression::cast_ref(&element)
                     && !attr.syntax().parent().is_some_and(|parent| {
                         HtmlAttributeInitializerClause::can_cast(parent.kind())
                     })
                     && let Ok(expression) = attr.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(candidate) = build_svelte_mustache_candidate(&expression)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -701,6 +728,7 @@ fn build_text_expression_directive_candidate(
         is_event_handler: false,
         is_class_attribute: false,
         is_slot_props: false,
+        is_generics_list: false,
     })
 }
 
@@ -728,6 +756,7 @@ fn build_attribute_expression_candidate(
         is_event_handler: false,
         is_class_attribute,
         is_slot_props: false,
+        is_generics_list: false,
     })
 }
 
@@ -804,6 +833,36 @@ fn build_vue_directive_candidate(
         is_event_handler,
         is_class_attribute,
         is_slot_props,
+        is_generics_list: false,
+    })
+}
+
+/// Build an `EmbedCandidate::Directive` from the `generic` attribute of a Vue `<script setup>`,
+/// e.g. `<script setup lang="ts" generic="T extends Item">`.
+///
+/// The TypeScript content is the text inside the quotes.
+fn build_vue_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
+    if !element.is_script_tag() || element.find_attribute_by_name("setup").is_none() {
+        return None;
+    }
+    let attribute = element.find_attribute_by_name("generic")?;
+    let initializer = attribute.as_html_attribute()?.initializer()?;
+    let html_string = initializer.value().ok()?.as_html_string()?.clone();
+    let content_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let content_range = inner_text.source_range(content_token.text_range());
+
+    Some(EmbedCandidate::Directive {
+        content: EmbedContent {
+            element_range: initializer.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: inner_text,
+        },
+        is_event_handler: false,
+        is_class_attribute: false,
+        is_slot_props: false,
+        is_generics_list: true,
     })
 }
 
@@ -823,6 +882,37 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
         },
         block_kind: EmbedBlockKind::Neutral,
     })
+}
+
+/// Build an `EmbedCandidate::TextExpression` from the default value of a Vue
+/// `v-for` binding, such as `fallback` in `{ item = fallback } in items`.
+///
+/// The whitespace after the value is trivia of its token, which the candidate
+/// leaves out.
+fn build_vue_v_for_default_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
+    let content_token = expression.html_literal_token().ok()?;
+    let content_range = content_token.text_trimmed_range();
+    Some(EmbedCandidate::TextExpression {
+        content: EmbedContent {
+            element_range: expression.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: content_token.token_text_trimmed(),
+        },
+        block_kind: EmbedBlockKind::Neutral,
+    })
+}
+
+/// Build an `EmbedCandidate::TextExpression` from an `HtmlTextExpression` in a
+/// Svelte template, recording whether Svelte renders its value as text.
+fn build_svelte_mustache_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
+    let mut candidate = build_text_expression_candidate(expression)?;
+    if expression.is_svelte_text_interpolation()
+        && let EmbedCandidate::TextExpression { block_kind, .. } = &mut candidate
+    {
+        *block_kind = EmbedBlockKind::SvelteTextInterpolation;
+    }
+    Some(candidate)
 }
 
 fn build_attribute_candidate(
@@ -1142,6 +1232,7 @@ fn parse_matched_embed(
                             event_handler: false,
                             allow_statements: true,
                             slot_props: false,
+                            generics_list: false,
                         });
                     }
                     // Astro <script> tags and plain HTML: no EmbeddingKind
@@ -1164,6 +1255,9 @@ fn parse_matched_embed(
                             EmbedBlockKind::Svelte(SvelteBlockKind::Declaration) => {
                                 SvelteEmbeddingKind::Declaration
                             }
+                            EmbedBlockKind::SvelteTextInterpolation => {
+                                SvelteEmbeddingKind::TextInterpolation
+                            }
                             _ => SvelteEmbeddingKind::Expression,
                         };
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
@@ -1180,6 +1274,7 @@ fn parse_matched_embed(
                             event_handler: false,
                             allow_statements: false,
                             slot_props: false,
+                            generics_list: false,
                         });
                     }
                     false
@@ -1188,6 +1283,7 @@ fn parse_matched_embed(
                     is_event_handler,
                     is_class_attribute,
                     is_slot_props,
+                    is_generics_list,
                     ..
                 } => {
                     match ctx.host_file_source.variant() {
@@ -1206,6 +1302,7 @@ fn parse_matched_embed(
                                 event_handler: *is_event_handler,
                                 allow_statements: false,
                                 slot_props: *is_slot_props,
+                                generics_list: *is_generics_list,
                             });
                         }
                         HtmlVariant::Svelte => {
@@ -1267,6 +1364,7 @@ fn parse_matched_embed(
                 content.content_offset,
                 ctx.cache,
                 options,
+                &[],
             );
 
             Some(ParsedEmbed {

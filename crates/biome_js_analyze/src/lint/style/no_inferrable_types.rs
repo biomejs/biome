@@ -182,7 +182,10 @@ impl Rule for NoInferrableTypes {
             markup! {
                 "This type annotation is trivially inferred from its initialization."
             },
-        ))
+        )
+        .note(markup! {
+            "TypeScript already infers this type from the initial value, so the annotation repeats information and adds noise."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, annotation: &Self::State) -> Option<JsRuleAction> {

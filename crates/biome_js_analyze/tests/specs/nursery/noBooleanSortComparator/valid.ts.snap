@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+function typedSet(set: Set<number>, map: Map<number, number>, weakSet: WeakSet<object>) {
+	set.sort((a, b) => a > b);
+	map.sort((a, b) => a > b);
+	weakSet.sort((a, b) => a > b);
+}
+array.sort((a: number, b: number): number => compare(a, b));
+array.sort((a: number, b: number): boolean | number => compare(a, b));
+array.sort((a: number, b: number): asserts a is number => compare(a, b));
+array.sort((a: number, b: number): NotFlag => compare(a, b));
+array.sort(compare as (a: number, b: number) => number);
+array.sort(compare as NumberComparator);
+array.sort(compare as { (a: number, b: number): number });
+array.sort(compare as {});
+array.sort(numberComparator);
+array.sort((a: number, b: number) => compare(a, b) as number);
+array.sort((a, b) => optionalFlag);
+
+function optionalParameter(optionalFlag?: boolean) {
+	array.sort((a, b) => optionalFlag);
+}
+
+type NotFlag = number;
+type NumberComparator = (a: number, b: number) => number;
+declare const numberComparator: (a: number, b: number) => number;
+declare let optionalFlag: boolean | undefined;
+
+```

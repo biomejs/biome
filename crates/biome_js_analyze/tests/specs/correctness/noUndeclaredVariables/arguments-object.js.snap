@@ -29,6 +29,10 @@ arguments-object.js:7:13 lint/correctness/noUndeclaredVariables ━━━━━�
     8 │ 
     9 │ const bar = () => {
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -44,6 +48,10 @@ arguments-object.js:10:17 lint/correctness/noUndeclaredVariables ━━━━━
   > 10 │     console.log(arguments);
        │                 ^^^^^^^^^
     11 │ }
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

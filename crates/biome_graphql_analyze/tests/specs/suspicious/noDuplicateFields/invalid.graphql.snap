@@ -32,18 +32,35 @@ query test {
   }
 }
 
+query test {
+  users {
+    id
+    id
+    id
+  }
+}
+
 ```
 
 # Diagnostics
 ```
-invalid.graphql:1:36 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:1:13 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Variable `v` defined multiple times.
+  i The variable `v` is defined multiple times.
   
   > 1 │ query test($v: String, $t: String, $v: String) {
-      │                                    ^^^^^^^^^^
+      │             ^
     2 │   id
     3 │ }
+  
+  i The variable `v` is repeated here.
+  
+  > 1 │ query test($v: String, $t: String, $v: String) {
+      │                                     ^
+    2 │   id
+    3 │ }
+  
+  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
   
   i Remove the duplicated variable.
   
@@ -51,15 +68,25 @@ invalid.graphql:1:36 lint/suspicious/noDuplicateFields ━━━━━━━━�
 ```
 
 ```
-invalid.graphql:6:48 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:9 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Argument `first` defined multiple times.
+  i The argument `first` is defined multiple times.
   
     5 │ query test {
   > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
-      │                                                ^^^^^^^^^
+      │         ^^^^^
     7 │     id
     8 │   }
+  
+  i The argument `first` is repeated here.
+  
+    5 │ query test {
+  > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
+      │                                                ^^^^^
+    7 │     id
+    8 │   }
+  
+  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
   
   i Remove the duplicated argument.
   
@@ -67,9 +94,18 @@ invalid.graphql:6:48 lint/suspicious/noDuplicateFields ━━━━━━━━�
 ```
 
 ```
-invalid.graphql:16:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:14:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Field `name` defined multiple times.
+  i The field `name` is defined multiple times.
+  
+    12 │   users {
+    13 │     id
+  > 14 │     name
+       │     ^^^^
+    15 │     email
+    16 │     name
+  
+  i The field `name` is repeated here.
   
     14 │     name
     15 │     email
@@ -78,22 +114,72 @@ invalid.graphql:16:5 lint/suspicious/noDuplicateFields ━━━━━━━━�
     17 │   }
     18 │ }
   
+  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
+  
   i Remove the duplicated field.
   
 
 ```
 
 ```
-invalid.graphql:25:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:24:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Field `email` defined multiple times.
+  i The field `email` is defined multiple times.
+  
+    22 │     id
+    23 │     name
+  > 24 │     email
+       │     ^^^^^
+    25 │     email: somethingElse
+    26 │   }
+  
+  i The field `email` is repeated here.
   
     23 │     name
     24 │     email
   > 25 │     email: somethingElse
-       │     ^^^^^^^^^^^^^^^^^^^^
+       │     ^^^^^
     26 │   }
     27 │ }
+  
+  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
+  
+  i Remove the duplicated field.
+  
+
+```
+
+```
+invalid.graphql:31:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The field `id` is defined multiple times.
+  
+    29 │ query test {
+    30 │   users {
+  > 31 │     id
+       │     ^^
+    32 │     id
+    33 │     id
+  
+  i The field `id` is repeated here.
+  
+    30 │   users {
+    31 │     id
+  > 32 │     id
+       │     ^^
+    33 │     id
+    34 │   }
+  
+  i The field `id` is repeated here.
+  
+    31 │     id
+    32 │     id
+  > 33 │     id
+       │     ^^
+    34 │   }
+    35 │ }
+  
+  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
   
   i Remove the duplicated field.
   

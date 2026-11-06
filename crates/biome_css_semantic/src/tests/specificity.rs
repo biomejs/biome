@@ -15,8 +15,7 @@ fn test_specificity_type_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(0, 0, 1));
+    assert_eq!(selector.specificity(), Specificity(0, 0, 1));
 }
 
 #[test]
@@ -30,8 +29,7 @@ fn test_specificity_class_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(0, 1, 0));
+    assert_eq!(selector.specificity(), Specificity(0, 1, 0));
 }
 
 #[test]
@@ -45,8 +43,7 @@ fn test_specificity_id_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(1, 0, 0));
+    assert_eq!(selector.specificity(), Specificity(1, 0, 0));
 }
 
 #[test]
@@ -60,8 +57,7 @@ fn test_specificity_type_and_class_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(0, 1, 1));
+    assert_eq!(selector.specificity(), Specificity(0, 1, 1));
 }
 
 #[test]
@@ -75,8 +71,7 @@ fn test_specificity_attribute_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(0, 1, 0));
+    assert_eq!(selector.specificity(), Specificity(0, 1, 0));
 }
 
 #[test]
@@ -90,8 +85,7 @@ fn test_specificity_pseudo_class_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(0, 1, 0));
+    assert_eq!(selector.specificity(), Specificity(0, 1, 0));
 }
 
 #[test]
@@ -105,8 +99,7 @@ fn test_specificity_pseudo_element_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(0, 0, 1));
+    assert_eq!(selector.specificity(), Specificity(0, 0, 1));
 }
 
 #[test]
@@ -120,8 +113,7 @@ fn test_specificity_complex_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(1, 2, 3));
+    assert_eq!(selector.specificity(), Specificity(1, 2, 3));
 }
 
 #[test]
@@ -135,8 +127,7 @@ fn test_specificity_pseudo_class_functions() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
-    assert_eq!(specificity, &Specificity(1, 0, 0));
+    assert_eq!(selector.specificity(), Specificity(1, 0, 0));
 }
 
 #[test]
@@ -150,9 +141,9 @@ fn test_specificity_with_pseudo_function_where() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // :where doesn't contribute to specificity
-    assert_eq!(specificity, &Specificity(0, 0, 0));
+    assert_eq!(specificity, Specificity(0, 0, 0));
 }
 
 #[test]
@@ -166,9 +157,9 @@ fn test_specificity_with_pseudo_function_is() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // :is takes the maximum specificity of its arguments
-    assert_eq!(specificity, &Specificity(0, 1, 0));
+    assert_eq!(specificity, Specificity(0, 1, 0));
 }
 
 #[test]
@@ -182,9 +173,9 @@ fn test_specificity_nested_selector() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // For ".parent .child", the specificity is sum of ".parent" and ".child": (0,2,0)
-    assert_eq!(specificity, &Specificity(0, 2, 0));
+    assert_eq!(specificity, Specificity(0, 2, 0));
 }
 
 #[test]
@@ -198,12 +189,12 @@ fn test_specificity_nested_pseudo_class() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // Specificity:
     // - "a" contributes (0, 0, 1)
     // - ":not(.active)" contributes specificity of ".active" (0,1,0)
     // Total specificity: (0, 1, 1)
-    assert_eq!(specificity, &Specificity(0, 1, 1));
+    assert_eq!(specificity, Specificity(0, 1, 1));
 }
 
 #[test]
@@ -217,12 +208,12 @@ fn test_specificity_nested_pseudo_class_functions() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // ":not(:nth-child(2n+1))"
     // - ":nth-child" contributes (0, 1, 0)
     // - ":not" takes specificity of its argument
     // Total specificity: (0, 1, 0)
-    assert_eq!(specificity, &Specificity(0, 1, 0));
+    assert_eq!(specificity, Specificity(0, 1, 0));
 }
 
 #[test]
@@ -236,7 +227,7 @@ fn test_specificity_multiple_nesting() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // Calculating specificity:
     // "body"                -> (0, 0, 1)
     // "div#main"            -> (1, 0, 1)
@@ -249,7 +240,7 @@ fn test_specificity_multiple_nesting() {
     // Total classes: 1+1+1 = 3 (from .content, .active, :hover)
     // Total elements: 1+1+1+1+1 = 5 (from body, div, ul, li, a)
     let expected_specificity = Specificity(1, 3, 5);
-    assert_eq!(specificity, &expected_specificity);
+    assert_eq!(specificity, expected_specificity);
 }
 
 #[test]
@@ -263,12 +254,12 @@ fn test_specificity_nested_pseudo_elements_and_classes() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // "div"                 -> (0, 0, 1)
     // "::before"            -> (0, 0, 1)
     // ":hover"              -> (0, 1, 0)
     // Total specificity: (0, 1, 2)
-    assert_eq!(specificity, &Specificity(0, 1, 2));
+    assert_eq!(specificity, Specificity(0, 1, 2));
 }
 
 #[test]
@@ -282,13 +273,13 @@ fn test_specificity_nested_combinators() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // "ul"                 -> (0, 0, 1)
     // "li"                 -> (0, 0, 1)
     // "li.active"          -> (0, 1, 1)
     // "a#link:hover"       -> (1, 1, 1)
     // Total specificity: (1, 2, 4)
-    assert_eq!(specificity, &Specificity(1, 2, 4));
+    assert_eq!(specificity, Specificity(1, 2, 4));
 }
 
 #[test]
@@ -302,13 +293,13 @@ fn test_specificity_with_nested_pseudo_functions() {
     let rule = rules.first().unwrap();
     let selector = &rule.selectors[0];
 
-    let specificity = &selector.specificity;
+    let specificity = selector.specificity();
     // ":is(div, :not(.class))"
     // - Arguments are "div" (0, 0, 1) and ":not(.class)" (0, 1, 0)
     // - ":not(.class)" has specificity of ".class" (0,1,0)
     // - ":is" takes the maximum specificity of its arguments
     // So overall specificity: max((0,0,1), (0,1,0)) = (0,1,0)
-    assert_eq!(specificity, &Specificity(0, 1, 0));
+    assert_eq!(specificity, Specificity(0, 1, 0));
 }
 
 #[test]
@@ -328,9 +319,8 @@ fn test_specificity_nested_selector_lists() {
         Specificity(0, 1, 1), // "a:hover"
         Specificity(1, 0, 3), // "ul li a#link"
     ];
-    for (selector, expected_specificity) in rule.selectors.iter().zip(expected_specificities.iter())
-    {
-        let specificity = &selector.specificity;
+    for (selector, expected_specificity) in rule.selectors.iter().zip(expected_specificities) {
+        let specificity = selector.specificity();
         assert_eq!(specificity, expected_specificity);
     }
 }
@@ -350,7 +340,7 @@ fn test_specificity_deeply_nested_rules() {
         .expect("Expected to find parent rule with selector 'a'");
 
     let div_rule_id = parent_rule
-        .child_ids
+        .child_ids()
         .first()
         .expect("Expected 'div' child rule");
     let div_rule = model
@@ -358,7 +348,7 @@ fn test_specificity_deeply_nested_rules() {
         .expect("Expected to retrieve 'div' rule");
 
     let class_rule_id = div_rule
-        .child_ids
+        .child_ids()
         .first()
         .expect("Expected '.class' child rule");
     let class_rule = model
@@ -366,10 +356,10 @@ fn test_specificity_deeply_nested_rules() {
         .expect("Expected to retrieve 'span.class' rule");
 
     let id_rule_id = class_rule
-        .child_ids
+        .child_ids()
         .first()
         .expect("Expected '#id' child rule");
-    let _id_rule = model
+    let id_rule = model
         .get_rule_by_id(id_rule_id)
         .expect("Expected to retrieve '#id' rule");
 
@@ -377,24 +367,22 @@ fn test_specificity_deeply_nested_rules() {
     // 'a'
     let a_selector = &parent_rule.selectors[0];
     assert_eq!(a_selector.resolved().to_string(), "a");
-    assert_eq!(&a_selector.specificity, &Specificity(0, 0, 1));
+    assert_eq!(a_selector.specificity(), Specificity(0, 0, 1));
 
     // 'a div'
     let div_selector = &div_rule.selectors[0];
     assert_eq!(div_selector.resolved().to_string(), "a div");
-    assert_eq!(&div_selector.specificity, &Specificity(0, 0, 2));
+    assert_eq!(div_selector.specificity(), Specificity(0, 0, 2));
 
-    // TODO: Bug. It should be (0, 1, 2) instead of (0, 1, 1)
     // 'a div .class'
-    // let class_selector = &class_rule.selectors[0];
-    // assert_eq!(class_selector.resolved().to_string(), ".class");
-    // assert_eq!(&class_selector.specificity, &Specificity(0, 1, 2));
+    let class_selector = &class_rule.selectors[0];
+    assert_eq!(class_selector.resolved().to_string(), "a div .class");
+    assert_eq!(class_selector.specificity(), Specificity(0, 1, 2));
 
-    // TODO: Bug. It should be (1, 1, 2) instead of (1, 1, 0)
     // 'a div .class #id'
-    // let id_selector = &id_rule.selectors[0];
-    // assert_eq!(id_selector.resolved().to_string(), "#id");
-    // assert_eq!(&id_selector.specificity, &Specificity(1, 1, 2));
+    let id_selector = &id_rule.selectors[0];
+    assert_eq!(id_selector.resolved().to_string(), "a div .class #id");
+    assert_eq!(id_selector.specificity(), Specificity(1, 1, 2));
 }
 
 #[test]
@@ -410,13 +398,16 @@ fn test_specificity_scss_partial_combinator_selector() {
     let model = semantic_model(&root);
     let rules = model.rules();
     let partial = rules.first().expect("expected the partial selector rule");
-    assert_eq!(partial.selectors[0].specificity, Specificity(0, 1, 0));
+    assert_eq!(partial.selectors[0].specificity(), Specificity(0, 1, 0));
 
-    let child_id = partial.child_ids.first().expect("expected the nested rule");
+    let child_id = partial
+        .child_ids()
+        .first()
+        .expect("expected the nested rule");
     let child = model
         .get_rule_by_id(child_id)
         .expect("expected the nested rule in the semantic model");
-    assert_eq!(child.selectors[0].specificity, Specificity(0, 2, 0));
+    assert_eq!(child.selectors[0].specificity(), Specificity(0, 2, 0));
 }
 
 #[test]
@@ -437,7 +428,7 @@ fn test_specificity_scss_interpolated_sub_selector() {
     let specificities = rule
         .selectors
         .iter()
-        .map(|selector| selector.specificity)
+        .map(|selector| selector.specificity())
         .collect::<Vec<_>>();
 
     assert_eq!(
@@ -447,6 +438,40 @@ fn test_specificity_scss_interpolated_sub_selector() {
             Specificity(0, 1, 0),
             Specificity(0, 1, 0),
             Specificity(1, 2, 0),
+        ]
+    );
+}
+
+#[test]
+fn test_specificity_scss_compound_placeholders() {
+    let parse = parse_css(
+        "%a, %a%b, %a%b%c, %a.card:hover%b, .card%a%b, button%a%b {}",
+        CssFileSource::scss(),
+        CssParserOptions::default(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    let rule = rules
+        .first()
+        .expect("expected the compound placeholder selector rule");
+    let specificities = rule
+        .selectors
+        .iter()
+        .map(|selector| selector.specificity())
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        specificities,
+        [
+            Specificity(0, 1, 0),
+            Specificity(0, 2, 0),
+            Specificity(0, 3, 0),
+            Specificity(0, 4, 0),
+            Specificity(0, 3, 0),
+            Specificity(0, 2, 1),
         ]
     );
 }

@@ -95,7 +95,10 @@ impl Rule for UseNumberToFixedDigitsArgument {
             markup! {
                 "Specify the number of digits you want to appear after the decimal point."
             },
-        ))
+        )
+        .note(markup! {
+            "Without an argument, "<Emphasis>"Number#toFixed()"</Emphasis>" rounds to zero digits after the decimal point, which is easy to overlook."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

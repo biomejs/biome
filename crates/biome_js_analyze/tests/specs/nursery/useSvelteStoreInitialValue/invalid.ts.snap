@@ -1,0 +1,76 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { writable, readable, derived, type Readable } from "svelte/store";
+
+export const w = writable<number>();
+export const r = readable<string>();
+export const d: Readable<number> = derived<Readable<number>, number>(w, ($w) => $w * 2);
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:18 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    2 │ import { writable, readable, derived, type Readable } from "svelte/store";
+    3 │ 
+  > 4 │ export const w = writable<number>();
+      │                  ^^^^^^^^
+    5 │ export const r = readable<string>();
+    6 │ export const d: Readable<number> = derived<Readable<number>, number>(w, ($w) => $w * 2);
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:18 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This readable() store is created without an initial value.
+  
+    4 │ export const w = writable<number>();
+  > 5 │ export const r = readable<string>();
+      │                  ^^^^^^^^
+    6 │ export const d: Readable<number> = derived<Readable<number>, number>(w, ($w) => $w * 2);
+    7 │ 
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:36 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+    4 │ export const w = writable<number>();
+    5 │ export const r = readable<string>();
+  > 6 │ export const d: Readable<number> = derived<Readable<number>, number>(w, ($w) => $w * 2);
+      │                                    ^^^^^^^
+    7 │ 
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

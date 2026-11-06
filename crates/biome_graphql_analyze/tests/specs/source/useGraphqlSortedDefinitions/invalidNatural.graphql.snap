@@ -1,0 +1,48 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidNatural.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type Item10 { id: ID! }
+type Item9 { id: ID! }
+type b { id: ID! }
+type B { id: ID! }
+type A { id: ID! }
+
+```
+
+# Diagnostics
+```
+invalidNatural.graphql:2:1 assist/source/useGraphqlSortedDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i The definitions of this document are not sorted.
+  
+    1 │ # should generate diagnostics
+  > 2 │ type Item10 { id: ID! }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ type Item9 { id: ID! }
+  > 4 │ type b { id: ID! }
+  > 5 │ type B { id: ID! }
+  > 6 │ type A { id: ID! }
+      │ ^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Safe fix: Sort the definitions.
+  
+    1   │ - #·should·generate·diagnostics
+    2   │ - type·Item10·{·id:·ID!·}
+    3   │ - type·Item9·{·id:·ID!·}
+      1 │ + type·A·{·id:·ID!·}
+      2 │ + type·B·{·id:·ID!·}
+    4 3 │   type b { id: ID! }
+    5   │ - type·B·{·id:·ID!·}
+    6   │ - type·A·{·id:·ID!·}
+      4 │ + type·Item9·{·id:·ID!·}
+      5 │ + #·should·generate·diagnostics
+      6 │ + type·Item10·{·id:·ID!·}
+    7 7 │   
+  
+
+```

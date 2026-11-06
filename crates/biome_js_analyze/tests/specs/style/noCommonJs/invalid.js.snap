@@ -28,6 +28,8 @@ invalid.js:1:1 lint/style/noCommonJs ━━━━━━━━━━━━━━�
   
   i ESM-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
   
+  i Replace it with an import declaration, such as import name from "module".
+  
 
 ```
 
@@ -43,6 +45,8 @@ invalid.js:4:5 lint/style/noCommonJs ━━━━━━━━━━━━━━�
     6 │ 
   
   i ESM-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
+  
+  i Replace it with an import declaration, such as import name from "module".
   
 
 ```
@@ -61,6 +65,8 @@ invalid.js:7:1 lint/style/noCommonJs ━━━━━━━━━━━━━━�
   
   i ESM-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
   
+  i Replace it with an export declaration, such as export default value or export const name = value.
+  
 
 ```
 
@@ -75,6 +81,8 @@ invalid.js:8:1 lint/style/noCommonJs ━━━━━━━━━━━━━━�
     9 │ 
   
   i ESM-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
+  
+  i Replace it with an export declaration, such as export default value or export const name = value.
   
 
 ```

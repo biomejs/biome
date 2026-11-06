@@ -1,0 +1,42 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+extend type Account {
+  id: ID!
+}
+
+directive @auth on FIELD_DEFINITION
+
+fragment Fields on User {
+  id
+}
+
+enum Role {
+  ADMIN
+}
+
+type User {
+  id: ID!
+}
+
+type Zed {
+  id: ID!
+}
+
+mutation Zeta {
+  field
+}
+
+schema {
+  query: Query
+}
+
+{
+  field
+}
+
+```

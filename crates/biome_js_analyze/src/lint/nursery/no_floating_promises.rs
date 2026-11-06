@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
 };
 use biome_module_graph::type_inference::TypeInferenceClassification;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
@@ -295,31 +295,26 @@ impl Rule for NoFloatingPromises {
                         AnyJsName::JsName(make::js_name(make::ident("all"))),
                     ));
 
-                let call_expression = AnyJsExpression::JsCallExpression(
-                    make::js_call_expression(
-                        callee_expression,
-                        make::js_call_arguments(
-                            make::token(T!['(']),
-                            make::js_call_argument_list(
-                                [AnyJsCallArgument::AnyJsExpression(
-                                    expression.clone().trim_trivia()?,
-                                )],
-                                [],
+                mutation.wrap_node(expression, |expression| {
+                    let call_expression = AnyJsExpression::JsCallExpression(
+                        make::js_call_expression(
+                            callee_expression,
+                            make::js_call_arguments(
+                                make::token(T!['(']),
+                                make::js_call_argument_list(
+                                    [AnyJsCallArgument::AnyJsExpression(expression)],
+                                    [],
+                                ),
+                                make::token(T![')']),
                             ),
-                            make::token(T![')']),
-                        ),
-                    )
-                    .build(),
-                );
-
-                let await_expression =
+                        )
+                        .build(),
+                    );
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-                        make::token(JsSyntaxKind::AWAIT_KW)
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                         call_expression,
-                    ));
-
-                mutation.replace_node(expression, await_expression);
+                    ))
+                });
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -328,14 +323,12 @@ impl Rule for NoFloatingPromises {
                 ))
             }
             NoFloatingPromisesState::UnhandledPromise => {
-                let await_expression =
+                mutation.wrap_node(expression, |expression| {
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-                        make::token(JsSyntaxKind::AWAIT_KW)
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        expression.clone().trim_comments_and_trivia()?,
-                    ));
-
-                mutation.replace_node_transfer_trivia(expression, await_expression);
+                        make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
+                        expression,
+                    ))
+                });
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),

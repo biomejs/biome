@@ -115,6 +115,10 @@ invalid.ts:4:19 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     5 │   export function foo_declare(sn: string | number): void;
     6 │ }
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -129,6 +133,10 @@ invalid.ts:12:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
        │   ^^^^^^^^
     13 │ };
     14 │ 
+  
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
   
 
 ```
@@ -145,6 +153,10 @@ invalid.ts:19:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     20 │ }
     21 │ 
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -159,6 +171,10 @@ invalid.ts:26:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
        │   ^^^^
     27 │ }
     28 │ 
+  
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
   
 
 ```
@@ -175,6 +191,10 @@ invalid.ts:32:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     33 │   fooB(sn: string | number): void {};
     34 │ }
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -190,7 +210,7 @@ invalid.ts:40:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     41 │   fooC(s: string): void;
     42 │   fooC(sn: string | number): void {};
   
-  i All fooC signatures must be adjacent.
+  i Another fooC signature is declared here.
   
     39 │   fooC(s: string): void;
     40 │   barC(): void {};
@@ -199,7 +219,7 @@ invalid.ts:40:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     42 │   fooC(sn: string | number): void {};
     43 │   barC(): void {};
   
-  i All barC signatures must be adjacent.
+  i Another barC signature is declared here.
   
     41 │   fooC(s: string): void;
     42 │   fooC(sn: string | number): void {};
@@ -207,6 +227,10 @@ invalid.ts:40:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
        │   ^^^^
     44 │ }
     45 │ 
+  
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
   
 
 ```
@@ -223,6 +247,10 @@ invalid.ts:50:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     51 │   fooD(sn: string | number): void {};
     52 │   fooD(sn: string | number): void {};
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -237,6 +265,10 @@ invalid.ts:58:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
        │   ^^^^
     59 │   fooE(sn: string | number): void {};
     60 │ }
+  
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
   
 
 ```
@@ -253,6 +285,10 @@ invalid.ts:65:10 lint/suspicious/useAdjacentOverloadSignatures ━━━━━�
     66 │   static fooF(sn: string | number): void {};
     67 │ }
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -267,6 +303,10 @@ invalid.ts:72:17 lint/suspicious/useAdjacentOverloadSignatures ━━━━━�
        │                 ^^^
     73 │ 
     74 │ function f() {
+  
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
   
 
 ```
@@ -283,6 +323,10 @@ invalid.ts:78:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     79 │   }
     80 │ }
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -298,6 +342,10 @@ invalid.ts:86:5 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
     87 │   };
     88 │ }
   
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
+  
 
 ```
 
@@ -312,6 +360,10 @@ invalid.ts:93:3 lint/suspicious/useAdjacentOverloadSignatures ━━━━━━
        │   ^^^^^^^^^
     94 │ } {
     95 │ }
+  
+  i Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations.
+  
+  i Move the signatures so that they are directly next to each other.
   
 
 ```

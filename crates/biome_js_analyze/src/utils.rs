@@ -1,9 +1,16 @@
-use biome_js_syntax::{AnyJsExpression, JsBinaryExpression, JsSyntaxNode, inner_string_text};
+use biome_js_syntax::{
+    AnyJsExpression, JsBinaryExpression, JsSyntaxNode, JsUnaryOperator, inner_string_text,
+};
 use biome_rowan::{AstNode, Direction, WalkEvent};
+use rustc_hash::FxHasher;
+use std::hash::{Hash, Hasher};
 use std::iter;
 
 pub mod batch;
+pub mod function_return;
+pub mod indexed_collection;
 pub mod rename;
+pub mod same_reference;
 #[cfg(test)]
 pub mod tests;
 
@@ -37,6 +44,21 @@ pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> boo
         }
     }
     true
+}
+
+/// Hashes the kinds and inner token texts that [is_node_equal] compares, so nodes that
+/// [is_node_equal] considers equal have the same hash.
+pub(crate) fn node_hash(node: &JsSyntaxNode) -> u64 {
+    let mut hasher = FxHasher::default();
+    for event in node.preorder_with_tokens(Direction::Next) {
+        if let WalkEvent::Enter(element) = event {
+            element.kind().hash(&mut hasher);
+            if let Some(token) = element.as_token() {
+                inner_string_text(token).text().hash(&mut hasher);
+            }
+        }
+    }
+    hasher.finish()
 }
 
 #[derive(Debug, PartialEq)]
@@ -126,6 +148,25 @@ pub(crate) fn parse_package_name(path: &str) -> Option<&str> {
         None
     } else {
         Some(path)
+    }
+}
+
+/// Returns the value of a number literal, looking through parentheses, TypeScript type
+/// wrappers, and unary `+` and `-`.
+pub(crate) fn static_number_value(expression: &AnyJsExpression) -> Option<f64> {
+    match expression.clone().omit_type_wrappers()? {
+        AnyJsExpression::AnyJsLiteralExpression(literal) => {
+            literal.as_js_number_literal_expression()?.as_number()
+        }
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            let value = static_number_value(&unary.argument().ok()?)?;
+            match unary.operator().ok()? {
+                JsUnaryOperator::Minus => Some(-value),
+                JsUnaryOperator::Plus => Some(value),
+                _ => None,
+            }
+        }
+        _ => None,
     }
 }
 

@@ -1,0 +1,76 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: semicolon.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+div {
+  color: red;
+  display: block // Display comment.
+}
+
+.compact {color: red;
+  display: block // Display comment.
+}
+
+```
+
+# Diagnostics
+```
+semicolon.scss:2:5 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ div {
+      │     ^
+  > 3 │   color: red;
+  > 4 │   display: block // Display comment.
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ .compact {color: red;
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   div {
+     3    │ - ··color:·red;
+     4    │ - ··display:·block·//·Display·comment.
+        3 │ + ··display:·block;·//·Display·comment.
+        4 │ + ··color:·red;
+     5  5 │   }
+     6  6 │   
+  
+
+```
+
+```
+semicolon.scss:7:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     5 │ }
+     6 │ 
+   > 7 │ .compact {color: red;
+       │          ^^^^^^^^^^^^
+   > 8 │   display: block // Display comment.
+   > 9 │ }
+       │ ^
+    10 │ 
+  
+  i Safe fix: Sort these properties
+  
+     5  5 │   }
+     6  6 │   
+     7    │ - .compact·{color:·red;
+     8    │ - ··display:·block·//·Display·comment.
+        7 │ + .compact·{
+        8 │ + ··display:·block;·//·Display·comment.
+        9 │ + color:·red;
+     9 10 │   }
+    10 11 │   
+  
+
+```

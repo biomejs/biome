@@ -88,7 +88,10 @@ impl Rule for NoOctalEscape {
             markup! {
                 "Don't use deprecated "<Emphasis>"octal escape sequences"</Emphasis>"."
             },
-        ))
+        )
+        .note(markup! {
+            "Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals."
+        }))
     }
 
     fn action(

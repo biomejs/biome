@@ -1,0 +1,15 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "no-unused-vars": ["error", { "ignoreUsingDeclarations": true }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "ignoreRestSiblings": true,
+          "ignoreUsingDeclarations": true
+        }
+      ]
+    }
+  }
+}

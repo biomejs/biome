@@ -317,7 +317,13 @@ impl Rule for NoUnsafeOptionalChaining {
             .detail(
                 range,
                 "If it short-circuits with 'undefined' the evaluation will throw TypeError here:",
-            ),
+            )
+            .note(markup! {
+                "Optional chaining produces "<Emphasis>"undefined"</Emphasis>" when the value before "<Emphasis>"?."</Emphasis>" is "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>", and this operation does not accept "<Emphasis>"undefined"</Emphasis>"."
+            })
+            .note(markup! {
+                "Provide a fallback value, for example "<Emphasis>"(a?.b ?? {})"</Emphasis>", or check that the value is defined before using it."
+            }),
         )
     }
 }

@@ -1,0 +1,4 @@
+@property --brand { syntax: "<color>"; inherits: true; initial-value: red; }
+@font-palette-values --theme { font-family: "Bixa"; }
+@position-try --corner { top: 0; }
+@custom-media --wide (width > 1px);

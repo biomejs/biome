@@ -7,12 +7,20 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make::{self, js_module_item_list};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsModuleItem, JsModuleItemList, JsSyntaxKind, JsVariableDeclarator,
-    JsVariableDeclaratorList, T,
+    AnyJsExpression, AnyJsModuleItem, AnyJsStatement, JsDebuggerStatement, JsEmptyStatement,
+    JsExport, JsExportNamedClause, JsImport, JsModuleItemList, JsSyntaxKind, JsVariableDeclarator,
+    JsVariableDeclaratorList, T, TsInterfaceDeclaration, TsModuleDeclaration,
+    TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText, TriviaPieceKind};
+use biome_parser::token_set;
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, TextRange, TokenText,
+    TriviaPieceKind,
+};
 use biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions;
+use either::Either;
 use rustc_hash::FxHashMap;
+use smallvec::SmallVec;
 
 use crate::JsRuleAction;
 use biome_languages::JsFileSource;
@@ -132,121 +140,62 @@ impl Rule for UseVueDefineMacrosOrder {
             .map(|(idx, s)| (s, idx))
             .collect();
 
-        struct FoundMacro {
-            order_index: usize,
-            fixable_statement_index: Option<usize>,
-            range: TextRange,
-            has_out_of_order_content_prior: bool,
-        }
-
         let mut non_macro_found = false;
         let mut skippable_top_statements_end_index = 0;
-        let mut found_macro: Option<FoundMacro> = None;
+        let mut previous_order_index = 0;
+        let mut first_issue = None;
+        let mut macro_statements = SmallVec::new();
+        let mut fixable = true;
 
         for (index, statement) in ctx.query().into_iter().enumerate() {
             if is_skippable_before_macro(&statement) {
-                if found_macro.is_none() && !non_macro_found {
+                if macro_statements.is_empty() && !non_macro_found {
                     skippable_top_statements_end_index = index + 1;
                 }
-
                 continue;
             }
 
-            if let Some(name) = get_name_from_call_expr(&statement)
-                && let Some(&order_index) = order_map.get(name.as_ref())
-            {
-                match &found_macro {
-                    None => {
-                        found_macro = Some(FoundMacro {
-                            order_index,
-                            fixable_statement_index: Some(index),
-                            range: statement.range(),
-                            has_out_of_order_content_prior: non_macro_found,
-                        });
-                    }
-                    Some(c) if order_index < c.order_index => {
-                        found_macro = Some(FoundMacro {
-                            order_index,
-                            fixable_statement_index: Some(index),
-                            range: statement.range(),
-                            has_out_of_order_content_prior: true,
-                        });
-                    }
-                    _ => {
-                        // Same/higher order, do nothing
-                    }
-                }
-            } else if let Some(declarators) = get_declarators_from_statement(&statement) {
-                // If there are multiple declarators, fixing is not trivial, so we won't suggest it.
-                let fixable_statement_index = if (&declarators).into_iter().count() == 1 {
-                    Some(index)
-                } else {
-                    None
+            let declarators = get_declarators_from_statement(&statement);
+            let single_declarator = declarators.as_ref().is_none_or(|list| list.len() == 1);
+            let calls = if let Some(declarators) = declarators {
+                Either::Left(declarators.into_iter().map(|declarator| {
+                    let declarator = declarator.ok()?;
+                    Some((get_name_from_declarator(&declarator), declarator.range()))
+                }))
+            } else {
+                Either::Right(std::iter::once(Some((
+                    get_name_from_call_expr(&statement),
+                    statement.range(),
+                ))))
+            };
+
+            for call in calls {
+                let Some((Some(name), range)) = call else {
+                    non_macro_found = true;
+                    continue;
+                };
+                let Some(&order_index) = order_map.get(name.as_ref()) else {
+                    non_macro_found = true;
+                    continue;
                 };
 
-                for declarator in declarators {
-                    let Some(declarator) = declarator.ok() else {
-                        non_macro_found = true;
-                        continue;
-                    };
-
-                    if let Some(name) = get_name_from_declarator(&declarator)
-                        && let Some(&order_index) = order_map.get(name.as_ref())
-                    {
-                        let range = declarator.range();
-                        match &found_macro {
-                            None => {
-                                found_macro = Some(FoundMacro {
-                                    order_index,
-                                    fixable_statement_index,
-                                    range,
-                                    has_out_of_order_content_prior: non_macro_found,
-                                });
-                            }
-                            Some(c) => {
-                                let has_out_of_order_content_prior = if order_index < c.order_index
-                                {
-                                    true
-                                } else {
-                                    c.has_out_of_order_content_prior || non_macro_found
-                                };
-
-                                found_macro = Some(FoundMacro {
-                                    order_index,
-                                    fixable_statement_index,
-                                    range,
-                                    has_out_of_order_content_prior,
-                                });
-                            }
-                        }
-                    } else {
-                        non_macro_found = true;
-                    }
+                if first_issue.is_none() && (non_macro_found || order_index < previous_order_index)
+                {
+                    first_issue = Some((range, name));
                 }
-            } else {
-                non_macro_found = true;
+                previous_order_index = previous_order_index.max(order_index);
+                fixable &= single_declarator;
+                macro_statements.push((index, order_index));
             }
         }
 
-        if let Some(vue_macro) = found_macro
-            && vue_macro.has_out_of_order_content_prior
-        {
-            let name = ctx
-                .options()
-                .order_or_default()
-                .nth(vue_macro.order_index)
-                .expect("Valid index")
-                .into();
-            return Some(MacroOrderIssue {
-                range: vue_macro.range,
-                name,
-                move_from_to: vue_macro
-                    .fixable_statement_index
-                    .map(|index| (index, skippable_top_statements_end_index)),
-            });
-        }
-
-        None
+        let (range, name) = first_issue?;
+        Some(MacroOrderIssue {
+            range,
+            name,
+            macro_statements: fixable.then_some(macro_statements),
+            insert_at: skippable_top_statements_end_index,
+        })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -261,13 +210,12 @@ impl Rule for UseVueDefineMacrosOrder {
                 rule_category!(),
                 state.range,
                 markup! {
-                    <Emphasis>{state.name}</Emphasis>" macro is out of order."
+                    <Emphasis>{state.name.text()}</Emphasis>" macro is out of order."
                 },
             )
             .note(markup! {
                 "Macros defined in <script setup> should be ordered as follows: "<Emphasis>{pretty_order}</Emphasis>
             })
-            // and before skippable content
             .note(markup! {
                 "and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements."
             }),
@@ -275,30 +223,58 @@ impl Rule for UseVueDefineMacrosOrder {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let (from, to) = state.move_from_to?;
-
+        let macro_statements = state.macro_statements.as_ref()?;
         let root = ctx.query();
         let mut mutation = root.clone().begin();
+        let mut statements: Vec<_> = root.into_iter().map(Some).collect();
+        let mut macros: Vec<_> = macro_statements
+            .iter()
+            .map(|&(index, order)| Some((order, statements[index].take()?)))
+            .collect::<Option<_>>()?;
+        macros.sort_by_key(|(order, _)| *order);
 
-        let mut statements: Vec<AnyJsModuleItem> = root.into_iter().collect();
-        let statement = statements.remove(from);
+        let mut reordered: Vec<_> = statements.drain(..state.insert_at).flatten().collect();
+        reordered.extend(macros.into_iter().map(|(_, statement)| statement));
+        reordered.extend(statements.into_iter().flatten());
 
-        // Need to add newline after the moved statement, because it may not have one.
-        let trailing_trivia = make::token(T![;])
+        let newline = make::token(T![;])
             .with_trailing_trivia([(TriviaPieceKind::Newline, "\n")])
-            .trailing_trivia()
-            .pieces();
+            .trailing_trivia();
+        for index in 1..reordered.len() {
+            // New neighbors must not turn separate statements into a call or other expression.
+            if token_set![
+                T!['('],
+                T!['['],
+                T!['`'],
+                T![+],
+                T![-],
+                T![<],
+                JsSyntaxKind::JS_REGEX_LITERAL
+            ]
+            .contains(reordered[index].syntax().first_token()?.kind())
+            {
+                reordered[index - 1] = terminate_statement(&reordered[index - 1])?;
+            }
+            let trailing = reordered[index - 1].syntax().last_trailing_trivia()?;
+            let leading = reordered[index].syntax().first_leading_trivia()?;
+            if !trailing.pieces().any(|piece| piece.is_newline())
+                && !leading
+                    .pieces()
+                    .take_while(|piece| !piece.is_comments())
+                    .any(|piece| piece.is_newline())
+            {
+                reordered[index] = reordered[index]
+                    .clone()
+                    .prepend_trivia_pieces(newline.pieces())?;
+            }
+        }
 
-        let statement = statement.with_trailing_trivia_pieces(trailing_trivia)?;
-        statements.insert(to, statement);
-
-        let new_modules_list = js_module_item_list(statements);
-        mutation.replace_node(root.clone(), new_modules_list);
+        mutation.replace_node_discard_trivia(root.clone(), js_module_item_list(reordered));
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Reorder macro "<Emphasis>{state.name}</Emphasis>"." }.to_owned(),
+            markup! { "Reorder compiler macros." }.to_owned(),
             mutation,
         ))
     }
@@ -306,8 +282,9 @@ impl Rule for UseVueDefineMacrosOrder {
 
 pub struct MacroOrderIssue {
     range: TextRange,
-    name: Box<str>,
-    move_from_to: Option<(usize, usize)>,
+    name: TokenText,
+    macro_statements: Option<SmallVec<[(usize, usize); 4]>>,
+    insert_at: usize,
 }
 
 fn get_name_from_call_expr(item: &AnyJsModuleItem) -> Option<TokenText> {
@@ -354,17 +331,55 @@ fn get_possible_macro_name(expr: &AnyJsExpression) -> Option<TokenText> {
     Some(name)
 }
 
-/// What can appear before the macro without causing a violation.
+fn terminate_statement(statement: &AnyJsModuleItem) -> Option<AnyJsModuleItem> {
+    // Keep this local mutation from rebuilding the enclosing module.
+    let statement = statement.clone_subtree();
+    let Some(terminal) = statement
+        .syntax()
+        .last_token()?
+        .parent()?
+        .ancestors()
+        .find_map(AnyJsStatement::cast)
+    else {
+        return Some(statement);
+    };
+    let trailing = terminal.syntax().last_trailing_trivia()?;
+    let semicolon = make::token(T![;]).with_trailing_trivia_pieces(trailing.pieces());
+    let new_terminal = match terminal.clone() {
+        AnyJsStatement::JsExpressionStatement(terminal) if terminal.semicolon_token().is_none() => {
+            terminal
+                .with_trailing_trivia_pieces([])?
+                .with_semicolon_token(Some(semicolon))
+                .into()
+        }
+        AnyJsStatement::JsVariableStatement(terminal) if terminal.semicolon_token().is_none() => {
+            terminal
+                .with_trailing_trivia_pieces([])?
+                .with_semicolon_token(Some(semicolon))
+                .into()
+        }
+        AnyJsStatement::JsThrowStatement(terminal) if terminal.semicolon_token().is_none() => {
+            terminal
+                .with_trailing_trivia_pieces([])?
+                .with_semicolon_token(Some(semicolon))
+                .into()
+        }
+        _ => return Some(statement),
+    };
+    let mut mutation = statement.begin();
+    mutation.replace_node_discard_trivia(terminal, new_terminal);
+    AnyJsModuleItem::cast(mutation.commit())
+}
+
+/// Statements allowed before or between compiler macros.
 fn is_skippable_before_macro(item: &AnyJsModuleItem) -> bool {
-    matches!(
-        item.syntax().kind(),
-        JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
-            | JsSyntaxKind::TS_INTERFACE_DECLARATION
-            | JsSyntaxKind::TS_MODULE_DECLARATION
-            | JsSyntaxKind::JS_DEBUGGER_STATEMENT
-            | JsSyntaxKind::JS_EMPTY_STATEMENT
-            | JsSyntaxKind::JS_IMPORT
-            | JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE
-            | JsSyntaxKind::JS_EXPORT
-    )
+    const SKIPPABLE: SyntaxKindSet<biome_js_syntax::JsLanguage> = TsTypeAliasDeclaration::KIND_SET
+        .union(TsInterfaceDeclaration::KIND_SET)
+        .union(TsModuleDeclaration::KIND_SET)
+        .union(JsDebuggerStatement::KIND_SET)
+        .union(JsEmptyStatement::KIND_SET)
+        .union(JsImport::KIND_SET)
+        .union(JsExportNamedClause::KIND_SET)
+        .union(JsExport::KIND_SET);
+    SKIPPABLE.matches(item.syntax().kind())
 }

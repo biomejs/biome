@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noVueRestrictedVOn": {
+          "level": "on",
+          "options": {
+            "listeners": [
+              { "event": "focusin" },
+              { "event": "submit", "message": "Use the onSave prop instead." },
+              {},
+              { "event": "click", "modifiers": ["prevent"] },
+              { "event": "click", "element": "MyButton" },
+              { "event": "keyup", "modifiers": ["enter", "ctrl"], "element": "input" },
+              { "event": "select", "element": "Foo.Bar" },
+              { "event": "update:modelValue" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

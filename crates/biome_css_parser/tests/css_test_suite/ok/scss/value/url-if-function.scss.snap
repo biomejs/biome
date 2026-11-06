@@ -95,11 +95,13 @@ CssRoot {
                                                                     r_paren_token: R_PAREN@50..51 ")" [] [],
                                                                 },
                                                                 colon_token: COLON@51..53 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssString {
-                                                                        value_token: CSS_STRING_LITERAL@53..63 "\"dark.png\"" [] [],
-                                                                    },
-                                                                ],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssString {
+                                                                            value_token: CSS_STRING_LITERAL@53..63 "\"dark.png\"" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             },
                                                             SEMICOLON@63..65 ";" [] [Whitespace(" ")],
                                                             CssIfBranch {
@@ -107,11 +109,13 @@ CssRoot {
                                                                     else_token: ELSE_KW@65..69 "else" [] [],
                                                                 },
                                                                 colon_token: COLON@69..71 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssString {
-                                                                        value_token: CSS_STRING_LITERAL@71..82 "\"light.png\"" [] [],
-                                                                    },
-                                                                ],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssString {
+                                                                            value_token: CSS_STRING_LITERAL@71..82 "\"light.png\"" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@82..83 ")" [] [],
@@ -163,11 +167,13 @@ CssRoot {
                                                                     r_paren_token: R_PAREN@117..118 ")" [] [],
                                                                 },
                                                                 colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssString {
-                                                                        value_token: CSS_STRING_LITERAL@120..130 "\"dark.png\"" [] [],
-                                                                    },
-                                                                ],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssString {
+                                                                            value_token: CSS_STRING_LITERAL@120..130 "\"dark.png\"" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             },
                                                         ],
                                                         r_paren_token: R_PAREN@130..131 ")" [] [],
@@ -222,11 +228,13 @@ CssRoot {
                                                                     },
                                                                 },
                                                                 colon_token: COLON@170..172 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssString {
-                                                                        value_token: CSS_STRING_LITERAL@172..183 "\"light.png\"" [] [],
-                                                                    },
-                                                                ],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssString {
+                                                                            value_token: CSS_STRING_LITERAL@172..183 "\"light.png\"" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             },
                                                             SEMICOLON@183..185 ";" [] [Whitespace(" ")],
                                                             CssIfBranch {
@@ -234,11 +242,13 @@ CssRoot {
                                                                     else_token: ELSE_KW@185..189 "else" [] [],
                                                                 },
                                                                 colon_token: COLON@189..191 ":" [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssString {
-                                                                        value_token: CSS_STRING_LITERAL@191..201 "\"dark.png\"" [] [],
-                                                                    },
-                                                                ],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssString {
+                                                                            value_token: CSS_STRING_LITERAL@191..201 "\"dark.png\"" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             },
                                                             SEMICOLON@201..202 ";" [] [],
                                                         ],
@@ -382,17 +392,19 @@ CssRoot {
                                           0: IDENT@46..50 "dark" [] []
                                   3: R_PAREN@50..51 ")" [] []
                                 1: COLON@51..53 ":" [] [Whitespace(" ")]
-                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@53..63
-                                  0: CSS_STRING@53..63
-                                    0: CSS_STRING_LITERAL@53..63 "\"dark.png\"" [] []
+                                2: SCSS_EXPRESSION@53..63
+                                  0: SCSS_EXPRESSION_ITEM_LIST@53..63
+                                    0: CSS_STRING@53..63
+                                      0: CSS_STRING_LITERAL@53..63 "\"dark.png\"" [] []
                               1: SEMICOLON@63..65 ";" [] [Whitespace(" ")]
                               2: CSS_IF_BRANCH@65..82
                                 0: CSS_ELSE_KEYWORD@65..69
                                   0: ELSE_KW@65..69 "else" [] []
                                 1: COLON@69..71 ":" [] [Whitespace(" ")]
-                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@71..82
-                                  0: CSS_STRING@71..82
-                                    0: CSS_STRING_LITERAL@71..82 "\"light.png\"" [] []
+                                2: SCSS_EXPRESSION@71..82
+                                  0: SCSS_EXPRESSION_ITEM_LIST@71..82
+                                    0: CSS_STRING@71..82
+                                      0: CSS_STRING_LITERAL@71..82 "\"light.png\"" [] []
                             3: R_PAREN@82..83 ")" [] []
                       3: CSS_URL_MODIFIER_LIST@83..83
                       4: R_PAREN@83..84 ")" [] []
@@ -427,9 +439,10 @@ CssRoot {
                                           0: IDENT@113..117 "dark" [] []
                                   3: R_PAREN@117..118 ")" [] []
                                 1: COLON@118..120 ":" [] [Whitespace(" ")]
-                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@120..130
-                                  0: CSS_STRING@120..130
-                                    0: CSS_STRING_LITERAL@120..130 "\"dark.png\"" [] []
+                                2: SCSS_EXPRESSION@120..130
+                                  0: SCSS_EXPRESSION_ITEM_LIST@120..130
+                                    0: CSS_STRING@120..130
+                                      0: CSS_STRING_LITERAL@120..130 "\"dark.png\"" [] []
                             3: R_PAREN@130..131 ")" [] []
                       3: CSS_URL_MODIFIER_LIST@131..131
                       4: R_PAREN@131..132 ")" [] []
@@ -466,17 +479,19 @@ CssRoot {
                                             0: IDENT@165..169 "dark" [] []
                                     3: R_PAREN@169..170 ")" [] []
                                 1: COLON@170..172 ":" [] [Whitespace(" ")]
-                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@172..183
-                                  0: CSS_STRING@172..183
-                                    0: CSS_STRING_LITERAL@172..183 "\"light.png\"" [] []
+                                2: SCSS_EXPRESSION@172..183
+                                  0: SCSS_EXPRESSION_ITEM_LIST@172..183
+                                    0: CSS_STRING@172..183
+                                      0: CSS_STRING_LITERAL@172..183 "\"light.png\"" [] []
                               1: SEMICOLON@183..185 ";" [] [Whitespace(" ")]
                               2: CSS_IF_BRANCH@185..201
                                 0: CSS_ELSE_KEYWORD@185..189
                                   0: ELSE_KW@185..189 "else" [] []
                                 1: COLON@189..191 ":" [] [Whitespace(" ")]
-                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@191..201
-                                  0: CSS_STRING@191..201
-                                    0: CSS_STRING_LITERAL@191..201 "\"dark.png\"" [] []
+                                2: SCSS_EXPRESSION@191..201
+                                  0: SCSS_EXPRESSION_ITEM_LIST@191..201
+                                    0: CSS_STRING@191..201
+                                      0: CSS_STRING_LITERAL@191..201 "\"dark.png\"" [] []
                               3: SEMICOLON@201..202 ";" [] []
                             3: R_PAREN@202..203 ")" [] []
                       3: CSS_URL_MODIFIER_LIST@203..203

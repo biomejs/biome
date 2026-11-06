@@ -11,4 +11,23 @@ expression: valid.scss
   background: url(if(false, "dark.png", "light.png"));
 }
 
+@function spacing_scale($multiplier) {
+  @return $multiplier * 4px;
+}
+
+.element {
+  color: lighten(black, 10%);
+  margin: spacing-scale(2);
+  padding: nth(1px 2px, 2);
+}
+
+.declared-later {
+  width: declared-after-use(2);
+  height: declared_after_use(3);
+}
+
+@function declared_after_use($value) {
+  @return $value * 1px;
+}
+
 ```

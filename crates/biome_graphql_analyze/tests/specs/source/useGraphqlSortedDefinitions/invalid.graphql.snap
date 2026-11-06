@@ -1,0 +1,59 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+type User {
+  id: ID!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+directive @auth on FIELD_DEFINITION
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:1 assist/source/useGraphqlSortedDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The definitions of this document are not sorted.
+  
+     1 │ # should generate diagnostics
+   > 2 │ type User {
+       │ ^^^^^^^^^^^
+   > 3 │   id: ID!
+   > 4 │ }
+        ...
+   > 9 │ }
+  > 10 │ 
+  > 11 │ directive @auth on FIELD_DEFINITION
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Safe fix: Sort the definitions.
+  
+     1    │ - #·should·generate·diagnostics
+     2    │ - type·User·{
+     3    │ - ··id:·ID!
+     4    │ - }
+        1 │ + directive·@auth·on·FIELD_DEFINITION
+     5  2 │   
+     6  3 │   enum Role {
+    ····· │ 
+     9  6 │   }
+    10  7 │   
+    11    │ - directive·@auth·on·FIELD_DEFINITION
+        8 │ + #·should·generate·diagnostics
+        9 │ + type·User·{
+       10 │ + ··id:·ID!
+       11 │ + }
+    12 12 │   
+  
+
+```

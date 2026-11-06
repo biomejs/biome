@@ -91,24 +91,20 @@ CssRoot {
                             condition: CssMediaFeatureInParens {
                                 l_paren_token: L_PAREN@7..8 "(" [] [],
                                 feature: CssQueryFeatureBoolean {
-                                    name: ScssInterpolatedIdentifier {
-                                        items: ScssInterpolatedIdentifierPartList [
-                                            ScssInterpolation {
-                                                hash_token: HASH@8..9 "#" [] [],
-                                                l_curly_token: L_CURLY@9..10 "{" [] [],
-                                                value: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssVariable {
-                                                            dollar_token: DOLLAR@10..11 "$" [] [],
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@11..18 "feature" [] [],
-                                                            },
-                                                        },
-                                                    ],
+                                    name: ScssInterpolation {
+                                        hash_token: HASH@8..9 "#" [] [],
+                                        l_curly_token: L_CURLY@9..10 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@10..11 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@11..18 "feature" [] [],
+                                                    },
                                                 },
-                                                r_curly_token: R_CURLY@18..19 "}" [] [],
-                                            },
-                                        ],
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@18..19 "}" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@19..21 ")" [] [Whitespace(" ")],
@@ -175,24 +171,20 @@ CssRoot {
                             condition: CssMediaFeatureInParens {
                                 l_paren_token: L_PAREN@62..63 "(" [] [],
                                 feature: CssQueryFeaturePlain {
-                                    name: ScssInterpolatedIdentifier {
-                                        items: ScssInterpolatedIdentifierPartList [
-                                            ScssInterpolation {
-                                                hash_token: HASH@63..64 "#" [] [],
-                                                l_curly_token: L_CURLY@64..65 "{" [] [],
-                                                value: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssVariable {
-                                                            dollar_token: DOLLAR@65..66 "$" [] [],
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@66..73 "feature" [] [],
-                                                            },
-                                                        },
-                                                    ],
+                                    name: ScssInterpolation {
+                                        hash_token: HASH@63..64 "#" [] [],
+                                        l_curly_token: L_CURLY@64..65 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@65..66 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@66..73 "feature" [] [],
+                                                    },
                                                 },
-                                                r_curly_token: R_CURLY@73..74 "}" [] [],
-                                            },
-                                        ],
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@73..74 "}" [] [],
                                     },
                                     colon_token: COLON@74..76 ":" [] [Whitespace(" ")],
                                     value: ScssInterpolation {
@@ -1114,18 +1106,16 @@ CssRoot {
               0: CSS_MEDIA_FEATURE_IN_PARENS@7..21
                 0: L_PAREN@7..8 "(" [] []
                 1: CSS_QUERY_FEATURE_BOOLEAN@8..19
-                  0: SCSS_INTERPOLATED_IDENTIFIER@8..19
-                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@8..19
-                      0: SCSS_INTERPOLATION@8..19
-                        0: HASH@8..9 "#" [] []
-                        1: L_CURLY@9..10 "{" [] []
-                        2: SCSS_EXPRESSION@10..18
-                          0: SCSS_EXPRESSION_ITEM_LIST@10..18
-                            0: SCSS_VARIABLE@10..18
-                              0: DOLLAR@10..11 "$" [] []
-                              1: CSS_IDENTIFIER@11..18
-                                0: IDENT@11..18 "feature" [] []
-                        3: R_CURLY@18..19 "}" [] []
+                  0: SCSS_INTERPOLATION@8..19
+                    0: HASH@8..9 "#" [] []
+                    1: L_CURLY@9..10 "{" [] []
+                    2: SCSS_EXPRESSION@10..18
+                      0: SCSS_EXPRESSION_ITEM_LIST@10..18
+                        0: SCSS_VARIABLE@10..18
+                          0: DOLLAR@10..11 "$" [] []
+                          1: CSS_IDENTIFIER@11..18
+                            0: IDENT@11..18 "feature" [] []
+                    3: R_CURLY@18..19 "}" [] []
                 2: R_PAREN@19..21 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@21..53
           0: L_CURLY@21..22 "{" [] []
@@ -1167,18 +1157,16 @@ CssRoot {
               0: CSS_MEDIA_FEATURE_IN_PARENS@62..87
                 0: L_PAREN@62..63 "(" [] []
                 1: CSS_QUERY_FEATURE_PLAIN@63..85
-                  0: SCSS_INTERPOLATED_IDENTIFIER@63..74
-                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@63..74
-                      0: SCSS_INTERPOLATION@63..74
-                        0: HASH@63..64 "#" [] []
-                        1: L_CURLY@64..65 "{" [] []
-                        2: SCSS_EXPRESSION@65..73
-                          0: SCSS_EXPRESSION_ITEM_LIST@65..73
-                            0: SCSS_VARIABLE@65..73
-                              0: DOLLAR@65..66 "$" [] []
-                              1: CSS_IDENTIFIER@66..73
-                                0: IDENT@66..73 "feature" [] []
-                        3: R_CURLY@73..74 "}" [] []
+                  0: SCSS_INTERPOLATION@63..74
+                    0: HASH@63..64 "#" [] []
+                    1: L_CURLY@64..65 "{" [] []
+                    2: SCSS_EXPRESSION@65..73
+                      0: SCSS_EXPRESSION_ITEM_LIST@65..73
+                        0: SCSS_VARIABLE@65..73
+                          0: DOLLAR@65..66 "$" [] []
+                          1: CSS_IDENTIFIER@66..73
+                            0: IDENT@66..73 "feature" [] []
+                    3: R_CURLY@73..74 "}" [] []
                   1: COLON@74..76 ":" [] [Whitespace(" ")]
                   2: SCSS_INTERPOLATION@76..85
                     0: HASH@76..77 "#" [] []

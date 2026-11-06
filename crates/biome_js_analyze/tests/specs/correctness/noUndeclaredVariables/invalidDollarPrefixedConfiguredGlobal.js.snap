@@ -18,6 +18,10 @@ invalidDollarPrefixedConfiguredGlobal.js:1:1 lint/correctness/noUndeclaredVariab
       │ ^^^^
     2 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   

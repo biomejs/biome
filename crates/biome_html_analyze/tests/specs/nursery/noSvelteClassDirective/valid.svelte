@@ -1,0 +1,15 @@
+<!-- should not generate diagnostics -->
+
+<script>
+	let { active, isActive, color, props } = $props();
+</script>
+
+<div class="active"></div>
+<div class={{ active: isActive }}></div>
+<div class={{ active }}></div>
+<div class={["button", isActive && "active"]}></div>
+<div class={isActive ? "active" : "inactive"}></div>
+<div class={["button", props.class]}></div>
+<div style:color={color}></div>
+<div style:color></div>
+<input bind:value={color} />

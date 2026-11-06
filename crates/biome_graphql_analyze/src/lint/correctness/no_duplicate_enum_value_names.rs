@@ -1,14 +1,14 @@
-use biome_diagnostics::Severity;
-use std::collections::HashSet;
-
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_graphql_syntax::GraphqlEnumTypeDefinition;
-use biome_rowan::{AstNodeList, TextRange};
+use biome_rowan::AstNodeList;
 use biome_rule_options::no_duplicate_enum_value_names::NoDuplicateEnumValueNamesOptions;
 use biome_string_case::StrOnlyExtension;
+
+use crate::utils::{DuplicateName, collect_duplicate_names};
 
 declare_lint_rule! {
     /// Disallow duplicate names in GraphQL enums.
@@ -56,57 +56,46 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateEnumValueNames {
     type Query = Ast<GraphqlEnumTypeDefinition>;
-    type State = Vec<TextRange>;
-    type Signals = Option<Self::State>;
+    type State = DuplicateName;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateEnumValueNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        // We can't use TokenText (to minimize allocations) because of lowercasing and Cow can't be used in a HashSet
-        let mut found: HashSet<String> = HashSet::new();
-
-        let enum_values = node.enum_values()?;
-        let duplicates: Vec<TextRange> = enum_values
-            .values()
-            .iter()
-            .filter_map(|enum_value| {
-                if let Some(name) = enum_value.value().ok()
-                    && let Some(value_token) = name.value_token().ok()
-                {
-                    let string = value_token.token_text().to_lowercase_cow().to_string();
-                    if found.insert(string) {
-                        return None;
-                    } else {
-                        let range = value_token.text_range();
-                        return Some(range);
-                    }
-                }
-
-                None
-            })
-            .collect();
-
-        if duplicates.is_empty() {
-            None
-        } else {
-            Some(duplicates)
-        }
+        let Some(enum_values) = ctx.query().enum_values() else {
+            return Box::default();
+        };
+        // The key is lowercased because enum values are compared case-insensitively.
+        collect_duplicate_names(enum_values.values().iter().filter_map(|enum_value| {
+            let token = enum_value.value().ok()?.value_token().ok()?;
+            let name = token.token_text_trimmed();
+            Some((
+                name.to_lowercase_cow().into_owned(),
+                name,
+                token.text_trimmed_range(),
+            ))
+        }))
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateName {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
         let mut diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            state.first()?,
+            first,
             markup! {
-               "Duplicate enum value name."
+                "The enum value name \""<Emphasis>{name}</Emphasis>"\" is used more than once."
             },
         );
 
-        for range in &state[1..] {
+        for range in duplicates {
             diagnostic = diagnostic.detail(
                 range,
                 markup! {
-                    "Another duplicate enum value."
+                    "This value matches \""<Emphasis>{name}</Emphasis>"\" ignoring letter case."
                 },
             );
         }

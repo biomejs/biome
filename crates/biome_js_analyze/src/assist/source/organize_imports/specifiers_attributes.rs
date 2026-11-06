@@ -4,7 +4,7 @@ use biome_js_syntax::{
     AnyJsBinding, AnyJsImportAssertionEntry, JsExportNamedFromSpecifierList,
     JsExportNamedSpecifierList, JsImportAssertion, JsNamedImportSpecifiers, T, inner_string_text,
 };
-use biome_rowan::{AstNode, AstSeparatedElement, AstSeparatedList, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedElement, AstSeparatedList};
 use biome_rule_options::organize_imports::SortOrder;
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
@@ -69,7 +69,7 @@ pub fn sort_import_specifiers(
                 name.name_token().ok()?.token_text_trimmed(),
             ))
         },
-        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        || make::token(T![,]).with_trailing_space(),
         comparator,
     )
     .ok()?;
@@ -95,9 +95,7 @@ pub fn merge_import_specifiers(
         if separator.is_none() {
             node = node.trim_trailing_trivia()?;
         }
-        let separator = separator.unwrap_or_else(|| {
-            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
-        });
+        let separator = separator.unwrap_or_else(|| make::token(T![,]).with_trailing_space());
         nodes.push(node);
         separators.push(separator);
     }
@@ -149,7 +147,7 @@ pub fn sort_export_from_specifiers(
                 .ok()
                 .map(ComparableToken::new)
         },
-        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        || make::token(T![,]).with_trailing_space(),
         comparator,
     )
     .ok()?;
@@ -173,9 +171,7 @@ pub fn merge_export_from_specifiers(
         if separator.is_none() {
             node = node.trim_trailing_trivia()?;
         }
-        let separator = separator.unwrap_or_else(|| {
-            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
-        });
+        let separator = separator.unwrap_or_else(|| make::token(T![,]).with_trailing_space());
         nodes.push(node);
         separators.push(separator);
     }
@@ -229,7 +225,7 @@ pub fn sort_export_specifiers(
                 .ok()
                 .map(ComparableToken::new)
         },
-        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        || make::token(T![,]).with_trailing_space(),
         comparator,
     )
     .ok()?;
@@ -253,9 +249,7 @@ pub fn merge_export_specifiers(
         if separator.is_none() {
             node = node.trim_trailing_trivia()?;
         }
-        let separator = separator.unwrap_or_else(|| {
-            make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
-        });
+        let separator = separator.unwrap_or_else(|| make::token(T![,]).with_trailing_space());
         nodes.push(node);
         separators.push(separator);
     }
@@ -307,7 +301,7 @@ pub fn sort_attributes(
             };
             Some(ComparableToken::new(inner_string_text(&node.key().ok()?)))
         },
-        || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        || make::token(T![,]).with_trailing_space(),
         comparator,
     )
     .ok()?;

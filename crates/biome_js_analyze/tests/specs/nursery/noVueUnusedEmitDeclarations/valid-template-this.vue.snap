@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-template-this.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="this.$emit('bar')">Bar</button>
+</template>
+
+<script>
+export default {
+  emits: ["bar"],
+};
+</script>
+
+```

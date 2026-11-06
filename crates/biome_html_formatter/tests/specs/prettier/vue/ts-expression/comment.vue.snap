@@ -26,22 +26,15 @@ info: vue/ts-expression/comment.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,19 +1,14 @@
- <template>
-   <div
-     v-if="
--      // leading comment
--      isFolder(/* NOTE: I like pizza */ file)
--      // trailing comment
--    "
+@@ -5,15 +5,10 @@
+       isFolder(/* NOTE: I like pizza */ file)
+       // trailing comment
+     "
 -    :format="
 -      /* leading comment */ myFunc(
 -        /* NOTE: I like banana */ o as unknown,
 -      ) /* trailing comment */
-+            // leading comment
-+    isFolder(   /* NOTE: I like pizza */file)
-+    // trailing comment
-     "
+-    "
 +    :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
    >
      {{
@@ -59,9 +52,9 @@ info: vue/ts-expression/comment.vue
 <template>
   <div
     v-if="
-            // leading comment
-    isFolder(   /* NOTE: I like pizza */file)
-    // trailing comment
+      // leading comment
+      isFolder(/* NOTE: I like pizza */ file)
+      // trailing comment
     "
     :format="   /* leading comment */ myFunc( /* NOTE: I like banana */ o as unknown ) /* trailing comment */"
   >

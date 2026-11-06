@@ -78,6 +78,8 @@ logicalAndCases1.js:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     5 │ foo.bar && foo.bar.baz
     6 │ foo && foo()
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      2  2 │   
@@ -101,6 +103,8 @@ logicalAndCases1.js:5:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^
     6 │ foo && foo()
     7 │ foo.bar && foo.bar()
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -126,6 +130,8 @@ logicalAndCases1.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     7 │ foo.bar && foo.bar()
     8 │ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      4  4 │   foo && foo.bar
@@ -149,6 +155,8 @@ logicalAndCases1.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^
     8 │ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz
     9 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -174,6 +182,8 @@ logicalAndCases1.js:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
      9 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz
     10 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      6  6 │   foo && foo()
@@ -198,6 +208,8 @@ logicalAndCases1.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━�
     10 │ 
     11 │ // case with a jump (i.e. a non-nullish prop)
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      7  7 │   foo.bar && foo.bar()
@@ -220,6 +232,8 @@ logicalAndCases1.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ foo.bar && foo.bar.baz.buzz
     14 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -245,6 +259,8 @@ logicalAndCases1.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     14 │ 
     15 │ // case where for some reason there is a doubled up expression
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     11 11 │   // case with a jump (i.e. a non-nullish prop)
@@ -267,6 +283,8 @@ logicalAndCases1.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ foo.bar && foo.bar.baz && foo.bar.baz && foo.bar.baz.buzz
     18 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -292,6 +310,8 @@ logicalAndCases1.js:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     18 │ 
     19 │ // chained members with element access
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     15 15 │   // case where for some reason there is a doubled up expression
@@ -314,6 +334,8 @@ logicalAndCases1.js:20:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ 
     22 │ // case with a jump (i.e. a non-nullish prop)
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -338,6 +360,8 @@ logicalAndCases1.js:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     24 │ 
     25 │ // chained calls
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     21 21 │   
@@ -360,6 +384,8 @@ logicalAndCases1.js:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     27 │ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz()
     28 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz()
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -385,6 +411,8 @@ logicalAndCases1.js:27:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     28 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz()
     29 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     25 25 │   // chained calls
@@ -409,6 +437,8 @@ logicalAndCases1.js:28:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     29 │ 
     30 │ // case with a jump (i.e. a non-nullish prop)
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     26 26 │   foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz()
@@ -431,6 +461,8 @@ logicalAndCases1.js:31:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     32 │ foo.bar && foo.bar.baz.buzz()
     33 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -456,6 +488,8 @@ logicalAndCases1.js:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     33 │ 
     34 │ // case with a jump (i.e. a non-nullish prop)
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     30 30 │   // case with a jump (i.e. a non-nullish prop)
@@ -478,6 +512,8 @@ logicalAndCases1.js:35:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ 
     37 │ // case with a call expr inside the chain for some inefficient reason
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -502,6 +538,8 @@ logicalAndCases1.js:38:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     39 │ 
     40 │ // chained calls with element access
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     36 36 │   
@@ -524,6 +562,8 @@ logicalAndCases1.js:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ foo && foo.bar && foo.bar.baz && foo.bar.baz[buzz] && foo.bar.baz[buzz]()
     43 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -549,6 +589,8 @@ logicalAndCases1.js:42:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     43 │ 
     44 │ // (partially) pre-optional chained
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     40 40 │   // chained calls with element access
@@ -571,6 +613,8 @@ logicalAndCases1.js:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     46 │ foo && foo?.bar.baz && foo?.bar.baz[buzz]
     47 │ foo && foo?.() && foo?.().bar
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -596,6 +640,8 @@ logicalAndCases1.js:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     47 │ foo && foo?.() && foo?.().bar
     48 │ foo.bar && foo.bar?.() && foo.bar?.().baz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     46 │ foo·&&·foo?.bar.baz·&&·foo?.bar.baz[buzz]
@@ -615,6 +661,8 @@ logicalAndCases1.js:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     48 │ foo.bar && foo.bar?.() && foo.bar?.().baz
     49 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     47 │ foo·&&·foo?.()·&&·foo?.().bar
@@ -633,6 +681,8 @@ logicalAndCases1.js:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     48 │ foo.bar·&&·foo.bar?.()·&&·foo.bar?.().baz
@@ -650,6 +700,8 @@ logicalAndCases1.js:54:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^^^
     55 │ foo.bar && foo.bar.baz && bing
     56 │ foo && foo() && bing
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -675,6 +727,8 @@ logicalAndCases1.js:55:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     56 │ foo && foo() && bing
     57 │ foo.bar && foo.bar() && bing
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     53 53 │   // chained members
@@ -698,6 +752,8 @@ logicalAndCases1.js:56:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
        │ ^^^^^^^^^^^^
     57 │ foo.bar && foo.bar() && bing
     58 │ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && bing
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -723,6 +779,8 @@ logicalAndCases1.js:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     58 │ foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && bing
     59 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && bing
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     55 55 │   foo.bar && foo.bar.baz && bing
@@ -747,6 +805,8 @@ logicalAndCases1.js:58:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     59 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && bing
     60 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     56 56 │   foo && foo() && bing
@@ -769,6 +829,8 @@ logicalAndCases1.js:59:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
   > 59 │ foo.bar && foo.bar.baz && foo.bar.baz.buzz && bing
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     60 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   

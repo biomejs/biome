@@ -1,0 +1,98 @@
+/* should generate diagnostics */
+.margin-block {
+	margin-block-start: 1px;
+	color: red;
+	margin-block-end: 2px;
+}
+
+.margin-inline {
+	margin-inline-end: 4px;
+	margin-inline-start: 3px;
+}
+
+.padding-block {
+	padding-block-start: 1px;
+	padding-block-end: 2px;
+}
+
+.padding-inline {
+	padding-inline-start: 1px;
+	padding-inline-end: 2px;
+}
+
+.inset-block {
+	inset-block-start: 1px;
+	inset-block-end: 2px;
+}
+
+.inset-inline {
+	inset-inline-start: 1px;
+	inset-inline-end: 2px;
+}
+
+.scroll-margin-block {
+	scroll-margin-block-start: 1px;
+	scroll-margin-block-end: 2px;
+}
+
+.scroll-margin-inline {
+	scroll-margin-inline-start: 1px;
+	scroll-margin-inline-end: 2px;
+}
+
+.scroll-padding-block {
+	scroll-padding-block-start: 1px;
+	scroll-padding-block-end: 2px;
+}
+
+.scroll-padding-inline {
+	scroll-padding-inline-start: 1px;
+	scroll-padding-inline-end: 2px;
+}
+
+.border-block {
+	border-block-start: 1px solid blue;
+	border-block-end: 1px solid blue;
+}
+
+.border-inline {
+	border-inline-start: 1px solid blue;
+	border-inline-end: 1px solid blue;
+}
+
+.border-width {
+	border-block-start-width: 1px;
+	border-block-end-width: 2px;
+	border-inline-end-width: 4px;
+	border-inline-start-width: 3px;
+}
+
+.border-style {
+	border-block-start-style: solid;
+	border-block-end-style: dashed;
+	border-inline-start-style: double;
+	border-inline-end-style: dotted;
+}
+
+.border-color {
+	border-block-start-color: red;
+	border-block-end-color: blue;
+	border-inline-start-color: green;
+	border-inline-end-color: yellow;
+}
+
+.same-values-collapse {
+	margin-block-start: 1px;
+	margin-block-end: 1px;
+}
+
+.important {
+	border-block-start-width: 1px !important;
+	border-block-end-width: 2px !important;
+}
+
+.conflicting-physical-longhand {
+	margin-block-start: 1px;
+	margin-top: 2px;
+	margin-block-end: 3px;
+}

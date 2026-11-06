@@ -11,6 +11,7 @@ use biome_rowan::TextRange;
 use biome_rule_options::use_consistent_function_style::{
     FunctionStyle, UseConsistentFunctionStyleOptions,
 };
+use biome_rule_options::use_consistent_unicode_bom::UnicodeBom;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
@@ -133,9 +134,9 @@ impl AsRef<str> for IgnorePattern {
     }
 }
 impl biome_deserialize::Deserializable for IgnorePattern {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
@@ -186,12 +187,12 @@ impl GlobalConf {
     }
 }
 impl Deserializable for GlobalConf {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Qualifier)
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::Flag)
@@ -251,13 +252,13 @@ impl<T> IntoIterator for ShorthandVec<T> {
     }
 }
 impl<T: Deserializable> Deserializable for ShorthandVec<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         Some(Self(
-            if value.visitable_type()? == DeserializableType::Array {
+            if value.visitable_type(ctx)? == DeserializableType::Array {
                 Deserializable::deserialize(ctx, value, name)?
             } else {
                 Vec::from_iter([Deserializable::deserialize(ctx, value, name)?])
@@ -292,9 +293,9 @@ impl<T> From<Vec<T>> for NestableVec<T> {
     }
 }
 impl<T: Deserializable> Deserializable for NestableVec<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         value
@@ -311,19 +312,19 @@ impl<T> NestableVecVisitor<T> {
         Self { _ty: PhantomData }
     }
 }
-impl<T: Deserializable> DeserializationVisitor for NestableVecVisitor<T> {
+impl<S, T: Deserializable> DeserializationVisitor<S> for NestableVecVisitor<T> {
     type Output = Vec<T>;
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
     fn visit_array(
         self,
-        ctx: &mut dyn DeserializationContext,
-        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
         _range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
         let mut output = Vec::new();
         for item in items.flatten() {
-            if item.visitable_type()? == DeserializableType::Array {
+            if item.visitable_type(ctx)? == DeserializableType::Array {
                 output.extend(Vec::<T>::deserialize(ctx, &item, name)?);
             } else {
                 output.push(T::deserialize(ctx, &item, name)?);
@@ -373,21 +374,23 @@ impl<T: Default, U: Default> RuleConf<T, U> {
     }
 }
 impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable for RuleConf<T, U> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T, U>(PhantomData<(T, U)>);
-        impl<T: Deserializable + 'static, U: Deserializable + 'static> DeserializationVisitor
+        impl<S, T: Deserializable + 'static, U: Deserializable + 'static> DeserializationVisitor<S>
             for Visitor<T, U>
         {
             type Output = RuleConf<T, U>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                values: &mut dyn ExactSizeIterator<
+                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                >,
                 range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -432,7 +435,7 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
             }
         }
         if matches!(
-            value.visitable_type()?,
+            value.visitable_type(ctx)?,
             DeserializableType::Number | DeserializableType::Str
         ) {
             Deserializable::deserialize(ctx, value, name).map(RuleConf::Severity)
@@ -484,12 +487,12 @@ enum NumberOrString {
     String(String),
 }
 impl Deserializable for NumberOrString {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Str {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Str {
             Self::String(Deserializable::deserialize(ctx, value, name)?)
         } else {
             Self::Number(Deserializable::deserialize(ctx, value, name)?)
@@ -511,19 +514,19 @@ impl Deref for Rules {
     }
 }
 impl Deserializable for Rules {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<S> DeserializationVisitor<S> for Visitor {
             type Output = Rules;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut dyn DeserializationContext<State = S>,
+                members: &mut MapMembers<'_, S>,
                 _range: biome_rowan::TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -545,14 +548,36 @@ impl Deserializable for Rules {
                                 result.insert(Rule::ClassMethodsUseThis(conf));
                             }
                         }
+                        "eqeqeq" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::Eqeqeq(conf));
+                            }
+                        }
                         "func-style" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::FuncStyle(conf));
                             }
                         }
+                        "max-depth" => {
+                            // Migrating a limit that Biome can't represent with the default
+                            // maximum would change the behavior, so the rule isn't migrated.
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name)
+                                && !matches!(
+                                    conf,
+                                    RuleConf::Option(_, MaxDepthOptions::Unsupported)
+                                )
+                            {
+                                result.insert(Rule::MaxDepth(conf));
+                            }
+                        }
                         "max-nested-callbacks" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
+                            }
+                        }
+                        "max-statements" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::MaxStatements(conf));
                             }
                         }
                         "no-console" => {
@@ -568,6 +593,16 @@ impl Deserializable for Rules {
                         "no-restricted-globals" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
+                            }
+                        }
+                        "no-unused-vars" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::NoUnusedVars(conf));
+                            }
+                        }
+                        "unicode-bom" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicodeBom(conf));
                             }
                         }
                         // Eslint plugin rules with options that we handle
@@ -611,6 +646,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoShadow(conf));
                             }
                         }
+                        "@typescript-eslint/no-unused-vars" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptNoUnusedVars(conf));
+                            }
+                        }
                         "@typescript-eslint/no-base-to-string" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptNoBaseToString(conf));
@@ -619,6 +659,11 @@ impl Deserializable for Rules {
                         "@typescript-eslint/switch-exhaustiveness-check" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
+                            }
+                        }
+                        "svelte/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteBlockLang(conf));
                             }
                         }
                         "svelte/no-restricted-html-elements" => {
@@ -631,14 +676,34 @@ impl Deserializable for Rules {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
                             }
                         }
+                        "vue/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueBlockLang(conf));
+                            }
+                        }
                         "vue/no-restricted-html-elements" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::VueNoRestrictedHtmlElements(conf));
                             }
                         }
+                        "vue/no-undef-properties" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueNoUndefProperties(conf));
+                            }
+                        }
+                        "unicorn/consistent-json-file-read" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicornConsistentJsonFileRead(conf));
+                            }
+                        }
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
+                            }
+                        }
+                        "unused-imports/no-unused-vars" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnusedImportsNoUnusedVars(conf));
                             }
                         }
                         "unicorn/numeric-separators-style" => {
@@ -664,6 +729,50 @@ impl Deserializable for Rules {
     }
 }
 
+#[derive(Clone, Copy, Debug, Default, Deserializable)]
+pub(crate) enum EqeqeqMode {
+    #[default]
+    Always,
+    Smart,
+    #[deserializable(rename = "allow-null")]
+    AllowNull,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserializable)]
+pub(crate) struct EqeqeqNullOptions {
+    null: Option<EqeqeqNullMode>,
+}
+
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum EqeqeqNullMode {
+    Always,
+    Ignore,
+    Never,
+}
+
+impl From<RuleConf<EqeqeqMode, EqeqeqNullOptions>>
+    for biome_rule_options::no_double_equals::NoDoubleEqualsOptions
+{
+    fn from(value: RuleConf<EqeqeqMode, EqeqeqNullOptions>) -> Self {
+        let (mode, null_options) = match value {
+            RuleConf::Option(_, mode) => (mode, EqeqeqNullOptions::default()),
+            RuleConf::Options(_, mode, options) => (mode, options),
+            _ => (EqeqeqMode::default(), EqeqeqNullOptions::default()),
+        };
+        // Biome cannot express smart's literal/typeof exceptions or require loose null equality.
+        let ignore_null = match mode {
+            EqeqeqMode::Always => matches!(
+                null_options.null,
+                Some(EqeqeqNullMode::Ignore | EqeqeqNullMode::Never)
+            ),
+            EqeqeqMode::Smart | EqeqeqMode::AllowNull => true,
+        };
+        Self {
+            ignore_null: Some(ignore_null),
+        }
+    }
+}
+
 #[derive(Debug, Default, Deserializable)]
 pub struct NoConsoleOptions {
     /// Allowed calls on the console object.
@@ -673,6 +782,166 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
     fn from(val: NoConsoleOptions) -> Self {
         Self {
             allow: (!val.allow.is_empty()).then_some(val.allow),
+        }
+    }
+}
+
+/// Options of `no-unused-vars`, shared by `@typescript-eslint/no-unused-vars`
+/// and `unused-imports/no-unused-vars`.
+///
+/// Only the options with a Biome equivalent are kept.
+/// The `*IgnorePattern` options are regular expressions,
+/// whereas Biome's `ignore` option only matches exact names.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct NoUnusedVarsOptions {
+    pub(crate) ignore_rest_siblings: Option<bool>,
+    pub(crate) ignore_using_declarations: Option<bool>,
+}
+
+/// How a base configuration configures one of the `no-unused-vars` rules.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct BaseNoUnusedVarsRule {
+    /// Whether the base configuration enables the rule.
+    pub(crate) is_enabled: bool,
+    /// The options that the base configuration provides for the rule, even if it disables it.
+    pub(crate) options: Option<NoUnusedVarsOptions>,
+}
+
+impl BaseNoUnusedVarsRule {
+    fn new(conf: &RuleConf<NoUnusedVarsOptions>) -> Self {
+        Self {
+            is_enabled: !matches!(conf.severity(), Severity::Off),
+            options: match conf {
+                RuleConf::Option(_, options) => Some(*options),
+                _ => None,
+            },
+        }
+    }
+}
+
+/// How a base configuration configures each of the `no-unused-vars` rules.
+///
+/// ESLint keeps the options of a rule when a configuration that applies on top of the base one
+/// only sets the severity of that rule.
+/// The options of the other rules are not inherited, even if they migrate to the same Biome rule.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct BaseNoUnusedVarsRules {
+    eslint: BaseNoUnusedVarsRule,
+    typescript: BaseNoUnusedVarsRule,
+    unused_imports: BaseNoUnusedVarsRule,
+}
+
+impl BaseNoUnusedVarsRules {
+    /// Returns how the base configuration configures the ESLint rule `eslint_name`.
+    pub(crate) fn get(&self, eslint_name: &str) -> BaseNoUnusedVarsRule {
+        match eslint_name {
+            "no-unused-vars" => self.eslint,
+            "@typescript-eslint/no-unused-vars" => self.typescript,
+            "unused-imports/no-unused-vars" => self.unused_imports,
+            _ => BaseNoUnusedVarsRule::default(),
+        }
+    }
+}
+
+impl Rules {
+    pub(crate) fn eqeqeq_options(&self) -> Option<(EqeqeqMode, EqeqeqNullOptions)> {
+        self.0.iter().find_map(|rule| match rule {
+            Rule::Eqeqeq(RuleConf::Option(_, mode)) => Some((*mode, EqeqeqNullOptions::default())),
+            Rule::Eqeqeq(RuleConf::Options(_, mode, options)) => Some((*mode, *options)),
+            Rule::Eqeqeq(_) => Some((EqeqeqMode::default(), EqeqeqNullOptions::default())),
+            _ => None,
+        })
+    }
+
+    pub(crate) fn inherit_eqeqeq_options(&mut self, base: Option<(EqeqeqMode, EqeqeqNullOptions)>) {
+        let Some((mode, options)) = base else {
+            return;
+        };
+        let rule = self
+            .0
+            .extract_if(|rule| matches!(rule, Rule::Eqeqeq(RuleConf::Severity(_))))
+            .next();
+        if let Some(Rule::Eqeqeq(RuleConf::Severity(severity))) = rule {
+            self.0
+                .insert(Rule::Eqeqeq(RuleConf::Options(severity, mode, options)));
+        }
+    }
+
+    /// Returns how these rules configure each of the `no-unused-vars` rules.
+    pub(crate) fn base_no_unused_vars_rules(&self) -> BaseNoUnusedVarsRules {
+        let mut result = BaseNoUnusedVarsRules::default();
+        for rule in &self.0 {
+            match rule {
+                Rule::NoUnusedVars(conf) => result.eslint = BaseNoUnusedVarsRule::new(conf),
+                Rule::TypeScriptNoUnusedVars(conf) => {
+                    result.typescript = BaseNoUnusedVarsRule::new(conf);
+                }
+                Rule::UnusedImportsNoUnusedVars(conf) => {
+                    result.unused_imports = BaseNoUnusedVarsRule::new(conf);
+                }
+                _ => {}
+            }
+        }
+        result
+    }
+}
+
+impl NoUnusedVarsOptions {
+    const ESLINT_DEFAULT_IGNORE_REST_SIBLINGS: bool = false;
+    const ESLINT_DEFAULT_IGNORE_USING_DECLARATIONS: bool = false;
+}
+
+impl Deserializable for NoUnusedVarsOptions {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        // The string form (`"all"` or `"local"`) only sets `vars`, which has no Biome equivalent.
+        if value.visitable_type(ctx)? == DeserializableType::Str {
+            return Some(Self::default());
+        }
+
+        NoUnusedVarsObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct NoUnusedVarsObjectOptions {
+    ignore_rest_siblings: Option<bool>,
+    ignore_using_declarations: Option<bool>,
+}
+
+impl From<NoUnusedVarsObjectOptions> for NoUnusedVarsOptions {
+    fn from(value: NoUnusedVarsObjectOptions) -> Self {
+        Self {
+            ignore_rest_siblings: value.ignore_rest_siblings,
+            ignore_using_declarations: value.ignore_using_declarations,
+        }
+    }
+}
+
+/// ESLint replaces all the options of a rule when a configuration provides an options object,
+/// and applies its own defaults to the omitted ones.
+/// Every option is set explicitly, so Biome neither applies its own defaults
+/// nor inherits values from a base configuration.
+impl From<NoUnusedVarsOptions>
+    for biome_rule_options::no_unused_variables::NoUnusedVariablesOptions
+{
+    fn from(value: NoUnusedVarsOptions) -> Self {
+        Self {
+            ignore_rest_siblings: Some(
+                value
+                    .ignore_rest_siblings
+                    .unwrap_or(NoUnusedVarsOptions::ESLINT_DEFAULT_IGNORE_REST_SIBLINGS),
+            ),
+            ignore_using_declarations: Some(
+                value
+                    .ignore_using_declarations
+                    .unwrap_or(NoUnusedVarsOptions::ESLINT_DEFAULT_IGNORE_USING_DECLARATIONS),
+            ),
+            ignore: None,
         }
     }
 }
@@ -695,6 +964,67 @@ impl FuncStyleOptions {
     }
 }
 
+#[derive(Debug)]
+pub(crate) enum MaxDepthOptions {
+    /// The configured maximum, or `None` when ESLint uses its default.
+    Max(Option<u8>),
+    /// The options set a maximum that Biome can't represent.
+    ///
+    /// Deserialization reports a diagnostic for the invalid value.
+    Unsupported,
+}
+
+impl Deserializable for MaxDepthOptions {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        // Returning `None` would make `RuleConf` fall back to the severity alone,
+        // which migrates the rule with the default maximum.
+        let max = if value.visitable_type(ctx)? == DeserializableType::Number {
+            Deserializable::deserialize(ctx, value, name).map(Some)
+        } else {
+            MaxDepthObjectOptions::deserialize(ctx, value, name).map(MaxDepthObjectOptions::max)
+        };
+        Some(max.map_or(Self::Unsupported, Self::Max))
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxDepthObjectOptions {
+    #[deserializable(bail_on_error)]
+    max: Option<u8>,
+    #[deserializable(bail_on_error)]
+    maximum: Option<u8>,
+}
+
+impl MaxDepthObjectOptions {
+    fn max(self) -> Option<u8> {
+        // ESLint reads `maximum || max`: the deprecated `maximum` wins unless it is zero.
+        self.maximum.filter(|maximum| *maximum != 0).or(self.max)
+    }
+}
+
+impl MaxDepthOptions {
+    /// Returns the Biome options, or `None` if Biome can't represent the ESLint options.
+    pub(crate) fn into_biome_options(
+        self,
+    ) -> Option<biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions>
+    {
+        match self {
+            // ESLint and Biome share the same default maximum, so an omitted value is kept omitted.
+            Self::Max(max) => Some(
+                biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions {
+                    max,
+                    ignore_at_rules: None,
+                },
+            ),
+            Self::Unsupported => None,
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct MaxNestedCallbacksOptions {
     max: Option<u8>,
@@ -705,12 +1035,12 @@ impl MaxNestedCallbacksOptions {
 }
 
 impl Deserializable for MaxNestedCallbacksOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Number {
+        if value.visitable_type(ctx)? == DeserializableType::Number {
             return Some(Self {
                 max: Deserializable::deserialize(ctx, value, name),
             });
@@ -744,6 +1074,62 @@ impl From<MaxNestedCallbacksOptions>
                     .max
                     .unwrap_or(MaxNestedCallbacksOptions::ESLINT_DEFAULT_MAX),
             ),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct MaxStatementsOptions {
+    max: Option<u16>,
+}
+
+impl Deserializable for MaxStatementsOptions {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type(ctx)? == DeserializableType::Number {
+            return Some(Self {
+                max: Deserializable::deserialize(ctx, value, name),
+            });
+        }
+
+        MaxStatementsObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxStatementsObjectOptions {
+    max: Option<u16>,
+    maximum: Option<u16>,
+}
+
+impl From<MaxStatementsObjectOptions> for MaxStatementsOptions {
+    fn from(value: MaxStatementsObjectOptions) -> Self {
+        // ESLint gives precedence to the deprecated `maximum` option.
+        Self {
+            max: value.maximum.or(value.max),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxStatementsTopLevelOptions {
+    #[deserializable(rename = "ignoreTopLevelFunctions")]
+    ignore_top_level_functions: Option<bool>,
+}
+
+impl MaxStatementsOptions {
+    pub(crate) fn into_biome_options(
+        self,
+        top_level_options: Option<MaxStatementsTopLevelOptions>,
+    ) -> biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions
+    {
+        biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions {
+            max: self.max,
+            ignore_top_level_functions: top_level_options
+                .and_then(|options| options.ignore_top_level_functions),
         }
     }
 }
@@ -837,12 +1223,12 @@ impl NoRestrictedGlobal {
     }
 }
 impl Deserializable for NoRestrictedGlobal {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(NoRestrictedGlobal::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(NoRestrictedGlobal::WithMessage)
@@ -886,11 +1272,16 @@ pub(crate) enum Rule {
     // We use this to configure equivalent Bione's rules.
     ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
+    Eqeqeq(RuleConf<EqeqeqMode, EqeqeqNullOptions>),
     FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
+    MaxDepth(RuleConf<MaxDepthOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
+    MaxStatements(RuleConf<MaxStatementsOptions, MaxStatementsTopLevelOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
+    NoUnusedVars(RuleConf<NoUnusedVarsOptions>),
+    UnicodeBom(RuleConf<UnicodeBom>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
@@ -903,14 +1294,20 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    TypeScriptNoUnusedVars(RuleConf<NoUnusedVarsOptions>),
     TypeScriptSwitchExhaustivenessCheck(
         RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
     ),
+    SvelteBlockLang(RuleConf<eslint_svelte::BlockLangOptions>),
     SvelteNoRestrictedHtmlElements(RuleConf<eslint_svelte::RestrictedHtmlElement>),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
+    UnicornConsistentJsonFileRead(RuleConf<eslint_unicorn::ConsistentJsonFileReadOption>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
+    UnusedImportsNoUnusedVars(RuleConf<NoUnusedVarsOptions>),
+    VueBlockLang(RuleConf<eslint_vue::BlockLangOptions>),
     VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
+    VueNoUndefProperties(RuleConf<eslint_vue::NoUndefPropertiesOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
@@ -919,11 +1316,16 @@ impl Rule {
             Self::Any(name, _) => name.clone(),
             Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
+            Self::Eqeqeq(_) => Cow::Borrowed("eqeqeq"),
             Self::FuncStyle(_) => Cow::Borrowed("func-style"),
+            Self::MaxDepth(_) => Cow::Borrowed("max-depth"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
+            Self::MaxStatements(_) => Cow::Borrowed("max-statements"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
+            Self::NoUnusedVars(_) => Cow::Borrowed("no-unused-vars"),
+            Self::UnicodeBom(_) => Cow::Borrowed("unicode-bom"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::ReactForbidElements(_) => Cow::Borrowed("react/forbid-elements"),
@@ -941,22 +1343,30 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::TypeScriptNoUnusedVars(_) => Cow::Borrowed("@typescript-eslint/no-unused-vars"),
             Self::TypeScriptSwitchExhaustivenessCheck(_) => {
                 Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
             }
+            Self::SvelteBlockLang(_) => Cow::Borrowed("svelte/block-lang"),
             Self::SvelteNoRestrictedHtmlElements(_) => {
                 Cow::Borrowed("svelte/no-restricted-html-elements")
             }
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
             }
+            Self::UnicornConsistentJsonFileRead(_) => {
+                Cow::Borrowed("unicorn/consistent-json-file-read")
+            }
+            Self::VueBlockLang(_) => Cow::Borrowed("vue/block-lang"),
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
             }
+            Self::UnusedImportsNoUnusedVars(_) => Cow::Borrowed("unused-imports/no-unused-vars"),
             Self::VueNoRestrictedHtmlElements(_) => {
                 Cow::Borrowed("vue/no-restricted-html-elements")
             }
+            Self::VueNoUndefProperties(_) => Cow::Borrowed("vue/no-undef-properties"),
         }
     }
 }
@@ -988,6 +1398,23 @@ impl From<SvelteNoUnnecessaryStateWrapOptions>
             additional_reactive_classes: (!value.additional_reactive_classes.is_empty())
                 .then_some(value.additional_reactive_classes),
             allow_reassign: value.allow_reassign,
+        }
+    }
+}
+
+/// A value that is either a single item or an array of items.
+#[derive(Debug)]
+pub(crate) struct OneOrMany<T>(pub(crate) Vec<T>);
+impl<T: Deserializable> Deserializable for OneOrMany<T> {
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type(ctx)? == DeserializableType::Array {
+            Vec::deserialize(ctx, value, name).map(Self)
+        } else {
+            T::deserialize(ctx, value, name).map(|item| Self(vec![item]))
         }
     }
 }

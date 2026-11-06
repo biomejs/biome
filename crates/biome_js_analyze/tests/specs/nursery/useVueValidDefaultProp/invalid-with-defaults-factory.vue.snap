@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults-factory.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+withDefaults(defineProps<{ foo?: string; bar?: number }>(), {
+  foo: () => 123,
+  bar() {
+    return "bar";
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults-factory.vue:4:14 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop foo that doesn't match the type of the prop.
+  
+    2 │ /* should generate diagnostics */
+    3 │ withDefaults(defineProps<{ foo?: string; bar?: number }>(), {
+  > 4 │   foo: () => 123,
+      │              ^^^
+    5 │   bar() {
+    6 │     return "bar";
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults-factory.vue:6:12 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The function returns a default value for the prop bar that doesn't match the type of the prop.
+  
+    4 │   foo: () => 123,
+    5 │   bar() {
+  > 6 │     return "bar";
+      │            ^^^^^
+    7 │   },
+    8 │ });
+  
+  i The prop accepts Number.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

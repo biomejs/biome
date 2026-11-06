@@ -47,3 +47,9 @@ body { padding-left: 1px; @media (color) { color: blue; } padding: 2px; }
 body { font-size: var(--foo); @supports (font: -apple-system-body) {} font: sans-serif; }
 
 body { .child { padding-left: 1px; padding: 2px; } }
+
+:root { margin-top: 1px; --space-1: 4px; --space-2: 8px; margin: 0; }
+
+a { padding-right: 1px; padding-left: 1px; padding-right: 2px; padding: 0; }
+
+a { -webkit-margin-top: 1px; margin-left: 1px; margin: 0; -webkit-margin: 0; }

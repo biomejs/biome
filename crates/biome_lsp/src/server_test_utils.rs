@@ -397,6 +397,7 @@ pub(crate) const CHANNEL_BUFFER_SIZE: usize = 8;
 pub(crate) enum ServerNotification {
     PublishDiagnostics(PublishDiagnosticsParams),
     RegisterCapability(lsp::RegistrationParams),
+    UnregisterCapability(lsp::UnregistrationParams),
     ShowMessage(ShowMessageParams),
 }
 
@@ -510,7 +511,20 @@ where
                 }
                 Response::from_ok(id.clone(), to_value(())?)
             }
-            "client/unregisterCapability" => Response::from_ok(id.clone(), to_value(())?),
+            "client/unregisterCapability" => {
+                let params: lsp::UnregistrationParams =
+                    from_value(params).context("invalid unregistration params")?;
+                if params
+                    .unregisterations
+                    .iter()
+                    .any(|unregistration| unregistration.id == "biome_did_change_watched_files")
+                {
+                    let _ = notify
+                        .send(ServerNotification::UnregisterCapability(params))
+                        .await;
+                }
+                Response::from_ok(id.clone(), to_value(())?)
+            }
             "workspace/configuration" => {
                 let result =
                     to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;

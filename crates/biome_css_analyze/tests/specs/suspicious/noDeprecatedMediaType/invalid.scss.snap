@@ -1,0 +1,35 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@media tv {
+  $color: red;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:8 lint/suspicious/noDeprecatedMediaType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected deprecated media type: tv
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @media tv {
+      │        ^^
+    3 │   $color: red;
+    4 │ }
+  
+  i Deprecated media types are recognized but match nothing; prefer using media features or recommended media types.
+  
+  i Recommended media types include:
+  
+  - all
+  - print
+  - screen
+  
+
+```

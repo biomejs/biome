@@ -120,6 +120,8 @@ invalid.js:1:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     2 │ 
     3 │ 1 * 2 + 'foo';
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
       1     │ - foo·+·'baz';
@@ -141,6 +143,8 @@ invalid.js:3:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^
     4 │ 
     5 │ 1 + 2 + 3 + "px" + 4 + 5;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -166,6 +170,8 @@ invalid.js:5:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     6 │ 
     7 │ a + b + c + 'px' + d + e;
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
       3   3 │   1 * 2 + 'foo';
@@ -189,6 +195,8 @@ invalid.js:7:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ 1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -214,6 +222,8 @@ invalid.js:9:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     10 │ 
     11 │ (1 + 'foo') * 2;
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
       7   7 │   a + b + c + 'px' + d + e;
@@ -237,6 +247,8 @@ invalid.js:11:2 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │  ^^^^^^^^^
     12 │ 
     13 │ 1 * (2 + 'foo') + 'bar';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -262,6 +274,8 @@ invalid.js:13:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     14 │ 
     15 │ 'foo' + 1;
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      11  11 │   (1 + 'foo') * 2;
@@ -285,6 +299,8 @@ invalid.js:13:6 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │      ^^^^^^^^^
     14 │ 
     15 │ 'foo' + 1;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -310,6 +326,8 @@ invalid.js:15:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     16 │ 
     17 │ 'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      13  13 │   1 * (2 + 'foo') + 'bar';
@@ -333,6 +351,8 @@ invalid.js:17:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ 
     19 │ 'foo' + 1 + 2;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -358,6 +378,8 @@ invalid.js:19:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     20 │ 
     21 │ 1 + '2' - 3;
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      17  17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
@@ -381,6 +403,8 @@ invalid.js:21:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^
     22 │ 
     23 │ foo() + ' bar';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -406,6 +430,8 @@ invalid.js:23:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     24 │ 
     25 │ foo() + '\n';
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      21  21 │   1 + '2' - 3;
@@ -429,6 +455,8 @@ invalid.js:25:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^
     26 │ 
     27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -454,6 +482,8 @@ invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     28 │ 
     29 │ `foo` + 1;
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      25  25 │   foo() + '\n';
@@ -477,6 +507,8 @@ invalid.js:29:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^
     30 │ 
     31 │ `foo${1}` + 2;
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -502,6 +534,8 @@ invalid.js:31:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     32 │ 
     33 │ // strings including `${`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      29  29 │   `foo` + 1;
@@ -525,6 +559,8 @@ invalid.js:35:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ 
     37 │ 'foo: ${bar.' + baz + '.bat}';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -550,6 +586,8 @@ invalid.js:37:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     38 │ 
     39 │ 'foo: `bar.' + baz + '.bat}';
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      35  35 │   '${foo.' + bar + '.baz}';
@@ -573,6 +611,8 @@ invalid.js:39:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │ 
     41 │ '${foo}: `bar.' + baz + '.bat}';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -598,6 +638,8 @@ invalid.js:41:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     42 │ 
     43 │ 'foo: ${bar.' + baz + '.bat}';
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      39  39 │   'foo: `bar.' + baz + '.bat}';
@@ -621,6 +663,8 @@ invalid.js:43:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 
     45 │ 'foo: `bar.' + baz + '.bat}';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -646,6 +690,8 @@ invalid.js:45:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     46 │ 
     47 │ 'foo: \\${bar.' + baz + '.bat}';
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      43  43 │   'foo: ${bar.' + baz + '.bat}';
@@ -669,6 +715,8 @@ invalid.js:47:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     48 │ 
     49 │ 'foo: \\${bar.' + baz + '.bat}';
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -694,6 +742,8 @@ invalid.js:49:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     50 │ 
     51 │ // parentheses
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      47  47 │   'foo: \\${bar.' + baz + '.bat}';
@@ -717,6 +767,8 @@ invalid.js:53:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
        │           ^^^^^^^^^^^^^
     54 │ 
     55 │ ("a") + (b) + ("c");
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -742,6 +794,8 @@ invalid.js:55:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     56 │ 
     57 │ //a
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      53  53 │   const x = a + ("b") + c;
@@ -764,6 +818,8 @@ invalid.js:58:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     59 │ 
     60 │ // parentheses and type coercion
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -789,6 +845,8 @@ invalid.js:62:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     63 │ 
     64 │ (1 + 2) + "a"; // `${1 + 2}a`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      60  60 │   // parentheses and type coercion
@@ -812,6 +870,8 @@ invalid.js:64:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^
     65 │ 
     66 │ 1 + 2 + "a"; // `${1 + 2}a`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -837,6 +897,8 @@ invalid.js:66:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     67 │ 
     68 │ (1 + 2) + ("a"); // `${1 + 2}a`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      64  64 │   (1 + 2) + "a"; // `${1 + 2}a`
@@ -860,6 +922,8 @@ invalid.js:68:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^
     69 │ 
     70 │ "a" + 1 + 2; // `a${1}${2}`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -885,6 +949,8 @@ invalid.js:70:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     71 │ 
     72 │ 1 + (2 + "a"); // `${1}${2}a`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      68  68 │   (1 + 2) + ("a"); // `${1 + 2}a`
@@ -908,6 +974,8 @@ invalid.js:72:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^
     73 │ 
     74 │ (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -933,6 +1001,8 @@ invalid.js:74:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     75 │ 
     76 │ (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      72  72 │   1 + (2 + "a"); // `${1}${2}a`
@@ -956,6 +1026,8 @@ invalid.js:76:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     77 │ 
     78 │ "a" + (1 + 2 + "b"); // `a${1 + 2}b`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -981,6 +1053,8 @@ invalid.js:78:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     79 │ 
     80 │ (1 + 2 + "a") + "b"; // `${1 + 2}ab`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      76  76 │   (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
@@ -1004,6 +1078,8 @@ invalid.js:80:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^
     81 │ 
     82 │ ("a" + 1 + 2) + "b"; // `a${1}${2}b`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -1029,6 +1105,8 @@ invalid.js:82:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     83 │ 
     84 │ ("a" + 1) + (2 + "b"); // `a${1}${2}b`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      80  80 │   (1 + 2 + "a") + "b"; // `${1 + 2}ab`
@@ -1052,6 +1130,8 @@ invalid.js:84:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^
     85 │ 
     86 │ (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -1077,6 +1157,8 @@ invalid.js:86:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     87 │ 
     88 │ "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      84  84 │   ("a" + 1) + (2 + "b"); // `a${1}${2}b`
@@ -1100,6 +1182,8 @@ invalid.js:88:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     89 │ 
     90 │ 1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -1125,6 +1209,8 @@ invalid.js:90:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     91 │ 
     92 │ 1 - 2 + "a"; // `${1 - 2}a`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      88  88 │   "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
@@ -1148,6 +1234,8 @@ invalid.js:92:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^
     93 │ 
     94 │ "a" + (1 - 2); // `a${1 - 2}`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -1173,6 +1261,8 @@ invalid.js:94:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
     95 │ 
     96 │ (foo && bar) + "baz"; // `${foo && bar}baz`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      92  92 │   1 - 2 + "a"; // `${1 - 2}a`
@@ -1196,6 +1286,8 @@ invalid.js:96:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^
     97 │ 
     98 │ "foo" + (bar && baz); // `foo${bar && baz}`
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   
@@ -1221,6 +1313,8 @@ invalid.js:98:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
      99 │ 
     100 │ (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      96  96 │   (foo && bar) + "baz"; // `${foo && bar}baz`
@@ -1245,6 +1339,8 @@ invalid.js:100:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
     101 │ 
     102 │ "foo" + (bar && baz + 1); // `foo${bar && baz + 1}`
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
      98  98 │   "foo" + (bar && baz); // `foo${bar && baz}`
@@ -1267,6 +1363,8 @@ invalid.js:102:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
   > 102 │ "foo" + (bar && baz + 1); // `foo${bar && baz + 1}`
         │ ^^^^^^^^^^^^^^^^^^^^^^^^
     103 │ 
+  
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
   
   i Unsafe fix: Use a template literal.
   

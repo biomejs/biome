@@ -62,27 +62,38 @@ throw new Error('must not execute');
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 2 rules resolved. Some plugin imports could not be resolved.
+  × 1 plugin in the configuration has an error.
+  
+  The configuration enables 2 plugin rules and 1 JavaScript plugin.
   
   Local plugins
   
-  - unfiltered
+  - unfiltered.grit (rule name: unfiltered)
   
-  Rules with include globs
+  Rules that apply only to matching files
   
-  - filtered.grit ((includes: [src/**/*.ts, !**/*.test.ts]) or (includes: [**/*.test.ts] and override includes: [tests/**]) or (override includes: [scripts/**]))
+  - filtered.grit (rule name: filtered), for files matching any of:
+    - includes: [src/**/*.ts, !**/*.test.ts]
+    - override includes: [tests/**] and includes: [**/*.test.ts]
+    - override includes: [scripts/**]
   
   JavaScript plugins
   
-  - throw.ts ((includes: [src/**/*.ts]) or (includes: [**/*.test.ts] and override includes: [tests/**]))
+  - throw.ts, for files matching any of:
+    - includes: [src/**/*.ts]
+    - override includes: [tests/**] and includes: [**/*.test.ts]
   
-  Unresolved imports
+  i Biome doesn't run JavaScript plugins during inspection, so their rule names aren't listed.
+  
+  Plugins with errors
   
   broken
   
-  × Cannot load Biome manifest broken/biome-manifest.json.
+  × The Biome manifest broken/biome-manifest.json is invalid.
   
-  × version must be 1.
+  × Unsupported version 2.
+  
+  i Biome manifests must use version 1.
   
 
 

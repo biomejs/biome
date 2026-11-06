@@ -9,8 +9,10 @@ impl FormatRule<AnyScssInterpolatedValuePart> for FormatAnyScssInterpolatedValue
     fn fmt(&self, node: &AnyScssInterpolatedValuePart, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyScssInterpolatedValuePart::AnyCssDimension(node) => node.format().fmt(f),
+            AnyScssInterpolatedValuePart::CssGenericDelimiter(node) => node.format().fmt(f),
             AnyScssInterpolatedValuePart::CssIdentifier(node) => node.format().fmt(f),
             AnyScssInterpolatedValuePart::CssNumber(node) => node.format().fmt(f),
+            AnyScssInterpolatedValuePart::ScssHashValue(node) => node.format().fmt(f),
             AnyScssInterpolatedValuePart::ScssInterpolation(node) => node.format().fmt(f),
             AnyScssInterpolatedValuePart::ScssNamespacedVariable(node) => node.format().fmt(f),
             AnyScssInterpolatedValuePart::ScssVariable(node) => node.format().fmt(f),

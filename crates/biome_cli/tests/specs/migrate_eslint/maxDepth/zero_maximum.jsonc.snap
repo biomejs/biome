@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+assertion_line: 1337
+expression: zero_maximum.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "max-depth": ["warn", { "max": 3, "maximum": 0 }] } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"noExcessiveNestedBlocks": { "level": "warn", "options": { "max": 3 } }
+			}
+		}
+	}
+}
+
+```

@@ -1,0 +1,27 @@
+/* should not generate diagnostics */
+import { nextTick } from "vue";
+
+// Outside of a component, `this` is not a component instance.
+const another = function () {
+  this.$set(obj, key, value);
+  this.$delete(obj, key);
+};
+
+class Store {
+  update() {
+    this.$set(obj, key, value);
+  }
+}
+
+const Vue = { set() {}, delete() {} };
+Vue.set(obj, key, value);
+Vue.delete(obj, key);
+Vue.nextTick();
+nextTick();
+
+function local() {
+  function set() {}
+  function del() {}
+  set(obj, key, value);
+  del(obj, key);
+}

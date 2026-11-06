@@ -1,0 +1,223 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImports.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { z as a } from "other-package"; a.string().trim().startsWith("-");
+import * as b from "other-package"; b.string().trim().startsWith("-");
+import { string as c } from "zod"; c.string().trim().startsWith("-");
+import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+import { z as e } from "zod"; e.number.trim().startsWith("-");
+import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+z.string().trim().startsWith("-");
+
+```
+
+# Diagnostics
+```
+invalidImports.js:2:52 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { z as a } from "other-package"; a.string().trim().startsWith("-");
+      │                                                    ^^^^^^
+    3 │ import * as b from "other-package"; b.string().trim().startsWith("-");
+    4 │ import { string as c } from "zod"; c.string().trim().startsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - import·{·z·as·a·}·from·"other-package";·a.string().trim().startsWith("-");
+      2 │ + import·{·z·as·a·}·from·"other-package";·a.string().trimStart().startsWith("-");
+    3 3 │   import * as b from "other-package"; b.string().trim().startsWith("-");
+    4 4 │   import { string as c } from "zod"; c.string().trim().startsWith("-");
+  
+
+```
+
+```
+invalidImports.js:3:48 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { z as a } from "other-package"; a.string().trim().startsWith("-");
+  > 3 │ import * as b from "other-package"; b.string().trim().startsWith("-");
+      │                                                ^^^^^^
+    4 │ import { string as c } from "zod"; c.string().trim().startsWith("-");
+    5 │ import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   import { z as a } from "other-package"; a.string().trim().startsWith("-");
+    3   │ - import·*·as·b·from·"other-package";·b.string().trim().startsWith("-");
+      3 │ + import·*·as·b·from·"other-package";·b.string().trimStart().startsWith("-");
+    4 4 │   import { string as c } from "zod"; c.string().trim().startsWith("-");
+    5 5 │   import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+  
+
+```
+
+```
+invalidImports.js:4:47 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    2 │ import { z as a } from "other-package"; a.string().trim().startsWith("-");
+    3 │ import * as b from "other-package"; b.string().trim().startsWith("-");
+  > 4 │ import { string as c } from "zod"; c.string().trim().startsWith("-");
+      │                                               ^^^^^^
+    5 │ import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+    6 │ import { z as e } from "zod"; e.number.trim().startsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    2 2 │   import { z as a } from "other-package"; a.string().trim().startsWith("-");
+    3 3 │   import * as b from "other-package"; b.string().trim().startsWith("-");
+    4   │ - import·{·string·as·c·}·from·"zod";·c.string().trim().startsWith("-");
+      4 │ + import·{·string·as·c·}·from·"zod";·c.string().trimStart().startsWith("-");
+    5 5 │   import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+    6 6 │   import { z as e } from "zod"; e.number.trim().startsWith("-");
+  
+
+```
+
+```
+invalidImports.js:5:52 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    3 │ import * as b from "other-package"; b.string().trim().startsWith("-");
+    4 │ import { string as c } from "zod"; c.string().trim().startsWith("-");
+  > 5 │ import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+      │                                                    ^^^^^^
+    6 │ import { z as e } from "zod"; e.number.trim().startsWith("-");
+    7 │ import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    3 3 │   import * as b from "other-package"; b.string().trim().startsWith("-");
+    4 4 │   import { string as c } from "zod"; c.string().trim().startsWith("-");
+    5   │ - import·{·z·as·d·}·from·"zod";·d.string("argument").trim().startsWith("-");
+      5 │ + import·{·z·as·d·}·from·"zod";·d.string("argument").trimStart().startsWith("-");
+    6 6 │   import { z as e } from "zod"; e.number.trim().startsWith("-");
+    7 7 │   import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+  
+
+```
+
+```
+invalidImports.js:6:40 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    4 │ import { string as c } from "zod"; c.string().trim().startsWith("-");
+    5 │ import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+  > 6 │ import { z as e } from "zod"; e.number.trim().startsWith("-");
+      │                                        ^^^^^^
+    7 │ import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+    8 │ z.string().trim().startsWith("-");
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    4 4 │   import { string as c } from "zod"; c.string().trim().startsWith("-");
+    5 5 │   import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+    6   │ - import·{·z·as·e·}·from·"zod";·e.number.trim().startsWith("-");
+      6 │ + import·{·z·as·e·}·from·"zod";·e.number.trimStart().startsWith("-");
+    7 7 │   import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+    8 8 │   z.string().trim().startsWith("-");
+  
+
+```
+
+```
+invalidImports.js:7:58 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    5 │ import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+    6 │ import { z as e } from "zod"; e.number.trim().startsWith("-");
+  > 7 │ import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+      │                                                          ^^^^^^
+    8 │ z.string().trim().startsWith("-");
+    9 │ 
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    5 5 │   import { z as d } from "zod"; d.string("argument").trim().startsWith("-");
+    6 6 │   import { z as e } from "zod"; e.number.trim().startsWith("-");
+    7   │ - import·{·z·as·f·}·from·"zod";·function·g(f)·{·f.string().trim().startsWith("-");·}
+      7 │ + import·{·z·as·f·}·from·"zod";·function·g(f)·{·f.string().trimStart().startsWith("-");·}
+    8 8 │   z.string().trim().startsWith("-");
+    9 9 │   
+  
+
+```
+
+```
+invalidImports.js:8:12 lint/nursery/noUnnecessaryStringTrim  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This trim() call removes whitespace from both ends of the string, but startsWith() only needs it removed from the start.
+  
+    6 │ import { z as e } from "zod"; e.number.trim().startsWith("-");
+    7 │ import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+  > 8 │ z.string().trim().startsWith("-");
+      │            ^^^^^^
+    9 │ 
+  
+  i Whitespace at the end of the string can't change the result of startsWith() here.
+  
+  i Use trimStart() to remove whitespace from the start only.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use trimStart() instead.
+  
+    6 6 │   import { z as e } from "zod"; e.number.trim().startsWith("-");
+    7 7 │   import { z as f } from "zod"; function g(f) { f.string().trim().startsWith("-"); }
+    8   │ - z.string().trim().startsWith("-");
+      8 │ + z.string().trimStart().startsWith("-");
+    9 9 │   
+  
+
+```

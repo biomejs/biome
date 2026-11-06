@@ -1,22 +1,29 @@
 use crate::fonts::is_function_keyword;
-use crate::utils::is_custom_function;
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use crate::services::semantic::Semantic;
+use crate::utils::{is_custom_function, is_scss_built_in_function};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 
 declare_lint_rule! {
     /// Disallow unrecognized CSS value functions.
     ///
-    /// CSS value functions use a name followed by parentheses, such as `scale()` or `calc()`.
-    /// Custom functions whose names begin with `--`, such as `--custom-function()`, are allowed.
-    /// Known functions come from the
-    /// [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions) and
-    /// [browser compatibility data](https://github.com/mdn/browser-compat-data/tree/main/css/types).
+    /// This rule ignores double-dashed custom functions, e.g. `--custom-function()`.
+    /// In SCSS files, it also ignores SCSS built-in functions and functions declared in the same file.
+    ///
+    /// ## SCSS limitations
+    ///
+    /// The rule does not resolve functions made globally available by legacy SCSS `@import`.
+    /// Configure the `ignore` option for imported functions that cannot be resolved locally.
+    ///
+    /// Data sources of known CSS value functions are:
+    /// - MDN reference on [CSS value functions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions)
+    /// - MDN reference on [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference)
+    /// - MDN [browser compatibility data for CSS value functions](https://github.com/mdn/browser-compat-data/tree/main/css/types)
     ///
     /// ## Examples
     ///
@@ -71,7 +78,7 @@ pub struct NoUnknownFunctionState {
 }
 
 impl Rule for NoUnknownFunction {
-    type Query = Ast<CssFunction>;
+    type Query = Semantic<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownFunctionOptions;
@@ -84,13 +91,20 @@ impl Rule for NoUnknownFunction {
         })?;
         let function_name = binding.text_trimmed();
 
-        // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
-        // Therefore, we ignore these custom functions to prevent false detections.
+        // The semantic model doesn't track custom function definitions, which may also come
+        // from other files, so we ignore custom functions to prevent false detections.
         if is_custom_function(function_name) {
             return None;
         }
 
         if is_function_keyword(function_name) {
+            return None;
+        }
+
+        if ctx.source_type::<CssFileSource>().is_scss()
+            && (is_scss_built_in_function(function_name)
+                || ctx.model().has_scss_function(function_name))
+        {
             return None;
         }
 
@@ -113,6 +127,9 @@ impl Rule for NoUnknownFunction {
                     "Unexpected unknown function: "<Emphasis>{state.function_name}</Emphasis>
                 },
             )
+            .note(markup! {
+                "Browsers ignore a declaration that contains an unknown function, so the style is not applied."
+            })
             .note(markup! {
                 "Use a known function instead."
             })

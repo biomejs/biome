@@ -1,0 +1,6 @@
+@container card if(style(--enabled: true): 1px + 2px; else: 0) { .arithmetic { color: red; } }
+@container card if(style(--enabled: true): 1px; else: 0) { .native { color: red; } }
+@container card if(style(--enabled: true): if(style(--inner: true): 1px + 2px; else: 0); else: 0) { .nested { color: red; } }
+@container card if(style(--enabled: true): if(style(--inner: true): 1px; else: 0); else: 0) { .nested-native { color: red; } }
+@container card if(style(--enabled: true): $value; else: 0) { .variable { color: red; } }
+.after { display: block; }

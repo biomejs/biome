@@ -194,25 +194,23 @@ CssRoot {
                     CssBogus {
                         items: [
                             CssKeyframesSelectorList [
-                                CssBogusSelector {
-                                    items: [
-                                        ScssInterpolation {
-                                            hash_token: HASH@114..115 "#" [] [],
-                                            l_curly_token: L_CURLY@115..116 "{" [] [],
-                                            value: ScssExpression {
-                                                items: ScssExpressionItemList [
-                                                    ScssVariable {
-                                                        dollar_token: DOLLAR@116..117 "$" [] [],
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@117..121 "step" [] [],
-                                                        },
+                                ScssKeyframesSelector {
+                                    selector: ScssInterpolation {
+                                        hash_token: HASH@114..115 "#" [] [],
+                                        l_curly_token: L_CURLY@115..116 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@116..117 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@117..121 "step" [] [],
                                                     },
-                                                ],
-                                            },
-                                            r_curly_token: R_CURLY@121..122 "}" [] [],
+                                                },
+                                            ],
                                         },
-                                        PERCENT@122..124 "%" [] [Whitespace(" ")],
-                                    ],
+                                        r_curly_token: R_CURLY@121..122 "}" [] [],
+                                    },
+                                    percent_token: PERCENT@122..124 "%" [] [Whitespace(" ")],
                                 },
                             ],
                             CssDeclarationBlock {
@@ -617,7 +615,7 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@114..153
           0: CSS_BOGUS@114..140
             0: CSS_KEYFRAMES_SELECTOR_LIST@114..124
-              0: CSS_BOGUS_SELECTOR@114..124
+              0: SCSS_KEYFRAMES_SELECTOR@114..124
                 0: SCSS_INTERPOLATION@114..122
                   0: HASH@114..115 "#" [] []
                   1: L_CURLY@115..116 "{" [] []

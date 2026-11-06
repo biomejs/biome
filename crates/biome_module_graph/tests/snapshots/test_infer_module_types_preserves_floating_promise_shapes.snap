@@ -158,31 +158,32 @@ Binding doWork "doWork" => async Function "doWork" {
   returns: instanceof Promise<void>
 }
 
-Binding mappedAsync "mappedAsync" => instanceof Array<instanceof Promise<unknown>>
+Binding mappedAsync "mappedAsync" => instanceof Array<instanceof Promise<number>>
 
-Expression "[1, 2, 3]" => [number: 1,
-number: 2,
-number: 3]
+Expression "[1, 2, 3]" => instanceof Array<number>
 
-Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
+Expression "[1, 2, 3].map" => sync Function "map" {
   accepts: {
     params: [
-      : sync Function "<U>(item: T) => U" {
+      required callbackfn: sync Function {
         accepts: {
           params: [
-            : U
+            required value: number
+            required index: number
+            required array: instanceof Array<number>
           ]
           type_args: []
         }
         returns: U
       }
+      optional thisArg: any
     ]
     type_args: [U]
   }
   returns: instanceof Array<U>
 }
 
-Expression "[1, 2, 3].map(async (value) => value + 1)" => instanceof Array<instanceof Promise<unknown>>
+Expression "[1, 2, 3].map(async (value) => value + 1)" => instanceof Array<instanceof Promise<number>>
 
 Expression "1" => number: 1
 
@@ -197,42 +198,43 @@ Expression "async (value) => value + 1" => async Function {
     ]
     type_args: []
   }
-  returns: instanceof Promise<unknown>
+  returns: instanceof Promise<number>
 }
 
-Binding value "value" => U
+Binding value "value" => number
 
-Expression "value" => U
+Expression "value" => number
 
-Expression "value + 1" => unknown
+Expression "value + 1" => number
 
 Expression "1" => number: 1
 
-Binding mappedPromise "mappedPromise" => instanceof Array<instanceof Promise<unknown>>
+Binding mappedPromise "mappedPromise" => instanceof Array<instanceof Promise<number>>
 
-Expression "[1, 2, 3]" => [number: 1,
-number: 2,
-number: 3]
+Expression "[1, 2, 3]" => instanceof Array<number>
 
-Expression "[1, 2, 3].map" => sync Function "Array.prototype.map" {
+Expression "[1, 2, 3].map" => sync Function "map" {
   accepts: {
     params: [
-      : sync Function "<U>(item: T) => U" {
+      required callbackfn: sync Function {
         accepts: {
           params: [
-            : U
+            required value: number
+            required index: number
+            required array: instanceof Array<number>
           ]
           type_args: []
         }
         returns: U
       }
+      optional thisArg: any
     ]
     type_args: [U]
   }
   returns: instanceof Array<U>
 }
 
-Expression "[1, 2, 3].map((value) => Promise.resolve(value + 1))" => instanceof Array<instanceof Promise<unknown>>
+Expression "[1, 2, 3].map((value) => Promise.resolve(value + 1))" => instanceof Array<instanceof Promise<number>>
 
 Expression "1" => number: 1
 
@@ -247,10 +249,10 @@ Expression "(value) => Promise.resolve(value + 1)" => sync Function {
     ]
     type_args: []
   }
-  returns: instanceof Promise<unknown>
+  returns: instanceof Promise<number>
 }
 
-Binding value "value" => U
+Binding value "value" => number
 
 Expression "Promise" => class "Promise" {
   extends: none
@@ -268,11 +270,11 @@ Expression "Promise.resolve" => sync Function "resolve" {
   returns: instanceof Promise<TResolveValue>
 }
 
-Expression "Promise.resolve(value + 1)" => instanceof Promise<unknown>
+Expression "Promise.resolve(value + 1)" => instanceof Promise<number>
 
-Expression "value" => U
+Expression "value" => number
 
-Expression "value + 1" => unknown
+Expression "value + 1" => number
 
 Expression "1" => number: 1
 

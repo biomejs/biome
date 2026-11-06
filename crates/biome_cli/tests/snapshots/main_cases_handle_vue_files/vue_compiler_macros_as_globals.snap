@@ -49,6 +49,8 @@ file.vue:17:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 

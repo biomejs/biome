@@ -60,13 +60,14 @@ pub fn generate_tables() -> Result<()> {
         192_460,
     )?
     .extract(&["Hangul"])?;
-    let emoji = Properties::cached_or_fetch(
+    let emoji_data = Properties::cached_or_fetch(
         paths::EMOJI_DATA,
         &format!("{UCD_URL}/emoji/emoji-data.txt"),
         EMOJI_VERSION,
         107_324,
-    )?
-    .extract(&["Emoji"])?;
+    )?;
+    let emoji = emoji_data.extract(&["Emoji"])?;
+    let emoji_presentation = emoji_data.extract(&["Emoji_Presentation"])?;
     let punctuation = Properties::cached_or_fetch(
         paths::DERIVED_GENERAL_CATEGORY,
         &format!("{UCD_URL}/extracted/DerivedGeneralCategory.txt"),
@@ -88,12 +89,20 @@ pub fn generate_tables() -> Result<()> {
             && character != '\u{20a9}'
     });
 
+    // "CJK character" as defined by the CommonMark CJK-friendly amendments:
+    // https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md
+    let cjk_character = collect_ranges(|character| {
+        (contains(&east_asian_width, character) && !contains(&emoji_presentation, character))
+            || contains(&hangul, character)
+    });
+
     let cjk_segment_break_character = format_table(
         "is_cjk_segment_break_character",
         cjk_segment_break_character,
     );
     let cjk_punctuation = format_table("is_cjk_punctuation", cjk_punctuation);
     let default_ignorable = format_table("is_default_ignorable_code_point", default_ignorable);
+    let cjk_character = format_table("is_cjk_character", cjk_character);
 
     let unicode_version_doc = format!("Generated from Unicode {UNICODE_VERSION}.");
     let tokens = quote! {
@@ -124,6 +133,10 @@ pub fn generate_tables() -> Result<()> {
             #cjk_segment_break_character
             #cjk_punctuation
             #default_ignorable
+        }
+
+        pub mod markdown {
+            #cjk_character
         }
     };
 

@@ -49,6 +49,7 @@ type ConditionalType<T> = {
 type ManyVoid = readonly void[];
 function foo(arr: readonly void[]) {}
 type invalidVoidUnion = void | Map<string, number>;
+type voidNeverStringUnion = void | never | string;
 
 ```
 
@@ -63,6 +64,8 @@ invalid.ts:2:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
       │                          ^^^^
     3 │ const arrowGeneric = <T extends void>(arg: T) => {};
     4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -86,6 +89,8 @@ invalid.ts:3:33 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
       │                                 ^^^^
     4 │ const arrowGeneric2 = <T extends void = void>(arg: T) => {};
     5 │ function functionGeneric<T extends void>(arg: T) {}
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -111,6 +116,8 @@ invalid.ts:4:34 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
     5 │ function functionGeneric<T extends void>(arg: T) {}
     6 │ function functionGeneric2<T extends void = void>(arg: T) {}
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
      2  2 │   function takeVoid(thing: void) {}
@@ -134,6 +141,8 @@ invalid.ts:5:36 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
       │                                    ^^^^
     6 │ function functionGeneric2<T extends void = void>(arg: T) {}
     7 │ declare function functionDeclaration<T extends void>(arg: T): void;
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -159,6 +168,8 @@ invalid.ts:6:37 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
     7 │ declare function functionDeclaration<T extends void>(arg: T): void;
     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
      4  4 │   const arrowGeneric2 = <T extends void = void>(arg: T) => {};
@@ -182,6 +193,8 @@ invalid.ts:7:48 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
       │                                                ^^^^
     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
     9 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -207,6 +220,8 @@ invalid.ts:8:49 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━
      9 │ 
     10 │ declare function voidArray(args: void[]): void[];
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
      6  6 │   function functionGeneric2<T extends void = void>(arg: T) {}
@@ -230,6 +245,8 @@ invalid.ts:10:34 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                                  ^^^^
     11 │ let value = undefined as void;
     12 │ let value = <void>undefined;
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -255,6 +272,8 @@ invalid.ts:10:43 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     11 │ let value = undefined as void;
     12 │ let value = <void>undefined;
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
      8  8 │   declare function functionDeclaration2<T extends void = void>(arg: T): void;
@@ -277,6 +296,8 @@ invalid.ts:11:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                          ^^^^
     12 │ let value = <void>undefined;
     13 │ function takesThings(...things: void[]): void {}
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -302,6 +323,8 @@ invalid.ts:12:14 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     13 │ function takesThings(...things: void[]): void {}
     14 │ type KeyofVoid = keyof void;
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     10 10 │   declare function voidArray(args: void[]): void[];
@@ -325,6 +348,8 @@ invalid.ts:13:33 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                                 ^^^^
     14 │ type KeyofVoid = keyof void;
     15 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -350,6 +375,8 @@ invalid.ts:14:24 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     15 │ 
     16 │ interface Interface {
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     12 12 │   let value = <void>undefined;
@@ -374,6 +401,8 @@ invalid.ts:18:13 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     19 │ }
     20 │ 
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     16 16 │   interface Interface {
@@ -396,6 +425,8 @@ invalid.ts:22:30 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                              ^^^^
     23 │ }
     24 │ let letVoid: void;
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -421,6 +452,8 @@ invalid.ts:24:14 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     25 │ type VoidType = void;
     26 │ class OtherClassName {
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     22 22 │     private readonly propName: void;
@@ -444,6 +477,8 @@ invalid.ts:25:17 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                 ^^^^
     26 │ class OtherClassName {
     27 │   private propName: VoidType;
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -469,6 +504,8 @@ invalid.ts:30:36 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     31 │ type UnionType = string | ((number & any) | (string | void));
     32 │ declare function test(): number | void;
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     28 28 │   }
@@ -491,6 +528,8 @@ invalid.ts:31:55 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                                                       ^^^^
     32 │ declare function test(): number | void;
     33 │ declare function test<T extends number | void>(): T;
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -516,6 +555,8 @@ invalid.ts:32:35 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     33 │ declare function test<T extends number | void>(): T;
     34 │ type IntersectionType = string & number & void;
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     30 30 │   type UnionType = string | number | void;
@@ -539,6 +580,8 @@ invalid.ts:33:42 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                                          ^^^^
     34 │ type IntersectionType = string & number & void;
     35 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -564,6 +607,8 @@ invalid.ts:34:43 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     35 │ 
     36 │ type MappedType<T> = {
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     32 32 │   declare function test(): number | void;
@@ -587,6 +632,8 @@ invalid.ts:37:19 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     38 │ };
     39 │ 
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     35 35 │   
@@ -609,6 +656,8 @@ invalid.ts:41:41 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
        │                                         ^^^^
     42 │ };
     43 │ type ManyVoid = readonly void[];
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -634,6 +683,8 @@ invalid.ts:43:26 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44 │ function foo(arr: readonly void[]) {}
     45 │ type invalidVoidUnion = void | Map<string, number>;
   
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
   i Unsafe fix: Use undefined instead.
   
     41 41 │     [K in keyof T]: T[K] extends string ? void : string;
@@ -656,7 +707,9 @@ invalid.ts:44:28 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
   > 44 │ function foo(arr: readonly void[]) {}
        │                            ^^^^
     45 │ type invalidVoidUnion = void | Map<string, number>;
-    46 │ 
+    46 │ type voidNeverStringUnion = void | never | string;
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -665,7 +718,7 @@ invalid.ts:44:28 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44    │ - function·foo(arr:·readonly·void[])·{}
        44 │ + function·foo(arr:·readonly·undefined[])·{}
     45 45 │   type invalidVoidUnion = void | Map<string, number>;
-    46 46 │   
+    46 46 │   type voidNeverStringUnion = void | never | string;
   
 
 ```
@@ -679,7 +732,10 @@ invalid.ts:45:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44 │ function foo(arr: readonly void[]) {}
   > 45 │ type invalidVoidUnion = void | Map<string, number>;
        │                         ^^^^
-    46 │ 
+    46 │ type voidNeverStringUnion = void | never | string;
+    47 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
   
   i Unsafe fix: Use undefined instead.
   
@@ -687,7 +743,32 @@ invalid.ts:45:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44 44 │   function foo(arr: readonly void[]) {}
     45    │ - type·invalidVoidUnion·=·void·|·Map<string,·number>;
        45 │ + type·invalidVoidUnion·=·undefined·|·Map<string,·number>;
-    46 46 │   
+    46 46 │   type voidNeverStringUnion = void | never | string;
+    47 47 │   
+  
+
+```
+
+```
+invalid.ts:46:29 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is confusing inside a union type.
+  
+    44 │ function foo(arr: readonly void[]) {}
+    45 │ type invalidVoidUnion = void | Map<string, number>;
+  > 46 │ type voidNeverStringUnion = void | never | string;
+       │                             ^^^^
+    47 │ 
+  
+  i void is meant for the return type of a function. In other positions it is easy to mix up with undefined, which makes the type harder to understand.
+  
+  i Unsafe fix: Use undefined instead.
+  
+    44 44 │   function foo(arr: readonly void[]) {}
+    45 45 │   type invalidVoidUnion = void | Map<string, number>;
+    46    │ - type·voidNeverStringUnion·=·void·|·never·|·string;
+       46 │ + type·voidNeverStringUnion·=·undefined·|·never·|·string;
+    47 47 │   
   
 
 ```

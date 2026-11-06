@@ -20,11 +20,11 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
+use biome_service::workspace::{ClientId, FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
 };
-use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectParams};
 use biome_service::{Workspace, WorkspaceServer};
@@ -36,16 +36,17 @@ use papaya::{HashMap, HashSet};
 use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
-use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicI32};
+use std::sync::{Arc, OnceLock, Weak};
 use std::time::Duration;
 use tokio::spawn;
+use tokio::sync::Mutex as TokioMutex;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock as TokioRwLock;
 use tokio::sync::watch;
-use tokio::task::spawn_blocking;
+use tokio::task::{AbortHandle, spawn_blocking};
 use tokio::time::sleep;
 use tower_lsp_server::Client;
 use tower_lsp_server::ls_types::{
@@ -127,6 +128,12 @@ pub(crate) struct Session {
     /// we refresh that project's diagnostics.
     notified_broken_configuration: HashSet<ProjectKey>,
 
+    /// Remembers which warnings we have shown for folders whose documents
+    /// couldn't be opened because their configuration failed to load, so each
+    /// warning is shown once per folder instead of every time a document is opened.
+    /// Cleared whenever the configuration is reloaded.
+    notified_broken_configuration_folders: HashSet<(Utf8PathBuf, &'static str)>,
+
     /// Tracks whether the initialized() notification has been received
     initialized: AtomicBool,
 
@@ -148,6 +155,10 @@ pub(crate) struct Session {
     /// all refreshed.
     service_rx: watch::Receiver<ServiceNotification>,
 
+    /// The task that refreshes the diagnostics of the open documents when the
+    /// workspace updates its index. It ends with the session.
+    diagnostics_refresh: OnceLock<AbortHandle>,
+
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
         TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
@@ -155,6 +166,9 @@ pub(crate) struct Session {
     /// Cached configuration status per base path to avoid reloading on every request.
     configuration_status_by_path:
         TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
+
+    /// Dynamic capabilities that the client has acknowledged as registered.
+    registered_capabilities: TokioMutex<FxHashMap<&'static str, RegisteredCapability>>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -232,6 +246,12 @@ pub(crate) enum CapabilityStatus {
     Disable,
 }
 
+#[derive(PartialEq)]
+struct RegisteredCapability {
+    method: &'static str,
+    register_options: Option<Value>,
+}
+
 impl CapabilitySet {
     /// Insert a capability in the set
     pub(crate) fn add_capability(
@@ -241,6 +261,19 @@ impl CapabilitySet {
         status: CapabilityStatus,
     ) {
         self.registry.insert(id, (method, status));
+    }
+}
+
+impl Drop for Session {
+    /// Forgets the client of the session in the workspace, and stops the
+    /// refresh of its diagnostics. No request of the session can run anymore,
+    /// because each of them holds the session.
+    fn drop(&mut self) {
+        self.workspace
+            .forget_closed_client(ClientId::new(self.key.0));
+        if let Some(task) = self.diagnostics_refresh.get() {
+            task.abort();
+        }
     }
 }
 
@@ -267,10 +300,13 @@ impl Session {
             extension_settings: config,
             cancellation,
             notified_broken_configuration: Default::default(),
+            notified_broken_configuration_folders: Default::default(),
             initialized: AtomicBool::new(false),
             service_rx,
+            diagnostics_refresh: OnceLock::new(),
             loading_operations: Default::default(),
             configuration_status_by_path: Default::default(),
+            registered_capabilities: Default::default(),
             workspace_folders: Default::default(),
         }
     }
@@ -294,7 +330,7 @@ impl Session {
     /// LSP request handlers (formatting, code actions, ...) should use
     /// [Self::workspace_for_request] instead.
     pub(crate) fn workspace(&self) -> impl Workspace + '_ {
-        RetryingWorkspace::new(self.workspace.with_db_state(&self.db_state))
+        RetryingWorkspace::new(self.workspace_for_request())
     }
 
     /// Returns the workspace without automatic retries.
@@ -312,7 +348,22 @@ impl Session {
     /// edit. Answering with `ContentModified` instead makes the editor
     /// re-send the request with fresh positions, if it still needs it.
     pub(crate) fn workspace_for_request(&self) -> impl Workspace + '_ {
-        self.workspace.with_db_state(&self.db_state)
+        // Every connection is a separate client with its own view of the files
+        // it opens.
+        self.workspace
+            .with_client(&self.db_state, ClientId::new(self.key.0))
+    }
+
+    /// Closes the files that this session has open, so that their content
+    /// stops shadowing the files on disk for the other clients of the server.
+    pub(crate) fn close_files(&self) {
+        let result = self
+            .workspace
+            .with_client(&self.db_state, ClientId::new(self.key.0))
+            .close_client_files();
+        if let Err(error) = result {
+            error!("Failed to close the files of a disconnected client: {error}");
+        }
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
@@ -339,13 +390,23 @@ impl Session {
             error!("Failed to initialize session: {err}");
         }
 
-        let session = self.clone();
-        spawn(async move {
-            let mut service_data_rx = session.service_rx.clone();
+        // The diagnostics of a document can depend on other files, such as
+        // the ones it imports. The workspace announces when its index changes:
+        // once at the end of a project scan, and after each later update, such
+        // as a change on disk or in another document. The task then publishes
+        // the diagnostics of the open documents again.
+        //
+        // The task holds the session weakly, so that the session can end with
+        // its connection. The session aborts the task when it's dropped.
+        let session = Arc::downgrade(self);
+        let mut service_data_rx = self.service_rx.clone();
+        let task = spawn(async move {
             while let Ok(()) = service_data_rx.changed().await {
-                match *session.service_rx.borrow() {
+                let Some(session) = Weak::upgrade(&session) else {
+                    break;
+                };
+                match *service_data_rx.borrow() {
                     ServiceNotification::IndexUpdated => {
-                        let session = session.clone();
                         spawn(async move {
                             session.update_all_diagnostics().await;
                         });
@@ -356,56 +417,90 @@ impl Session {
                 }
             }
         });
+        // A session is initialized once, so a second task is redundant.
+        if let Err(task) = self.diagnostics_refresh.set(task.abort_handle()) {
+            task.abort();
+        }
     }
 
-    /// Register a set of capabilities with the client
+    /// Updates the dynamic capabilities registered with the client.
     pub(crate) async fn register_capabilities(&self, capabilities: CapabilitySet) {
+        let mut registered_capabilities = self.registered_capabilities.lock().await;
         let mut registrations = Vec::new();
         let mut unregistrations = Vec::new();
 
-        let mut register_methods = String::new();
-        let mut unregister_methods = String::new();
-
         for (id, (method, status)) in capabilities.registry {
-            unregistrations.push(Unregistration {
-                id: id.to_string(),
-                method: method.to_string(),
-            });
-
-            if !unregister_methods.is_empty() {
-                unregister_methods.push_str(", ");
-            }
-
-            unregister_methods.push_str(method);
-
-            if let CapabilityStatus::Enable(register_options) = status {
-                registrations.push(Registration {
-                    id: id.to_string(),
-                    method: method.to_string(),
-                    register_options,
-                });
-
-                if !register_methods.is_empty() {
-                    register_methods.push_str(", ");
+            match status {
+                CapabilityStatus::Enable(register_options) => {
+                    let capability = RegisteredCapability {
+                        method,
+                        register_options,
+                    };
+                    if registered_capabilities.get(id) == Some(&capability) {
+                        continue;
+                    }
+                    if let Some(registered) = registered_capabilities.get(id) {
+                        unregistrations.push((id, registered.method));
+                    }
+                    registrations.push((id, capability));
                 }
-
-                register_methods.push_str(method);
+                CapabilityStatus::Disable => {
+                    if let Some(registered) = registered_capabilities.get(id) {
+                        unregistrations.push((id, registered.method));
+                    }
+                }
             }
         }
 
-        if let Err(e) = self.client.unregister_capability(unregistrations).await {
-            error!(
-                "Error unregistering {unregister_methods:?} capabilities: {}",
-                e
+        if !unregistrations.is_empty() {
+            let request = unregistrations
+                .iter()
+                .map(|(id, method)| Unregistration {
+                    id: (*id).to_string(),
+                    method: (*method).to_string(),
+                })
+                .collect();
+
+            if let Err(error) = self.client.unregister_capability(request).await {
+                error!(
+                    capability_count = unregistrations.len(),
+                    "Error unregistering capabilities: {error}"
+                );
+                return;
+            }
+
+            info!(
+                capability_count = unregistrations.len(),
+                "Unregister capabilities"
             );
-        } else {
-            info!("Unregister capabilities {unregister_methods:?}");
+            for (id, _) in &unregistrations {
+                registered_capabilities.remove(id);
+            }
         }
 
-        if let Err(e) = self.client.register_capability(registrations).await {
-            error!("Error registering {register_methods:?} capabilities: {}", e);
-        } else {
-            info!("Register capabilities {register_methods:?}");
+        if !registrations.is_empty() {
+            let request = registrations
+                .iter()
+                .map(|(id, capability)| Registration {
+                    id: (*id).to_string(),
+                    method: capability.method.to_string(),
+                    register_options: capability.register_options.clone(),
+                })
+                .collect();
+
+            if let Err(error) = self.client.register_capability(request).await {
+                error!(
+                    capability_count = registrations.len(),
+                    "Error registering capabilities: {error}"
+                );
+                return;
+            }
+
+            info!(
+                capability_count = registrations.len(),
+                "Register capabilities"
+            );
+            registered_capabilities.extend(registrations);
         }
     }
 
@@ -1025,6 +1120,9 @@ impl Session {
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
+        // Warn again about configurations that still fail to load after this reload.
+        self.notified_broken_configuration_folders.pin().clear();
+
         if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
             let config_file_path = config_path.to_path_buf();
@@ -1537,6 +1635,33 @@ impl Session {
         self.notified_broken_configuration.pin().insert(project_key);
     }
 
+    /// Warns the user that the documents in `folder` aren't processed because its
+    /// configuration failed to load with `status`. Each warning is shown once per folder.
+    pub(crate) async fn notify_broken_configuration_for_folder(
+        &self,
+        folder: &Utf8Path,
+        status: ConfigurationStatus,
+    ) {
+        let message = match status {
+            ConfigurationStatus::Error => {
+                "The configuration file has errors. Biome won't process files until the configuration is fixed."
+            }
+            ConfigurationStatus::EditorConfigError => {
+                "The .editorconfig file has errors. Biome won't process files until the file is fixed or its usage is disabled."
+            }
+            _ => return,
+        };
+        if self
+            .notified_broken_configuration_folders
+            .pin()
+            .insert((folder.to_path_buf(), message))
+        {
+            self.client
+                .show_message(MessageType::WARNING, message)
+                .await;
+        }
+    }
+
     pub(crate) fn requires_configuration(&self) -> bool {
         self.extension_settings.read().requires_configuration()
     }
@@ -1588,11 +1713,14 @@ mod tests {
     use biome_service::WorkspaceServer;
     use biome_service::workspace::NoopQueryProvider;
     use crossbeam::channel::bounded;
+    use futures::SinkExt;
     use std::sync::Mutex;
     use tokio::sync::Notify;
+    use tower::{Service, ServiceExt};
+    use tower_lsp_server::ClientSocket;
     use tower_lsp_server::LanguageServer;
     use tower_lsp_server::LspService;
-    use tower_lsp_server::jsonrpc::Result as JsonRpcResult;
+    use tower_lsp_server::jsonrpc::{Request, Response, Result as JsonRpcResult};
     use tower_lsp_server::ls_types::{InitializeParams, InitializeResult};
 
     struct DummyServer;
@@ -1607,7 +1735,8 @@ mod tests {
         }
     }
 
-    fn create_test_session() -> Arc<Session> {
+    fn create_test_session_with_transport() -> (Arc<Session>, LspService<DummyServer>, ClientSocket)
+    {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         let fs: Arc<dyn biome_resolver::FsWithResolverProxy> =
@@ -1629,7 +1758,7 @@ mod tests {
         let cancellation = cancellation.clone();
         let service_rx = service_rx.clone();
 
-        let (_service, _socket) = LspService::build(move |client| {
+        let (service, socket) = LspService::build(move |client| {
             let session = Arc::new(Session::new(
                 SessionKey(0),
                 client,
@@ -1643,11 +1772,79 @@ mod tests {
         })
         .finish();
 
-        session_slot
+        let session = session_slot
             .lock()
             .unwrap()
             .take()
-            .expect("session should be initialized")
+            .expect("session should be initialized");
+        (session, service, socket)
+    }
+
+    fn create_test_session() -> Arc<Session> {
+        create_test_session_with_transport().0
+    }
+
+    #[tokio::test]
+    async fn capability_updates_are_serialized_and_skip_unchanged_registrations() {
+        let (session, mut service, client) = create_test_session_with_transport();
+        service
+            .ready()
+            .await
+            .unwrap()
+            .call(
+                Request::build("initialize")
+                    .id("init")
+                    .params(serde_json::json!({ "capabilities": {} }))
+                    .finish(),
+            )
+            .await
+            .unwrap();
+
+        let (mut stream, mut sink) = client.split();
+        let requests = Arc::new(Mutex::new(Vec::new()));
+        let recorded_requests = requests.clone();
+        let handler = tokio::spawn(async move {
+            while let Some(request) = stream.next().await {
+                recorded_requests
+                    .lock()
+                    .unwrap()
+                    .push(request.method().to_string());
+                let id = request.id().expect("request should have an id").clone();
+                sink.send(Response::from_ok(id, serde_json::to_value(()).unwrap()))
+                    .await
+                    .unwrap();
+            }
+        });
+
+        let capabilities = |register_options| {
+            let mut capabilities = CapabilitySet::default();
+            capabilities.add_capability(
+                "biome_formatting",
+                "textDocument/formatting",
+                CapabilityStatus::Enable(register_options),
+            );
+            capabilities
+        };
+
+        tokio::join!(
+            session.register_capabilities(capabilities(None)),
+            session.register_capabilities(capabilities(None))
+        );
+        session
+            .register_capabilities(capabilities(Some(serde_json::json!({
+                "documentSelector": null
+            }))))
+            .await;
+        handler.abort();
+
+        assert_eq!(
+            *requests.lock().unwrap(),
+            [
+                "client/registerCapability",
+                "client/unregisterCapability",
+                "client/registerCapability"
+            ]
+        );
     }
 
     #[tokio::test]

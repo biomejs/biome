@@ -1,0 +1,286 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+%a%b { color: red; }
+.card%a { color: blue; }
+.after { color: green; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssBogusSelector {
+                    items: [
+                        CssNestedSelectorList [],
+                        CssBogusSubSelector {
+                            items: [
+                                PERCENT@0..1 "%" [] [],
+                                CssCustomIdentifier {
+                                    value_token: IDENT@1..2 "a" [] [],
+                                },
+                            ],
+                        },
+                        CssSubSelectorList [
+                            CssBogusSubSelector {
+                                items: [
+                                    PERCENT@2..3 "%" [] [],
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@3..5 "b" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                        ],
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@5..7 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@7..12 "color" [] [],
+                                },
+                                colon_token: COLON@12..14 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@14..17 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@17..19 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@19..20 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@20..22 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@22..26 "card" [] [],
+                            },
+                        },
+                        CssBogusSubSelector {
+                            items: [
+                                PERCENT@26..27 "%" [] [],
+                                CssCustomIdentifier {
+                                    value_token: IDENT@27..29 "a" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@29..31 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@31..36 "color" [] [],
+                                },
+                                colon_token: COLON@36..38 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@38..42 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@42..44 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@44..45 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@45..47 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@47..53 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@53..55 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@55..60 "color" [] [],
+                                },
+                                colon_token: COLON@60..62 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@62..67 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@67..69 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@69..70 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..71
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..70
+    0: CSS_QUALIFIED_RULE@0..20
+      0: CSS_SELECTOR_LIST@0..5
+        0: CSS_BOGUS_SELECTOR@0..5
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_BOGUS_SUB_SELECTOR@0..2
+            0: PERCENT@0..1 "%" [] []
+            1: CSS_CUSTOM_IDENTIFIER@1..2
+              0: IDENT@1..2 "a" [] []
+          2: CSS_SUB_SELECTOR_LIST@2..5
+            0: CSS_BOGUS_SUB_SELECTOR@2..5
+              0: PERCENT@2..3 "%" [] []
+              1: CSS_CUSTOM_IDENTIFIER@3..5
+                0: IDENT@3..5 "b" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@5..20
+        0: L_CURLY@5..7 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@7..19
+          0: CSS_DECLARATION_WITH_SEMICOLON@7..19
+            0: CSS_DECLARATION@7..17
+              0: CSS_GENERIC_PROPERTY@7..17
+                0: CSS_IDENTIFIER@7..12
+                  0: IDENT@7..12 "color" [] []
+                1: COLON@12..14 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@14..17
+                  0: CSS_IDENTIFIER@14..17
+                    0: IDENT@14..17 "red" [] []
+              1: (empty)
+            1: SEMICOLON@17..19 ";" [] [Whitespace(" ")]
+        2: R_CURLY@19..20 "}" [] []
+    1: CSS_QUALIFIED_RULE@20..45
+      0: CSS_SELECTOR_LIST@20..29
+        0: CSS_COMPOUND_SELECTOR@20..29
+          0: CSS_NESTED_SELECTOR_LIST@20..20
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@20..29
+            0: CSS_CLASS_SELECTOR@20..26
+              0: DOT@20..22 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@22..26
+                0: IDENT@22..26 "card" [] []
+            1: CSS_BOGUS_SUB_SELECTOR@26..29
+              0: PERCENT@26..27 "%" [] []
+              1: CSS_CUSTOM_IDENTIFIER@27..29
+                0: IDENT@27..29 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@29..45
+        0: L_CURLY@29..31 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@31..44
+          0: CSS_DECLARATION_WITH_SEMICOLON@31..44
+            0: CSS_DECLARATION@31..42
+              0: CSS_GENERIC_PROPERTY@31..42
+                0: CSS_IDENTIFIER@31..36
+                  0: IDENT@31..36 "color" [] []
+                1: COLON@36..38 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@38..42
+                  0: CSS_IDENTIFIER@38..42
+                    0: IDENT@38..42 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@42..44 ";" [] [Whitespace(" ")]
+        2: R_CURLY@44..45 "}" [] []
+    2: CSS_QUALIFIED_RULE@45..70
+      0: CSS_SELECTOR_LIST@45..53
+        0: CSS_COMPOUND_SELECTOR@45..53
+          0: CSS_NESTED_SELECTOR_LIST@45..45
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@45..53
+            0: CSS_CLASS_SELECTOR@45..53
+              0: DOT@45..47 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@47..53
+                0: IDENT@47..53 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@53..70
+        0: L_CURLY@53..55 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@55..69
+          0: CSS_DECLARATION_WITH_SEMICOLON@55..69
+            0: CSS_DECLARATION@55..67
+              0: CSS_GENERIC_PROPERTY@55..67
+                0: CSS_IDENTIFIER@55..60
+                  0: IDENT@55..60 "color" [] []
+                1: COLON@60..62 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@62..67
+                  0: CSS_IDENTIFIER@62..67
+                    0: IDENT@62..67 "green" [] []
+              1: (empty)
+            1: SEMICOLON@67..69 ";" [] [Whitespace(" ")]
+        2: R_CURLY@69..70 "}" [] []
+  2: EOF@70..71 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-compound-placeholders.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS placeholder selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ %a%b { color: red; }
+      │ ^^
+    2 │ .card%a { color: blue; }
+    3 │ .after { color: green; }
+  
+parity-compound-placeholders.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS placeholder selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ %a%b { color: red; }
+      │   ^^
+    2 │ .card%a { color: blue; }
+    3 │ .after { color: green; }
+  
+parity-compound-placeholders.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS placeholder selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ %a%b { color: red; }
+  > 2 │ .card%a { color: blue; }
+      │      ^^
+    3 │ .after { color: green; }
+    4 │ 
+  
+```

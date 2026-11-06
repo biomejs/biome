@@ -1,0 +1,81 @@
+@use "sass:string";
+@use "sass:math";
+@use "sass:meta";
+$condition: "style(--status: complete)";
+$compound: "style(--status: complete) and media(width > 1px)";
+$enabled: true;
+$flag: true;
+
+@function state-value($condition, $matched, $fallback) {
+  @return if(#{$condition}: $matched; else: $fallback);
+}
+$complete: "style(--status: complete)";
+.card {
+  --status: pending;
+  border-color: state-value($complete, seagreen, gray);
+  background-color: state-value($complete, #f6fff6, #f7f7f7);
+}
+.card.is-complete { --status: complete; }
+
+.minimal { color: if(#{$condition}: seagreen; else: gray); next: retained; }
+.parentheses { color: if((#{$condition}): red; else: blue); next: retained; }
+.not { color: if(not #{$condition}: red; else: blue); next: retained; }
+.not-parentheses { color: if(not (#{$condition}): red; else: blue); next: retained; }
+.style-and-left { color: if(#{$condition} and style(--x: y): red; else: blue); next: retained; }
+.style-and-right { color: if(style(--x: y) and #{$condition}: red; else: blue); next: retained; }
+.style-or-left { color: if(#{$condition} or style(--x: y): red; else: blue); next: retained; }
+.style-or-right { color: if(style(--x: y) or #{$condition}: red; else: blue); next: retained; }
+.media-and-left { color: if(#{$condition} and media(width > 1px): red; else: blue); next: retained; }
+.media-and-right { color: if(media(width > 1px) and #{$condition}: red; else: blue); next: retained; }
+.media-or-left { color: if(#{$condition} or media(width > 1px): red; else: blue); next: retained; }
+.media-or-right { color: if(media(width > 1px) or #{$condition}: red; else: blue); next: retained; }
+.supports-and-left { color: if(#{$condition} and supports(display: grid): red; else: blue); next: retained; }
+.supports-and-right { color: if(supports(display: grid) and #{$condition}: red; else: blue); next: retained; }
+.supports-or-left { color: if(#{$condition} or supports(display: grid): red; else: blue); next: retained; }
+.supports-or-right { color: if(supports(display: grid) or #{$condition}: red; else: blue); next: retained; }
+.sass-and-left { color: if(#{$condition} and sass($enabled): red; else: blue); next: retained; }
+.sass-and-right { color: if(sass($enabled) and #{$condition}: red; else: blue); next: retained; }
+.sass-or-left { color: if(#{$condition} or sass($enabled): red; else: blue); next: retained; }
+.sass-or-right { color: if(sass($enabled) or #{$condition}: red; else: blue); next: retained; }
+.compound-text { color: if((#{$compound}): red; else: blue); next: retained; }
+.inner-punctuation { color: if(#{"style(--status: complete); else: fake, )}"}: red; else: blue); next: retained; }
+.inner-nested-calls { color: if(#{string.slice("style(--status: complete)", 1, string.length("style(--status: complete)"))}: red; else: blue); next: retained; }
+.inner-modern-if { color: if(#{if(sass($enabled): "style(--status: complete)"; else: "media(width > 1px)")}: red; else: blue); next: retained; }
+.comments { color: if(/*a*/ #{$condition} /*b*/ and /*c*/ style(--x: y) /*d*/ : /*e*/ red /*f*/ ; /*g*/ else /*h*/ : blue); next: retained; }
+.legacy { color: if(#{$flag}, white, black); next: retained; }
+.native-css { color: if(style(--x: y): red; else: blue); next: retained; }
+.native-sass { color: if(sass($enabled): red; else: blue); next: retained; }
+
+.grouped {
+  color: if((#{$condition} and style(--enabled: true)) or (#{$condition} and sass($enabled)): red; else: blue);
+  background: if(#{$condition} and #{$condition}: white; else: black);
+}
+.multiline {
+  color: if(
+    (#{$compound}): seagreen;
+    not #{$condition}: gray;
+    else: black;
+  );
+}
+.suppressed {
+  // biome-ignore format: preserve the authored condition spacing
+  color: if(  (#{$compound})  :seagreen;else:gray);
+  width: if(#{$condition}:
+  // biome-ignore format: preserve this branch value
+  1px+   2px;else:0);
+}
+.branch-values {
+  width: if(#{$condition}: 1px+2px; else: (4px+5px)*2);
+  padding: if(#{$condition}: 1px+2px 4px*2; else: 5px 7px);
+  font-family: if(#{$condition}: serif,monospace; else: system-ui,sans-serif);
+  color: red if(sass($enabled): !important; else: null);
+  nested: if(#{$condition}: math.max(1px+2px,2px)+if(sass(false):1px;else:2px+3px); else:0);
+  literal: if(#{$condition}: before else after; else: else);
+  uppercase: if(#{$condition}: INITIAL; else: INHERIT);
+  map: meta.inspect(if(sass(true): (left:1px+2px,right:(3px,4px)); else:(none:0)));
+}
+.urls {
+  background: url(if(#{$condition}: "dark.png"; else: "light.png"));
+  mask-image: url(if(#{$flag}, "dark.png", "light.png"));
+}
+.after { display: block; }

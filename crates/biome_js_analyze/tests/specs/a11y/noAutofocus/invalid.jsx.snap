@@ -36,6 +36,8 @@ invalid.jsx:3:13 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
     4 │     <input autoFocus />
     5 │     <input autoFocus="true" />
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     3 │ ····<button·autoFocus·/>
@@ -54,6 +56,8 @@ invalid.jsx:4:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
       │            ^^^^^^^^^
     5 │     <input autoFocus="true" />
     6 │     <input autoFocus={undefined} />
+  
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -74,6 +78,8 @@ invalid.jsx:5:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
     6 │     <input autoFocus={undefined} />
     7 │     <input autoFocus={"false"} />
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     5 │ ····<input·autoFocus="true"·/>
@@ -92,6 +98,8 @@ invalid.jsx:6:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
       │            ^^^^^^^^^^^^^^^^^^^^^
     7 │     <input autoFocus={"false"} />
     8 │     <input autoFocus={"false"} /*comment*/ />
+  
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -112,6 +120,8 @@ invalid.jsx:7:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
     8 │     <input autoFocus={"false"} /*comment*/ />
     9 │     <input /*comment*/ autoFocus={"false"} />
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     7 │ ····<input·autoFocus={"false"}·/>
@@ -130,6 +140,8 @@ invalid.jsx:8:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
        │            ^^^^^^^^^^^^^^^^^^^
      9 │     <input /*comment*/ autoFocus={"false"} />
     10 │     <input autoFocus={"false" /*comment*/} />
+  
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -155,6 +167,8 @@ invalid.jsx:9:24 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
     10 │     <input autoFocus={"false" /*comment*/} />
     11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     9 │ ····<input·/*comment*/·autoFocus={"false"}·/>
@@ -174,6 +188,8 @@ invalid.jsx:10:12 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
     11 │     <input /*comment*/ autoFocus={"false"} /*comment*/ />
     12 │     <div autoFocus />
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     10 │ ····<input·autoFocus={"false"·/*comment*/}·/>
@@ -192,6 +208,8 @@ invalid.jsx:11:24 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
        │                        ^^^^^^^^^^^^^^^^^^^
     12 │     <div autoFocus />
     13 │     <div autoFocus={true} />
+  
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -217,6 +235,8 @@ invalid.jsx:12:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
     13 │     <div autoFocus={true} />
     14 │     <div autoFocus={false} />
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     12 │ ····<div·autoFocus·/>
@@ -235,6 +255,8 @@ invalid.jsx:13:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
        │          ^^^^^^^^^^^^^^^^
     14 │     <div autoFocus={false} />
     15 │     <div popover={false}><input autoFocus /></div>
+  
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
   
   i Unsafe fix: Remove the autoFocus attribute.
   
@@ -255,6 +277,8 @@ invalid.jsx:14:10 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
     15 │     <div popover={false}><input autoFocus /></div>
     16 │ </>
   
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
+  
   i Unsafe fix: Remove the autoFocus attribute.
   
     14 │ ····<div·autoFocus={false}·/>
@@ -273,6 +297,8 @@ invalid.jsx:15:33 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━
        │                                 ^^^^^^^^^
     16 │ </>
     17 │ 
+  
+  i Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard.
   
   i Unsafe fix: Remove the autoFocus attribute.
   

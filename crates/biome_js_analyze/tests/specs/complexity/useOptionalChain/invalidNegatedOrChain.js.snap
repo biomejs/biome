@@ -36,6 +36,8 @@ invalidNegatedOrChain.js:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     4 │ !foo || !foo.bar || !foo.bar.baz;
     5 │ !foo.bar || !foo.bar.baz;
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      1  1 │   /* should generate diagnostics */
@@ -58,6 +60,8 @@ invalidNegatedOrChain.js:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ !foo.bar || !foo.bar.baz;
     6 │ !foo || !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -83,6 +87,8 @@ invalidNegatedOrChain.js:5:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     6 │ !foo || !foo.bar || !foo.bar.baz || !foo.bar.baz.buzz;
     7 │ !foo || !foo[bar];
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      3  3 │   !foo || !foo.bar;
@@ -106,6 +112,8 @@ invalidNegatedOrChain.js:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ !foo || !foo[bar];
     8 │ !foo || !foo[bar] || !foo[bar].baz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -131,6 +139,8 @@ invalidNegatedOrChain.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     8 │ !foo || !foo[bar] || !foo[bar].baz;
     9 │ !foo.bar || !foo.bar();
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      5  5 │   !foo.bar || !foo.bar.baz;
@@ -154,6 +164,8 @@ invalidNegatedOrChain.js:8:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ !foo.bar || !foo.bar();
     10 │ !a.b || !a.b();
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -179,6 +191,8 @@ invalidNegatedOrChain.js:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     10 │ !a.b || !a.b();
     11 │ (!foo || !foo.bar) && (!baz || !baz.bar);
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      7  7 │   !foo || !foo[bar];
@@ -202,6 +216,8 @@ invalidNegatedOrChain.js:10:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^^
     11 │ (!foo || !foo.bar) && (!baz || !baz.bar);
     12 │ !foo || !foo?.bar.baz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -227,6 +243,8 @@ invalidNegatedOrChain.js:11:2 lint/complexity/useOptionalChain  FIXABLE  ━━�
     12 │ !foo || !foo?.bar.baz;
     13 │ !foo || foo.bar !== "x";
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      9  9 │   !foo.bar || !foo.bar();
@@ -250,6 +268,8 @@ invalidNegatedOrChain.js:11:24 lint/complexity/useOptionalChain  FIXABLE  ━━
        │                        ^^^^^^^^^^^^^^^^
     12 │ !foo || !foo?.bar.baz;
     13 │ !foo || foo.bar !== "x";
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -275,6 +295,8 @@ invalidNegatedOrChain.js:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     13 │ !foo || foo.bar !== "x";
     14 │ !foo || foo.bar != "x";
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     12 │ !foo·||·!foo?.bar.baz;
@@ -293,6 +315,8 @@ invalidNegatedOrChain.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     14 │ !foo || foo.bar != "x";
     15 │ !foo || "x" !== foo.bar;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -318,6 +342,8 @@ invalidNegatedOrChain.js:14:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     15 │ !foo || "x" !== foo.bar;
     16 │ !foo || "x" != foo.bar;
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     12 12 │   !foo || !foo?.bar.baz;
@@ -342,6 +368,8 @@ invalidNegatedOrChain.js:15:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     16 │ !foo || "x" != foo.bar;
     17 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     13 13 │   !foo || foo.bar !== "x";
@@ -364,6 +392,8 @@ invalidNegatedOrChain.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
   > 16 │ !foo || "x" != foo.bar;
        │ ^^^^^^^^^^^^^^^^^^^^^^
     17 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   

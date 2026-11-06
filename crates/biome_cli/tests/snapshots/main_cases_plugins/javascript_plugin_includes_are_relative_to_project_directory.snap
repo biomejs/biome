@@ -1,0 +1,83 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/javascript_plugin_includes_are_relative_to_project_directory'
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./no-assign.js", "includes": ["src/**", "!src/generated/**"] }
+  ]
+}
+```
+
+## `no-assign.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+
+export const noAssign = defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run(node) {
+        registerDiagnostic(node, "error", "Do not use Object.assign");
+    },
+});
+```
+
+## `packages/app/src/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `src/generated/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+## `src/index.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not use Object.assign
+  
+  > 1 │ Object.assign({}, value);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+Found 1 error.
+```

@@ -372,6 +372,12 @@ impl Diagnostic for RootInRoot {
         })
     }
 
+    fn description(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str(
+            "Found a nested root configuration, but there's already a root configuration.",
+        )
+    }
+
     fn severity(&self) -> Severity {
         Severity::Error
     }
@@ -409,6 +415,7 @@ impl Diagnostic for RootInRoot {
     category = "configuration",
     severity = Error,
     message(
+        description = "Biome couldn't find a root configuration to extend from. Remove the extends field or make sure the parent configuration has root: true.",
         message("Biome couldn't find a root configuration to extend from. Remove the "<Emphasis>"extends"</Emphasis>" field or make sure the parent configuration has "<Emphasis>"root: true"</Emphasis>".")
     )
 )]

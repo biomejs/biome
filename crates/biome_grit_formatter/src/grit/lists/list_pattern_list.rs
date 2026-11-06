@@ -12,7 +12,7 @@ impl FormatRule<GritListPatternList> for FormatGritListPatternList {
         for (element, formatted) in node.iter().zip(node.format_separated(",")) {
             filler.entry(
                 &format_once(|f| {
-                    if get_lines_before(element?.syntax()) > 0 {
+                    if get_lines_before(element?.syntax()) > 1 {
                         write!(f, [empty_line()])
                     } else {
                         write!(f, [soft_line_break_or_space()])

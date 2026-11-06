@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/leading-comment-wrapped-selector.css
+---
+
+# Input
+
+```css
+/* A comment directly above the rule. */
+#CybotCookiebotDialog
+  #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+  color: red;
+}
+
+#CybotCookiebotDialog
+  #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection:hover {
+  color: blue;
+}
+
+/* A comment directly above the rule. */
+.CybotCookiebotDialog .CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+  color: red;
+}
+
+/* A comment directly above the rule. */
+div #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection > .fooooooooooo {
+  color: red;
+}
+
+@media (min-width: 100px) {
+  /* A comment directly above the rule. */
+  #CybotCookiebotDialog #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+    color: red;
+  }
+}
+
+```
+
+
+# Formatted
+
+```css
+/* A comment directly above the rule. */
+#CybotCookiebotDialog
+	#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+	color: red;
+}
+
+#CybotCookiebotDialog
+	#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection:hover {
+	color: blue;
+}
+
+/* A comment directly above the rule. */
+.CybotCookiebotDialog
+	.CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+	color: red;
+}
+
+/* A comment directly above the rule. */
+div
+	#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection
+	> .fooooooooooo {
+	color: red;
+}
+
+@media (min-width: 100px) {
+	/* A comment directly above the rule. */
+	#CybotCookiebotDialog
+		#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+		color: red;
+	}
+}
+
+```

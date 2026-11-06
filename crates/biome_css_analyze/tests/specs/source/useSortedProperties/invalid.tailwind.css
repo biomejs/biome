@@ -1,0 +1,11 @@
+/* should generate diagnostics */
+@theme {
+  color: red;
+  --*: initial;
+  --font-*: initial;
+  --font-custom: Custom;
+  display: block;
+  --color-custom: red;
+  --color-*: initial;
+  --color-custom: blue;
+}

@@ -4,3 +4,8 @@
 @media not #{"(unknown-feature)"} {}
 
 @media (width) and #{"(unknown-feature)"} {}
+
+@media ($min < width), ($min < width < $max) {}
+@media ($min + 1rem < width < $max - 1rem) {}
+@media ($feature), ($feature: $value), ($feature < $max) {}
+@media ($min < $feature < $max) {}

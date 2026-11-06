@@ -1,5 +1,5 @@
+use super::name::parse_dashed_at_rule_name;
 use crate::syntax::block::parse_declaration_block;
-use crate::syntax::parse_dashed_identifier;
 use crate::{parser::CssParser, syntax::parse_error::expected_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
@@ -41,7 +41,7 @@ pub(crate) fn parse_font_palette_values_at_rule_declarator(p: &mut CssParser) ->
     let m = p.start();
     p.bump(T![font_palette_values]);
 
-    let decl_kind = if parse_dashed_identifier(p)
+    let decl_kind = if parse_dashed_at_rule_name(p)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS, FONT_PALETTE_VALUES_RECOVERY_SET)

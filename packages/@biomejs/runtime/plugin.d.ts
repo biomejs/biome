@@ -15,6 +15,8 @@ export * from "./semantic";
 
 declare const queriedNode: unique symbol;
 declare const nativeMutation: unique symbol;
+declare const nodeKindSet: unique symbol;
+declare const tokenKindSet: unique symbol;
 
 /**
  * A query matching AST nodes by their syntax kinds, created with {@link ast}.
@@ -82,6 +84,7 @@ export type JsEmbeddingKind =
 			readonly embeddingKind:
 				| "source"
 				| "expression"
+				| "textInterpolation"
 				| "snippetSignature"
 				| "legacyConst"
 				| "declaration";
@@ -288,6 +291,215 @@ export const factory: {
 	 */
 	readonly token: (kind: JsTokenKind, text?: string) => JsAstToken;
 };
+
+/**
+ * A set of node kinds, created with {@link nodeKinds}.
+ *
+ * Testing membership with {@link NodeKindSet#has} reads the node's kind
+ * natively, which is cheaper than comparing `node.kind` strings. Build sets
+ * once at module scope and reuse them across `run()` calls.
+ *
+ * `K` is the exact union of kinds in the set, so a set of some kinds is not
+ * assignable to a set of other or more kinds. Functions that accept any node
+ * kind set should be generic, as in
+ * `function f<K extends keyof JsNodeByKind>(set: NodeKindSet<K>)`.
+ */
+export interface NodeKindSet<
+	in out K extends keyof JsNodeByKind = keyof JsNodeByKind,
+> {
+	readonly [nodeKindSet]: true;
+	/**
+	 * Returns whether `element` is a node whose kind is in this set.
+	 *
+	 * Returns `false` for tokens and for `undefined`, so optional fields and the
+	 * results of childrenWithTokens() can be passed directly.
+	 *
+	 * For example, report calls and constructor calls:
+	 * ```ts
+	 * const CALLS = nodeKinds("JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION");
+	 *
+	 * if (CALLS.has(statement.expression)) {
+	 *   registerDiagnostic(statement, "information", "This statement is a call.");
+	 * }
+	 * ```
+	 *
+	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
+	 */
+	has(element: JsAstElement | undefined): element is JsNodeByKind[K];
+	/**
+	 * Returns a new set with the kinds of this set and `other`. Neither set
+	 * changes.
+	 *
+	 * For example, extend a shared set of calls:
+	 * ```ts
+	 * const CALLS = nodeKinds("JS_CALL_EXPRESSION", "JS_NEW_EXPRESSION");
+	 * const CALLS_AND_IMPORTS = CALLS.union(nodeKinds("JS_IMPORT_CALL_EXPRESSION"));
+	 * ```
+	 *
+	 * @throws {TypeError} If `other` is not a set returned by {@link nodeKinds},
+	 * including when it is a token kind set.
+	 */
+	union<J extends keyof JsNodeByKind>(
+		other: NodeKindSet<J>,
+	): NodeKindSet<K | J>;
+}
+
+/**
+ * A set of token kinds, created with {@link tokenKinds}.
+ *
+ * Testing membership with {@link TokenKindSet#has} reads the token's kind
+ * natively, which is cheaper than comparing `token.kind` strings. Build sets
+ * once at module scope and reuse them across `run()` calls.
+ *
+ * `K` is the exact union of kinds in the set, so a set of some kinds is not
+ * assignable to a set of other or more kinds. Functions that accept any token
+ * kind set should be generic, as in
+ * `function f<K extends JsAstToken["kind"]>(set: TokenKindSet<K>)`.
+ */
+export interface TokenKindSet<
+	in out K extends JsAstToken["kind"] = JsAstToken["kind"],
+> {
+	readonly [tokenKindSet]: true;
+	/**
+	 * Returns whether `element` is a token whose kind is in this set.
+	 *
+	 * Returns `false` for nodes and for `undefined`, so the results of
+	 * childrenWithTokens() can be passed directly.
+	 *
+	 * For example, report loose equality operators:
+	 * ```ts
+	 * const LOOSE_EQUALITY = tokenKinds("EQ2", "NEQ");
+	 *
+	 * for (const element of binary.childrenWithTokens()) {
+	 *   if (LOOSE_EQUALITY.has(element)) {
+	 *     registerDiagnostic(binary, "warning", `Use strict equality instead of ${element.text}.`);
+	 *   }
+	 * }
+	 * ```
+	 *
+	 * @throws {TypeError} If `element` is not a node, a token, or `undefined`.
+	 */
+	has(
+		element: JsAstElement | undefined,
+	): element is JsAstToken & { readonly kind: K };
+	/**
+	 * Returns a new set with the kinds of this set and `other`. Neither set
+	 * changes.
+	 *
+	 * For example, combine equality and relational operators:
+	 * ```ts
+	 * const EQUALITY = tokenKinds("EQ2", "EQ3", "NEQ", "NEQ2");
+	 * const COMPARISON = EQUALITY.union(tokenKinds("L_ANGLE", "R_ANGLE", "LTEQ", "GTEQ"));
+	 * ```
+	 *
+	 * @throws {TypeError} If `other` is not a set returned by {@link tokenKinds},
+	 * including when it is a node kind set.
+	 */
+	union<J extends JsAstToken["kind"]>(
+		other: TokenKindSet<J>,
+	): TokenKindSet<K | J>;
+}
+
+/**
+ * Creates a set of node kinds. Pass names listed in {@link JsNodeByKind}.
+ *
+ * Node kinds and token kinds are separate: passing a token kind such as
+ * `"IDENT"` throws. Use {@link tokenKinds} to build a set of token kinds.
+ *
+ * @throws {TypeError} If a kind is not a string or does not name a node kind.
+ */
+export function nodeKinds<K extends readonly (keyof JsNodeByKind)[]>(
+	...kinds: K
+): NodeKindSet<K[number]>;
+
+/**
+ * Creates a set of token kinds. Pass any name that {@link JsAstToken#kind}
+ * can return, such as `"IDENT"` or `"LET_KW"`.
+ *
+ * Node kinds and token kinds are separate: passing a node kind such as
+ * `"JS_CALL_EXPRESSION"` throws. Use {@link nodeKinds} to build a set of node
+ * kinds.
+ *
+ * @throws {TypeError} If a kind is not a string or does not name a token kind.
+ */
+export function tokenKinds<K extends readonly JsAstToken["kind"][]>(
+	...kinds: K
+): TokenKindSet<K[number]>;
+
+declare module "./js_ast" {
+	interface JsAstNode {
+		/**
+		 * Returns a fresh array of the nodes inside this node whose kind is in
+		 * `kinds`, in source order. This node itself is never included, even
+		 * when its kind is in `kinds`.
+		 *
+		 * Biome searches the tree natively and creates JavaScript objects only
+		 * for the matching nodes, which is much faster than visiting every node
+		 * with children(). Returned nodes do not have stable JavaScript object
+		 * identity.
+		 *
+		 * For example, report every `debugger` statement in a file:
+		 * ```ts
+		 * const DEBUGGER = nodeKinds("JS_DEBUGGER_STATEMENT");
+		 *
+		 * export const noDebugger = defineRule({
+		 *   query: ast("JS_MODULE"),
+		 *   run(root) {
+		 *     for (const statement of root.descendants(DEBUGGER)) {
+		 *       registerDiagnostic(statement, "warning", "Remove this debugger statement.");
+		 *     }
+		 *   },
+		 * });
+		 * ```
+		 *
+		 * @throws {TypeError} If `kinds` is not a set created with {@link nodeKinds}.
+		 */
+		descendants<K extends keyof JsNodeByKind>(
+			kinds: NodeKindSet<K>,
+		): readonly JsNodeByKind[K][];
+		/**
+		 * Visits the nodes inside this node whose kind is in `kinds`, in source
+		 * order. This node itself is never visited, even when its kind is in
+		 * `kinds`.
+		 *
+		 * `enter` is called with each matching node before the nodes inside it,
+		 * and `exit`, when provided, is called with the same object after them.
+		 * Use the pair to track nesting, such as a stack of enclosing elements.
+		 * Return `false` from `enter` to skip the nodes inside that node; `exit`
+		 * is then not called for it. Any other return value continues the walk.
+		 * An exception thrown by a callback stops the walk and is rethrown.
+		 *
+		 * Biome walks the tree natively and calls the functions only for the
+		 * matching nodes, which is much faster than visiting every node with
+		 * children().
+		 *
+		 * For example, report calls nested inside another call:
+		 * ```ts
+		 * const CALLS = nodeKinds("JS_CALL_EXPRESSION");
+		 *
+		 * let depth = 0;
+		 * root.walk(
+		 *   CALLS,
+		 *   (call) => {
+		 *     if (depth > 0) registerDiagnostic(call, "information", "Nested call.");
+		 *     depth++;
+		 *   },
+		 *   () => {
+		 *     depth--;
+		 *   },
+		 * );
+		 * ```
+		 *
+		 * @throws {TypeError} If `kinds` is not a set created with {@link nodeKinds},
+		 * or `enter` or `exit` is not a function.
+		 */
+		walk<K extends keyof JsNodeByKind>(
+			kinds: NodeKindSet<K>,
+			enter: (node: JsNodeByKind[K]) => unknown,
+			exit?: (node: JsNodeByKind[K]) => void,
+		): void;
+	}
+}
 
 /** A suggested source edit attached to a diagnostic. */
 export interface CodeFix {

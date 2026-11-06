@@ -1,0 +1,32 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+a {
+  &:nth-child(0) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:15 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This selector will never match any elements.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a {
+  > 3 │   &:nth-child(0) {}
+      │               ^
+    4 │ }
+    5 │ 
+  
+  i Avoid using An+B selectors that always evaluate to 0.
+  
+  i For more details, see the official spec for An+B selectors.
+  
+
+```

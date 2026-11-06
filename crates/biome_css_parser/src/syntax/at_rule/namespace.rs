@@ -1,3 +1,4 @@
+use super::name::{is_at_scss_at_rule_prelude_name, parse_scss_at_rule_prelude_name};
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_namespace_url;
 use crate::syntax::value::url::{is_at_url_function, parse_url_function};
@@ -41,7 +42,11 @@ pub(crate) fn parse_namespace_at_rule(p: &mut CssParser) -> ParsedSyntax {
         // If we aren't at a namespace URL, then we are at a prefix,
         // and we need to try to parse it.
         // The problem is that both `url` and `src` are valid identifiers.
-        parse_regular_identifier(p).ok();
+        if is_at_scss_at_rule_prelude_name(p) {
+            parse_scss_at_rule_prelude_name(p).ok();
+        } else {
+            parse_regular_identifier(p).ok();
+        }
     }
 
     let kind = match parse_namespace_url(p).or_recover(

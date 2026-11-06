@@ -3,6 +3,7 @@
 ///
 /// ALso, the module includes implementation to convert rule options to Biome's rule options.
 use biome_deserialize_macros::Deserializable;
+use biome_rule_options::use_consistent_json_file_read;
 use biome_rule_options::use_filenaming_convention;
 use biome_rule_options::use_numeric_separators;
 use smallvec::SmallVec;
@@ -127,5 +128,31 @@ fn some_if_set(
         Some(opts.into())
     } else {
         None
+    }
+}
+
+/// ESLint option for `unicorn/consistent-json-file-read`, written as a string after the severity:
+/// `["error", "buffer"]`.
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum ConsistentJsonFileReadOption {
+    #[deserializable(rename = "string")]
+    String,
+    #[deserializable(rename = "buffer")]
+    Buffer,
+}
+impl From<ConsistentJsonFileReadOption>
+    for use_consistent_json_file_read::UseConsistentJsonFileReadOptions
+{
+    fn from(val: ConsistentJsonFileReadOption) -> Self {
+        Self {
+            read_as: Some(match val {
+                ConsistentJsonFileReadOption::String => {
+                    use_consistent_json_file_read::JsonFileReadAs::String
+                }
+                ConsistentJsonFileReadOption::Buffer => {
+                    use_consistent_json_file_read::JsonFileReadAs::Buffer
+                }
+            }),
+        }
     }
 }

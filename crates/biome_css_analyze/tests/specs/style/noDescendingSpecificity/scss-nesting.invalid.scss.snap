@@ -1,0 +1,196 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-nesting.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.parent {
+  .middle {
+    .nested-parent .nested-target {}
+  }
+}
+.nested-target {}
+
+.block {
+  &--active .suffix-target {}
+}
+.suffix-target {}
+
+.multi-parent {
+  & & .multi-target {}
+  & .multi-target {}
+}
+
+.sidebar > {
+  .partial-target {}
+}
+.partial-target {}
+
+.card {
+  + {
+    .adjacent-target {}
+  }
+}
+.adjacent-target {}
+
+.low,
+#high {
+  .list-target {}
+}
+.list-target {}
+
+```
+
+# Diagnostics
+```
+scss-nesting.invalid.scss:7:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    5 │   }
+    6 │ }
+  > 7 │ .nested-target {}
+      │ ^^^^^^^^^^^^^^
+    8 │ 
+    9 │ .block {
+  
+  i This selector specificity is (0, 4, 0)
+  
+    2 │ .parent {
+    3 │   .middle {
+  > 4 │     .nested-parent .nested-target {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   }
+    6 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-nesting.invalid.scss:12:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    10 │   &--active .suffix-target {}
+    11 │ }
+  > 12 │ .suffix-target {}
+       │ ^^^^^^^^^^^^^^
+    13 │ 
+    14 │ .multi-parent {
+  
+  i This selector specificity is (0, 2, 0)
+  
+     9 │ .block {
+  > 10 │   &--active .suffix-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ .suffix-target {}
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-nesting.invalid.scss:16:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    14 │ .multi-parent {
+    15 │   & & .multi-target {}
+  > 16 │   & .multi-target {}
+       │   ^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i This selector specificity is (0, 3, 0)
+  
+    14 │ .multi-parent {
+  > 15 │   & & .multi-target {}
+       │   ^^^^^^^^^^^^^^^^^
+    16 │   & .multi-target {}
+    17 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-nesting.invalid.scss:22:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    20 │   .partial-target {}
+    21 │ }
+  > 22 │ .partial-target {}
+       │ ^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ .card {
+  
+  i This selector specificity is (0, 2, 0)
+  
+    19 │ .sidebar > {
+  > 20 │   .partial-target {}
+       │   ^^^^^^^^^^^^^^^
+    21 │ }
+    22 │ .partial-target {}
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-nesting.invalid.scss:29:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    27 │   }
+    28 │ }
+  > 29 │ .adjacent-target {}
+       │ ^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ .low,
+  
+  i This selector specificity is (0, 2, 0)
+  
+    24 │ .card {
+    25 │   + {
+  > 26 │     .adjacent-target {}
+       │     ^^^^^^^^^^^^^^^^
+    27 │   }
+    28 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-nesting.invalid.scss:35:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    33 │   .list-target {}
+    34 │ }
+  > 35 │ .list-target {}
+       │ ^^^^^^^^^^^^
+    36 │ 
+  
+  i This selector specificity is (1, 1, 0)
+  
+    31 │ .low,
+    32 │ #high {
+  > 33 │   .list-target {}
+       │   ^^^^^^^^^^^^
+    34 │ }
+    35 │ .list-target {}
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

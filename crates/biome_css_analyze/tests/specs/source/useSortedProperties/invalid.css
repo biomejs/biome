@@ -209,3 +209,112 @@
   offset-rotate: 0deg;
   offset-anchor: 50% 50%;
 }
+
+.scroll-behavior {
+  color: red;
+  scroll-behavior: smooth;
+  overflow: auto;
+  display: block;
+}
+
+.multi-column {
+  columns: auto;
+  display: block;
+  column-fill: balance;
+  column-span: all;
+  column-count: 2;
+  column-width: 10em;
+}
+
+.column-rule {
+  column-rule: 1px solid red;
+  align-items: center;
+  column-rule-color: red;
+  column-rule-style: solid;
+  column-rule-width: 1px;
+  column-gap: 1em;
+}
+
+.anchor-positioning {
+  position-try: normal;
+  color: red;
+  position-visibility: always;
+  position-try-fallbacks: flip-block;
+  position-try-order: normal;
+  position-anchor: --anchor;
+  position-area: top;
+  anchor-scope: all;
+  anchor-name: --anchor;
+  display: block;
+}
+
+.text-box {
+  text-box: normal;
+  text-autospace: normal;
+  color: red;
+  text-box-edge: auto;
+  text-box-trim: none;
+  line-height: 1;
+}
+
+.field-sizing {
+  resize: both;
+  field-sizing: content;
+  display: block;
+}
+
+.logical-borders {
+  border-block: 1px solid red;
+  border-inline: 1px solid red;
+  border-inline-width: 1px;
+  border-inline-style: solid;
+  border-inline-color: red;
+  border-block-width: 1px;
+  border-block-style: solid;
+  border-block-color: red;
+}
+
+.corner-shape {
+  corner-shape: round;
+  corner-bottom-left-shape: bevel;
+  corner-top-left-shape: bevel;
+  border-radius: 1em;
+}
+
+.svg-geometry {
+  vector-effect: non-scaling-stroke;
+  fill: red;
+  d: none;
+  r: 1px;
+  cy: 1px;
+  cx: 1px;
+  ry: 1px;
+  rx: 1px;
+  y: 1px;
+  x: 1px;
+}
+
+.math {
+  transform: none;
+  math-depth: 0;
+  math-shift: normal;
+  math-style: normal;
+}
+
+.transition-behavior {
+  transition: opacity 1s;
+  transition-behavior: allow-discrete;
+  color: red;
+}
+
+.paged-media {
+  break-before: page;
+  page: wide;
+  will-change: auto;
+}
+
+.all-exempt-properties {
+  direction: rtl;
+  unicode-bidi: isolate;
+  all: initial;
+}

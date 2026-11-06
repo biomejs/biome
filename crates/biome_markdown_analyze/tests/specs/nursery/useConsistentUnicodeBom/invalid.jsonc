@@ -1,0 +1,9 @@
+// should generate diagnostics
+[
+  "\ufeff# Heading",
+  "\ufeff",
+  "\ufeff  # Heading",
+  "\ufeff\n# Heading",
+  "\ufeff<!-- header -->\n# Heading",
+  "\ufeff---\ntitle: Example\n---\n# Heading"
+]

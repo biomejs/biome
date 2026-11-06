@@ -22,12 +22,14 @@ var foo = `foo\\\\\\\nbar`;
 ```
 invalid.js:1:16 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
   > 1 │ var foo = /*1*/`bar`/*2*/;
       │                ^^^^^
     2 │ var foo1 = `bar `;
     3 │ var foo = `back\rtick`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -42,13 +44,15 @@ invalid.js:1:16 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:2:12 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     1 │ var foo = /*1*/`bar`/*2*/;
   > 2 │ var foo1 = `bar `;
       │            ^^^^^^
     3 │ var foo = `back\rtick`;
     4 │ var foo = `back\ntick`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -64,7 +68,7 @@ invalid.js:2:12 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:3:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     1 │ var foo = /*1*/`bar`/*2*/;
     2 │ var foo1 = `bar `;
@@ -72,6 +76,8 @@ invalid.js:3:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
       │           ^^^^^^^^^^^^
     4 │ var foo = `back\ntick`;
     5 │ var foo = `back\u2028tick`
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -88,7 +94,7 @@ invalid.js:3:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:4:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     2 │ var foo1 = `bar `;
     3 │ var foo = `back\rtick`;
@@ -96,6 +102,8 @@ invalid.js:4:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
       │           ^^^^^^^^^^^^
     5 │ var foo = `back\u2028tick`
     6 │ var foo = `back\u2029tick`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -112,7 +120,7 @@ invalid.js:4:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:5:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     3 │ var foo = `back\rtick`;
     4 │ var foo = `back\ntick`;
@@ -120,6 +128,8 @@ invalid.js:5:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
       │           ^^^^^^^^^^^^^^^^
     6 │ var foo = `back\u2029tick`;
     7 │ var foo = `back\\\\\ntick`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -136,7 +146,7 @@ invalid.js:5:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:6:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     4 │ var foo = `back\ntick`;
     5 │ var foo = `back\u2028tick`
@@ -144,6 +154,8 @@ invalid.js:6:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
       │           ^^^^^^^^^^^^^^^^
     7 │ var foo = `back\\\\\ntick`;
     8 │ var foo = `\n`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -160,7 +172,7 @@ invalid.js:6:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:7:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     5 │ var foo = `back\u2028tick`
     6 │ var foo = `back\u2029tick`;
@@ -168,6 +180,8 @@ invalid.js:7:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
       │           ^^^^^^^^^^^^^^^^
     8 │ var foo = `\n`;
     9 │ function foo() { `use strict`; foo(); }
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -184,7 +198,7 @@ invalid.js:7:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:8:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
      6 │ var foo = `back\u2029tick`;
      7 │ var foo = `back\\\\\ntick`;
@@ -192,6 +206,8 @@ invalid.js:8:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
        │           ^^^^
      9 │ function foo() { `use strict`; foo(); }
     10 │ var foo = `foo\\nbar`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -208,7 +224,7 @@ invalid.js:8:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:9:18 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
      7 │ var foo = `back\\\\\ntick`;
      8 │ var foo = `\n`;
@@ -216,6 +232,8 @@ invalid.js:9:18 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
        │                  ^^^^^^^^^^^^
     10 │ var foo = `foo\\nbar`;
     11 │ var foo = `foo\\\nbar`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -232,7 +250,7 @@ invalid.js:9:18 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━�
 ```
 invalid.js:10:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
      8 │ var foo = `\n`;
      9 │ function foo() { `use strict`; foo(); }
@@ -240,6 +258,8 @@ invalid.js:10:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
        │           ^^^^^^^^^^^
     11 │ var foo = `foo\\\nbar`;
     12 │ var foo = `foo\\\\\\\nbar`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -256,13 +276,15 @@ invalid.js:10:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
 ```
 invalid.js:11:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
      9 │ function foo() { `use strict`; foo(); }
     10 │ var foo = `foo\\nbar`;
   > 11 │ var foo = `foo\\\nbar`;
        │           ^^^^^^^^^^^^
     12 │ var foo = `foo\\\\\\\nbar`;
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   
@@ -278,12 +300,14 @@ invalid.js:11:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━
 ```
 invalid.js:12:11 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use template literals if interpolation and special-character handling are not needed.
+  ! Unnecessary template literal.
   
     10 │ var foo = `foo\\nbar`;
     11 │ var foo = `foo\\\nbar`;
   > 12 │ var foo = `foo\\\\\\\nbar`;
        │           ^^^^^^^^^^^^^^^^
+  
+  i A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler.
   
   i Safe fix: Replace with string literal
   

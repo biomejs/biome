@@ -35,6 +35,20 @@
 //! 2. Not preceded by punctuation, OR followed by whitespace/punctuation
 //!
 //! Underscore (`_`) has additional intraword restrictions (§6.2 rules 2, 5, 7, 8).
+//!
+//! # CJK-friendly Amendments
+//!
+//! CommonMark rejects `**テスト。**テスト` because the closing run sits between
+//! punctuation and a letter, a position that is common in Chinese, Japanese,
+//! and Korean text written without spaces. When
+//! [`MarkdownParserOptions::with_cjk_friendly_emphasis`](crate::MarkdownParserOptions::with_cjk_friendly_emphasis)
+//! is enabled, the flanking rules follow the
+//! [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md):
+//! punctuation next to a run doesn't prevent flanking when either side is a CJK
+//! character. Delimiter runs that touch neither CJK characters nor variation
+//! selectors keep their CommonMark flanking, but they can still pair
+//! differently: in `**テスト。**テスト a**`, the middle run closes the first
+//! one, so the last run stays unmatched instead of closing the middle one.
 
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
@@ -50,7 +64,7 @@ mod entities;
 mod html;
 mod links;
 
-pub(crate) use emphasis::EmphasisContext;
+pub(crate) use emphasis::{EmphasisContext, is_non_emoji_variation_selector};
 pub(crate) use html::is_inline_html;
 
 enum InlineLinksPolicy {
@@ -100,12 +114,17 @@ fn parse_inline_item_list_until_impl(
             continue;
         }
 
-        // Autolinks and inline HTML can contain `]`
+        // Autolinks, inline HTML, and MDX tags can contain `]`
         if p.at(L_ANGLE) {
             if html::parse_autolink(p).is_present() {
                 continue;
             }
             if html::parse_inline_html(p).is_present() {
+                continue;
+            }
+            if MarkdownSyntaxFeatures::Mdx.is_supported(p)
+                && super::parse_mdx_inline_tag(p).is_present()
+            {
                 continue;
             }
             let _ = super::parse_textual(p);
@@ -304,11 +323,24 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         if result.is_present() {
             return result;
         }
+        if MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+            let result = super::parse_mdx_inline_tag(p);
+            if result.is_present() {
+                return result;
+            }
+        }
         // Fall back to textual
         super::parse_textual(p)
     } else if p.at(MD_ENTITY_LITERAL) {
         // Entity or numeric character reference (already validated by lexer)
         entities::parse_entity_reference(p)
+    } else if p.at(T!['{']) && MarkdownSyntaxFeatures::Mdx.is_supported(p) {
+        let result = super::parse_mdx_inline_expression(p);
+        if result.is_absent() {
+            super::parse_textual(p)
+        } else {
+            result
+        }
     } else {
         super::parse_textual(p)
     }

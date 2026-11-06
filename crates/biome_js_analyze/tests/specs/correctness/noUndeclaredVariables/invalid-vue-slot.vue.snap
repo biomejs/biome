@@ -28,6 +28,10 @@ invalid-vue-slot.vue:5:8 lint/correctness/noUndeclaredVariables ━━━━━�
     6 │   </template>
     7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -45,6 +49,10 @@ invalid-vue-slot.vue:5:21 lint/correctness/noUndeclaredVariables ━━━━━
       │                     ^^^^^^
     6 │   </template>
     7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
@@ -64,6 +72,10 @@ invalid-vue-slot.vue:5:34 lint/correctness/noUndeclaredVariables ━━━━━
     6 │   </template>
     7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -82,6 +94,10 @@ invalid-vue-slot.vue:7:40 lint/correctness/noUndeclaredVariables ━━━━━
     8 │ </template>
     9 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -99,6 +115,10 @@ invalid-vue-slot.vue:7:18 lint/correctness/noUndeclaredVariables ━━━━━
       │                  ^^^^^^^^^^^^^^^
     8 │ </template>
     9 │ 
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithParseErrors.ts
+---
+# Input
+```ts
+// @ts-ignore
+let a = ;
+
+function f( {
+	// @ts-ignore
+	return 1;
+}
+
+```
+
+_Note: The parser emitted 4 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalidWithParseErrors.ts:1:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+  > 1 │ // @ts-ignore
+      │    ^^^^^^^^^^
+    2 │ let a = ;
+    3 │ 
+  
+  i The directive is applied to this line.
+  
+    1 │ // @ts-ignore
+  > 2 │ let a = ;
+      │ ^^^
+    3 │ 
+    4 │ function f( {
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    1   │ - //·@ts-ignore
+      1 │ + //·@ts-expect-error
+    2 2 │   let a = ;
+    3 3 │   
+  
+
+```
+
+```
+invalidWithParseErrors.ts:5:5 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    4 │ function f( {
+  > 5 │ 	// @ts-ignore
+      │ 	   ^^^^^^^^^^
+    6 │ 	return 1;
+    7 │ }
+  
+  i The directive is applied to this line.
+  
+    4 │ function f( {
+    5 │ 	// @ts-ignore
+  > 6 │ 	return 1;
+      │ 	^^^^^^
+    7 │ }
+    8 │ 
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    3 3 │   
+    4 4 │   function f( {
+    5   │ - → //·@ts-ignore
+      5 │ + → //·@ts-expect-error
+    6 6 │     return 1;
+    7 7 │   }
+  
+
+```

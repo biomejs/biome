@@ -15,7 +15,7 @@ fn test_infer_module_types_selects_call_overloads_by_parameter_types_on_build() 
 
             export const textual = reader("value");
             export const numeric = reader(1);
-            export const args = [1, 2];
+            export const args = [1, 2] as const;
             export const spread = reader(...args);
         "#,
     );

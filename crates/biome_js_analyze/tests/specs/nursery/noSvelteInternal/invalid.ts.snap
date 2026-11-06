@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import type { ComponentInternals } from "svelte/internal/client";
+export type { Snippet } from "svelte/internal";
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:41 lint/nursery/noSvelteInternal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from svelte/internal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import type { ComponentInternals } from "svelte/internal/client";
+      │                                         ^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ export type { Snippet } from "svelte/internal";
+    4 │ 
+  
+  i This module is private to Svelte and can change or disappear in any release.
+  
+  i Import from a public module, such as svelte, instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:30 lint/nursery/noSvelteInternal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import from svelte/internal.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import type { ComponentInternals } from "svelte/internal/client";
+  > 3 │ export type { Snippet } from "svelte/internal";
+      │                              ^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This module is private to Svelte and can change or disappear in any release.
+  
+  i Import from a public module, such as svelte, instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

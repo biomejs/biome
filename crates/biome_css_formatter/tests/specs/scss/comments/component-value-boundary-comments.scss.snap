@@ -41,13 +41,20 @@ a {
 		$z -1px 2px lightgray;
 }
 a {
-	box-shadow: $x /* short */ $y, $z;
+	box-shadow:
+		$x /* short */ $y,
+		$z;
 }
 a {
-	box-shadow: $x /* first */ /* second */ $y, $z;
+	box-shadow:
+		$x /* first */ /* second */ $y,
+		$z;
 }
 a {
-	box-shadow: $x, /* after comma */ $y 2px gray, $z;
+	box-shadow:
+		$x,
+		/* after comma */ $y 2px gray,
+		$z;
 }
 a {
 	box-shadow: $x, /* single item after comma */ $y, $z;
@@ -56,7 +63,9 @@ a {
 	box-shadow: $x /* before comma */, $y;
 }
 a {
-	box-shadow: $x /* biome-ignore format: preserve this boundary */ $y, $z;
+	box-shadow:
+		$x /* biome-ignore format: preserve this boundary */ $y,
+		$z;
 }
 a {
 	box-shadow:
@@ -76,7 +85,9 @@ a {
 	grid-template-columns: $a $b, $c $d;
 }
 a {
-	box-shadow: $x $y gray, $z /* final boundary */ $w black;
+	box-shadow:
+		$x $y gray,
+		$z /* final boundary */ $w black;
 }
 a {
 	box-shadow:
@@ -86,7 +97,9 @@ a {
 		$a $b blue;
 }
 a {
-	box-shadow: $x $y /* ordinary own-line block comment */ $z gray, $a $b black;
+	box-shadow:
+		$x $y /* ordinary own-line block comment */ $z gray,
+		$a $b black;
 }
 a {
 	box-shadow: $x + /* nested expression comment */ $y, $z;

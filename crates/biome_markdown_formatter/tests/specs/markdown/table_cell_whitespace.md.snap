@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/table_cell_whitespace.md
+---
+
+# Input
+
+```md
+| a | b |
+| --- | --- |
+| x | `y` z |
+| `p` z `q` | r |
+
+| a | b |
+| --- | --- |
+| `p` w `q` | r |
+| x | `y` w |
+
+| a | b |
+| --- | --- |
+| `type` | `web` (alias `redis`). **Immutable.** |
+
+| Field | Notes |
+| --- | --- |
+| `routes` | SPA (e.g. fallback to `index.html`). |
+
+| a | b |
+| --- | --- |
+| <!-- c --> | x |
+
+```
+
+
+# Formatted
+
+```md
+| a         | b     |
+| --------- | ----- |
+| x         | `y` z |
+| `p` z `q` | r     |
+
+| a         | b     |
+| --------- | ----- |
+| `p` w `q` | r     |
+| x         | `y` w |
+
+| a      | b                                     |
+| ------ | ------------------------------------- |
+| `type` | `web` (alias `redis`). **Immutable.** |
+
+| Field    | Notes                                |
+| -------- | ------------------------------------ |
+| `routes` | SPA (e.g. fallback to `index.html`). |
+
+| a          | b   |
+| ---------- | --- |
+| <!-- c --> | x   |
+
+```

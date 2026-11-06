@@ -39,6 +39,10 @@ invalid.ts:1:1 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     2 │ x!.y;
     3 │ x.y!;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
 
 ```
 
@@ -52,6 +56,10 @@ invalid.ts:2:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
       │ ^^
     3 │ x.y!;
     4 │ !x!.y;
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -76,6 +84,10 @@ invalid.ts:3:1 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     4 │ !x!.y;
     5 │ x!.y?.z;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
 
 ```
 
@@ -90,6 +102,10 @@ invalid.ts:4:2 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
       │  ^^
     5 │ x!.y?.z;
     6 │ x![y];
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -115,6 +131,10 @@ invalid.ts:5:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
     6 │ x![y];
     7 │ x![y]?.z;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
      3  3 │   x.y!;
@@ -138,6 +158,10 @@ invalid.ts:6:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
       │ ^^
     7 │ x![y]?.z;
     8 │ x.y.z!();
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -163,6 +187,10 @@ invalid.ts:7:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
     8 │ x.y.z!();
     9 │ x.y?.z!();
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
      5  5 │   x!.y?.z;
@@ -186,6 +214,10 @@ invalid.ts:8:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
        │ ^^^^^^
      9 │ x.y?.z!();
     10 │ x!!!;
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -211,6 +243,10 @@ invalid.ts:9:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━�
     10 │ x!!!;
     11 │ x!!.y;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
      7  7 │   x![y]?.z;
@@ -235,6 +271,10 @@ invalid.ts:10:1 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     11 │ x!!.y;
     12 │ x.y!!;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
 
 ```
 
@@ -249,6 +289,10 @@ invalid.ts:11:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
        │ ^^^
     12 │ x.y!!;
     13 │ x.y.z!!();
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -274,6 +318,10 @@ invalid.ts:12:1 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     13 │ x.y.z!!();
     14 │ x!?.[y].z;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
 
 ```
 
@@ -288,6 +336,10 @@ invalid.ts:13:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
        │ ^^^^^^^
     14 │ x!?.[y].z;
     15 │ x!?.y.z;
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -313,6 +365,10 @@ invalid.ts:14:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
     15 │ x!?.y.z;
     16 │ x!!!?.y.z;
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
     14 │ x!?.[y].z;
@@ -331,6 +387,10 @@ invalid.ts:15:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
        │ ^^
     16 │ x!!!?.y.z;
     17 │ x.y.z!?.();
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -351,6 +411,10 @@ invalid.ts:16:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
     17 │ x.y.z!?.();
     18 │ x.y.z!!!?.();
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
     16 │ x!!!?.y.z;
@@ -369,6 +433,10 @@ invalid.ts:17:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
        │ ^^^^^^
     18 │ x.y.z!!!?.();
     19 │ (b! as number) = "test";
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
@@ -389,6 +457,10 @@ invalid.ts:18:1 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━
     19 │ (b! as number) = "test";
     20 │ (b!! as number) = "test";
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
   i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
   
     18 │ x.y.z!!!?.();
@@ -408,6 +480,10 @@ invalid.ts:19:2 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     20 │ (b!! as number) = "test";
     21 │ x[y.z!];
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
 
 ```
 
@@ -423,6 +499,10 @@ invalid.ts:20:2 lint/style/noNonNullAssertion ━━━━━━━━━━━�
     21 │ x[y.z!];
     22 │ 
   
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
+  
 
 ```
 
@@ -436,6 +516,10 @@ invalid.ts:21:3 lint/style/noNonNullAssertion ━━━━━━━━━━━�
   > 21 │ x[y.z!];
        │   ^^^^
     22 │ 
+  
+  i A non-null assertion tells TypeScript to ignore a possible null or undefined value. If the value is missing at runtime, the code fails with an error that the compiler could not catch.
+  
+  i Check that the value is defined before using it, for example with an if statement or optional chaining, instead of asserting it.
   
 
 ```

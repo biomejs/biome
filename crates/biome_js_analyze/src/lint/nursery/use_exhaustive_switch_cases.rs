@@ -252,7 +252,7 @@ impl Rule for UseExhaustiveSwitchCases {
         let mut mutation = ctx.root().begin();
 
         let error_expr = make::js_new_expression(
-            make::token(T![new]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![new]).with_trailing_space(),
             make::js_call_expression(
                 make::js_identifier_expression(make::js_reference_identifier(make::ident("Error")))
                     .into(),
@@ -300,7 +300,7 @@ impl Rule for UseExhaustiveSwitchCases {
             });
 
         let throw_stmt: AnyJsStatement = make::js_throw_statement(
-            make::token(T![throw]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![throw]).with_trailing_space(),
             error_expr.clone().into(),
         )
         .with_semicolon_token(make::token(T![;]))
@@ -308,8 +308,7 @@ impl Rule for UseExhaustiveSwitchCases {
         .into();
 
         for ty in state {
-            let mut case_token =
-                make::token(T![case]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+            let mut case_token = make::token(T![case]).with_trailing_space();
 
             if let Some(leading_trivia) = &leading_trivia {
                 case_token = case_token.with_leading_trivia_pieces(leading_trivia.iter().cloned());
@@ -323,7 +322,7 @@ impl Rule for UseExhaustiveSwitchCases {
             let clause = AnyJsSwitchClause::JsCaseClause(make::js_case_clause(
                 case_token,
                 missing_case_to_expression(ty)?,
-                make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T![:]).with_trailing_space(),
                 make::js_statement_list((!has_default).then(|| throw_stmt.clone())),
             ));
 

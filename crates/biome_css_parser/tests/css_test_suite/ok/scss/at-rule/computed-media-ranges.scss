@@ -1,0 +1,29 @@
+$feature: width;
+$min: 20rem;
+$max: 80rem;
+@function range-name() { @return width; }
+
+@media ($feature + "" >= 40rem) { .name-first { color: red; } }
+@media (40rem <= $feature + "") { .reverse { color: red; } }
+@media (20rem < $feature + "" <= 80rem) { .interval { color: red; } }
+@media (range-name() >= 40rem) { .function { color: red; } }
+@media (40rem <= range-name()) { .reverse-function { color: red; } }
+@media (20rem < range-name() <= 80rem) { .interval-function { color: red; } }
+@media ($feature + "" >= $min + 1rem) { .dynamic { color: red; } }
+@media ($min + 1rem < $feature + "" <= $max - 1rem) { .dynamic-interval { color: red; } }
+@media ($feature /* name */ + "" /* comparison */ >= 40rem), (range-name() > 20rem) and (color) { .queries { color: red; } }
+@import "wide-layout.css" screen and ($feature + "" >= 40rem);
+@import "wide-layout.css" screen and (40rem <= range-name());
+@import "wide-layout.css" screen and (20rem < $feature + "" <= 80rem);
+
+@media ($min + 1rem < width) { .bound { color: red; } }
+@media ($min + 1rem < width <= $max - 1rem) { .bounds { color: red; } }
+@media ($feature >= 40rem) { .variable { color: red; } }
+@media (40rem <= $feature) { .reverse-variable { color: red; } }
+@media (#{$feature} >= 40rem) { .interpolation { color: red; } }
+@media (#{$feature} + "" >= 40rem) { .interpolated-name { color: red; } }
+@media ("#{$feature}" >= 40rem) { .quoted-name { color: red; } }
+@media (20rem < "#{$feature}" <= 80rem) { .quoted-interval { color: red; } }
+@media (20rem < #{$feature} + "" <= 80rem) { .interpolated-interval { color: red; } }
+@media (#{$min} /* bound */ < range-name() <= 80rem) { .interpolated-bound { color: red; } }
+@import "wide-layout.css" screen and (#{$min} < range-name() <= 80rem);

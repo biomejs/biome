@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/directive-values/quotes-in-values.vue
+---
+
+# Input
+
+```vue
+<template>
+	<div :bar='foo("x")'></div>
+	<div :bar="'it\'s'"></div>
+	<div v-for="x in ['a',b]">{{ x }}</div>
+	<div v-for='x in ["a",b]'>{{ x }}</div>
+	<div v-for='x in [`say "hi"`]'>{{ x }}</div>
+</template>
+
+```
+
+
+# Formatted
+
+```vue
+<template>
+	<div :bar="foo('x')"></div>
+	<div :bar="'it\'s'"></div>
+	<div v-for="x in ['a', b]">{{ x }}</div>
+	<div v-for="x in ['a', b]">{{ x }}</div>
+	<div v-for="x in [`say &quot;hi&quot;`]">{{ x }}</div>
+</template>
+
+```

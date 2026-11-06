@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { value } from "./value.js";
+value < 0 ? -value : value;
+
+```
+
+# Diagnostics
+```
+invalidImport.js:3:1 lint/nursery/useMathAbs  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This conditional expression manually computes an absolute value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { value } from "./value.js";
+  > 3 │ value < 0 ? -value : value;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Math.abs() expresses this directly and avoids repeating the value for the positive and negative cases.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   import { value } from "./value.js";
+    3   │ - value·<·0·?·-value·:·value;
+      3 │ + Math.abs(value);
+    4 4 │   
+  
+
+```

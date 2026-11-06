@@ -1,0 +1,17 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-control-flow.valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$condition: true;
+.selector {
+  @if $condition {
+    color: red;
+  } @else {
+    color: blue;
+  }
+}
+
+```

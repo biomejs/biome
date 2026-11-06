@@ -20,6 +20,10 @@ ignore-types.ts:3:18 lint/correctness/noUndeclaredVariables ━━━━━━�
   > 3 │ export const X = UndeclaredVariable;
       │                  ^^^^^^^^^^^^^^^^^^
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   

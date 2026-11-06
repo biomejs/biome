@@ -181,6 +181,45 @@ pub(super) fn convert_export(ctx: &ConvertCtx<'_>, export: &JsExport) -> Result<
                     attributes: None,
                 }))
             }
+            AnyJsDeclarationClause::TsTypeAliasDeclaration(declaration) => {
+                Ok(Statement::ExportNamedDeclaration(ExportNamedDeclaration {
+                    base: ctx.base(export.syntax().text_trimmed_range()),
+                    declaration: Some(Box::new(Declaration::TSTypeAliasDeclaration(
+                        convert_ts_type_alias_declaration(ctx, &declaration)?,
+                    ))),
+                    specifiers: Vec::new(),
+                    source: None,
+                    export_kind: Some(ExportKind::Type),
+                    assertions: None,
+                    attributes: None,
+                }))
+            }
+            AnyJsDeclarationClause::TsInterfaceDeclaration(declaration) => {
+                Ok(Statement::ExportNamedDeclaration(ExportNamedDeclaration {
+                    base: ctx.base(export.syntax().text_trimmed_range()),
+                    declaration: Some(Box::new(Declaration::TSInterfaceDeclaration(
+                        convert_ts_interface_declaration(ctx, &declaration)?,
+                    ))),
+                    specifiers: Vec::new(),
+                    source: None,
+                    export_kind: Some(ExportKind::Type),
+                    assertions: None,
+                    attributes: None,
+                }))
+            }
+            AnyJsDeclarationClause::TsEnumDeclaration(declaration) => {
+                Ok(Statement::ExportNamedDeclaration(ExportNamedDeclaration {
+                    base: ctx.base(export.syntax().text_trimmed_range()),
+                    declaration: Some(Box::new(Declaration::TSEnumDeclaration(
+                        convert_ts_enum_declaration(ctx, &declaration)?,
+                    ))),
+                    specifiers: Vec::new(),
+                    source: None,
+                    export_kind: Some(ExportKind::Value),
+                    assertions: None,
+                    attributes: None,
+                }))
+            }
             declaration => Err(unsupported(declaration.syntax())),
         },
         AnyJsExportClause::JsExportDefaultExpressionClause(clause) => Ok(

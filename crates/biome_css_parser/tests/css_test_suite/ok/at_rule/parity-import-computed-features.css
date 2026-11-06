@@ -1,0 +1,8 @@
+@import "wide-layout.css" screen and (min-width: 48rem);
+@media (min-width: 40rem), (aspect-ratio: 16 / 9) {}
+@media (width: calc(100px + 1rem)) {}
+@container (width >= 20rem) {}
+@container scroll-state(stuck: top) {}
+@supports (display: grid) {}
+.control { width: if(media(width >= 30rem): 1px; else: 2px); }
+@media (calc(20rem + 1px) < width) {}

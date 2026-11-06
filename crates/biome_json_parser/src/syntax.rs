@@ -14,6 +14,7 @@ const VALUE_START: TokenSet<JsonSyntaxKind> = token_set![
     T![false],
     JSON_STRING_LITERAL,
     JSON_NUMBER_LITERAL,
+    GRIT_METAVARIABLE,
     T!['['],
     T!['{'],
 ];
@@ -68,6 +69,12 @@ fn parse_value(p: &mut JsonParser) -> ParsedSyntax {
             let m = p.start();
             p.bump(JSON_NUMBER_LITERAL);
             Present(m.complete(p, JSON_NUMBER_VALUE))
+        }
+
+        GRIT_METAVARIABLE => {
+            let m = p.start();
+            p.bump(GRIT_METAVARIABLE);
+            Present(m.complete(p, JSON_METAVARIABLE))
         }
 
         T!['{'] => parse_sequence(p, SequenceKind::Object),
@@ -288,6 +295,11 @@ fn parse_member_name(p: &mut JsonParser) -> ParsedSyntax {
             let m = p.start();
             p.bump(JSON_STRING_LITERAL);
             Present(m.complete(p, JSON_MEMBER_NAME))
+        }
+        GRIT_METAVARIABLE => {
+            let m = p.start();
+            p.bump(GRIT_METAVARIABLE);
+            Present(m.complete(p, JSON_METAVARIABLE))
         }
         IDENT | T![null] | T![true] | T![false] => {
             let m = p.start();

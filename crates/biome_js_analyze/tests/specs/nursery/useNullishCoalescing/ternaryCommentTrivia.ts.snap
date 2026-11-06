@@ -31,6 +31,8 @@ ternaryCommentTrivia.ts:3:11 lint/nursery/useNullishCoalescing  FIXABLE  ━━�
     4 │ 
     5 │ // Comment before test
   
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -59,6 +61,8 @@ ternaryCommentTrivia.ts:7:23 lint/nursery/useNullishCoalescing  FIXABLE  ━━�
     8 │ 
     9 │ // Negative form with comments on both branches
   
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -85,6 +89,8 @@ ternaryCommentTrivia.ts:11:11 lint/nursery/useNullishCoalescing  FIXABLE  ━━
   > 11 │ const c = z === null ? /* fallback */ 'default' : /* value */ z;
        │           ^^^^^^^^^^
     12 │ 
+  
+  i A ternary expression that checks for null or undefined does what ?? does, but ?? is shorter and easier to read.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
   

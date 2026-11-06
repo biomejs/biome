@@ -26,9 +26,7 @@ This paragraph
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,13 +1,11 @@
- This paragraph
--
+@@ -3,11 +3,10 @@
  > is interrupted by block quote.
  
  [This link
@@ -48,6 +46,7 @@ This paragraph
 
 ```md
 This paragraph
+
 > is interrupted by block quote.
 
 [This link

@@ -1,0 +1,152 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { queryOptions, useQuery } from "@tanstack/react-query";
+
+useQuery({
+	queryKey: ["todos"],
+	queryFn: async () => {
+		await fetch("/api/todos");
+	},
+});
+
+useQuery({
+	queryKey: ["todos"],
+	queryFn: async () => {
+		const response = await fetch("/api/todos");
+		if (response.ok) {
+			return response.json();
+		}
+	},
+});
+
+useQuery({
+	queryKey: ["todos"],
+	queryFn: function () {
+		fetch("/api/todos").then((response) => response.json());
+	},
+});
+
+async function refreshTodos() {
+	await fetch("/api/todos/refresh");
+}
+
+export const todosOptions = queryOptions({
+	queryKey: ["todos"],
+	queryFn: refreshTodos,
+});
+
+const queryFn = () => {};
+
+export const sharedOptions = { queryKey: ["todos"], queryFn };
+
+```
+
+# Diagnostics
+```
+invalid.js:6:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    4 │ useQuery({
+    5 │ 	queryKey: ["todos"],
+  > 6 │ 	queryFn: async () => {
+      │ 	^^^^^^^
+    7 │ 		await fetch("/api/todos");
+    8 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    11 │ useQuery({
+    12 │ 	queryKey: ["todos"],
+  > 13 │ 	queryFn: async () => {
+       │ 	^^^^^^^
+    14 │ 		const response = await fetch("/api/todos");
+    15 │ 		if (response.ok) {
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    21 │ useQuery({
+    22 │ 	queryKey: ["todos"],
+  > 23 │ 	queryFn: function () {
+       │ 	^^^^^^^
+    24 │ 		fetch("/api/todos").then((response) => response.json());
+    25 │ 	},
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:2 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    32 │ export const todosOptions = queryOptions({
+    33 │ 	queryKey: ["todos"],
+  > 34 │ 	queryFn: refreshTodos,
+       │ 	^^^^^^^
+    35 │ });
+    36 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:53 lint/nursery/noTanstackQueryVoidQueryFn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This query function can return undefined.
+  
+    37 │ const queryFn = () => {};
+    38 │ 
+  > 39 │ export const sharedOptions = { queryKey: ["todos"], queryFn };
+       │                                                     ^^^^^^^
+    40 │ 
+  
+  i TanStack Query doesn't accept undefined as the data of a query. The query fails with an error instead of saving a result.
+  
+  i Return the data in every case. If there is no data to return, return null instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

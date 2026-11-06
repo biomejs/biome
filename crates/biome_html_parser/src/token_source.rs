@@ -46,6 +46,9 @@ pub(crate) enum HtmlLexContext {
     /// Lexes the iterable expression after a Vue `v-for` `in` or `of` operator.
     /// The stored syntax kind is the quote that terminates the attribute value.
     VueVForExpression(HtmlSyntaxKind),
+    /// Lexes the default value of a Vue `v-for` binding, after its `=`.
+    /// The stored syntax kind is the quote that terminates the attribute value.
+    VueVForDefault(HtmlSyntaxKind),
     /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
@@ -66,7 +69,7 @@ pub(crate) enum HtmlLexContext {
     /// Outside of this context, the lexer doesn't yield any particular keywords.
     Svelte,
 
-    /// The binding properties in Svelte are special and require a special lexing. They accept everything until `=` is found.
+    /// The binding properties in Svelte are special and require a special lexing. They accept everything until whitespace, `=`, `>`, `/`, or `|` is found.
     SvelteBindingLiteral,
 
     /// Lex tokens inside text expressions. In the following examples, `foo` is the text expression:
@@ -79,6 +82,13 @@ pub(crate) enum HtmlLexContext {
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
     Doctype,
+    /// Lexes the target and attributes of a processing instruction, between
+    /// `<?` and `?>`.
+    ///
+    /// A name ends before `?>`, so the `?` of `<?xml?>` or `<?foo bar?>` starts
+    /// the closing `?>` rather than joining the name. Framework syntax, such as
+    /// Vue directives or Astro expressions, is not recognized.
+    ProcessingInstruction,
     /// Treat everything as text until the closing tag is encountered.
     EmbeddedLanguage(HtmlEmbeddedLanguage),
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.

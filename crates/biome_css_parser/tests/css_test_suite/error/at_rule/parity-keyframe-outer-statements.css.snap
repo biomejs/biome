@@ -1,0 +1,216 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@keyframes rejected {
+  @include frames;
+  to { opacity: 1; }
+}
+
+.after { color: red; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@11..20 "rejected" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@20..21 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssBogusKeyframesItem {
+                            items: [
+                                AT@21..25 "@" [Newline("\n"), Whitespace("  ")] [],
+                                ScssIncludeAtRule {
+                                    include_token: INCLUDE_KW@25..33 "include" [] [Whitespace(" ")],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@33..39 "frames" [] [],
+                                    },
+                                    arguments: missing (optional),
+                                    using_clause: missing (optional),
+                                    block: missing (optional),
+                                    semicolon_token: SEMICOLON@39..40 ";" [] [],
+                                },
+                            ],
+                        },
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: TO_KW@40..46 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@46..48 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@48..55 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@55..57 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@57..58 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@58..60 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@60..61 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@61..63 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@63..66 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@66..72 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@72..74 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@74..79 "color" [] [],
+                                },
+                                colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@81..84 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@84..86 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@86..87 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@87..88 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..88
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..87
+    0: CSS_AT_RULE@0..63
+      0: AT@0..1 "@" [] []
+      1: CSS_KEYFRAMES_AT_RULE@1..63
+        0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@11..20
+          0: IDENT@11..20 "rejected" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@20..63
+          0: L_CURLY@20..21 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@21..61
+            0: CSS_BOGUS_KEYFRAMES_ITEM@21..40
+              0: AT@21..25 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_INCLUDE_AT_RULE@25..40
+                0: INCLUDE_KW@25..33 "include" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@33..39
+                  0: IDENT@33..39 "frames" [] []
+                2: (empty)
+                3: (empty)
+                4: (empty)
+                5: SEMICOLON@39..40 ";" [] []
+            1: CSS_KEYFRAMES_ITEM@40..61
+              0: CSS_KEYFRAMES_SELECTOR_LIST@40..46
+                0: CSS_KEYFRAMES_IDENT_SELECTOR@40..46
+                  0: TO_KW@40..46 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              1: CSS_DECLARATION_BLOCK@46..61
+                0: L_CURLY@46..48 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@48..60
+                  0: CSS_DECLARATION_WITH_SEMICOLON@48..60
+                    0: CSS_DECLARATION@48..58
+                      0: CSS_GENERIC_PROPERTY@48..58
+                        0: CSS_IDENTIFIER@48..55
+                          0: IDENT@48..55 "opacity" [] []
+                        1: COLON@55..57 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@57..58
+                          0: CSS_NUMBER@57..58
+                            0: CSS_NUMBER_LITERAL@57..58 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@58..60 ";" [] [Whitespace(" ")]
+                2: R_CURLY@60..61 "}" [] []
+          2: R_CURLY@61..63 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@63..87
+      0: CSS_SELECTOR_LIST@63..72
+        0: CSS_COMPOUND_SELECTOR@63..72
+          0: CSS_NESTED_SELECTOR_LIST@63..63
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@63..72
+            0: CSS_CLASS_SELECTOR@63..72
+              0: DOT@63..66 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@66..72
+                0: IDENT@66..72 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@72..87
+        0: L_CURLY@72..74 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@74..86
+          0: CSS_DECLARATION_WITH_SEMICOLON@74..86
+            0: CSS_DECLARATION@74..84
+              0: CSS_GENERIC_PROPERTY@74..84
+                0: CSS_IDENTIFIER@74..79
+                  0: IDENT@74..79 "color" [] []
+                1: COLON@79..81 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@81..84
+                  0: CSS_IDENTIFIER@81..84
+                    0: IDENT@81..84 "red" [] []
+              1: (empty)
+            1: SEMICOLON@84..86 ";" [] [Whitespace(" ")]
+        2: R_CURLY@86..87 "}" [] []
+  2: EOF@87..88 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-keyframe-outer-statements.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS statements in keyframes are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @keyframes rejected {
+  > 2 │   @include frames;
+      │   ^^^^^^^^^^^^^^^^
+    3 │   to { opacity: 1; }
+    4 │ }
+  
+```

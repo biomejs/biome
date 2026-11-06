@@ -73,6 +73,8 @@ invalid.js:1:16 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     2 │ if (foo.length || foo.bar()) {}
     3 │ if (!!(!!foo.length)) {}
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
     1 │ if·(foo.bar·&&·foo.bar.length·>·0)·{}
@@ -90,6 +92,8 @@ invalid.js:2:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━
       │     ^^^^^^^^^^
     3 │ if (!!(!!foo.length)) {}
     4 │ if (!(foo.length === 0)) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -109,6 +113,8 @@ invalid.js:3:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━
       │     ^^^^^^^^^^^^^^^^
     4 │ if (!(foo.length === 0)) {}
     5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -134,6 +140,8 @@ invalid.js:4:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━
     5 │ if (/** 1 **/ 0 === foo.length /** 2 **/) {}
     6 │ if (0 < foo.length) {}
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
      2  2 │   if (foo.length || foo.bar()) {}
@@ -157,6 +165,8 @@ invalid.js:5:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
       │               ^^^^^^^^^^^^^^^^
     6 │ if (0 < foo.length) {}
     7 │ while (foo.length >= 1) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -182,6 +192,8 @@ invalid.js:6:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━
     7 │ while (foo.length >= 1) {}
     8 │ do {} while (/** 1 **/foo.length /** 2 **/);
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
      4  4 │   if (!(foo.length === 0)) {}
@@ -205,6 +217,8 @@ invalid.js:7:8 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━
       │        ^^^^^^^^^^^^^^^
     8 │ do {} while (/** 1 **/foo.length /** 2 **/);
     9 │ for (let i = 0; (bar && !foo.length); i ++) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -230,6 +244,8 @@ invalid.js:8:23 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
      9 │ for (let i = 0; (bar && !foo.length); i ++) {}
     10 │ const isEmpty = foo.length < 1;
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
     8 │ do·{}·while·(/**·1·**/·foo.length·/**·2·**/·>·0);
@@ -248,6 +264,8 @@ invalid.js:9:25 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                         ^^^^^^^^^^^
     10 │ const isEmpty = foo.length < 1;
     11 │ bar(foo.length >= 1)
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -273,6 +291,8 @@ invalid.js:10:17 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     11 │ bar(foo.length >= 1)
     12 │ bar(!foo.length || foo.length)
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
      8  8 │   do {} while (/** 1 **/foo.length /** 2 **/);
@@ -296,6 +316,8 @@ invalid.js:11:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │     ^^^^^^^^^^^^^^^
     12 │ bar(!foo.length || foo.length)
     13 │ alert(foo.length && bar())
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -321,6 +343,8 @@ invalid.js:12:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     13 │ alert(foo.length && bar())
     14 │ const hasLength = () => foo.length && bar()
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     10 10 │   const isEmpty = foo.length < 1;
@@ -345,6 +369,8 @@ invalid.js:13:7 lint/style/useExplicitLengthCheck ━━━━━━━━━━
     14 │ const hasLength = () => foo.length && bar()
     15 │ const parenthesizedHasLength = () => (foo.length) && bar()
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
 
 ```
 
@@ -359,6 +385,8 @@ invalid.js:14:25 lint/style/useExplicitLengthCheck ━━━━━━━━━�
        │                         ^^^^^^^^^^
     15 │ const parenthesizedHasLength = () => (foo.length) && bar()
     16 │ if (!foo.length > 0) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
 
 ```
@@ -375,6 +403,8 @@ invalid.js:15:39 lint/style/useExplicitLengthCheck ━━━━━━━━━�
     16 │ if (!foo.length > 0) {}
     17 │ if (true === !foo.length) {}
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
 
 ```
 
@@ -389,6 +419,8 @@ invalid.js:16:5 lint/style/useExplicitLengthCheck ━━━━━━━━━━
        │     ^^^^^^^^^^^
     17 │ if (true === !foo.length) {}
     18 │ const bar = void !foo.length;
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
 
 ```
@@ -405,6 +437,8 @@ invalid.js:17:14 lint/style/useExplicitLengthCheck ━━━━━━━━━�
     18 │ const bar = void !foo.length;
     19 │ const isNotEmpty = Boolean(foo.length)
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
 
 ```
 
@@ -419,6 +453,8 @@ invalid.js:18:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                  ^^^^^^^^^^^
     19 │ const isNotEmpty = Boolean(foo.length)
     20 │ Boolean(foo.length).toString()
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -444,6 +480,8 @@ invalid.js:19:20 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     20 │ Boolean(foo.length).toString()
     21 │ +Boolean(foo.length)
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
     17 17 │   if (true === !foo.length) {}
@@ -467,6 +505,8 @@ invalid.js:20:1 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^
     21 │ +Boolean(foo.length)
     22 │ const isNotEmpty1 = Boolean(foo.length || bar)
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -492,6 +532,8 @@ invalid.js:21:2 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     22 │ const isNotEmpty1 = Boolean(foo.length || bar)
     23 │ const isEmpty1 = Boolean(!foo.length)
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
     19 19 │   const isNotEmpty = Boolean(foo.length)
@@ -516,6 +558,8 @@ invalid.js:22:29 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     23 │ const isEmpty1 = Boolean(!foo.length)
     24 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
     22 │ const·isNotEmpty1·=·Boolean(foo.length·>·0||·bar)
@@ -534,6 +578,8 @@ invalid.js:23:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                  ^^^^^^^^^^^^^^^^^^^^
     24 │ const isEmpty2 = Boolean(/** 1 **/foo.length === 0)
     25 │ const isNotEmpty2 = !Boolean(foo.length === 0)
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -559,6 +605,8 @@ invalid.js:24:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     25 │ const isNotEmpty2 = !Boolean(foo.length === 0)
     26 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     24 │ const·isEmpty2·=·Boolean(/**·1·**/foo.length·===·0)
@@ -577,6 +625,8 @@ invalid.js:25:21 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     26 │ const isEmpty3 = !Boolean(!Boolean(foo.length === 0))
     27 │ if (foo.size) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -602,6 +652,8 @@ invalid.js:26:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     27 │ if (foo.size) {}
     28 │ if (foo.size && bar.length) {}
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     26 │ const·isEmpty3·=·!Boolean(!Boolean(foo.length·===·0))
@@ -620,6 +672,8 @@ invalid.js:27:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │     ^^^^^^^^
     28 │ if (foo.size && bar.length) {}
     29 │ 
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .size with .size > 0
   
@@ -640,6 +694,8 @@ invalid.js:28:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     29 │ 
     30 │ // Unlike ESLint Unicorn, Biome checks direct properties on `this` because they
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .size with .size > 0
   
     28 │ if·(foo.size·>·0&&·bar.length)·{}
@@ -658,6 +714,8 @@ invalid.js:28:17 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                 ^^^^^^^^^^
     29 │ 
     30 │ // Unlike ESLint Unicorn, Biome checks direct properties on `this` because they
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length > 0
   
@@ -678,6 +736,8 @@ invalid.js:34:13 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     35 │         while (!this.size || foo);
     36 │     }
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length > 0
   
     34 │ ········if·(this.length·>·0)·{};
@@ -696,6 +756,8 @@ invalid.js:35:16 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                ^^^^^^^^^^
     36 │     }
     37 │ }
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .size with .size === 0
   
@@ -719,6 +781,8 @@ invalid.js:40:23 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                       ^^^^^^^^^^^
     41 │ function foo() {throw!foo.length}
     42 │ async function foo() {await!foo.length}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -744,6 +808,8 @@ invalid.js:41:22 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     42 │ async function foo() {await!foo.length}
     43 │ function * foo() {yield!foo.length}
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     39 39 │   // Space after keywords
@@ -767,6 +833,8 @@ invalid.js:42:28 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                            ^^^^^^^^^^^
     43 │ function * foo() {yield!foo.length}
     44 │ function * foo() {yield*!foo.length}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -792,6 +860,8 @@ invalid.js:43:24 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     44 │ function * foo() {yield*!foo.length}
     45 │ delete!foo.length
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     41 41 │   function foo() {throw!foo.length}
@@ -815,6 +885,8 @@ invalid.js:44:25 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │                         ^^^^^^^^^^^
     45 │ delete!foo.length
     46 │ typeof!foo.length
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -840,6 +912,8 @@ invalid.js:45:7 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     46 │ typeof!foo.length
     47 │ void!foo.length
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     43 43 │   function * foo() {yield!foo.length}
@@ -863,6 +937,8 @@ invalid.js:46:7 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │       ^^^^^^^^^^^
     47 │ void!foo.length
     48 │ a instanceof!foo.length
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -888,6 +964,8 @@ invalid.js:47:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     48 │ a instanceof!foo.length
     49 │ a in!foo.length
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     45 45 │   delete!foo.length
@@ -912,6 +990,8 @@ invalid.js:48:13 lint/style/useExplicitLengthCheck ━━━━━━━━━�
     49 │ a in!foo.length
     50 │ export default!foo.length
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
 
 ```
 
@@ -927,6 +1007,8 @@ invalid.js:49:5 lint/style/useExplicitLengthCheck ━━━━━━━━━━
     50 │ export default!foo.length
     51 │ if(true){}else!foo.length
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
 
 ```
 
@@ -941,6 +1023,8 @@ invalid.js:50:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │               ^^^^^^^^^^^
     51 │ if(true){}else!foo.length
     52 │ do!foo.length;while(true) {}
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -966,6 +1050,8 @@ invalid.js:51:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     52 │ do!foo.length;while(true) {}
     53 │ switch(foo){case!foo.length:{}}
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     49 49 │   a in!foo.length
@@ -989,6 +1075,8 @@ invalid.js:52:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
        │   ^^^^^^^^^^^
     53 │ switch(foo){case!foo.length:{}}
     54 │ for(const a of!foo.length);
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   
@@ -1014,6 +1102,8 @@ invalid.js:53:17 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     54 │ for(const a of!foo.length);
     55 │ for(const a in!foo.length);
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     51 51 │   if(true){}else!foo.length
@@ -1038,6 +1128,8 @@ invalid.js:54:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
     55 │ for(const a in!foo.length);
     56 │ 
   
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
+  
   i Unsafe fix: Replace .length with .length === 0
   
     52 52 │   do!foo.length;while(true) {}
@@ -1060,6 +1152,8 @@ invalid.js:55:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━�
   > 55 │ for(const a in!foo.length);
        │               ^^^^^^^^^^^
     56 │ 
+  
+  i An explicit comparison makes it clear which condition is checked, instead of relying on how a number is converted to a boolean.
   
   i Unsafe fix: Replace .length with .length === 0
   

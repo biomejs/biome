@@ -5,26 +5,15 @@ use biome_module_graph::{ModuleDb, traverse_import_tree_for_html_classes};
 use biome_service::db::WorkspaceDb;
 use camino::Utf8Path;
 
-use super::support::{
-    astro_css_source, build_html_db, html_css_source, parse_embedded_css, svelte_css_source,
-    vue_css_source,
-};
+use super::support::build_html_db;
 
-fn classes(
-    path: &str,
-    source: HtmlFileSource,
-    styles: &[(&str, biome_languages::CssFileSource)],
-) -> (WorkspaceDb, Vec<String>) {
+/// Returns the classes of the import tree of a document made of a `div` and
+/// the `styles` elements.
+fn classes(path: &str, source: HtmlFileSource, styles: &[&str]) -> (WorkspaceDb, Vec<String>) {
+    let text = format!("<div class=\"card\"></div>{}", styles.concat());
     let fs = MemoryFileSystem::default();
-    fs.insert(path.into(), "<div class=\"card\"></div>");
-    let embedded = styles
-        .iter()
-        .map(|(css, source)| parse_embedded_css(css, *source))
-        .collect();
-    let db = build_html_db(
-        &fs,
-        &[(path, "<div class=\"card\"></div>", source, embedded)],
-    );
+    fs.insert(path.into(), text.as_str());
+    let db = build_html_db(&fs, &[(path, &text, source)]);
     let module = db.module_for_path(Utf8Path::new(path)).unwrap();
     let classes = traverse_import_tree_for_html_classes(&db, module)
         .iter()
@@ -39,7 +28,7 @@ fn test_html_inline_style_classes_are_global() {
     let (db, classes) = classes(
         "/src/index.html",
         HtmlFileSource::html(),
-        &[(".card{}", html_css_source())],
+        &["<style>.card{}</style>"],
     );
     let info = db
         .html_module_info_for_path(Utf8Path::new("/src/index.html"))
@@ -56,10 +45,7 @@ fn test_html_self_closing_element_class_references_are_collected() {
     let source = "<img class=\"hero\"/><input class=\"field\"/><br class=\"spacer\"/>";
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.html".into(), source);
-    let db = build_html_db(
-        &fs,
-        &[("/src/index.html", source, HtmlFileSource::html(), vec![])],
-    );
+    let db = build_html_db(&fs, &[("/src/index.html", source, HtmlFileSource::html())]);
     let info = db
         .html_module_info_for_path(Utf8Path::new("/src/index.html"))
         .unwrap();
@@ -75,10 +61,7 @@ fn test_vue_unscoped_style_classes_are_global() {
     let (db, classes) = classes(
         "/src/Comp.vue",
         HtmlFileSource::vue(),
-        &[(
-            ".card{}",
-            vue_css_source(EmbeddingStyleApplicability::Global),
-        )],
+        &["<style>.card{}</style>"],
     );
     assert_eq!(
         db.html_module_info_for_path(Utf8Path::new("/src/Comp.vue"))
@@ -95,10 +78,7 @@ fn test_vue_scoped_style_classes_are_local_and_hidden() {
     let (db, classes) = classes(
         "/src/Scoped.vue",
         HtmlFileSource::vue(),
-        &[(
-            ".alpha{}",
-            vue_css_source(EmbeddingStyleApplicability::Local),
-        )],
+        &["<style scoped>.alpha{}</style>"],
     );
     assert_eq!(
         db.html_module_info_for_path(Utf8Path::new("/src/Scoped.vue"))
@@ -116,14 +96,8 @@ fn test_vue_mixed_scoped_and_unscoped() {
         "/src/Mixed.vue",
         HtmlFileSource::vue(),
         &[
-            (
-                ".global-btn{}",
-                vue_css_source(EmbeddingStyleApplicability::Global),
-            ),
-            (
-                ".scoped-card{}",
-                vue_css_source(EmbeddingStyleApplicability::Local),
-            ),
+            "<style>.global-btn{}</style>",
+            "<style scoped>.scoped-card{}</style>",
         ],
     );
     assert!(
@@ -138,10 +112,7 @@ fn test_astro_local_style_classes_are_hidden() {
     let (db, classes) = classes(
         "/src/Page.astro",
         HtmlFileSource::astro(),
-        &[(
-            ".hero{}",
-            astro_css_source(EmbeddingStyleApplicability::Local),
-        )],
+        &["<style>.hero{}</style>"],
     );
     assert_eq!(
         db.html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
@@ -158,10 +129,7 @@ fn test_astro_global_style_classes_are_visible() {
     let (_, classes) = classes(
         "/src/Layout.astro",
         HtmlFileSource::astro(),
-        &[(
-            ".wrapper{}",
-            astro_css_source(EmbeddingStyleApplicability::Global),
-        )],
+        &["<style is:global>.wrapper{}</style>"],
     );
     assert!(classes.contains(&"wrapper".into()));
 }
@@ -171,7 +139,7 @@ fn test_svelte_local_style_classes_are_hidden() {
     let (db, classes) = classes(
         "/src/Button.svelte",
         HtmlFileSource::svelte(),
-        &[(".btn{}", svelte_css_source())],
+        &["<style>.btn{}</style>"],
     );
     assert_eq!(
         db.html_module_info_for_path(Utf8Path::new("/src/Button.svelte"))
@@ -188,7 +156,7 @@ fn test_svelte_global_pseudo_class_is_visible() {
     let (db, classes) = classes(
         "/src/Global.svelte",
         HtmlFileSource::svelte(),
-        &[(":global(.prose){}", svelte_css_source())],
+        &["<style>:global(.prose){}</style>"],
     );
     assert_eq!(
         db.html_module_info_for_path(Utf8Path::new("/src/Global.svelte"))

@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+import { useAttrs, useSlots } from "vue";
+
+const customName = defineProps({ msg: String });
+const emitsWrong = defineEmits(["change"]);
+const slotsWrong = defineSlots();
+const useSlotsWrong = useSlots();
+const attrsWrong = useAttrs();
+
+function update() {
+  emitsWrong("change", customName.msg);
+  console.log(slotsWrong.default, useSlotsWrong.header, attrsWrong.class);
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of defineProps() is stored in customName instead of props.
+  
+    3 │ import { useAttrs, useSlots } from "vue";
+    4 │ 
+  > 5 │ const customName = defineProps({ msg: String });
+      │       ^^^^^^^^^^
+    6 │ const emitsWrong = defineEmits(["change"]);
+    7 │ const slotsWrong = defineSlots();
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to props.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to props.
+  
+     3  3 │   import { useAttrs, useSlots } from "vue";
+     4  4 │   
+     5    │ - const·customName·=·defineProps({·msg:·String·});
+        5 │ + const·props·=·defineProps({·msg:·String·});
+     6  6 │   const emitsWrong = defineEmits(["change"]);
+     7  7 │   const slotsWrong = defineSlots();
+    ····· │ 
+    10 10 │   
+    11 11 │   function update() {
+    12    │ - ··emitsWrong("change",·customName.msg);
+       12 │ + ··emitsWrong("change",·props.msg);
+    13 13 │     console.log(slotsWrong.default, useSlotsWrong.header, attrsWrong.class);
+    14 14 │   }
+  
+
+```
+
+```
+invalid.vue:6:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of defineEmits() is stored in emitsWrong instead of emit.
+  
+    5 │ const customName = defineProps({ msg: String });
+  > 6 │ const emitsWrong = defineEmits(["change"]);
+      │       ^^^^^^^^^^
+    7 │ const slotsWrong = defineSlots();
+    8 │ const useSlotsWrong = useSlots();
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to emit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to emit.
+  
+     4  4 │   
+     5  5 │   const customName = defineProps({ msg: String });
+     6    │ - const·emitsWrong·=·defineEmits(["change"]);
+        6 │ + const·emit·=·defineEmits(["change"]);
+     7  7 │   const slotsWrong = defineSlots();
+     8  8 │   const useSlotsWrong = useSlots();
+    ····· │ 
+    10 10 │   
+    11 11 │   function update() {
+    12    │ - ··emitsWrong("change",·customName.msg);
+       12 │ + ··emit("change",·customName.msg);
+    13 13 │     console.log(slotsWrong.default, useSlotsWrong.header, attrsWrong.class);
+    14 14 │   }
+  
+
+```
+
+```
+invalid.vue:7:7 lint/nursery/useVueMacroVariableName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of defineSlots() is stored in slotsWrong instead of slots.
+  
+    5 │ const customName = defineProps({ msg: String });
+    6 │ const emitsWrong = defineEmits(["change"]);
+  > 7 │ const slotsWrong = defineSlots();
+      │       ^^^^^^^^^^
+    8 │ const useSlotsWrong = useSlots();
+    9 │ const attrsWrong = useAttrs();
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to slots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:7 lint/nursery/useVueMacroVariableName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of useSlots() is stored in useSlotsWrong instead of slots.
+  
+     6 │ const emitsWrong = defineEmits(["change"]);
+     7 │ const slotsWrong = defineSlots();
+   > 8 │ const useSlotsWrong = useSlots();
+       │       ^^^^^^^^^^^^^
+     9 │ const attrsWrong = useAttrs();
+    10 │ 
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to slots.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:7 lint/nursery/useVueMacroVariableName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The result of useAttrs() is stored in attrsWrong instead of attrs.
+  
+     7 │ const slotsWrong = defineSlots();
+     8 │ const useSlotsWrong = useSlots();
+   > 9 │ const attrsWrong = useAttrs();
+       │       ^^^^^^^^^^
+    10 │ 
+    11 │ function update() {
+  
+  i Using the same variable name for this result in every component makes components easier to read and search.
+  
+  i Rename the variable to attrs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the variable to attrs.
+  
+     7  7 │   const slotsWrong = defineSlots();
+     8  8 │   const useSlotsWrong = useSlots();
+     9    │ - const·attrsWrong·=·useAttrs();
+        9 │ + const·attrs·=·useAttrs();
+    10 10 │   
+    11 11 │   function update() {
+    12 12 │     emitsWrong("change", customName.msg);
+    13    │ - ··console.log(slotsWrong.default,·useSlotsWrong.header,·attrsWrong.class);
+       13 │ + ··console.log(slotsWrong.default,·useSlotsWrong.header,·attrs.class);
+    14 14 │   }
+    15 15 │   
+  
+
+```

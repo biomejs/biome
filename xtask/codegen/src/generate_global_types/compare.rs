@@ -10,15 +10,9 @@ use super::lower::{
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
-const ARRAY_MEMBER_COUNT: usize = 4;
-const ARRAY_TYPE_PARAMETERS: &[LoweredTypeReference] =
-    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
-const ARRAY_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] =
-    &[LoweredTypeReference::Predefined("GLOBAL_U_ID")];
 const PROMISE_MEMBER_COUNT: usize = 11;
 const PROMISE_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
-const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 
 #[derive(Clone, Copy)]
 struct PromiseMethodShape {
@@ -189,7 +183,6 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
             return_type_id: "GLOBAL_INSTANCEOF_PROMISE_ID",
         },
     )?;
-    assert_array_shape(lowered)?;
 
     Ok(())
 }
@@ -299,131 +292,6 @@ fn assert_promise_method(
             "generated {} helper has unexpected shape",
             shape.helper_name
         );
-    }
-    Ok(())
-}
-
-/// Validates the retained predefined `Array` instance projection independently of lowered statics.
-fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
-    let Some(array) = lowered.global("Array") else {
-        bail!("generated globals are missing the Array global");
-    };
-    if array.id_constant() != "ARRAY_ID_GLOBAL_TYPE_ID" {
-        bail!(
-            "generated Array global targets {}, expected ARRAY_ID_GLOBAL_TYPE_ID",
-            array.id_constant()
-        );
-    }
-    let LoweredTypeData::Class(class) = array.data() else {
-        bail!("generated Array global is not a class");
-    };
-    if class.name() != "Array" {
-        bail!(
-            "generated Array class has name {}, expected Array",
-            class.name()
-        );
-    }
-    if class.type_parameters() != ARRAY_TYPE_PARAMETERS {
-        bail!("generated Array global has unexpected type parameters");
-    }
-    let instance_member_count = class
-        .members()
-        .iter()
-        .filter(|member| {
-            matches!(
-                member.kind(),
-                LoweredMemberKind::Named { .. }
-                    | LoweredMemberKind::ComputedValue { .. }
-                    | LoweredMemberKind::IndexSignature { .. }
-            )
-        })
-        .count();
-    if instance_member_count != ARRAY_MEMBER_COUNT {
-        bail!(
-            "generated Array global has {instance_member_count} instance members, expected {ARRAY_MEMBER_COUNT}",
-        );
-    }
-
-    assert_array_member(class, "filter", "GLOBAL_ARRAY_FILTER_ID")?;
-    assert_array_member(class, "forEach", "GLOBAL_ARRAY_FOREACH_ID")?;
-    assert_array_member(class, "map", "GLOBAL_ARRAY_MAP_ID")?;
-    assert_array_member(class, "length", "GLOBAL_NUMBER_KEYWORD_ID")?;
-
-    assert_array_method(
-        lowered,
-        "Array.prototype.filter",
-        "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
-        NO_TYPE_PARAMETERS,
-        "GLOBAL_CONDITIONAL_CALLBACK_ID",
-        "GLOBAL_INSTANCEOF_ARRAY_T_ID",
-    )?;
-    assert_array_method(
-        lowered,
-        "Array.prototype.forEach",
-        "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
-        NO_TYPE_PARAMETERS,
-        "GLOBAL_VOID_CALLBACK_ID",
-        "GLOBAL_VOID_ID",
-    )?;
-    assert_array_method(
-        lowered,
-        "Array.prototype.map",
-        "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
-        ARRAY_MAP_TYPE_PARAMETERS,
-        "GLOBAL_MAP_CALLBACK_ID",
-        "GLOBAL_INSTANCEOF_ARRAY_U_ID",
-    )?;
-
-    Ok(())
-}
-
-/// Requires a named, non-optional Array member with the expected predefined type.
-fn assert_array_member(class: &LoweredClass, name: &str, type_id: &'static str) -> Result<()> {
-    let Some(member) = class.member(name) else {
-        bail!("generated Array global is missing {name}");
-    };
-    if member.kind() != &(LoweredMemberKind::Named { optional: false }) {
-        bail!("generated Array.{name} has unexpected kind");
-    }
-    if member.type_reference() != &LoweredTypeReference::Predefined(type_id) {
-        bail!("generated Array.{name} has unexpected type");
-    }
-    Ok(())
-}
-
-/// Checks an Array helper's identity, type parameters, callback slot, and return type.
-fn assert_array_method(
-    lowered: &LoweredGlobalTypes,
-    name: &str,
-    id_constant: &str,
-    type_parameters: &[LoweredTypeReference],
-    parameter_type_id: &'static str,
-    return_type_id: &'static str,
-) -> Result<()> {
-    let function = generated_function(lowered, name, id_constant)?;
-    if function.is_async() {
-        bail!("generated {name} helper must not be async");
-    }
-    if function.type_parameters() != type_parameters {
-        bail!("generated {name} helper has unexpected type parameters");
-    }
-    if function.name() != Some(name) {
-        bail!("generated {name} helper has unexpected function name");
-    }
-    let [parameter] = function.parameters() else {
-        bail!("generated {name} helper must have one parameter");
-    };
-    if parameter.binding() != &LoweredFunctionParameterBinding::Pattern {
-        bail!("generated {name} helper must have a pattern parameter");
-    }
-    if parameter.type_reference() != &LoweredTypeReference::Predefined(parameter_type_id) {
-        bail!("generated {name} helper has unexpected parameter type");
-    }
-    if parameter.is_optional() || parameter.is_rest() {
-        bail!("generated {name} helper parameter must be required and non-rest");
-    }
-    if function.return_type() != &LoweredTypeReference::Predefined(return_type_id) {
-        bail!("generated {name} helper has unexpected return type");
     }
     Ok(())
 }

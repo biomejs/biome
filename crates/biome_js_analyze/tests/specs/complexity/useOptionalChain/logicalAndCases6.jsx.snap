@@ -86,6 +86,8 @@ logicalAndCases6.jsx:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     3 │ foo.bar != undefined && foo.bar.baz.buzz()
     4 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      1  1 │   // case with a jump (i.e. a non-nullish prop)
@@ -108,6 +110,8 @@ logicalAndCases6.jsx:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
     5 │ // case with a jump (i.e. a non-nullish prop)
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -132,6 +136,8 @@ logicalAndCases6.jsx:6:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     7 │ 
     8 │ // case with a call expr inside the chain for some inefficient reason
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      4  4 │   
@@ -155,6 +161,8 @@ logicalAndCases6.jsx:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━━━
     10 │ 
     11 │ // chained calls with element access
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      7  7 │   
@@ -177,6 +185,8 @@ logicalAndCases6.jsx:12:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ foo != undefined && foo.bar != undefined && foo.bar.baz != undefined && foo.bar.baz[buzz] != undefined && foo.bar.baz[buzz]()
     14 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -202,6 +212,8 @@ logicalAndCases6.jsx:13:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     14 │ 
     15 │ // (partially) pre-optional chained
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     11 11 │   // chained calls with element access
@@ -224,6 +236,8 @@ logicalAndCases6.jsx:16:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     17 │ foo != undefined && foo?.bar.baz != undefined && foo?.bar.baz[buzz]
     18 │ foo != undefined && foo?.() != undefined && foo?.().bar
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -249,6 +263,8 @@ logicalAndCases6.jsx:17:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     18 │ foo != undefined && foo?.() != undefined && foo?.().bar
     19 │ foo.bar != undefined && foo.bar?.() != undefined && foo.bar?.().baz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     17 │ foo·!=·undefined·&&·foo?.bar.baz·!=·undefined·&&·foo?.bar.baz[buzz]
@@ -267,6 +283,8 @@ logicalAndCases6.jsx:18:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     19 │ foo.bar != undefined && foo.bar?.() != undefined && foo.bar?.().baz
     20 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -287,6 +305,8 @@ logicalAndCases6.jsx:19:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     20 │ 
     21 │ //private static member name
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     19 │ foo.bar·!=·undefined·&&·foo.bar?.()·!=·undefined·&&·foo.bar?.().baz
@@ -304,6 +324,8 @@ logicalAndCases6.jsx:22:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^
     23 │ foo.#bar && foo.#bar.#baz
     24 │ foo.#bar && foo.#bar()
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -329,6 +351,8 @@ logicalAndCases6.jsx:23:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     24 │ foo.#bar && foo.#bar()
     25 │ foo && foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     21 21 │   //private static member name
@@ -352,6 +376,8 @@ logicalAndCases6.jsx:24:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^
     25 │ foo && foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
     26 │ foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -377,6 +403,8 @@ logicalAndCases6.jsx:25:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     26 │ foo.#bar && foo.#bar.#baz && foo.#bar.#baz.#buzz
     27 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     23 23 │   foo.#bar && foo.#bar.#baz
@@ -401,6 +429,8 @@ logicalAndCases6.jsx:26:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     27 │ 
     28 │ // two  errors
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     24 24 │   foo.#bar && foo.#bar()
@@ -423,6 +453,8 @@ logicalAndCases6.jsx:29:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     30 │ 
     31 │ // case with inconsistent checks
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -447,6 +479,8 @@ logicalAndCases6.jsx:29:34 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     30 │ 
     31 │ // case with inconsistent checks
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     27 27 │   
@@ -469,6 +503,8 @@ logicalAndCases6.jsx:32:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     33 │ 
     34 │ foo.bar && foo.bar.baz != null && foo.bar.baz.qux !== undefined && foo.bar.baz.qux.buzz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -494,6 +530,8 @@ logicalAndCases6.jsx:34:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     35 │ 
     36 │ // ensure essential whitespace isn't removed
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     32 32 │   foo && foo.bar != null && foo.bar.baz !== undefined && foo.bar.baz.buzz;
@@ -516,6 +554,8 @@ logicalAndCases6.jsx:37:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     38 │ foo && foo.bar(baz => typeof baz);
     39 │ foo && foo["some long string"] && foo["some long string"].baz
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -541,6 +581,8 @@ logicalAndCases6.jsx:38:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     39 │ foo && foo["some long string"] && foo["some long string"].baz
     40 │ foo && foo[`some long string`] && foo[`some long string`].baz
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     36 36 │   // ensure essential whitespace isn't removed
@@ -564,6 +606,8 @@ logicalAndCases6.jsx:39:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │ foo && foo[`some long string`] && foo[`some long string`].baz
     41 │ foo && foo['some long string'] && foo['some long string'].baz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -589,6 +633,8 @@ logicalAndCases6.jsx:40:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     41 │ foo && foo['some long string'] && foo['some long string'].baz;
     42 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     38 38 │   foo && foo.bar(baz => typeof baz);
@@ -613,6 +659,8 @@ logicalAndCases6.jsx:41:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     42 │ 
     43 │ // other literal expressions
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     39 39 │   foo && foo["some long string"] && foo["some long string"].baz
@@ -635,6 +683,8 @@ logicalAndCases6.jsx:44:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     45 │ foo && foo[true] && foo[true].baz;
     46 │ foo && foo[null] && foo[null].baz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -660,6 +710,8 @@ logicalAndCases6.jsx:45:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     46 │ foo && foo[null] && foo[null].baz;
     47 │ foo && foo[12n] && foo[12n].baz;
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     43 43 │   // other literal expressions
@@ -683,6 +735,8 @@ logicalAndCases6.jsx:46:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     47 │ foo && foo[12n] && foo[12n].baz;
     48 │ foo && foo[/\w+/] && foo[/\w+/].baz;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -708,6 +762,8 @@ logicalAndCases6.jsx:47:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     48 │ foo && foo[/\w+/] && foo[/\w+/].baz;
     49 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     45 45 │   foo && foo[true] && foo[true].baz;
@@ -730,6 +786,8 @@ logicalAndCases6.jsx:48:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
   > 48 │ foo && foo[/\w+/] && foo[/\w+/].baz;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -757,6 +815,8 @@ logicalAndCases6.jsx:52:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     55 │ 
     56 │ // other weird cases
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     50 50 │   
@@ -780,6 +840,8 @@ logicalAndCases6.jsx:57:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     58 │ foo.bar && foo.bar?.();
     59 │ 
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     57 │ foo·&&·foo?.();
@@ -799,6 +861,8 @@ logicalAndCases6.jsx:58:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     59 │ 
     60 │ // comments
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     58 │ foo.bar·&&·foo.bar?.();
@@ -816,6 +880,8 @@ logicalAndCases6.jsx:61:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     62 │ foo && foo[bar] && /*0*/foo/*1*/[/*2*/bar/*3*/]/*4*/[/*5*/baz/*6*/]/*7*/;
     63 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -841,6 +907,8 @@ logicalAndCases6.jsx:62:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     63 │ 
     64 │ foo && foo[bar] && /*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     60 60 │   // comments
@@ -865,6 +933,8 @@ logicalAndCases6.jsx:64:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
     65 │ 
     66 │ // call expressions with the same member name but different arguments
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     64 │ foo·&&·foo[bar]·&&·/*0*/foo/*1*/?./*2*/[/*3*/bar/*4*/]/*5*/?./*6*/[/*7*/baz/*8*/]/*9*/;
@@ -881,6 +951,8 @@ logicalAndCases6.jsx:67:1 lint/complexity/useOptionalChain  FIXABLE  ━━━�
   > 67 │ foo && foo.bar('a') && foo.bar('b')
        │ ^^^^^^^^^^^^^^^^^^^
     68 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   

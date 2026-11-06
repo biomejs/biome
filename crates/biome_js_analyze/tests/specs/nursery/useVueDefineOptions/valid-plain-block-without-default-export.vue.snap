@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-plain-block-without-default-export.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export const A = 42;
+</script>
+
+<script setup>
+const props = defineProps(["foo"]);
+</script>
+
+```

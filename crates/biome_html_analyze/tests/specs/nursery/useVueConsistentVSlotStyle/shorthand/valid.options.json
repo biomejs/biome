@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "useVueConsistentVSlotStyle": {
+          "level": "on",
+          "options": { "atComponent": "shorthand", "default": "shorthand", "named": "shorthand" }
+        }
+      }
+    }
+  }
+}

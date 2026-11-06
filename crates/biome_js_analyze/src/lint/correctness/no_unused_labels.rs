@@ -14,7 +14,9 @@ use biome_rule_options::no_unused_labels::NoUnusedLabelsOptions;
 use crate::JsRuleAction;
 use crate::services::control_flow::AnyJsControlFlowRoot;
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, BatchMutationExt, Language, SyntaxNode, SyntaxResult, TokenText};
+use biome_rowan::{
+    AstNode, BatchMutationExt, Language, SyntaxKindSet, SyntaxNode, SyntaxResult, TokenText,
+};
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
@@ -139,6 +141,18 @@ impl UnusedLabelVisitor {
 
 impl Visitor for UnusedLabelVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            AnyJsControlFlowRoot::KIND_SET
+                .union(JsLabeledStatement::KIND_SET)
+                .union(JsBreakStatement::KIND_SET)
+                .union(JsContinueStatement::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,

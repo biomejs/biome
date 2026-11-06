@@ -75,8 +75,6 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
             not_requested_features: execution.not_requested_features(),
         });
 
-        let can_read = DocumentFileSource::can_read(biome_path);
-
         let file_features = match file_features {
             Ok(FileFeaturesResult {
                 features_supported: file_features,
@@ -88,7 +86,10 @@ pub trait Handler: Default + Send + Sync + Debug + std::panic::RefUnwindSafe {
                     return false;
                 }
 
-                if file_features.is_not_supported() && !file_features.is_ignored() && !can_read {
+                if file_features.is_not_supported()
+                    && !file_features.is_ignored()
+                    && !DocumentFileSource::can_read(biome_path)
+                {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     miss_handler_err(ctx, fs, extension_error(biome_path), biome_path);
                     return false;

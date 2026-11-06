@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-unresolved-type.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import type { Props } from "./types";
+
+const props = defineProps<Props>();
+console.log(props.anything);
+</script>
+
+<template>
+  <p>{{ foo }} {{ unknown }}</p>
+</template>
+
+```

@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use biome_css_syntax::{
     AnyCssValue, AnyScssExpression, CssSyntaxToken, ScssParenthesizedExpression,
-    ScssUnaryExpression, ScssUnaryExpressionFields, T, is_in_scss_control_condition_sequence,
+    ScssSupportsDeclaration, ScssUnaryExpression, ScssUnaryExpressionFields, T,
+    is_in_scss_control_condition_sequence,
 };
 use biome_formatter::write;
 
@@ -35,7 +36,7 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
                     expression.format().with_text_case(CssCase::Preserve)
                 ]
             )
-        } else if needs_space_after_minus(&operator, &expression) {
+        } else if needs_space_after_minus(node, &operator, &expression) {
             write!(
                 f,
                 [
@@ -56,10 +57,25 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
     }
 }
 
-/// Keeps unary `-` separate from function names and module namespaces.
-fn needs_space_after_minus(operator: &CssSyntaxToken, expression: &AnyScssExpression) -> bool {
+/// Keeps unary `-` separate where joining it changes parsing.
+fn needs_space_after_minus(
+    node: &ScssUnaryExpression,
+    operator: &CssSyntaxToken,
+    expression: &AnyScssExpression,
+) -> bool {
     if operator.kind() != T![-] {
         return false;
+    }
+
+    // Joining `- -space` into `--space` makes Sass preserve the supports value
+    // as raw custom-property text instead of evaluating it.
+    if expression
+        .syntax()
+        .first_token()
+        .is_some_and(|token| token.text_trimmed().starts_with('-'))
+        && is_in_supports_declaration_name(node)
+    {
+        return true;
     }
 
     match expression.as_any_css_value() {
@@ -73,4 +89,26 @@ fn needs_space_after_minus(operator: &CssSyntaxToken, expression: &AnyScssExpres
         }
         _ => false,
     }
+}
+
+/// Distinguishes a computed supports name from its declaration value.
+///
+/// ```scss
+/// $gap: 2px;
+/// @supports (- -space: $gap) {}
+/// ```
+fn is_in_supports_declaration_name(node: &ScssUnaryExpression) -> bool {
+    let Some(declaration) = node
+        .syntax()
+        .ancestors()
+        .find_map(ScssSupportsDeclaration::cast)
+    else {
+        return false;
+    };
+
+    declaration.name().is_ok_and(|name| {
+        name.syntax()
+            .text_trimmed_range()
+            .contains_range(node.syntax().text_trimmed_range())
+    })
 }

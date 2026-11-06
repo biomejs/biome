@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsForVariableDeclaration, JsLanguage,
     JsVariableDeclaration, JsYieldExpression, TextRange, WalkEvent,
 };
-use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rowan::{AstNode, AstNodeList, Language, SyntaxKindSet, SyntaxNode, TextSize};
 use biome_rule_options::use_await::UseAwaitOptions;
 
 declare_lint_rule! {
@@ -115,6 +115,20 @@ struct MissingAwaitVisitor {
 
 impl Visitor for MissingAwaitVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            AnyFunctionLike::KIND_SET
+                .union(JsAwaitExpression::KIND_SET)
+                .union(JsForOfStatement::KIND_SET)
+                .union(JsVariableDeclaration::KIND_SET)
+                .union(JsForVariableDeclaration::KIND_SET)
+                .union(JsYieldExpression::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,

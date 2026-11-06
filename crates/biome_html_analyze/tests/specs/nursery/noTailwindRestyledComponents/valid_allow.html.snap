@@ -20,5 +20,7 @@ expression: valid_allow.html
 <my-color class="[color:red]"></my-color>
 <my-color class="stroke-none"></my-color>
 <custom-button class="stroke-2"></custom-button>
+<my-panel class="shadow-(length:--x) bg-(image:--x)"></my-panel>
+<my-color class="shadow-(--x) bg-(--x,var(--y))"></my-color>
 
 ```

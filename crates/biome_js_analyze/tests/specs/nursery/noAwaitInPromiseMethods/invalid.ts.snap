@@ -1,0 +1,188 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+Promise.all([(await promise as Foo).bar]);
+Promise.all([(await promise)!]);
+Promise.all([await promise as Foo]);
+Promise.all([await promise satisfies Foo]);
+Promise.all([<Foo>await promise]);
+Promise.all([await promise!]);
+Promise.all([(await promise)<Foo>()]);
+Promise.all<Foo>([await promise]);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:15 lint/nursery/noAwaitInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Promise.all([(await promise as Foo).bar]);
+      │               ^^^^^^^^^^^^^
+    3 │ Promise.all([(await promise)!]);
+    4 │ Promise.all([await promise as Foo]);
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i Move the await into an async function that you call right away, or use .then() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:15 lint/nursery/noAwaitInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+    1 │ /* should generate diagnostics */
+    2 │ Promise.all([(await promise as Foo).bar]);
+  > 3 │ Promise.all([(await promise)!]);
+      │               ^^^^^^^^^^^^^
+    4 │ Promise.all([await promise as Foo]);
+    5 │ Promise.all([await promise satisfies Foo]);
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i Move the await into an async function that you call right away, or use .then() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:14 lint/nursery/noAwaitInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+    2 │ Promise.all([(await promise as Foo).bar]);
+    3 │ Promise.all([(await promise)!]);
+  > 4 │ Promise.all([await promise as Foo]);
+      │              ^^^^^^^^^^^^^
+    5 │ Promise.all([await promise satisfies Foo]);
+    6 │ Promise.all([<Foo>await promise]);
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i Move the await into an async function that you call right away, or use .then() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:14 lint/nursery/noAwaitInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+    3 │ Promise.all([(await promise)!]);
+    4 │ Promise.all([await promise as Foo]);
+  > 5 │ Promise.all([await promise satisfies Foo]);
+      │              ^^^^^^^^^^^^^
+    6 │ Promise.all([<Foo>await promise]);
+    7 │ Promise.all([await promise!]);
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i Move the await into an async function that you call right away, or use .then() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:19 lint/nursery/noAwaitInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+    4 │ Promise.all([await promise as Foo]);
+    5 │ Promise.all([await promise satisfies Foo]);
+  > 6 │ Promise.all([<Foo>await promise]);
+      │                   ^^^^^^^^^^^^^
+    7 │ Promise.all([await promise!]);
+    8 │ Promise.all([(await promise)<Foo>()]);
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i Move the await into an async function that you call right away, or use .then() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:14 lint/nursery/noAwaitInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+    5 │ Promise.all([await promise satisfies Foo]);
+    6 │ Promise.all([<Foo>await promise]);
+  > 7 │ Promise.all([await promise!]);
+      │              ^^^^^^^^^^^^^^
+    8 │ Promise.all([(await promise)<Foo>()]);
+    9 │ Promise.all<Foo>([await promise]);
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the await.
+  
+    7 │ Promise.all([await·promise!]);
+      │              ------           
+
+```
+
+```
+invalid.ts:8:15 lint/nursery/noAwaitInPromiseMethods ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+     6 │ Promise.all([<Foo>await promise]);
+     7 │ Promise.all([await promise!]);
+   > 8 │ Promise.all([(await promise)<Foo>()]);
+       │               ^^^^^^^^^^^^^
+     9 │ Promise.all<Foo>([await promise]);
+    10 │ 
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i Move the await into an async function that you call right away, or use .then() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:19 lint/nursery/noAwaitInPromiseMethods  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This await delays the call to Promise.all().
+  
+     7 │ Promise.all([await promise!]);
+     8 │ Promise.all([(await promise)<Foo>()]);
+   > 9 │ Promise.all<Foo>([await promise]);
+       │                   ^^^^^^^^^^^^^
+    10 │ 
+  
+  i The rest of the array and the call to Promise.all() have to wait until this promise finishes, so the promises don't run at the same time.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the await.
+  
+    9 │ Promise.all<Foo>([await·promise]);
+      │                   ------          
+
+```

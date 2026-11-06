@@ -8,16 +8,20 @@ use biome_js_syntax::assign_ext::AnyJsMemberAssignment;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsBindingPattern, AnyJsClass, AnyJsClassMember, AnyJsExpression,
     AnyJsFunctionBody, AnyJsObjectBindingPatternMember, AnyJsRoot, JsArrayAssignmentPattern,
-    JsArrowFunctionExpression, JsAssignmentExpression, JsClassMemberList, JsConstructorClassMember,
-    JsForInStatement, JsForOfStatement, JsFunctionBody, JsIdentifierBinding,
-    JsIdentifierExpression, JsInitializerClause, JsLanguage, JsObjectAssignmentPattern,
-    JsObjectBindingPattern, JsPostUpdateExpression, JsPreUpdateExpression, JsPropertyClassMember,
-    JsStatementList, JsStaticInitializationBlockClassMember, JsStaticMemberExpression,
-    JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TextRange, TsPropertyParameter,
-    inner_string_text, static_value::StaticValue,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsClassDeclaration,
+    JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
+    JsConstructorClassMember, JsForInStatement, JsForOfStatement, JsFunctionBody,
+    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
+    JsIdentifierBinding, JsIdentifierExpression, JsInitializerClause, JsLanguage,
+    JsObjectAssignmentPattern, JsObjectBindingPattern, JsPostUpdateExpression,
+    JsPreUpdateExpression, JsPropertyClassMember, JsStatementList,
+    JsStaticInitializationBlockClassMember, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, TextRange, TsPropertyParameter, inner_string_text,
+    static_value::StaticValue,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxNode, Text, WalkEvent,
+    declare_node_union,
 };
 use rustc_hash::FxHashSet;
 use std::option::Option;
@@ -94,6 +98,13 @@ impl Visitor for SyntaxClassMemberReferencesVisitor {
     ) {
     }
 
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(SyntaxKindSet::EMPTY)
+    }
+
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(SemanticClassModel {});
     }
@@ -114,6 +125,13 @@ impl Visitor for SemanticClassMemberReferencesVisitor {
         {
             ctx.match_query(node.clone());
         }
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsClass::KIND_SET)
     }
 }
 
@@ -416,6 +434,12 @@ struct ThisScopeVisitor<'a> {
 }
 // Can not implement `Visitor` directly because it requires a new ctx that can not be created here
 impl ThisScopeVisitor<'_> {
+    /// The kinds of the nodes that [Self::visit] reads.
+    const VISITED_KINDS: SyntaxKindSet<JsLanguage> = JsClassExpression::KIND_SET
+        .union(JsClassDeclaration::KIND_SET)
+        .union(JsFunctionBody::KIND_SET)
+        .union(JsArrowFunctionExpression::KIND_SET);
+
     fn visit(&mut self, event: &WalkEvent<SyntaxNode<JsLanguage>>) {
         match event {
             WalkEvent::Enter(node) => {
@@ -518,7 +542,10 @@ impl ThisScopeReferences {
             inherited_this_references: self.local_this_references.as_slice(),
         };
 
-        let iter = self.body.syntax().preorder();
+        let iter = self
+            .body
+            .syntax()
+            .preorder_of_kinds(ThisScopeVisitor::VISITED_KINDS);
         for event in iter {
             visitor.visit(&event);
         }
@@ -836,6 +863,17 @@ fn collect_references_from_body(
     })
 }
 
+/// The kinds of the nodes that start a nested scope in a class property
+/// initializer or an arrow function body.
+const NESTED_SCOPE_KINDS: SyntaxKindSet<JsLanguage> = JsArrowFunctionExpression::KIND_SET
+    .union(JsClassExpression::KIND_SET)
+    .union(JsClassDeclaration::KIND_SET)
+    .union(JsClassExportDefaultDeclaration::KIND_SET)
+    .union(JsFunctionExpression::KIND_SET)
+    .union(JsFunctionDeclaration::KIND_SET)
+    .union(JsFunctionExportDefaultDeclaration::KIND_SET)
+    .union(JsFunctionBody::KIND_SET);
+
 /// Collects references to class members from a class property initializer.
 ///
 /// Arrow functions capture the initializer's lexical `this`, while normal functions establish their
@@ -857,7 +895,7 @@ fn collect_references_from_property_initializer(
         &mut reads,
     );
 
-    for event in expression.syntax().preorder() {
+    for event in expression.syntax().preorder_of_kinds(NESTED_SCOPE_KINDS) {
         match event {
             WalkEvent::Enter(node) => {
                 if skipped_ranges
@@ -939,7 +977,7 @@ fn collect_references_from_arrow_function(
     let mut skipped_ranges = vec![];
     let body_syntax = body.syntax();
 
-    for event in body_syntax.preorder() {
+    for event in body_syntax.preorder_of_kinds(NESTED_SCOPE_KINDS) {
         match event {
             WalkEvent::Enter(node) => {
                 if skipped_ranges
@@ -985,6 +1023,14 @@ fn collect_references_from_arrow_function(
     }
 }
 
+/// The kinds of the nodes that [visit_references_in_body] reads.
+const REFERENCE_KINDS: SyntaxKindSet<JsLanguage> = JsObjectBindingPattern::KIND_SET
+    .union(JsStaticMemberExpression::KIND_SET)
+    .union(JsAssignmentExpression::KIND_SET)
+    .union(JsForInStatement::KIND_SET)
+    .union(JsForOfStatement::KIND_SET)
+    .union(AnyJsUpdateExpression::KIND_SET);
+
 /// Traverses a JavaScript method or initializer body to collect references
 /// to `this`-based class members, calling the provided callbacks for reads and writes.
 ///
@@ -997,7 +1043,7 @@ fn visit_references_in_body(
     writes: &mut FxHashSet<ClassMemberReference>,
     reads: &mut FxHashSet<ClassMemberReference>,
 ) {
-    let iter = method_body_element.preorder();
+    let iter = method_body_element.preorder_of_kinds(REFERENCE_KINDS);
 
     for event in iter {
         match event {

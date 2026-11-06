@@ -11,6 +11,16 @@ expression: invalid.scss
   color: \49 F(true, red, blue);
 }
 
+@function spacing($value) {
+  @return $value * 4px;
+}
+
+.b {
+  margin: spacing(1);
+  padding: undeclared(1);
+  width: spacingx(1);
+}
+
 ```
 
 # Diagnostics
@@ -25,6 +35,8 @@ invalid.scss:3:10 lint/correctness/noUnknownFunction ━━━━━━━━━
       │          ^^
     4 │   color: If(true, red, blue);
     5 │   color: \49 F(true, red, blue);
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
   
   i Use a known function instead.
   
@@ -45,6 +57,8 @@ invalid.scss:4:10 lint/correctness/noUnknownFunction ━━━━━━━━━
     5 │   color: \49 F(true, red, blue);
     6 │ }
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.
@@ -63,6 +77,50 @@ invalid.scss:5:10 lint/correctness/noUnknownFunction ━━━━━━━━━
       │          ^^^^^
     6 │ }
     7 │ 
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.scss:14:12 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: undeclared
+  
+    12 │ .b {
+    13 │   margin: spacing(1);
+  > 14 │   padding: undeclared(1);
+       │            ^^^^^^^^^^
+    15 │   width: spacingx(1);
+    16 │ }
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.scss:15:10 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: spacingx
+  
+    13 │   margin: spacing(1);
+    14 │   padding: undeclared(1);
+  > 15 │   width: spacingx(1);
+       │          ^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
   
   i Use a known function instead.
   

@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+(value as number) > 10 && value < 5;
+value! > 10 && value! < 5;
+(a satisfies T) === b && b !== a;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (value as number) > 10 && value < 5;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ value! > 10 && value! < 5;
+    4 │ (a satisfies T) === b && b !== a;
+  
+  i No value can make this comparison...
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (value as number) > 10 && value < 5;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ value! > 10 && value! < 5;
+    4 │ (a satisfies T) === b && b !== a;
+  
+  i ...and this comparison true at the same time.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (value as number) > 10 && value < 5;
+      │                           ^^^^^^^^^
+    3 │ value! > 10 && value! < 5;
+    4 │ (a satisfies T) === b && b !== a;
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (value as number) > 10 && value < 5;
+  > 3 │ value! > 10 && value! < 5;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ (a satisfies T) === b && b !== a;
+    5 │ 
+  
+  i No value can make this comparison...
+  
+    1 │ /* should generate diagnostics */
+    2 │ (value as number) > 10 && value < 5;
+  > 3 │ value! > 10 && value! < 5;
+      │ ^^^^^^^^^^^
+    4 │ (a satisfies T) === b && b !== a;
+    5 │ 
+  
+  i ...and this comparison true at the same time.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (value as number) > 10 && value < 5;
+  > 3 │ value! > 10 && value! < 5;
+      │                ^^^^^^^^^^
+    4 │ (a satisfies T) === b && b !== a;
+    5 │ 
+  
+  i Check whether a comparison operator or a number is wrong.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noConstantComparisons ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition can never be true.
+  
+    2 │ (value as number) > 10 && value < 5;
+    3 │ value! > 10 && value! < 5;
+  > 4 │ (a satisfies T) === b && b !== a;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i One side is the opposite of the other, so they can never both be true.
+  
+  i Check whether one side should check something else.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -81,6 +81,7 @@ mod tests {
     #[test]
     fn needs_parentheses() {
         assert_not_needs_parentheses!("function test() { return a, b }", JsSequenceExpression);
+        assert_not_needs_parentheses!("function test() { throw a, b }", JsSequenceExpression);
         assert_not_needs_parentheses!("for (let i, x; i++, x++;) {}", JsSequenceExpression);
         assert_not_needs_parentheses!("a, b;", JsSequenceExpression);
         assert_not_needs_parentheses!("a, b, c", JsSequenceExpression[0]);

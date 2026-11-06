@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-separate-script.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const events = { notify: null };
+</script>
+<script setup>
+defineEmits(events);
+</script>
+
+```

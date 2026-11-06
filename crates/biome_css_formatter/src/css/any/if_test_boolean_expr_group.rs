@@ -12,6 +12,7 @@ impl FormatRule<AnyCssIfTestBooleanExprGroup> for FormatAnyCssIfTestBooleanExprG
             AnyCssIfTestBooleanExprGroup::CssIfTestBooleanExprInParens(node) => {
                 node.format().fmt(f)
             }
+            AnyCssIfTestBooleanExprGroup::ScssInterpolation(node) => node.format().fmt(f),
         }
     }
 }

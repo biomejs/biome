@@ -1,0 +1,43 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: renamedUseSortedClassesWithLevel.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noFloatingPromises": "warn",
+        "useSortedClasses": { "level": "warn", "fix": "safe" }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+renamedUseSortedClassesWithLevel.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to useTailwindSortedClasses.
+  
+    4 │       "nursery": {
+    5 │         "noFloatingPromises": "warn",
+  > 6 │         "useSortedClasses": { "level": "warn", "fix": "safe" }
+      │         ^^^^^^^^^^^^^^^^^^
+    7 │       }
+    8 │     }
+  
+  i Safe fix: Rename the lint rule.
+  
+     4  4 │         "nursery": {
+     5  5 │           "noFloatingPromises": "warn",
+     6    │ - ········"useSortedClasses":·{·"level":·"warn",·"fix":·"safe"·}
+        6 │ + ········"useTailwindSortedClasses":·{·"level":·"warn",·"fix":·"safe"·}
+     7  7 │         }
+     8  8 │       }
+  
+
+```

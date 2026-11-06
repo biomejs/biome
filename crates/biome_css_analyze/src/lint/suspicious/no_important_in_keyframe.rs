@@ -65,6 +65,8 @@ impl Rule for NoImportantInKeyframe {
         for item in node.items() {
             let keyframe_item = match item {
                 AnyCssKeyframesItem::CssKeyframesItem(keyframe_item) => keyframe_item,
+                AnyCssKeyframesItem::CssAtRule(_) => continue,
+                AnyCssKeyframesItem::CssEmptyDeclaration(_) => continue,
                 AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => continue,
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             };
@@ -95,11 +97,14 @@ impl Rule for NoImportantInKeyframe {
                 rule_category!(),
                 span,
                 markup! {
-                    "Using "<Emphasis>"!important"</Emphasis>" within keyframes declaration is completely ignored in some browsers."
+                    "Unexpected "<Emphasis>"!important"</Emphasis>" within a keyframes declaration."
                 },
             )
             .note(markup! {
-                    "Consider removing useless "<Emphasis>"!important"</Emphasis>" declaration."
+                    "Declarations marked "<Emphasis>"!important"</Emphasis>" inside keyframes are completely ignored in some browsers, so they have no effect there."
+            })
+            .note(markup! {
+                    "Remove the "<Emphasis>"!important"</Emphasis>" annotation and keep the declaration."
             }),
         )
     }

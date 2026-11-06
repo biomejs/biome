@@ -1,0 +1,6 @@
+.first { color: red }; .second { color: blue }
+;;; .third { color: red };;;
+@media screen { ;; .media { color: red }; ; }
+@supports (display: grid) { ; .supports { display: grid }; }
+@keyframes pulse { ; from { opacity: 0 }; ; to { opacity: 1 }; }
+.after { color: blue }

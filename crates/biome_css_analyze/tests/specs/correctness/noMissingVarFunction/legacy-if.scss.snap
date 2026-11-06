@@ -28,6 +28,8 @@ legacy-if.scss:4:19 lint/correctness/noMissingVarFunction ━━━━━━━�
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--inner).
+  
 
 ```
 
@@ -44,6 +46,8 @@ legacy-if.scss:5:37 lint/correctness/noMissingVarFunction ━━━━━━━�
     7 │ 
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+  i Wrap the variable in 'var()', for example var(--inner).
   
 
 ```

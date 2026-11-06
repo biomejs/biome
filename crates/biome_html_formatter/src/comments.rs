@@ -3,7 +3,7 @@ use biome_formatter::{
     comments::{
         CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
     },
-    prelude::*,
+    rowan::prelude::*,
     write,
 };
 use biome_html_syntax::{HtmlClosingElement, HtmlLanguage, HtmlOpeningElement, HtmlSyntaxKind};

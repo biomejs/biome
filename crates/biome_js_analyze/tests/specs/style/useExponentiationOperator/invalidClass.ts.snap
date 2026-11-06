@@ -24,6 +24,8 @@ invalidClass.ts:2:20 lint/style/useExponentiationOperator  FIXABLE  ━━━━
     3 │ (class A extends Math.pow(a, b) implements Foo {})
     4 │ (class A<T> extends (Math.pow(a, b)) {})
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     1 1 │   // @ts-nocheck
@@ -46,6 +48,8 @@ invalidClass.ts:3:18 lint/style/useExponentiationOperator  FIXABLE  ━━━━
       │                  ^^^^^^^^^^^^^^
     4 │ (class A<T> extends (Math.pow(a, b)) {})
     5 │ class C<T> extends (Math.pow(a, b)) implements Foo, Bar<T> {}
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -71,6 +75,8 @@ invalidClass.ts:4:22 lint/style/useExponentiationOperator  FIXABLE  ━━━━
     5 │ class C<T> extends (Math.pow(a, b)) implements Foo, Bar<T> {}
     6 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
     2 2 │   class C<T> extends Math.pow(a, b) implements Foo<T> {}
@@ -93,6 +99,8 @@ invalidClass.ts:5:21 lint/style/useExponentiationOperator  FIXABLE  ━━━━
   > 5 │ class C<T> extends (Math.pow(a, b)) implements Foo, Bar<T> {}
       │                     ^^^^^^^^^^^^^^
     6 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   

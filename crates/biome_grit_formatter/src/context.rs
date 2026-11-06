@@ -1,5 +1,6 @@
 use crate::comments::{FormatGritLeadingComment, GritCommentStyle, GritComments};
 use biome_formatter::printer::PrinterOptions;
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
     IndentWidth, LineEnding, LineWidth, TrailingNewline, TransformSourceMap,
@@ -33,6 +34,7 @@ impl GritFormatContext {
 
 impl FormatContext for GritFormatContext {
     type Options = GritFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

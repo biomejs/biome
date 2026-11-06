@@ -64,7 +64,7 @@ file.html:1:18 parse ━━━━━━━━━━━━━━━━━━━�
 ```block
 file.html:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This syntax is not supported in CSS.
+  × SCSS partial combinator selectors are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ <script>function () { return "ipsum" }</script>
   > 2 │ <style>#id .class div > { background-color: ; align: center; padding: 0; } </style>

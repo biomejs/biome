@@ -87,7 +87,13 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useButtonType",
         language: "jsx",
-        sources: &[RuleSource::EslintReact("button-has-type").same(), RuleSource::EslintReactDom("no-missing-button-type").same(), RuleSource::EslintReactXyz("dom-no-missing-button-type").same(), RuleSource::HtmlEslint("require-button-type").inspired()],
+        sources: &[
+            RuleSource::EslintReact("button-has-type").same(),
+            RuleSource::EslintReactDom("no-missing-button-type").same(),
+            RuleSource::EslintReactXyz("dom-no-missing-button-type").same(),
+            RuleSource::HtmlEslint("require-button-type").inspired(),
+            RuleSource::DenoLint("jsx-button-has-type").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

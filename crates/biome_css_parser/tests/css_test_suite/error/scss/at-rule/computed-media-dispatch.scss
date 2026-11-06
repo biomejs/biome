@@ -1,0 +1,6 @@
+@media () {}
+@media (: 40rem) {}
+@media (>= 40rem) {}
+@media (20rem < 40rem <= 80rem) {}
+@media (feature() >= "width") {}
+.after { color: green; }

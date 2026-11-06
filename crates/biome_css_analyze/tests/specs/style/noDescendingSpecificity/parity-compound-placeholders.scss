@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+%a%b .placeholder-target {}
+.placeholder-target {}
+
+.card%a%b .mixed-target {}
+.mixed-target {}
+
+%a%b {
+  .nested-target {}
+}
+.nested-target {}
+
+.parent .normal-target {}
+.normal-target {}

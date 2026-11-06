@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-define-model.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+defineEmits({ "update:foo"() {}, "update:modelValue": null });
+const foo = defineModel("foo");
+const [model, modifiers] = defineModel();
+</script>
+
+```

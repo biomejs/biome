@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_12389.svelte
+---
+
+# Input
+
+```svelte
+<input bind:value={value} />
+<Comp bind:open={open} />
+
+```
+
+
+# Formatted
+
+```svelte
+<input bind:value>
+<Comp bind:open />
+
+```

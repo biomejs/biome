@@ -1,6 +1,4 @@
 use biome_diagnostics::Severity;
-use std::collections::HashSet;
-
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -10,8 +8,10 @@ use biome_graphql_syntax::{
     GraphqlInputObjectTypeExtension, GraphqlInterfaceTypeDefinition, GraphqlInterfaceTypeExtension,
     GraphqlObjectTypeDefinition, GraphqlObjectTypeExtension,
 };
-use biome_rowan::{AstNode, TokenText, declare_node_union};
+use biome_rowan::declare_node_union;
 use biome_rule_options::no_duplicate_field_definition_names::NoDuplicateFieldDefinitionNamesOptions;
+
+use crate::utils::{DuplicateName, collect_duplicate_names};
 
 declare_lint_rule! {
     /// Require all fields of a type to be unique.
@@ -78,100 +78,81 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateFieldDefinitionNames {
     type Query = Ast<AnyNoDuplicateFieldDefinitionNamesQuery>;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type State = DuplicateName;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateFieldDefinitionNamesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        match node {
+        let duplicates = match node {
             AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlObjectTypeDefinition(object_def) => {
-                let fields = object_def.fields()?;
-                check_list(fields)
+                object_def.fields().map(check_list)
             }
             AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlObjectTypeExtension(object_ext) => {
-                let fields = object_ext.fields()?;
-                check_list(fields)
+                object_ext.fields().map(check_list)
             }
             AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInterfaceTypeDefinition(
                 interface_def,
-            ) => {
-                let fields = interface_def.fields()?;
-                check_list(fields)
-            }
+            ) => interface_def.fields().map(check_list),
             AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInterfaceTypeExtension(
                 interface_ext,
-            ) => {
-                let fields = interface_ext.fields()?;
-                check_list(fields)
-            }
+            ) => interface_ext.fields().map(check_list),
             AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInputObjectTypeDefinition(
                 input_def,
-            ) => {
-                let fields = input_def.input_fields()?;
-                check_input_list(fields)
-            }
+            ) => input_def.input_fields().map(check_input_list),
             AnyNoDuplicateFieldDefinitionNamesQuery::GraphqlInputObjectTypeExtension(input_ext) => {
-                let fields = input_ext.input_fields()?;
-                check_input_list(fields)
+                input_ext.input_fields().map(check_input_list)
             }
-        }
+        };
+
+        duplicates.unwrap_or_default()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = ctx.query().range();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                span,
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateName {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The field name \""<Emphasis>{name}</Emphasis>"\" is used more than once."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Duplicate field name."
+                    "The field \""<Emphasis>{name}</Emphasis>"\" is repeated here."
                 },
-            )
-            .note(markup! {
-                "A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently."
-            }),
-        )
+            );
+        }
+
+        Some(diagnostic.note(markup! {
+            "A GraphQL complex type is only valid if all its fields are uniquely named. Make sure to name every field differently."
+        }))
     }
 }
 
-fn check_list(fields: GraphqlFieldsDefinition) -> Option<()> {
-    let mut found: HashSet<TokenText> = HashSet::new();
-
-    for element in fields.fields() {
-        if let Some(name) = element.name().ok()
-            && let Some(value_token) = name.value_token().ok()
-        {
-            let string = value_token.token_text();
-            if found.contains(&string) {
-                return Some(());
-            } else {
-                found.insert(string);
-            }
-        }
-    }
-
-    None
+fn check_list(fields: GraphqlFieldsDefinition) -> Box<[DuplicateName]> {
+    collect_duplicate_names(fields.fields().into_iter().filter_map(|field| {
+        let token = field.name().ok()?.value_token().ok()?;
+        let name = token.token_text_trimmed();
+        Some((name.clone(), name, token.text_trimmed_range()))
+    }))
 }
 
-fn check_input_list(fields: GraphqlInputFieldsDefinition) -> Option<()> {
-    let mut found: HashSet<TokenText> = HashSet::new();
-
-    for element in fields.fields() {
-        if let Some(name) = element.name().ok()
-            && let Some(value_token) = name.value_token().ok()
-        {
-            let string = value_token.token_text();
-            if found.contains(&string) {
-                return Some(());
-            } else {
-                found.insert(string);
-            }
-        }
-    }
-
-    None
+fn check_input_list(fields: GraphqlInputFieldsDefinition) -> Box<[DuplicateName]> {
+    collect_duplicate_names(fields.fields().into_iter().filter_map(|field| {
+        let token = field.name().ok()?.value_token().ok()?;
+        let name = token.token_text_trimmed();
+        Some((name.clone(), name, token.text_trimmed_range()))
+    }))
 }
 
 declare_node_union! {

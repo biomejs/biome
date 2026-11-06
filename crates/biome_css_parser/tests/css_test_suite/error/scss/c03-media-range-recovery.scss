@@ -1,0 +1,5 @@
+@media ($min < ) { .missing-name { color: red; } }
+@media ($min < width < ) { .missing-upper { color: red; } }
+@media ($min + < width) { .missing-operand { color: red; } }
+@media ($min < width < $max - 1rem { .missing-paren { color: red; } }
+.after { display: block; }

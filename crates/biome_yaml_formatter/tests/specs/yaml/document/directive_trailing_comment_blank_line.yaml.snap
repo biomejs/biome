@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/directive_trailing_comment_blank_line.yaml
+---
+
+# Input
+
+```yaml
+%YAML 1.2 # on the directive line
+
+---
+a
+
+```
+
+
+# Formatted
+
+```yaml
+%YAML 1.2 # on the directive line
+
+---
+a
+
+```

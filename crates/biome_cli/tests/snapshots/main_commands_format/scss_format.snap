@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write format.scss
+```
+
+## `format.scss`
+
+```scss
+$color: red;
+.element {
+	color: $color;
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

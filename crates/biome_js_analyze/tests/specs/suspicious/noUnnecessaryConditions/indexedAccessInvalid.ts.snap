@@ -41,6 +41,8 @@ indexedAccessInvalid.ts:7:6 lint/suspicious/noUnnecessaryConditions ━━━━
   
   i The value's type can never be falsy, so this check is redundant.
   
+  i Remove the condition, or check the value you meant to test.
+  
 
 ```
 
@@ -84,6 +86,8 @@ indexedAccessInvalid.ts:13:8 lint/suspicious/noUnnecessaryConditions ━━━�
   
   i The value passed to switch can never equal this value.
   
+  i Remove the unreachable case, or change it to a value that the switch expression can have.
+  
 
 ```
 
@@ -100,6 +104,8 @@ indexedAccessInvalid.ts:19:6 lint/suspicious/noUnnecessaryConditions ━━━�
     21 │ 
   
   i The value's type can never be falsy, so this check is redundant.
+  
+  i Remove the condition, or check the value you meant to test.
   
 
 ```

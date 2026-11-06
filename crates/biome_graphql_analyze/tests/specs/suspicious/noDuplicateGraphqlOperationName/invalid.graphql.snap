@@ -38,21 +38,23 @@ mutation updateUser {
 
 # Diagnostics
 ```
-invalid.graphql:7:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:1:7 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Operation named "user" is already defined.
+  ! The operation name "user" is used more than once.
   
-     5 │ }
-     6 │ 
-   > 7 │ query user {
-       │ ^^^^^^^^^^^^
-   > 8 │   me {
-   > 9 │     id
-  > 10 │   }
-  > 11 │ }
-       │ ^
-    12 │ 
-    13 │ mutation updateUser {
+  > 1 │ query user {
+      │       ^^^^
+    2 │   user {
+    3 │     id
+  
+  i The operation "user" is repeated here.
+  
+    5 │ }
+    6 │ 
+  > 7 │ query user {
+      │       ^^^^
+    8 │   me {
+    9 │     id
   
   i GraphQL operation names must be unique to ensure proper identification.
   
@@ -62,44 +64,34 @@ invalid.graphql:7:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━
 ```
 
 ```
-invalid.graphql:19:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:13:10 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Operation named "updateUser" is already defined.
+  ! The operation name "updateUser" is used more than once.
+  
+    11 │ }
+    12 │ 
+  > 13 │ mutation updateUser {
+       │          ^^^^^^^^^^
+    14 │   updateUser {
+    15 │     id
+  
+  i The operation "updateUser" is repeated here.
   
     17 │ }
     18 │ 
   > 19 │ mutation updateUser {
-       │ ^^^^^^^^^^^^^^^^^^^^^
-  > 20 │   updateProfile {
-  > 21 │     name
-  > 22 │   }
-  > 23 │ }
-       │ ^
-    24 │ 
-    25 │ mutation updateUser {
+       │          ^^^^^^^^^^
+    20 │   updateProfile {
+    21 │     name
   
-  i GraphQL operation names must be unique to ensure proper identification.
-  
-  i Rename the operation to have a unique name.
-  
-
-```
-
-```
-invalid.graphql:25:1 lint/suspicious/noDuplicateGraphqlOperationName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Operation named "updateUser" is already defined.
+  i The operation "updateUser" is repeated here.
   
     23 │ }
     24 │ 
   > 25 │ mutation updateUser {
-       │ ^^^^^^^^^^^^^^^^^^^^^
-  > 26 │   updateSettings {
-  > 27 │     theme
-  > 28 │   }
-  > 29 │ }
-       │ ^
-    30 │ 
+       │          ^^^^^^^^^^
+    26 │   updateSettings {
+    27 │     theme
   
   i GraphQL operation names must be unique to ensure proper identification.
   

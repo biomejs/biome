@@ -40,6 +40,8 @@ invalid.js:1:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
     2 │ document.cookie += ";foo=bar"
     3 │ 
   
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
+  
   i Consider using the Cookie Store API.
   
 
@@ -55,6 +57,8 @@ invalid.js:2:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
     4 │ window.document.cookie = "foo=bar";
+  
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
   
   i Consider using the Cookie Store API.
   
@@ -73,6 +77,8 @@ invalid.js:4:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
     5 │ globalThis.window.document.cookie = "foo=bar";
     6 │ 
   
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
+  
   i Consider using the Cookie Store API.
   
 
@@ -88,6 +94,8 @@ invalid.js:5:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
     7 │ document["cookie"] = "foo=bar"
+  
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
   
   i Consider using the Cookie Store API.
   
@@ -106,6 +114,8 @@ invalid.js:7:1 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
     8 │ 
     9 │ function document_is_global1(){
   
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
+  
   i Consider using the Cookie Store API.
   
 
@@ -122,6 +132,8 @@ invalid.js:11:5 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^
     12 │ }
     13 │ 
+  
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
   
   i Consider using the Cookie Store API.
   
@@ -140,6 +152,8 @@ invalid.js:17:5 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
     18 │ }
     19 │ 
   
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
+  
   i Consider using the Cookie Store API.
   
 
@@ -155,6 +169,8 @@ invalid.js:22:5 lint/suspicious/noDocumentCookie ━━━━━━━━━━�
   > 22 │     global_doc.cookie = "foo=bar";
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     23 │ }
+  
+  i Writing to document.cookie directly is error-prone, because the value is a string that must be built and escaped by hand. It is also a synchronous API that can slow the page down.
   
   i Consider using the Cookie Store API.
   

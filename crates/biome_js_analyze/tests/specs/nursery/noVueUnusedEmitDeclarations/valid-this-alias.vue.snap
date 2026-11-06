@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-this-alias.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  emits: ["foo"],
+  methods: {
+    click() {
+      const vm = this;
+      vm?.$emit?.("foo");
+    },
+  },
+};
+</script>
+
+```

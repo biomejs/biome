@@ -1,7 +1,7 @@
 use crate::{
     GreenNode, Language, NodeOrToken, ParsedChildren, SyntaxFactory, SyntaxKind, SyntaxNode,
     cow_mut::CowMut,
-    green::{GreenElement, NodeCache, NodeCacheNodeEntryMut},
+    green::{CacheChild, NodeCache, NodeCacheNodeEntryMut},
     syntax::TriviaPiece,
 };
 use std::{marker::PhantomData, num::NonZeroUsize};
@@ -23,9 +23,11 @@ impl Checkpoint {
 /// A builder for a syntax tree.
 #[derive(Debug)]
 pub struct TreeBuilder<'cache, L: Language, S: SyntaxFactory<Kind = L::Kind>> {
+    /// Declared before `cache` so that the children drop before an owned cache, which
+    /// keeps the borrowed children from outliving it.
+    children: Vec<CacheChild>,
     cache: CowMut<'cache, NodeCache>,
     parents: Vec<(L::Kind, usize)>,
-    children: Vec<(u64, GreenElement)>,
     ph: PhantomData<S>,
 }
 
@@ -79,8 +81,8 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     /// Adds new token to the current branch.
     #[inline]
     pub fn token(&mut self, kind: L::Kind, text: &str) -> &mut Self {
-        let (hash, token) = self.cache.token(kind.to_raw(), text);
-        self.children.push((hash, token.into()));
+        let token = self.cache.token(kind.to_raw(), text);
+        self.children.push(token);
         self
     }
 
@@ -94,10 +96,10 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
         leading: &[TriviaPiece],
         trailing: &[TriviaPiece],
     ) {
-        let (hash, token) = self
+        let token = self
             .cache
             .token_with_trivia(kind.to_raw(), text, leading, trailing);
-        self.children.push((hash, token.into()));
+        self.children.push(token);
     }
 
     /// Start new node and make it current.
@@ -124,21 +126,22 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
             S::make_syntax(kind, children).into_green()
         };
 
-        let (hash, node) = match node_entry {
-            NodeCacheNodeEntryMut::NoCache(hash) => (hash, build_node()),
-            NodeCacheNodeEntryMut::Vacant(entry) => {
-                let node = build_node();
-
-                let hash = entry.cache(node.clone());
-                (hash, node)
-            }
+        let node = match node_entry {
+            NodeCacheNodeEntryMut::NoCache => CacheChild::owned(build_node().into()),
+            NodeCacheNodeEntryMut::Vacant(entry) => entry.cache(build_node()),
             NodeCacheNodeEntryMut::Cached(cached) => {
-                self.children.truncate(first_child);
-                (cached.hash(), cached.node().to_owned())
+                // SAFETY: The cache only returns a cached node if no child has the uncached
+                // hash. None of the children owns its element, so skipping their `Drop` leaks
+                // nothing.
+                #[expect(unsafe_code)]
+                unsafe {
+                    self.children.set_len(first_child)
+                };
+                cached.into_child()
             }
         };
 
-        self.children.push((hash, node.into()));
+        self.children.push(node);
         self
     }
 
@@ -207,7 +210,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     #[must_use]
     pub(crate) fn finish_green(&mut self) -> GreenNode {
         assert_eq!(self.children.len(), 1);
-        match self.children.pop().unwrap().1 {
+        match self.children.pop().unwrap().into_element() {
             NodeOrToken::Node(node) => node,
             _ => panic!(),
         }
@@ -218,7 +221,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
 mod tests {
     use crate::green::GreenElementRef;
     use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{GreenNodeData, GreenTokenData, NodeOrToken};
+    use crate::{GreenNodeData, GreenTokenData, NodeCache, NodeOrToken};
 
     // Builds a "Condition" like structure where the closing ) is missing
     fn build_condition_with_missing_closing_parenthesis(builder: &mut RawSyntaxTreeBuilder) {
@@ -282,6 +285,59 @@ mod tests {
         let last_condition = root.children().next_back().unwrap();
 
         assert_ne!(first_condition.element(), last_condition.element());
+    }
+
+    fn build_literal_list(builder: &mut RawSyntaxTreeBuilder, literals: &[&str]) {
+        builder.start_node(RawLanguageKind::ROOT);
+        for literal in literals {
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token(RawLanguageKind::STRING_TOKEN, literal);
+            builder.finish_node();
+        }
+        builder.finish_node();
+    }
+
+    #[test]
+    fn trees_outlive_entries_evicted_from_a_reused_cache() {
+        let mut cache = NodeCache::default();
+
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        build_literal_list(&mut builder, &["a", "b"]);
+        let first = builder.finish();
+
+        // Doesn't use `a`, so the cache evicts it when the builder finishes.
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        build_literal_list(&mut builder, &["b", "c"]);
+        let second = builder.finish();
+
+        drop(cache);
+
+        assert_eq!(first.to_string(), "ab");
+        assert_eq!(second.to_string(), "bc");
+    }
+
+    #[test]
+    fn drops_unfinished_builder_with_owned_and_cached_children() {
+        let mut cache = NodeCache::default();
+
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        builder.start_node(RawLanguageKind::ROOT);
+        // A node with more than three children isn't cached, so the builder owns it.
+        build_literal_list(&mut builder, &["a", "b", "c", "d"]);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token(RawLanguageKind::STRING_TOKEN, "a");
+        builder.finish_node();
+        drop(builder);
+
+        let mut builder = RawSyntaxTreeBuilder::with_cache(&mut cache);
+        build_literal_list(&mut builder, &["a", "b", "c", "d"]);
+        assert_eq!(builder.finish().to_string(), "abcd");
+
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        build_literal_list(&mut builder, &["a", "b", "c", "d"]);
+        builder.token(RawLanguageKind::STRING_TOKEN, "a");
+        drop(builder);
     }
 
     fn assert_same_elements(left: GreenElementRef<'_>, right: GreenElementRef<'_>) {

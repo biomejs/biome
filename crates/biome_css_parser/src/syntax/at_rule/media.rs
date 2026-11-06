@@ -1,7 +1,7 @@
 use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
-use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_any_query_feature};
+use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_media_query_feature};
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
@@ -505,7 +505,7 @@ pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn recover_media_feature_in_parens_body(p: &mut CssParser) {
-    parse_any_query_feature(p)
+    parse_media_query_feature(p)
         .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
         .ok();
 }

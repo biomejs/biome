@@ -144,7 +144,6 @@ impl OverridePattern {
             javascript.resolver = None;
             javascript.experimental_embedded_snippets_enabled = None;
             if let Some(parser) = javascript.parser.as_mut() {
-                parser.grit_metavariables = None;
                 parser.jsx_everywhere = None;
             }
             if javascript
@@ -647,9 +646,9 @@ impl OverrideGlobs {
     }
 }
 impl biome_deserialize::Deserializable for OverrideGlobs {
-    fn deserialize(
-        ctx: &mut dyn biome_deserialize::DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         biome_deserialize::Deserializable::deserialize(ctx, value, name).map(OverrideGlobs::Globs)
@@ -1078,6 +1077,7 @@ mod tests {
             line_width: Some(LineWidth::try_from(80).expect("valid line width")),
             trailing_newline: global_formatter.trailing_newline,
             prose_wrap: Some(ProseWrap::Always),
+            format_embeds: None,
         };
         assert_eq!(
             configuration
@@ -1108,6 +1108,7 @@ mod tests {
             parser: Some(MarkdownParserConfiguration {
                 frontmatter: Some(false.into()),
                 gfm: None,
+                cjk_friendly_emphasis: None,
             }),
             linter: Some(MarkdownLinterConfiguration {
                 enabled: Some(true.into()),
@@ -1128,6 +1129,7 @@ mod tests {
                 parser: Some(MarkdownParserConfiguration {
                     frontmatter: Some(true.into()),
                     gfm: None,
+                    cjk_friendly_emphasis: None,
                 }),
                 linter: Some(MarkdownLinterConfiguration {
                     enabled: Some(false.into()),

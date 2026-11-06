@@ -1,7 +1,11 @@
 use crate::html::lists::element_list::{FormatHtmlElementListOptions, HtmlChildListLayout};
 use crate::utils::css_display::{CssDisplay, get_css_display_from_tag};
+use crate::utils::markdown::starts_markdown_block;
 use crate::utils::metadata::{get_css_whitespace, get_element_css_display};
-use crate::verbatim::{format_html_leading_comments, format_html_leading_comments_for_block};
+use crate::verbatim::{
+    FormatHtmlVerbatimElementChildren, format_html_leading_comments,
+    format_html_leading_comments_for_block,
+};
 use crate::{html::lists::element_list::FormatHtmlElementList, prelude::*};
 use biome_formatter::{CstFormatContext, FormatRefWithRule, FormatRuleWithOptions, write};
 use biome_html_syntax::{
@@ -218,7 +222,10 @@ impl FormatHtmlElement {
                 .first_token()
                 .is_some_and(|tok| tok.leading_trivia().pieces().any(|p| p.is_newline()));
 
-        let forces_break_children = should_force_break_content
+        let starts_markdown_block = starts_markdown_block(node.syntax(), f);
+
+        let forces_break_children = (starts_markdown_block && content_has_leading_newline)
+            || should_force_break_content
             // If `<template>` is at the root level, always force multiline formatting of its children.
             || (is_root_element_list && is_template_element)
             // Elements with a leading newline and direct element children should force
@@ -288,6 +295,8 @@ impl FormatHtmlElement {
                 r_angle_is_borrowed: borrowed_r_angle.is_some(),
                 attr_group_id,
                 borrowed_sibling_r_angle: self.borrowed_sibling_r_angle.clone(),
+                is_single_line: starts_markdown_block,
+                verbatim_children: should_be_verbatim && !should_format_embedded_nodes,
             }),
             &opening_element,
             f,
@@ -297,11 +306,7 @@ impl FormatHtmlElement {
         if should_format_embedded_nodes {
             write!(f, [children.format()])?;
         } else if should_be_verbatim {
-            // An element with no children has nothing to reproduce, and asking
-            // for it anyway would record an empty range as verbatim.
-            if !children.is_empty() {
-                write!(f, [&format_html_verbatim_node(children.syntax())])?;
-            }
+            write!(f, [FormatHtmlVerbatimElementChildren(node)])?;
         } else {
             // Use BestFitting layout to allow the formatter to choose between
             // flat and expanded versions. The `if_group_breaks`/`if_group_fits_on_line`
@@ -325,6 +330,7 @@ impl FormatHtmlElement {
         FormatNodeRule::fmt(
             &FormatHtmlClosingElement::default().with_options(FormatHtmlClosingElementOptions {
                 tag_borrowed: should_borrow_closing_tag,
+                verbatim_children: should_be_verbatim && !should_format_embedded_nodes,
                 r_angle_borrowed: self.closing_r_angle_borrowed,
             }),
             &closing_element,

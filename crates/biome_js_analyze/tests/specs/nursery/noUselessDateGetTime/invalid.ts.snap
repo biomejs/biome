@@ -1,0 +1,80 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+new Date((date as Date).getTime());
+new Date((date satisfies Date).getTime());
+new Date(date!.getTime());
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:25 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ new Date((date as Date).getTime());
+      │                         ^^^^^^^^^
+    3 │ new Date((date satisfies Date).getTime());
+    4 │ new Date(date!.getTime());
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    2 │ new·Date((date·as·Date).getTime());
+      │                        ----------  
+
+```
+
+```
+invalid.ts:3:32 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ new Date((date as Date).getTime());
+  > 3 │ new Date((date satisfies Date).getTime());
+      │                                ^^^^^^^^^
+    4 │ new Date(date!.getTime());
+    5 │ 
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    3 │ new·Date((date·satisfies·Date).getTime());
+      │                               ----------  
+
+```
+
+```
+invalid.ts:4:16 lint/nursery/noUselessDateGetTime  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This .getTime() call is unnecessary.
+  
+    2 │ new Date((date as Date).getTime());
+    3 │ new Date((date satisfies Date).getTime());
+  > 4 │ new Date(date!.getTime());
+      │                ^^^^^^^^^
+    5 │ 
+  
+  i Passing a date directly to new Date() already creates a copy of it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the .getTime() call.
+  
+    4 │ new·Date(date!.getTime());
+      │               ----------  
+
+```

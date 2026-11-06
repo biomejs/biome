@@ -1,0 +1,277 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div is="foo" />
+  <div :is="foo" />
+  <div v-bind:is="foo" />
+  <tr is="my-row"></tr>
+  <button is="fancy-button">Click</button>
+  <div is />
+  <div is="" />
+  <div is="Vue:foo" />
+  <div :is="'vue:foo'" />
+  <svg><g is="foo" /></svg>
+  <math><mi is="foo" /></math>
+  <template is="foo"></template>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div is="foo" />
+      │        ^^^^^^^^
+    4 │   <div :is="foo" />
+    5 │   <div v-bind:is="foo" />
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    2 │ <template>
+    3 │   <div is="foo" />
+  > 4 │   <div :is="foo" />
+      │        ^^^^^^^^^
+    5 │   <div v-bind:is="foo" />
+    6 │   <tr is="my-row"></tr>
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Use the <component> element to choose which component to render.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    3 │   <div is="foo" />
+    4 │   <div :is="foo" />
+  > 5 │   <div v-bind:is="foo" />
+      │        ^^^^^^^^^^^^^^^
+    6 │   <tr is="my-row"></tr>
+    7 │   <button is="fancy-button">Click</button>
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Use the <component> element to choose which component to render.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:7 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    4 │   <div :is="foo" />
+    5 │   <div v-bind:is="foo" />
+  > 6 │   <tr is="my-row"></tr>
+      │       ^^^^^^^^^^^
+    7 │   <button is="fancy-button">Click</button>
+    8 │   <div is />
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:11 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    5 │   <div v-bind:is="foo" />
+    6 │   <tr is="my-row"></tr>
+  > 7 │   <button is="fancy-button">Click</button>
+      │           ^^^^^^^^^^^^^^^^^
+    8 │   <div is />
+    9 │   <div is="" />
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+     6 │   <tr is="my-row"></tr>
+     7 │   <button is="fancy-button">Click</button>
+   > 8 │   <div is />
+       │        ^^
+     9 │   <div is="" />
+    10 │   <div is="Vue:foo" />
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+     7 │   <button is="fancy-button">Click</button>
+     8 │   <div is />
+   > 9 │   <div is="" />
+       │        ^^^^^
+    10 │   <div is="Vue:foo" />
+    11 │   <div :is="'vue:foo'" />
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+     8 │   <div is />
+     9 │   <div is="" />
+  > 10 │   <div is="Vue:foo" />
+       │        ^^^^^^^^^^^^
+    11 │   <div :is="'vue:foo'" />
+    12 │   <svg><g is="foo" /></svg>
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:8 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+     9 │   <div is="" />
+    10 │   <div is="Vue:foo" />
+  > 11 │   <div :is="'vue:foo'" />
+       │        ^^^^^^^^^^^^^^^
+    12 │   <svg><g is="foo" /></svg>
+    13 │   <math><mi is="foo" /></math>
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Use the <component> element to choose which component to render.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:11 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    10 │   <div is="Vue:foo" />
+    11 │   <div :is="'vue:foo'" />
+  > 12 │   <svg><g is="foo" /></svg>
+       │           ^^^^^^^^
+    13 │   <math><mi is="foo" /></math>
+    14 │   <template is="foo"></template>
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:13 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    11 │   <div :is="'vue:foo'" />
+    12 │   <svg><g is="foo" /></svg>
+  > 13 │   <math><mi is="foo" /></math>
+       │             ^^^^^^^^
+    14 │   <template is="foo"></template>
+    15 │ </template>
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:13 lint/nursery/noVueDeprecatedHtmlElementIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The is attribute is used on a built-in element.
+  
+    12 │   <svg><g is="foo" /></svg>
+    13 │   <math><mi is="foo" /></math>
+  > 14 │   <template is="foo"></template>
+       │             ^^^^^^^^
+    15 │ </template>
+    16 │ 
+  
+  i Vue 3 no longer renders a component in place of a built-in HTML, SVG, or MathML element with is. It passes the attribute to the browser instead.
+  
+  i Prefix the value with vue:, or use the <component> element to render a component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

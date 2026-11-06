@@ -1,0 +1,39 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+	"zed": "",
+	"alpha": "fff"
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by key.
+  
+  > 1 │ {
+      │ ^
+  > 2 │ 	"zed": "",
+  > 3 │ 	"alpha": "fff"
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+  i Safe fix: Sort the members by key.
+  
+    1 1 │   {
+    2   │ - → "zed":·"",
+    3   │ - → "alpha":·"fff"
+      2 │ + → "alpha":·"fff",
+      3 │ + → "zed":·""
+    4 4 │   }
+    5 5 │   
+  
+
+```

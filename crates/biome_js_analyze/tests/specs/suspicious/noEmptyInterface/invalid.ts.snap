@@ -18,6 +18,8 @@ invalid.ts:1:1 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━�
       │ ^^^^^^^^^^^^^^^^
     2 │ 
   
+  i An empty interface has no members, so when strictNullChecks is enabled, any value other than null or undefined can be assigned to it. This is rarely what is intended.
+  
   i Safe fix: Use a type alias instead.
   
     1   │ - interface·Foo·{}

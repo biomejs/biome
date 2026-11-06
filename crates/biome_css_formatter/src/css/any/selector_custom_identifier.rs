@@ -9,6 +9,7 @@ impl FormatRule<AnyCssSelectorCustomIdentifier> for FormatAnyCssSelectorCustomId
     fn fmt(&self, node: &AnyCssSelectorCustomIdentifier, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssSelectorCustomIdentifier::CssCustomIdentifier(node) => node.format().fmt(f),
+            AnyCssSelectorCustomIdentifier::CssMetavariable(node) => node.format().fmt(f),
             AnyCssSelectorCustomIdentifier::ScssInterpolatedIdentifier(node) => {
                 node.format().fmt(f)
             }

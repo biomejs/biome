@@ -68,11 +68,20 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        4 │ + → → {·"includes":·["*.js"],·"linter":·{·"enabled":·false·}·},
        5 │ + → → {
        6 │ + → → → "includes":·["bin/*.js",·"lib/*.js",·"!*.test.js"],
-       7 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
-       8 │ + → → }
-       9 │ + → ]
-      10 │ + }
-      11 │ + 
+       7 │ + → → → "linter":·{
+       8 │ + → → → → "rules":·{
+       9 │ + → → → → → "suspicious":·{
+      10 │ + → → → → → → "noDoubleEquals":·{
+      11 │ + → → → → → → → "level":·"off",
+      12 │ + → → → → → → → "options":·{·"ignoreNull":·false·}
+      13 │ + → → → → → → }
+      14 │ + → → → → → }
+      15 │ + → → → → }
+      16 │ + → → → }
+      17 │ + → → }
+      18 │ + → ]
+      19 │ + }
+      20 │ + 
   
 
 ```

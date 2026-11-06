@@ -23,6 +23,8 @@ noExplicitAny.ts:1:27 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
   i Safe fix: Suppress rule lint/suspicious/noExplicitAny for this line.
   
       1 │ + //·biome-ignore·lint/suspicious/noExplicitAny:·<explanation>
@@ -50,6 +52,8 @@ noExplicitAny.ts:2:12 lint/suspicious/noExplicitAny  FIXABLE  ━━━━━━
     4 │ }
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
   i Safe fix: Suppress rule lint/suspicious/noExplicitAny for this line.
   

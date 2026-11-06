@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+.grid {
+  grid-template-areas:
+    "a a a"
+    "b b b";
+}
+
+$areas: "header" "main";
+.dynamic-grid {
+  grid-template-areas: $areas;
+}

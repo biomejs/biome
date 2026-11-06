@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-ts.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should not generate diagnostics */
+import type { Props } from './types';
+const { foo } = defineProps<{ foo?: string }>();
+const { bar = 'default' } = defineProps<{ bar?: string }>();
+const { baz } = defineProps<Props>();
+defineProps<{ qux?: string }>();
+const empty = defineProps<{}>();
+</script>
+
+```

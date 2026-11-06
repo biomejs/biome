@@ -1,0 +1,108 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid-hash-id-values.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$three: #ABC;
+$four: #ABCD;
+$six: #ABCDEF;
+$eight: #ABCDEF12;
+.colors { color: #ABC; string: #ABCG; }
+
+```
+
+# Diagnostics
+```
+invalid-hash-id-values.scss:2:9 lint/style/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ $three: #ABC;
+      │         ^^^^
+    3 │ $four: #ABCD;
+    4 │ $six: #ABCDEF;
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+
+```
+
+```
+invalid-hash-id-values.scss:3:8 lint/style/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    1 │ /* should generate diagnostics */
+    2 │ $three: #ABC;
+  > 3 │ $four: #ABCD;
+      │        ^^^^^
+    4 │ $six: #ABCDEF;
+    5 │ $eight: #ABCDEF12;
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+
+```
+
+```
+invalid-hash-id-values.scss:4:7 lint/style/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    2 │ $three: #ABC;
+    3 │ $four: #ABCD;
+  > 4 │ $six: #ABCDEF;
+      │       ^^^^^^^
+    5 │ $eight: #ABCDEF12;
+    6 │ .colors { color: #ABC; string: #ABCG; }
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+
+```
+
+```
+invalid-hash-id-values.scss:5:9 lint/style/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    3 │ $four: #ABCD;
+    4 │ $six: #ABCDEF;
+  > 5 │ $eight: #ABCDEF12;
+      │         ^^^^^^^^^
+    6 │ .colors { color: #ABC; string: #ABCG; }
+    7 │ 
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+
+```
+
+```
+invalid-hash-id-values.scss:6:18 lint/style/noHexColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected hex color.
+  
+    4 │ $six: #ABCDEF;
+    5 │ $eight: #ABCDEF12;
+  > 6 │ .colors { color: #ABC; string: #ABCG; }
+      │                  ^^^^
+    7 │ 
+  
+  i Hex colors are less readable and have limitations compared to other color models.
+  
+  i Consider using a named color or a color function like rgb(), hsl() or oklch(). See MDN Web Docs on CSS color values for more information.
+  
+
+```

@@ -1100,6 +1100,7 @@ AnyVueVForBinding =
 	VueVForIdentifierBinding
 	| AnyVueVForDestructuredBinding
 	| VueVForTupleBinding
+	| VueVForDefaultBinding
 
 AnyVueVForDestructuredBinding =
 	VueVForObjectBinding
@@ -1112,6 +1113,7 @@ AnyVueVForBindingListElement =
 	| VueVForObjectPropertyBinding
 	| AnyVueVForDestructuredBinding
 	| VueVForRestBinding
+	| VueVForDefaultBinding
 
 // <div v-for="item in items" />
 //             ^^^^
@@ -1124,6 +1126,13 @@ VueVForObjectPropertyBinding =
 	property: VueVForIdentifierBinding
 	':'
 	binding: AnyVueVForBinding
+
+// <div v-for="{ foo = fallback } in items" />
+//               ^^^^^^^^^^^^^^
+VueVForDefaultBinding =
+	binding: AnyVueVForBinding
+	'='
+	default: HtmlTextExpression
 
 // <div v-for="{ foo, bar } in items" />
 //             ^^^^^^^^^^^^

@@ -1,0 +1,16 @@
+<!-- should not generate diagnostics -->
+<template>
+  <div>foo</div>
+  <div v-foo="bar">baz</div>
+  <div v-html="foo" />
+  <div v-text="foo" />
+  <div v-html="foo"></div>
+  <div v-html="foo"> </div>
+  <div v-html="foo">
+  </div>
+  <div v-html="foo" /><!-- bar -->
+  <div v-t="foo">bar</div>
+  <div :html="foo">bar</div>
+  <div v-bind:text="foo">bar</div>
+  <div V-HTML="foo">bar</div>
+</template>

@@ -1,0 +1,780 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var x = new c();
+var x = new φ;
+var x = new 𐐨;
+var x = 𐐀();
+var x = new a.𐐨();
+var x = a.𐐀();
+var x = new a.b.c;
+var x = new a.b['c'];
+var b = Foo();
+var b = a.Foo();
+var b = a['Foo']();
+var b = a.Date.UTC();
+var b = UTC();
+var a = B.C();
+var a = B
+.C();
+var a = new B.c();
+var a = new B.
+c();
+var a = new b[ ( 'foo' ) ]();
+var a = new b[`foo`];
+new (foo?.bar)();
+foo?.Bar();
+(foo?.Bar)();
+Foo?.();
+const x = new toString();
+const x = new constructor();
+const x = new hasOwnProperty();
+const x = new isPrototypeOf();
+const x = new propertyIsEnumerable();
+const x = new valueOf();
+const x = new toLocaleString();
+obj['Number'](42);
+obj?.String(42);
+globalThis.foo.String(42);
+globalThis.Foo();
+globalThis.foo.UTC(2000, 0);
+
+```
+
+# Diagnostics
+```
+invalid.js:2:13 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var x = new c();
+      │             ^
+    3 │ var x = new φ;
+    4 │ var x = new 𐐨;
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:13 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var x = new c();
+  > 3 │ var x = new φ;
+      │             ^
+    4 │ var x = new 𐐨;
+    5 │ var x = 𐐀();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:13 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    2 │ var x = new c();
+    3 │ var x = new φ;
+  > 4 │ var x = new 𐐨;
+      │             ^
+    5 │ var x = 𐐀();
+    6 │ var x = new a.𐐨();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    3 │ var x = new φ;
+    4 │ var x = new 𐐨;
+  > 5 │ var x = 𐐀();
+      │         ^
+    6 │ var x = new a.𐐨();
+    7 │ var x = a.𐐀();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    4 │ var x = new 𐐨;
+    5 │ var x = 𐐀();
+  > 6 │ var x = new a.𐐨();
+      │               ^
+    7 │ var x = a.𐐀();
+    8 │ var x = new a.b.c;
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:11 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    5 │ var x = 𐐀();
+    6 │ var x = new a.𐐨();
+  > 7 │ var x = a.𐐀();
+      │           ^
+    8 │ var x = new a.b.c;
+    9 │ var x = new a.b['c'];
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:17 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+     6 │ var x = new a.𐐨();
+     7 │ var x = a.𐐀();
+   > 8 │ var x = new a.b.c;
+       │                 ^
+     9 │ var x = new a.b['c'];
+    10 │ var b = Foo();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:17 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+     7 │ var x = a.𐐀();
+     8 │ var x = new a.b.c;
+   > 9 │ var x = new a.b['c'];
+       │                 ^^^
+    10 │ var b = Foo();
+    11 │ var b = a.Foo();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:9 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+     8 │ var x = new a.b.c;
+     9 │ var x = new a.b['c'];
+  > 10 │ var b = Foo();
+       │         ^^^
+    11 │ var b = a.Foo();
+    12 │ var b = a['Foo']();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:11 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+     9 │ var x = new a.b['c'];
+    10 │ var b = Foo();
+  > 11 │ var b = a.Foo();
+       │           ^^^
+    12 │ var b = a['Foo']();
+    13 │ var b = a.Date.UTC();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:11 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    10 │ var b = Foo();
+    11 │ var b = a.Foo();
+  > 12 │ var b = a['Foo']();
+       │           ^^^^^
+    13 │ var b = a.Date.UTC();
+    14 │ var b = UTC();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:16 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    11 │ var b = a.Foo();
+    12 │ var b = a['Foo']();
+  > 13 │ var b = a.Date.UTC();
+       │                ^^^
+    14 │ var b = UTC();
+    15 │ var a = B.C();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:9 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    12 │ var b = a['Foo']();
+    13 │ var b = a.Date.UTC();
+  > 14 │ var b = UTC();
+       │         ^^^
+    15 │ var a = B.C();
+    16 │ var a = B
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:11 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    13 │ var b = a.Date.UTC();
+    14 │ var b = UTC();
+  > 15 │ var a = B.C();
+       │           ^
+    16 │ var a = B
+    17 │ .C();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:2 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    15 │ var a = B.C();
+    16 │ var a = B
+  > 17 │ .C();
+       │  ^
+    18 │ var a = new B.c();
+    19 │ var a = new B.
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    16 │ var a = B
+    17 │ .C();
+  > 18 │ var a = new B.c();
+       │               ^
+    19 │ var a = new B.
+    20 │ c();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    18 │ var a = new B.c();
+    19 │ var a = new B.
+  > 20 │ c();
+       │ ^
+    21 │ var a = new b[ ( 'foo' ) ]();
+    22 │ var a = new b[`foo`];
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:18 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    19 │ var a = new B.
+    20 │ c();
+  > 21 │ var a = new b[ ( 'foo' ) ]();
+       │                  ^^^^^
+    22 │ var a = new b[`foo`];
+    23 │ new (foo?.bar)();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    20 │ c();
+    21 │ var a = new b[ ( 'foo' ) ]();
+  > 22 │ var a = new b[`foo`];
+       │               ^^^^^
+    23 │ new (foo?.bar)();
+    24 │ foo?.Bar();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:11 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    21 │ var a = new b[ ( 'foo' ) ]();
+    22 │ var a = new b[`foo`];
+  > 23 │ new (foo?.bar)();
+       │           ^^^
+    24 │ foo?.Bar();
+    25 │ (foo?.Bar)();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:6 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    22 │ var a = new b[`foo`];
+    23 │ new (foo?.bar)();
+  > 24 │ foo?.Bar();
+       │      ^^^
+    25 │ (foo?.Bar)();
+    26 │ Foo?.();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:7 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    23 │ new (foo?.bar)();
+    24 │ foo?.Bar();
+  > 25 │ (foo?.Bar)();
+       │       ^^^
+    26 │ Foo?.();
+    27 │ const x = new toString();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    24 │ foo?.Bar();
+    25 │ (foo?.Bar)();
+  > 26 │ Foo?.();
+       │ ^^^
+    27 │ const x = new toString();
+    28 │ const x = new constructor();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    25 │ (foo?.Bar)();
+    26 │ Foo?.();
+  > 27 │ const x = new toString();
+       │               ^^^^^^^^
+    28 │ const x = new constructor();
+    29 │ const x = new hasOwnProperty();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    26 │ Foo?.();
+    27 │ const x = new toString();
+  > 28 │ const x = new constructor();
+       │               ^^^^^^^^^^^
+    29 │ const x = new hasOwnProperty();
+    30 │ const x = new isPrototypeOf();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    27 │ const x = new toString();
+    28 │ const x = new constructor();
+  > 29 │ const x = new hasOwnProperty();
+       │               ^^^^^^^^^^^^^^
+    30 │ const x = new isPrototypeOf();
+    31 │ const x = new propertyIsEnumerable();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    28 │ const x = new constructor();
+    29 │ const x = new hasOwnProperty();
+  > 30 │ const x = new isPrototypeOf();
+       │               ^^^^^^^^^^^^^
+    31 │ const x = new propertyIsEnumerable();
+    32 │ const x = new valueOf();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    29 │ const x = new hasOwnProperty();
+    30 │ const x = new isPrototypeOf();
+  > 31 │ const x = new propertyIsEnumerable();
+       │               ^^^^^^^^^^^^^^^^^^^^
+    32 │ const x = new valueOf();
+    33 │ const x = new toLocaleString();
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    30 │ const x = new isPrototypeOf();
+    31 │ const x = new propertyIsEnumerable();
+  > 32 │ const x = new valueOf();
+       │               ^^^^^^^
+    33 │ const x = new toLocaleString();
+    34 │ obj['Number'](42);
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    31 │ const x = new propertyIsEnumerable();
+    32 │ const x = new valueOf();
+  > 33 │ const x = new toLocaleString();
+       │               ^^^^^^^^^^^^^^
+    34 │ obj['Number'](42);
+    35 │ obj?.String(42);
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:5 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    32 │ const x = new valueOf();
+    33 │ const x = new toLocaleString();
+  > 34 │ obj['Number'](42);
+       │     ^^^^^^^^
+    35 │ obj?.String(42);
+    36 │ globalThis.foo.String(42);
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:6 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    33 │ const x = new toLocaleString();
+    34 │ obj['Number'](42);
+  > 35 │ obj?.String(42);
+       │      ^^^^^^
+    36 │ globalThis.foo.String(42);
+    37 │ globalThis.Foo();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:16 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    34 │ obj['Number'](42);
+    35 │ obj?.String(42);
+  > 36 │ globalThis.foo.String(42);
+       │                ^^^^^^
+    37 │ globalThis.Foo();
+    38 │ globalThis.foo.UTC(2000, 0);
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:12 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    35 │ obj?.String(42);
+    36 │ globalThis.foo.String(42);
+  > 37 │ globalThis.Foo();
+       │            ^^^
+    38 │ globalThis.foo.UTC(2000, 0);
+    39 │ 
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:16 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    36 │ globalThis.foo.String(42);
+    37 │ globalThis.Foo();
+  > 38 │ globalThis.foo.UTC(2000, 0);
+       │                ^^^
+    39 │ 
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

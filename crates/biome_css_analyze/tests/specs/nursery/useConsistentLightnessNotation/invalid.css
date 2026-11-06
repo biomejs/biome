@@ -1,0 +1,18 @@
+/* should generate diagnostics */
+a { color: oklch(0.85 0.17 88); }
+a { color: oklab(0.86 0.2 154); }
+a { color: lch(85 0.17 88); }
+a { color: lab(86 0.2 154); }
+a { color: OKLCH(0.855 0.17 88); }
+a { color: oklch(1 0 0); }
+a { color: oklch(0 0 0); }
+a { color: oklch(.5 0 0); }
+a { color: oklch(0.005 0 0); }
+a { color: lab(8.5 0 0); }
+a { color: oklch(0.85 0.17 88 / 0.5); }
+a { color: oklch(from red 0.5 c h); }
+a { color: lch(from #fff 50 c h); }
+a { color: oklch(from rgb(0 0 0) 0.5 c h); }
+a { background: linear-gradient(oklch(0.5 0.1 200), lab(40 10 10)); }
+a { color: oklch(1e-1 0 0); }
+a { color: lab(5e1 0 0); }

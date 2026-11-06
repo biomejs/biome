@@ -1,0 +1,324 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <transition><div /></transition>
+  <Transition><div /></Transition>
+  <Transition><div>Content</div></Transition>
+  <transition><div /><div /></transition>
+  <transition><div v-for="e in list" /></transition>
+  <svg height="100" width="100"><transition><circle /></transition></svg>
+  <transition><template v-for="e in list"><div /></template></transition>
+  <Transition>
+    text
+    <!-- comment -->
+    <div />
+  </Transition>
+  <transition :appear="false"><div /></transition>
+  <transition v-bind:appear="false"><div /></transition>
+  <transition @appear="isLoaded"><div /></transition>
+  <transition><dialog v-dialog="show" /></transition>
+  <transition><div key="static" /></transition>
+  <transition name="fade" mode="out-in"><p class="message">Saved</p></transition>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <transition><div /></transition>
+      │               ^^^^^^^
+    4 │   <Transition><div /></Transition>
+    5 │   <Transition><div>Content</div></Transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    2 │ <template>
+    3 │   <transition><div /></transition>
+  > 4 │   <Transition><div /></Transition>
+      │               ^^^^^^^
+    5 │   <Transition><div>Content</div></Transition>
+    6 │   <transition><div /><div /></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    3 │   <transition><div /></transition>
+    4 │   <Transition><div /></Transition>
+  > 5 │   <Transition><div>Content</div></Transition>
+      │               ^^^^^
+    6 │   <transition><div /><div /></transition>
+    7 │   <transition><div v-for="e in list" /></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    4 │   <Transition><div /></Transition>
+    5 │   <Transition><div>Content</div></Transition>
+  > 6 │   <transition><div /><div /></transition>
+      │               ^^^^^^^
+    7 │   <transition><div v-for="e in list" /></transition>
+    8 │   <svg height="100" width="100"><transition><circle /></transition></svg>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    5 │   <Transition><div>Content</div></Transition>
+    6 │   <transition><div /><div /></transition>
+  > 7 │   <transition><div v-for="e in list" /></transition>
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <svg height="100" width="100"><transition><circle /></transition></svg>
+    9 │   <transition><template v-for="e in list"><div /></template></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:45 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+     6 │   <transition><div /><div /></transition>
+     7 │   <transition><div v-for="e in list" /></transition>
+   > 8 │   <svg height="100" width="100"><transition><circle /></transition></svg>
+       │                                             ^^^^^^^^^^
+     9 │   <transition><template v-for="e in list"><div /></template></transition>
+    10 │   <Transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+     7 │   <transition><div v-for="e in list" /></transition>
+     8 │   <svg height="100" width="100"><transition><circle /></transition></svg>
+   > 9 │   <transition><template v-for="e in list"><div /></template></transition>
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │   <Transition>
+    11 │     text
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:5 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    11 │     text
+    12 │     <!-- comment -->
+  > 13 │     <div />
+       │     ^^^^^^^
+    14 │   </Transition>
+    15 │   <transition :appear="false"><div /></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:31 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    13 │     <div />
+    14 │   </Transition>
+  > 15 │   <transition :appear="false"><div /></transition>
+       │                               ^^^^^^^
+    16 │   <transition v-bind:appear="false"><div /></transition>
+    17 │   <transition @appear="isLoaded"><div /></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:16:37 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    14 │   </Transition>
+    15 │   <transition :appear="false"><div /></transition>
+  > 16 │   <transition v-bind:appear="false"><div /></transition>
+       │                                     ^^^^^^^
+    17 │   <transition @appear="isLoaded"><div /></transition>
+    18 │   <transition><dialog v-dialog="show" /></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:34 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    15 │   <transition :appear="false"><div /></transition>
+    16 │   <transition v-bind:appear="false"><div /></transition>
+  > 17 │   <transition @appear="isLoaded"><div /></transition>
+       │                                  ^^^^^^^
+    18 │   <transition><dialog v-dialog="show" /></transition>
+    19 │   <transition><div key="static" /></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    16 │   <transition v-bind:appear="false"><div /></transition>
+    17 │   <transition @appear="isLoaded"><div /></transition>
+  > 18 │   <transition><dialog v-dialog="show" /></transition>
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │   <transition><div key="static" /></transition>
+    20 │   <transition name="fade" mode="out-in"><p class="message">Saved</p></transition>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:15 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    17 │   <transition @appear="isLoaded"><div /></transition>
+    18 │   <transition><dialog v-dialog="show" /></transition>
+  > 19 │   <transition><div key="static" /></transition>
+       │               ^^^^^^^^^^^^^^^^^^^^
+    20 │   <transition name="fade" mode="out-in"><p class="message">Saved</p></transition>
+    21 │ </template>
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:20:41 lint/nursery/useVueToggleInsideTransition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This element inside <Transition> is never shown or hidden.
+  
+    18 │   <transition><dialog v-dialog="show" /></transition>
+    19 │   <transition><div key="static" /></transition>
+  > 20 │   <transition name="fade" mode="out-in"><p class="message">Saved</p></transition>
+       │                                         ^^^^^^^^^^^^^^^^^^^
+    21 │ </template>
+    22 │ 
+  
+  i A transition only plays when the element inside it appears or disappears. This element is always present, so the transition never plays.
+  
+  i Add v-if or v-show to the element, or bind a :key that changes when the content does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

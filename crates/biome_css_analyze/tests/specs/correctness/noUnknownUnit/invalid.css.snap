@@ -51,6 +51,8 @@ invalid.css:1:18 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -73,6 +75,8 @@ invalid.css:2:15 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     4 │ a { font-size: 0.5remm; }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -98,6 +102,8 @@ invalid.css:3:18 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -121,6 +127,8 @@ invalid.css:4:19 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     6 │ a { color: hsl(255pix, 0, 51); }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -146,6 +154,8 @@ invalid.css:5:19 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -169,6 +179,8 @@ invalid.css:6:19 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     8 │ a { color: hsla(255pix, 0, 51, 1); }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -194,6 +206,8 @@ invalid.css:7:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -217,6 +231,8 @@ invalid.css:8:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     10 │ a { margin: calc(10pix*2); }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -242,6 +258,8 @@ invalid.css:9:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -265,6 +283,8 @@ invalid.css:10:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     12 │ a { -webkit-transition-delay: 10pix; }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -290,6 +310,8 @@ invalid.css:11:22 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -313,6 +335,8 @@ invalid.css:12:33 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     14 │ a { margin: some-function(13pix + 10px); }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -338,6 +362,8 @@ invalid.css:13:28 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -361,6 +387,8 @@ invalid.css:14:29 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     16 │ @media (min-width: 13pix) {}
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -386,6 +414,8 @@ invalid.css:15:20 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -409,6 +439,8 @@ invalid.css:16:22 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     18 │ @media (width < 10.01REMS) {}
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -434,6 +466,8 @@ invalid.css:17:47 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -457,6 +491,8 @@ invalid.css:18:22 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     20 │ a { flex: 0 9r9 auto; }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -482,6 +518,8 @@ invalid.css:19:15 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -505,6 +543,8 @@ invalid.css:20:14 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     22 │ @media (resolution: 2x) and (min-width: 200x) {}
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -530,6 +570,8 @@ invalid.css:21:15 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -553,6 +595,8 @@ invalid.css:22:44 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     24 │ a { background: image-set('img1x.png' 1x, 'img2x.png' 2x) left 20x / 15% 60% repeat-x; }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -578,6 +622,8 @@ invalid.css:23:60 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -601,6 +647,8 @@ invalid.css:24:66 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     26 │ a { background-image: image-set('img1x.png' 1pix, 'img2x.png' 2x); }
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   
@@ -626,6 +674,8 @@ invalid.css:25:80 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -650,6 +700,8 @@ invalid.css:26:46 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px
@@ -672,6 +724,8 @@ invalid.css:29:28 lint/correctness/noUnknownUnit ━━━━━━━━━━�
     30 │ 
   
   i See MDN web docs for more details.
+  
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
   
   i Use a known unit instead, such as:
   

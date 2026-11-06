@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+import { mount } from "svelte";
+import { writable } from "svelte/store";
+import { fade } from "svelte/transition";
+import { internals } from "svelte/internals";
+import { helper } from "./svelte/internal";
+import { other } from "my-svelte/internal";
+export * from "svelte/motion";
+await import("svelte");
+const name = "svelte/internal";

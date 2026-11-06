@@ -94,7 +94,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noInnerDeclarations",
         language: "js",
-        sources: &[RuleSource::Eslint("no-inner-declarations").same()],
+        sources: &[
+            RuleSource::Eslint("no-inner-declarations").same(),
+            RuleSource::EslintSvelte("no-inner-declarations").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

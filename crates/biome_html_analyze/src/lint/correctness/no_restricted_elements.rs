@@ -62,7 +62,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRestrictedElements {
-        version: "next",
+        version: "2.6.0",
         name: "noRestrictedElements",
         language: "html",
         recommended: false,
@@ -96,7 +96,10 @@ impl Rule for NoRestrictedElements {
                     "The "<Emphasis>{format_args!("{}", name.syntax().text_trimmed())}</Emphasis>" element is restricted in this project."
                 },
             )
-            .note(markup! { {message} }),
+            .note(markup! { {message} })
+            .note(markup! {
+                "Replace the element with an allowed alternative, or update the "<Emphasis>"elements"</Emphasis>" option if the element should be allowed."
+            }),
         )
     }
 }

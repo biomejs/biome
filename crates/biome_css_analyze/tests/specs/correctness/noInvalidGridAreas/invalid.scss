@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+.grid {
+  grid-template-areas:
+    "a a"
+    "b b b";
+}

@@ -186,7 +186,7 @@ CssRoot {
                                     L_PAREN@99..100 "(" [] [],
                                     CssBogus {
                                         items: [
-                                            CssBogus {
+                                            CssBogusIfTestBooleanExpr {
                                                 items: [
                                                     HASH@100..101 "#" [] [],
                                                     L_CURLY@101..102 "{" [] [],
@@ -279,7 +279,7 @@ CssRoot {
                 CssBogusSelector {
                     items: [
                         CssNestedSelectorList [],
-                        CssBogus {
+                        CssBogusSubSelector {
                             items: [
                                 PERCENT@140..143 "%" [Newline("\n"), Newline("\n")] [],
                                 CssCustomIdentifier {
@@ -666,7 +666,7 @@ CssRoot {
                   0: IDENT@95..99 "lang" [] []
                 1: L_PAREN@99..100 "(" [] []
                 2: CSS_BOGUS@100..110
-                  0: CSS_BOGUS@100..110
+                  0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@100..110
                     0: HASH@100..101 "#" [] []
                     1: L_CURLY@101..102 "{" [] []
                     2: SCSS_EXPRESSION@102..109
@@ -718,7 +718,7 @@ CssRoot {
       0: CSS_SELECTOR_LIST@140..155
         0: CSS_BOGUS_SELECTOR@140..155
           0: CSS_NESTED_SELECTOR_LIST@140..140
-          1: CSS_BOGUS@140..155
+          1: CSS_BOGUS_SUB_SELECTOR@140..155
             0: PERCENT@140..143 "%" [Newline("\n"), Newline("\n")] []
             1: CSS_CUSTOM_IDENTIFIER@143..155
               0: IDENT@143..155 "placeholder" [] [Whitespace(" ")]

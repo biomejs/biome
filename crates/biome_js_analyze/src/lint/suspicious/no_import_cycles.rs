@@ -240,7 +240,13 @@ impl Rule for NoImportCycles {
                 node.range(),
                 markup!("This import is part of a cycle."),
             )
-            .note(note),
+            .note(note)
+            .note(markup! {
+                "Modules in a cycle can be loaded in an unexpected order, so values they import may still be uninitialized when they are used. Cycles also make dependencies harder to follow."
+            })
+            .note(markup! {
+                "Break the cycle, for example by moving the shared code into a separate module that the files import instead."
+            }),
         )
     }
 }

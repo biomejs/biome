@@ -1,0 +1,356 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent, watch, watchEffect } from "vue";
+
+defineComponent({
+	setup: async function () {
+		await doSomething();
+		watch(source, () => {});
+	},
+});
+
+defineComponent({
+	setup: async () => {
+		await doSomething();
+		watchEffect(() => {});
+	},
+});
+
+createApp({
+	async setup() {
+		await doSomething();
+		watch(source, () => {});
+	},
+});
+
+// Each watcher after the first `await` is reported.
+defineComponent({
+	async setup() {
+		await doSomething();
+		watch(source, () => {});
+		await doSomething();
+		watch(source, () => {});
+	},
+});
+
+// The `await` is inside a block that comes before the watcher.
+defineComponent({
+	async setup() {
+		if (shouldLoad) {
+			await doSomething();
+		}
+		watchEffect(() => {});
+	},
+});
+
+// The `await` is in the arguments of an earlier call.
+defineComponent({
+	async setup() {
+		const data = useData(await doSomething());
+		watchEffect(() => {});
+	},
+});
+
+// The watcher is created after its argument is awaited.
+defineComponent({
+	async setup() {
+		watch(await loadSource(), () => {});
+	},
+});
+
+defineComponent({
+	async setup() {
+		for await (const item of items) {
+			watch(item, () => {});
+		}
+		watchEffect(() => {});
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:7:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    5 │ 	setup: async function () {
+    6 │ 		await doSomething();
+  > 7 │ 		watch(source, () => {});
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	},
+    9 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    4 │ defineComponent({
+    5 │ 	setup: async function () {
+  > 6 │ 		await doSomething();
+      │ 		^^^^^
+    7 │ 		watch(source, () => {});
+    8 │ 	},
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    12 │ 	setup: async () => {
+    13 │ 		await doSomething();
+  > 14 │ 		watchEffect(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	},
+    16 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    11 │ defineComponent({
+    12 │ 	setup: async () => {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 		watchEffect(() => {});
+    15 │ 	},
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    19 │ 	async setup() {
+    20 │ 		await doSomething();
+  > 21 │ 		watch(source, () => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 	},
+    23 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    18 │ createApp({
+    19 │ 	async setup() {
+  > 20 │ 		await doSomething();
+       │ 		^^^^^
+    21 │ 		watch(source, () => {});
+    22 │ 	},
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    27 │ 	async setup() {
+    28 │ 		await doSomething();
+  > 29 │ 		watch(source, () => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 		await doSomething();
+    31 │ 		watch(source, () => {});
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    26 │ defineComponent({
+    27 │ 	async setup() {
+  > 28 │ 		await doSomething();
+       │ 		^^^^^
+    29 │ 		watch(source, () => {});
+    30 │ 		await doSomething();
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    29 │ 		watch(source, () => {});
+    30 │ 		await doSomething();
+  > 31 │ 		watch(source, () => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 	},
+    33 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    26 │ defineComponent({
+    27 │ 	async setup() {
+  > 28 │ 		await doSomething();
+       │ 		^^^^^
+    29 │ 		watch(source, () => {});
+    30 │ 		await doSomething();
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    39 │ 			await doSomething();
+    40 │ 		}
+  > 41 │ 		watchEffect(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	},
+    43 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    37 │ 	async setup() {
+    38 │ 		if (shouldLoad) {
+  > 39 │ 			await doSomething();
+       │ 			^^^^^
+    40 │ 		}
+    41 │ 		watchEffect(() => {});
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    47 │ 	async setup() {
+    48 │ 		const data = useData(await doSomething());
+  > 49 │ 		watchEffect(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    50 │ 	},
+    51 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    46 │ defineComponent({
+    47 │ 	async setup() {
+  > 48 │ 		const data = useData(await doSomething());
+       │ 		                     ^^^^^
+    49 │ 		watchEffect(() => {});
+    50 │ 	},
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    54 │ defineComponent({
+    55 │ 	async setup() {
+  > 56 │ 		watch(await loadSource(), () => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 	},
+    58 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    54 │ defineComponent({
+    55 │ 	async setup() {
+  > 56 │ 		watch(await loadSource(), () => {});
+       │ 		      ^^^^^
+    57 │ 	},
+    58 │ });
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:4 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    61 │ 	async setup() {
+    62 │ 		for await (const item of items) {
+  > 63 │ 			watch(item, () => {});
+       │ 			^^^^^^^^^^^^^^^^^^^^^
+    64 │ 		}
+    65 │ 		watchEffect(() => {});
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    60 │ defineComponent({
+    61 │ 	async setup() {
+  > 62 │ 		for await (const item of items) {
+       │ 		    ^^^^^
+    63 │ 			watch(item, () => {});
+    64 │ 		}
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:65:3 lint/nursery/noVueWatchAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This watcher is created after an await, so it keeps running after the component is removed.
+  
+    63 │ 			watch(item, () => {});
+    64 │ 		}
+  > 65 │ 		watchEffect(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    66 │ 	},
+    67 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the watcher belongs to.
+  
+    60 │ defineComponent({
+    61 │ 	async setup() {
+  > 62 │ 		for await (const item of items) {
+       │ 		    ^^^^^
+    63 │ 			watch(item, () => {});
+    64 │ 		}
+  
+  i Create the watcher before the first await in setup(), or store the function it returns and call that function to stop the watcher.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+let count = 0;
+console.log(count);
+count = 1;
+</script>
+
+<p>{count}</p>
+
+```

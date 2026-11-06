@@ -64,10 +64,8 @@ CssRoot {
                 ],
             },
         },
-        CssBogusRule {
-            items: [
-                SEMICOLON@18..19 ";" [] [],
-            ],
+        CssEmptyDeclaration {
+            semicolon_token: SEMICOLON@18..19 ";" [] [],
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
@@ -152,7 +150,7 @@ CssRoot {
                       1: CSS_IDENTIFIER@13..17
                         0: IDENT@13..17 "name" [] []
                 3: R_CURLY@17..18 "}" [] []
-    1: CSS_BOGUS_RULE@18..19
+    1: CSS_EMPTY_DECLARATION@18..19
       0: SEMICOLON@18..19 ";" [] []
     2: CSS_QUALIFIED_RULE@19..35
       0: CSS_SELECTOR_LIST@19..32

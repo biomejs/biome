@@ -1,0 +1,34 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+	"name": "example",
+	"engines": ["node >=24", { "npm": 11 }]
+}
+
+```
+
+# Diagnostics
+```
+package.json:3:13 lint/nursery/usePackageJsonValidEngines ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The engines field is not an object.
+  
+    1 │ {
+    2 │ 	"name": "example",
+  > 3 │ 	"engines": ["node >=24", { "npm": 11 }]
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Package managers read engines to find the versions of each program that the package supports. They expect an object that maps each program name to a version range.
+  
+  i Use an object, such as { "node": ">=24" }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

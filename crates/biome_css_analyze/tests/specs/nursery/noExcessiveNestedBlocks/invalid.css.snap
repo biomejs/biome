@@ -1,0 +1,298 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.six-rules {
+    .b {
+        .c {
+            .d {
+                .e {
+                    .f {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Only the outermost block exceeding the limit is reported. */
+.eight-rules {
+    .b {
+        .c {
+            .d {
+                .e {
+                    .f {
+                        .g {
+                            .h {
+                                color: red;
+                            }
+                        }
+
+                        @media print {
+                            color: blue;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Sibling blocks that exceed the limit are reported separately. */
+.siblings {
+    .b {
+        .c {
+            .d {
+                .e {
+                    .f {
+                        color: red;
+                    }
+
+                    .g {
+                        color: blue;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Nested at-rules add a level like nested rules do. */
+.nested-at-rules {
+    .b {
+        @media print {
+            .c {
+                @supports (display: grid) {
+                    .d {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* The reported block can belong to an at-rule. */
+.reported-at-rule {
+    .b {
+        .c {
+            .d {
+                .e {
+                    @media print {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* A top-level at-rule doesn't add a level, but the blocks inside it still count. */
+@media print {
+    .a {
+        .b {
+            .c {
+                .d {
+                    .e {
+                        .f {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Only the top-level at-rule is free: an at-rule nested inside it adds a level. */
+@layer components {
+    @media print {
+        .a {
+            .b {
+                .c {
+                    .d {
+                        .e {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:7:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    5 │             .d {
+    6 │                 .e {
+  > 7 │                     .f {
+      │                     ^^
+    8 │                         color: red;
+    9 │                     }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:22:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    20 │             .d {
+    21 │                 .e {
+  > 22 │                     .f {
+       │                     ^^
+    23 │                         .g {
+    24 │                             .h {
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:45:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    43 │             .d {
+    44 │                 .e {
+  > 45 │                     .f {
+       │                     ^^
+    46 │                         color: red;
+    47 │                     }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:49:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    47 │                     }
+    48 │ 
+  > 49 │                     .g {
+       │                     ^^
+    50 │                         color: blue;
+    51 │                     }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:64:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    62 │             .c {
+    63 │                 @supports (display: grid) {
+  > 64 │                     .d {
+       │                     ^^
+    65 │                         color: red;
+    66 │                     }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:79:21 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    77 │             .d {
+    78 │                 .e {
+  > 79 │                     @media print {
+       │                     ^^^^^^^^^^^^
+    80 │                         color: red;
+    81 │                     }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:95:25 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    93 │                 .d {
+    94 │                     .e {
+  > 95 │                         .f {
+       │                         ^^
+    96 │                             color: red;
+    97 │                         }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:112:25 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    110 │                 .c {
+    111 │                     .d {
+  > 112 │                         .e {
+        │                         ^^
+    113 │                             color: red;
+    114 │                         }
+  
+  i Blocks nested 5 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 4.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

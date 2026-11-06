@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-duplicate-declarations.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+const emit = defineEmits<{
+  (e: "change", value: string): void;
+  (e: "change", value: number): void;
+}>();
+emit("change", 1);
+</script>
+
+```

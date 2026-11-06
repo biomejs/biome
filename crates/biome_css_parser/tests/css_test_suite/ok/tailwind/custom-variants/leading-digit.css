@@ -1,0 +1,11 @@
+@custom-variant 2xl (@container page (width >= 96rem));
+
+@custom-variant 3xl {
+	@container page (width >= 112rem) {
+		@slot;
+	}
+}
+
+@custom-variant 2 (&:hover);
+
+@custom-variant @2xl (&:hover);

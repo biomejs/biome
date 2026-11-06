@@ -505,13 +505,11 @@ biome inspect plugins --path=src/app.test.ts
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 46 rules resolved.
-  
-  Target path: src/app.test.ts
+  i The configuration enables 46 plugin rules for src/app.test.ts.
   
   @acme/accessibility
   
-  - noAutofocus (direct import, presets/recommended)
+  - noAutofocus (listed directly, presets/recommended)
   - noPositiveTabindex (presets/recommended)
   - noRedundantRoles (presets/recommended)
   - useAltText (presets/recommended)
@@ -521,17 +519,17 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   - useHeadingContent (presets/recommended)
   - useHtmlLang (presets/recommended)
   - useKeyWithClickEvents (presets/recommended)
-  - useValidLang (direct import)
+  - useValidLang (listed directly)
   
   @acme/javascript
   
   - noAlert (presets/recommended, presets/strict)
   - noConsole (presets/strict)
-  - noDebugger (direct import, presets/recommended, presets/strict)
+  - noDebugger (listed directly, presets/recommended, presets/strict)
   - noEval (presets/recommended, presets/strict)
   - noImplicitCoercion (presets/strict)
   - noNestedTernary (presets/strict)
-  - noRestrictedGlobals (direct import)
+  - noRestrictedGlobals (listed directly)
   - noVar (presets/recommended, presets/strict)
   - useConst (presets/recommended, presets/strict)
   - useObjectShorthand (presets/recommended, presets/strict)
@@ -544,28 +542,28 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
   - noDynamicRequire (presets/recommended)
   - noInsecureRandom (presets/recommended)
   - noPathTraversal (presets/recommended)
-  - noSecrets (direct import, presets/recommended)
+  - noSecrets (listed directly, presets/recommended)
   - noShellInterpolation (presets/recommended)
   - noSqlInterpolation (presets/recommended)
   - noUnsafeInnerHtml (presets/recommended)
   - noWeakCrypto (presets/recommended)
   - useHttps (presets/recommended)
-  - useSecureCookies (direct import)
+  - useSecureCookies (listed directly)
   
   @acme/testing
   
-  - expectExpect (direct import [includes: [src/**/*.test.ts] and override includes: [**/*.test.ts]], presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - noConditionalExpect (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - noDisabledTests (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - noDuplicateHooks (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - noFakeTimers (direct import [override includes: [**/*.test.ts]])
-  - noFocusedTests (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - noIdenticalTitle (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - noStandaloneExpect (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
-  - useAwaitAsyncMatchers (presets/strict [override includes: [**/*.test.ts]])
-  - useToHaveLength (presets/strict [override includes: [**/*.test.ts]])
-  - useToStrictEqual (presets/strict [override includes: [**/*.test.ts]])
-  - validDescribeCallback (presets/recommended [override includes: [**/*.test.ts, **/*.spec.ts]], presets/strict [override includes: [**/*.test.ts]])
+  - expectExpect (listed directly, presets/recommended, presets/strict)
+  - noConditionalExpect (presets/recommended, presets/strict)
+  - noDisabledTests (presets/recommended, presets/strict)
+  - noDuplicateHooks (presets/recommended, presets/strict)
+  - noFakeTimers (listed directly)
+  - noFocusedTests (presets/recommended, presets/strict)
+  - noIdenticalTitle (presets/recommended, presets/strict)
+  - noStandaloneExpect (presets/recommended, presets/strict)
+  - useAwaitAsyncMatchers (presets/strict)
+  - useToHaveLength (presets/strict)
+  - useToStrictEqual (presets/strict)
+  - validDescribeCallback (presets/recommended, presets/strict)
   
 
 ```

@@ -1,0 +1,9 @@
+@font-palette-values --palette-#{} { font-family: "Bixa"; }
+.after-empty { color: red; }
+
+@font-palette-values --#{$name
+{ font-family: "Bixa"; }
+.after-unclosed { color: blue; }
+
+@font-palette-values palette-#{$name} { font-family: "Bixa"; }
+.after-invalid-prefix { color: green; }

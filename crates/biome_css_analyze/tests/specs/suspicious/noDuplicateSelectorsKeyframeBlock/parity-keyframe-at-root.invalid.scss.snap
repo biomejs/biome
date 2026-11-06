@@ -1,0 +1,40 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-keyframe-at-root.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  @at-root (without: all) {
+    .fade-in {
+      animation: fade-in 200ms ease;
+    }
+  }
+  from {
+    opacity: 1;
+  }
+}
+
+```
+
+# Diagnostics
+```
+parity-keyframe-at-root.invalid.scss:11:3 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━
+
+  × The duplicate keyframe selector is overwritten by later one.
+  
+     9 │     }
+    10 │   }
+  > 11 │   from {
+       │   ^^^^
+    12 │     opacity: 1;
+    13 │   }
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```

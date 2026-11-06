@@ -28,11 +28,12 @@ use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language,
-    NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
+    NodeOrToken, SyntaxKindSet, SyntaxNode, TextRange, WalkEvent, declare_node_union,
 };
 use regex::Regex;
 use rustc_hash::FxHashSet;
 use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 use std::sync::LazyLock;
 
 declare_lint_rule! {
@@ -158,18 +159,10 @@ impl Rule for NoUnusedImports {
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let default_local_name = clause.default_specifier().ok()?.local_name().ok()?;
 
-                let is_default_import_unused = is_unused(
-                    ctx,
-                    embedded,
-                    &default_local_name,
-                );
+                let is_default_import_unused = is_unused(ctx, embedded, &default_local_name);
                 let (is_combined_unused, named_import_range) = match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers) => {
-                        match unused_named_specifiers(
-                            ctx,
-                            embedded,
-                            &specifiers,
-                        ) {
+                        match unused_named_specifiers(ctx, embedded, &specifiers) {
                             Some(Unused::AllImports(range) | Unused::EmptyStatement(range)) => {
                                 (true, range)
                             }
@@ -203,7 +196,8 @@ impl Rule for NoUnusedImports {
             }
             AnyJsImportClause::JsImportDefaultClause(clause) => {
                 let local_name = clause.default_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, embedded, &local_name).then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded, &local_name)
+                    .then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
                 // exception: allow type augmentation imports
@@ -215,15 +209,12 @@ impl Rule for NoUnusedImports {
                     return None;
                 }
 
-                unused_named_specifiers(
-                    ctx,
-                    embedded,
-                    &clause.named_specifiers().ok()?,
-                )
+                unused_named_specifiers(ctx, embedded, &clause.named_specifiers().ok()?)
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
                 let local_name = clause.namespace_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, embedded, &local_name).then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded, &local_name)
+                    .then_some(Unused::AllImports(local_name.range()))
             }
         }
     }
@@ -363,8 +354,7 @@ impl Rule for NoUnusedImports {
                     });
 
                 if needs_export_empty {
-                    let export_token = make::token(T![export])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let export_token = make::token(T![export]).with_trailing_space();
                     let export_empty = make::js_export(
                         make::js_decorator_list([]),
                         export_token,
@@ -424,8 +414,7 @@ impl Rule for NoUnusedImports {
                 let default_specifier = prev_clause.default_specifier().ok()?;
                 let local_name = default_specifier.local_name().ok()?;
                 let mut local_name = local_name.as_js_identifier_binding()?.name_token().ok()?;
-                local_name =
-                    local_name.with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+                local_name = local_name.with_trailing_space();
 
                 let new_clause = make::js_import_default_clause(
                     prev_clause.default_specifier().ok()?.with_local_name(
@@ -504,7 +493,7 @@ impl Rule for NoUnusedImports {
 }
 
 /// Model for tracking any types referenced in JsDoc or TSDoc comments (like {@link TypeName} or @param {TypeName})
-#[derive(Clone, Default)]
+#[derive(Default)]
 struct JsDocTypeModel(FxHashSet<String>);
 
 impl Deref for JsDocTypeModel {
@@ -532,6 +521,13 @@ declare_node_union! {
 
 impl Visitor for JsDocTypeCollectorVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsWithTypeReferencingJsDoc::KIND_SET)
+    }
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,
@@ -548,7 +544,7 @@ impl Visitor for JsDocTypeCollectorVisitor {
     }
 
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        ctx.services.insert_service(self.jsdoc_types);
+        ctx.services.insert_service(Rc::new(self.jsdoc_types));
     }
 }
 
@@ -593,7 +589,7 @@ fn load_jsdoc_types_from_jsdoc_comment(model: &mut JsDocTypeModel, comment: &str
 }
 
 pub struct JsDocTypeServices {
-    jsdoc_types: JsDocTypeModel,
+    jsdoc_types: Rc<JsDocTypeModel>,
     semantic_services: SemanticServices,
 }
 impl JsDocTypeServices {
@@ -612,7 +608,7 @@ impl FromServices for JsDocTypeServices {
         rule_metadata: &RuleMetadata,
         services: &ServiceBag,
     ) -> Result<Self, ServicesDiagnostic> {
-        let jsdoc_types: &JsDocTypeModel = services
+        let jsdoc_types: &Rc<JsDocTypeModel> = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["JsDocTypeModel"]))?;
 
@@ -628,8 +624,6 @@ impl Phase for JsDocTypeServices {
         Phases::Semantic
     }
 }
-
-
 
 impl Queryable for NoUnusedImportsQuery {
     type Input = JsSyntaxNode;
@@ -703,7 +697,9 @@ fn is_unused(
     // Used in the template, as a value or a type, which the script's semantic
     // model can't see.
     if let Some(token) = binding_name.as_ref()
-        && embedded.is_used(token.token_text_trimmed())
+        && (embedded.is_used(token.token_text_trimmed())
+            || file_source.as_embedding_kind().is_svelte()
+                && embedded.is_svelte_store_used(token.token_text_trimmed()))
     {
         return false;
     }

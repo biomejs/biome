@@ -66,15 +66,15 @@ biome inspect plugins
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 2 rules resolved.
+  i The configuration enables 2 plugin rules.
   
   plugin (node_modules/plugin/biome-manifest.json)
   
-  - selected (direct import)
+  - selected (listed directly)
   
   plugin (shared/node_modules/plugin/biome-manifest.json)
   
-  - selected (direct import)
+  - selected (listed directly)
   
 
 ```

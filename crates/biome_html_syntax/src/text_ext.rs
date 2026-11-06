@@ -1,5 +1,8 @@
-use crate::{HtmlTextExpression, is_quoted, static_value::StaticValue};
-use biome_rowan::Text;
+use crate::{
+    HtmlAttributeSingleTextExpression, HtmlSingleTextExpression, HtmlTextExpression,
+    SvelteTemplateElementList, is_quoted, static_value::StaticValue,
+};
+use biome_rowan::{AstNode, AstNodeList, Text};
 
 impl HtmlTextExpression {
     /// Returns the string value of the attribute, if available, without quotes.
@@ -30,5 +33,24 @@ impl HtmlTextExpression {
                 None
             }
         }
+    }
+
+    /// Returns `true` if Svelte converts the value of this expression to a string when
+    /// rendering it.
+    ///
+    /// That is the case for a mustache in element content, such as `<p>{value}</p>`,
+    /// and for a mustache inside a quoted attribute value that contains other parts,
+    /// such as `class="item {value}"`. A mustache that forms an entire attribute value,
+    /// such as `prop={value}` or `prop="{value}"`, returns `false`.
+    pub fn is_svelte_text_interpolation(&self) -> bool {
+        let Some(parent) = self.syntax().parent() else {
+            return false;
+        };
+        if HtmlSingleTextExpression::can_cast(parent.kind()) {
+            return true;
+        }
+        HtmlAttributeSingleTextExpression::cast(parent)
+            .and_then(|mustache| mustache.parent::<SvelteTemplateElementList>())
+            .is_some_and(|list| list.len() > 1)
     }
 }

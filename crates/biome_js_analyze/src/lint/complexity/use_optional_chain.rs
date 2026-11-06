@@ -176,7 +176,10 @@ impl Rule for UseOptionalChain {
                 "Change to an optional chain."
             }
             .to_owned(),
-        ))
+        )
+        .note(markup! {
+            "An optional chain is shorter, and it avoids repeating the same expression in each check."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsSyntaxToken,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_global_dirname_filename::NoGlobalDirnameFilenameOptions;
 
 declare_lint_rule! {
@@ -166,7 +166,7 @@ fn make_property_object_member(
         biome_js_syntax::AnyJsObjectMemberName::JsLiteralMemberName(make::js_literal_member_name(
             make::ident(key.text_trimmed()),
         )),
-        make::token(JsSyntaxKind::COLON).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(JsSyntaxKind::COLON).with_trailing_space(),
         AnyJsExpression::JsStaticMemberExpression(make_import_meta(import_meta_property)),
     )
 }

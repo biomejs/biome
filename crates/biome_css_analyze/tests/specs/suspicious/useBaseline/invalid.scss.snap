@@ -1,0 +1,36 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin theme {
+  accent-color: auto;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:3 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS property accent-color isn't part of the chosen Baseline.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin theme {
+  > 3 │   accent-color: auto;
+      │   ^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature accent-color.
+  
+
+```

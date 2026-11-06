@@ -294,58 +294,85 @@ pub fn disable() {
 }
 
 /// Returns whether profiling is currently enabled.
+#[inline]
 pub fn is_enabled() -> bool {
     ENABLED.load(Ordering::Relaxed)
 }
 
 /// RAII timer that records elapsed time for a rule when dropped.
+///
+/// A timer started while profiling is disabled holds no state: it never reads
+/// the clock and records nothing, even if profiling is enabled before it is
+/// dropped.
 pub struct RuleRunTimer {
-    label: Option<RuleLabel>,
+    running: Option<RunningRuleTimer>,
+}
+
+/// The label and start time of a timer started while profiling was enabled.
+struct RunningRuleTimer {
+    label: RuleLabel,
     #[cfg(not(target_arch = "wasm32"))]
     start: Instant,
+}
+
+// Both functions are out of line so that the clock reads and the thread-local
+// recording stay out of `start_rule`, `start_plugin_rule`, and `Drop`, which are
+// inlined into every rule invocation.
+impl RunningRuleTimer {
+    #[cold]
+    #[inline(never)]
+    fn new(label: RuleLabel) -> Self {
+        Self {
+            label,
+            #[cfg(not(target_arch = "wasm32"))]
+            start: Instant::now(),
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn record(self) {
+        #[cfg(not(target_arch = "wasm32"))]
+        let elapsed = self.start.elapsed();
+        #[cfg(target_arch = "wasm32")]
+        let elapsed = Duration::ZERO;
+        with_thread_profiler(|profiler| profiler.record(self.label, elapsed));
+    }
 }
 
 impl RuleRunTimer {
     fn new_enabled(label: RuleLabel) -> Self {
         Self {
-            label: Some(label),
-            #[cfg(not(target_arch = "wasm32"))]
-            start: Instant::now(),
+            running: Some(RunningRuleTimer::new(label)),
         }
     }
 
+    #[inline]
     fn new_disabled() -> Self {
-        // We still initialize `start` to a valid Instant to keep struct layout simple,
-        // but it won't be used as `label` is None.
-        Self {
-            label: None,
-            #[cfg(not(target_arch = "wasm32"))]
-            start: Instant::now(),
-        }
+        Self { running: None }
     }
 
     /// Consume the timer and manually record the elapsed time (useful when you need explicit control).
+    #[inline]
     pub fn stop(self) {
         drop(self)
     }
 }
 
 impl Drop for RuleRunTimer {
+    #[inline]
     fn drop(&mut self) {
         // We use Drop to record the elapsed time so its impossible to accidentally reuse the timer.
-        if let Some(label) = self.label.take() {
-            #[cfg(not(target_arch = "wasm32"))]
-            let elapsed = self.start.elapsed();
-            #[cfg(target_arch = "wasm32")]
-            let elapsed = Duration::ZERO;
-            with_thread_profiler(|profiler| profiler.record(label, elapsed));
+        if let Some(running) = self.running.take() {
+            running.record();
         }
     }
 }
 
 /// Starts measuring execution time for a built-in rule `R`.
 ///
-/// When profiling is disabled, returns a no-op timer with near-zero overhead.
+/// When profiling is disabled, returns a no-op timer that costs one boolean check.
+#[inline]
 pub fn start_rule<R: Rule>() -> RuleRunTimer {
     if !is_enabled() {
         return RuleRunTimer::new_disabled();
@@ -356,7 +383,8 @@ pub fn start_rule<R: Rule>() -> RuleRunTimer {
 
 /// Starts measuring execution time for a plugin rule with the specified `name`.
 ///
-/// When profiling is disabled, returns a no-op timer with near-zero overhead.
+/// When profiling is disabled, returns a no-op timer that costs one boolean check.
+#[inline]
 pub fn start_plugin_rule(name: impl Into<Box<str>>) -> RuleRunTimer {
     if !is_enabled() {
         return RuleRunTimer::new_disabled();
@@ -721,5 +749,38 @@ mod tests {
         assert_eq!(profile.max, Duration::from_millis(3));
 
         reset();
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn timers_record_only_when_started_while_enabled() {
+        use super::{disable, enable, is_enabled, start_plugin_rule, with_thread_profiler};
+
+        // Reads this thread's profiler, because other tests reset the aggregate.
+        fn recorded_count(label: &RuleLabel) -> u32 {
+            with_thread_profiler(|profiler| {
+                profiler.metrics.get(label).map_or(0, |metric| metric.count)
+            })
+            .unwrap()
+        }
+
+        let name = "test/timerState";
+        let label = RuleLabel::plugin(name);
+        assert!(!is_enabled());
+
+        start_plugin_rule(name).stop();
+        drop(start_plugin_rule(name));
+        let started_while_disabled = start_plugin_rule(name);
+        enable();
+        started_while_disabled.stop();
+        disable();
+        assert_eq!(recorded_count(&label), 0);
+
+        enable();
+        let started_while_enabled = start_plugin_rule(name);
+        drop(start_plugin_rule(name));
+        disable();
+        started_while_enabled.stop();
+        assert_eq!(recorded_count(&label), 2);
     }
 }

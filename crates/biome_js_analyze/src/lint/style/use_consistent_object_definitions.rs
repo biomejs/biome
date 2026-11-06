@@ -9,7 +9,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName, JsLanguage, T, inner_string_text,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_consistent_object_definitions::{
     ObjectPropertySyntax, UseConsistentObjectDefinitionsOptions,
 };
@@ -53,6 +53,14 @@ declare_lint_rule! {
     /// let valid = {
     ///     foo,
     ///     bar() { return "bar"; },
+    /// };
+    /// ```
+    ///
+    /// A function expression with its own name isn't reported, because turning it into a method could change the function's `name` or how its name can be used inside its body.
+    ///
+    /// ```js,use_options
+    /// let valid = {
+    ///     baz: function qux() { return "qux"; },
     /// };
     /// ```
     ///
@@ -151,8 +159,14 @@ impl Rule for UseConsistentObjectDefinitions {
                         let variable_token = identifier_token.name().ok()?.value_token().ok()?;
                         inner_string_text(&variable_token)
                     }
-                    AnyJsExpression::JsFunctionExpression(_function_token) => {
-                        // Functions are always shorthandable
+                    AnyJsExpression::JsFunctionExpression(function_token) => {
+                        // A named function expression can't be shorthanded: its own name sets the
+                        // function's `name` property and is bound inside its body, while a method
+                        // gets its `name` from the property key and binds no name inside its body
+                        if function_token.id().is_some() {
+                            return None;
+                        }
+                        // Anonymous functions are always shorthandable
                         match syntax {
                             ObjectPropertySyntax::Shorthand => return Some(()),
                             ObjectPropertySyntax::Explicit => return None,
@@ -179,7 +193,7 @@ impl Rule for UseConsistentObjectDefinitions {
                     }
                     AnyJsObjectMemberName::JsComputedMemberName(_computed_token) => {
                         let reference_token = source.value().ok()?;
-                        // Computed is always shorthandable if the value is a function, else never
+                        // Computed is always shorthandable if the value is an anonymous function, else never
                         match reference_token {
                             AnyJsExpression::JsFunctionExpression(_function_token) => {
                                 match syntax {
@@ -235,7 +249,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 make::js_property_object_member(
                     make::js_literal_member_name(node.name().ok()?.value_token().ok()?).into(),
-                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![:]).with_trailing_space(),
                     make::js_identifier_expression(node.name().ok()?).into(),
                 )
                 .with_leading_trivia_pieces(leading_trivia.pieces())?
@@ -247,8 +261,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 let mut func_token = make::token(T![function]);
                 if node.star_token().is_none() {
-                    func_token =
-                        func_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    func_token = func_token.with_trailing_space();
                 }
 
                 let mut func = make::js_function_expression(
@@ -263,9 +276,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 if let Some(token) = node.star_token() {
                     // `*foo() {}` -> `foo: function* () {}`
-                    func = func.with_star_token(
-                        token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    );
+                    func = func.with_star_token(token.with_trailing_space());
                 }
 
                 if let Some(type_params) = node.type_parameters() {
@@ -278,7 +289,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 make::js_property_object_member(
                     node.name().ok()?,
-                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![:]).with_trailing_space(),
                     func.build().into(),
                 )
                 .with_leading_trivia_pieces(leading_trivia.pieces())?

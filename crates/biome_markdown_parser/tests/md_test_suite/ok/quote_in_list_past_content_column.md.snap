@@ -1,0 +1,725 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+10. a
+    > q
+    > r
+
+# Wide post-marker space
+
+-   a
+    > q
+    > r
+
+# Nested list item
+
+- a
+  - b
+    > q
+    > r
+
+# Nested quote
+
+- a
+  - b
+    > q
+    > > r
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@0..3 "10." [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@3..4 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@4..5 "a" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@6..10 "    " [] [],
+                                },
+                            ],
+                        },
+                        MdQuote {
+                            prefix: MdQuotePrefix {
+                                pre_marker_indent: MdQuoteIndentList [],
+                                marker_token: R_ANGLE@10..11 ">" [] [],
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] [],
+                            },
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@12..13 "q" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@13..14 "\n" [] [],
+                                        },
+                                        MdQuotePrefix {
+                                            pre_marker_indent: MdQuoteIndentList [
+                                                MdQuoteIndent {
+                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@14..18 "    " [] [],
+                                                },
+                                            ],
+                                            marker_token: R_ANGLE@18..19 ">" [] [],
+                                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@20..21 "r" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@22..23 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@23..24 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@24..47 " Wide post-marker space" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@47..48 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@48..49 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@49..50 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@50..53 "   " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@53..54 "a" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@54..55 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@55..59 "    " [] [],
+                                },
+                            ],
+                        },
+                        MdQuote {
+                            prefix: MdQuotePrefix {
+                                pre_marker_indent: MdQuoteIndentList [],
+                                marker_token: R_ANGLE@59..60 ">" [] [],
+                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@60..61 " " [] [],
+                            },
+                            content: MdBlockList [
+                                MdParagraph {
+                                    list: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@61..62 "q" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@62..63 "\n" [] [],
+                                        },
+                                        MdQuotePrefix {
+                                            pre_marker_indent: MdQuoteIndentList [
+                                                MdQuoteIndent {
+                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@63..67 "    " [] [],
+                                                },
+                                            ],
+                                            marker_token: R_ANGLE@67..68 ">" [] [],
+                                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@68..69 " " [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@69..70 "r" [] [],
+                                        },
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@70..71 "\n" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@71..72 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@72..73 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@73..90 " Nested list item" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@90..91 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@91..92 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@92..93 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@93..94 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@94..95 "a" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@95..96 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@96..98 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    prefix: MdListMarkerPrefix {
+                                        pre_marker_indent: MdIndentTokenList [],
+                                        marker: MINUS@98..99 "-" [] [],
+                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@99..100 " " [] [],
+                                        content_indent: MdIndentTokenList [],
+                                    },
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@100..101 "b" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@101..102 "\n" [] [],
+                                                },
+                                            ],
+                                        },
+                                        MdContinuationIndent {
+                                            indent: MdIndentTokenList [
+                                                MdIndentToken {
+                                                    md_indent_char_token: MD_INDENT_CHAR@102..106 "    " [] [],
+                                                },
+                                            ],
+                                        },
+                                        MdQuote {
+                                            prefix: MdQuotePrefix {
+                                                pre_marker_indent: MdQuoteIndentList [],
+                                                marker_token: R_ANGLE@106..107 ">" [] [],
+                                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@107..108 " " [] [],
+                                            },
+                                            content: MdBlockList [
+                                                MdParagraph {
+                                                    list: MdInlineItemList [
+                                                        MdTextual {
+                                                            value_token: MD_TEXTUAL_LITERAL@108..109 "q" [] [],
+                                                        },
+                                                        MdTextual {
+                                                            value_token: MD_TEXTUAL_LITERAL@109..110 "\n" [] [],
+                                                        },
+                                                        MdQuotePrefix {
+                                                            pre_marker_indent: MdQuoteIndentList [
+                                                                MdQuoteIndent {
+                                                                    md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@110..114 "    " [] [],
+                                                                },
+                                                            ],
+                                                            marker_token: R_ANGLE@114..115 ">" [] [],
+                                                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@115..116 " " [] [],
+                                                        },
+                                                        MdTextual {
+                                                            value_token: MD_TEXTUAL_LITERAL@116..117 "r" [] [],
+                                                        },
+                                                        MdTextual {
+                                                            value_token: MD_TEXTUAL_LITERAL@117..118 "\n" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@118..119 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@119..120 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@120..133 " Nested quote" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@133..134 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@134..135 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@135..136 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@136..137 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@137..138 "a" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@138..139 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@139..141 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdBulletListItem {
+                            md_bullet_list: MdBulletList [
+                                MdBullet {
+                                    prefix: MdListMarkerPrefix {
+                                        pre_marker_indent: MdIndentTokenList [],
+                                        marker: MINUS@141..142 "-" [] [],
+                                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@142..143 " " [] [],
+                                        content_indent: MdIndentTokenList [],
+                                    },
+                                    content: MdBlockList [
+                                        MdParagraph {
+                                            list: MdInlineItemList [
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@143..144 "b" [] [],
+                                                },
+                                                MdTextual {
+                                                    value_token: MD_TEXTUAL_LITERAL@144..145 "\n" [] [],
+                                                },
+                                            ],
+                                        },
+                                        MdContinuationIndent {
+                                            indent: MdIndentTokenList [
+                                                MdIndentToken {
+                                                    md_indent_char_token: MD_INDENT_CHAR@145..149 "    " [] [],
+                                                },
+                                            ],
+                                        },
+                                        MdQuote {
+                                            prefix: MdQuotePrefix {
+                                                pre_marker_indent: MdQuoteIndentList [],
+                                                marker_token: R_ANGLE@149..150 ">" [] [],
+                                                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@150..151 " " [] [],
+                                            },
+                                            content: MdBlockList [
+                                                MdParagraph {
+                                                    list: MdInlineItemList [
+                                                        MdTextual {
+                                                            value_token: MD_TEXTUAL_LITERAL@151..152 "q" [] [],
+                                                        },
+                                                        MdTextual {
+                                                            value_token: MD_TEXTUAL_LITERAL@152..153 "\n" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                                MdQuotePrefix {
+                                                    pre_marker_indent: MdQuoteIndentList [
+                                                        MdQuoteIndent {
+                                                            md_quote_pre_marker_indent_token: MD_QUOTE_PRE_MARKER_INDENT@153..157 "    " [] [],
+                                                        },
+                                                    ],
+                                                    marker_token: R_ANGLE@157..158 ">" [] [],
+                                                    post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@158..159 " " [] [],
+                                                },
+                                                MdQuote {
+                                                    prefix: MdQuotePrefix {
+                                                        pre_marker_indent: MdQuoteIndentList [],
+                                                        marker_token: R_ANGLE@159..160 ">" [] [],
+                                                        post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@160..161 " " [] [],
+                                                    },
+                                                    content: MdBlockList [
+                                                        MdParagraph {
+                                                            list: MdInlineItemList [
+                                                                MdTextual {
+                                                                    value_token: MD_TEXTUAL_LITERAL@161..162 "r" [] [],
+                                                                },
+                                                                MdTextual {
+                                                                    value_token: MD_TEXTUAL_LITERAL@162..163 "\n" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@163..163 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..163
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..163
+    0: MD_ORDERED_LIST_ITEM@0..22
+      0: MD_BULLET_LIST@0..22
+        0: MD_BULLET@0..22
+          0: MD_LIST_MARKER_PREFIX@0..4
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MD_ORDERED_LIST_MARKER@0..3 "10." [] []
+            2: MD_LIST_POST_MARKER_SPACE@3..4 " " [] []
+            3: MD_INDENT_TOKEN_LIST@4..4
+          1: MD_BLOCK_LIST@4..22
+            0: MD_PARAGRAPH@4..6
+              0: MD_INLINE_ITEM_LIST@4..6
+                0: MD_TEXTUAL@4..5
+                  0: MD_TEXTUAL_LITERAL@4..5 "a" [] []
+                1: MD_TEXTUAL@5..6
+                  0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
+            1: MD_CONTINUATION_INDENT@6..10
+              0: MD_INDENT_TOKEN_LIST@6..10
+                0: MD_INDENT_TOKEN@6..10
+                  0: MD_INDENT_CHAR@6..10 "    " [] []
+            2: MD_QUOTE@10..22
+              0: MD_QUOTE_PREFIX@10..12
+                0: MD_QUOTE_INDENT_LIST@10..10
+                1: R_ANGLE@10..11 ">" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] []
+              1: MD_BLOCK_LIST@12..22
+                0: MD_PARAGRAPH@12..22
+                  0: MD_INLINE_ITEM_LIST@12..22
+                    0: MD_TEXTUAL@12..13
+                      0: MD_TEXTUAL_LITERAL@12..13 "q" [] []
+                    1: MD_TEXTUAL@13..14
+                      0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
+                    2: MD_QUOTE_PREFIX@14..20
+                      0: MD_QUOTE_INDENT_LIST@14..18
+                        0: MD_QUOTE_INDENT@14..18
+                          0: MD_QUOTE_PRE_MARKER_INDENT@14..18 "    " [] []
+                      1: R_ANGLE@18..19 ">" [] []
+                      2: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] []
+                    3: MD_TEXTUAL@20..21
+                      0: MD_TEXTUAL_LITERAL@20..21 "r" [] []
+                    4: MD_TEXTUAL@21..22
+                      0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
+    1: MD_NEWLINE@22..23
+      0: NEWLINE@22..23 "\n" [] []
+    2: MD_HEADER@23..47
+      0: MD_INDENT_TOKEN_LIST@23..23
+      1: MD_HASH_LIST@23..24
+        0: MD_HASH@23..24
+          0: HASH@23..24 "#" [] []
+      2: MD_PARAGRAPH@24..47
+        0: MD_INLINE_ITEM_LIST@24..47
+          0: MD_TEXTUAL@24..47
+            0: MD_TEXTUAL_LITERAL@24..47 " Wide post-marker space" [] []
+      3: MD_HASH_LIST@47..47
+    3: MD_NEWLINE@47..48
+      0: NEWLINE@47..48 "\n" [] []
+    4: MD_NEWLINE@48..49
+      0: NEWLINE@48..49 "\n" [] []
+    5: MD_BULLET_LIST_ITEM@49..71
+      0: MD_BULLET_LIST@49..71
+        0: MD_BULLET@49..71
+          0: MD_LIST_MARKER_PREFIX@49..53
+            0: MD_INDENT_TOKEN_LIST@49..49
+            1: MINUS@49..50 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@50..53 "   " [] []
+            3: MD_INDENT_TOKEN_LIST@53..53
+          1: MD_BLOCK_LIST@53..71
+            0: MD_PARAGRAPH@53..55
+              0: MD_INLINE_ITEM_LIST@53..55
+                0: MD_TEXTUAL@53..54
+                  0: MD_TEXTUAL_LITERAL@53..54 "a" [] []
+                1: MD_TEXTUAL@54..55
+                  0: MD_TEXTUAL_LITERAL@54..55 "\n" [] []
+            1: MD_CONTINUATION_INDENT@55..59
+              0: MD_INDENT_TOKEN_LIST@55..59
+                0: MD_INDENT_TOKEN@55..59
+                  0: MD_INDENT_CHAR@55..59 "    " [] []
+            2: MD_QUOTE@59..71
+              0: MD_QUOTE_PREFIX@59..61
+                0: MD_QUOTE_INDENT_LIST@59..59
+                1: R_ANGLE@59..60 ">" [] []
+                2: MD_QUOTE_POST_MARKER_SPACE@60..61 " " [] []
+              1: MD_BLOCK_LIST@61..71
+                0: MD_PARAGRAPH@61..71
+                  0: MD_INLINE_ITEM_LIST@61..71
+                    0: MD_TEXTUAL@61..62
+                      0: MD_TEXTUAL_LITERAL@61..62 "q" [] []
+                    1: MD_TEXTUAL@62..63
+                      0: MD_TEXTUAL_LITERAL@62..63 "\n" [] []
+                    2: MD_QUOTE_PREFIX@63..69
+                      0: MD_QUOTE_INDENT_LIST@63..67
+                        0: MD_QUOTE_INDENT@63..67
+                          0: MD_QUOTE_PRE_MARKER_INDENT@63..67 "    " [] []
+                      1: R_ANGLE@67..68 ">" [] []
+                      2: MD_QUOTE_POST_MARKER_SPACE@68..69 " " [] []
+                    3: MD_TEXTUAL@69..70
+                      0: MD_TEXTUAL_LITERAL@69..70 "r" [] []
+                    4: MD_TEXTUAL@70..71
+                      0: MD_TEXTUAL_LITERAL@70..71 "\n" [] []
+    6: MD_NEWLINE@71..72
+      0: NEWLINE@71..72 "\n" [] []
+    7: MD_HEADER@72..90
+      0: MD_INDENT_TOKEN_LIST@72..72
+      1: MD_HASH_LIST@72..73
+        0: MD_HASH@72..73
+          0: HASH@72..73 "#" [] []
+      2: MD_PARAGRAPH@73..90
+        0: MD_INLINE_ITEM_LIST@73..90
+          0: MD_TEXTUAL@73..90
+            0: MD_TEXTUAL_LITERAL@73..90 " Nested list item" [] []
+      3: MD_HASH_LIST@90..90
+    8: MD_NEWLINE@90..91
+      0: NEWLINE@90..91 "\n" [] []
+    9: MD_NEWLINE@91..92
+      0: NEWLINE@91..92 "\n" [] []
+    10: MD_BULLET_LIST_ITEM@92..118
+      0: MD_BULLET_LIST@92..118
+        0: MD_BULLET@92..118
+          0: MD_LIST_MARKER_PREFIX@92..94
+            0: MD_INDENT_TOKEN_LIST@92..92
+            1: MINUS@92..93 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@93..94 " " [] []
+            3: MD_INDENT_TOKEN_LIST@94..94
+          1: MD_BLOCK_LIST@94..118
+            0: MD_PARAGRAPH@94..96
+              0: MD_INLINE_ITEM_LIST@94..96
+                0: MD_TEXTUAL@94..95
+                  0: MD_TEXTUAL_LITERAL@94..95 "a" [] []
+                1: MD_TEXTUAL@95..96
+                  0: MD_TEXTUAL_LITERAL@95..96 "\n" [] []
+            1: MD_CONTINUATION_INDENT@96..98
+              0: MD_INDENT_TOKEN_LIST@96..98
+                0: MD_INDENT_TOKEN@96..98
+                  0: MD_INDENT_CHAR@96..98 "  " [] []
+            2: MD_BULLET_LIST_ITEM@98..118
+              0: MD_BULLET_LIST@98..118
+                0: MD_BULLET@98..118
+                  0: MD_LIST_MARKER_PREFIX@98..100
+                    0: MD_INDENT_TOKEN_LIST@98..98
+                    1: MINUS@98..99 "-" [] []
+                    2: MD_LIST_POST_MARKER_SPACE@99..100 " " [] []
+                    3: MD_INDENT_TOKEN_LIST@100..100
+                  1: MD_BLOCK_LIST@100..118
+                    0: MD_PARAGRAPH@100..102
+                      0: MD_INLINE_ITEM_LIST@100..102
+                        0: MD_TEXTUAL@100..101
+                          0: MD_TEXTUAL_LITERAL@100..101 "b" [] []
+                        1: MD_TEXTUAL@101..102
+                          0: MD_TEXTUAL_LITERAL@101..102 "\n" [] []
+                    1: MD_CONTINUATION_INDENT@102..106
+                      0: MD_INDENT_TOKEN_LIST@102..106
+                        0: MD_INDENT_TOKEN@102..106
+                          0: MD_INDENT_CHAR@102..106 "    " [] []
+                    2: MD_QUOTE@106..118
+                      0: MD_QUOTE_PREFIX@106..108
+                        0: MD_QUOTE_INDENT_LIST@106..106
+                        1: R_ANGLE@106..107 ">" [] []
+                        2: MD_QUOTE_POST_MARKER_SPACE@107..108 " " [] []
+                      1: MD_BLOCK_LIST@108..118
+                        0: MD_PARAGRAPH@108..118
+                          0: MD_INLINE_ITEM_LIST@108..118
+                            0: MD_TEXTUAL@108..109
+                              0: MD_TEXTUAL_LITERAL@108..109 "q" [] []
+                            1: MD_TEXTUAL@109..110
+                              0: MD_TEXTUAL_LITERAL@109..110 "\n" [] []
+                            2: MD_QUOTE_PREFIX@110..116
+                              0: MD_QUOTE_INDENT_LIST@110..114
+                                0: MD_QUOTE_INDENT@110..114
+                                  0: MD_QUOTE_PRE_MARKER_INDENT@110..114 "    " [] []
+                              1: R_ANGLE@114..115 ">" [] []
+                              2: MD_QUOTE_POST_MARKER_SPACE@115..116 " " [] []
+                            3: MD_TEXTUAL@116..117
+                              0: MD_TEXTUAL_LITERAL@116..117 "r" [] []
+                            4: MD_TEXTUAL@117..118
+                              0: MD_TEXTUAL_LITERAL@117..118 "\n" [] []
+    11: MD_NEWLINE@118..119
+      0: NEWLINE@118..119 "\n" [] []
+    12: MD_HEADER@119..133
+      0: MD_INDENT_TOKEN_LIST@119..119
+      1: MD_HASH_LIST@119..120
+        0: MD_HASH@119..120
+          0: HASH@119..120 "#" [] []
+      2: MD_PARAGRAPH@120..133
+        0: MD_INLINE_ITEM_LIST@120..133
+          0: MD_TEXTUAL@120..133
+            0: MD_TEXTUAL_LITERAL@120..133 " Nested quote" [] []
+      3: MD_HASH_LIST@133..133
+    13: MD_NEWLINE@133..134
+      0: NEWLINE@133..134 "\n" [] []
+    14: MD_NEWLINE@134..135
+      0: NEWLINE@134..135 "\n" [] []
+    15: MD_BULLET_LIST_ITEM@135..163
+      0: MD_BULLET_LIST@135..163
+        0: MD_BULLET@135..163
+          0: MD_LIST_MARKER_PREFIX@135..137
+            0: MD_INDENT_TOKEN_LIST@135..135
+            1: MINUS@135..136 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@136..137 " " [] []
+            3: MD_INDENT_TOKEN_LIST@137..137
+          1: MD_BLOCK_LIST@137..163
+            0: MD_PARAGRAPH@137..139
+              0: MD_INLINE_ITEM_LIST@137..139
+                0: MD_TEXTUAL@137..138
+                  0: MD_TEXTUAL_LITERAL@137..138 "a" [] []
+                1: MD_TEXTUAL@138..139
+                  0: MD_TEXTUAL_LITERAL@138..139 "\n" [] []
+            1: MD_CONTINUATION_INDENT@139..141
+              0: MD_INDENT_TOKEN_LIST@139..141
+                0: MD_INDENT_TOKEN@139..141
+                  0: MD_INDENT_CHAR@139..141 "  " [] []
+            2: MD_BULLET_LIST_ITEM@141..163
+              0: MD_BULLET_LIST@141..163
+                0: MD_BULLET@141..163
+                  0: MD_LIST_MARKER_PREFIX@141..143
+                    0: MD_INDENT_TOKEN_LIST@141..141
+                    1: MINUS@141..142 "-" [] []
+                    2: MD_LIST_POST_MARKER_SPACE@142..143 " " [] []
+                    3: MD_INDENT_TOKEN_LIST@143..143
+                  1: MD_BLOCK_LIST@143..163
+                    0: MD_PARAGRAPH@143..145
+                      0: MD_INLINE_ITEM_LIST@143..145
+                        0: MD_TEXTUAL@143..144
+                          0: MD_TEXTUAL_LITERAL@143..144 "b" [] []
+                        1: MD_TEXTUAL@144..145
+                          0: MD_TEXTUAL_LITERAL@144..145 "\n" [] []
+                    1: MD_CONTINUATION_INDENT@145..149
+                      0: MD_INDENT_TOKEN_LIST@145..149
+                        0: MD_INDENT_TOKEN@145..149
+                          0: MD_INDENT_CHAR@145..149 "    " [] []
+                    2: MD_QUOTE@149..163
+                      0: MD_QUOTE_PREFIX@149..151
+                        0: MD_QUOTE_INDENT_LIST@149..149
+                        1: R_ANGLE@149..150 ">" [] []
+                        2: MD_QUOTE_POST_MARKER_SPACE@150..151 " " [] []
+                      1: MD_BLOCK_LIST@151..163
+                        0: MD_PARAGRAPH@151..153
+                          0: MD_INLINE_ITEM_LIST@151..153
+                            0: MD_TEXTUAL@151..152
+                              0: MD_TEXTUAL_LITERAL@151..152 "q" [] []
+                            1: MD_TEXTUAL@152..153
+                              0: MD_TEXTUAL_LITERAL@152..153 "\n" [] []
+                        1: MD_QUOTE_PREFIX@153..159
+                          0: MD_QUOTE_INDENT_LIST@153..157
+                            0: MD_QUOTE_INDENT@153..157
+                              0: MD_QUOTE_PRE_MARKER_INDENT@153..157 "    " [] []
+                          1: R_ANGLE@157..158 ">" [] []
+                          2: MD_QUOTE_POST_MARKER_SPACE@158..159 " " [] []
+                        2: MD_QUOTE@159..163
+                          0: MD_QUOTE_PREFIX@159..161
+                            0: MD_QUOTE_INDENT_LIST@159..159
+                            1: R_ANGLE@159..160 ">" [] []
+                            2: MD_QUOTE_POST_MARKER_SPACE@160..161 " " [] []
+                          1: MD_BLOCK_LIST@161..163
+                            0: MD_PARAGRAPH@161..163
+                              0: MD_INLINE_ITEM_LIST@161..163
+                                0: MD_TEXTUAL@161..162
+                                  0: MD_TEXTUAL_LITERAL@161..162 "r" [] []
+                                1: MD_TEXTUAL@162..163
+                                  0: MD_TEXTUAL_LITERAL@162..163 "\n" [] []
+  3: EOF@163..163 "" [] []
+
+```

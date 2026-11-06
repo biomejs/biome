@@ -20,6 +20,11 @@ declare_lint_rule! {
     /// Vendor-prefixed pseudo-elements are allowed. See
     /// [MDN's pseudo-element reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
     ///
+    /// ## SCSS limitations
+    ///
+    /// Pseudo-element names containing SCSS interpolation are ignored because the emitted name
+    /// cannot be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -164,7 +169,7 @@ fn should_not_trigger_pseudo_element_name(
     file_source: &CssFileSource,
     options: &NoUnknownPseudoElementOptions,
 ) -> bool {
-    // `::foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    // `::foo-#{$name}` cannot be validated before SCSS interpolation is resolved.
     let Some(name) = name.as_css_identifier() else {
         return true;
     };

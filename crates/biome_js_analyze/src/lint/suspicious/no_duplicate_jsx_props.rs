@@ -116,7 +116,15 @@ impl Rule for NoDuplicateJsxProps {
             )
         }
 
-        Some(diagnostic)
+        Some(
+            diagnostic
+                .note(markup! {
+                    "Only the last assignment takes effect. The earlier values are silently ignored."
+                })
+                .note(markup! {
+                    "Remove the duplicated property, or rename it if you meant a different property."
+                }),
+        )
     }
 }
 

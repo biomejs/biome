@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-type-props.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should not generate diagnostics */
+interface Props {
+  foo?: number;
+}
+
+const props = defineProps<Props>();
+</script>
+
+```

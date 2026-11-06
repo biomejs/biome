@@ -119,7 +119,16 @@ impl Format<JsFormatContext> for AnyJsBinaryLikeExpression {
 
         let inline_logical_expression = self.should_inline_logical_expression();
         let should_indent_if_inlines = should_indent_if_parent_inlines(parent.as_ref());
-        let should_not_indent = self.should_not_indent_if_parent_indents(parent);
+        // Like Prettier, a chain that is a whole Vue template expression, such
+        // as the value of `v-if`, keeps its operands at the same indentation.
+        // The HTML formatter indents an attribute value or an interpolation as
+        // a whole.
+        let is_vue_template_expression = parent.as_ref().is_some_and(|parent| {
+            parent.kind() == JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT
+                && f.options().source_type().as_embedding_kind().is_vue()
+        });
+        let should_not_indent =
+            is_vue_template_expression || self.should_not_indent_if_parent_indents(parent);
 
         let flattened = parts.len() > 2;
 

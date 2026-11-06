@@ -26,6 +26,12 @@ pub(crate) struct FormatHtmlOpeningElement {
     /// Prettier borrows the `>` from the first element's closing tag and prints it
     /// at the start of the next element's opening tag group to keep them "touching".
     borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+
+    /// Whether the tag is printed on a single line, whatever its width.
+    is_single_line: bool,
+    /// Whether verbatim content owns the dangling and trailing comments after this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    verbatim_children: bool,
 }
 
 pub(crate) struct FormatHtmlOpeningElementOptions {
@@ -36,6 +42,12 @@ pub(crate) struct FormatHtmlOpeningElementOptions {
 
     /// A `>` token borrowed from the previous sibling element's closing tag.
     pub borrowed_sibling_r_angle: Option<HtmlSyntaxToken>,
+
+    /// Whether the tag is printed on a single line, whatever its width.
+    pub is_single_line: bool,
+    /// Whether verbatim content owns the dangling and trailing comments after this tag.
+    /// When true, this rule skips those comments and does not insert a separating space.
+    pub verbatim_children: bool,
 }
 
 impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
@@ -45,6 +57,8 @@ impl FormatRuleWithOptions<HtmlOpeningElement> for FormatHtmlOpeningElement {
         self.r_angle_is_borrowed = options.r_angle_is_borrowed;
         self.attr_group_id = Some(options.attr_group_id);
         self.borrowed_sibling_r_angle = options.borrowed_sibling_r_angle;
+        self.is_single_line = options.is_single_line;
+        self.verbatim_children = options.verbatim_children;
         self
     }
 }
@@ -55,7 +69,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         node: &HtmlOpeningElement,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        if !f.comments().has_dangling_comments(node.syntax()) {
+        if self.verbatim_children || !f.comments().has_dangling_comments(node.syntax()) {
             return Ok(());
         }
 
@@ -105,6 +119,17 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         }
     }
 
+    fn fmt_trailing_comments(
+        &self,
+        node: &HtmlOpeningElement,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        if self.verbatim_children {
+            return Ok(());
+        }
+        format_html_trailing_comments(node.syntax()).fmt(f)
+    }
+
     fn fmt_fields(&self, node: &HtmlOpeningElement, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlOpeningElementFields {
             l_angle_token,
@@ -141,6 +166,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
                     .with_options(FormatHtmlAttributeListOptions {
                         is_canonical_html_element,
                         tag_name: Some(name.clone()),
+                        is_single_line: self.is_single_line,
                     })
                     .fmt(f)?;
 
@@ -149,7 +175,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
                 // The r_angle is placed inside this group because prettier always includes this token
                 // in the same group as the attributes, unless the token is being borrowed.
                 // When these tokens are borrowed, they are managed by the sibling `HtmlElementList` formatter.
-                if !bracket_same_line {
+                if !bracket_same_line && !self.is_single_line {
                     write!(f, [soft_line_break()])?;
                 }
                 if !self.r_angle_is_borrowed {
@@ -163,6 +189,7 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
         // Handle whitespace sensitivity in cases where the HtmlElementList formatter is not invoked because the element has no children.
         if let Ok(r_angle_token) = &r_angle_token
             && is_whitespace_sensitive
+            && !self.verbatim_children
             && r_angle_token.has_trailing_whitespace()
         {
             // we can't get rid of the whitespace if the element is whitespace sensitive

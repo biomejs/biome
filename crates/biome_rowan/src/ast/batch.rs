@@ -369,6 +369,38 @@ where
         self.replace_token_discard_trivia(prev_token, new_token)
     }
 
+    /// Push a change to replace `node` with the node that `wrap` builds around it, such as
+    /// `await node` or `(node)`.
+    ///
+    /// `wrap` receives `node` without its outer leading and trailing trivia. That trivia is put
+    /// around the result instead, so comments in front of `node` end up in front of the wrapper
+    /// and appear once. If the result has no tokens, the trivia has nowhere to go and is dropped.
+    pub fn wrap_node<T, U>(&mut self, node: T, wrap: impl FnOnce(T) -> U)
+    where
+        T: AstNode<Language = L>,
+        U: AstNode<Language = L>,
+    {
+        let prev_node = node.syntax().clone();
+        let leading = prev_node.first_leading_trivia();
+        let trailing = prev_node.last_trailing_trivia();
+        // Trimming only fails when `node` has no tokens, in which case it has no trivia either.
+        let node = node.clone().trim_comments_and_trivia().unwrap_or(node);
+
+        let mut wrapped = wrap(node).into_syntax();
+        if let Some(leading) = leading
+            && let Some(with_leading) = wrapped.clone().prepend_trivia_pieces(leading.pieces())
+        {
+            wrapped = with_leading;
+        }
+        if let Some(trailing) = trailing
+            && let Some(with_trailing) = wrapped.clone().append_trivia_pieces(trailing.pieces())
+        {
+            wrapped = with_trailing;
+        }
+
+        self.replace_element_discard_trivia(prev_node.into(), wrapped.into());
+    }
+
     /// Push a change to replace the "prev_element" with "next_element".
     ///
     /// Changes to take effect must be committed.
@@ -735,8 +767,10 @@ where
 #[cfg(test)]
 pub mod test {
     use crate::{
-        AstNode, BatchMutationExt, SyntaxNodeCast, TriviaPiece,
-        raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
+        AstNode, BatchMutationExt, RawSyntaxKind, SyntaxKindSet, SyntaxNodeCast, TriviaPiece,
+        raw_language::{
+            LiteralExpression, RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder,
+        },
     };
 
     /// ```
@@ -960,5 +994,153 @@ pub mod test {
             .descendants_tokens(crate::Direction::Next)
             .any(|t: crate::SyntaxToken<_>| t.text_trimmed() == "a");
         assert!(!has_a, "node 'a' should have been removed");
+    }
+
+    /// A `( LITERAL_EXPRESSION )` node, used as the wrapper in the `wrap_node` tests.
+    #[derive(Clone)]
+    struct Condition {
+        node: crate::SyntaxNode<RawLanguage>,
+    }
+
+    impl AstNode for Condition {
+        type Language = RawLanguage;
+
+        const KIND_SET: SyntaxKindSet<RawLanguage> =
+            SyntaxKindSet::from_raw(RawSyntaxKind(RawLanguageKind::CONDITION as u16));
+
+        fn can_cast(kind: RawLanguageKind) -> bool {
+            kind == RawLanguageKind::CONDITION
+        }
+
+        fn cast(syntax: crate::SyntaxNode<RawLanguage>) -> Option<Self> {
+            Self::can_cast(syntax.kind()).then_some(Self { node: syntax })
+        }
+
+        fn syntax(&self) -> &crate::SyntaxNode<RawLanguage> {
+            &self.node
+        }
+
+        fn into_syntax(self) -> crate::SyntaxNode<RawLanguage> {
+            self.node
+        }
+    }
+
+    /// Builds `ROOT [ LITERAL_EXPRESSION [ STRING_TOKEN ] ]`, where `text` is the token's full
+    /// text including its trivia.
+    fn tree_with_trivia(
+        text: &str,
+        leading: &[TriviaPiece],
+        trailing: &[TriviaPiece],
+    ) -> RawLanguageRoot {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, text, leading, trailing);
+        builder.finish_node();
+        builder.finish_node();
+        builder.finish().cast::<RawLanguageRoot>().unwrap()
+    }
+
+    /// Builds `( node )`, asserting that `node` arrives without outer trivia.
+    fn parenthesize(node: LiteralExpression) -> Condition {
+        assert_eq!(
+            node.syntax().to_string(),
+            node.syntax().text_trimmed().to_string()
+        );
+        let token = |kind, text| Some(crate::SyntaxToken::new_detached(kind, text, [], []).into());
+        Condition {
+            node: crate::SyntaxNode::new_detached(
+                RawLanguageKind::CONDITION,
+                [
+                    token(RawLanguageKind::L_PAREN_TOKEN, "("),
+                    Some(node.into_syntax().into()),
+                    token(RawLanguageKind::R_PAREN_TOKEN, ")"),
+                ],
+            ),
+        }
+    }
+
+    /// Parenthesizes the first `LITERAL_EXPRESSION` of `root` and returns the committed tree.
+    fn parenthesize_first_literal(root: RawLanguageRoot) -> crate::SyntaxNode<RawLanguage> {
+        let node = root
+            .syntax()
+            .descendants()
+            .find_map(LiteralExpression::cast)
+            .unwrap();
+        let mut batch = root.begin();
+        batch.wrap_node(node, parenthesize);
+        batch.commit()
+    }
+
+    #[test]
+    pub fn ok_wrap_node_without_trivia() {
+        let root = tree_with_trivia("a", &[], &[]);
+
+        assert_eq!(parenthesize_first_literal(root).to_string(), "(a)");
+    }
+
+    #[test]
+    pub fn ok_wrap_node_moves_leading_trivia_outside_wrapper() {
+        let root = tree_with_trivia(
+            "// a\na",
+            &[TriviaPiece::single_line_comment(4), TriviaPiece::newline(1)],
+            &[],
+        );
+
+        assert_eq!(parenthesize_first_literal(root).to_string(), "// a\n(a)");
+    }
+
+    #[test]
+    pub fn ok_wrap_node_moves_trailing_trivia_outside_wrapper() {
+        let root = tree_with_trivia(
+            "a /* b */",
+            &[],
+            &[
+                TriviaPiece::whitespace(1),
+                TriviaPiece::multi_line_comment(7),
+            ],
+        );
+
+        assert_eq!(parenthesize_first_literal(root).to_string(), "(a) /* b */");
+    }
+
+    #[test]
+    pub fn ok_wrap_node_moves_leading_and_trailing_trivia_outside_wrapper() {
+        let root = tree_with_trivia(
+            "// a\na /* b */",
+            &[TriviaPiece::single_line_comment(4), TriviaPiece::newline(1)],
+            &[
+                TriviaPiece::whitespace(1),
+                TriviaPiece::multi_line_comment(7),
+            ],
+        );
+
+        assert_eq!(
+            parenthesize_first_literal(root).to_string(),
+            "// a\n(a) /* b */"
+        );
+    }
+
+    #[test]
+    pub fn ok_wrap_node_without_tokens() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+
+        let after = parenthesize_first_literal(root);
+
+        assert_eq!(after.to_string(), "()");
+        let condition = after
+            .descendants()
+            .find(|node| node.kind() == RawLanguageKind::CONDITION)
+            .expect("the literal should be wrapped in a condition");
+        assert!(
+            condition
+                .children()
+                .any(|node| node.kind() == RawLanguageKind::LITERAL_EXPRESSION)
+        );
     }
 }

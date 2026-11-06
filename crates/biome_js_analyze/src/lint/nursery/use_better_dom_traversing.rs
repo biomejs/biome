@@ -12,7 +12,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, JsComputedMemberExpression,
     JsStaticMemberExpression, JsSyntaxNode,
 };
-use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
+use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::use_better_dom_traversing::UseBetterDomTraversingOptions;
 use smallvec::SmallVec;
 
@@ -199,7 +199,7 @@ impl Rule for UseBetterDomTraversing {
                 UseBetterDomTraversingState::FirstChild
                 | UseBetterDomTraversingState::FirstElementChild,
             ) => {
-                if has_comments_inside(node.syntax()) {
+                if node.syntax().has_inner_comments() {
                     return None;
                 }
                 let replacement_name = match state {
@@ -229,7 +229,7 @@ impl Rule for UseBetterDomTraversing {
                 AnyUseBetterDomTraversingQuery::JsCallExpression(node),
                 UseBetterDomTraversingState::MergeQuerySelector { can_fix: true },
             ) => {
-                if has_comments_inside(node.syntax()) {
+                if node.syntax().has_inner_comments() {
                     return None;
                 }
                 let (root, selectors) = query_selector_chain(node)?;
@@ -624,16 +624,6 @@ fn is_document_object(expr: &AnyJsExpression) -> bool {
         })
         .and_then(|id| id.name().ok())
         .is_some_and(|name| name.has_name("window") || name.has_name("globalThis"))
-}
-
-/// Comments on the first token's leading trivia (file-level comments) are ignored.
-fn has_comments_inside(node: &JsSyntaxNode) -> bool {
-    let mut tokens = node.descendants_tokens(Direction::Next);
-    let Some(first) = tokens.next() else {
-        return false;
-    };
-    first.has_trailing_comments()
-        || tokens.any(|token| token.has_leading_comments() || token.has_trailing_comments())
 }
 
 fn make_string_literal_expression(value: &str, preferred_quote: PreferredQuote) -> AnyJsExpression {

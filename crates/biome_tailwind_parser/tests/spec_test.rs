@@ -4,7 +4,9 @@ use biome_diagnostics::{DiagnosticExt, PrintDiagnostic, termcolor};
 use biome_rowan::{AstNode, SyntaxKind};
 use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::TwRoot;
-use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
+use biome_test_utils::{
+    has_bogus_nodes_or_empty_slots, validate_eof_token, validate_text_trimmed_ranges,
+};
 use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
@@ -33,6 +35,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let parsed = parse_tailwind(&content);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
 
     let formatted_ast = if let Some(ast) = TwRoot::cast(parsed.syntax()) {
         format!("{ast:#?}")

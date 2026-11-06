@@ -278,15 +278,25 @@ impl Rule for UseErrorCause {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
-            State::WithoutCause(range) => Some(RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "The original error is not being passed to the new `Error` object.\
-                    Include the original error in the `cause` property to preserve it."
-                },
-            )),
-            State::ShadowedCause { cause_range, catch_binding_range } => Some(
+            State::WithoutCause(range) => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    range,
+                    markup! {
+                        "The original error is not passed to the new `Error` object."
+                    },
+                )
+                .note(markup! {
+                    "Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace."
+                })
+                .note(markup! {
+                    "Pass the original error in the `cause` option, for example `new Error(\"message\", { cause: error })`."
+                }),
+            ),
+            State::ShadowedCause {
+                cause_range,
+                catch_binding_range,
+            } => Some(
                 RuleDiagnostic::new(
                     rule_category!(),
                     cause_range,
@@ -297,26 +307,44 @@ impl Rule for UseErrorCause {
                 .detail(
                     catch_binding_range,
                     "The original error is declared here.",
-                ),
+                )
+                .note(markup! {
+                    "The `cause` refers to a different value than the caught error, so the original error is still lost."
+                })
+                .note(markup! {
+                    "Rename the variable that shadows the caught error, or pass the caught error as the `cause`."
+                }),
             ),
-            State::NoErrorBinding(range) => Some(RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "The original error is being discarded because the `catch` clause doesn't have a parameter.\
-                    Specify an error object in the `catch` clause to access the original error."
-                },
-            )),
-            State::DestructuringBinding(range) => Some(RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "Destructuring the error in a `catch` clause is not recommended, \
-                    as it can lead to losing important information from the error object, \
-                    such as the stack trace.\
-                    Use a single variable to catch the error, and then access its properties."
-                },
-            )),
+            State::NoErrorBinding(range) => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    range,
+                    markup! {
+                        "The original error is discarded because the `catch` clause has no parameter."
+                    },
+                )
+                .note(markup! {
+                    "Without a parameter, the code cannot access the original error, so its details are lost."
+                })
+                .note(markup! {
+                    "Add a parameter to the `catch` clause and pass it as the `cause` of the new error."
+                }),
+            ),
+            State::DestructuringBinding(range) => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    range,
+                    markup! {
+                        "The error is destructured in the `catch` clause."
+                    },
+                )
+                .note(markup! {
+                    "Destructuring can lose information from the error object, such as the stack trace. The original error also cannot be passed as the `cause`."
+                })
+                .note(markup! {
+                    "Catch the error in a single variable, read its properties from that variable, and pass the variable as the `cause`."
+                }),
+            ),
         }
     }
 }

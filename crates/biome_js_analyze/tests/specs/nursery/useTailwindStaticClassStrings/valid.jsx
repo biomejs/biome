@@ -1,0 +1,12 @@
+// should not generate diagnostics
+<div className="bg-red-500 text-white" />;
+<div className={active ? "bg-red-500" : "bg-blue-500"} />;
+<div className={classes} />;
+<div className={{ "bg-red-500": "prefix-" + value }} />;
+<div className={("prefix-" + value) ? "bg-red-500" : "bg-blue-500"} />;
+<div className={("prefix-" + value) && "bg-red-500"} />;
+<div title={`bg-${color}`} />;
+const unrelated = `bg-${color}`;
+<div className="bg-${color}" />;
+<div className={lookup("prefix-" + value)} />;
+<div className={lookup`id-${value}`} />;

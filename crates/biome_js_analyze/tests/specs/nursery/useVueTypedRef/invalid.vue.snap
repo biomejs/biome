@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import { ref } from "vue";
+
+const count = ref();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:15 lint/nursery/useVueTypedRef ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This ref() call creates a ref without a type.
+  
+    3 │ import { ref } from "vue";
+    4 │ 
+  > 5 │ const count = ref();
+      │               ^^^^^
+    6 │ </script>
+    7 │ 
+  
+  i Without a type argument, TypeScript can't tell which values the ref is meant to hold, so it can't catch mistakes when the ref is used.
+  
+  i Add a type argument, for example ref<number>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

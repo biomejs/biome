@@ -1230,6 +1230,117 @@ import { mdiSquareOutline } from "@mdi/js";
 }
 
 #[test]
+fn suppress_does_not_add_comments_for_events_emitted_in_templates() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+export default {
+  emits: [
+    "unused",
+    "close",
+  ],
+};
+</script>
+
+<template>
+  <button @click="$emit('close')">Close</button>
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--only=nursery/noVueUnusedEmitDeclarations",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file).unwrap().read_to_string(&mut buffer).unwrap();
+
+    // Only the event that nothing emits gets a suppression comment. The event
+    // the template emits must stay untouched.
+    assert_eq!(
+        buffer.matches("biome-ignore").count(),
+        1,
+        "Suppress should not add comments for events emitted in templates. File content:\n{buffer}"
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_does_not_add_comments_for_events_emitted_in_templates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn unused_emit_rule_ignores_templates_it_cannot_read() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Without full support for HTML-like files, only the script block is
+    // analyzed, so the events the template emits are not known.
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script setup>
+defineEmits(["close"]);
+</script>
+
+<template>
+  <button @click="$emit('close')">Close</button>
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=nursery/noVueUnusedEmitDeclarations",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unused_emit_rule_ignores_templates_it_cannot_read",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn typed_slot_props_are_parsed_and_formatted() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1270,6 +1381,197 @@ const fallback: ItemType = "fallback";
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "typed_slot_props_are_parsed_and_formatted",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn script_setup_generic_is_parsed() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": { "enabled": true }, "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<script setup lang="ts" generic="TData   extends object,TRow">
+defineProps<{rows:TData[];selected:TRow}>()
+</script>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "script_setup_generic_is_parsed",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn undeclared_emits_rule_checks_templates_with_full_support() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+export default {
+  emits: ["change"],
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+  },
+};
+</script>
+
+<template>
+  <button @click="$emit('open')">Open</button>
+  <button @click="$emit('change')">Change</button>
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=nursery/noVueUndeclaredEmits", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "undeclared_emits_rule_checks_templates_with_full_support",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn undeclared_emits_rule_ignores_templates_it_cannot_read() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // Without full support for HTML-like files, only the script block is
+    // analyzed, so the events the template emits are not checked.
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+export default {
+  emits: ["change"],
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+  },
+};
+</script>
+
+<template>
+  <button @click="$emit('open')">Open</button>
+</template>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--only=nursery/noVueUndeclaredEmits", file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "undeclared_emits_rule_ignores_templates_it_cannot_read",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn suppress_adds_comments_for_undeclared_emits() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // After `--suppress` applies a comment, the file is analyzed again from
+    // the edited tree, and the Vue semantic model is rebuilt from the script
+    // block alone. Suppression tests in `biome_js_analyze` don't run that
+    // pass.
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<script>
+export default {
+  emits: ["change"],
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+  },
+};
+</script>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--suppress",
+                "--only=nursery/noVueUndeclaredEmits",
+                file.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "suppress_adds_comments_for_undeclared_emits",
         fs,
         console,
         result,

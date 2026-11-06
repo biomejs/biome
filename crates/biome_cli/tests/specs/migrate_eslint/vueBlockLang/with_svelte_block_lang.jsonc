@@ -1,0 +1,9 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "vue/block-lang": ["error", { "script": { "lang": "ts" } }],
+      "svelte/block-lang": ["error", { "script": "js" }]
+    }
+  }
+}

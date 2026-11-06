@@ -10,7 +10,7 @@ use biome_js_syntax::{
     AnyFunctionLike, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsRoot, JsDirective,
     JsDirectiveList, JsExport, JsSyntaxToken, T, export_ext::AnyJsExported,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TokenText};
 use biome_rule_options::use_react_async_server_function::UseReactAsyncServerFunctionOptions;
 
 declare_lint_rule! {
@@ -247,7 +247,7 @@ pub enum ServerFunctionKind {
 }
 
 fn make_async_token_with_space() -> biome_js_syntax::JsSyntaxToken {
-    make::token(T![async]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+    make::token(T![async]).with_trailing_space()
 }
 
 fn make_async_token_with_space_from_anchor(
@@ -255,7 +255,7 @@ fn make_async_token_with_space_from_anchor(
 ) -> biome_js_syntax::JsSyntaxToken {
     make::token(T![async])
         .with_leading_trivia_pieces(anchor.leading_trivia().pieces())
-        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+        .with_trailing_space()
 }
 
 fn has_local_use_server_directive(function: &AnyFunctionLike) -> bool {

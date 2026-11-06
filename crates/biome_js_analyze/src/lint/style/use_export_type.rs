@@ -18,7 +18,7 @@ use biome_js_syntax::{
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, TriviaPieceKind, chain_trivia_pieces,
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, chain_trivia_pieces,
     declare_node_union, trim_leading_trivia_pieces,
 };
 use biome_rule_options::use_export_type::{Style, UseExportTypeOptions};
@@ -347,10 +347,7 @@ impl Rule for UseExportType {
                             clause.clone(),
                             clause
                                 .clone()
-                                .with_type_token(Some(
-                                    make::token(T![type])
-                                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                                ))
+                                .with_type_token(Some(make::token(T![type]).with_trailing_space()))
                                 .with_specifiers(new_specifier_list),
                         );
                     }
@@ -384,10 +381,7 @@ impl Rule for UseExportType {
                             clause.clone(),
                             clause
                                 .clone()
-                                .with_type_token(Some(
-                                    make::token(T![type])
-                                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                                ))
+                                .with_type_token(Some(make::token(T![type]).with_trailing_space()))
                                 .with_specifiers(new_specifier_list),
                         );
                     }
@@ -415,7 +409,7 @@ impl Rule for UseExportType {
                                     .with_leading_trivia_pieces(
                                         specifier.syntax().first_leading_trivia()?.pieces(),
                                     )
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                                    .with_trailing_space(),
                             )),
                     );
                 }
@@ -654,9 +648,7 @@ fn new_named_exports(
         named_type_specifiers,
         r_curly_token.clone(),
     )
-    .with_type_token(
-        make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-    )
+    .with_type_token(make::token(T![type]).with_trailing_space())
     .build()
     .with_semicolon_token(semicolon_token.clone());
     let value_export_clause =
@@ -669,8 +661,8 @@ fn new_named_exports(
         type_export_clause.into(),
     );
     let new_export_token = make::token(T![export])
-        .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
-        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        .with_leading_newline()
+        .with_trailing_space();
     let export_value = make::js_export(
         make::js_decorator_list([]),
         new_export_token,
@@ -697,9 +689,7 @@ fn new_named_from_exports(
         from_token.clone(),
         source.clone(),
     )
-    .with_type_token(
-        make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-    )
+    .with_type_token(make::token(T![type]).with_trailing_space())
     .build()
     .with_semicolon_token(semicolon_token.clone());
     let export_type = make::js_export(
@@ -717,8 +707,8 @@ fn new_named_from_exports(
     .build()
     .with_semicolon_token(semicolon_token);
     let new_export_token = make::token(T![export])
-        .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
-        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        .with_leading_newline()
+        .with_trailing_space();
     let export_value = make::js_export(
         make::js_decorator_list([]),
         new_export_token,

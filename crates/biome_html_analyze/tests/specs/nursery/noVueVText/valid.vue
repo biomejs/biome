@@ -1,0 +1,11 @@
+<!-- should not generate diagnostics -->
+<template>
+  <div>{{ foobar }}</div>
+  <div v-html="content"></div>
+  <div :text="foobar"></div>
+  <div v-bind:text="foobar"></div>
+  <div text="foobar"></div>
+  <div v-text-custom="foobar"></div>
+  <div v-texts="foobar"></div>
+  <MyComponent @text="onText" />
+</template>

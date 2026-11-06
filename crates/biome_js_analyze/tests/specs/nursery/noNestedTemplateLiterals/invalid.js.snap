@@ -1,0 +1,478 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+let message1 = `I have ${color ? `${count} ${color}` : count} apples`;
+
+// Each level of nesting is reported.
+let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+
+// Tagged templates count on either side.
+let message4 = tag`I have ${color ? `${count} ${color}` : count} apples`;
+let message5 = tag`I have ${color ? tag`${count} ${color}` : count} apples`;
+
+// Every nested template literal is reported.
+let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+
+// Starts on a different line but ends on the same line as the outer template.
+let message8 = `I have
+${color ? `${count} ${color}` : count} apples`;
+
+// Starts on the same line but ends on a different line than the outer template.
+let message9 = `I have ${color ? `${count} ${color}` : count}
+apples`;
+
+// Nested inside a function inside the template.
+let message10 = `${items.map((item) => `<li>${item}</li>`)}`;
+
+// The tag spans several lines, but the backticks start on the same line.
+let message11 = foo
+	.bar`I have ${`${count}`}
+apples`;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:34 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ let message1 = `I have ${color ? `${count} ${color}` : count} apples`;
+      │                                  ^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // Each level of nesting is reported.
+  
+  i This is the outer template literal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ let message1 = `I have ${color ? `${count} ${color}` : count} apples`;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ // Each level of nesting is reported.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:34 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    4 │ // Each level of nesting is reported.
+  > 5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+      │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+    7 │ 
+  
+  i This is the outer template literal.
+  
+    4 │ // Each level of nesting is reported.
+  > 5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+    7 │ 
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:41 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    4 │ // Each level of nesting is reported.
+  > 5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+      │                                         ^^^^^^^^^^
+    6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+    7 │ 
+  
+  i This is the outer template literal.
+  
+    4 │ // Each level of nesting is reported.
+  > 5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+      │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+    7 │ 
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:34 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    4 │ // Each level of nesting is reported.
+    5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+  > 6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+      │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Tagged templates count on either side.
+  
+  i This is the outer template literal.
+  
+    4 │ // Each level of nesting is reported.
+    5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+  > 6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Tagged templates count on either side.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:41 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    4 │ // Each level of nesting is reported.
+    5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+  > 6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+      │                                         ^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Tagged templates count on either side.
+  
+  i This is the outer template literal.
+  
+    4 │ // Each level of nesting is reported.
+    5 │ let message2 = `I have ${color ? `${x ? `indeed 0` : count} ${color}` : count} apples`;
+  > 6 │ let message3 = `I have ${color ? `${x ? `indeed ${0}` : count} ${color}` : count} apples`;
+      │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ // Tagged templates count on either side.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:37 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+     8 │ // Tagged templates count on either side.
+   > 9 │ let message4 = tag`I have ${color ? `${count} ${color}` : count} apples`;
+       │                                     ^^^^^^^^^^^^^^^^^^^
+    10 │ let message5 = tag`I have ${color ? tag`${count} ${color}` : count} apples`;
+    11 │ 
+  
+  i This is the outer template literal.
+  
+     8 │ // Tagged templates count on either side.
+   > 9 │ let message4 = tag`I have ${color ? `${count} ${color}` : count} apples`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ let message5 = tag`I have ${color ? tag`${count} ${color}` : count} apples`;
+    11 │ 
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:37 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+     8 │ // Tagged templates count on either side.
+     9 │ let message4 = tag`I have ${color ? `${count} ${color}` : count} apples`;
+  > 10 │ let message5 = tag`I have ${color ? tag`${count} ${color}` : count} apples`;
+       │                                     ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Every nested template literal is reported.
+  
+  i This is the outer template literal.
+  
+     8 │ // Tagged templates count on either side.
+     9 │ let message4 = tag`I have ${color ? `${count} ${color}` : count} apples`;
+  > 10 │ let message5 = tag`I have ${color ? tag`${count} ${color}` : count} apples`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ // Every nested template literal is reported.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:34 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    12 │ // Every nested template literal is reported.
+  > 13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+       │                                  ^^^^^^^^^^^^^^^^^^^
+    14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+    15 │ 
+  
+  i This is the outer template literal.
+  
+    12 │ // Every nested template literal is reported.
+  > 13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+    15 │ 
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:56 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    12 │ // Every nested template literal is reported.
+  > 13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+       │                                                        ^^^^^^^^^^^^^^^^^^
+    14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+    15 │ 
+  
+  i This is the outer template literal.
+  
+    12 │ // Every nested template literal is reported.
+  > 13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+    15 │ 
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:26 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    12 │ // Every nested template literal is reported.
+    13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+  > 14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+       │                          ^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Starts on a different line but ends on the same line as the outer template.
+  
+  i This is the outer template literal.
+  
+    12 │ // Every nested template literal is reported.
+    13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+  > 14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Starts on a different line but ends on the same line as the outer template.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:49 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    12 │ // Every nested template literal is reported.
+    13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+  > 14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+       │                                                 ^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Starts on a different line but ends on the same line as the outer template.
+  
+  i This is the outer template literal.
+  
+    12 │ // Every nested template literal is reported.
+    13 │ let message6 = `I have ${color ? `${count} ${color}` : `this is ${count}`} apples`;
+  > 14 │ let message7 = `I have ${`${count} ${color}`} ${`this is ${count}`} apples`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // Starts on a different line but ends on the same line as the outer template.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:11 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    16 │ // Starts on a different line but ends on the same line as the outer template.
+    17 │ let message8 = `I have
+  > 18 │ ${color ? `${count} ${color}` : count} apples`;
+       │           ^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Starts on the same line but ends on a different line than the outer template.
+  
+  i This is the outer template literal.
+  
+    16 │ // Starts on a different line but ends on the same line as the outer template.
+  > 17 │ let message8 = `I have
+       │                ^^^^^^^
+  > 18 │ ${color ? `${count} ${color}` : count} apples`;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // Starts on the same line but ends on a different line than the outer template.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:34 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    20 │ // Starts on the same line but ends on a different line than the outer template.
+  > 21 │ let message9 = `I have ${color ? `${count} ${color}` : count}
+       │                                  ^^^^^^^^^^^^^^^^^^^
+    22 │ apples`;
+    23 │ 
+  
+  i This is the outer template literal.
+  
+    20 │ // Starts on the same line but ends on a different line than the outer template.
+  > 21 │ let message9 = `I have ${color ? `${count} ${color}` : count}
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 22 │ apples`;
+       │ ^^^^^^^
+    23 │ 
+    24 │ // Nested inside a function inside the template.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:40 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    24 │ // Nested inside a function inside the template.
+  > 25 │ let message10 = `${items.map((item) => `<li>${item}</li>`)}`;
+       │                                        ^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // The tag spans several lines, but the backticks start on the same line.
+  
+  i This is the outer template literal.
+  
+    24 │ // Nested inside a function inside the template.
+  > 25 │ let message10 = `${items.map((item) => `<li>${item}</li>`)}`;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // The tag spans several lines, but the backticks start on the same line.
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:16 lint/nursery/noNestedTemplateLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This template literal is nested inside another template literal.
+  
+    27 │ // The tag spans several lines, but the backticks start on the same line.
+    28 │ let message11 = foo
+  > 29 │ 	.bar`I have ${`${count}`}
+       │ 	              ^^^^^^^^^^
+    30 │ apples`;
+    31 │ 
+  
+  i This is the outer template literal.
+  
+    27 │ // The tag spans several lines, but the backticks start on the same line.
+  > 28 │ let message11 = foo
+       │                 ^^^
+  > 29 │ 	.bar`I have ${`${count}`}
+  > 30 │ apples`;
+       │ ^^^^^^^
+    31 │ 
+  
+  i Nested template literals are hard to read, because it is unclear which backtick ends which string.
+  
+  i Move the inner template literal into a separate variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

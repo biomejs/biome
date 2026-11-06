@@ -1,0 +1,14 @@
+# should generate diagnostics
+type c {
+  id: ID!
+} # same c
+
+type a {
+  id: ID!
+}
+
+# header for b
+"Description of b"
+type b {
+  id: ID!
+} # same b

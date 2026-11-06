@@ -1,7 +1,7 @@
 use crate::format_element::PrintMode;
 use crate::prelude::AlignedStr;
+use crate::source::Source;
 use crate::{GroupId, TextSize};
-use biome_rowan::TextRange;
 use std::cell::Cell;
 
 /// A Tag marking the start and end of some content to which some special formatting should be applied.
@@ -9,7 +9,7 @@ use std::cell::Cell;
 /// Tags always come in pairs of a start and an end tag and the styling defined by this tag
 /// will be applied to all elements in between the start/end tags.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Tag {
+pub enum Tag<S: Source> {
     /// Indents the content one level deeper, see [crate::builders::indent] for documentation and examples.
     StartIndent,
     EndIndent,
@@ -69,9 +69,11 @@ pub enum Tag {
     StartLabelled(LabelId),
     EndLabelled,
 
-    /// Content that will be formatted later by another formatter.
-    /// These tags must be removed during the second pass.
-    StartEmbedded(TextRange),
+    /// Code written in another language, which the formatter of that language
+    /// can format later.
+    ///
+    /// See [crate::builders::FormatEmbedded] for documentation.
+    StartEmbedded(S::EmbeddedKey),
     EndEmbedded,
 
     /// Entry inside of a [crate::FormatElement::BestFitting]
@@ -79,7 +81,7 @@ pub enum Tag {
     EndBestFittingEntry,
 }
 
-impl Tag {
+impl<S: Source> Tag<S> {
     /// Returns `true` if `self` is any start tag.
     pub const fn is_start(&self) -> bool {
         matches!(
@@ -170,6 +172,7 @@ impl GroupMode {
 pub struct Group {
     id: Option<GroupId>,
     mode: Cell<GroupMode>,
+    boundary: bool,
 }
 
 impl Group {
@@ -177,7 +180,19 @@ impl Group {
         Self {
             id: None,
             mode: Cell::new(GroupMode::Flat),
+            boundary: false,
         }
+    }
+
+    /// Makes the group stop the expansion of its content from reaching it
+    /// and the groups around it, see [crate::builders::boundary_group]
+    pub fn with_boundary(mut self, boundary: bool) -> Self {
+        self.boundary = boundary;
+        self
+    }
+
+    pub fn is_boundary(&self) -> bool {
+        self.boundary
     }
 
     pub fn with_id(mut self, id: Option<GroupId>) -> Self {

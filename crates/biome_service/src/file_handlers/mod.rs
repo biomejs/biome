@@ -64,11 +64,11 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomai
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
+use biome_db::Source;
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::EmbeddedData;
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;
@@ -93,6 +93,8 @@ use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::{Dependencies, PackageJson};
 use biome_parser::AnyParse;
+use biome_parser::db::SourceExt;
+use biome_parser::db::{AnalyzedSource, SnippetRef};
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "lang_js")]
 use biome_rowan::TokenText;
@@ -151,7 +153,7 @@ pub struct FixAllParams<'a> {
 #[derive(Clone, Debug)]
 pub(crate) enum ParsedOrigin {
     /// The parse result has been queried from the database.
-    Workspace(AnyParsedSource),
+    Workspace(AnalyzedSource),
     /// The parse result has been generated from the server during an in-flight operation, and it won't
     /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
     Interned {
@@ -164,7 +166,7 @@ pub(crate) enum ParsedOrigin {
 #[derive(Clone, Debug)]
 pub(crate) enum ParsedSnippetOrigin {
     /// The parse result has been queried from the database.
-    Workspace(ParsedSnippet),
+    Workspace(SnippetRef),
     /// The parse result has been generated from the server during an in-flight operation, and it won't
     /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
     Interned {
@@ -177,7 +179,7 @@ pub(crate) enum ParsedSnippetOrigin {
 impl ParsedSnippetOrigin {
     pub(crate) fn parsed_origin(&self) -> ParsedOrigin {
         match self {
-            Self::Workspace(snippet) => (*snippet).into(),
+            Self::Workspace(snippet) => snippet.clone().into(),
             Self::Interned { parse, content, .. } => {
                 ParsedOrigin::interned(parse.clone(), Some(content.content_offset))
             }
@@ -186,60 +188,54 @@ impl ParsedSnippetOrigin {
 
     pub(crate) fn file_source(&self, db: &WorkspaceDb) -> Option<DocumentFileSource> {
         match self {
-            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index(db)),
+            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index()),
             Self::Interned { file_source, .. } => Some(*file_source),
         }
     }
 
-    pub(crate) fn element_range(&self, db: &WorkspaceDb) -> TextRange {
+    pub(crate) fn element_range(&self) -> TextRange {
         match self {
-            Self::Workspace(snippet) => snippet.element_range(db),
+            Self::Workspace(snippet) => snippet.element_range(),
             Self::Interned { content, .. } => content.element_range,
         }
     }
 
-    pub(crate) fn content_range(&self, db: &WorkspaceDb) -> TextRange {
+    pub(crate) fn content_range(&self) -> TextRange {
         match self {
-            Self::Workspace(snippet) => snippet.content_range(db),
+            Self::Workspace(snippet) => snippet.content_range(),
             Self::Interned { content, .. } => content.content_range,
         }
     }
 
-    pub(crate) fn content_offset(&self, db: &WorkspaceDb) -> TextSize {
+    pub(crate) fn content_offset(&self) -> TextSize {
         match self {
-            Self::Workspace(snippet) => snippet.content_offset(db),
+            Self::Workspace(snippet) => snippet.content_offset(),
             Self::Interned { content, .. } => content.content_offset,
         }
     }
 
-    pub(crate) fn diagnostics<'a>(
-        &'a self,
-        db: &'a WorkspaceDb,
-    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
+    pub(crate) fn diagnostics(&self) -> &[biome_parser::diagnostic::ParseDiagnostic] {
         match self {
-            Self::Workspace(snippet) => snippet.parsed(db).diagnostics(),
+            Self::Workspace(snippet) => snippet.parsed().diagnostics(),
             Self::Interned { parse, .. } => parse.diagnostics(),
         }
     }
 
-    pub(crate) fn serde_diagnostics(
-        &self,
-        db: &WorkspaceDb,
-    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
+    pub(crate) fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
         match self {
-            Self::Workspace(snippet) => snippet.serde_diagnostics(db),
+            Self::Workspace(snippet) => snippet.serde_diagnostics(),
             Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
         }
     }
 
-    pub(crate) fn has_errors(&self, db: &WorkspaceDb) -> bool {
-        self.diagnostics(db)
+    pub(crate) fn has_errors(&self) -> bool {
+        self.diagnostics()
             .iter()
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
     }
 
-    pub(crate) fn error_count(&self, db: &WorkspaceDb) -> usize {
-        self.diagnostics(db)
+    pub(crate) fn error_count(&self) -> usize {
+        self.diagnostics()
             .iter()
             .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
             .count()
@@ -247,14 +243,21 @@ impl ParsedSnippetOrigin {
 }
 
 impl ParsedOrigin {
+    /// Returns the document in the database, or `None` when the parse result
+    /// isn't stored in it.
+    pub(crate) fn document(&self) -> Option<Source> {
+        match self {
+            Self::Workspace(source) => Some(source.document()),
+            Self::Interned { .. } => None,
+        }
+    }
+
     pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
         match self {
-            Self::Workspace(AnyParsedSource::ParsedSource(source)) => {
-                SnippetsIterator::Workspace(source.snippets(db).iter())
+            Self::Workspace(AnalyzedSource::Source(source)) => {
+                SnippetsIterator::from_source(*source, db)
             }
-            Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
-                SnippetsIterator::Interned([].iter())
-            }
+            Self::Workspace(AnalyzedSource::Snippet(_)) => SnippetsIterator::Interned([].iter()),
             Self::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
         }
     }
@@ -330,9 +333,9 @@ impl ParsedOrigin {
         }
     }
 
-    pub(crate) fn diagnostic_offset(&self, db: &WorkspaceDb) -> Option<TextSize> {
+    pub(crate) fn diagnostic_offset(&self) -> Option<TextSize> {
         match self {
-            Self::Workspace(source) => source.diagnostic_offset(db),
+            Self::Workspace(source) => source.diagnostic_offset(),
             Self::Interned {
                 diagnostic_offset, ..
             } => *diagnostic_offset,
@@ -340,27 +343,21 @@ impl ParsedOrigin {
     }
 }
 
-impl From<AnyParsedSource> for ParsedOrigin {
-    fn from(source: AnyParsedSource) -> Self {
+impl From<AnalyzedSource> for ParsedOrigin {
+    fn from(source: AnalyzedSource) -> Self {
         Self::Workspace(source)
     }
 }
 
-impl From<ParsedSource> for ParsedOrigin {
-    fn from(source: ParsedSource) -> Self {
+impl From<Source> for ParsedOrigin {
+    fn from(source: Source) -> Self {
         Self::Workspace(source.into())
     }
 }
 
-impl From<ParsedSnippet> for ParsedOrigin {
-    fn from(source: ParsedSnippet) -> Self {
+impl From<SnippetRef> for ParsedOrigin {
+    fn from(source: SnippetRef) -> Self {
         Self::Workspace(source.into())
-    }
-}
-
-impl From<&ParsedSnippet> for ParsedOrigin {
-    fn from(source: &ParsedSnippet) -> Self {
-        Self::Workspace((*source).into())
     }
 }
 
@@ -371,32 +368,64 @@ impl From<AnyParse> for ParsedOrigin {
 }
 
 pub(crate) enum SnippetsIterator<'a> {
-    Workspace(std::slice::Iter<'a, ParsedSnippet>),
+    /// The snippets of a parsed source.
+    Workspace(std::vec::IntoIter<SnippetRef>),
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
 }
 
 impl<'a> SnippetsIterator<'a> {
-    /// Excludes host-owned template comments and Markdown fenced code blocks from
-    /// guest analysis. The unfiltered iterator remains available for formatting
-    /// and host suppression extraction.
+    /// Iterates over the snippets of `source`.
+    pub(crate) fn from_source(source: Source, db: &WorkspaceDb) -> Self {
+        let snippets: Vec<_> = source
+            .snippets(db)
+            .iter()
+            .map(|snippet| snippet.to_ref(db))
+            .collect();
+        Self::Workspace(snippets.into_iter())
+    }
+
+    /// Excludes host-owned template comments from guest analysis, and every
+    /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
+    /// host suppression extraction.
     pub(crate) fn for_analysis(
         self,
         host: &'a ParsedOrigin,
         source: DocumentFileSource,
+        settings: &Settings,
+        path: &Utf8Path,
         db: &'a WorkspaceDb,
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        let _ = (settings, path);
+        #[cfg(feature = "md_embeds")]
+        let skips_markdown_snippets = source.to_markdown_file_source().is_some()
+            && !md::analyze_embeds_enabled(settings, path);
         self.filter(move |snippet| {
             let _ = (host, source, snippet, db);
+            #[cfg(feature = "md_embeds")]
+            if skips_markdown_snippets {
+                return false;
+            }
             #[cfg(feature = "html_embeds")]
             if html::is_astro_template_comment(host, source, snippet, db) {
                 return false;
             }
-            #[cfg(feature = "md_embeds")]
-            if md::is_fenced_code_block(host, source, snippet, db) {
-                return false;
-            }
             true
         })
+    }
+
+    /// Excludes the snippets whose syntax errors don't stop formatting the
+    /// containing file: the formatter of a Markdown file keeps such snippets as
+    /// written.
+    pub(crate) fn blocking_formatting(
+        self,
+        source: DocumentFileSource,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        let _ = source;
+        #[cfg(feature = "lang_md")]
+        let blocks = source.to_markdown_file_source().is_none();
+        #[cfg(not(feature = "lang_md"))]
+        let blocks = true;
+        self.filter(move |_| blocks)
     }
 }
 
@@ -405,9 +434,7 @@ impl Iterator for SnippetsIterator<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            Self::Workspace(snippets) => {
-                snippets.next().copied().map(ParsedSnippetOrigin::Workspace)
-            }
+            Self::Workspace(snippets) => snippets.next().map(ParsedSnippetOrigin::Workspace),
             Self::Interned(snippets) => snippets.next().cloned(),
         }
     }
@@ -451,7 +478,7 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) node_cache: &'a mut NodeCache,
 }
 
-type Parse =
+pub(crate) type Parse =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
 type ParseEmbeddedNodes =
     for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
@@ -463,20 +490,20 @@ pub struct ParserCapabilities {
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
-type DebugSyntaxTree = fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> GetSyntaxTreeResult;
-type DebugControlFlow = fn(AnyParsedSource, TextSize, WorkspaceDb) -> String;
+type DebugSyntaxTree = fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> GetSyntaxTreeResult;
+type DebugControlFlow = fn(AnalyzedSource, TextSize, WorkspaceDb) -> String;
 type DebugFormatterIR = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &SettingsWithEditor,
     WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
-type DebugTypeInfo = fn(AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes =
-    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 type DebugSemanticModel =
-    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -553,7 +580,7 @@ impl<'a> LintParams<'a> {
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -672,7 +699,7 @@ impl<'a> ProcessLint<'a> {
                 || !params.skip.is_empty(),
             rules: params.settings.linter_rules(),
             pull_code_actions: params.pull_code_actions,
-            diagnostic_offset: params.parsed_source.diagnostic_offset(&params.workspace_db),
+            diagnostic_offset: params.parsed_source.diagnostic_offset(),
             max_diagnostics: params.max_diagnostics,
             diagnostic_level: params.diagnostic_level,
             enforce_assist: params.enforce_assist,
@@ -684,6 +711,7 @@ impl<'a> ProcessLint<'a> {
         signal: &dyn AnalyzerSignal<L>,
     ) -> ControlFlow {
         if let Some(mut diagnostic) = signal.diagnostic() {
+            let is_internal = diagnostic.tags().is_internal();
             if self.ignores_suppression_comment
                 && diagnostic.category() == Some(category!("suppressions/unused"))
             {
@@ -724,9 +752,10 @@ impl<'a> ProcessLint<'a> {
                 Severity::Hint => {}
             }
 
-            if self
-                .max_diagnostics
-                .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
+            if is_internal
+                || self
+                    .max_diagnostics
+                    .is_none_or(|max_diagnostics| self.diagnostic_count <= max_diagnostics)
             {
                 if self.pull_code_actions {
                     for action in signal.actions(ActionFilter::rule_fix()) {
@@ -1091,7 +1120,7 @@ impl ProcessDiagnosticsAndActions {
                     offset: None,
                 })
                 .collect();
-            if !actions.is_empty() {
+            if !actions.is_empty() || diagnostic.tags().is_internal() {
                 if let Some(offset) = &self.diagnostic_offset {
                     diagnostic.add_diagnostic_offset(*offset);
                 }
@@ -1113,7 +1142,7 @@ impl ProcessDiagnosticsAndActions {
 }
 
 pub(crate) struct CodeActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
@@ -1150,7 +1179,7 @@ type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError>;
 type Rename = fn(
     &BiomePath,
-    AnyParsedSource,
+    AnalyzedSource,
     TextSize,
     String,
     WorkspaceDb,
@@ -1185,7 +1214,7 @@ type Format = fn(
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &SettingsWithEditor,
     TextRange,
     WorkspaceDb,
@@ -1193,7 +1222,7 @@ type FormatRange = fn(
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &SettingsWithEditor,
     TextSize,
     WorkspaceDb,
@@ -1235,7 +1264,7 @@ type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
@@ -1263,7 +1292,7 @@ pub(crate) struct EditorCapabilities {
 }
 
 pub(crate) struct ResolveBindingParams {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) cursor_offset: TextSize,
     pub(crate) workspace_db: WorkspaceDb,
     pub(crate) path: Utf8PathBuf,
@@ -1273,7 +1302,7 @@ pub(crate) struct ResolveDefinitionParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) definition_ref: &'a DefinitionReference,
     pub(crate) workspace_db: WorkspaceDb,
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
 }
 
 type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;
@@ -1688,6 +1717,7 @@ struct LintVisitor<'a, 'b> {
     pub(crate) rules_with_fix: FxHashSet<RuleFilter<'a>>,
     rules: Option<&'b Rules>,
     domains: Option<&'b RuleDomains>,
+    explicitly_enabled_rules: &'b FxHashSet<RuleFilter<'static>>,
     globals: &'b mut Vec<Box<str>>,
 }
 
@@ -1695,6 +1725,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
         rules: Option<&'b Rules>,
         domains: Option<&'b RuleDomains>,
+        explicitly_enabled_rules: &'b FxHashSet<RuleFilter<'static>>,
         globals: &'b mut Vec<Box<str>>,
     ) -> Self {
         Self {
@@ -1703,6 +1734,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             rules_with_fix: Default::default(),
             rules,
             domains,
+            explicitly_enabled_rules,
             globals,
         }
     }
@@ -1775,8 +1807,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let rules = self.rules.cloned().unwrap_or_default();
         // A rule enabled explicitly in the configuration stays enabled even if
         // one of its domains is disabled.
-        for rule_filter in rules.as_explicitly_enabled_rules() {
-            self.disabled_rules.remove(&rule_filter);
+        for rule_filter in self.explicitly_enabled_rules {
+            self.disabled_rules.remove(rule_filter);
         }
         self.enabled_rules.extend(rules.as_enabled_rules());
         self.disabled_rules.extend(rules.as_disabled_rules());
@@ -2414,12 +2446,15 @@ fn compute_analyzer_visitor(
 
     let linter_rules = settings.as_linter_rules_by_indices(override_indices);
     let linter_domains = settings.as_linter_domains_by_indices(override_indices);
+    let explicitly_enabled_rules =
+        settings.as_linter_explicitly_enabled_rules_by_indices(override_indices);
     let assist_actions = settings.as_assist_actions_by_indices(override_indices);
 
     let mut globals = Vec::new();
     let mut lint = LintVisitor::new(
         linter_rules.as_deref(),
         linter_domains.as_deref(),
+        &explicitly_enabled_rules,
         &mut globals,
     );
 
@@ -2705,7 +2740,7 @@ mod tests {
     #[cfg(feature = "lang_js")]
     use crate::settings::Settings;
     #[cfg(feature = "lang_js")]
-    use biome_analyze::RuleFilter;
+    use biome_analyze::{RuleDomain, RuleFilter};
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
     use camino::Utf8Path;
@@ -2731,6 +2766,26 @@ mod tests {
                 .iter()
                 .any(|global| global.as_ref() == "test")
         );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn tailwind_domain_requires_tailwind_4() {
+        let activates_tailwind_domain = |version: &str| {
+            let manifest = PackageJson {
+                dependencies: Dependencies(
+                    vec![("tailwindcss".into(), version.into())].into_boxed_slice(),
+                ),
+                ..PackageJson::default()
+            };
+            RuleDomain::Tailwind
+                .manifest_dependencies()
+                .iter()
+                .any(|(dependency, range)| manifest.matches_dependency(dependency, range))
+        };
+
+        assert!(activates_tailwind_domain("^4.0.0"));
+        assert!(!activates_tailwind_domain("^3.4.17"));
     }
 
     #[cfg(feature = "lang_js")]

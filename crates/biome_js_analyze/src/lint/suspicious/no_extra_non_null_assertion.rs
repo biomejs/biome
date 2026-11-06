@@ -148,7 +148,10 @@ impl Rule for NoExtraNonNullAssertion {
             rule_category!(),
             ctx.query().range(),
             "Forbidden extra non-null assertion.",
-        );
+        )
+        .note(markup! {
+            "Repeating the assertion has no effect beyond the first one, and it can point to a mistake."
+        });
 
         Some(diagnostic)
     }

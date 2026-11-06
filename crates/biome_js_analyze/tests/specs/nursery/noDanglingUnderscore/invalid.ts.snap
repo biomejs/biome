@@ -1,0 +1,142 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare const _foo: number;
+const bar_: string = "";
+export const _baz = 1;
+function _overloaded(a: string): void;
+function _overloaded(a: number): void;
+function _overloaded(a: unknown) {}
+(foo as Foo)._bar;
+foo!._bar;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:15 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _foo starts with an underscore.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ declare const _foo: number;
+      │               ^^^^
+    3 │ const bar_: string = "";
+    4 │ export const _baz = 1;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:7 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name bar_ ends with an underscore.
+  
+    1 │ /* should generate diagnostics */
+    2 │ declare const _foo: number;
+  > 3 │ const bar_: string = "";
+      │       ^^^^
+    4 │ export const _baz = 1;
+    5 │ function _overloaded(a: string): void;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:14 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _baz starts with an underscore.
+  
+    2 │ declare const _foo: number;
+    3 │ const bar_: string = "";
+  > 4 │ export const _baz = 1;
+      │              ^^^^
+    5 │ function _overloaded(a: string): void;
+    6 │ function _overloaded(a: number): void;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:10 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _overloaded starts with an underscore.
+  
+    5 │ function _overloaded(a: string): void;
+    6 │ function _overloaded(a: number): void;
+  > 7 │ function _overloaded(a: unknown) {}
+      │          ^^^^^^^^^^^
+    8 │ (foo as Foo)._bar;
+    9 │ foo!._bar;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:14 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+     6 │ function _overloaded(a: number): void;
+     7 │ function _overloaded(a: unknown) {}
+   > 8 │ (foo as Foo)._bar;
+       │              ^^^^
+     9 │ foo!._bar;
+    10 │ 
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:6 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+     7 │ function _overloaded(a: unknown) {}
+     8 │ (foo as Foo)._bar;
+   > 9 │ foo!._bar;
+       │      ^^^^
+    10 │ 
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

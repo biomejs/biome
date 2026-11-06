@@ -1,0 +1,44 @@
+$prefix: overflow-;
+$axis: x;
+
+@supports ($prefix + : clip) { .missing-operand { color: red; } }
+.after-missing-operand { color: green; }
+
+@supports ($prefix + $axis clip) { .missing-colon { color: red; } }
+.after-missing-colon { color: green; }
+
+@supports ($prefix + $axis:) { .missing-value { color: red; } }
+.after-missing-value { color: green; }
+
+@supports ($prefix + $axis: clip { .missing-close { color: red; } }
+.after-missing-close { color: green; }
+
+@import "operand.css" supports($prefix + : clip);
+.after-import-missing-operand { color: green; }
+
+@import "colon.css" supports($prefix + $axis clip);
+.after-import-missing-colon { color: green; }
+
+@import "value.css" supports($prefix + $axis:);
+.after-import-missing-value { color: green; }
+
+@import "close.css" supports(($prefix + $axis: clip);
+.after-import-missing-close { color: green; }
+
+@import "selector-function.css" supports(selector(overflow-x): clip);
+.after-bare-selector-function { color: green; }
+
+@import "interpolated-function.css" supports(#{fn}(x): clip);
+.after-bare-interpolated-function { color: green; }
+
+@import "suffixed-function.css" supports(fn-#{$axis}(x): clip);
+.after-bare-suffixed-function { color: green; }
+
+@import "bare-calc-function.css" supports(calc(0): a);
+.after-bare-calc-function { color: green; }
+
+@import "bare-foo-function.css" supports(foo(x): clip);
+.after-bare-foo-function { color: green; }
+
+@import "bare-abs-function.css" supports(abs(1): clip);
+.after-bare-abs-function { color: green; }

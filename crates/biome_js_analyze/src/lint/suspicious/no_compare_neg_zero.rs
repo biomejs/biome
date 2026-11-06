@@ -87,7 +87,10 @@ impl Rule for NoCompareNegZero {
             markup! {
                 "Do not use the "{state.operator_kind}" operator to compare against -0."
             },
-        ))
+        )
+        .note(markup! {
+            "The comparison treats "<Emphasis>"-0"</Emphasis>" and "<Emphasis>"0"</Emphasis>" as equal, so comparing against "<Emphasis>"-0"</Emphasis>" gives the same result as comparing against "<Emphasis>"0"</Emphasis>"."
+        }))
     }
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();

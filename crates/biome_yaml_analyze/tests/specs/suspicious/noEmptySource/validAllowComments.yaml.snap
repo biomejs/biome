@@ -1,0 +1,18 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: validAllowComments.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+---
+# Comment
+---
+--- # Comment
+...
+---
+# Comment
+...
+--- !!map # Comment
+
+```

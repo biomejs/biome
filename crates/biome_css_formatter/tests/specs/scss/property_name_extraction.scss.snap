@@ -57,7 +57,9 @@ grid-template-#{$axis}:1fr
 
 .values {
 	margin: 1px 2px;
-	box-shadow: $x 2px black, $y 4px gray;
+	box-shadow:
+		$x 2px black,
+		$y 4px gray;
 	--grid-template-columns: 1fr
 	2fr;
 }

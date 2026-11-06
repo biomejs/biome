@@ -8,3 +8,4 @@ pub mod semantic;
 pub mod semantic_class;
 pub mod turborepo;
 pub mod typed;
+pub mod vue;

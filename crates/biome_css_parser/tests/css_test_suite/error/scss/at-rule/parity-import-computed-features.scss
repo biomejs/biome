@@ -1,0 +1,9 @@
+$bound: min;
+@media ($bound + : 30rem) { .missing-operand { color: red; } }
+.after-operand { color: green; }
+@import "wide-layout.css" screen and ($bound + "-width":);
+@media (width: 30rem) { .after-value { color: green; } }
+@media ($bound + "-width": 30rem { .missing-close { color: red; } }
+.after-close { color: green; }
+@import "wide-layout.css" screen and ($bound + "-width": 30rem;
+@media (color) { .after-import { color: green; } }

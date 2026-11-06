@@ -1,0 +1,135 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```graphql
+﻿query { field }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �query { field }
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �query·{·field·}
+      │ -               
+
+```
+
+# Input
+```graphql
+﻿
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �
+      │ -
+
+```
+
+# Input
+```graphql
+﻿  query { field }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �  query { field }
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+  - �··query·{·field·}
+  + ··query·{·field·}
+  
+
+```
+
+# Input
+```graphql
+﻿
+query { field }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �
+      │ ^
+    2 │ query { field }
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �
+      │ -
+
+```
+
+# Input
+```graphql
+﻿# header
+query { field }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �# header
+      │ ^
+    2 │ query { field }
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1   │ - �#·header
+      1 │ + #·header
+    2 2 │   query { field }
+  
+
+```

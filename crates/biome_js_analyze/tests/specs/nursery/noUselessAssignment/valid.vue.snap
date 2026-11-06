@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+let count = 0;
+console.log(count);
+count = 1;
+</script>
+
+<template>
+	<p>{{ count }}</p>
+</template>
+
+```

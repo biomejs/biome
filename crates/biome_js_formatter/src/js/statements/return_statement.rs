@@ -112,7 +112,16 @@ impl Format<JsFormatContext> for FormatReturnOrThrowArgument<'_> {
                 f,
                 [token("("), &block_indent(&argument.format()), token(")")]
             )
-        } else if is_binary_or_sequence_argument(argument) && !is_suppressed {
+        } else if JsSequenceExpression::can_cast(argument.syntax().kind()) && !is_suppressed {
+            write!(
+                f,
+                [group(&format_args![
+                    token("("),
+                    soft_block_indent(&argument.format()),
+                    token(")")
+                ])]
+            )
+        } else if AnyJsBinaryLikeExpression::can_cast(argument.syntax().kind()) && !is_suppressed {
             write!(
                 f,
                 [group(&format_args![
@@ -153,9 +162,4 @@ fn has_argument_leading_comments(argument: &AnyJsExpression, comments: &JsCommen
     }
 
     false
-}
-
-fn is_binary_or_sequence_argument(argument: &AnyJsExpression) -> bool {
-    JsSequenceExpression::can_cast(argument.syntax().kind())
-        || AnyJsBinaryLikeExpression::can_cast(argument.syntax().kind())
 }

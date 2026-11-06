@@ -70,6 +70,7 @@ impl Rule for NoLabelVar {
         .detail(binding_syntax_node.text_trimmed_range(), markup! {
             "The variable is declared here"
         },)
-        .note(markup! {"Creating a label with the same name as an in-scope variable leads to confusion."}))
+        .note(markup! {"Creating a label with the same name as an in-scope variable leads to confusion."})
+        .note(markup! {"Rename the label or the variable so that the two names are different."}))
     }
 }

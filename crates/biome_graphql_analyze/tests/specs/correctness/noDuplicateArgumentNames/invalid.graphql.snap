@@ -17,19 +17,31 @@ query C {
 query D {
 	field @directive(arg1: "value", arg1: "value", arg1: "value")
 }
+query E {
+	field(a: 1, b: 2, a: 3, b: 4)
+}
 
 ```
 
 # Diagnostics
 ```
-invalid.graphql:3:7 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:8 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate argument name.
+  × The argument name "arg1" is used more than once.
   
     1 │ # should generate diagnostics
     2 │ query A {
   > 3 │ 	field(arg1: "value", arg1: "value")
-      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ 	      ^^^^
+    4 │ }
+    5 │ query B {
+  
+  i The argument "arg1" is repeated here.
+  
+    1 │ # should generate diagnostics
+    2 │ query A {
+  > 3 │ 	field(arg1: "value", arg1: "value")
+      │ 	                     ^^^^
     4 │ }
     5 │ query B {
   
@@ -39,14 +51,32 @@ invalid.graphql:3:7 lint/correctness/noDuplicateArgumentNames ━━━━━━
 ```
 
 ```
-invalid.graphql:6:7 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:8 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate argument name.
+  × The argument name "arg1" is used more than once.
   
     4 │ }
     5 │ query B {
   > 6 │ 	field(arg1: "value", arg1: "value", arg1: "value")
-      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ 	      ^^^^
+    7 │ }
+    8 │ query C {
+  
+  i The argument "arg1" is repeated here.
+  
+    4 │ }
+    5 │ query B {
+  > 6 │ 	field(arg1: "value", arg1: "value", arg1: "value")
+      │ 	                     ^^^^
+    7 │ }
+    8 │ query C {
+  
+  i The argument "arg1" is repeated here.
+  
+    4 │ }
+    5 │ query B {
+  > 6 │ 	field(arg1: "value", arg1: "value", arg1: "value")
+      │ 	                                    ^^^^
     7 │ }
     8 │ query C {
   
@@ -56,14 +86,23 @@ invalid.graphql:6:7 lint/correctness/noDuplicateArgumentNames ━━━━━━
 ```
 
 ```
-invalid.graphql:9:18 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:9:19 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate argument name.
+  × The argument name "arg1" is used more than once.
   
      7 │ }
      8 │ query C {
    > 9 │ 	field @directive(arg1: "value", arg1: "value")
-       │ 	                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 	                 ^^^^
+    10 │ }
+    11 │ query D {
+  
+  i The argument "arg1" is repeated here.
+  
+     7 │ }
+     8 │ query C {
+   > 9 │ 	field @directive(arg1: "value", arg1: "value")
+       │ 	                                ^^^^
     10 │ }
     11 │ query D {
   
@@ -73,16 +112,86 @@ invalid.graphql:9:18 lint/correctness/noDuplicateArgumentNames ━━━━━�
 ```
 
 ```
-invalid.graphql:12:18 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:12:19 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate argument name.
+  × The argument name "arg1" is used more than once.
   
     10 │ }
     11 │ query D {
   > 12 │ 	field @directive(arg1: "value", arg1: "value", arg1: "value")
-       │ 	                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ 	                 ^^^^
     13 │ }
-    14 │ 
+    14 │ query E {
+  
+  i The argument "arg1" is repeated here.
+  
+    10 │ }
+    11 │ query D {
+  > 12 │ 	field @directive(arg1: "value", arg1: "value", arg1: "value")
+       │ 	                                ^^^^
+    13 │ }
+    14 │ query E {
+  
+  i The argument "arg1" is repeated here.
+  
+    10 │ }
+    11 │ query D {
+  > 12 │ 	field @directive(arg1: "value", arg1: "value", arg1: "value")
+       │ 	                                               ^^^^
+    13 │ }
+    14 │ query E {
+  
+  i A GraphQL field or directive is only valid if all supplied arguments are uniquely named. Make sure to name every argument differently.
+  
+
+```
+
+```
+invalid.graphql:15:8 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument name "a" is used more than once.
+  
+    13 │ }
+    14 │ query E {
+  > 15 │ 	field(a: 1, b: 2, a: 3, b: 4)
+       │ 	      ^
+    16 │ }
+    17 │ 
+  
+  i The argument "a" is repeated here.
+  
+    13 │ }
+    14 │ query E {
+  > 15 │ 	field(a: 1, b: 2, a: 3, b: 4)
+       │ 	                  ^
+    16 │ }
+    17 │ 
+  
+  i A GraphQL field or directive is only valid if all supplied arguments are uniquely named. Make sure to name every argument differently.
+  
+
+```
+
+```
+invalid.graphql:15:14 lint/correctness/noDuplicateArgumentNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The argument name "b" is used more than once.
+  
+    13 │ }
+    14 │ query E {
+  > 15 │ 	field(a: 1, b: 2, a: 3, b: 4)
+       │ 	            ^
+    16 │ }
+    17 │ 
+  
+  i The argument "b" is repeated here.
+  
+    13 │ }
+    14 │ query E {
+  > 15 │ 	field(a: 1, b: 2, a: 3, b: 4)
+       │ 	                        ^
+    16 │ }
+    17 │ 
   
   i A GraphQL field or directive is only valid if all supplied arguments are uniquely named. Make sure to name every argument differently.
   

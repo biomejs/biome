@@ -2,9 +2,11 @@ use crate::buffer::BufferSnapshot;
 use crate::builders::{FillBuilder, JoinBuilder, JoinNodesBuilder, Line};
 use crate::prelude::*;
 use crate::{
-    Arguments, Buffer, Comments, CstFormatContext, FormatContext, FormatState, FormatStateSnapshot,
-    GroupId, SourceMapGeneration, VecBuffer,
+    Arguments, Buffer, FormatContext, FormatState, FormatStateSnapshot, GroupId,
+    SourceMapGeneration, VecBuffer,
 };
+#[cfg(feature = "rowan")]
+use crate::{Comments, CstFormatContext};
 
 /// Handles the formatting of a CST and stores the context how the CST should be formatted (user preferences).
 /// The formatter is passed to the [Format] implementation of every node in the CST so that they
@@ -18,12 +20,11 @@ impl<'buf, Context> Formatter<'buf, Context> {
     pub fn new(buffer: &'buf mut (dyn Buffer<Context = Context> + 'buf)) -> Self {
         Self { buffer }
     }
+}
 
+impl<'buf, Context: FormatContext> Formatter<'buf, Context> {
     /// Returns the format options
-    pub fn options(&self) -> &Context::Options
-    where
-        Context: FormatContext,
-    {
+    pub fn options(&self) -> &Context::Options {
         self.context().options()
     }
 
@@ -115,7 +116,7 @@ impl<'buf, Context> Formatter<'buf, Context> {
         JoinBuilder::with_separator(self, joiner)
     }
 
-    /// Specialized version of [crate::Formatter::join_with] for joining SyntaxNodes separated by a space, soft
+    /// Specialized version of [crate::Formatter::join_with] for joining nodes separated by a space, soft
     /// line break or empty line depending on the input file.
     ///
     /// This function inspects the input source and separates consecutive elements with either
@@ -127,7 +128,7 @@ impl<'buf, Context> Formatter<'buf, Context> {
         JoinNodesBuilder::new(soft_line_break_or_space(), self)
     }
 
-    /// Specialized version of [crate::Formatter::join_with] for joining SyntaxNodes separated by one or more
+    /// Specialized version of [crate::Formatter::join_with] for joining nodes separated by one or more
     /// line breaks depending on the input file.
     ///
     /// This function inspects the input source and separates consecutive elements with either
@@ -137,7 +138,7 @@ impl<'buf, Context> Formatter<'buf, Context> {
         JoinNodesBuilder::new(hard_line_break(), self)
     }
 
-    /// Specialized version of [crate::Formatter::join_with] for joining SyntaxNodes separated by a simple space.
+    /// Specialized version of [crate::Formatter::join_with] for joining nodes separated by a simple space.
     ///
     /// This function *disregards* the input source and always separates consecutive elements with a plain
     /// [crate::builders::space], forcing a flat layout regardless of any line breaks or spaces were separating
@@ -206,7 +207,10 @@ impl<'buf, Context> Formatter<'buf, Context> {
     }
 
     /// Formats `content` into an interned element without writing it to the formatter's buffer.
-    pub fn intern(&mut self, content: &dyn Format<Context>) -> FormatResult<Option<FormatElement>> {
+    pub fn intern(
+        &mut self,
+        content: &dyn Format<Context>,
+    ) -> FormatResult<Option<FormatElement<Context::Source>>> {
         let mut buffer = VecBuffer::new(self.state_mut());
         crate::write!(&mut buffer, [content])?;
         let elements = buffer.into_vec();
@@ -214,7 +218,10 @@ impl<'buf, Context> Formatter<'buf, Context> {
         Ok(self.intern_vec(elements))
     }
 
-    pub fn intern_vec(&mut self, mut elements: Vec<FormatElement>) -> Option<FormatElement> {
+    pub fn intern_vec(
+        &mut self,
+        mut elements: Vec<FormatElement<Context::Source>>,
+    ) -> Option<FormatElement<Context::Source>> {
         match elements.len() {
             0 => None,
             // Doesn't get cheaper than calling clone, use the element directly
@@ -246,6 +253,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<Context> Formatter<'_, Context>
 where
     Context: CstFormatContext,
@@ -256,15 +264,15 @@ where
     }
 }
 
-impl<Context> Buffer for Formatter<'_, Context> {
+impl<Context: FormatContext> Buffer for Formatter<'_, Context> {
     type Context = Context;
 
     #[inline(always)]
-    fn write_element(&mut self, element: FormatElement) -> FormatResult<()> {
+    fn write_element(&mut self, element: FormatElement<Context::Source>) -> FormatResult<()> {
         self.buffer.write_element(element)
     }
 
-    fn elements(&self) -> &[FormatElement] {
+    fn elements(&self) -> &[FormatElement<Context::Source>] {
         self.buffer.elements()
     }
 

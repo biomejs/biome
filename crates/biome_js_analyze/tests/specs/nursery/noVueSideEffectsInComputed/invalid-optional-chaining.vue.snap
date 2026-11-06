@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-optional-chaining.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  computed: {
+    test1() {
+      return this?.something?.reverse?.();
+    },
+    test2() {
+      return (this?.something)?.reverse?.();
+    },
+    test3() {
+      return (this?.something?.reverse)?.();
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-optional-chaining.vue:6:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test1 changes state.
+  
+    4 │   computed: {
+    5 │     test1() {
+  > 6 │       return this?.something?.reverse?.();
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │     },
+    8 │     test2() {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-optional-chaining.vue:9:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test2 changes state.
+  
+     7 │     },
+     8 │     test2() {
+   > 9 │       return (this?.something)?.reverse?.();
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     },
+    11 │     test3() {
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-optional-chaining.vue:12:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property test3 changes state.
+  
+    10 │     },
+    11 │     test3() {
+  > 12 │       return (this?.something?.reverse)?.();
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │     },
+    14 │   },
+  
+  i Vue decides when to run a computed property, and skips running it again while the values it reads stay the same. Changes made inside it happen at unpredictable times.
+  
+  i Make the change in a method or a watcher instead. To sort or reverse an array, work on a copy, as in [...items].reverse().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -51,9 +51,8 @@ pub use crate::registry::{
     RuleRegistry, RuleRegistryBuilder, RuleSuppressions,
 };
 pub use crate::rule::{
-    CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleDomain, RuleGroup, RuleMeta, RuleMetadata, RulePreset, RuleSource, RuleSourceKind,
-    RuleSourceWithKind, SuppressAction,
+    FixKind, GroupCategory, Rule, RuleAction, RuleDiagnostic, RuleDomain, RuleGroup, RuleMeta,
+    RuleMetadata, RulePreset, RuleSource, RuleSourceKind, RuleSourceWithKind, SuppressAction,
 };
 pub use crate::services::{
     ExtendedConfigurationProvider, FromServices, ServiceBag, ServicesDiagnostic,
@@ -71,8 +70,8 @@ pub use crate::visitor::{
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
-    TokenAtOffset, TriviaPieceKind,
+    AstNode, BatchMutation, BorrowedToken, Language, SyntaxKind as _, SyntaxKindSet, SyntaxNode,
+    SyntaxToken, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
 use biome_suppression::{Suppression as ParsedSuppression, SuppressionKind};
 use rustc_hash::FxHashSet;
@@ -245,6 +244,9 @@ where
             if let ControlFlow::Break(br) = result {
                 return Some(br);
             }
+            if query_matcher.has_panicked() {
+                return None;
+            }
 
             // Finish all the active visitors, this is executed outside of the
             // phase runner as it needs mutable access to the service bag (the
@@ -371,9 +373,8 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        let iter = self.root.syntax().preorder_tokens(Direction::Next);
         // Iterate to evaluate suppressions
-        for token in iter {
+        for token in self.root.syntax().borrowed_tokens() {
             self.handle_token(token)?;
         }
         // Emit any validation diagnostics from finalizing
@@ -384,24 +385,7 @@ where
             }
         }
         // Iterate for syntax rules after we've established suppressions
-        let iter = self.root.syntax().preorder();
-        for event in iter {
-            // If this is a node event pass it to the visitors for this phase
-            for visitor in self.visitors.iter_mut() {
-                let ctx = VisitorContext {
-                    phase: self.phase,
-                    root: self.root,
-                    services: self.services,
-                    range: self.range,
-                    query_matcher: self.query_matcher,
-                    signal_queue: &mut self.signal_queue,
-                    suppression_action: self.suppression_action,
-                    options: self.options,
-                };
-
-                visitor.visit(&event, ctx);
-            }
-        }
+        self.walk_nodes(|_| ControlFlow::Continue(()))?;
 
         // Flush all remaining pending events
         self.flush_matches(None)
@@ -410,8 +394,45 @@ where
     /// Runs phases 1..N over nodes, since suppression comments were already
     /// processed and cached in `run_initial_phase`
     fn run_remaining_phases(mut self) -> ControlFlow<Break> {
-        for event in self.root.syntax().preorder() {
-            // Run all the active visitors for the phase on the event
+        // Flush all pending query signals after each event
+        self.walk_nodes(|runner| runner.flush_matches(None))
+    }
+
+    /// Passes the walk events of the phase to its visitors, calling
+    /// `after_event` after each event.
+    ///
+    /// The walk skips the nodes that no visitor of the phase reads, as
+    /// reported by [Visitor::visited_kinds]. Skipped nodes have no effect on
+    /// the visitors, so the queries and signals are those of a full walk.
+    fn walk_nodes(
+        &mut self,
+        after_event: impl FnMut(&mut Self) -> ControlFlow<Break>,
+    ) -> ControlFlow<Break> {
+        let root = self.root.syntax();
+        match self.visited_kinds() {
+            None => self.visit_events(root.preorder(), after_event),
+            Some(kinds) if kinds == SyntaxKindSet::EMPTY => ControlFlow::Continue(()),
+            Some(kinds) => self.visit_events(root.preorder_of_kinds(kinds), after_event),
+        }
+    }
+
+    /// Returns the union of the kinds the visitors of this phase read, or
+    /// `None` if one of them reads every node.
+    fn visited_kinds(&self) -> Option<SyntaxKindSet<L>> {
+        let query_kinds = self.query_matcher.syntax_query_kinds(self.phase);
+        self.visitors
+            .iter()
+            .try_fold(SyntaxKindSet::EMPTY, |kinds, visitor| {
+                Some(kinds.union(visitor.visited_kinds(query_kinds)?))
+            })
+    }
+
+    fn visit_events(
+        &mut self,
+        events: impl Iterator<Item = WalkEvent<SyntaxNode<L>>>,
+        mut after_event: impl FnMut(&mut Self) -> ControlFlow<Break>,
+    ) -> ControlFlow<Break> {
+        for event in events {
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {
                     phase: self.phase,
@@ -425,10 +446,16 @@ where
                 };
 
                 visitor.visit(&event, ctx);
+                if self.query_matcher.has_panicked() {
+                    break;
+                }
             }
 
-            // Flush all pending query signals
-            self.flush_matches(None)?;
+            if self.query_matcher.has_panicked() {
+                return self.flush_matches(None);
+            }
+
+            after_event(self)?;
         }
 
         ControlFlow::Continue(())
@@ -436,9 +463,9 @@ where
 
     /// Registers native and embedded suppression comments in source order while
     /// tracking line breaks in the original token and trivia.
-    fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
+    fn handle_token(&mut self, token: BorrowedToken<'_, L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
-        for piece in token.leading_trivia().pieces() {
+        for piece in token.leading_trivia_pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -448,9 +475,9 @@ where
                 self.bump_line_index(piece.text(), piece.text_range());
             }
 
-            if let Some(comment) = piece.as_comments() {
+            if piece.kind().is_comment() {
                 let range = piece.text_range();
-                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                let suppressions = self.suppression.parse_comment(piece.text(), range);
                 self.handle_comment(SuppressionComment {
                     range,
                     suppressions,
@@ -483,7 +510,7 @@ where
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
 
-        for piece in token.trailing_trivia().pieces() {
+        for piece in token.trailing_trivia_pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -493,9 +520,9 @@ where
                 self.bump_line_index(piece.text(), piece.text_range());
             }
 
-            if let Some(comment) = piece.as_comments() {
+            if piece.kind().is_comment() {
                 let range = piece.text_range();
-                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                let suppressions = self.suppression.parse_comment(piece.text(), range);
                 self.handle_comment(SuppressionComment {
                     range,
                     suppressions,
@@ -538,7 +565,9 @@ where
                 continue;
             }
 
-            if range_match(self.range, entry.text_range) {
+            if matches!(&entry.rule, SignalRuleKey::Internal)
+                || range_match(self.range, entry.text_range)
+            {
                 // TODO: would be nice to remove suppressed instances, if any, before emitting
                 (self.emit_signal)(&*entry.signal)?;
             }

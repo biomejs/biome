@@ -79,6 +79,8 @@ invalid.js:1:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     2 │ const y = 2.302;
     3 │ const z = 2.3025;
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.PI instead.
   
      1    │ - const·x·=·3.141;
@@ -99,6 +101,8 @@ invalid.js:2:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
       │           ^^^^^
     3 │ const z = 2.3025;
     4 │ 
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LN10 instead.
   
@@ -123,6 +127,8 @@ invalid.js:3:11 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     4 │ 
     5 │ const constants = [
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LN10 instead.
   
      1  1 │   const x = 3.141;
@@ -145,6 +151,8 @@ invalid.js:6:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
       │ 	^^^^^^^^
     7 │ 	2.718_281, // E with separator
     8 │ 	2.302585, // LN10
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.E instead.
   
@@ -170,6 +178,8 @@ invalid.js:7:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     8 │ 	2.302585, // LN10
     9 │ 	0.693147, // LN2
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.E instead.
   
      5  5 │   const constants = [
@@ -193,6 +203,8 @@ invalid.js:8:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^^^^
      9 │ 	0.693147, // LN2
     10 │ 	0.434294, // LOG10E
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LN10 instead.
   
@@ -218,6 +230,8 @@ invalid.js:9:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     10 │ 	0.434294, // LOG10E
     11 │ 	1.442695, // LOG2E
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LN2 instead.
   
      7  7 │     2.718_281, // E with separator
@@ -241,6 +255,8 @@ invalid.js:10:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^^^^
     11 │ 	1.442695, // LOG2E
     12 │ 	3.141592, // PI
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LOG10E instead.
   
@@ -266,6 +282,8 @@ invalid.js:11:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     12 │ 	3.141592, // PI
     13 │ 	0.707106, // SQRT1_2
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LOG2E instead.
   
      9  9 │     0.693147, // LN2
@@ -289,6 +307,8 @@ invalid.js:12:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^^^^
     13 │ 	0.707106, // SQRT1_2
     14 │ 	1.414213, // SQRT2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.PI instead.
   
@@ -314,6 +334,8 @@ invalid.js:13:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     14 │ 	1.414213, // SQRT2
     15 │ ];
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
     11 11 │     1.442695, // LOG2E
@@ -338,6 +360,8 @@ invalid.js:14:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     15 │ ];
     16 │ 
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.SQRT2 instead.
   
     12 12 │     3.141592, // PI
@@ -360,6 +384,8 @@ invalid.js:18:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^
     19 │ 	2.302, // LN10
     20 │ 	0.693, // LN2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.E instead.
   
@@ -385,6 +411,8 @@ invalid.js:19:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     20 │ 	0.693, // LN2
     21 │ 	0.434, // LOG10E
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LN10 instead.
   
     17 17 │   const constants1 = [
@@ -408,6 +436,8 @@ invalid.js:20:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^
     21 │ 	0.434, // LOG10E
     22 │ 	1.442, // LOG2E
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LN2 instead.
   
@@ -433,6 +463,8 @@ invalid.js:21:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     22 │ 	1.442, // LOG2E
     23 │ 	3.141, // PI
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LOG10E instead.
   
     19 19 │     2.302, // LN10
@@ -456,6 +488,8 @@ invalid.js:22:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^
     23 │ 	3.141, // PI
     24 │ 	0.707, // SQRT1_2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LOG2E instead.
   
@@ -481,6 +515,8 @@ invalid.js:23:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     24 │ 	0.707, // SQRT1_2
     25 │ 	1.414, // SQRT2
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.PI instead.
   
     21 21 │     0.434, // LOG10E
@@ -504,6 +540,8 @@ invalid.js:24:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^
     25 │ 	1.414, // SQRT2
     26 │ ];
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
@@ -529,6 +567,8 @@ invalid.js:25:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     26 │ ];
     27 │ 
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.SQRT2 instead.
   
     23 23 │     3.141, // PI
@@ -551,6 +591,8 @@ invalid.js:29:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^^^^^^^^^^^^^
     30 │     2.302585092994046, // LN10
     31 │     0.6931471805599453, // LN2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.E instead.
   
@@ -576,6 +618,8 @@ invalid.js:30:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     31 │     0.6931471805599453, // LN2
     32 │     0.4342944819032518, // LOG10E
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LN10 instead.
   
     28 28 │   const exact = [
@@ -599,6 +643,8 @@ invalid.js:31:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^^^^
     32 │     0.4342944819032518, // LOG10E
     33 │     1.4426950408889634, // LOG2E
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LN2 instead.
   
@@ -624,6 +670,8 @@ invalid.js:32:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     33 │     1.4426950408889634, // LOG2E
     34 │     3.141592653589793, // PI
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LOG10E instead.
   
     30 30 │       2.302585092994046, // LN10
@@ -647,6 +695,8 @@ invalid.js:33:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^^^^
     34 │     3.141592653589793, // PI
     35 │     0.7071067811865476, // SQRT1_2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LOG2E instead.
   
@@ -672,6 +722,8 @@ invalid.js:34:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     35 │     0.7071067811865476, // SQRT1_2
     36 │     .7071067811865476, // SQRT1_2 without leading 0
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.PI instead.
   
     32 32 │       0.4342944819032518, // LOG10E
@@ -695,6 +747,8 @@ invalid.js:35:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^^^^
     36 │     .7071067811865476, // SQRT1_2 without leading 0
     37 │     1.4142135623730951, // SQRT2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
@@ -720,6 +774,8 @@ invalid.js:36:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     37 │     1.4142135623730951, // SQRT2
     38 │ ];
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
     34 34 │       3.141592653589793, // PI
@@ -743,6 +799,8 @@ invalid.js:37:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^^^^
     38 │ ];
     39 │ 
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.SQRT2 instead.
   
@@ -768,6 +826,8 @@ invalid.js:42:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     43 │     2.302585093, // LN10
     44 │     0.6931471806, // LN2
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.E instead.
   
     40 40 │   const rounded = [
@@ -791,6 +851,8 @@ invalid.js:43:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^
     44 │     0.6931471806, // LN2
     45 │     0.4342944819033, // LOG10E
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LN10 instead.
   
@@ -816,6 +878,8 @@ invalid.js:44:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     45 │     0.4342944819033, // LOG10E
     46 │     1.442695040889, // LOG2E
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LN2 instead.
   
     42 42 │   	2.7183, // E
@@ -839,6 +903,8 @@ invalid.js:45:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^
     46 │     1.442695040889, // LOG2E
     47 │     3.1415926535898, // PI
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LOG10E instead.
   
@@ -864,6 +930,8 @@ invalid.js:46:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     47 │     3.1415926535898, // PI
     48 │     0.70710678118655, // SQRT1_2
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LOG2E instead.
   
     44 44 │       0.6931471806, // LN2
@@ -887,6 +955,8 @@ invalid.js:47:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^
     48 │     0.70710678118655, // SQRT1_2
     49 │     1.4142135623731, // SQRT2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.PI instead.
   
@@ -912,6 +982,8 @@ invalid.js:48:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     49 │     1.4142135623731, // SQRT2
     50 │ ];
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.SQRT1_2 instead.
   
     46 46 │       1.442695040889, // LOG2E
@@ -936,6 +1008,8 @@ invalid.js:49:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     50 │ ];
     51 │ 
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.SQRT2 instead.
   
     47 47 │       3.1415926535898, // PI
@@ -958,6 +1032,8 @@ invalid.js:53:2 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     54 │     2.30258509299404568401799145468436421, // LN10
     55 │     0.693147180559945309417232121458176568, // LN2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.E instead.
   
@@ -983,6 +1059,8 @@ invalid.js:54:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     55 │     0.693147180559945309417232121458176568, // LN2
     56 │     0.301029995663981195213738894724493027, // LOG10E
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LN10 instead.
   
     52 52 │   const precisionLoss = [
@@ -1006,6 +1084,8 @@ invalid.js:55:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     56 │     0.301029995663981195213738894724493027, // LOG10E
     57 │     1.44269504088896340735992468100189214, // LOG2E
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.LN2 instead.
   
@@ -1031,6 +1111,8 @@ invalid.js:57:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
     58 │     3.14159265358979323846264338327950288, // PI
     59 │     0.707106781186547524400844362104849039, // SQRT1_2
   
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
+  
   i Unsafe fix: Use Math.LOG2E instead.
   
     55 55 │       0.693147180559945309417232121458176568, // LN2
@@ -1054,6 +1136,8 @@ invalid.js:58:5 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━�
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     59 │     0.707106781186547524400844362104849039, // SQRT1_2
     60 │     1.41421356237309504880168872420969808, // SQRT2
+  
+  i A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means.
   
   i Unsafe fix: Use Math.PI instead.
   

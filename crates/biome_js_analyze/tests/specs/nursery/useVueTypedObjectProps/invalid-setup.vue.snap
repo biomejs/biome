@@ -1,0 +1,212 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineProps({
+  user: Object,
+  items: Array,
+  settings: { type: Object },
+  tags: { type: Array, required: true },
+  value: [Object, String],
+  list: { type: [String, Array] },
+  wrapped: (Object),
+  parenthesizedOptions: ({ type: Object }),
+  type: Object,
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup.vue:4:9 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+    2 │ <script setup lang="ts">
+    3 │ defineProps({
+  > 4 │   user: Object,
+      │         ^^^^^^
+    5 │   items: Array,
+    6 │   settings: { type: Object },
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:5:10 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Array but has no TypeScript type.
+  
+    3 │ defineProps({
+    4 │   user: Object,
+  > 5 │   items: Array,
+      │          ^^^^^
+    6 │   settings: { type: Object },
+    7 │   tags: { type: Array, required: true },
+  
+  i TypeScript only knows that the prop is an array, not what it holds, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Array as PropType<string[]>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:6:21 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+    4 │   user: Object,
+    5 │   items: Array,
+  > 6 │   settings: { type: Object },
+      │                     ^^^^^^
+    7 │   tags: { type: Array, required: true },
+    8 │   value: [Object, String],
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:7:17 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Array but has no TypeScript type.
+  
+    5 │   items: Array,
+    6 │   settings: { type: Object },
+  > 7 │   tags: { type: Array, required: true },
+      │                 ^^^^^
+    8 │   value: [Object, String],
+    9 │   list: { type: [String, Array] },
+  
+  i TypeScript only knows that the prop is an array, not what it holds, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Array as PropType<string[]>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:8:11 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+     6 │   settings: { type: Object },
+     7 │   tags: { type: Array, required: true },
+   > 8 │   value: [Object, String],
+       │           ^^^^^^
+     9 │   list: { type: [String, Array] },
+    10 │   wrapped: (Object),
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:9:26 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Array but has no TypeScript type.
+  
+     7 │   tags: { type: Array, required: true },
+     8 │   value: [Object, String],
+   > 9 │   list: { type: [String, Array] },
+       │                          ^^^^^
+    10 │   wrapped: (Object),
+    11 │   parenthesizedOptions: ({ type: Object }),
+  
+  i TypeScript only knows that the prop is an array, not what it holds, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Array as PropType<string[]>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:10:13 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+     8 │   value: [Object, String],
+     9 │   list: { type: [String, Array] },
+  > 10 │   wrapped: (Object),
+       │             ^^^^^^
+    11 │   parenthesizedOptions: ({ type: Object }),
+    12 │   type: Object,
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:11:34 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+     9 │   list: { type: [String, Array] },
+    10 │   wrapped: (Object),
+  > 11 │   parenthesizedOptions: ({ type: Object }),
+       │                                  ^^^^^^
+    12 │   type: Object,
+    13 │ });
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:12:9 lint/nursery/useVueTypedObjectProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This prop is declared with Object but has no TypeScript type.
+  
+    10 │   wrapped: (Object),
+    11 │   parenthesizedOptions: ({ type: Object }),
+  > 12 │   type: Object,
+       │         ^^^^^^
+    13 │ });
+    14 │ </script>
+  
+  i TypeScript only knows that the prop is an object, not which properties it has, so it can't catch mistakes when the prop is passed or used.
+  
+  i Add the type with PropType from vue, for example Object as PropType<User>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

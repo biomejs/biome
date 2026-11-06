@@ -1,0 +1,638 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: chains.js
+---
+# Input
+```js
+if (x === 0) {}
+else if (x === 1) {}
+else if (x === 2) {}
+else if (x === 3) {}
+else if (x === 4) {}
+else if (x === 5) {}
+else if (x === 6) {}
+else if (x === 7) {}
+else if (x === 8) {}
+else if (x === 9) {}
+else if (x === 10) {}
+else if (x === 11) {}
+else if (x === 12) {}
+else if (x === 13) {}
+else if (x === 14) {}
+else if (x === 15) {}
+else if (x === 16) {}
+else if (x === 17) {}
+else if (x === 18) {}
+else if (x === 19) {}
+else if (x === 20) {}
+else if (x === 21) {}
+else if (x === 22) {}
+else if (x === 23) {}
+else if (x === 24) {}
+else if (x === 25) {}
+else if (x === 26) {}
+else if (x === 27) {}
+else if (x === 28) {}
+else if (x === 29) {}
+else if (x === 3) {}
+else if (x === 29) {}
+else if (x === 30) {}
+
+if (a && x === 1) {}
+else if (a && x === 2) {}
+else if (a && x === 3) {}
+else if (x === 2 && a) {}
+else if (a && x === 4 && y) {}
+else if (x === 5) {}
+
+if ((a || b) && c) {}
+else if (c && (b || a)) {}
+
+if (a) {}
+else if (b) {}
+else if (a || b) {}
+else if (b || a || c) {}
+
+if (a ?? b) {}
+else if (a ?? b) {}
+
+if ('a' === x) {}
+else if ("a" === x) {}
+
+if (a) {}
+else if (a && b) {}
+else if (c && a) {}
+
+if (a) if (b) if (a) {}
+
+if (a) while (x) if (a) {}
+
+if (a) foo: if (b) {} else {} else if (b) {} else if (a) {}
+
+if (a) bar: if (b) {} else if (a) {} else {}
+
+if (a) {
+	if (x) {} else if (x) {}
+} else if (a) {}
+
+if (a) {} else if (b) {
+	if (a) {} else if (c) {} else if (c) {}
+} else if (b) {}
+
+if (a && x === 0) {}
+else if (a && x === 1) {}
+else if (a && x === 2) {}
+else if (a && x === 3) {}
+else if (a && x === 4) {}
+else if (a && x === 5) {}
+else if (a && x === 6) {}
+else if (a && x === 7) {}
+else if (a && x === 8) {}
+else if (a && x === 9) {}
+else if (a && x === 10) {}
+else if (a && x === 11) {}
+else if (a && x === 12) {}
+else if (a && x === 13) {}
+else if (a && x === 14) {}
+else if (a && x === 15) {}
+else if (a && x === 16) {}
+else if (a && x === 17) {}
+else if (a && x === 18) {}
+else if (a && x === 19) {}
+else if (x === 2 && a) {}
+else if (a && x === 30 && y) {}
+else if (x === 31) {}
+else if ((b || a) && x === 3) {}
+
+if (y === 0) {}
+else if (y === 1) {}
+else if (y === 2) {}
+else if (y === 3) {}
+else if (y === 4) {}
+else if (y === 5) {}
+else if (y === 6) {}
+else if (y === 7) {}
+else if (y === 8) {}
+else if (y === 9) {}
+else if (y === 10) {}
+else if (y === 11) {}
+else if (y === 12) {}
+else if (y === 13) {}
+else if (y === 14) {}
+else if (y === 15) {}
+else if (y === 16) {}
+else if (y === 17) {}
+else if (y === 18) lbl: if (z) {} else if (y === 4) {} else {}
+else if (z) {}
+else if (y === 17) {}
+
+if (k === 0) {}
+else if (k === 1) {}
+else if (k === 2) {}
+else if (k === 3) {}
+else if (k === 4) {}
+else if (k === 5) {}
+else if (k === 6) {}
+else if (k === 7) {}
+else if (k === 8) {}
+else if (k === 9) {}
+else if (k === 10) {}
+else if (k === 11) {}
+else if (k === 12) {}
+else if (k === 13) {}
+else if (k === 14) {}
+else if (k === 15) {}
+else if (k === 16) {}
+else if (k === 17) {}
+else if ((a || b) && c) {}
+else if (c && (b || a)) {}
+else if ('q' === x) {}
+else if ("q" === x) {}
+else if (a ?? b) {}
+else if (a ?? b) {}
+else if (a ?? b) {}
+
+if (v === 0) {}
+else if (v === 1) {}
+else if (v === 2) {}
+else if (v === 3) {}
+else if (v === 4) {}
+else if (v === 5) {}
+else if (v === 6) {}
+else if (v === 7) {}
+else if (v === 8) {}
+else if (v === 9) {}
+else if (v === 10) {}
+else if (v === 11) {}
+else if (v === 12) {}
+else if (v === 13) {}
+else if (v === 14) {}
+else if (v === 15) lbl: if (w === 0) {}
+else if (w === 1) {}
+else if (w === 2) {}
+else if (w === 3) {}
+else if (w === 4) {}
+else if (w === 5) {}
+else if (w === 2) {}
+else if (v === 3) {}
+else {}
+else if (v === 16) {}
+else if (v === 17) {}
+else if (v === 18) {}
+else if (v === 19) {}
+else if (v === 20) {}
+else if (w === 2) {}
+else if (v === 3) {}
+
+```
+
+# Diagnostics
+```
+chains.js:31:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    29 │ else if (x === 28) {}
+    30 │ else if (x === 29) {}
+  > 31 │ else if (x === 3) {}
+       │          ^^^^^^^
+    32 │ else if (x === 29) {}
+    33 │ else if (x === 30) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:32:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    30 │ else if (x === 29) {}
+    31 │ else if (x === 3) {}
+  > 32 │ else if (x === 29) {}
+       │          ^^^^^^^^
+    33 │ else if (x === 30) {}
+    34 │ 
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:38:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    36 │ else if (a && x === 2) {}
+    37 │ else if (a && x === 3) {}
+  > 38 │ else if (x === 2 && a) {}
+       │          ^^^^^^^^^^^^
+    39 │ else if (a && x === 4 && y) {}
+    40 │ else if (x === 5) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:43:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    42 │ if ((a || b) && c) {}
+  > 43 │ else if (c && (b || a)) {}
+       │          ^^^^^^^^^^^^^
+    44 │ 
+    45 │ if (a) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:47:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    45 │ if (a) {}
+    46 │ else if (b) {}
+  > 47 │ else if (a || b) {}
+       │          ^^^^^^
+    48 │ else if (b || a || c) {}
+    49 │ 
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:54:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    53 │ if ('a' === x) {}
+  > 54 │ else if ("a" === x) {}
+       │          ^^^^^^^^^
+    55 │ 
+    56 │ if (a) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:57:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    56 │ if (a) {}
+  > 57 │ else if (a && b) {}
+       │          ^^^^^^
+    58 │ else if (c && a) {}
+    59 │ 
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:58:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    56 │ if (a) {}
+    57 │ else if (a && b) {}
+  > 58 │ else if (c && a) {}
+       │          ^^^^^^
+    59 │ 
+    60 │ if (a) if (b) if (a) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:60:19 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    58 │ else if (c && a) {}
+    59 │ 
+  > 60 │ if (a) if (b) if (a) {}
+       │                   ^
+    61 │ 
+    62 │ if (a) while (x) if (a) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:62:22 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    60 │ if (a) if (b) if (a) {}
+    61 │ 
+  > 62 │ if (a) while (x) if (a) {}
+       │                      ^
+    63 │ 
+    64 │ if (a) foo: if (b) {} else {} else if (b) {} else if (a) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:64:55 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    62 │ if (a) while (x) if (a) {}
+    63 │ 
+  > 64 │ if (a) foo: if (b) {} else {} else if (b) {} else if (a) {}
+       │                                                       ^
+    65 │ 
+    66 │ if (a) bar: if (b) {} else if (a) {} else {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:66:32 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    64 │ if (a) foo: if (b) {} else {} else if (b) {} else if (a) {}
+    65 │ 
+  > 66 │ if (a) bar: if (b) {} else if (a) {} else {}
+       │                                ^
+    67 │ 
+    68 │ if (a) {
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:69:21 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    68 │ if (a) {
+  > 69 │ 	if (x) {} else if (x) {}
+       │ 	                   ^
+    70 │ } else if (a) {}
+    71 │ 
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:70:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    68 │ if (a) {
+    69 │ 	if (x) {} else if (x) {}
+  > 70 │ } else if (a) {}
+       │            ^
+    71 │ 
+    72 │ if (a) {} else if (b) {
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:73:36 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    72 │ if (a) {} else if (b) {
+  > 73 │ 	if (a) {} else if (c) {} else if (c) {}
+       │ 	                                  ^
+    74 │ } else if (b) {}
+    75 │ 
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:74:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    72 │ if (a) {} else if (b) {
+    73 │ 	if (a) {} else if (c) {} else if (c) {}
+  > 74 │ } else if (b) {}
+       │            ^
+    75 │ 
+    76 │ if (a && x === 0) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:96:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    94 │ else if (a && x === 18) {}
+    95 │ else if (a && x === 19) {}
+  > 96 │ else if (x === 2 && a) {}
+       │          ^^^^^^^^^^^^
+    97 │ else if (a && x === 30 && y) {}
+    98 │ else if (x === 31) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:119:44 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    117 │ else if (y === 16) {}
+    118 │ else if (y === 17) {}
+  > 119 │ else if (y === 18) lbl: if (z) {} else if (y === 4) {} else {}
+        │                                            ^^^^^^^
+    120 │ else if (z) {}
+    121 │ else if (y === 17) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:121:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    119 │ else if (y === 18) lbl: if (z) {} else if (y === 4) {} else {}
+    120 │ else if (z) {}
+  > 121 │ else if (y === 17) {}
+        │          ^^^^^^^^
+    122 │ 
+    123 │ if (k === 0) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:142:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    140 │ else if (k === 17) {}
+    141 │ else if ((a || b) && c) {}
+  > 142 │ else if (c && (b || a)) {}
+        │          ^^^^^^^^^^^^^
+    143 │ else if ('q' === x) {}
+    144 │ else if ("q" === x) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:144:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    142 │ else if (c && (b || a)) {}
+    143 │ else if ('q' === x) {}
+  > 144 │ else if ("q" === x) {}
+        │          ^^^^^^^^^
+    145 │ else if (a ?? b) {}
+    146 │ else if (a ?? b) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:170:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    168 │ else if (w === 4) {}
+    169 │ else if (w === 5) {}
+  > 170 │ else if (w === 2) {}
+        │          ^^^^^^^
+    171 │ else if (v === 3) {}
+    172 │ else {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:171:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    169 │ else if (w === 5) {}
+    170 │ else if (w === 2) {}
+  > 171 │ else if (v === 3) {}
+        │          ^^^^^^^
+    172 │ else {}
+    173 │ else if (v === 16) {}
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```
+
+```
+chains.js:179:10 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
+  
+    177 │ else if (v === 20) {}
+    178 │ else if (w === 2) {}
+  > 179 │ else if (v === 3) {}
+        │          ^^^^^^^
+    180 │ 
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
+
+```

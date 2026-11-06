@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/declaration/parity-custom-property-urls/unicode.scss
+---
+
+# Input
+
+```scss
+.icon{
+--line:url(/icons/x .svg);
+--paragraph:url(/icons/x .svg);
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineWidth": 80
+  }
+}
+```
+
+# Formatted
+
+```scss
+.icon {
+	--line: url(/icons/x .svg);
+	--paragraph: url(/icons/x .svg);
+}
+
+```

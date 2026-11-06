@@ -1,0 +1,8 @@
+// should generate diagnostics
+[
+  "",
+  "p { color: red; }",
+  "  p { color: red; }",
+  "\np { color: red; }",
+  "/* header */\np { color: red; }"
+]

@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: longhand-except-valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <MyComp value foo-bar :show="true" />
+</template>
+
+```

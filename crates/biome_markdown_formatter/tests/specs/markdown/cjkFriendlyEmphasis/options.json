@@ -1,0 +1,7 @@
+{
+  "markdown": {
+    "parser": {
+      "cjkFriendlyEmphasis": true
+    }
+  }
+}

@@ -25,13 +25,15 @@ function g(whatever: any): any {}
 ```
 invalidParams.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     1 │ // different name from implementation, but same between overloads
   > 2 │ function f(foo: string): string;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ function f(foo: number): string;
     4 │ function f(param: any): string {return ""}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -49,13 +51,15 @@ invalidParams.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidParams.ts:7:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     6 │ // Destructuring doesn't count since they don't have names
   > 7 │ function f2(foo: string, {bar}: Record<"bar", string>): string;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ function f2(foo: string, {barrer}: Record<"bar" | "barrer", string>): string;
     9 │ function f2(whatever: any): string {return "foooarafv"}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -77,13 +81,15 @@ invalidParams.ts:7:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidParams.ts:12:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     11 │ // neither does array spread
   > 12 │ function g(foo: string, [a, b]: [number, string]): string;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ function g(foo: string, [a, b]: [string, string]): string;
     14 │ function g(whatever: any): any {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   

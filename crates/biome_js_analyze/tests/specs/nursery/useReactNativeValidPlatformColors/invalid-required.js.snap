@@ -1,0 +1,78 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-required.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const { PlatformColor, DynamicColorIOS } = require('react-native');
+const ReactNative = require('react-native');
+
+const labelColor = 'labelColor';
+const destructured = PlatformColor(labelColor);
+const destructuredDynamic = DynamicColorIOS(colors);
+const member = ReactNative.PlatformColor(labelColor);
+
+```
+
+# Diagnostics
+```
+invalid-required.js:6:36 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    5 │ const labelColor = 'labelColor';
+  > 6 │ const destructured = PlatformColor(labelColor);
+      │                                    ^^^^^^^^^^
+    7 │ const destructuredDynamic = DynamicColorIOS(colors);
+    8 │ const member = ReactNative.PlatformColor(labelColor);
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-required.js:7:44 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × DynamicColorIOS() must be called with a single object written directly in the call.
+  
+    5 │ const labelColor = 'labelColor';
+    6 │ const destructured = PlatformColor(labelColor);
+  > 7 │ const destructuredDynamic = DynamicColorIOS(colors);
+      │                                            ^^^^^^^^
+    8 │ const member = ReactNative.PlatformColor(labelColor);
+    9 │ 
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Pass an object like { light: "black", dark: "white" }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-required.js:8:42 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    6 │ const destructured = PlatformColor(labelColor);
+    7 │ const destructuredDynamic = DynamicColorIOS(colors);
+  > 8 │ const member = ReactNative.PlatformColor(labelColor);
+      │                                          ^^^^^^^^^^
+    9 │ 
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

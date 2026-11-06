@@ -34,7 +34,9 @@ use crate::token_source::{
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T, VOID_ELEMENTS};
 use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
+use biome_parser::parse_recovery::{
+    ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
+};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -269,6 +271,9 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 /// Parses `<?instruction foo="bar" ?>
+///
+/// Every token up to the `?>` is lexed in
+/// [HtmlLexContext::ProcessingInstruction], whatever the framework of the file.
 fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<?]) {
         return Absent;
@@ -277,10 +282,10 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     let start_range = p.cur_range();
-    p.bump_with_context(T![<?], inside_tag_context(p));
+    p.bump_with_context(T![<?], HtmlLexContext::ProcessingInstruction);
 
     let name_range = p.cur_range();
-    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+    parse_processing_instruction_name(p, HTML_TAG_NAME).or_add_diagnostic(p, expected_element_name);
 
     if start_range.end() != name_range.start() {
         p.error(expected_no_spaces(
@@ -289,11 +294,128 @@ fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
         ));
     }
 
-    AttributeList::default().parse_list(p);
+    ProcessingInstructionAttributeList.parse_list(p);
 
     p.expect(T![?>]);
 
     Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
+}
+
+/// Parses a name inside a processing instruction as a node of `kind`: the
+/// target as `HTML_TAG_NAME`, or an attribute name as `HTML_ATTRIBUTE_NAME`.
+#[inline]
+fn parse_processing_instruction_name(p: &mut HtmlParser, kind: HtmlSyntaxKind) -> ParsedSyntax {
+    if !p.at(HTML_LITERAL) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::ProcessingInstruction);
+
+    Present(m.complete(p, kind))
+}
+
+/// Parses an attribute of a processing instruction, such as `version="1.0"`
+/// in `<?xml version="1.0"?>`. The value can be unquoted, as in `<?foo a=b?>`.
+#[inline]
+fn parse_processing_instruction_attribute(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(HTML_LITERAL) {
+        return Absent;
+    }
+
+    let m = p.start();
+    parse_processing_instruction_name(p, HTML_ATTRIBUTE_NAME).ok();
+
+    if p.at(T![=]) {
+        let initializer = p.start();
+        p.bump_with_context(T![=], HtmlLexContext::ProcessingInstruction);
+
+        if p.at(HTML_STRING_LITERAL) || p.at(HTML_LITERAL) {
+            let value = p.start();
+            p.bump_remap_with_context(HTML_STRING_LITERAL, HtmlLexContext::ProcessingInstruction);
+            value.complete(p, HTML_STRING);
+        } else {
+            p.error(expected_initializer(p, p.cur_range()));
+        }
+
+        initializer.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE);
+    }
+
+    Present(m.complete(p, HTML_ATTRIBUTE))
+}
+
+/// Whether the parser is at the `?>` that closes a processing instruction, or
+/// at a token that ends an instruction whose `?>` is missing.
+#[inline]
+fn is_at_processing_instruction_end(p: &mut HtmlParser) -> bool {
+    p.at_ts(token_set![T![?>], T![>], T![<], T![<?]])
+}
+
+struct ProcessingInstructionAttributeList;
+
+impl ParseNodeList for ProcessingInstructionAttributeList {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const LIST_KIND: Self::Kind = HTML_ATTRIBUTE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_processing_instruction_attribute(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        is_at_processing_instruction_end(p)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &ProcessingInstructionAttributeListRecovery,
+            expected_attribute,
+        )
+    }
+}
+
+/// Skips the tokens of a processing instruction that cannot start an
+/// attribute, such as the `"a"` of `<?php echo "a" ?>`, up to the next name or
+/// the end of the instruction.
+struct ProcessingInstructionAttributeListRecovery;
+
+impl ParseRecovery for ProcessingInstructionAttributeListRecovery {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const RECOVERED_KIND: Self::Kind = HTML_BOGUS_ATTRIBUTE;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(HTML_LITERAL) || is_at_processing_instruction_end(p)
+    }
+
+    fn recover(&self, p: &mut Self::Parser<'_>) -> RecoveryResult {
+        if p.at(EOF) {
+            return Err(RecoveryError::Eof);
+        }
+
+        if self.is_at_recovered(p) {
+            return Err(RecoveryError::AlreadyRecovered);
+        }
+
+        if p.is_speculative_parsing() {
+            return Err(RecoveryError::RecoveryDisabled);
+        }
+
+        let m = p.start();
+
+        // The default recovery lexes the skipped tokens in the regular
+        // context, which would read the closing `?>` as text.
+        while !(self.is_at_recovered(p) || p.at(EOF)) {
+            p.bump_any_with_context(HtmlLexContext::ProcessingInstruction);
+        }
+
+        Ok(m.complete(p, Self::RECOVERED_KIND))
+    }
 }
 
 /// Whether a top-level block of a Vue single-file component holds something
@@ -770,7 +892,6 @@ impl ParseNodeList for ElementList {
     }
 }
 
-#[derive(Default)]
 struct AttributeList {
     /// Whether to watch for a `lang` attribute. Off unless the caller asks, so
     /// that ordinary attribute parsing doesn't pay for the lookahead.
@@ -807,7 +928,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![?>]) || p.at(T![/]) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(

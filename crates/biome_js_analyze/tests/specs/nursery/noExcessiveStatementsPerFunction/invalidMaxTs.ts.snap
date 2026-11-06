@@ -1,0 +1,114 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidMaxTs.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function overload(a: string): void;
+function overload(a: number): void;
+function overload(a: string | number) { a; b; c; }
+
+abstract class C {
+	method(): void;
+	method() { a; b; c; }
+	@decorator
+	decorated() { a; b; c; }
+}
+
+class D {
+	@decorator()
+	@other
+	public static decorated() { a; b; c; }
+}
+
+```
+
+# Diagnostics
+```
+invalidMaxTs.ts:4:1 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    2 │ function overload(a: string): void;
+    3 │ function overload(a: number): void;
+  > 4 │ function overload(a: string | number) { a; b; c; }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ abstract class C {
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTs.ts:8:2 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+     6 │ abstract class C {
+     7 │ 	method(): void;
+   > 8 │ 	method() { a; b; c; }
+       │ 	^^^^^^^^
+     9 │ 	@decorator
+    10 │ 	decorated() { a; b; c; }
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTs.ts:9:2 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+     7 │ 	method(): void;
+     8 │ 	method() { a; b; c; }
+   > 9 │ 	@decorator
+       │ 	^^^^^^^^^^
+  > 10 │ 	decorated() { a; b; c; }
+       │ 	^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidMaxTs.ts:14:2 lint/nursery/noExcessiveStatementsPerFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function has too many statements (3). Maximum allowed is 2.
+  
+    13 │ class D {
+  > 14 │ 	@decorator()
+       │ 	^^^^^^^^^^^^
+  > 15 │ 	@other
+  > 16 │ 	public static decorated() { a; b; c; }
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Functions with many statements are harder to read, test, and maintain.
+  
+  i Consider splitting this function into smaller functions.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

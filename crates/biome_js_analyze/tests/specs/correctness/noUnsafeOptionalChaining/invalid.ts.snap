@@ -35,6 +35,10 @@ invalid.ts:2:7 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     3 │ (a?.b as any)();
     4 │ (a?.b as any).c;
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -58,6 +62,10 @@ invalid.ts:3:3 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
       │              ^^
     4 │ (a?.b as any).c;
     5 │ (a?.b satisfies any).c;
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -83,6 +91,10 @@ invalid.ts:4:3 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     5 │ (a?.b satisfies any).c;
     6 │ (<any>a?.b)();
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -106,6 +118,10 @@ invalid.ts:5:3 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
       │                      ^
     6 │ (<any>a?.b)();
     7 │ new (a?.b<string>)();
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -131,6 +147,10 @@ invalid.ts:6:8 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     7 │ new (a?.b<string>)();
     8 │ for (const x of a?.b as any[]);
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -155,6 +175,10 @@ invalid.ts:7:7 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     8 │ for (const x of a?.b as any[]);
     9 │ 
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -176,6 +200,10 @@ invalid.ts:8:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
   > 8 │ for (const x of a?.b as any[]);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     9 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```

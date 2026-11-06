@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+/* should not generate diagnostics */
+var a = 'hello world';
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+0x1234;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+0X5;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+a = 0;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+0.1;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+0.5e1;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const numbers = [0o71, 0O71, 0b101, 0B101, 0xFF, 0XFF, 57, 0e1, 0E1, .5];
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const numbers = [0n, 10n, 0o71n, 0O71n, 0b101n, 0xFFn, 1_000, 0o7_1];
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const text = '071'; const template = `071`; const pattern = /071/;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const text = '\071';
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const object = { '071': true, '08': false, 0: true, 0o71: false, 57() {}, 0n: true };
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const { '071': value } = object;
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */
+const object = { get '071'() {}, set '007'(value) {} };
+```

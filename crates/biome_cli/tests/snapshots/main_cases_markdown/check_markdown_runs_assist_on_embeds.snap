@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "analyzeEmbeds": true
+  }
+}
+```
+
+## `file.md`
+
+```md
+# Embeds
+
+```js
+import { a, b } from "./module.js";
+
+export { a, b };
+```
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

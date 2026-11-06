@@ -1,0 +1,1690 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+array.splice(0, 1);
+array.splice();
+array.splice(index, 0);
+array.splice(index, -1);
+array.splice(index, +0);
+array.splice(index, - -0);
+array.splice(+0, +1);
+array.splice(0, - -1);
+array.splice(- -0, 1);
+array.splice(0, 0, element);
+array.splice(0, -1, element);
+array.splice(0, 0, element, ...moreElements);
+array.splice(0, 0, ...elements);
+array.splice(array.length - 1, 1);
+array.splice(array.length - +1, +1);
+object.array.splice(object.array.length - 1, 1);
+array.splice(array.length, 0, element);
+array.splice(array.length, 0, element, ...moreElements);
+array.splice(array.length, 0, ...elements);
+object.array.splice(object.array.length, 0, element);
+object["array"].splice(object.array.length, 0, element);
+array.splice(0);
+object.array.splice(0);
+this.items.splice(0);
+array.splice(0, array.length);
+object.array.splice(0, object.array.length);
+
+// Other kinds of objects
+[1, 2, 3].splice(0, 1);
+getArray().splice(0, 1);
+object[foo?.bar].splice(index, 0);
+
+// Parentheses, trailing commas, and line breaks
+(array.splice)(0, 1);
+(array).splice(0, 1);
+(array.splice(0));
+array.splice((0), (1));
+array.splice(0, 1,);
+array.splice(0, 0, element,);
+array.splice(0, 0, (first, second));
+array.splice(array.length, 0, (first, second));
+array
+	.splice(
+		0,
+		0,
+		element,
+	);
+
+// The comma operator discards the value of every operand except the last one.
+array.splice(0), f();
+array.splice(0, array.length), f();
+f(), array.splice(0);
+f(), array.splice(0), g();
+array.splice(index, 0), f();
+array.splice(0, 1), f();
+
+// The returned value is used, so there is no fix.
+const noOpResult = array.splice(index, 0);
+const shiftResult = array.splice(0, 1);
+const unshiftResult = array.splice(0, 0, element);
+const popResult = array.splice(array.length - 1, 1);
+const pushResult = array.splice(array.length, 0, element);
+consume((f(), array.splice(0, 1)));
+
+// A fix would remove these comments.
+array.splice(0, /* comment */ 0, element);
+array.splice(/* comment */ 0, 1);
+array.splice(index, /* comment */ 0);
+array.splice(index, 0) /* comment */;
+array.splice(index, 0); // comment
+// comment
+array.splice(index, 0);
+
+// Removing these calls would also remove other function calls.
+array.splice(getIndex(), 0);
+getArray().splice(index, 0);
+array.splice(index++, 0);
+
+// Removing this call would leave an `if` statement without a body.
+if (condition) array.splice(index, 0);
+
+// `push()` would add the element at a different position if `createElement()` changes the array.
+array.splice(array.length, 0, createElement());
+array.splice(array.length, 0, ...createElements());
+array.splice(0, 0, createElement());
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.splice(0, 1);
+      │ ^^^^^^^^^^^^^^^^^^
+    3 │ array.splice();
+    4 │ array.splice(index, 0);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - array.splice(0,·1);
+        2 │ + array.shift();
+     3  3 │   array.splice();
+     4  4 │   array.splice(index, 0);
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.splice(0, 1);
+  > 3 │ array.splice();
+      │ ^^^^^^^^^^^^^^
+    4 │ array.splice(index, 0);
+    5 │ array.splice(index, -1);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   array.splice(0, 1);
+     3    │ - array.splice();
+     4  3 │   array.splice(index, 0);
+     5  4 │   array.splice(index, -1);
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    2 │ array.splice(0, 1);
+    3 │ array.splice();
+  > 4 │ array.splice(index, 0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ array.splice(index, -1);
+    6 │ array.splice(index, +0);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+     2  2 │   array.splice(0, 1);
+     3  3 │   array.splice();
+     4    │ - array.splice(index,·0);
+     5  4 │   array.splice(index, -1);
+     6  5 │   array.splice(index, +0);
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    3 │ array.splice();
+    4 │ array.splice(index, 0);
+  > 5 │ array.splice(index, -1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ array.splice(index, +0);
+    7 │ array.splice(index, - -0);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+     3  3 │   array.splice();
+     4  4 │   array.splice(index, 0);
+     5    │ - array.splice(index,·-1);
+     6  5 │   array.splice(index, +0);
+     7  6 │   array.splice(index, - -0);
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    4 │ array.splice(index, 0);
+    5 │ array.splice(index, -1);
+  > 6 │ array.splice(index, +0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ array.splice(index, - -0);
+    8 │ array.splice(+0, +1);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+     4  4 │   array.splice(index, 0);
+     5  5 │   array.splice(index, -1);
+     6    │ - array.splice(index,·+0);
+     7  6 │   array.splice(index, - -0);
+     8  7 │   array.splice(+0, +1);
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    5 │ array.splice(index, -1);
+    6 │ array.splice(index, +0);
+  > 7 │ array.splice(index, - -0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ array.splice(+0, +1);
+    9 │ array.splice(0, - -1);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+     5  5 │   array.splice(index, -1);
+     6  6 │   array.splice(index, +0);
+     7    │ - array.splice(index,·-·-0);
+     8  7 │   array.splice(+0, +1);
+     9  8 │   array.splice(0, - -1);
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+     6 │ array.splice(index, +0);
+     7 │ array.splice(index, - -0);
+   > 8 │ array.splice(+0, +1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+     9 │ array.splice(0, - -1);
+    10 │ array.splice(- -0, 1);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+     6  6 │   array.splice(index, +0);
+     7  7 │   array.splice(index, - -0);
+     8    │ - array.splice(+0,·+1);
+        8 │ + array.shift();
+     9  9 │   array.splice(0, - -1);
+    10 10 │   array.splice(- -0, 1);
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+     7 │ array.splice(index, - -0);
+     8 │ array.splice(+0, +1);
+   > 9 │ array.splice(0, - -1);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    10 │ array.splice(- -0, 1);
+    11 │ array.splice(0, 0, element);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+     7  7 │   array.splice(index, - -0);
+     8  8 │   array.splice(+0, +1);
+     9    │ - array.splice(0,·-·-1);
+        9 │ + array.shift();
+    10 10 │   array.splice(- -0, 1);
+    11 11 │   array.splice(0, 0, element);
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+     8 │ array.splice(+0, +1);
+     9 │ array.splice(0, - -1);
+  > 10 │ array.splice(- -0, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    11 │ array.splice(0, 0, element);
+    12 │ array.splice(0, -1, element);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+     8  8 │   array.splice(+0, +1);
+     9  9 │   array.splice(0, - -1);
+    10    │ - array.splice(-·-0,·1);
+       10 │ + array.shift();
+    11 11 │   array.splice(0, 0, element);
+    12 12 │   array.splice(0, -1, element);
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+     9 │ array.splice(0, - -1);
+    10 │ array.splice(- -0, 1);
+  > 11 │ array.splice(0, 0, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ array.splice(0, -1, element);
+    13 │ array.splice(0, 0, element, ...moreElements);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+     9  9 │   array.splice(0, - -1);
+    10 10 │   array.splice(- -0, 1);
+    11    │ - array.splice(0,·0,·element);
+       11 │ + array.unshift(element);
+    12 12 │   array.splice(0, -1, element);
+    13 13 │   array.splice(0, 0, element, ...moreElements);
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    10 │ array.splice(- -0, 1);
+    11 │ array.splice(0, 0, element);
+  > 12 │ array.splice(0, -1, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ array.splice(0, 0, element, ...moreElements);
+    14 │ array.splice(0, 0, ...elements);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    10 10 │   array.splice(- -0, 1);
+    11 11 │   array.splice(0, 0, element);
+    12    │ - array.splice(0,·-1,·element);
+       12 │ + array.unshift(element);
+    13 13 │   array.splice(0, 0, element, ...moreElements);
+    14 14 │   array.splice(0, 0, ...elements);
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    11 │ array.splice(0, 0, element);
+    12 │ array.splice(0, -1, element);
+  > 13 │ array.splice(0, 0, element, ...moreElements);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ array.splice(0, 0, ...elements);
+    15 │ array.splice(array.length - 1, 1);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    11 11 │   array.splice(0, 0, element);
+    12 12 │   array.splice(0, -1, element);
+    13    │ - array.splice(0,·0,·element,·...moreElements);
+       13 │ + array.unshift(element,·...moreElements);
+    14 14 │   array.splice(0, 0, ...elements);
+    15 15 │   array.splice(array.length - 1, 1);
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    12 │ array.splice(0, -1, element);
+    13 │ array.splice(0, 0, element, ...moreElements);
+  > 14 │ array.splice(0, 0, ...elements);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ array.splice(array.length - 1, 1);
+    16 │ array.splice(array.length - +1, +1);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    12 12 │   array.splice(0, -1, element);
+    13 13 │   array.splice(0, 0, element, ...moreElements);
+    14    │ - array.splice(0,·0,·...elements);
+       14 │ + array.unshift(...elements);
+    15 15 │   array.splice(array.length - 1, 1);
+    16 16 │   array.splice(array.length - +1, +1);
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as pop().
+  
+    13 │ array.splice(0, 0, element, ...moreElements);
+    14 │ array.splice(0, 0, ...elements);
+  > 15 │ array.splice(array.length - 1, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ array.splice(array.length - +1, +1);
+    17 │ object.array.splice(object.array.length - 1, 1);
+  
+  i pop() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use pop() instead.
+  
+    13 13 │   array.splice(0, 0, element, ...moreElements);
+    14 14 │   array.splice(0, 0, ...elements);
+    15    │ - array.splice(array.length·-·1,·1);
+       15 │ + array.pop();
+    16 16 │   array.splice(array.length - +1, +1);
+    17 17 │   object.array.splice(object.array.length - 1, 1);
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as pop().
+  
+    14 │ array.splice(0, 0, ...elements);
+    15 │ array.splice(array.length - 1, 1);
+  > 16 │ array.splice(array.length - +1, +1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ object.array.splice(object.array.length - 1, 1);
+    18 │ array.splice(array.length, 0, element);
+  
+  i pop() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use pop() instead.
+  
+    14 14 │   array.splice(0, 0, ...elements);
+    15 15 │   array.splice(array.length - 1, 1);
+    16    │ - array.splice(array.length·-·+1,·+1);
+       16 │ + array.pop();
+    17 17 │   object.array.splice(object.array.length - 1, 1);
+    18 18 │   array.splice(array.length, 0, element);
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as pop().
+  
+    15 │ array.splice(array.length - 1, 1);
+    16 │ array.splice(array.length - +1, +1);
+  > 17 │ object.array.splice(object.array.length - 1, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ array.splice(array.length, 0, element);
+    19 │ array.splice(array.length, 0, element, ...moreElements);
+  
+  i pop() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use pop() instead.
+  
+    15 15 │   array.splice(array.length - 1, 1);
+    16 16 │   array.splice(array.length - +1, +1);
+    17    │ - object.array.splice(object.array.length·-·1,·1);
+       17 │ + object.array.pop();
+    18 18 │   array.splice(array.length, 0, element);
+    19 19 │   array.splice(array.length, 0, element, ...moreElements);
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    16 │ array.splice(array.length - +1, +1);
+    17 │ object.array.splice(object.array.length - 1, 1);
+  > 18 │ array.splice(array.length, 0, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ array.splice(array.length, 0, element, ...moreElements);
+    20 │ array.splice(array.length, 0, ...elements);
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+    16 16 │   array.splice(array.length - +1, +1);
+    17 17 │   object.array.splice(object.array.length - 1, 1);
+    18    │ - array.splice(array.length,·0,·element);
+       18 │ + array.push(element);
+    19 19 │   array.splice(array.length, 0, element, ...moreElements);
+    20 20 │   array.splice(array.length, 0, ...elements);
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    17 │ object.array.splice(object.array.length - 1, 1);
+    18 │ array.splice(array.length, 0, element);
+  > 19 │ array.splice(array.length, 0, element, ...moreElements);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ array.splice(array.length, 0, ...elements);
+    21 │ object.array.splice(object.array.length, 0, element);
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+    17 17 │   object.array.splice(object.array.length - 1, 1);
+    18 18 │   array.splice(array.length, 0, element);
+    19    │ - array.splice(array.length,·0,·element,·...moreElements);
+       19 │ + array.push(element,·...moreElements);
+    20 20 │   array.splice(array.length, 0, ...elements);
+    21 21 │   object.array.splice(object.array.length, 0, element);
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    18 │ array.splice(array.length, 0, element);
+    19 │ array.splice(array.length, 0, element, ...moreElements);
+  > 20 │ array.splice(array.length, 0, ...elements);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ object.array.splice(object.array.length, 0, element);
+    22 │ object["array"].splice(object.array.length, 0, element);
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+    18 18 │   array.splice(array.length, 0, element);
+    19 19 │   array.splice(array.length, 0, element, ...moreElements);
+    20    │ - array.splice(array.length,·0,·...elements);
+       20 │ + array.push(...elements);
+    21 21 │   object.array.splice(object.array.length, 0, element);
+    22 22 │   object["array"].splice(object.array.length, 0, element);
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    19 │ array.splice(array.length, 0, element, ...moreElements);
+    20 │ array.splice(array.length, 0, ...elements);
+  > 21 │ object.array.splice(object.array.length, 0, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ object["array"].splice(object.array.length, 0, element);
+    23 │ array.splice(0);
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+    19 19 │   array.splice(array.length, 0, element, ...moreElements);
+    20 20 │   array.splice(array.length, 0, ...elements);
+    21    │ - object.array.splice(object.array.length,·0,·element);
+       21 │ + object.array.push(element);
+    22 22 │   object["array"].splice(object.array.length, 0, element);
+    23 23 │   array.splice(0);
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    20 │ array.splice(array.length, 0, ...elements);
+    21 │ object.array.splice(object.array.length, 0, element);
+  > 22 │ object["array"].splice(object.array.length, 0, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ array.splice(0);
+    24 │ object.array.splice(0);
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+    20 20 │   array.splice(array.length, 0, ...elements);
+    21 21 │   object.array.splice(object.array.length, 0, element);
+    22    │ - object["array"].splice(object.array.length,·0,·element);
+       22 │ + object["array"].push(element);
+    23 23 │   array.splice(0);
+    24 24 │   object.array.splice(0);
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    21 │ object.array.splice(object.array.length, 0, element);
+    22 │ object["array"].splice(object.array.length, 0, element);
+  > 23 │ array.splice(0);
+       │ ^^^^^^^^^^^^^^^
+    24 │ object.array.splice(0);
+    25 │ this.items.splice(0);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    21 21 │   object.array.splice(object.array.length, 0, element);
+    22 22 │   object["array"].splice(object.array.length, 0, element);
+    23    │ - array.splice(0);
+       23 │ + array.length·=·0;
+    24 24 │   object.array.splice(0);
+    25 25 │   this.items.splice(0);
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    22 │ object["array"].splice(object.array.length, 0, element);
+    23 │ array.splice(0);
+  > 24 │ object.array.splice(0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    25 │ this.items.splice(0);
+    26 │ array.splice(0, array.length);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    22 22 │   object["array"].splice(object.array.length, 0, element);
+    23 23 │   array.splice(0);
+    24    │ - object.array.splice(0);
+       24 │ + object.array.length·=·0;
+    25 25 │   this.items.splice(0);
+    26 26 │   array.splice(0, array.length);
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    23 │ array.splice(0);
+    24 │ object.array.splice(0);
+  > 25 │ this.items.splice(0);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    26 │ array.splice(0, array.length);
+    27 │ object.array.splice(0, object.array.length);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    23 23 │   array.splice(0);
+    24 24 │   object.array.splice(0);
+    25    │ - this.items.splice(0);
+       25 │ + this.items.length·=·0;
+    26 26 │   array.splice(0, array.length);
+    27 27 │   object.array.splice(0, object.array.length);
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    24 │ object.array.splice(0);
+    25 │ this.items.splice(0);
+  > 26 │ array.splice(0, array.length);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ object.array.splice(0, object.array.length);
+    28 │ 
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    24 24 │   object.array.splice(0);
+    25 25 │   this.items.splice(0);
+    26    │ - array.splice(0,·array.length);
+       26 │ + array.length·=·0;
+    27 27 │   object.array.splice(0, object.array.length);
+    28 28 │   
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    25 │ this.items.splice(0);
+    26 │ array.splice(0, array.length);
+  > 27 │ object.array.splice(0, object.array.length);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ // Other kinds of objects
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    25 25 │   this.items.splice(0);
+    26 26 │   array.splice(0, array.length);
+    27    │ - object.array.splice(0,·object.array.length);
+       27 │ + object.array.length·=·0;
+    28 28 │   
+    29 29 │   // Other kinds of objects
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    29 │ // Other kinds of objects
+  > 30 │ [1, 2, 3].splice(0, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ getArray().splice(0, 1);
+    32 │ object[foo?.bar].splice(index, 0);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    28 28 │   
+    29 29 │   // Other kinds of objects
+    30    │ - [1,·2,·3].splice(0,·1);
+       30 │ + [1,·2,·3].shift();
+    31 31 │   getArray().splice(0, 1);
+    32 32 │   object[foo?.bar].splice(index, 0);
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    29 │ // Other kinds of objects
+    30 │ [1, 2, 3].splice(0, 1);
+  > 31 │ getArray().splice(0, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ object[foo?.bar].splice(index, 0);
+    33 │ 
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    29 29 │   // Other kinds of objects
+    30 30 │   [1, 2, 3].splice(0, 1);
+    31    │ - getArray().splice(0,·1);
+       31 │ + getArray().shift();
+    32 32 │   object[foo?.bar].splice(index, 0);
+    33 33 │   
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    30 │ [1, 2, 3].splice(0, 1);
+    31 │ getArray().splice(0, 1);
+  > 32 │ object[foo?.bar].splice(index, 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ // Parentheses, trailing commas, and line breaks
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+    30 30 │   [1, 2, 3].splice(0, 1);
+    31 31 │   getArray().splice(0, 1);
+    32    │ - object[foo?.bar].splice(index,·0);
+    33 32 │   
+    34 33 │   // Parentheses, trailing commas, and line breaks
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    34 │ // Parentheses, trailing commas, and line breaks
+  > 35 │ (array.splice)(0, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    36 │ (array).splice(0, 1);
+    37 │ (array.splice(0));
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    33 33 │   
+    34 34 │   // Parentheses, trailing commas, and line breaks
+    35    │ - (array.splice)(0,·1);
+       35 │ + (array.shift)();
+    36 36 │   (array).splice(0, 1);
+    37 37 │   (array.splice(0));
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    34 │ // Parentheses, trailing commas, and line breaks
+    35 │ (array.splice)(0, 1);
+  > 36 │ (array).splice(0, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    37 │ (array.splice(0));
+    38 │ array.splice((0), (1));
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    34 34 │   // Parentheses, trailing commas, and line breaks
+    35 35 │   (array.splice)(0, 1);
+    36    │ - (array).splice(0,·1);
+       36 │ + (array).shift();
+    37 37 │   (array.splice(0));
+    38 38 │   array.splice((0), (1));
+  
+
+```
+
+```
+invalid.js:37:2 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    35 │ (array.splice)(0, 1);
+    36 │ (array).splice(0, 1);
+  > 37 │ (array.splice(0));
+       │  ^^^^^^^^^^^^^^^
+    38 │ array.splice((0), (1));
+    39 │ array.splice(0, 1,);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    35 35 │   (array.splice)(0, 1);
+    36 36 │   (array).splice(0, 1);
+    37    │ - (array.splice(0));
+       37 │ + (array.length·=·0);
+    38 38 │   array.splice((0), (1));
+    39 39 │   array.splice(0, 1,);
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    36 │ (array).splice(0, 1);
+    37 │ (array.splice(0));
+  > 38 │ array.splice((0), (1));
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    39 │ array.splice(0, 1,);
+    40 │ array.splice(0, 0, element,);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    36 36 │   (array).splice(0, 1);
+    37 37 │   (array.splice(0));
+    38    │ - array.splice((0),·(1));
+       38 │ + array.shift();
+    39 39 │   array.splice(0, 1,);
+    40 40 │   array.splice(0, 0, element,);
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    37 │ (array.splice(0));
+    38 │ array.splice((0), (1));
+  > 39 │ array.splice(0, 1,);
+       │ ^^^^^^^^^^^^^^^^^^^
+    40 │ array.splice(0, 0, element,);
+    41 │ array.splice(0, 0, (first, second));
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    37 37 │   (array.splice(0));
+    38 38 │   array.splice((0), (1));
+    39    │ - array.splice(0,·1,);
+       39 │ + array.shift();
+    40 40 │   array.splice(0, 0, element,);
+    41 41 │   array.splice(0, 0, (first, second));
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    38 │ array.splice((0), (1));
+    39 │ array.splice(0, 1,);
+  > 40 │ array.splice(0, 0, element,);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ array.splice(0, 0, (first, second));
+    42 │ array.splice(array.length, 0, (first, second));
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    38 38 │   array.splice((0), (1));
+    39 39 │   array.splice(0, 1,);
+    40    │ - array.splice(0,·0,·element,);
+       40 │ + array.unshift(element,);
+    41 41 │   array.splice(0, 0, (first, second));
+    42 42 │   array.splice(array.length, 0, (first, second));
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    39 │ array.splice(0, 1,);
+    40 │ array.splice(0, 0, element,);
+  > 41 │ array.splice(0, 0, (first, second));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ array.splice(array.length, 0, (first, second));
+    43 │ array
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    39 39 │   array.splice(0, 1,);
+    40 40 │   array.splice(0, 0, element,);
+    41    │ - array.splice(0,·0,·(first,·second));
+       41 │ + array.unshift((first,·second));
+    42 42 │   array.splice(array.length, 0, (first, second));
+    43 43 │   array
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    40 │ array.splice(0, 0, element,);
+    41 │ array.splice(0, 0, (first, second));
+  > 42 │ array.splice(array.length, 0, (first, second));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ array
+    44 │ 	.splice(
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+    40 40 │   array.splice(0, 0, element,);
+    41 41 │   array.splice(0, 0, (first, second));
+    42    │ - array.splice(array.length,·0,·(first,·second));
+       42 │ + array.push((first,·second));
+    43 43 │   array
+    44 44 │   	.splice(
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    41 │ array.splice(0, 0, (first, second));
+    42 │ array.splice(array.length, 0, (first, second));
+  > 43 │ array
+       │ ^^^^^
+  > 44 │ 	.splice(
+  > 45 │ 		0,
+  > 46 │ 		0,
+  > 47 │ 		element,
+  > 48 │ 	);
+       │ 	^
+    49 │ 
+    50 │ // The comma operator discards the value of every operand except the last one.
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    42 42 │   array.splice(array.length, 0, (first, second));
+    43 43 │   array
+    44    │ - → .splice(
+    45    │ - → → 0,
+    46    │ - → → 0,
+       44 │ + → .unshift(
+    47 45 │       element,
+    48 46 │     );
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    50 │ // The comma operator discards the value of every operand except the last one.
+  > 51 │ array.splice(0), f();
+       │ ^^^^^^^^^^^^^^^
+    52 │ array.splice(0, array.length), f();
+    53 │ f(), array.splice(0);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    49 49 │   
+    50 50 │   // The comma operator discards the value of every operand except the last one.
+    51    │ - array.splice(0),·f();
+       51 │ + array.length·=·0,·f();
+    52 52 │   array.splice(0, array.length), f();
+    53 53 │   f(), array.splice(0);
+  
+
+```
+
+```
+invalid.js:52:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    50 │ // The comma operator discards the value of every operand except the last one.
+    51 │ array.splice(0), f();
+  > 52 │ array.splice(0, array.length), f();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ f(), array.splice(0);
+    54 │ f(), array.splice(0), g();
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    50 50 │   // The comma operator discards the value of every operand except the last one.
+    51 51 │   array.splice(0), f();
+    52    │ - array.splice(0,·array.length),·f();
+       52 │ + array.length·=·0,·f();
+    53 53 │   f(), array.splice(0);
+    54 54 │   f(), array.splice(0), g();
+  
+
+```
+
+```
+invalid.js:53:6 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    51 │ array.splice(0), f();
+    52 │ array.splice(0, array.length), f();
+  > 53 │ f(), array.splice(0);
+       │      ^^^^^^^^^^^^^^^
+    54 │ f(), array.splice(0), g();
+    55 │ array.splice(index, 0), f();
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    51 51 │   array.splice(0), f();
+    52 52 │   array.splice(0, array.length), f();
+    53    │ - f(),·array.splice(0);
+       53 │ + f(),·array.length·=·0;
+    54 54 │   f(), array.splice(0), g();
+    55 55 │   array.splice(index, 0), f();
+  
+
+```
+
+```
+invalid.js:54:6 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    52 │ array.splice(0, array.length), f();
+    53 │ f(), array.splice(0);
+  > 54 │ f(), array.splice(0), g();
+       │      ^^^^^^^^^^^^^^^
+    55 │ array.splice(index, 0), f();
+    56 │ array.splice(0, 1), f();
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+    52 52 │   array.splice(0, array.length), f();
+    53 53 │   f(), array.splice(0);
+    54    │ - f(),·array.splice(0),·g();
+       54 │ + f(),·array.length·=·0,·g();
+    55 55 │   array.splice(index, 0), f();
+    56 56 │   array.splice(0, 1), f();
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    53 │ f(), array.splice(0);
+    54 │ f(), array.splice(0), g();
+  > 55 │ array.splice(index, 0), f();
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    56 │ array.splice(0, 1), f();
+    57 │ 
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    54 │ f(), array.splice(0), g();
+    55 │ array.splice(index, 0), f();
+  > 56 │ array.splice(0, 1), f();
+       │ ^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ // The returned value is used, so there is no fix.
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+    54 54 │   f(), array.splice(0), g();
+    55 55 │   array.splice(index, 0), f();
+    56    │ - array.splice(0,·1),·f();
+       56 │ + array.shift(),·f();
+    57 57 │   
+    58 58 │   // The returned value is used, so there is no fix.
+  
+
+```
+
+```
+invalid.js:59:20 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    58 │ // The returned value is used, so there is no fix.
+  > 59 │ const noOpResult = array.splice(index, 0);
+       │                    ^^^^^^^^^^^^^^^^^^^^^^
+    60 │ const shiftResult = array.splice(0, 1);
+    61 │ const unshiftResult = array.splice(0, 0, element);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i The call always returns an empty array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:21 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    58 │ // The returned value is used, so there is no fix.
+    59 │ const noOpResult = array.splice(index, 0);
+  > 60 │ const shiftResult = array.splice(0, 1);
+       │                     ^^^^^^^^^^^^^^^^^^
+    61 │ const unshiftResult = array.splice(0, 0, element);
+    62 │ const popResult = array.splice(array.length - 1, 1);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i shift() returns the removed element, while splice() returns an array that contains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:61:23 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    59 │ const noOpResult = array.splice(index, 0);
+    60 │ const shiftResult = array.splice(0, 1);
+  > 61 │ const unshiftResult = array.splice(0, 0, element);
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ const popResult = array.splice(array.length - 1, 1);
+    63 │ const pushResult = array.splice(array.length, 0, element);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i unshift() returns the new length of the array, while splice() returns an empty array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:19 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as pop().
+  
+    60 │ const shiftResult = array.splice(0, 1);
+    61 │ const unshiftResult = array.splice(0, 0, element);
+  > 62 │ const popResult = array.splice(array.length - 1, 1);
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ const pushResult = array.splice(array.length, 0, element);
+    64 │ consume((f(), array.splice(0, 1)));
+  
+  i pop() is easier to read, because its name says what the call does.
+  
+  i pop() returns the removed element, while splice() returns an array that contains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:20 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    61 │ const unshiftResult = array.splice(0, 0, element);
+    62 │ const popResult = array.splice(array.length - 1, 1);
+  > 63 │ const pushResult = array.splice(array.length, 0, element);
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ consume((f(), array.splice(0, 1)));
+    65 │ 
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i push() returns the new length of the array, while splice() returns an empty array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:15 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    62 │ const popResult = array.splice(array.length - 1, 1);
+    63 │ const pushResult = array.splice(array.length, 0, element);
+  > 64 │ consume((f(), array.splice(0, 1)));
+       │               ^^^^^^^^^^^^^^^^^^
+    65 │ 
+    66 │ // A fix would remove these comments.
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i shift() returns the removed element, while splice() returns an array that contains it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:67:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    66 │ // A fix would remove these comments.
+  > 67 │ array.splice(0, /* comment */ 0, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ array.splice(/* comment */ 0, 1);
+    69 │ array.splice(index, /* comment */ 0);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    66 │ // A fix would remove these comments.
+    67 │ array.splice(0, /* comment */ 0, element);
+  > 68 │ array.splice(/* comment */ 0, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ array.splice(index, /* comment */ 0);
+    70 │ array.splice(index, 0) /* comment */;
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    67 │ array.splice(0, /* comment */ 0, element);
+    68 │ array.splice(/* comment */ 0, 1);
+  > 69 │ array.splice(index, /* comment */ 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ array.splice(index, 0) /* comment */;
+    71 │ array.splice(index, 0); // comment
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:70:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    68 │ array.splice(/* comment */ 0, 1);
+    69 │ array.splice(index, /* comment */ 0);
+  > 70 │ array.splice(index, 0) /* comment */;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    71 │ array.splice(index, 0); // comment
+    72 │ // comment
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    69 │ array.splice(index, /* comment */ 0);
+    70 │ array.splice(index, 0) /* comment */;
+  > 71 │ array.splice(index, 0); // comment
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    72 │ // comment
+    73 │ array.splice(index, 0);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    71 │ array.splice(index, 0); // comment
+    72 │ // comment
+  > 73 │ array.splice(index, 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 
+    75 │ // Removing these calls would also remove other function calls.
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:76:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    75 │ // Removing these calls would also remove other function calls.
+  > 76 │ array.splice(getIndex(), 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ getArray().splice(index, 0);
+    78 │ array.splice(index++, 0);
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:77:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    75 │ // Removing these calls would also remove other function calls.
+    76 │ array.splice(getIndex(), 0);
+  > 77 │ getArray().splice(index, 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    78 │ array.splice(index++, 0);
+    79 │ 
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    76 │ array.splice(getIndex(), 0);
+    77 │ getArray().splice(index, 0);
+  > 78 │ array.splice(index++, 0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ 
+    80 │ // Removing this call would leave an `if` statement without a body.
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:81:16 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+    80 │ // Removing this call would leave an `if` statement without a body.
+  > 81 │ if (condition) array.splice(index, 0);
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    82 │ 
+    83 │ // `push()` would add the element at a different position if `createElement()` changes the array.
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    83 │ // `push()` would add the element at a different position if `createElement()` changes the array.
+  > 84 │ array.splice(array.length, 0, createElement());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ array.splice(array.length, 0, ...createElements());
+    86 │ array.splice(0, 0, createElement());
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:85:1 lint/nursery/noUselessSplice ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+    83 │ // `push()` would add the element at a different position if `createElement()` changes the array.
+    84 │ array.splice(array.length, 0, createElement());
+  > 85 │ array.splice(array.length, 0, ...createElements());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │ array.splice(0, 0, createElement());
+    87 │ 
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:86:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    84 │ array.splice(array.length, 0, createElement());
+    85 │ array.splice(array.length, 0, ...createElements());
+  > 86 │ array.splice(0, 0, createElement());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ 
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+    84 84 │   array.splice(array.length, 0, createElement());
+    85 85 │   array.splice(array.length, 0, ...createElements());
+    86    │ - array.splice(0,·0,·createElement());
+       86 │ + array.unshift(createElement());
+    87 87 │   
+  
+
+```

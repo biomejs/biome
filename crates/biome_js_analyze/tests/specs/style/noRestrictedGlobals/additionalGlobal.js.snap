@@ -18,6 +18,8 @@ additionalGlobal.js:1:13 lint/style/noRestrictedGlobals ━━━━━━━━
       │             ^
     2 │ 
   
+  i This global variable is listed in the deniedGlobals option.
+  
   i jQuery is not allowed. Use native DOM manipulation instead.
   
 

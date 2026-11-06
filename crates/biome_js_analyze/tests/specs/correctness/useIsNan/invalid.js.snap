@@ -80,6 +80,8 @@ invalid.js:1:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     2 │ 123 === NaN;
     3 │ NaN === "abc";
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
      1    │ - 123·==·NaN;
@@ -100,6 +102,8 @@ invalid.js:2:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
       │ ^^^^^^^^^^^
     3 │ NaN === "abc";
     4 │ NaN == "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -123,6 +127,8 @@ invalid.js:3:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
       │ ^^^^^^^^^^^^^
     4 │ NaN == "abc";
     5 │ 123 != NaN;
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -148,6 +154,8 @@ invalid.js:4:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     5 │ 123 != NaN;
     6 │ 123 !== NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
      2  2 │   123 === NaN;
@@ -171,6 +179,8 @@ invalid.js:5:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
       │ ^^^^^^^^^^
     6 │ 123 !== NaN;
     7 │ NaN !== "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -196,6 +206,8 @@ invalid.js:6:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     7 │ NaN !== "abc";
     8 │ NaN != "abc";
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
      4  4 │   NaN == "abc";
@@ -219,6 +231,8 @@ invalid.js:7:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
       │ ^^^^^^^^^^^^^
     8 │ NaN != "abc";
     9 │ NaN < "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -244,6 +258,8 @@ invalid.js:8:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
      9 │ NaN < "abc";
     10 │ "abc" < NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
      6  6 │   123 !== NaN;
@@ -267,6 +283,8 @@ invalid.js:9:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^
     10 │ "abc" < NaN;
     11 │ NaN > "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -292,6 +310,8 @@ invalid.js:10:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     11 │ NaN > "abc";
     12 │ "abc" > NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
      8  8 │   NaN != "abc";
@@ -315,6 +335,8 @@ invalid.js:11:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^
     12 │ "abc" > NaN;
     13 │ NaN <= "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -340,6 +362,8 @@ invalid.js:12:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     13 │ NaN <= "abc";
     14 │ "abc" <= NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     10 10 │   "abc" < NaN;
@@ -363,6 +387,8 @@ invalid.js:13:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^
     14 │ "abc" <= NaN;
     15 │ NaN >= "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -388,6 +414,8 @@ invalid.js:14:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     15 │ NaN >= "abc";
     16 │ "abc" >= NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     12 12 │   "abc" > NaN;
@@ -411,6 +439,8 @@ invalid.js:15:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^
     16 │ "abc" >= NaN;
     17 │ 123 == Number.NaN;
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -436,6 +466,8 @@ invalid.js:16:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     17 │ 123 == Number.NaN;
     18 │ 123 === Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     14 14 │   "abc" <= NaN;
@@ -459,6 +491,8 @@ invalid.js:17:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     18 │ 123 === Number.NaN;
     19 │ Number.NaN === "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -484,6 +518,8 @@ invalid.js:18:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     19 │ Number.NaN === "abc";
     20 │ Number.NaN == "abc";
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     16 16 │   "abc" >= NaN;
@@ -507,6 +543,8 @@ invalid.js:19:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^
     20 │ Number.NaN == "abc";
     21 │ 123 != Number.NaN;
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -532,6 +570,8 @@ invalid.js:20:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     21 │ 123 != Number.NaN;
     22 │ 123 !== Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     18 18 │   123 === Number.NaN;
@@ -555,6 +595,8 @@ invalid.js:21:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     22 │ 123 !== Number.NaN;
     23 │ Number.NaN !== "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -580,6 +622,8 @@ invalid.js:22:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     23 │ Number.NaN !== "abc";
     24 │ Number.NaN != "abc";
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     20 20 │   Number.NaN == "abc";
@@ -603,6 +647,8 @@ invalid.js:23:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^
     24 │ Number.NaN != "abc";
     25 │ Number.NaN < "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -628,6 +674,8 @@ invalid.js:24:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     25 │ Number.NaN < "abc";
     26 │ "abc" < Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     22 22 │   123 !== Number.NaN;
@@ -651,6 +699,8 @@ invalid.js:25:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^
     26 │ "abc" < Number.NaN;
     27 │ Number.NaN > "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -676,6 +726,8 @@ invalid.js:26:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     27 │ Number.NaN > "abc";
     28 │ "abc" > Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     24 24 │   Number.NaN != "abc";
@@ -699,6 +751,8 @@ invalid.js:27:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^
     28 │ "abc" > Number.NaN;
     29 │ Number.NaN <= "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -724,6 +778,8 @@ invalid.js:28:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     29 │ Number.NaN <= "abc";
     30 │ "abc" <= Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     26 26 │   "abc" < Number.NaN;
@@ -747,6 +803,8 @@ invalid.js:29:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^
     30 │ "abc" <= Number.NaN;
     31 │ Number.NaN >= "abc";
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -772,6 +830,8 @@ invalid.js:30:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     31 │ Number.NaN >= "abc";
     32 │ "abc" >= Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     28 28 │   "abc" > Number.NaN;
@@ -795,6 +855,8 @@ invalid.js:31:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^
     32 │ "abc" >= Number.NaN;
     33 │ x === Number?.NaN;
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -820,6 +882,8 @@ invalid.js:32:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     33 │ x === Number?.NaN;
     34 │ x === Number['NaN'];
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     30 30 │   "abc" <= Number.NaN;
@@ -843,6 +907,8 @@ invalid.js:33:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     34 │ x === Number['NaN'];
     35 │ 
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -868,6 +934,8 @@ invalid.js:34:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     35 │ 
     36 │ 123 == globalThis.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     32 32 │   "abc" >= Number.NaN;
@@ -892,6 +960,8 @@ invalid.js:36:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     37 │ 123 == window.NaN;
     38 │ 123 == globalThis.Number.NaN;
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     34 34 │   x === Number['NaN'];
@@ -914,6 +984,8 @@ invalid.js:37:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     38 │ 123 == globalThis.Number.NaN;
     39 │ 
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
   i Unsafe fix: Use Number.isNaN() instead.
   
@@ -939,6 +1011,8 @@ invalid.js:38:1 lint/correctness/useIsNan  FIXABLE  ━━━━━━━━━�
     39 │ 
     40 │ // switch-case
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
   i Unsafe fix: Use Number.isNaN() instead.
   
     36 36 │   123 == globalThis.NaN;
@@ -962,6 +1036,8 @@ invalid.js:41:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
     42 │ switch(NaN) {}
     43 │ switch(foo) { case NaN: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -976,6 +1052,8 @@ invalid.js:42:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │        ^^^
     43 │ switch(foo) { case NaN: break; }
     44 │ switch(NaN) { default: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -992,6 +1070,8 @@ invalid.js:43:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
     44 │ switch(NaN) { default: break; }
     45 │ switch(NaN) { case foo: break; default: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1006,6 +1086,8 @@ invalid.js:44:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │        ^^^
     45 │ switch(NaN) { case foo: break; default: break; }
     46 │ switch(foo) { case NaN: }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1022,6 +1104,8 @@ invalid.js:45:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
     46 │ switch(foo) { case NaN: }
     47 │ switch(foo) { case (NaN): break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1036,6 +1120,8 @@ invalid.js:46:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │                    ^^^
     47 │ switch(foo) { case (NaN): break; }
     48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1052,6 +1138,8 @@ invalid.js:47:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
     48 │ switch(foo) { case bar: break; case NaN: break; default: break; }
     49 │ switch(foo) { case bar: case NaN: default: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1066,6 +1154,8 @@ invalid.js:48:37 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │                                     ^^^
     49 │ switch(foo) { case bar: case NaN: default: break; }
     50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1082,6 +1172,8 @@ invalid.js:49:30 lint/correctness/useIsNan ━━━━━━━━━━━━�
     50 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case NaN: break; }
     51 │ switch(NaN) { case NaN: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1096,6 +1188,8 @@ invalid.js:50:37 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │                                     ^^^
     51 │ switch(NaN) { case NaN: break; }
     52 │ switch(foo) { case Number.NaN: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1112,6 +1206,8 @@ invalid.js:50:71 lint/correctness/useIsNan ━━━━━━━━━━━━�
     51 │ switch(NaN) { case NaN: break; }
     52 │ switch(foo) { case Number.NaN: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1126,6 +1222,8 @@ invalid.js:51:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │        ^^^
     52 │ switch(foo) { case Number.NaN: break; }
     53 │ switch(Number.NaN) { case foo: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1142,6 +1240,8 @@ invalid.js:51:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
     52 │ switch(foo) { case Number.NaN: break; }
     53 │ switch(Number.NaN) { case foo: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1156,6 +1256,8 @@ invalid.js:52:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │                    ^^^^^^^^^^
     53 │ switch(Number.NaN) { case foo: break; }
     54 │ switch(Number.NaN) {}
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1172,6 +1274,8 @@ invalid.js:53:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
     54 │ switch(Number.NaN) {}
     55 │ switch(Number.NaN) { default: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1186,6 +1290,8 @@ invalid.js:54:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │        ^^^^^^^^^^
     55 │ switch(Number.NaN) { default: break; }
     56 │ switch(Number.NaN) { case foo: break; default: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1202,6 +1308,8 @@ invalid.js:55:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
     56 │ switch(Number.NaN) { case foo: break; default: break; }
     57 │ switch(foo) { case Number.NaN: }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1216,6 +1324,8 @@ invalid.js:56:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │        ^^^^^^^^^^
     57 │ switch(foo) { case Number.NaN: }
     58 │ switch(foo) { case (Number.NaN): break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1232,6 +1342,8 @@ invalid.js:57:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
     58 │ switch(foo) { case (Number.NaN): break; }
     59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1246,6 +1358,8 @@ invalid.js:58:20 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │                    ^^^^^^^^^^^^
     59 │ switch(foo) { case bar: break; case Number.NaN: break; default: break; }
     60 │ switch(foo) { case bar: case Number.NaN: default: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1262,6 +1376,8 @@ invalid.js:59:37 lint/correctness/useIsNan ━━━━━━━━━━━━�
     60 │ switch(foo) { case bar: case Number.NaN: default: break; }
     61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1276,6 +1392,8 @@ invalid.js:60:30 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │                              ^^^^^^^^^^
     61 │ switch(foo) { case bar: break; case NaN: break; case baz: break; case Number.NaN: break; }
     62 │ switch(Number.NaN) { case Number.NaN: break; }
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```
@@ -1292,6 +1410,8 @@ invalid.js:61:37 lint/correctness/useIsNan ━━━━━━━━━━━━�
     62 │ switch(Number.NaN) { case Number.NaN: break; }
     63 │ 
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1307,6 +1427,8 @@ invalid.js:61:71 lint/correctness/useIsNan ━━━━━━━━━━━━�
     62 │ switch(Number.NaN) { case Number.NaN: break; }
     63 │ 
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1321,6 +1443,8 @@ invalid.js:62:8 lint/correctness/useIsNan ━━━━━━━━━━━━�
        │        ^^^^^^^^^^
     63 │ 
   
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
+  
 
 ```
 
@@ -1334,6 +1458,8 @@ invalid.js:62:27 lint/correctness/useIsNan ━━━━━━━━━━━━�
   > 62 │ switch(Number.NaN) { case Number.NaN: break; }
        │                           ^^^^^^^^^^
     63 │ 
+  
+  i NaN is not equal to anything, not even to itself, so comparing with it directly never works as intended.
   
 
 ```

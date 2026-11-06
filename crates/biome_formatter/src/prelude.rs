@@ -3,6 +3,7 @@ pub use crate::format_element::*;
 pub use crate::format_extensions::{MemoizeFormat, Memoized};
 pub use crate::formatter::Formatter;
 pub use crate::printer::PrinterOptions;
+#[cfg(feature = "rowan")]
 pub use crate::trivia::{
     format_dangling_comments, format_leading_comments, format_only_if_breaks,
     format_trailing_comments, should_nestle_adjacent_doc_comments,

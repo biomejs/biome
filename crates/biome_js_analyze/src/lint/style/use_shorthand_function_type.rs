@@ -10,7 +10,7 @@ use biome_js_syntax::{
     AnyJsDeclarationClause, AnyTsReturnType, AnyTsType, JsSyntaxKind, T, TsCallSignatureTypeMember,
     TsFunctionType, TsInterfaceDeclaration, TsObjectType, TsTypeMemberList,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt};
 use biome_rule_options::use_shorthand_function_type::UseShorthandFunctionTypeOptions;
 
 declare_lint_rule! {
@@ -139,9 +139,9 @@ impl Rule for UseShorthandFunctionType {
 
         if let Some(interface_decl) = ts_type_member_list.parent::<TsInterfaceDeclaration>() {
             let type_alias_declaration = ts_type_alias_declaration(
-                make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T![type]).with_trailing_space(),
                 interface_decl.id().ok()?,
-                make::token(T![=]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T![=]).with_trailing_space(),
                 AnyTsType::from(convert_ts_call_signature_type_member_to_function_type(
                     node,
                 )?),
@@ -215,9 +215,9 @@ fn convert_ts_call_signature_type_member_to_function_type(
         make::js_parameters(
             make::token(T!['(']),
             node.parameters().ok()?.items(),
-            make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![')']).with_trailing_space(),
         ),
-        make::token(T![=>]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![=>]).with_trailing_space(),
         node.return_type_annotation()?.ty().ok()?,
     )
     .build();

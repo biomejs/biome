@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-not-component.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+const Foo = {
+  props: {
+    a: String,
+    b: {
+      default() {
+        return this.a;
+      },
+    },
+  },
+};
+</script>
+
+```

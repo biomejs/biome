@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-runtime.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const { other = "Hello" } = defineProps({
+  name: {
+    required: false,
+    default: "Hello",
+  },
+  age: {
+    required: true,
+  },
+  other: {
+    required: false,
+  },
+  list: ["name"],
+});
+</script>
+
+```

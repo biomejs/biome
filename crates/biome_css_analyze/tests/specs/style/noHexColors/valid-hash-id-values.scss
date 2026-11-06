@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+$targets: (app: #app, brand: #Brand);
+$id: #ABCG;
+.strings {
+  values: #BAR #ABCG #a #ab #abcde #abcdefg #-app #_app #and;
+  escaped: #\61 pp;
+  adjacent: #ABC#{G};
+  quoted: "#ABC";
+  --raw: #ABC;
+  fragment: url(#app);
+}
+#ABCG { color: red; }

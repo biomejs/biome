@@ -6,7 +6,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
+use biome_js_syntax::{
+    AnyJsStatement, AnyJsSwitchClause, JsIfStatement, JsStatementList, JsSyntaxKind,
+};
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
     trim_leading_trivia_pieces,
@@ -141,9 +143,12 @@ impl Rule for NoUselessElse {
             rule_category!(),
             else_clause.range(),
             markup! {
-                "This "<Emphasis>"else"</Emphasis>" clause can be omitted because previous branches break early."
+                "This "<Emphasis>"else"</Emphasis>" clause is unnecessary."
             },
-        ))
+        )
+        .note(markup! {
+            "The previous branches break early, so the code in the "<Emphasis>"else"</Emphasis>" clause only runs when none of them matched. The clause adds a level of nesting without changing behavior."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<JsRuleAction> {
@@ -232,6 +237,14 @@ fn breaks_early(statement: AnyJsStatement) -> Option<()> {
                     return None;
                 };
                 if last_case.consequent().is_empty() {
+                    return None;
+                }
+                // Without a `default` clause, no case may match and control
+                // continues after the switch.
+                if !cases
+                    .iter()
+                    .any(|clause| matches!(clause, AnyJsSwitchClause::JsDefaultClause(_)))
+                {
                     return None;
                 }
                 for switch_clause in cases.iter() {

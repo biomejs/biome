@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-function.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  props: ["name"],
+  setup(props) {
+    console.log(props.name, props.title);
+    return { greeting: "hello" };
+  },
+};
+</script>
+
+<template>
+  <p>{{ greeting }} {{ greting }}</p>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-setup-function.vue:6:35 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × title isn't declared as a prop of this component.
+  
+    4 │   props: ["name"],
+    5 │   setup(props) {
+  > 6 │     console.log(props.name, props.title);
+      │                                   ^^^^^
+    7 │     return { greeting: "hello" };
+    8 │   },
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-function.vue:13:24 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × greting isn't declared by this component.
+  
+    12 │ <template>
+  > 13 │   <p>{{ greeting }} {{ greting }}</p>
+       │                        ^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

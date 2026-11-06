@@ -50,7 +50,7 @@ CssRoot {
                                         items: [
                                             CssBogus {
                                                 items: [
-                                                    CssBogus {
+                                                    CssBogusIfTestBooleanExpr {
                                                         items: [
                                                             HASH@16..17 "#" [] [],
                                                             L_CURLY@17..18 "{" [] [],
@@ -130,7 +130,7 @@ CssRoot {
                 1: COLON@14..16 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@16..37
                   0: CSS_BOGUS@16..37
-                    0: CSS_BOGUS@16..37
+                    0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@16..37
                       0: HASH@16..17 "#" [] []
                       1: L_CURLY@17..18 "{" [] []
                       2: CSS_BOGUS@18..37

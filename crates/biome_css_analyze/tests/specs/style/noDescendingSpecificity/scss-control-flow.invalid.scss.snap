@@ -1,0 +1,382 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-control-flow.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin descending {
+  .mixin-parent .mixin-target {}
+  .mixin-target {}
+}
+@include descending;
+
+@mixin content-wrapper {
+  @content;
+}
+@include content-wrapper {
+  .include-parent .include-target {}
+  .include-target {}
+}
+
+@at-root {
+  .at-root-parent .at-root-target {}
+  .at-root-target {}
+}
+
+.outer {
+  @at-root {
+    .nested-at-root-parent .nested-at-root-target {}
+    .nested-at-root-target {}
+  }
+
+  @at-root {
+    & .amp-at-root-parent .amp-at-root-target {}
+    & .amp-at-root-target {}
+  }
+
+  @at-root (with: rule) {
+    .with-rule-parent .with-rule-target {}
+    .with-rule-target {}
+  }
+
+  @at-root (without: rule) {
+    .without-rule-parent .without-rule-target {}
+    .without-rule-target {}
+  }
+}
+
+$condition: true;
+@if $condition {
+  .if-parent .if-target {}
+  .if-target {}
+} @else {
+  .else-parent .else-target {}
+  .else-target {}
+}
+
+@for $index from 1 through 2 {
+  .for-parent .for-target {}
+  .for-target {}
+}
+
+@each $name in first, second {
+  .each-parent .each-target {}
+  .each-target {}
+}
+
+$count: 0;
+@while $count < 1 {
+  .while-parent .while-target {}
+  .while-target {}
+  $count: $count + 1;
+}
+
+```
+
+# Diagnostics
+```
+scss-control-flow.invalid.scss:4:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    2 │ @mixin descending {
+    3 │   .mixin-parent .mixin-target {}
+  > 4 │   .mixin-target {}
+      │   ^^^^^^^^^^^^^
+    5 │ }
+    6 │ @include descending;
+  
+  i This selector specificity is (0, 2, 0)
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin descending {
+  > 3 │   .mixin-parent .mixin-target {}
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │   .mixin-target {}
+    5 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:13:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    11 │ @include content-wrapper {
+    12 │   .include-parent .include-target {}
+  > 13 │   .include-target {}
+       │   ^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    10 │ }
+    11 │ @include content-wrapper {
+  > 12 │   .include-parent .include-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   .include-target {}
+    14 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:18:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    16 │ @at-root {
+    17 │   .at-root-parent .at-root-target {}
+  > 18 │   .at-root-target {}
+       │   ^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    16 │ @at-root {
+  > 17 │   .at-root-parent .at-root-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │   .at-root-target {}
+    19 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:24:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    22 │   @at-root {
+    23 │     .nested-at-root-parent .nested-at-root-target {}
+  > 24 │     .nested-at-root-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^
+    25 │   }
+    26 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    21 │ .outer {
+    22 │   @at-root {
+  > 23 │     .nested-at-root-parent .nested-at-root-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │     .nested-at-root-target {}
+    25 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:29:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    27 │   @at-root {
+    28 │     & .amp-at-root-parent .amp-at-root-target {}
+  > 29 │     & .amp-at-root-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    30 │   }
+    31 │ 
+  
+  i This selector specificity is (0, 3, 0)
+  
+    27 │   @at-root {
+  > 28 │     & .amp-at-root-parent .amp-at-root-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │     & .amp-at-root-target {}
+    30 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:34:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    32 │   @at-root (with: rule) {
+    33 │     .with-rule-parent .with-rule-target {}
+  > 34 │     .with-rule-target {}
+       │     ^^^^^^^^^^^^^^^^^
+    35 │   }
+    36 │ 
+  
+  i This selector specificity is (0, 3, 0)
+  
+    32 │   @at-root (with: rule) {
+  > 33 │     .with-rule-parent .with-rule-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │     .with-rule-target {}
+    35 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:39:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    37 │   @at-root (without: rule) {
+    38 │     .without-rule-parent .without-rule-target {}
+  > 39 │     .without-rule-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^
+    40 │   }
+    41 │ }
+  
+  i This selector specificity is (0, 2, 0)
+  
+    37 │   @at-root (without: rule) {
+  > 38 │     .without-rule-parent .without-rule-target {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │     .without-rule-target {}
+    40 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:46:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    44 │ @if $condition {
+    45 │   .if-parent .if-target {}
+  > 46 │   .if-target {}
+       │   ^^^^^^^^^^
+    47 │ } @else {
+    48 │   .else-parent .else-target {}
+  
+  i This selector specificity is (0, 2, 0)
+  
+    43 │ $condition: true;
+    44 │ @if $condition {
+  > 45 │   .if-parent .if-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    46 │   .if-target {}
+    47 │ } @else {
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:49:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    47 │ } @else {
+    48 │   .else-parent .else-target {}
+  > 49 │   .else-target {}
+       │   ^^^^^^^^^^^^
+    50 │ }
+    51 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    46 │   .if-target {}
+    47 │ } @else {
+  > 48 │   .else-parent .else-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │   .else-target {}
+    50 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:54:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    52 │ @for $index from 1 through 2 {
+    53 │   .for-parent .for-target {}
+  > 54 │   .for-target {}
+       │   ^^^^^^^^^^^
+    55 │ }
+    56 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    52 │ @for $index from 1 through 2 {
+  > 53 │   .for-parent .for-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^
+    54 │   .for-target {}
+    55 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:59:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    57 │ @each $name in first, second {
+    58 │   .each-parent .each-target {}
+  > 59 │   .each-target {}
+       │   ^^^^^^^^^^^^
+    60 │ }
+    61 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    57 │ @each $name in first, second {
+  > 58 │   .each-parent .each-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │   .each-target {}
+    60 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:65:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    63 │ @while $count < 1 {
+    64 │   .while-parent .while-target {}
+  > 65 │   .while-target {}
+       │   ^^^^^^^^^^^^^
+    66 │   $count: $count + 1;
+    67 │ }
+  
+  i This selector specificity is (0, 2, 0)
+  
+    62 │ $count: 0;
+    63 │ @while $count < 1 {
+  > 64 │   .while-parent .while-target {}
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │   .while-target {}
+    66 │   $count: $count + 1;
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

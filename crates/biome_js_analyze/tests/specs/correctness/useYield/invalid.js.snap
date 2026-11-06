@@ -78,6 +78,10 @@ invalid.js:1:1 lint/correctness/useYield ━━━━━━━━━━━━━
     4 │ 
     5 │ (function* foo() {
   
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
+  
 
 ```
 
@@ -96,6 +100,10 @@ invalid.js:5:2 lint/correctness/useYield ━━━━━━━━━━━━━
     8 │ 
     9 │ const obj = {
   
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
+  
 
 ```
 
@@ -113,6 +121,10 @@ invalid.js:10:2 lint/correctness/useYield ━━━━━━━━━━━━�
     13 │ };
     14 │ 
   
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
+  
 
 ```
 
@@ -129,6 +141,10 @@ invalid.js:16:2 lint/correctness/useYield ━━━━━━━━━━━━�
        │ 	^
     19 │ }
     20 │ 
+  
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
   
 
 ```
@@ -150,6 +166,10 @@ invalid.js:21:1 lint/correctness/useYield ━━━━━━━━━━━━�
     26 │ 
     27 │ function* foo() {
   
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
+  
 
 ```
 
@@ -166,6 +186,10 @@ invalid.js:28:2 lint/correctness/useYield ━━━━━━━━━━━━�
        │ 	^
     31 │ 	yield 0;
     32 │ }
+  
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
   
 
 ```
@@ -188,6 +212,10 @@ invalid.js:34:1 lint/correctness/useYield ━━━━━━━━━━━━�
     40 │ 
     41 │ function* foo() {
   
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
+  
 
 ```
 
@@ -206,6 +234,10 @@ invalid.js:43:3 lint/correctness/useYield ━━━━━━━━━━━━�
     46 │ 	};
     47 │ 
   
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
+  
 
 ```
 
@@ -222,6 +254,10 @@ invalid.js:49:3 lint/correctness/useYield ━━━━━━━━━━━━�
        │ 		^
     52 │ 	}
     53 │ 
+  
+  i A generator without yield never produces a value. This often means that a yield is missing.
+  
+  i Add a yield expression, or remove the * to turn the function into a regular function.
   
 
 ```

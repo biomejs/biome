@@ -107,7 +107,6 @@ pub struct JsResolverConfiguration {
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
 pub type JsxEverywhere = Bool<true>;
-pub type JsGritMetavariable = Bool<false>;
 
 /// Options that change how the JavaScript parser behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
@@ -120,11 +119,6 @@ pub struct JsParserConfiguration {
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unsafe_parameter_decorators_enabled: Option<UnsafeParameterDecoratorsEnabled>,
-
-    /// Enables parsing Grit metavariables in JavaScript and TypeScript syntax. Defaults to `false`.
-    #[cfg_attr(feature = "cli", bpaf(hide))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub grit_metavariables: Option<JsGritMetavariable>,
 
     /// Controls whether `.js`, `.mjs`, and `.cjs` files may contain JSX syntax. Disabling this
     /// option causes JSX in those files to raise a diagnostic. Defaults to `true`.

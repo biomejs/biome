@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-references-local-nested.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const sizes = ["small", "large"];
+const initial = "small";
+const props = defineProps({
+  size: {
+    type: String,
+    default: initial,
+    validator: (value) => sizes.includes(value),
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-references-local-nested.vue:8:14 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineProps() uses initial, which is declared in <script setup>.
+  
+     6 │   size: {
+     7 │     type: String,
+   > 8 │     default: initial,
+       │              ^^^^^^^
+     9 │     validator: (value) => sizes.includes(value),
+    10 │   },
+  
+  i Vue moves the argument of defineProps() out of the setup code when it compiles the component, so the argument can't use variables declared in <script setup>.
+  
+  i Import the value from another file, or declare it in a plain <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-references-local-nested.vue:9:27 lint/nursery/useVueValidDefineProps ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineProps() uses sizes, which is declared in <script setup>.
+  
+     7 │     type: String,
+     8 │     default: initial,
+   > 9 │     validator: (value) => sizes.includes(value),
+       │                           ^^^^^
+    10 │   },
+    11 │ });
+  
+  i Vue moves the argument of defineProps() out of the setup code when it compiles the component, so the argument can't use variables declared in <script setup>.
+  
+  i Import the value from another file, or declare it in a plain <script> block.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

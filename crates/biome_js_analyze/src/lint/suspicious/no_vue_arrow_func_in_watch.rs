@@ -191,7 +191,7 @@ impl Rule for NoVueArrowFuncInWatch {
                         )],
                         [],
                     ),
-                    make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![')']).with_trailing_space(),
                 )
             };
 
@@ -206,13 +206,12 @@ impl Rule for NoVueArrowFuncInWatch {
                     make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
                     make::js_directive_list(None),
                     make::js_statement_list([make::js_return_statement(
-                        make::token(T![return])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(T![return]).with_trailing_space(),
                     )
                     .with_argument(expr)
                     .build()
                     .into()]),
-                    make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
+                    make::token(T!['}']).with_leading_newline(),
                 )
             };
 

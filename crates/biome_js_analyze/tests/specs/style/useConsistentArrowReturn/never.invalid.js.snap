@@ -33,6 +33,8 @@ never.invalid.js:1:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━
     4 │ 
     5 │ const b = async () => {
   
+  i When the body only returns a value, the braces and the return keyword can be left out, which makes the function shorter.
+  
   i Safe fix: Remove the return statement.
   
      1    │ - const·a·=·()·=>·{
@@ -59,6 +61,8 @@ never.invalid.js:5:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━
       │ ^
     8 │ 
     9 │ const d = () => {
+  
+  i When the body only returns a value, the braces and the return keyword can be left out, which makes the function shorter.
   
   i Safe fix: Remove the return statement.
   
@@ -87,6 +91,8 @@ never.invalid.js:9:11 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━
   > 11 │ }
        │ ^
     12 │ 
+  
+  i When the body only returns a value, the braces and the return keyword can be left out, which makes the function shorter.
   
   i Safe fix: Remove the return statement.
   

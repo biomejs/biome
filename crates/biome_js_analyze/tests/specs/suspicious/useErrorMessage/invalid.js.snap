@@ -45,7 +45,7 @@ new AggregateError(errors, { foo });
 ```
 invalid.js:1:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
   > 1 │ throw new Error();
       │                ^^
@@ -54,13 +54,15 @@ invalid.js:1:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:2:12 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     1 │ throw new Error();
   > 2 │ throw Error();
@@ -69,6 +71,8 @@ invalid.js:2:12 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     4 │ throw new Error(``);
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -87,6 +91,8 @@ invalid.js:3:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -104,13 +110,15 @@ invalid.js:4:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:6:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     4 │ throw new Error(``);
     5 │ 
@@ -121,13 +129,15 @@ invalid.js:6:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:7:14 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     6 │ new AggregateError()
   > 7 │ new EvalError()
@@ -137,13 +147,15 @@ invalid.js:7:14 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:8:18 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
      6 │ new AggregateError()
      7 │ new EvalError()
@@ -154,13 +166,15 @@ invalid.js:8:18 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:9:15 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
      7 │ new EvalError()
      8 │ new InternalError()
@@ -171,13 +185,15 @@ invalid.js:9:15 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:10:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
      8 │ new InternalError()
      9 │ new RangeError()
@@ -188,13 +204,15 @@ invalid.js:10:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:11:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
      9 │ new RangeError()
     10 │ new ReferenceError()
@@ -205,13 +223,15 @@ invalid.js:11:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:12:14 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     10 │ new ReferenceError()
     11 │ new SyntaxError()
@@ -222,13 +242,15 @@ invalid.js:12:14 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:13:13 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     11 │ new SyntaxError()
     12 │ new TypeError()
@@ -238,6 +260,8 @@ invalid.js:13:13 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     15 │ throw new Error([]);
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -256,6 +280,8 @@ invalid.js:15:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -271,6 +297,8 @@ invalid.js:16:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     18 │ throw new Error({ foo });
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -289,6 +317,8 @@ invalid.js:17:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -305,6 +335,8 @@ invalid.js:18:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     20 │ throw new Error(undefined);
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -323,6 +355,8 @@ invalid.js:19:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -339,6 +373,8 @@ invalid.js:21:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     23 │ 
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -357,13 +393,15 @@ invalid.js:22:16 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:24:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     22 │ throw new Error(true);
     23 │ 
@@ -374,13 +412,15 @@ invalid.js:24:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
 ```
 invalid.js:25:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Provide an error message for the error.
+  ! Missing error message.
   
     24 │ new AggregateError(errors);
   > 25 │ new AggregateError(errors);
@@ -389,6 +429,8 @@ invalid.js:25:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     27 │ new AggregateError(errors, ``);
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -407,6 +449,8 @@ invalid.js:26:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -423,6 +467,8 @@ invalid.js:27:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     29 │ 
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -441,6 +487,8 @@ invalid.js:28:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -458,6 +506,8 @@ invalid.js:30:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -473,6 +523,8 @@ invalid.js:31:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     33 │ new AggregateError(errors, {});
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```
@@ -491,6 +543,8 @@ invalid.js:33:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
   
   i Providing meaningful error messages leads to more readable and debuggable code.
   
+  i Pass a non-empty string that describes what went wrong as the error message.
+  
 
 ```
 
@@ -506,6 +560,8 @@ invalid.js:34:19 lint/suspicious/useErrorMessage ━━━━━━━━━━�
     35 │ 
   
   i Providing meaningful error messages leads to more readable and debuggable code.
+  
+  i Pass a non-empty string that describes what went wrong as the error message.
   
 
 ```

@@ -6,10 +6,11 @@
 
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
-use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
-use biome_formatter::{FormatLanguage, FormatResult, Formatted, VecBuffer, write};
+use biome_formatter::{
+    CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, rowan::prelude::*,
+};
+use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
 use biome_rowan::{AstNode, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
@@ -53,25 +54,6 @@ pub fn format_node(
         HtmlFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
         delegate_fmt_embedded_nodes,
     )
-}
-
-/// The code of a node that is formatted by the formatter of another language.
-///
-/// It's printed as `content`, the node's own formatting, unless the caller of
-/// [format_node] replaces it with [Formatted::format_embedded].
-pub(crate) struct FormatEmbedded {
-    range: TextRange,
-    content: Interned,
-}
-
-impl Format<HtmlFormatContext> for FormatEmbedded {
-    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
-        f.write_elements([
-            FormatElement::Tag(StartEmbedded(self.range)),
-            FormatElement::Interned(self.content.clone()),
-            FormatElement::Tag(EndEmbedded),
-        ])
-    }
 }
 
 /// Used to get an object that knows how to format this object.
@@ -262,18 +244,24 @@ where
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         if f.context().should_delegate_fmt_embedded_nodes() {
-            let range = node.range();
+            let range = self.embedded_range(node);
             if f.context().is_embedded_node_range(range) {
-                let mut buffer = VecBuffer::new(f.state_mut());
-                write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
-                let embedded = FormatEmbedded {
-                    range,
-                    content: Interned::new(buffer.into_vec()),
-                };
+                let content = format_with(|f| self.fmt_fields(node, f));
+                let embedded = FormatEmbedded::new(range, &content, f)?;
                 return self.wrap_embed(node, &embedded, f);
             }
         }
         self.fmt_fields(node, f)
+    }
+
+    /// Returns the range of the embedded snippet, if applicable.
+    ///
+    /// This is useful in situations where the range the actual expression lives is smaller than the node itself,
+    /// like in Vue, where expressions are contained in attribute values, inside the quotes.
+    ///
+    /// Override this method when the code doesn't start and end with the node.
+    fn embedded_range(&self, node: &N) -> TextRange {
+        node.range()
     }
 
     /// Writes `embedded`, a piece of code written in another language, such as

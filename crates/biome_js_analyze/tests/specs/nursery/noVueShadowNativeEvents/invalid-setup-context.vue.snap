@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-context.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  setup(props, context) {
+    context.emit("click");
+    context?.emit?.("keydown");
+    (context?.emit)?.("keyup");
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-context.vue:5:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event click.
+  
+    3 │ export default {
+    4 │   setup(props, context) {
+  > 5 │     context.emit("click");
+      │                  ^^^^^^^
+    6 │     context?.emit?.("keydown");
+    7 │     (context?.emit)?.("keyup");
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-context.vue:6:21 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event keydown.
+  
+    4 │   setup(props, context) {
+    5 │     context.emit("click");
+  > 6 │     context?.emit?.("keydown");
+      │                     ^^^^^^^^^
+    7 │     (context?.emit)?.("keyup");
+    8 │   },
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-context.vue:7:23 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event keyup.
+  
+    5 │     context.emit("click");
+    6 │     context?.emit?.("keydown");
+  > 7 │     (context?.emit)?.("keyup");
+      │                       ^^^^^^^
+    8 │   },
+    9 │ };
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

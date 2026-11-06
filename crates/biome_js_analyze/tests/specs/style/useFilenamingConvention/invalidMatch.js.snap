@@ -31,5 +31,9 @@ invalidMatch.js lint/style/useFilenamingConvention ━━━━━━━━━�
 
   i This filename should match the following regex /[^i].*/.
   
+  i Your configuration requires filenames to follow this pattern, so that files in the project are named consistently.
+  
+  i Rename the file so that its name matches the regular expression.
+  
 
 ```

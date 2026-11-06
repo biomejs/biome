@@ -3,10 +3,14 @@ import type {
 	FixFileMode,
 	Module,
 	OpenProjectResult,
+	PatternId,
 	ProjectKey,
+	SearchLanguage,
 	Workspace,
 } from "./wasm";
 import { tryCatchWrapper } from "./wasm";
+
+export type { PatternId, SearchLanguage };
 
 /**
  * Check if a code point is a UTF-16 high surrogate (U+D800-U+DBFF).
@@ -182,6 +186,35 @@ export interface LintContentOptions {
 export interface LintResult<Diagnostic> {
 	content: string;
 	diagnostics: Diagnostic[];
+}
+
+export interface ParsePatternOptions {
+	/**
+	 * The language of the pattern's code snippets, unless the pattern declares
+	 * its own language
+	 */
+	defaultLanguage: SearchLanguage;
+}
+
+export interface SearchContentOptions {
+	/**
+	 * A virtual path of the file. You should add the extension, so Biome knows
+	 * how to parse the content
+	 */
+	filePath: string;
+	/**
+	 * The identifier returned by `parsePattern`
+	 */
+	patternId: PatternId;
+}
+
+export interface SearchResult {
+	/**
+	 * The `[start, end]` range of each match, as UTF-8 byte offsets into the
+	 * content. Convert a range with {@link spanInBytesToSpanInCodeUnits} before
+	 * using it with `String.prototype.slice`.
+	 */
+	matches: [number, number][];
 }
 
 function isFormatContentDebug(
@@ -430,6 +463,62 @@ export class BiomeCommon<Configuration, Diagnostic> {
 				printer.free();
 				throw err;
 			}
+		});
+	}
+
+	/**
+	 * Parse a GritQL pattern for searching code.
+	 *
+	 * It fails when the pattern is invalid.
+	 *
+	 * @param pattern The GritQL pattern to parse
+	 * @param options Options needed when parsing a pattern
+	 * @returns The identifier of the parsed pattern. Pass it to `searchContent`,
+	 * and to `dropPattern` once the pattern is no longer needed.
+	 */
+	parsePattern(
+		pattern: string,
+		{ defaultLanguage }: ParsePatternOptions,
+	): PatternId {
+		return tryCatchWrapper(() => {
+			const { patternId } = this.workspace.parsePattern({
+				pattern,
+				defaultLanguage,
+			});
+			return patternId;
+		});
+	}
+
+	/**
+	 * Search the content of a file for matches of a parsed GritQL pattern.
+	 *
+	 * @param projectKey The identifier of the project
+	 * @param content The content to search
+	 * @param options Options needed when searching some content
+	 */
+	searchContent(
+		projectKey: ProjectKey,
+		content: string,
+		{ filePath, patternId }: SearchContentOptions,
+	): SearchResult {
+		return this.withFile(projectKey, filePath, content, (path) => {
+			const { matches } = this.workspace.searchPattern({
+				projectKey,
+				path,
+				pattern: patternId,
+			});
+			return { matches };
+		});
+	}
+
+	/**
+	 * Release a pattern parsed by `parsePattern`.
+	 *
+	 * @param patternId The identifier of the pattern to release
+	 */
+	dropPattern(patternId: PatternId): void {
+		tryCatchWrapper(() => {
+			this.workspace.dropPattern({ pattern: patternId });
 		});
 	}
 }

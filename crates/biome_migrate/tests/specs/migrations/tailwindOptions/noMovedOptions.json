@@ -1,0 +1,10 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSortedClasses": { "level": "warn", "options": {} }
+      }
+    }
+  },
+  "javascript": { "useSortedClasses": { "options": { "functions": ["clsx"] } } }
+}

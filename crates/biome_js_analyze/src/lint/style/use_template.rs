@@ -50,7 +50,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useTemplate",
         language: "js",
-        sources: &[RuleSource::Eslint("prefer-template").same()],
+        sources: &[
+            RuleSource::Eslint("prefer-template").same(),
+            RuleSource::EslintVueJs("prefer-template").same(),
+        ],
         recommended: true,
         severity: Severity::Information,
         fix_kind: FixKind::Unsafe,
@@ -87,7 +90,10 @@ impl Rule for UseTemplate {
             markup! {
                 <Emphasis>"Template"</Emphasis>" literals are preferred over "<Emphasis>"string concatenation."</Emphasis>
             },
-        ))
+        )
+        .note(markup! {
+            "Template literals are easier to read than a chain of "<Emphasis>"+"</Emphasis>" operators and quotes, and they avoid mistakes with spaces and escaped quotes."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

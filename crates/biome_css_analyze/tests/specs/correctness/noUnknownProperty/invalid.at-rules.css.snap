@@ -58,9 +58,11 @@ invalid.at-rules.css:4:3 lint/correctness/noUnknownProperty ━━━━━━�
     5 │ 	}
     6 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -77,9 +79,11 @@ invalid.at-rules.css:10:3 lint/correctness/noUnknownProperty ━━━━━━�
     11 │ 	}
     12 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -96,9 +100,11 @@ invalid.at-rules.css:16:3 lint/correctness/noUnknownProperty ━━━━━━�
     17 │ 	}
     18 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -115,9 +121,11 @@ invalid.at-rules.css:22:3 lint/correctness/noUnknownProperty ━━━━━━�
     23 │ 	}
     24 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -134,9 +142,11 @@ invalid.at-rules.css:29:4 lint/correctness/noUnknownProperty ━━━━━━�
     30 │ 		}
     31 │ 	}
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```
@@ -153,9 +163,11 @@ invalid.at-rules.css:36:3 lint/correctness/noUnknownProperty ━━━━━━�
     37 │ 	}
     38 │ }
   
-  i See CSS Specifications and browser specific properties for more details.
+  i Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo.
   
-  i To resolve this issue, replace the unknown property with a valid CSS property.
+  i Use a known CSS property instead.
+  
+  i See CSS Specifications and browser specific properties for more details.
   
 
 ```

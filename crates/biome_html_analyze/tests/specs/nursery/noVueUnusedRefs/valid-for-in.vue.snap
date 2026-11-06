@@ -1,0 +1,22 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-for-in.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  mounted() {
+    for (const key in this.$refs) {
+      console.log(key);
+    }
+  },
+};
+</script>
+
+<template>
+  <input ref="a" />
+</template>
+
+```

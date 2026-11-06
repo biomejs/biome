@@ -1,0 +1,724 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+const min1 = array.sort((a, b) => a - b)[0];
+const min2 = array.toSorted((a, b) => a - b)[0];
+const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+const min4 = array.sort((a, b) => a - b).at(0);
+const min5 = array.toSorted((a, b) => a - b).at(0);
+const max1 = array.sort((a, b) => a - b).at(-1);
+const max2 = array.toSorted((a, b) => a - b).at(-1);
+const max3 = array.sort((a, b) => b - a)[0];
+const max4 = array.toSorted((a, b) => b - a)[0];
+const min6 = array.sort((a, b) => b - a).at(-1);
+const min7 = array.toSorted((a, b) => b - a).at(-1);
+const min8 = array.sort(function (a, b) {
+	return a - b;
+})[0];
+const max5 = array.toSorted((a, b) => {
+	return a - b;
+}).at(-1);
+const min9 = (array ?? fallback).toSorted((a, b) => a - b)[0];
+const min10 = array.toSorted((a, b) => {
+	// Compare numerically.
+	return a - b;
+})[0];
+class ArraySubclass extends Array {
+	getMinimum() {
+		return super.sort((a, b) => a - b)[0];
+	}
+}
+for (const value of array.sort((a, b) => a - b)[0]) {}
+const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+const min13 = (array.toSorted((a, b) => a - b))[(0)];
+function shadowed(Math) {
+	return array.toSorted((a, b) => a - b)[0];
+}
+const min14 = tag`${value}`.toSorted((a, b) => a - b)[0];
+let reassigned = new Set();
+reassigned = [3, 1, 2];
+const min15 = reassigned.toSorted((a, b) => a - b)[0];
+
+```
+
+# Diagnostics
+```
+invalid.js:3:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ const min1 = array.sort((a, b) => a - b)[0];
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const min2 = array.toSorted((a, b) => a - b)[0];
+    5 │ const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+     3    │ - const·min1·=·array.sort((a,·b)·=>·a·-·b)[0];
+        3 │ + const·min1·=·Math.min(...array);
+     4  4 │   const min2 = array.toSorted((a, b) => a - b)[0];
+     5  5 │   const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+  
+
+```
+
+```
+invalid.js:4:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    3 │ const min1 = array.sort((a, b) => a - b)[0];
+  > 4 │ const min2 = array.toSorted((a, b) => a - b)[0];
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+    6 │ const min4 = array.sort((a, b) => a - b).at(0);
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     2  2 │   
+     3  3 │   const min1 = array.sort((a, b) => a - b)[0];
+     4    │ - const·min2·=·array.toSorted((a,·b)·=>·a·-·b)[0];
+        4 │ + const·min2·=·Math.min(...array);
+     5  5 │   const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+     6  6 │   const min4 = array.sort((a, b) => a - b).at(0);
+  
+
+```
+
+```
+invalid.js:5:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    3 │ const min1 = array.sort((a, b) => a - b)[0];
+    4 │ const min2 = array.toSorted((a, b) => a - b)[0];
+  > 5 │ const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const min4 = array.sort((a, b) => a - b).at(0);
+    7 │ const min5 = array.toSorted((a, b) => a - b).at(0);
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     3  3 │   const min1 = array.sort((a, b) => a - b)[0];
+     4  4 │   const min2 = array.toSorted((a, b) => a - b)[0];
+     5    │ - const·min3·=·arrays[key?.name].toSorted((a,·b)·=>·a·-·b)[0];
+        5 │ + const·min3·=·Math.min(...arrays[key?.name]);
+     6  6 │   const min4 = array.sort((a, b) => a - b).at(0);
+     7  7 │   const min5 = array.toSorted((a, b) => a - b).at(0);
+  
+
+```
+
+```
+invalid.js:6:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    4 │ const min2 = array.toSorted((a, b) => a - b)[0];
+    5 │ const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+  > 6 │ const min4 = array.sort((a, b) => a - b).at(0);
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const min5 = array.toSorted((a, b) => a - b).at(0);
+    8 │ const max1 = array.sort((a, b) => a - b).at(-1);
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     4  4 │   const min2 = array.toSorted((a, b) => a - b)[0];
+     5  5 │   const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+     6    │ - const·min4·=·array.sort((a,·b)·=>·a·-·b).at(0);
+        6 │ + const·min4·=·Math.min(...array);
+     7  7 │   const min5 = array.toSorted((a, b) => a - b).at(0);
+     8  8 │   const max1 = array.sort((a, b) => a - b).at(-1);
+  
+
+```
+
+```
+invalid.js:7:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    5 │ const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+    6 │ const min4 = array.sort((a, b) => a - b).at(0);
+  > 7 │ const min5 = array.toSorted((a, b) => a - b).at(0);
+      │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const max1 = array.sort((a, b) => a - b).at(-1);
+    9 │ const max2 = array.toSorted((a, b) => a - b).at(-1);
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+     5  5 │   const min3 = arrays[key?.name].toSorted((a, b) => a - b)[0];
+     6  6 │   const min4 = array.sort((a, b) => a - b).at(0);
+     7    │ - const·min5·=·array.toSorted((a,·b)·=>·a·-·b).at(0);
+        7 │ + const·min5·=·Math.min(...array);
+     8  8 │   const max1 = array.sort((a, b) => a - b).at(-1);
+     9  9 │   const max2 = array.toSorted((a, b) => a - b).at(-1);
+  
+
+```
+
+```
+invalid.js:8:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its largest value.
+  
+     6 │ const min4 = array.sort((a, b) => a - b).at(0);
+     7 │ const min5 = array.toSorted((a, b) => a - b).at(0);
+   > 8 │ const max1 = array.sort((a, b) => a - b).at(-1);
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ const max2 = array.toSorted((a, b) => a - b).at(-1);
+    10 │ const max3 = array.sort((a, b) => b - a)[0];
+  
+  i Sorting does much more work than finding the largest value, which only needs to look at each item once.
+  
+  i Use Math.max() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     6  6 │   const min4 = array.sort((a, b) => a - b).at(0);
+     7  7 │   const min5 = array.toSorted((a, b) => a - b).at(0);
+     8    │ - const·max1·=·array.sort((a,·b)·=>·a·-·b).at(-1);
+        8 │ + const·max1·=·Math.max(...array);
+     9  9 │   const max2 = array.toSorted((a, b) => a - b).at(-1);
+    10 10 │   const max3 = array.sort((a, b) => b - a)[0];
+  
+
+```
+
+```
+invalid.js:9:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its largest value.
+  
+     7 │ const min5 = array.toSorted((a, b) => a - b).at(0);
+     8 │ const max1 = array.sort((a, b) => a - b).at(-1);
+   > 9 │ const max2 = array.toSorted((a, b) => a - b).at(-1);
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ const max3 = array.sort((a, b) => b - a)[0];
+    11 │ const max4 = array.toSorted((a, b) => b - a)[0];
+  
+  i Sorting does much more work than finding the largest value, which only needs to look at each item once.
+  
+  i Use Math.max() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     7  7 │   const min5 = array.toSorted((a, b) => a - b).at(0);
+     8  8 │   const max1 = array.sort((a, b) => a - b).at(-1);
+     9    │ - const·max2·=·array.toSorted((a,·b)·=>·a·-·b).at(-1);
+        9 │ + const·max2·=·Math.max(...array);
+    10 10 │   const max3 = array.sort((a, b) => b - a)[0];
+    11 11 │   const max4 = array.toSorted((a, b) => b - a)[0];
+  
+
+```
+
+```
+invalid.js:10:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its largest value.
+  
+     8 │ const max1 = array.sort((a, b) => a - b).at(-1);
+     9 │ const max2 = array.toSorted((a, b) => a - b).at(-1);
+  > 10 │ const max3 = array.sort((a, b) => b - a)[0];
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ const max4 = array.toSorted((a, b) => b - a)[0];
+    12 │ const min6 = array.sort((a, b) => b - a).at(-1);
+  
+  i Sorting does much more work than finding the largest value, which only needs to look at each item once.
+  
+  i Use Math.max() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     8  8 │   const max1 = array.sort((a, b) => a - b).at(-1);
+     9  9 │   const max2 = array.toSorted((a, b) => a - b).at(-1);
+    10    │ - const·max3·=·array.sort((a,·b)·=>·b·-·a)[0];
+       10 │ + const·max3·=·Math.max(...array);
+    11 11 │   const max4 = array.toSorted((a, b) => b - a)[0];
+    12 12 │   const min6 = array.sort((a, b) => b - a).at(-1);
+  
+
+```
+
+```
+invalid.js:11:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its largest value.
+  
+     9 │ const max2 = array.toSorted((a, b) => a - b).at(-1);
+    10 │ const max3 = array.sort((a, b) => b - a)[0];
+  > 11 │ const max4 = array.toSorted((a, b) => b - a)[0];
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ const min6 = array.sort((a, b) => b - a).at(-1);
+    13 │ const min7 = array.toSorted((a, b) => b - a).at(-1);
+  
+  i Sorting does much more work than finding the largest value, which only needs to look at each item once.
+  
+  i Use Math.max() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+     9  9 │   const max2 = array.toSorted((a, b) => a - b).at(-1);
+    10 10 │   const max3 = array.sort((a, b) => b - a)[0];
+    11    │ - const·max4·=·array.toSorted((a,·b)·=>·b·-·a)[0];
+       11 │ + const·max4·=·Math.max(...array);
+    12 12 │   const min6 = array.sort((a, b) => b - a).at(-1);
+    13 13 │   const min7 = array.toSorted((a, b) => b - a).at(-1);
+  
+
+```
+
+```
+invalid.js:12:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    10 │ const max3 = array.sort((a, b) => b - a)[0];
+    11 │ const max4 = array.toSorted((a, b) => b - a)[0];
+  > 12 │ const min6 = array.sort((a, b) => b - a).at(-1);
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ const min7 = array.toSorted((a, b) => b - a).at(-1);
+    14 │ const min8 = array.sort(function (a, b) {
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    10 10 │   const max3 = array.sort((a, b) => b - a)[0];
+    11 11 │   const max4 = array.toSorted((a, b) => b - a)[0];
+    12    │ - const·min6·=·array.sort((a,·b)·=>·b·-·a).at(-1);
+       12 │ + const·min6·=·Math.min(...array);
+    13 13 │   const min7 = array.toSorted((a, b) => b - a).at(-1);
+    14 14 │   const min8 = array.sort(function (a, b) {
+  
+
+```
+
+```
+invalid.js:13:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    11 │ const max4 = array.toSorted((a, b) => b - a)[0];
+    12 │ const min6 = array.sort((a, b) => b - a).at(-1);
+  > 13 │ const min7 = array.toSorted((a, b) => b - a).at(-1);
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ const min8 = array.sort(function (a, b) {
+    15 │ 	return a - b;
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    11 11 │   const max4 = array.toSorted((a, b) => b - a)[0];
+    12 12 │   const min6 = array.sort((a, b) => b - a).at(-1);
+    13    │ - const·min7·=·array.toSorted((a,·b)·=>·b·-·a).at(-1);
+       13 │ + const·min7·=·Math.min(...array);
+    14 14 │   const min8 = array.sort(function (a, b) {
+    15 15 │   	return a - b;
+  
+
+```
+
+```
+invalid.js:14:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    12 │ const min6 = array.sort((a, b) => b - a).at(-1);
+    13 │ const min7 = array.toSorted((a, b) => b - a).at(-1);
+  > 14 │ const min8 = array.sort(function (a, b) {
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 15 │ 	return a - b;
+  > 16 │ })[0];
+       │ ^^^^^
+    17 │ const max5 = array.toSorted((a, b) => {
+    18 │ 	return a - b;
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    12 12 │   const min6 = array.sort((a, b) => b - a).at(-1);
+    13 13 │   const min7 = array.toSorted((a, b) => b - a).at(-1);
+    14    │ - const·min8·=·array.sort(function·(a,·b)·{
+    15    │ - → return·a·-·b;
+    16    │ - })[0];
+       14 │ + const·min8·=·Math.min(...array);
+    17 15 │   const max5 = array.toSorted((a, b) => {
+    18 16 │     return a - b;
+  
+
+```
+
+```
+invalid.js:17:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its largest value.
+  
+    15 │ 	return a - b;
+    16 │ })[0];
+  > 17 │ const max5 = array.toSorted((a, b) => {
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 18 │ 	return a - b;
+  > 19 │ }).at(-1);
+       │ ^^^^^^^^^
+    20 │ const min9 = (array ?? fallback).toSorted((a, b) => a - b)[0];
+    21 │ const min10 = array.toSorted((a, b) => {
+  
+  i Sorting does much more work than finding the largest value, which only needs to look at each item once.
+  
+  i Use Math.max() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.max() instead.
+  
+    15 15 │     return a - b;
+    16 16 │   })[0];
+    17    │ - const·max5·=·array.toSorted((a,·b)·=>·{
+    18    │ - → return·a·-·b;
+    19    │ - }).at(-1);
+       17 │ + const·max5·=·Math.max(...array);
+    20 18 │   const min9 = (array ?? fallback).toSorted((a, b) => a - b)[0];
+    21 19 │   const min10 = array.toSorted((a, b) => {
+  
+
+```
+
+```
+invalid.js:20:14 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    18 │ 	return a - b;
+    19 │ }).at(-1);
+  > 20 │ const min9 = (array ?? fallback).toSorted((a, b) => a - b)[0];
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ const min10 = array.toSorted((a, b) => {
+    22 │ 	// Compare numerically.
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    18 18 │   	return a - b;
+    19 19 │   }).at(-1);
+    20    │ - const·min9·=·(array·??·fallback).toSorted((a,·b)·=>·a·-·b)[0];
+       20 │ + const·min9·=·Math.min(...(array·??·fallback));
+    21 21 │   const min10 = array.toSorted((a, b) => {
+    22 22 │   	// Compare numerically.
+  
+
+```
+
+```
+invalid.js:21:15 lint/nursery/noArraySortForMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    19 │ }).at(-1);
+    20 │ const min9 = (array ?? fallback).toSorted((a, b) => a - b)[0];
+  > 21 │ const min10 = array.toSorted((a, b) => {
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 22 │ 	// Compare numerically.
+  > 23 │ 	return a - b;
+  > 24 │ })[0];
+       │ ^^^^^
+    25 │ class ArraySubclass extends Array {
+    26 │ 	getMinimum() {
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:10 lint/nursery/noArraySortForMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    25 │ class ArraySubclass extends Array {
+    26 │ 	getMinimum() {
+  > 27 │ 		return super.sort((a, b) => a - b)[0];
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	}
+    29 │ }
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:21 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    28 │ 	}
+    29 │ }
+  > 30 │ for (const value of array.sort((a, b) => a - b)[0]) {}
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+    32 │ const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    28 28 │   	}
+    29 29 │   }
+    30    │ - for·(const·value·of·array.sort((a,·b)·=>·a·-·b)[0])·{}
+       30 │ + for·(const·value·of·Math.min(...array))·{}
+    31 31 │   const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+    32 32 │   const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+  
+
+```
+
+```
+invalid.js:31:15 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    29 │ }
+    30 │ for (const value of array.sort((a, b) => a - b)[0]) {}
+  > 31 │ const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+    33 │ const min13 = (array.toSorted((a, b) => a - b))[(0)];
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    29 29 │   }
+    30 30 │   for (const value of array.sort((a, b) => a - b)[0]) {}
+    31    │ - const·min11·=·new·Int8Array(values).toSorted((a,·b)·=>·a·-·b)[0];
+       31 │ + const·min11·=·Math.min(...new·Int8Array(values));
+    32 32 │   const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+    33 33 │   const min13 = (array.toSorted((a, b) => a - b))[(0)];
+  
+
+```
+
+```
+invalid.js:32:15 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    30 │ for (const value of array.sort((a, b) => a - b)[0]) {}
+    31 │ const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+  > 32 │ const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ const min13 = (array.toSorted((a, b) => a - b))[(0)];
+    34 │ function shadowed(Math) {
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    30 30 │   for (const value of array.sort((a, b) => a - b)[0]) {}
+    31 31 │   const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+    32    │ - const·min12·=·[3,·1,·2].sort((a,·b)·=>·a·-·b)[0];
+       32 │ + const·min12·=·Math.min(...[3,·1,·2]);
+    33 33 │   const min13 = (array.toSorted((a, b) => a - b))[(0)];
+    34 34 │   function shadowed(Math) {
+  
+
+```
+
+```
+invalid.js:33:15 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    31 │ const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+    32 │ const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+  > 33 │ const min13 = (array.toSorted((a, b) => a - b))[(0)];
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ function shadowed(Math) {
+    35 │ 	return array.toSorted((a, b) => a - b)[0];
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    31 31 │   const min11 = new Int8Array(values).toSorted((a, b) => a - b)[0];
+    32 32 │   const min12 = [3, 1, 2].sort((a, b) => a - b)[0];
+    33    │ - const·min13·=·(array.toSorted((a,·b)·=>·a·-·b))[(0)];
+       33 │ + const·min13·=·Math.min(...array);
+    34 34 │   function shadowed(Math) {
+    35 35 │   	return array.toSorted((a, b) => a - b)[0];
+  
+
+```
+
+```
+invalid.js:35:9 lint/nursery/noArraySortForMinMax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    33 │ const min13 = (array.toSorted((a, b) => a - b))[(0)];
+    34 │ function shadowed(Math) {
+  > 35 │ 	return array.toSorted((a, b) => a - b)[0];
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ }
+    37 │ const min14 = tag`${value}`.toSorted((a, b) => a - b)[0];
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:15 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    35 │ 	return array.toSorted((a, b) => a - b)[0];
+    36 │ }
+  > 37 │ const min14 = tag`${value}`.toSorted((a, b) => a - b)[0];
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ let reassigned = new Set();
+    39 │ reassigned = [3, 1, 2];
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    35 35 │   	return array.toSorted((a, b) => a - b)[0];
+    36 36 │   }
+    37    │ - const·min14·=·tag`${value}`.toSorted((a,·b)·=>·a·-·b)[0];
+       37 │ + const·min14·=·Math.min(...tag`${value}`);
+    38 38 │   let reassigned = new Set();
+    39 39 │   reassigned = [3, 1, 2];
+  
+
+```
+
+```
+invalid.js:40:15 lint/nursery/noArraySortForMinMax  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This sorts the whole array only to read its smallest value.
+  
+    38 │ let reassigned = new Set();
+    39 │ reassigned = [3, 1, 2];
+  > 40 │ const min15 = reassigned.toSorted((a, b) => a - b)[0];
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+  
+  i Sorting does much more work than finding the smallest value, which only needs to look at each item once.
+  
+  i Use Math.min() with the array spread into its arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.min() instead.
+  
+    38 38 │   let reassigned = new Set();
+    39 39 │   reassigned = [3, 1, 2];
+    40    │ - const·min15·=·reassigned.toSorted((a,·b)·=>·a·-·b)[0];
+       40 │ + const·min15·=·Math.min(...reassigned);
+    41 41 │   
+  
+
+```

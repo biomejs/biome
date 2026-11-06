@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: metavariable_property_name
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "2:5-2:15",
+        "3:5-3:20",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

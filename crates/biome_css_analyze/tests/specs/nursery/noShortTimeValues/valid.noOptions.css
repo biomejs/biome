@@ -1,0 +1,3 @@
+/* should not generate diagnostics */
+a { transition-duration: 1ms; }
+a { animation: foo 0.001s linear; }

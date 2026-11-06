@@ -1,0 +1,105 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: nested_tail.invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* Nested and explicit selectors with the same resolved target are compared. */
+a b:hover {}
+b {
+  &:hover {}
+}
+
+/* A nested selector expanded through a parent selector list is reported once. */
+.high .target {
+  #theme &:hover {}
+}
+.low-a.one .target,
+.low-b.two .target,
+.low-c.three .target {
+  &:hover {}
+}
+
+/* Combinators inside functional pseudo-classes do not split the target compound. */
+.parent .target:has(.x > .y) {}
+.target:has(.x > .y) {}
+
+```
+
+# Diagnostics
+```
+nested_tail.invalid.css:6:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 1)
+  
+    4 │ a b:hover {}
+    5 │ b {
+  > 6 │   &:hover {}
+      │   ^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i This selector specificity is (0, 1, 2)
+  
+    3 │ /* Nested and explicit selectors with the same resolved target are compared. */
+  > 4 │ a b:hover {}
+      │ ^^^^^^^^^
+    5 │ b {
+    6 │   &:hover {}
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+nested_tail.invalid.css:16:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 4, 0)
+  
+    14 │ .low-b.two .target,
+    15 │ .low-c.three .target {
+  > 16 │   &:hover {}
+       │   ^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i This selector specificity is (1, 3, 0)
+  
+     9 │ /* A nested selector expanded through a parent selector list is reported once. */
+    10 │ .high .target {
+  > 11 │   #theme &:hover {}
+       │   ^^^^^^^^^^^^^^
+    12 │ }
+    13 │ .low-a.one .target,
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+nested_tail.invalid.css:21:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 3, 0)
+  
+    19 │ /* Combinators inside functional pseudo-classes do not split the target compound. */
+    20 │ .parent .target:has(.x > .y) {}
+  > 21 │ .target:has(.x > .y) {}
+       │ ^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i This selector specificity is (0, 4, 0)
+  
+    19 │ /* Combinators inside functional pseudo-classes do not split the target compound. */
+  > 20 │ .parent .target:has(.x > .y) {}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ .target:has(.x > .y) {}
+    22 │ 
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

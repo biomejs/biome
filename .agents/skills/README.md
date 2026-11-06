@@ -24,7 +24,7 @@ Project-wide standards — no emojis, the evidence rule, dev-dependency rules, t
 | testing-codegen | Tests, `insta` snapshots, code generation commands |
 | changeset | Writing changesets for the CHANGELOG |
 | doc-comments | Rust comments for contributors and user-facing documentation |
-| syntax-text-handling | Syntax tokens, `TokenText`, ranges, string extraction, and embedded-language value shapes |
+| syntax-text-handling | Syntax tokens, `TokenText`, ranges, string extraction, embedded-language value shapes, tree traversal, analyzer `Visitor`s |
 
 ## Adding a skill
 

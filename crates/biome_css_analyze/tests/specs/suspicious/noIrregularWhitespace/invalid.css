@@ -95,3 +95,23 @@
 @container　(width < 15rem) {
 	color: blue;
 }
+
+/* \u{a0} before a comment */
+.comment-after-irregular-value {
+	color: red /* note */;
+}
+
+/* \u{3000} after a comment */
+.comment-before-string {
+	content:/* note */　"a";
+}
+
+/* \u{3000} before a string */
+.irregular-space-before-string {
+	content:　"a";
+}
+
+/* \u{a0} after a string */
+.irregular-space-after-string {
+	content: "a" ;
+}

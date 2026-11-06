@@ -1,0 +1,106 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseAlways/quote_list_containers.md
+---
+
+# Input
+
+```md
+-   > q
+    > ---
+
+-   > q
+    > ===
+
+- > 1. > q
+  >    > r
+
+- a
+  > 10. b
+  >     > q
+
+10. a
+    > first line
+    > second line
+
+10. a
+    > q
+> outside
+
+10. a
+    > q
+lazy continuation
+
+10. a
+    > ```
+    > code
+    > ```
+
+- > ~~~
+  > code
+  > ~~~
+
+- a
+  >	> q
+  >	> r
+
+> -	q
+>	 r
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "always",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+-   > q
+    > ---
+
+-   > q
+    > ===
+
+- > 1. > q r
+
+- a
+  > 10. b
+  >     > q
+
+10. a
+    > first line second line
+
+11. a
+    > q
+> outside
+
+10. a
+    > q lazy continuation
+
+11. a
+    > ```
+    > code
+    > ```
+
+- > ```
+  > code
+  > ```
+
+- a
+  >	> q r
+> - q
+>	 r
+
+```

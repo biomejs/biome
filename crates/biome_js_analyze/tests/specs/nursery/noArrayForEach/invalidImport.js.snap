@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImport.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+import * as CB from "callbag-basics";
+import { forEach } from "strict-callbag-basics";
+
+CB.forEach((x) => console.log(x));
+
+forEach.forEach((x) => console.log(x));
+
+```
+
+# Diagnostics
+```
+invalidImport.js:6:4 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    4 │ import { forEach } from "strict-callbag-basics";
+    5 │ 
+  > 6 │ CB.forEach((x) => console.log(x));
+      │    ^^^^^^^
+    7 │ 
+    8 │ forEach.forEach((x) => console.log(x));
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidImport.js:8:9 lint/nursery/noArrayForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This forEach() call can be written as a for...of loop.
+  
+    6 │ CB.forEach((x) => console.log(x));
+    7 │ 
+  > 8 │ forEach.forEach((x) => console.log(x));
+      │         ^^^^^^^
+    9 │ 
+  
+  i A for...of loop can use break and continue, and return and await inside it apply to the surrounding function.
+  
+  i Replace this call with a for...of loop. Loop over entries() if you also need the index.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

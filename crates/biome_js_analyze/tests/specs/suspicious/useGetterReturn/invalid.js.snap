@@ -148,6 +148,10 @@ invalid.js:2:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━
     3 │ };
     4 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -166,6 +170,10 @@ invalid.js:6:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━
        │     ^
     11 │ };
     12 │ 
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```
@@ -186,6 +194,10 @@ invalid.js:14:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     19 │ };
     20 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -201,6 +213,10 @@ invalid.js:23:9 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     24 │     }
     25 │ };
   
+  i A return without a value makes the getter evaluate to undefined, so reading the property does not give the value the code intends.
+  
+  i Return the value of the property from this statement.
+  
 
 ```
 
@@ -214,6 +230,10 @@ invalid.js:28:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
        │     ^^^^^^^^^^^^
     29 │ }
     30 │ 
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```
@@ -234,6 +254,10 @@ invalid.js:32:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     37 │ }
     38 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -253,6 +277,10 @@ invalid.js:40:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     45 │ }
     46 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -267,6 +295,10 @@ invalid.js:49:9 lint/suspicious/useGetterReturn ━━━━━━━━━━�
        │         ^^^^^^^
     50 │     }
     51 │ }
+  
+  i A return without a value makes the getter evaluate to undefined, so reading the property does not give the value the code intends.
+  
+  i Return the value of the property from this statement.
   
 
 ```
@@ -287,6 +319,10 @@ invalid.js:54:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     59 │ }
     60 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -305,6 +341,10 @@ invalid.js:62:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
        │     ^
     71 │ }
     72 │ 
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```
@@ -325,6 +365,10 @@ invalid.js:74:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     81 │ };
     82 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -343,6 +387,10 @@ invalid.js:84:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
        │     ^
     91 │ };
     92 │ 
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```
@@ -363,6 +411,10 @@ invalid.js:94:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     102 │ };
     103 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -382,6 +434,10 @@ invalid.js:105:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
     117 │ };
     118 │ 
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -400,6 +456,10 @@ invalid.js:120:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
         │     ^
     129 │ };
     130 │ 
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```

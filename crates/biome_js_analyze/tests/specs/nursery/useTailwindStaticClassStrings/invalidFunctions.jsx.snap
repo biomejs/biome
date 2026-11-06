@@ -1,0 +1,184 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFunctions.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+clsx(`bg-${color}`);
+clsx({ [`text-${color}`]: active });
+<div className={clsx(`bg-${color}`)} />;
+<div title={clsx(`bg-${color}`)} />;
+consume(clsx(`text-${color}`));
+clsx(clsx(`border-${color}`));
+cn(`bg-${color}`);
+twMerge("text-" + color);
+
+```
+
+# Diagnostics
+```
+invalidFunctions.jsx:2:6 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+  > 2 │ clsx(`bg-${color}`);
+      │      ^^^^^^^^^^^^^
+    3 │ clsx({ [`text-${color}`]: active });
+    4 │ <div className={clsx(`bg-${color}`)} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:3:9 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+    2 │ clsx(`bg-${color}`);
+  > 3 │ clsx({ [`text-${color}`]: active });
+      │         ^^^^^^^^^^^^^^^
+    4 │ <div className={clsx(`bg-${color}`)} />;
+    5 │ <div title={clsx(`bg-${color}`)} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:4:22 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    2 │ clsx(`bg-${color}`);
+    3 │ clsx({ [`text-${color}`]: active });
+  > 4 │ <div className={clsx(`bg-${color}`)} />;
+      │                      ^^^^^^^^^^^^^
+    5 │ <div title={clsx(`bg-${color}`)} />;
+    6 │ consume(clsx(`text-${color}`));
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:5:18 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    3 │ clsx({ [`text-${color}`]: active });
+    4 │ <div className={clsx(`bg-${color}`)} />;
+  > 5 │ <div title={clsx(`bg-${color}`)} />;
+      │                  ^^^^^^^^^^^^^
+    6 │ consume(clsx(`text-${color}`));
+    7 │ clsx(clsx(`border-${color}`));
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:6:14 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    4 │ <div className={clsx(`bg-${color}`)} />;
+    5 │ <div title={clsx(`bg-${color}`)} />;
+  > 6 │ consume(clsx(`text-${color}`));
+      │              ^^^^^^^^^^^^^^^
+    7 │ clsx(clsx(`border-${color}`));
+    8 │ cn(`bg-${color}`);
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:7:11 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    5 │ <div title={clsx(`bg-${color}`)} />;
+    6 │ consume(clsx(`text-${color}`));
+  > 7 │ clsx(clsx(`border-${color}`));
+      │           ^^^^^^^^^^^^^^^^^
+    8 │ cn(`bg-${color}`);
+    9 │ twMerge("text-" + color);
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:8:4 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+     6 │ consume(clsx(`text-${color}`));
+     7 │ clsx(clsx(`border-${color}`));
+   > 8 │ cn(`bg-${color}`);
+       │    ^^^^^^^^^^^^^
+     9 │ twMerge("text-" + color);
+    10 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:9:9 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+     7 │ clsx(clsx(`border-${color}`));
+     8 │ cn(`bg-${color}`);
+   > 9 │ twMerge("text-" + color);
+       │         ^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

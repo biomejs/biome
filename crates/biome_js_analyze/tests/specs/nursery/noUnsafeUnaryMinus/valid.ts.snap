@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
++42;
+-42;
+-42n;
+(a: number) => -a;
+(a: bigint) => -a;
+(a: number | bigint) => -a;
+(a: any) => -a;
+(a: 1 | 2) => -a;
+(a: string) => +a;
+(a: number[]) => -a[0];
+<T,>(t: T & number) => -t;
+(a: { x: number }) => -a.x;
+(a: never) => -a;
+<T extends number>(t: T) => -t;
+(a: number & { __brand: "id" }) => -a;
+(a: string) => -Number(a);
+(a: string) => -parseInt(a, 10);
+const count = 1;
+-count;
+-(1 + 2);
+-(-1);
+enum Direction {
+	Up = 1,
+	Down,
+}
+-Direction.Up;
+declare const direction: Direction;
+-direction;
+-undeclaredVariable;
+(a: number[], index: number) => -a[index];
+(a: Record<string, number>, key: string) => -a[key];
+(a: [number, bigint]) => -a[1];
+(a: number[]) => -(a[0]);
+
+```

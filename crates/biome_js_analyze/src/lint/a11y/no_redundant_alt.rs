@@ -134,6 +134,9 @@ impl Rule for NoRedundantAlt {
             )
             .note(markup! {
                 "Screen readers announce img elements as \"images\", so it is not necessary to redeclare this in alternative text."
+            })
+            .note(markup! {
+                "Remove the word if descriptive alt text remains. Otherwise, replace it with a description of what the image shows."
             }),
         )
     }

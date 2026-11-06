@@ -8,3 +8,6 @@ query B {
 query C {
 	field(arg: { f1: {f2: "value", f2: "value" }})
 }
+query D {
+	field(arg: { a: 1, b: 2, a: 3, b: 4 })
+}

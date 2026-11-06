@@ -2,7 +2,9 @@ use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock};
+use biome_markdown_syntax::{AnyMdBlock, AnyMdLeafBlock, MarkdownSyntaxToken};
+use biome_rowan::TextSize;
+use std::borrow::Cow;
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
 pub(crate) enum TextPrintMode {
@@ -129,5 +131,87 @@ pub(crate) fn format_removed_quote_boundary(
             })]
         ),
         _ => write!(f, [node.format()]),
+    }
+}
+
+/// Writes the lines of a block's literal token as they're written in the
+/// source, such as the code of a fenced code block.
+///
+/// The literal starts with the line break that ends the block's opening line.
+/// That line break isn't written, because the node that writes the opening
+/// line ends it. Each line loses up to `max_indent` leading spaces, and line
+/// breaks are written as literal line breaks.
+pub(crate) struct FormatLiteralLines<'a> {
+    pub(crate) token: &'a MarkdownSyntaxToken,
+    pub(crate) max_indent: usize,
+}
+
+impl Format<MarkdownFormatContext> for FormatLiteralLines<'_> {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        // Trivia is excluded on both sides: the opening fence line's trimmed
+        // info-string whitespace is attached to the token as leading
+        // whitespace trivia, and printing it would insert it as an extra
+        // content line.
+        let text = self.token.text_trimmed();
+        let bytes = text.as_bytes();
+        let token_start = self.token.text_trimmed_range().start();
+        let format_slice = |start: usize, end: usize, f: &mut MarkdownFormatter| {
+            syntax_token_cow_slice(
+                Cow::Borrowed(&text[start..end]),
+                self.token,
+                token_start + TextSize::from(start as u32),
+            )
+            .with_literal_line_breaks()
+            .fmt(f)
+        };
+        let mut line_start = match bytes {
+            [b'\r', b'\n', ..] => 2,
+            [b'\r' | b'\n', ..] => 1,
+            _ => 0,
+        };
+
+        while line_start < bytes.len() {
+            let mut content_start = line_start;
+            let max_content_start = line_start + self.max_indent;
+            while content_start < bytes.len()
+                && content_start < max_content_start
+                && bytes[content_start] == b' '
+            {
+                content_start += 1;
+            }
+
+            let mut line_end = content_start;
+            while line_end < bytes.len() && !matches!(bytes[line_end], b'\r' | b'\n') {
+                line_end += 1;
+            }
+
+            match bytes.get(line_end) {
+                Some(b'\n') => {
+                    format_slice(content_start, line_end + 1, f)?;
+                    line_start = line_end + 1;
+                }
+                Some(b'\r') => {
+                    if content_start < line_end {
+                        format_slice(content_start, line_end, f)?;
+                    }
+
+                    if bytes.get(line_end + 1) == Some(&b'\n') {
+                        format_slice(line_end + 1, line_end + 2, f)?;
+                        line_start = line_end + 2;
+                    } else {
+                        literal_line_break_without_parent().fmt(f)?;
+                        line_start = line_end + 1;
+                    }
+                }
+                _ => {
+                    if content_start < line_end {
+                        format_slice(content_start, line_end, f)?;
+                    }
+                    break;
+                }
+            }
+        }
+
+        Ok(())
     }
 }

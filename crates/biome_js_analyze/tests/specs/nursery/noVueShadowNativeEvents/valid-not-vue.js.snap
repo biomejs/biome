@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-not-vue.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export default {
+  emits: ["click"],
+  methods: {
+    onClick() {
+      this.$emit("click");
+    },
+  },
+};
+
+$emit("click");
+
+```

@@ -285,8 +285,12 @@ impl Rule for UseFilenamingConvention {
                     markup! {
                         "The filename should be in ASCII because "<Emphasis>"requireAscii"</Emphasis>" is set to `true`."
                     },
-                ).note(markup! {
-                    "If you want to use non-ASCII filenames, then set the "<Emphasis>"requireAscii"</Emphasis>" option to `false`.\nSee the rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more details."
+                )
+                .note(markup! {
+                    "Non-ASCII characters in filenames can be handled differently by operating systems, file systems, and tools."
+                })
+                .note(markup! {
+                    "Rename the file using only ASCII characters. If you want to use non-ASCII filenames, then set the "<Emphasis>"requireAscii"</Emphasis>" option to `false`.\nSee the rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more details."
                 }))
             },
             FileNamingConventionState::Filename => {
@@ -330,8 +334,12 @@ impl Rule for UseFilenamingConvention {
                             markup! {
                                 "The filename"{trimmed_info}" is in camelCase, however, two consecutive uppercase characters are not allowed because `strictCase` is set to `true`."
                             },
-                        ).note(markup! {
-                            "If you want to use consecutive uppercase characters in camelCase then consider setting `strictCase` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more information."
+                        )
+                        .note(markup! {
+                            "Allowing only single uppercase letters in camelCase keeps filenames consistent, for example "<Emphasis>"parseXml"</Emphasis>" instead of "<Emphasis>"parseXML"</Emphasis>"."
+                        })
+                        .note(markup! {
+                            "Lowercase the consecutive uppercase characters. If you want to use consecutive uppercase characters in camelCase then consider setting `strictCase` option to `false`.\n Check rule "<Hyperlink href="https://biomejs.dev/linter/rules/use-filenaming-convention#options">"options"</Hyperlink>" for more information."
                         }));
                     }
                 }
@@ -354,8 +362,13 @@ impl Rule for UseFilenamingConvention {
                         "The filename"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
                     },
                 );
+                let diagnostic = diagnostic.note(markup! {
+                    "A consistent filename style makes files easier to find. It also avoids problems on file systems that ignore letter case."
+                });
                 if suggested_filenames.is_empty() {
-                    return Some(diagnostic);
+                    return Some(diagnostic.note(markup! {
+                        "Rename the file to match one of the allowed cases."
+                    }));
                 }
                 Some(diagnostic.note(markup! {
                     "The filename could be renamed to one of the following names:\n"{suggested_filenames}
@@ -371,7 +384,13 @@ impl Rule for UseFilenamingConvention {
                     markup! {
                         "The file extension should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
                     },
-                ))
+                )
+                .note(markup! {
+                    "File extensions in mixed case are not recognized the same way by every tool and file system."
+                })
+                .note(markup! {
+                    "Rename the file so that its extension uses one of the allowed cases."
+                }))
             },
             FileNamingConventionState::Match => {
                 let matching = options.matching.as_ref()?.as_str();
@@ -381,7 +400,13 @@ impl Rule for UseFilenamingConvention {
                     markup! {
                         "This filename should match the following regex "<Emphasis>"/"{matching}"/"</Emphasis>"."
                     },
-                ))
+                )
+                .note(markup! {
+                    "Your configuration requires filenames to follow this pattern, so that files in the project are named consistently."
+                })
+                .note(markup! {
+                    "Rename the file so that its name matches the regular expression."
+                }))
             }
         }
     }

@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+T
+
+```
+
+
+## AST
+
+```
+JsVueGenericRoot {
+    items: TsTypeParameterList [
+        TsTypeParameter {
+            modifiers: TsTypeParameterModifierList [],
+            name: TsTypeParameterName {
+                ident_token: IDENT@0..1 "T" [] [],
+            },
+            constraint: missing (optional),
+            default: missing (optional),
+        },
+    ],
+    eof_token: EOF@1..2 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_GENERIC_ROOT@0..2
+  0: TS_TYPE_PARAMETER_LIST@0..1
+    0: TS_TYPE_PARAMETER@0..1
+      0: TS_TYPE_PARAMETER_MODIFIER_LIST@0..0
+      1: TS_TYPE_PARAMETER_NAME@0..1
+        0: IDENT@0..1 "T" [] []
+      2: (empty)
+      3: (empty)
+  1: EOF@1..2 "" [Newline("\n")] []
+
+```

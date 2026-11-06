@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component-in-setup.vue
+---
+# Input
+```vue
+<script setup>
+import { defineComponent } from 'vue';
+
+defineProps(['title']);
+
+const Child = defineComponent({
+    props: ['ref'],
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-component-in-setup.vue:7:13 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━
+
+  × ref is a reserved attribute and cannot be used as props.
+  
+    6 │ const Child = defineComponent({
+  > 7 │     props: ['ref'],
+      │             ^^^^^
+    8 │ });
+    9 │ </script>
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```

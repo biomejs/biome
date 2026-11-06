@@ -10,8 +10,7 @@ use biome_analyze::{
     ServiceBag,
 };
 use biome_console::markup;
-use biome_diagnostics::category;
-use biome_glob::NormalizedGlob;
+use biome_diagnostics::{Severity, category};
 use biome_js_runtime::{JsExecContext, JsPluginRule};
 use biome_js_syntax::JsSyntaxNode;
 use biome_languages::JsFileSource;
@@ -20,7 +19,7 @@ use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
 
 use crate::PluginDiagnostic;
-use crate::file_matches_includes;
+use crate::PluginIncludes;
 use crate::thread_local::ThreadLocalCell;
 
 /// Already loaded plugin in a thread.
@@ -50,6 +49,7 @@ fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<Lo
 pub struct AnalyzerJsPlugin {
     fs: Arc<dyn FsWithResolverProxy>,
     path: Utf8PathBuf,
+    name: Option<Box<str>>,
     loaded: ThreadLocalCell<LoadedPlugin>,
 
     /// The union of the syntax kinds queried by the rules of the plugin.
@@ -60,8 +60,7 @@ pub struct AnalyzerJsPlugin {
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
-    /// `Some(&[])` (an empty list) means the plugin never runs on any file.
-    includes: Option<Box<[NormalizedGlob]>>,
+    includes: Option<PluginIncludes>,
 }
 
 impl Debug for AnalyzerJsPlugin {
@@ -76,7 +75,7 @@ impl AnalyzerJsPlugin {
     pub fn load(
         fs: Arc<dyn FsWithResolverProxy>,
         path: &Utf8Path,
-        includes: Option<&[NormalizedGlob]>,
+        includes: Option<PluginIncludes>,
     ) -> Result<Self, PluginDiagnostic> {
         // Load the plugin in the main thread here to catch errors while loading,
         // and to extract the queried kinds.
@@ -94,18 +93,26 @@ impl AnalyzerJsPlugin {
         Ok(Self {
             fs,
             path: path.to_owned(),
+            name: None,
             loaded: ThreadLocalCell::new(),
             kinds,
             requires_semantic_model: plugin.rules.iter().any(|rule| rule.requires_semantic),
-            includes: includes.map(Into::into),
+            includes,
         })
+    }
+
+    pub(crate) fn with_name(mut self, name: impl Into<Box<str>>) -> Self {
+        self.name = Some(name.into());
+        self
     }
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
     fn name(&self) -> &str {
-        // JS plugins don't declare a name; fall back to the plugin file stem.
-        self.path.file_stem().unwrap_or("anonymous")
+        self.name
+            .as_deref()
+            .or_else(|| self.path.file_stem())
+            .unwrap_or("anonymous")
     }
 
     fn language(&self) -> PluginTargetLanguage {
@@ -113,7 +120,9 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        file_matches_includes(self.includes.as_deref(), path)
+        self.includes
+            .as_ref()
+            .is_none_or(|includes| includes.matches(path))
     }
 
     fn query(&self) -> Vec<RawSyntaxKind> {
@@ -139,7 +148,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         markup!(
                             "Could not run the plugin because the analyzed file's source type is unavailable."
                         ),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             };
@@ -156,7 +166,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                             category!("plugin"),
                             None::<TextRange>,
                             markup!("Could not load the plugin: "<Error>{err.to_string()}</Error>),
-                        ),
+                        )
+                        .with_severity(Severity::Error),
                         action: None,
                     }],
                 };
@@ -172,7 +183,8 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                         category!("plugin"),
                         None::<TextRange>,
                         markup!("Could not pass the AST to the plugin"),
-                    ),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 }],
             };
@@ -182,6 +194,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         let mut entries = Vec::new();
 
         for rule in rules.iter().filter(|rule| rule.kinds.contains(&kind)) {
+            let name = self.name.as_deref().unwrap_or(&rule.name);
             let result = ctx.call_rule(rule, node.clone(), &path, *source_type, services);
 
             // Drain the diagnostics even on errors, so a failed rule can't leak
@@ -193,14 +206,15 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                     diagnostic: RuleDiagnostic::new(
                         category!("plugin"),
                         None::<TextRange>,
-                        markup!("Rule "<Emphasis>{rule.name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
-                    ),
+                        markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
+                    )
+                    .with_severity(Severity::Error),
                     action: None,
                 });
             }
 
             entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
-                diagnostic: entry.diagnostic.subcategory(rule.name.clone()),
+                diagnostic: entry.diagnostic.subcategory(name.to_string()),
                 action: entry.action,
             }));
         }
@@ -214,8 +228,11 @@ mod tests {
     use super::*;
     use crate::test_utils::snapshot_content;
     use biome_diagnostics::advice::CodeSuggestionAdvice;
-    use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
+    use biome_diagnostics::{
+        Diagnostic, DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string,
+    };
     use biome_fs::MemoryFileSystem;
+    use biome_glob::NormalizedGlob;
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::JsSyntaxKind;
     use boa_engine::JsValue;
@@ -224,6 +241,67 @@ mod tests {
         let mut services = ServiceBag::default();
         services.insert_service(source_type);
         services
+    }
+
+    #[test]
+    fn throwing_rule_reports_error_severity() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            export const boom = defineRule({
+                query: ast("JS_MODULE"),
+                run() {
+                    throw new Error("boom");
+                },
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "console.log('hello');",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
+        let [entry] = result.entries.as_slice() else {
+            panic!("{result:?}");
+        };
+        assert!(
+            PrintDescription(&entry.diagnostic)
+                .to_string()
+                .contains("Rule boom errored: Error: boom")
+        );
+        assert_eq!(entry.diagnostic.severity(), Severity::Error);
+    }
+
+    #[test]
+    fn missing_source_type_reports_error_severity() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
+            export const noop = defineRule({
+                query: ast("JS_MODULE"),
+                run() {},
+            });"#,
+            None,
+        );
+        let parse = biome_js_parser::parse(
+            "console.log('hello');",
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &ServiceBag::default(),
+        );
+        let [entry] = result.entries.as_slice() else {
+            panic!("{result:?}");
+        };
+        assert_eq!(entry.diagnostic.severity(), Severity::Error);
     }
 
     #[test]
@@ -302,6 +380,7 @@ mod tests {
                     event_handler: false,
                     allow_statements: true,
                     slot_props: false,
+                    generics_list: false,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":true,"isSource":true,"eventHandler":false}]"#,
             ),
@@ -313,6 +392,7 @@ mod tests {
                     event_handler: true,
                     allow_statements: false,
                     slot_props: false,
+                    generics_list: false,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":false,"isSource":false,"eventHandler":true}]"#,
             ),
@@ -333,6 +413,15 @@ mod tests {
                     embedding_kind: SvelteEmbeddingKind::Expression,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"expression"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::TextInterpolation,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"textInterpolation"}]"#,
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
@@ -528,6 +617,7 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert(path.into(), source);
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let includes = includes.map(|globs| PluginIncludes::new(Utf8Path::new("/project"), globs));
         AnalyzerJsPlugin::load(fs, path.into(), includes).unwrap()
     }
 
@@ -572,6 +662,15 @@ mod tests {
         let plugin = load_test_plugin(Some(&globs));
         assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
         assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
+
+    #[test]
+    fn matches_globs_relative_to_base_path() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(plugin.applies_to_file(Utf8Path::new("/project/src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/project/packages/src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/other/src/main.ts")));
     }
 
     /// The AST is exposed through lazy getters installed on the prototype of each kind, so the
@@ -2245,3 +2344,11 @@ mod tests {
 #[cfg(test)]
 #[path = "semantic.tests.rs"]
 mod semantic_tests;
+
+#[cfg(test)]
+#[path = "kind_sets.tests.rs"]
+mod kind_sets_tests;
+
+#[cfg(test)]
+#[path = "traversal.tests.rs"]
+mod traversal_tests;

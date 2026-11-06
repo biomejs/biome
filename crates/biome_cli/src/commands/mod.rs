@@ -16,7 +16,8 @@ use biome_configuration::json::{
     JsonFormatterConfiguration, JsonLinterConfiguration, JsonParserConfiguration,
 };
 use biome_configuration::markdown::{
-    MarkdownFormatterConfiguration, MarkdownLinterConfiguration, MarkdownParserConfiguration,
+    MarkdownAnalyzeEmbeds, MarkdownFormatterConfiguration, MarkdownLinterConfiguration,
+    MarkdownParserConfiguration,
 };
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::yaml::YamlFormatterConfiguration;
@@ -41,6 +42,7 @@ use biome_configuration::{
 };
 use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic, Severity};
+use biome_flags::{CiProvider, Environment};
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
@@ -297,6 +299,16 @@ pub enum BiomeCommand {
 
         #[bpaf(external(markdown_linter_configuration), optional, hide_usage)]
         markdown_linter: Option<MarkdownLinterConfiguration>,
+
+        /// Runs the linter and assist actions on the code inside the fenced code blocks,
+        /// frontmatter, and HTML blocks of Markdown files. Defaults to `false`.
+        #[bpaf(
+            long("md-analyze-embeds"),
+            argument("true|false"),
+            optional,
+            hide_usage
+        )]
+        markdown_analyze_embeds: Option<MarkdownAnalyzeEmbeds>,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
@@ -715,15 +727,16 @@ pub enum MigrateSubCommand {
 
 #[derive(Debug, Bpaf, Clone)]
 pub enum InspectSubCommand {
-    /// Resolves plugin files and manifest exports without loading or executing plugin code.
+    /// Lists the plugin rules enabled by the configuration, grouped by plugin.
     ///
-    /// Lists resolved rules by plugin and importing preset, including their include globs.
-    /// Without `--path`, filtered imports are listed separately. Resolution does not establish language
-    /// compatibility or successful compilation.
+    /// Each rule shows whether the configuration lists it directly or through a preset. Rules
+    /// that apply only to some files are listed separately with their `includes` globs. Biome
+    /// locates the plugin files but doesn't compile or run them, so this command doesn't report
+    /// syntax errors or runtime failures.
     #[bpaf(command)]
     Plugins {
-        /// Lists only rules selected by override and plugin includes for this path.
-        /// Does not discover nested configurations or evaluate file/VCS ignores.
+        /// Lists only the rules that apply to this file, based on `overrides` and plugin `includes`.
+        /// Nested configuration files and ignore files are not considered.
         #[bpaf(long("path"), argument("PATH"), optional)]
         path: Option<String>,
     },
@@ -816,7 +829,12 @@ impl BiomeCommand {
         }
     }
 
-    pub fn get_color(&self) -> Option<&ColorsArg> {
+    /// Returns the color mode requested for this command, or `None` to
+    /// detect it from the terminal.
+    ///
+    /// When the command doesn't request a color mode, the default can depend
+    /// on `environment`.
+    pub fn get_color(&self, environment: &dyn Environment) -> Option<&ColorsArg> {
         match self.cli_options() {
             Some(cli_options) => {
                 // To properly display GitHub annotations we need to disable colors
@@ -831,7 +849,8 @@ impl BiomeCommand {
                 // In GitHub Actions, we disable colors so the auto-enabled GitHub reporter
                 // output is not corrupted by ANSI escape codes.
                 if matches!(self, Self::Ci { .. }) && cli_options.colors.is_none() {
-                    if is_github_actions() {
+                    if CiProvider::from_environment(environment) == Some(CiProvider::GithubActions)
+                    {
                         return Some(&ColorsArg::Off);
                     }
                     return Some(&ColorsArg::Force);
@@ -883,18 +902,6 @@ impl BiomeCommand {
         self.log_options()
             .map_or(LoggingKind::default(), |log_options| log_options.log_kind)
     }
-}
-
-/// Returns `true` when running in GitHub Actions in release builds.
-///
-/// In debug builds, this always returns `false` to avoid false positives in
-/// tests that run `biome ci` under CI (CI-ception).
-fn is_github_actions() -> bool {
-    if cfg!(debug_assertions) {
-        return false;
-    }
-    // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
-    std::env::var("GITHUB_ACTIONS").is_ok_and(|v| v == "true")
 }
 
 /// Prints configuration diagnostics and reports an error when loading produced an error.
@@ -1174,5 +1181,46 @@ mod tests {
     #[test]
     fn check_options() {
         biome_command().check_invariants(false);
+    }
+
+    fn parse(arguments: &[&str]) -> BiomeCommand {
+        biome_command()
+            .run_inner(bpaf::Args::from(arguments))
+            .expect("arguments to be valid")
+    }
+
+    #[test]
+    fn ci_forces_colors_outside_github_actions() {
+        let command = parse(&["ci", "file.js"]);
+        let environment = biome_flags::MemoryEnvironment::default().with_var("CI", "true");
+
+        assert!(matches!(
+            command.get_color(&environment),
+            Some(ColorsArg::Force)
+        ));
+    }
+
+    #[test]
+    fn ci_disables_colors_in_github_actions() {
+        let command = parse(&["ci", "file.js"]);
+        let environment =
+            biome_flags::MemoryEnvironment::default().with_var("GITHUB_ACTIONS", "true");
+
+        assert!(matches!(
+            command.get_color(&environment),
+            Some(ColorsArg::Off)
+        ));
+    }
+
+    #[test]
+    fn explicit_colors_win_in_github_actions() {
+        let command = parse(&["ci", "--colors=force", "file.js"]);
+        let environment =
+            biome_flags::MemoryEnvironment::default().with_var("GITHUB_ACTIONS", "true");
+
+        assert!(matches!(
+            command.get_color(&environment),
+            Some(ColorsArg::Force)
+        ));
     }
 }

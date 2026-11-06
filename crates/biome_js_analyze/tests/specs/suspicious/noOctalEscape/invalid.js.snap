@@ -37,6 +37,8 @@ invalid.js:2:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
     3 │ "foo \000 bar";
     4 │ "foo \377 bar";
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
      1  1 │   0;
@@ -59,6 +61,8 @@ invalid.js:3:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
       │      ^^^^
     4 │ "foo \377 bar";
     5 │ "foo \378 bar";
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -84,6 +88,8 @@ invalid.js:4:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
     5 │ "foo \378 bar";
     6 │ "foo \37a bar";
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
      2  2 │   "foo \01 bar";
@@ -107,6 +113,8 @@ invalid.js:5:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
       │      ^^^
     6 │ "foo \37a bar";
     7 │ "foo \381 bar";
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -132,6 +140,8 @@ invalid.js:6:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
     7 │ "foo \381 bar";
     8 │ "foo \3a1 bar";
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
      4  4 │   "foo \377 bar";
@@ -155,6 +165,8 @@ invalid.js:7:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
       │      ^^
     8 │ "foo \3a1 bar";
     9 │ "foo \751 bar";
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -180,6 +192,8 @@ invalid.js:8:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
      9 │ "foo \751 bar";
     10 │ "foo \258 bar";
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
      6  6 │   "foo \37a bar";
@@ -203,6 +217,8 @@ invalid.js:9:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
        │      ^^^
     10 │ "foo \258 bar";
     11 │ "foo \25a bar";
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -228,6 +244,8 @@ invalid.js:10:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
     11 │ "foo \25a bar";
     12 │ "foo \456 bar";
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
      8  8 │   "foo \3a1 bar";
@@ -251,6 +269,8 @@ invalid.js:11:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
        │      ^^^
     12 │ "foo \456 bar";
     13 │ "foo \777 bar";
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -276,6 +296,8 @@ invalid.js:12:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
     13 │ "foo \777 bar";
     14 │ "foo \1234 bar";
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
     10 10 │   "foo \258 bar";
@@ -299,6 +321,8 @@ invalid.js:13:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
        │      ^^^
     14 │ "foo \1234 bar";
     15 │ 
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -324,6 +348,8 @@ invalid.js:14:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
     15 │ 
     16 │ const o = {
   
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
+  
   i Safe fix: Use hexadecimal escape sequences instead.
   
     12 12 │   "foo \456 bar";
@@ -346,6 +372,8 @@ invalid.js:17:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
        │      ^^^
     18 │ };
     19 │ 
+  
+  i Octal escape sequences are deprecated. They are not allowed in strict mode or in template literals.
   
   i Safe fix: Use hexadecimal escape sequences instead.
   

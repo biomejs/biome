@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTs.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	import { writable } from "svelte/store";
+	const count = writable<number>();
+</script>
+
+<p>{$count}</p>
+
+```
+
+# Diagnostics
+```
+invalidTs.svelte:4:16 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    2 │ <script lang="ts">
+    3 │ 	import { writable } from "svelte/store";
+  > 4 │ 	const count = writable<number>();
+      │ 	              ^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

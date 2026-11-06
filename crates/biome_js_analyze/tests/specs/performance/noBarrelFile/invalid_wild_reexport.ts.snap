@@ -12,11 +12,15 @@ export * from "foo";
 ```
 invalid_wild_reexport.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  ! Avoid barrel files.
   
   > 1 │ export * from "foo";
       │ ^^^^^^^^^^^^^^^^^^^^
     2 │ 
+  
+  i Barrel files slow down tools and bundlers. They also create large module graphs that include modules that go unused.
+  
+  i Import from the module that defines each export, and remove the re-exports from this file.
   
   i Check this thorough explanation to better understand the context.
   

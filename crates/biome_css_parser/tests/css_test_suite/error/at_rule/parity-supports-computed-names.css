@@ -1,0 +1,8 @@
+@supports ($prefix + $axis: clip) { .scss-name { overflow-x: clip; } }
+.after-scss-name { color: green; }
+
+@import "a.css" supports($prefix + $axis: clip);
+.after-scss-import { color: green; }
+
+@import "b.css" supports(($prefix + $axis: clip));
+.after-grouped-scss-import { color: green; }

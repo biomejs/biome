@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsLogicalExpression, JsLogicalOperator, JsSyntaxKind, JsUnaryOperator, JsYieldArgument,
     JsYieldExpression, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxTriviaPiece};
 use biome_rule_options::no_yoda_expression::NoYodaExpressionOptions;
 
 declare_lint_rule! {
@@ -126,7 +126,7 @@ impl Rule for NoYodaExpression {
         let operator_leading_trivia = operator_token.leading_trivia().pieces();
         let operator_trailing_trivia = operator_token.trailing_trivia().pieces();
         let whitespace = make::token(T!(==))
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+            .with_trailing_space()
             .trailing_trivia()
             .last();
 

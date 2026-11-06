@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+a { color: oklch(85% 0.17 88); }
+a { color: oklab(86% 0.2 154); }
+a { color: lch(85% 0.17 88); }
+a { color: lab(86% 0.2 154); }
+a { color: oklch(from red 50% c h); }
+a { color: oklch(from red l c h); }
+a { color: oklch(none 0.17 88); }
+a { color: oklch(var(--lightness) 0.17 88); }
+a { color: oklch(calc(0.5 + 0.1) 0.17 88); }
+a { color: hsl(120 50 50); }
+a { color: color(display-p3 0.5 0.5 0.5); }
+a { color: rgb(0 0 0); }

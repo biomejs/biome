@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+if (map.has(key as string)) { map.get(anotherKey as string); }
+if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:39 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (map.has(key as string)) { map.get(anotherKey as string); }
+      │                                       ^^^^^^^^^^^^^^^^^^^^
+    3 │ if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+    4 │ function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+  
+  i The map is checked for this key.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ if (map.has(key as string)) { map.get(anotherKey as string); }
+      │             ^^^^^^^^^^^^^
+    3 │ if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+    4 │ function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:55 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (map.has(key as string)) { map.get(anotherKey as string); }
+  > 3 │ if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+      │                                                       ^^^^^^^^^^
+    4 │ function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+    5 │ 
+  
+  i The map is checked for this key.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (map.has(key as string)) { map.get(anotherKey as string); }
+  > 3 │ if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+      │                                      ^^^
+    4 │ function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+    5 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:75 lint/nursery/noMismatchedMapKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This get() call uses a different key than the has() check before it.
+  
+    2 │ if (map.has(key as string)) { map.get(anotherKey as string); }
+    3 │ if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+  > 4 │ function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+      │                                                                           ^^^
+    5 │ 
+  
+  i The map is checked for this key.
+  
+    2 │ if (map.has(key as string)) { map.get(anotherKey as string); }
+    3 │ if ((map as Map<string, number>).has(key)) { map!.get(anotherKey); }
+  > 4 │ function f(map: Map<string, number>) { if (map.has("a")) { return map.get("b"); } }
+      │                                                    ^^^
+    5 │ 
+  
+  i Checking one key and then using another is usually a copy-paste mistake, so this call may use the wrong entry.
+  
+  i Use the same key in both calls.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

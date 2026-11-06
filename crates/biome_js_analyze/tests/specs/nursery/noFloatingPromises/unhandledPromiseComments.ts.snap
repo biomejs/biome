@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unhandledPromiseComments.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+async function f() {
+	// a leading comment
+	Promise.resolve(1); // a trailing comment
+	Promise.resolve(1) /* a trailing comment */;
+}
+
+```
+
+# Diagnostics
+```
+unhandledPromiseComments.ts:4:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    2 │ async function f() {
+    3 │ 	// a leading comment
+  > 4 │ 	Promise.resolve(1); // a trailing comment
+      │ 	^^^^^^^^^^^^^^^^^^^
+    5 │ 	Promise.resolve(1) /* a trailing comment */;
+    6 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    4 │ → await·Promise.resolve(1);·//·a·trailing·comment
+      │   ++++++                                         
+
+```
+
+```
+unhandledPromiseComments.ts:5:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ 	// a leading comment
+    4 │ 	Promise.resolve(1); // a trailing comment
+  > 5 │ 	Promise.resolve(1) /* a trailing comment */;
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    5 │ → await·Promise.resolve(1)·/*·a·trailing·comment·*/;
+      │   ++++++                                            
+
+```

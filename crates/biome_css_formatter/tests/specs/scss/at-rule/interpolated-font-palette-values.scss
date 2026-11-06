@@ -1,0 +1,10 @@
+$name:brand;
+@font-palette-values --palette-#{ $name }2{font-family:"Bixa"}
+@font-palette-values   --palette-#{ $name } {font-family:"Bixa";override-colors:0 red}
+@font-palette-values --#{ $name }-dark{font-family:"Bixa";base-palette:1}
+@font-palette-values /* before */ --palette-#{ $name } /* after */ {font-family:"Bixa"}
+@font-palette-values --palette-#{/* expression */$name}{font-family:"Bixa"}
+@font-palette-values --Palette {font-family:"Bixa";override-colors:1 blue}
+
+// biome-ignore format: preserve the source layout
+@font-palette-values   --palette-#{ $name } {font-family:"Bixa";override-colors:0 red}

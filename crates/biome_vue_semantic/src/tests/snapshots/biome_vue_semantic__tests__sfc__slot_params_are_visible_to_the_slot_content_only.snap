@@ -1,0 +1,11 @@
+---
+source: crates/biome_vue_semantic/src/tests/sfc.rs
+expression: "references(r#\"<script setup>\nimport List from './List.vue'\ndefineProps(['lists', 'row'])\n</script>\n<template>\n  <List v-for=\"list in lists\" v-slot=\"{ row }\" v-if=\"row\" :items=\"list\" :selected=\"row\">\n    {{ row }} {{ list }}\n  </List>\n</template>\n\"#)"
+---
+ref lists 119..124 Binding Identifier Read -> Prop lists
+ref row 149..152 Binding Identifier Read -> Prop row
+ref list 162..166 Binding Identifier Read -> VForAlias list
+ref row 179..182 Binding Identifier Read -> Prop row
+ref row 192..195 Binding Identifier Read -> SlotParam row
+ref list 202..206 Binding Identifier Read -> VForAlias list
+ref List 99..103 Component TagName(ElementId(2)) Read -> Import List

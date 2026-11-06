@@ -1,0 +1,116 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: semicolon.css
+---
+# Input
+```css
+/* should generate diagnostics */
+div {
+  color: red;
+  display: block
+}
+
+.comments {
+  color: red;
+  /* Display comment. */
+  display: block /* Trailing display comment. */
+}
+
+.nested {
+  .child {}
+  color: red
+}
+
+```
+
+# Diagnostics
+```
+semicolon.css:2:5 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ div {
+      │     ^
+  > 3 │   color: red;
+  > 4 │   display: block
+  > 5 │ }
+      │ ^
+    6 │ 
+    7 │ .comments {
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   div {
+     3    │ - ··color:·red;
+     4    │ - ··display:·block
+        3 │ + ··display:·block;
+        4 │ + ··color:·red;
+     5  5 │   }
+     6  6 │   
+  
+
+```
+
+```
+semicolon.css:7:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     5 │ }
+     6 │ 
+   > 7 │ .comments {
+       │           ^
+   > 8 │   color: red;
+   > 9 │   /* Display comment. */
+  > 10 │   display: block /* Trailing display comment. */
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ .nested {
+  
+  i Safe fix: Sort these properties
+  
+     6  6 │   
+     7  7 │   .comments {
+     8    │ - ··color:·red;
+     9    │ - ··/*·Display·comment.·*/
+    10    │ - ··display:·block·/*·Trailing·display·comment.·*/
+        8 │ + ··/*·Display·comment.·*/
+        9 │ + ··display:·block;·/*·Trailing·display·comment.·*/
+       10 │ + ··color:·red;
+    11 11 │   }
+    12 12 │   
+  
+
+```
+
+```
+semicolon.css:13:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    11 │ }
+    12 │ 
+  > 13 │ .nested {
+       │         ^
+  > 14 │   .child {}
+  > 15 │   color: red
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i Safe fix: Sort these properties
+  
+    12 12 │   
+    13 13 │   .nested {
+    14    │ - ··.child·{}
+    15    │ - ··color:·red
+       14 │ + ··color:·red;
+       15 │ + ··.child·{}
+    16 16 │   }
+    17 17 │   
+  
+
+```

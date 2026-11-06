@@ -11,10 +11,12 @@ delete a.b;
 ```
 invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a.b;
       │ ^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
   i Unsafe fix: Use an undefined assignment instead.
   
@@ -33,10 +35,12 @@ delete a?.b;
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a?.b;
       │ ^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -50,10 +54,12 @@ delete a['b'];
 ```
 invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a['b'];
       │ ^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
   i Unsafe fix: Use an undefined assignment instead.
   
@@ -72,10 +78,12 @@ delete a?.['b'];
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a?.['b'];
       │ ^^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -89,10 +97,12 @@ delete a.b.c;
 ```
 invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a.b.c;
       │ ^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
   i Unsafe fix: Use an undefined assignment instead.
   
@@ -111,10 +121,12 @@ delete a.b?.c;
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a.b?.c;
       │ ^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -128,10 +140,12 @@ delete a.b['c'];
 ```
 invalid.jsonc:1:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a.b['c'];
       │ ^^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
   i Unsafe fix: Use an undefined assignment instead.
   
@@ -150,10 +164,12 @@ delete a.b?.['c'];
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a.b?.['c'];
       │ ^^^^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -167,10 +183,12 @@ delete a?.b.c;
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a?.b.c;
       │ ^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -184,10 +202,12 @@ delete a?.b?.c;
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a?.b?.c;
       │ ^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -201,10 +221,12 @@ delete a?.b['c'];
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a?.b['c'];
       │ ^^^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```
@@ -218,10 +240,12 @@ delete a?.b?.['c'];
 ```
 invalid.jsonc:1:1 lint/performance/noDelete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ delete a?.b?.['c'];
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
 
 ```

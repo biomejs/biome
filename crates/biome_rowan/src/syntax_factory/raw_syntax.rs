@@ -1,5 +1,5 @@
-use crate::green::GreenElement;
-use crate::{GreenNode, GreenToken, NodeOrToken, SyntaxKind};
+use crate::green::{GreenElement, GreenElementRef};
+use crate::{GreenNode, GreenNodeData, GreenToken, GreenTokenData, NodeOrToken, SyntaxKind};
 use std::marker::PhantomData;
 
 /// New-type wrapper around a `GreenNode`.
@@ -110,7 +110,7 @@ impl<K: SyntaxKind> From<GreenElement> for RawSyntaxElement<K> {
 /// New-type wrapper to a reference of a `GreenNode`.
 #[derive(Debug)]
 pub struct RawSyntaxNodeRef<'a, K: SyntaxKind> {
-    raw: &'a GreenNode,
+    raw: &'a GreenNodeData,
     ph: PhantomData<K>,
 }
 
@@ -121,9 +121,9 @@ impl<K: SyntaxKind> RawSyntaxNodeRef<'_, K> {
     }
 }
 
-impl<'a, K: SyntaxKind> From<&'a GreenNode> for RawSyntaxNodeRef<'a, K> {
+impl<'a, K: SyntaxKind> From<&'a GreenNodeData> for RawSyntaxNodeRef<'a, K> {
     #[inline]
-    fn from(node: &'a GreenNode) -> Self {
+    fn from(node: &'a GreenNodeData) -> Self {
         Self {
             raw: node,
             ph: PhantomData,
@@ -134,7 +134,7 @@ impl<'a, K: SyntaxKind> From<&'a GreenNode> for RawSyntaxNodeRef<'a, K> {
 /// New-type wrapper to a reference of a `GreenToken`
 #[derive(Debug)]
 pub struct RawSyntaxTokenRef<'a, K: SyntaxKind> {
-    raw: &'a GreenToken,
+    raw: &'a GreenTokenData,
     ph: PhantomData<K>,
 }
 
@@ -145,9 +145,9 @@ impl<K: SyntaxKind> RawSyntaxTokenRef<'_, K> {
     }
 }
 
-impl<'a, K: SyntaxKind> From<&'a GreenToken> for RawSyntaxTokenRef<'a, K> {
+impl<'a, K: SyntaxKind> From<&'a GreenTokenData> for RawSyntaxTokenRef<'a, K> {
     #[inline]
-    fn from(token: &'a GreenToken) -> Self {
+    fn from(token: &'a GreenTokenData) -> Self {
         Self {
             raw: token,
             ph: PhantomData,
@@ -168,21 +168,9 @@ impl<K: SyntaxKind> RawSyntaxElementRef<'_, K> {
     }
 }
 
-impl<'a, K: SyntaxKind> From<NodeOrToken<&'a GreenNode, &'a GreenToken>>
-    for RawSyntaxElementRef<'a, K>
-{
+impl<'a, K: SyntaxKind> From<GreenElementRef<'a>> for RawSyntaxElementRef<'a, K> {
     #[inline]
-    fn from(element: NodeOrToken<&'a GreenNode, &'a GreenToken>) -> Self {
-        match element {
-            NodeOrToken::Node(node) => NodeOrToken::Node(RawSyntaxNodeRef::from(node)),
-            NodeOrToken::Token(token) => NodeOrToken::Token(RawSyntaxTokenRef::from(token)),
-        }
-    }
-}
-
-impl<'a, K: SyntaxKind> From<&'a GreenElement> for RawSyntaxElementRef<'a, K> {
-    #[inline]
-    fn from(element: &'a GreenElement) -> Self {
+    fn from(element: GreenElementRef<'a>) -> Self {
         match element {
             NodeOrToken::Node(node) => NodeOrToken::Node(RawSyntaxNodeRef::from(node)),
             NodeOrToken::Token(token) => NodeOrToken::Token(RawSyntaxTokenRef::from(token)),

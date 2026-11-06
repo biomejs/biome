@@ -134,18 +134,19 @@ fn maximum_diagnostics() {
             .iter()
             .filter(|m| m.level == LogLevel::Error)
             .count(),
-        20_usize
+        // 20 diagnostics, the max-diagnostics warning, and the summary
+        22_usize
     );
 
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
                     && content.contains("Diagnostics not shown")
-                    && content.contains("28")
+                    && content.contains("29")
             })
     );
 
@@ -1264,7 +1265,7 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
     let result = run_cli_with_dyn_fs(
         Box::new(OsFileSystem::new(subroot_path.clone())),
         &mut console,
-        Args::from(["lint", root_path.as_ref()].as_slice()),
+        Args::from(["lint", subroot_path.as_ref()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();

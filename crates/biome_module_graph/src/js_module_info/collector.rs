@@ -5,16 +5,16 @@ use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsRestParameter,
-    JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
-    inner_string_text,
+    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsLanguage,
+    JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration,
+    TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
     RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
     TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
-use biome_rowan::{AstNode, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange, TokenText};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 
@@ -157,6 +157,13 @@ impl JsModuleInfoCollector {
             referenced_classes: Vec::new(),
         }
     }
+
+    /// The kinds of the nodes that [Self::leave_node] reads.
+    pub(super) const LEAVE_NODE_KINDS: SyntaxKindSet<JsLanguage> = AnyJsExpression::KIND_SET
+        .union(JsFormalParameter::KIND_SET)
+        .union(JsRestParameter::KIND_SET)
+        .union(JsVariableDeclaration::KIND_SET)
+        .union(biome_js_syntax::JsImport::KIND_SET);
 
     pub fn leave_node(&mut self, node: &JsSyntaxNode) {
         if let Some(expr) = AnyJsExpression::cast_ref(node) {

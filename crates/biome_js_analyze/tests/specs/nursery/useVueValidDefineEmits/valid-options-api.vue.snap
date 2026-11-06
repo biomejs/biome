@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const events = ["notify"];
+
+defineEmits(events);
+defineEmits();
+
+export default {
+	setup() {
+		defineEmits(events);
+		defineEmits();
+	},
+};
+</script>
+
+```

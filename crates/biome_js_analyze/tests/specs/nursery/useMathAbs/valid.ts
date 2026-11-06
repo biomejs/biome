@@ -1,0 +1,61 @@
+/* should not generate diagnostics */
+function parameter(value: bigint) {
+	return value < 0 ? -value : value;
+}
+function asAssertion(value) {
+	return (value as bigint) < 0 ? -(value as bigint) : (value as bigint);
+}
+function angleBracketAssertion(value) {
+	return (<bigint>value) < 0 ? -(<bigint>value) : (<bigint>value);
+}
+function range(value: bigint, limit: bigint) {
+	return value > limit || value < -limit;
+}
+function rangeLimit(value, limit: bigint) {
+	return value > limit || value < -limit;
+}
+function variable() {
+	const value: bigint = 1n;
+	return value < 0 ? -value : value;
+}
+function union(value: number | bigint) {
+	return value < 0 ? -value : value;
+}
+function unionAssertion(value) {
+	return (value as number | bigint) < 0 ? -(value as number | bigint) : (value as number | bigint);
+}
+function intersection(value: bigint & {}) {
+	return value < 0 ? -value : value;
+}
+function parenthesizedType(value: (bigint)) {
+	return value < 0 ? -value : value;
+}
+function literalType() {
+	const value: 1n = 1n;
+	return value < 0 ? -value : value;
+}
+function satisfiesAssertion(value) {
+	return (value satisfies bigint) < 0 ? -(value satisfies bigint) : (value satisfies bigint);
+}
+function nonNullAssertion(value) {
+	return (value as bigint)! < 0 ? -(value as bigint)! : (value as bigint)!;
+}
+class PropertyParameter {
+	absolute: bigint;
+	constructor(private value: bigint) {
+		this.absolute = value < 0 ? -value : value;
+	}
+}
+function definiteAssignment() {
+	let value!: bigint;
+	value = 1n;
+	return value < 0 ? -value : value;
+}
+function assertedLiteral() {
+	const value = 1n as const;
+	return value < 0 ? -value : value;
+}
+function assertedCall(raw: string) {
+	const value = BigInt(raw) as Wei;
+	return value < 0 ? -value : value;
+}

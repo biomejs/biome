@@ -8,7 +8,7 @@ use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
-    Resource, Severity, Visit, category,
+    Severity, Visit, category,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
@@ -416,6 +416,16 @@ impl Diagnostic for FileTooLarge {
         Severity::Warning
     }
 
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            fmt,
+            "The size of the file is {}, which exceeds the configured maximum of {} for this project.
+Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file.",
+            Bytes(self.size),
+            Bytes(self.limit)
+        )
+    }
+
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
@@ -439,7 +449,10 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
 pub struct NoProject;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(category = "project")]
+#[diagnostic(
+    category = "project",
+    message = "Biome can't update the settings of a nested configuration because no workspace directory was provided."
+)]
 pub struct NoWorkspaceDirectory;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -592,6 +605,9 @@ pub enum TransportError {
     Timeout,
     /// Error caused by a serialization or deserialization issue
     SerdeError(String),
+    /// Error emitted when the remote workspace cancelled a request because
+    /// its content changed while the request was running.
+    ContentModified,
     /// Generic error type for RPC errors that can't be deserialized into RomeError
     RPCError(String),
     /// A diagnostic returned by a remote workspace.
@@ -626,6 +642,9 @@ impl Diagnostic for TransportError {
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
+            Self::ContentModified => fmt.write_str(
+                "the remote workspace cancelled the request because its content changed",
+            ),
             Self::RPCError(err) => fmt.write_str(err),
             Self::RemoteDiagnostic(diagnostic) => diagnostic.description(fmt),
         }
@@ -638,6 +657,9 @@ impl Diagnostic for TransportError {
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
+            Self::ContentModified => fmt.write_str(
+                "the remote workspace cancelled the request because its content changed",
+            ),
             Self::RPCError(err) => fmt.write_str(err),
             Self::RemoteDiagnostic(diagnostic) => diagnostic.message(fmt),
         }
@@ -730,6 +752,20 @@ pub struct NoIgnoreFileFound {
 )]
 pub struct DisabledVcs {}
 
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        description = "Biome couldn't find the Tailwind CSS stylesheet {path} set in `tailwind.stylesheet`.",
+        message("Biome couldn't find the Tailwind CSS stylesheet "<Emphasis>{self.path}</Emphasis>" set in "<Emphasis>"tailwind.stylesheet"</Emphasis>"."),
+    )
+)]
+pub struct TailwindStylesheetNotFound {
+    #[location(resource)]
+    pub path: String,
+}
+
 #[cfg(feature = "plugins")]
 #[cfg_attr(feature = "plugins", derive(Debug, Serialize, Deserialize))]
 pub struct PluginErrors {
@@ -760,7 +796,7 @@ impl Diagnostic for PluginErrors {
         for diagnostic in &self.diagnostics {
             fmt.write_str("\n")?;
 
-            if let Some(Resource::File(path)) = diagnostic.location().resource {
+            if let Some(biome_diagnostics::Resource::File(path)) = diagnostic.location().resource {
                 fmt.write_markup(markup!(<Emphasis>{path}</Emphasis>": "))?;
             }
 
@@ -930,6 +966,14 @@ mod test {
     #[test]
     fn transport_timeout() {
         snap_diagnostic("transport_timeout", TransportError::Timeout.into())
+    }
+
+    #[test]
+    fn transport_content_modified() {
+        snap_diagnostic(
+            "transport_content_modified",
+            TransportError::ContentModified.into(),
+        )
     }
 
     #[test]

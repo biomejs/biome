@@ -7,6 +7,7 @@ pub use js_target_language::JsTargetLanguage;
 pub use json_target_language::JsonTargetLanguage;
 
 use camino::Utf8Path;
+use grit_util::constants::VARIABLE_REGEX;
 use grit_util::{AnalysisLogs, Ast, CodeRange, EffectRange, Language, Parser, SnippetTree};
 use std::borrow::Cow;
 use std::path::Path;
@@ -14,7 +15,7 @@ use std::str::FromStr;
 
 use biome_grit_syntax::{GritLanguageDeclaration, GritSyntaxKind};
 use biome_parser::AnyParse;
-use biome_rowan::SyntaxKind;
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_string_case::StrOnlyExtension;
 
 use crate::CompileError;
@@ -198,6 +199,12 @@ macro_rules! generate_target_language {
                 }
             }
 
+            // Snippets are parsed with their `$` prefixes, because their
+            // ranges are passed to the parser instead of being replaced.
+            fn metavariable_prefix_substitute(&self) -> &'static str {
+                self.metavariable_prefix()
+            }
+
             fn is_comment(&self, node: &GritTargetNode) -> bool {
                 match self {
                     $(Self::$language(language) => language.is_comment(node)),+
@@ -208,7 +215,7 @@ macro_rules! generate_target_language {
                 node.kind() == self.metavariable_kind()
                     || (self.is_alternative_metavariable_kind(node.kind())
                         && self
-                            .exact_replaced_variable_regex()
+                            .exact_variable_regex()
                             .is_match(node.text().trim()))
             }
 
@@ -294,20 +301,17 @@ impl GritTargetLanguage {
     }
 
     /// Returns `true` when the text `content` contains a metavariable
-    /// identifier with its prefix replaced with the
-    /// `[Self::metavariable_prefix_substitute()].
+    /// identifier.
     ///
     /// The metavariable may occur anywhere inside `content`.
-    pub fn matches_replaced_metavariable(&self, content: &str) -> bool {
-        self.replaced_metavariable_regex().is_match(content)
+    pub fn matches_metavariable(&self, content: &str) -> bool {
+        self.metavariable_regex().is_match(content)
     }
 
     pub fn parse_snippet_contexts(&self, source: &str) -> Vec<SnippetTree<GritTargetTree>> {
-        let source = self.substitute_metavariable_prefix(source);
-
         let mut snippet_trees: Vec<SnippetTree<GritTargetTree>> = Vec::new();
         for (pre, post) in self.snippet_context_strings() {
-            let parse_result = self.get_parser().parse_snippet(pre, &source, post);
+            let parse_result = self.get_parser().parse_snippet(pre, source, post);
 
             let has_errors = parse_result
                 .tree
@@ -538,6 +542,20 @@ impl LeafNormalizer {
     pub(crate) fn kind(&self) -> GritTargetSyntaxKind {
         self.kind
     }
+}
+
+/// Returns the ranges of the metavariables in a snippet `source`, such as
+/// `$name` and `$...`.
+pub(crate) fn metavariable_ranges(source: &str) -> Vec<TextRange> {
+    VARIABLE_REGEX
+        .find_iter(source)
+        .map(|m| {
+            TextRange::new(
+                TextSize::from(m.start() as u32),
+                TextSize::from(m.end() as u32),
+            )
+        })
+        .collect()
 }
 
 fn normalize_quoted_string(string: &str) -> Option<&str> {

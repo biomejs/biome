@@ -4,17 +4,15 @@
 )]
 
 use crate::fonts::{
-    CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
+    CssFontComponent, CssFontValue, find_font_family, font_components, is_font_family_keyword,
+    is_system_family_name_keyword,
 };
 use crate::utils::is_css_variable;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{
-    AnyCssAtRule, AnyCssGenericComponentValue, AnyCssGenericPropertyValueOrExpression, AnyCssValue,
-    CssAtRule, CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
-};
+use biome_css_syntax::{AnyCssAtRule, AnyCssValue, CssAtRule, CssGenericProperty, CssSyntaxKind};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
@@ -32,7 +30,13 @@ declare_lint_rule! {
     /// - the property uses a CSS-wide keyword such as `inherit` or `initial`;
     /// - the `font` shorthand uses a system-font value such as `caption` or `menu`;
     /// - the final family comes from a custom property through `var()`;
-    /// - `font-family` appears inside an `@font-face` rule.
+    /// - `font-family` appears inside an `@font-face` or `@font-palette-values` rule, where it is a
+    ///   descriptor that names font families rather than a fallback list.
+    ///
+    /// ## SCSS limitations
+    ///
+    /// Font values that require SCSS evaluation, including variables, interpolation, and
+    /// user-defined function results, are ignored because the emitted font family is unknown.
     ///
     /// ## Examples
     ///
@@ -68,6 +72,10 @@ declare_lint_rule! {
     /// @font-face { font-family: Gentium; }
     /// ```
     ///
+    /// ```css
+    /// @font-palette-values --palette { font-family: Bixa; }
+    /// ```
+    ///
     pub UseGenericFontNames {
         version: "1.8.0",
         name: "useGenericFontNames",
@@ -89,8 +97,9 @@ impl Rule for UseGenericFontNames {
         let property_name = node.name().ok()?.to_trimmed_text();
         let property_name = property_name.to_ascii_lowercase_cow();
 
-        // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
-        if is_in_font_face_at_rule(node) {
+        // See https://drafts.csswg.org/css-fonts/#font-face-rule and
+        // https://drafts.csswg.org/css-fonts/#font-palette-values
+        if is_font_family_descriptor(node) {
             return None;
         }
 
@@ -109,15 +118,7 @@ impl Rule for UseGenericFontNames {
 
         // handle shorthand font property with special value
         // e.g: { font: caption }, { font: inherit }
-        let properties = match node.value() {
-            Ok(value) => match value {
-                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
-                AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => return None,
-                AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
-                AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
-            },
-            Err(_) => return None,
-        };
+        let properties = font_components(node.value().ok()?)?;
         if is_font && is_shorthand_font_property_with_keyword(&properties) {
             return None;
         }
@@ -130,9 +131,9 @@ impl Rule for UseGenericFontNames {
         }
 
         let font_families = if is_font {
-            find_font_family(properties)
+            find_font_family(&properties)
         } else {
-            collect_font_family_properties(properties)
+            collect_font_family_properties(&properties)
         };
 
         if font_families.is_empty() {
@@ -157,7 +158,10 @@ impl Rule for UseGenericFontNames {
                 },
             )
             .note(markup! {
-                    "Consider adding a generic font family as a fallback."
+                "If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design."
+            })
+            .note(markup! {
+                "Consider adding a generic font family as a fallback."
             })
             .footer_list(
                 markup! {
@@ -169,14 +173,19 @@ impl Rule for UseGenericFontNames {
     }
 }
 
-fn is_in_font_face_at_rule(node: &CssGenericProperty) -> bool {
+fn is_font_family_descriptor(node: &CssGenericProperty) -> bool {
     node.syntax()
         .ancestors()
         .skip(1)
         .find(|n| n.kind() == CssSyntaxKind::CSS_AT_RULE)
         .and_then(|n| n.cast::<CssAtRule>())
         .and_then(|n| n.rule().ok())
-        .is_some_and(|n| matches!(n, AnyCssAtRule::CssFontFaceAtRule(_)))
+        .is_some_and(|n| {
+            matches!(
+                n,
+                AnyCssAtRule::CssFontFaceAtRule(_) | AnyCssAtRule::CssFontPaletteValuesAtRule(_)
+            )
+        })
 }
 
 /// Check if the node is inside a `@supports` feature declaration (the condition),
@@ -197,11 +206,12 @@ fn is_in_supports_feature_declaration(node: &CssGenericProperty) -> bool {
         .any(|n| n.kind() == CssSyntaxKind::CSS_SUPPORTS_FEATURE_DECLARATION)
 }
 
-fn is_shorthand_font_property_with_keyword(properties: &CssGenericComponentValueList) -> bool {
-    properties.into_iter().len() == 1
-        && properties
-            .into_iter()
-            .any(|p| is_system_family_name_keyword(&p.to_trimmed_text()))
+fn is_shorthand_font_property_with_keyword(properties: &[CssFontComponent]) -> bool {
+    matches!(
+        properties,
+        [CssFontComponent::Value(value)]
+            if is_system_family_name_keyword(value.to_trimmed_text().text())
+    )
 }
 
 fn has_generic_font_family_property(nodes: &[CssFontValue]) -> bool {
@@ -217,15 +227,14 @@ fn has_generic_font_family_property(nodes: &[CssFontValue]) -> bool {
     })
 }
 
-fn collect_font_family_properties(properties: CssGenericComponentValueList) -> Vec<CssFontValue> {
+fn collect_font_family_properties(properties: &[CssFontComponent]) -> Vec<CssFontValue> {
     properties
-        .into_iter()
-        .filter_map(|v| match v {
-            AnyCssGenericComponentValue::AnyCssValue(value) => match value {
-                AnyCssValue::CssIdentifier(node) => Some(CssFontValue::SingleValue(node.into())),
-                AnyCssValue::CssString(node) => Some(CssFontValue::SingleValue(node.into())),
-                _ => None,
-            },
+        .iter()
+        .filter_map(|component| match component.as_value()? {
+            AnyCssValue::CssIdentifier(node) => {
+                Some(CssFontValue::SingleValue(node.clone().into()))
+            }
+            AnyCssValue::CssString(node) => Some(CssFontValue::SingleValue(node.clone().into())),
             _ => None,
         })
         .collect()
@@ -234,14 +243,13 @@ fn collect_font_family_properties(properties: CssGenericComponentValueList) -> V
 /// Check if the last value in the properties list is a CSS variable.
 /// This handles cases like `font-family: "Noto Serif", var(--serif)`
 /// and `font: 1em "Noto Serif", var(--serif)`.
-fn is_last_value_css_variable(properties: &CssGenericComponentValueList) -> bool {
+fn is_last_value_css_variable(properties: &[CssFontComponent]) -> bool {
     // Find the last non-delimiter value
     properties
-        .into_iter()
-        .filter_map(|v| match v {
-            AnyCssGenericComponentValue::AnyCssValue(_) => Some(v),
-            AnyCssGenericComponentValue::CssGenericDelimiter(_) => None,
-        })
+        .iter()
+        .filter_map(CssFontComponent::as_value)
         .next_back()
-        .is_some_and(|v| is_css_variable(&v.to_trimmed_text().text().to_ascii_lowercase_cow()))
+        .is_some_and(|value| {
+            is_css_variable(&value.to_trimmed_text().text().to_ascii_lowercase_cow())
+        })
 }

@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: validScriptAndScriptSetup.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+await doSomething();
+</script>
+<script>
+import { onMounted } from "vue";
+
+await doSomething();
+onMounted(() => {});
+</script>
+
+```

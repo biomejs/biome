@@ -39,6 +39,8 @@ file.js:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━�
   > 1 │ let a = !b || !c
       │     ^
   
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
   i Safe fix: Use const instead.
   
   - let·a·=·!b·||·!c

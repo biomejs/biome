@@ -81,7 +81,7 @@ if (a) {
 ```
 invalid.js:5:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     3 │ if (isSomething(x)) {
     4 │     foo();
@@ -90,13 +90,17 @@ invalid.js:5:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━
     6 │     bar();
     7 │ }
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:15:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     13 │ } else if (c && d) {
     14 │     baz();
@@ -105,13 +109,17 @@ invalid.js:15:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     16 │     quux();
     17 │ } else {
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:27:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     25 │ } else if (n === 3) {
     26 │     baz();
@@ -120,13 +128,17 @@ invalid.js:27:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     28 │     quux();
     29 │ } else if (n === 5) {
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:35:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     33 │ if (a || b) {
     34 │     foo();
@@ -135,13 +147,17 @@ invalid.js:35:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     36 │     bar();
     37 │ }
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:43:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     41 │ } else if (b) {
     42 │     bar();
@@ -150,13 +166,17 @@ invalid.js:43:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     44 │     baz();
     45 │ }
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:49:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     47 │ if (a) {
     48 │     foo();
@@ -165,13 +185,17 @@ invalid.js:49:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     50 │     bar();
     51 │ }
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:55:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     53 │ if (a && b) {
     54 │     foo();
@@ -180,13 +204,17 @@ invalid.js:55:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     56 │     bar();
     57 │ }
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:61:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     59 │ if (a || b) {
     60 │     foo();
@@ -195,13 +223,17 @@ invalid.js:61:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
     62 │     bar();
     63 │ }
   
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
+  
 
 ```
 
 ```
 invalid.js:69:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain.
+  × This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain.
   
     67 │ } else if (b && c) {
     68 │     bar();
@@ -209,6 +241,10 @@ invalid.js:69:12 lint/suspicious/noDuplicateElseIf ━━━━━━━━━�
        │            ^^^^^^^^^^^^^^^^^^^^^^^
     70 │     baz();
     71 │ }
+  
+  i An earlier branch already handles every case this condition matches, so this branch can never execute.
+  
+  i Remove this branch, or change its condition to the one you meant.
   
 
 ```

@@ -1,0 +1,34 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin emphasized {
+  color: red !important;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:14 lint/complexity/noImportantStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of the !important style.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin emphasized {
+  > 3 │   color: red !important;
+      │              ^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i This style reverses the cascade logic, and precedence is reversed. This could lead to having styles with higher specificity being overridden by styles with lower specificity.
+  
+  i Unsafe fix: Remove the style.
+  
+    3 │ ··color:·red·!important;
+      │             ----------- 
+
+```

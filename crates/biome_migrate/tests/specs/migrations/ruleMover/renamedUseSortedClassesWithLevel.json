@@ -1,0 +1,10 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noFloatingPromises": "warn",
+        "useSortedClasses": { "level": "warn", "fix": "safe" }
+      }
+    }
+  }
+}

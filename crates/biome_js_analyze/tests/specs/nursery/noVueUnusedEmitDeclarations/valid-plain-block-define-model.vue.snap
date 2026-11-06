@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-plain-block-define-model.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  emits: ["update:foo"],
+};
+</script>
+
+<script setup>
+const foo = defineModel("foo");
+</script>
+
+```

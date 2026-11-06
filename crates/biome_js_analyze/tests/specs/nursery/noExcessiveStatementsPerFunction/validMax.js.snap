@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validMax.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+function foo() { var bar = 1; var baz = 2; }
+function foo() { var bar = 1; return function () { var z; return 42; }; }
+function foo() { if (a) b; c; }
+var foo = { thing: function() { var bar = 1; var baz = 2; } };
+var foo = { thing() { var bar = 1; var baz = 2; } };
+var foo = { ['thing']() { var bar = 1; var baz = 2; } };
+var foo = { thing: () => { var bar = 1; var baz = 2; } };
+var foo = { get thing() { var bar = 1; return bar; } };
+var foo = { set thing(v) { var bar = 1; this.v = v; } };
+var foo = () => a + b + c + d;
+function foo() { switch (a) { case 1: b; c; d; } }
+class C { static { one; two; three; { four; five; six; } } }
+function foo() { class C { static { one; two; three; { four; five; six; } } } }
+class C { static { one; two; three; function foo() { 1; 2; } four; five; six; } }
+class C { static { { one; two; three; function foo() { 1; 2; } four; five; six; } } }
+function foo() { let one; let two = class { static { let three; let four; let five; if (six) { let seven; let eight; let nine; } } }; }
+class C { method() { a; b; } get x() { a; return b; } set x(v) { a; b; } constructor() { a; b; } }
+
+```

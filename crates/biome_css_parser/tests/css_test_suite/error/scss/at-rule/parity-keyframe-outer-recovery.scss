@@ -1,0 +1,83 @@
+@keyframes broken-include {
+  @include ;
+  to { opacity: 1; }
+}
+
+.after-include { color: red; }
+
+@keyframes broken-condition {
+  @if {
+    50% { opacity: 0.5; }
+  }
+  to { opacity: 1; }
+}
+
+.after-condition { color: red; }
+
+@keyframes broken-loop {
+  @for $i from 0 through {
+    50% { opacity: 0.5; }
+  }
+  to { opacity: 1; }
+}
+
+.after-loop { color: red; }
+
+@keyframes rejected-generic-rule {
+  @for $i from 0 through 1 {
+    .not-a-keyframe-step { opacity: 0; }
+    to { opacity: 1; }
+  }
+  to { opacity: 1; }
+}
+
+.after-generic-rule { color: red; }
+
+@keyframes broken-if-boundary {
+  @if ;
+  50% { opacity: 0.5; }
+}
+
+.after-if-boundary { color: red; }
+
+@keyframes broken-for-boundary {
+  @for $i from 0 through ;
+  50% { opacity: 0.5; }
+}
+
+.after-for-boundary { color: red; }
+
+@keyframes broken-each-boundary {
+  @each $i in ;
+  50% { opacity: 0.5; }
+}
+
+.after-each-boundary { color: red; }
+
+@keyframes broken-while-boundary {
+  @while ;
+  50% { opacity: 0.5; }
+}
+
+.after-while-boundary { color: red; }
+
+@keyframes broken-final-control-block {
+  @if $enabled
+}
+
+.after-final-control-block { color: red; }
+
+@keyframes broken-each-in-boundary {
+  @each $i ;
+  50% { opacity: 0.5; }
+}
+
+.after-each-in-boundary { color: red; }
+
+@keyframes broken-control-before-statement {
+  @if true
+  @include frames;
+  to { opacity: 1; }
+}
+
+.after-control-before-statement { color: red; }

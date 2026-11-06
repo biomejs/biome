@@ -34,7 +34,9 @@ invalid.jsx:2:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     3 │ var a = <span role="switch"></span>;
     4 │ var a = <span role="slider" aria-valuemin="0"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -53,7 +55,9 @@ invalid.jsx:3:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     4 │ var a = <span role="slider" aria-valuemin="0"></span>;
     5 │ var a = <span role="slider" aria-valuemax="100"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -72,7 +76,9 @@ invalid.jsx:4:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     5 │ var a = <span role="slider" aria-valuemax="100"></span>;
     6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -91,7 +97,9 @@ invalid.jsx:5:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     6 │ var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
     7 │ var a = <span role="separator" tabIndex={0}></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -110,7 +118,9 @@ invalid.jsx:6:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     7 │ var a = <span role="separator" tabIndex={0}></span>;
     8 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -129,7 +139,9 @@ invalid.jsx:7:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     8 │ var a = <span role="scrollbar" aria-valuemin="0"></span>;
     9 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -148,7 +160,9 @@ invalid.jsx:8:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
      9 │ var a = <span role="scrollbar" aria-valuemax="100"></span>;
     10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   - aria-valuenow
@@ -168,7 +182,9 @@ invalid.jsx:9:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     10 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100"></span>;
     11 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   - aria-valuenow
@@ -188,7 +204,9 @@ invalid.jsx:10:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     11 │ var a = <span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>;
     12 │ var a = <span role="radio"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   - aria-valuenow
@@ -208,7 +226,9 @@ invalid.jsx:11:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     12 │ var a = <span role="radio"></span>;
     13 │ var a = <span role="heading"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   - aria-valuenow
@@ -228,7 +248,9 @@ invalid.jsx:12:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     13 │ var a = <span role="heading"></span>;
     14 │ var a = <span role="combobox" aria-controls="true"></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -247,7 +269,9 @@ invalid.jsx:13:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     14 │ var a = <span role="combobox" aria-controls="true"></span>;
     15 │ var a = <span role="menuitemcheckbox" ></span>;
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-level
   
@@ -266,7 +290,9 @@ invalid.jsx:14:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     15 │ var a = <span role="menuitemcheckbox" ></span>;
     16 │ 
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-expanded
   
@@ -284,7 +310,9 @@ invalid.jsx:15:15 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
        │               ^^^^^^^^^^^^^^^^^^^^^^^
     16 │ 
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   

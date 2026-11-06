@@ -1,0 +1,16 @@
+<!-- should not generate diagnostics -->
+<script>
+	import { writable, readable, derived } from "svelte/store";
+	import { writable as otherWritable } from "./unknown";
+
+	const w = writable(false);
+	const r = readable({});
+	const d = derived([a, b], () => {}, false);
+
+	const args = [[a, b], () => {}, false];
+	const spread = derived(...args);
+
+	const other = otherWritable();
+</script>
+
+<p>{$w} {$r} {$d} {$spread} {$other}</p>

@@ -1,0 +1,344 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <MyComponent v-text="content" />
+  <MyComponent v-html="html" />
+  <MyComponent v-text="content"></MyComponent>
+  <my-component v-html="html"></my-component>
+  <router-link v-text="content" />
+  <UI.Button v-text="content" />
+  <component :is="component" v-text="content" />
+  <component :is="component" v-html="html" />
+  <component v-text="content" />
+  <unknownelement v-text="content"></unknownelement>
+  <Transition v-html="html"></Transition>
+  <keep-alive v-text="content"></keep-alive>
+  <tr is="vue:my-row" v-text="content"></tr>
+  <div>
+    <MyComponent v-if="visible" v-html="html" />
+  </div>
+  <svg><MyIcon v-text="content" /></svg>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:16 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <MyComponent v-text="content" />
+      │                ^^^^^^^^^^^^^^^^
+    4 │   <MyComponent v-html="html" />
+    5 │   <MyComponent v-text="content"></MyComponent>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:16 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive is used on a component.
+  
+    2 │ <template>
+    3 │   <MyComponent v-text="content" />
+  > 4 │   <MyComponent v-html="html" />
+      │                ^^^^^^^^^^^^^
+    5 │   <MyComponent v-text="content"></MyComponent>
+    6 │   <my-component v-html="html"></my-component>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-html to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:16 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    3 │   <MyComponent v-text="content" />
+    4 │   <MyComponent v-html="html" />
+  > 5 │   <MyComponent v-text="content"></MyComponent>
+      │                ^^^^^^^^^^^^^^^^
+    6 │   <my-component v-html="html"></my-component>
+    7 │   <router-link v-text="content" />
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:17 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive is used on a component.
+  
+    4 │   <MyComponent v-html="html" />
+    5 │   <MyComponent v-text="content"></MyComponent>
+  > 6 │   <my-component v-html="html"></my-component>
+      │                 ^^^^^^^^^^^^^
+    7 │   <router-link v-text="content" />
+    8 │   <UI.Button v-text="content" />
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-html to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:16 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    5 │   <MyComponent v-text="content"></MyComponent>
+    6 │   <my-component v-html="html"></my-component>
+  > 7 │   <router-link v-text="content" />
+      │                ^^^^^^^^^^^^^^^^
+    8 │   <UI.Button v-text="content" />
+    9 │   <component :is="component" v-text="content" />
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:14 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+     6 │   <my-component v-html="html"></my-component>
+     7 │   <router-link v-text="content" />
+   > 8 │   <UI.Button v-text="content" />
+       │              ^^^^^^^^^^^^^^^^
+     9 │   <component :is="component" v-text="content" />
+    10 │   <component :is="component" v-html="html" />
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:30 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+     7 │   <router-link v-text="content" />
+     8 │   <UI.Button v-text="content" />
+   > 9 │   <component :is="component" v-text="content" />
+       │                              ^^^^^^^^^^^^^^^^
+    10 │   <component :is="component" v-html="html" />
+    11 │   <component v-text="content" />
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:30 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive is used on a component.
+  
+     8 │   <UI.Button v-text="content" />
+     9 │   <component :is="component" v-text="content" />
+  > 10 │   <component :is="component" v-html="html" />
+       │                              ^^^^^^^^^^^^^
+    11 │   <component v-text="content" />
+    12 │   <unknownelement v-text="content"></unknownelement>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-html to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:14 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+     9 │   <component :is="component" v-text="content" />
+    10 │   <component :is="component" v-html="html" />
+  > 11 │   <component v-text="content" />
+       │              ^^^^^^^^^^^^^^^^
+    12 │   <unknownelement v-text="content"></unknownelement>
+    13 │   <Transition v-html="html"></Transition>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:19 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    10 │   <component :is="component" v-html="html" />
+    11 │   <component v-text="content" />
+  > 12 │   <unknownelement v-text="content"></unknownelement>
+       │                   ^^^^^^^^^^^^^^^^
+    13 │   <Transition v-html="html"></Transition>
+    14 │   <keep-alive v-text="content"></keep-alive>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:15 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive is used on a component.
+  
+    11 │   <component v-text="content" />
+    12 │   <unknownelement v-text="content"></unknownelement>
+  > 13 │   <Transition v-html="html"></Transition>
+       │               ^^^^^^^^^^^^^
+    14 │   <keep-alive v-text="content"></keep-alive>
+    15 │   <tr is="vue:my-row" v-text="content"></tr>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-html to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:15 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    12 │   <unknownelement v-text="content"></unknownelement>
+    13 │   <Transition v-html="html"></Transition>
+  > 14 │   <keep-alive v-text="content"></keep-alive>
+       │               ^^^^^^^^^^^^^^^^
+    15 │   <tr is="vue:my-row" v-text="content"></tr>
+    16 │   <div>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:15:23 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    13 │   <Transition v-html="html"></Transition>
+    14 │   <keep-alive v-text="content"></keep-alive>
+  > 15 │   <tr is="vue:my-row" v-text="content"></tr>
+       │                       ^^^^^^^^^^^^^^^^
+    16 │   <div>
+    17 │     <MyComponent v-if="visible" v-html="html" />
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:33 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive is used on a component.
+  
+    15 │   <tr is="vue:my-row" v-text="content"></tr>
+    16 │   <div>
+  > 17 │     <MyComponent v-if="visible" v-html="html" />
+       │                                 ^^^^^^^^^^^^^
+    18 │   </div>
+    19 │   <svg><MyIcon v-text="content" /></svg>
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-html to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:19:16 lint/nursery/noVueVTextVHtmlOnComponent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-text directive is used on a component.
+  
+    17 │     <MyComponent v-if="visible" v-html="html" />
+    18 │   </div>
+  > 19 │   <svg><MyIcon v-text="content" /></svg>
+       │                ^^^^^^^^^^^^^^^^
+    20 │ </template>
+    21 │ 
+  
+  i Vue doesn't put the value in the component's slot. It replaces everything inside the component's root element, so the component's own content is lost.
+  
+  i Put the content between the component's opening and closing tags, or move v-text to an HTML element inside them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

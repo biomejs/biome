@@ -1,0 +1,7 @@
+.card {
+  width: attr(data-width $unit, 10px);
+  height: attr(data-height #{$unit}, 1px);
+  padding: attr(data-padding units.$unit, 0);
+  color: red;
+}
+.after { display: block; }

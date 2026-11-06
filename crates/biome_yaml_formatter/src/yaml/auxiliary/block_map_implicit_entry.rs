@@ -1,4 +1,4 @@
-use super::flow_map_implicit_entry::FormatCollectionKeyEntry;
+use super::flow_map_implicit_entry::FormatBreakableKeyEntry;
 use crate::comments::{FormatEntryDanglingComments, subtree_has_comments};
 use crate::prelude::*;
 use crate::utils::{flow_scalar_has_line_break, needs_space_before_colon};
@@ -24,7 +24,7 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
 
         // A flow collection key that breaks across multiple lines is only a
         // valid mapping key in the explicit `? key : value` form, which
-        // `FormatCollectionKeyEntry` synthesizes when the key breaks:
+        // `FormatBreakableKeyEntry` synthesizes when the key breaks:
         //
         // ```yaml
         // ? [key, that, does, not, fit, on, a, single, line]
@@ -37,7 +37,7 @@ impl FormatNodeRule<YamlBlockMapImplicitEntry> for FormatYamlBlockMapImplicitEnt
         {
             return write!(
                 f,
-                [FormatCollectionKeyEntry {
+                [FormatBreakableKeyEntry {
                     key: entry_key,
                     colon_token,
                     value: entry_value.clone().into(),

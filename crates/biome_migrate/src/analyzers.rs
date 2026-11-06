@@ -7,6 +7,7 @@ use crate::analyzers::organize_imports::OrganizeImports;
 use crate::analyzers::recommended::Recommended;
 use crate::analyzers::rule_mover::RuleMover;
 use crate::analyzers::schema::Schema;
+use crate::analyzers::tailwind_options::TailwindOptions;
 use crate::analyzers::trailing_comma::TrailingComma;
 use crate::analyzers::use_naming_convention_enum_member_case::UseNamingConventionEnumMemberCase;
 use biome_analyze::{GroupCategory, RegistryVisitor, RuleCategory, RuleGroup};
@@ -21,6 +22,7 @@ mod organize_imports;
 mod recommended;
 mod rule_mover;
 mod schema;
+mod tailwind_options;
 mod trailing_comma;
 mod use_naming_convention_enum_member_case;
 
@@ -47,7 +49,9 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<Monorepo>();
         registry.record_rule::<IgnoreScanner>();
         // v2.5.0
-        registry.record_rule::<Recommended>()
+        registry.record_rule::<Recommended>();
+        // v2.6.0
+        registry.record_rule::<TailwindOptions>()
     }
 }
 

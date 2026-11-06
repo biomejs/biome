@@ -1,0 +1,4 @@
+$bound: min;
+.nested { width: if(media(($bound + "-width": 30rem)): 1px; else: 2px); }
+@media (width: if(media(($bound + "-width": 30rem)): 1px; else: 2px)) {}
+@media ($bound + "-width": 40rem) { .after { color: green; } }

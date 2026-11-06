@@ -16,6 +16,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ x === -0;
       │ ^^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ x·===·-0;
@@ -36,6 +38,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ x == -0;
       │ ^^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   
@@ -58,6 +62,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 == x;
       │ ^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·==·x;
@@ -78,6 +84,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ x < -0;
       │ ^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   
@@ -100,6 +108,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 < x;
       │ ^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·<·x;
@@ -120,6 +130,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ x <= -0;
       │ ^^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   
@@ -142,6 +154,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 <= x;
       │ ^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·<=·x;
@@ -162,6 +176,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ x > -0;
       │ ^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   
@@ -184,6 +200,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 > x;
       │ ^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·>·x;
@@ -204,6 +222,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ x >= -0;
       │ ^^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   
@@ -226,6 +246,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 >= x;
       │ ^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·>=·x;
@@ -246,6 +268,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ x != -0;
       │ ^^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   
@@ -268,6 +292,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 != x;
       │ ^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·!=·x;
@@ -289,6 +315,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   > 1 │ -0 !== x;
       │ ^^^^^^^^
   
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
+  
   i Safe fix: Replace -0 with 0
   
     1 │ -0·!==·x;
@@ -309,6 +337,8 @@ invalid.jsonc:1:1 lint/suspicious/noCompareNegZero  FIXABLE  ━━━━━━�
   
   > 1 │ -0 === -0;
       │ ^^^^^^^^^
+  
+  i The comparison treats -0 and 0 as equal, so comparing against -0 gives the same result as comparing against 0.
   
   i Safe fix: Replace -0 with 0
   

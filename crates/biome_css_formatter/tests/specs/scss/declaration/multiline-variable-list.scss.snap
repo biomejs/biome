@@ -35,7 +35,7 @@ $button-config:
 
 $simple-list: "item-1", "item-2", "item-3";
 
-$single-compound: hotpink deepskyblue firebrick;
+$single-compound: hotpink deepskyblue firebrick,;
 
 $inline-config:
 	"save" 50px,

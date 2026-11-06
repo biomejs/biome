@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-spread.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const names = ["foo"];
+defineEmits([...names]);
+</script>
+
+```

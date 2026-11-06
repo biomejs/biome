@@ -1,0 +1,89 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --write --unsafe --only=nursery/useTailwindSortedClasses '<TEMP_DIR>/use_tailwind_sorted_classes_reads_package_imports'
+```
+
+## `biome.json`
+
+```json
+{
+  "tailwind": { "stylesheet": "./src/app.css" },
+  "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}
+```
+
+## `node_modules/@example/theme/package.json`
+
+```json
+{ "name": "@example/theme", "exports": { ".": { "style": "./theme.css" } } }
+```
+
+## `node_modules/@example/theme/theme.css`
+
+```css
+@theme { --color-brand: blue; }
+```
+
+## `node_modules/tw-animate-css/dist/tw-animate-prefix.css`
+
+```css
+@utility tw-animate-in { animation-name: enter; }
+```
+
+## `node_modules/tw-animate-css/dist/tw-animate.css`
+
+```css
+@import "./utilities.css";
+```
+
+## `node_modules/tw-animate-css/dist/utilities.css`
+
+```css
+@utility animate-in { animation-name: enter; }
+```
+
+## `node_modules/tw-animate-css/package.json`
+
+```json
+{
+    "name": "tw-animate-css",
+    "exports": {
+        ".": { "style": "./dist/tw-animate.css" },
+        "./prefix": { "style": "./dist/tw-animate-prefix.css" }
+    }
+}
+```
+
+## `package.json`
+
+```json
+{ "name": "app" }
+```
+
+## `src/App.jsx`
+
+```jsx
+export const utility = <div className="flex animate-in" />;
+export const prefix = <div className="flex tw-animate-in" />;
+export const theme = <div className="flex bg-brand" />;
+
+```
+
+## `src/app.css`
+
+```css
+@import "tw-animate-css";
+@import "tw-animate-css/prefix";
+@import "@example/theme";
+```
+
+# Emitted Messages
+
+```block
+Checked 4 files in <TIME>. Fixed 1 file.
+```

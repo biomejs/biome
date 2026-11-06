@@ -238,7 +238,13 @@ impl Rule for NoConstantBinaryExpressions {
                 rule_category!(),
                 node.range(),
                 markup! { "This binary expression leads to a constant result." },
-            ),
+            )
+            .note(markup! {
+                "One operand always has the same type or nullishness, so the comparison always gives the same answer."
+            })
+            .note(markup! {
+                "Remove the comparison, or compare against the value you meant."
+            }),
             Issue::ConstantShortCircuit { left, property, .. } => RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
@@ -247,7 +253,13 @@ impl Rule for NoConstantBinaryExpressions {
             .detail(
                 left.range(),
                 markup! { "This operand always evaluates to the same "{property}"." },
-            ),
+            )
+            .note(markup! {
+                "Because the left operand always has the same "{property}", the expression can be simplified, and its form is misleading."
+            })
+            .note(markup! {
+                "Replace the expression with the value it always produces, or fix the operand that is constant."
+            }),
             Issue::AlwaysNew { operand } => RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
@@ -256,12 +268,24 @@ impl Rule for NoConstantBinaryExpressions {
             .detail(
                 operand.range(),
                 markup! { "This expression always constructs a new object."},
-            ),
+            )
+            .note(markup! {
+                "Objects are compared by reference, so a newly created object is never equal to any other value."
+            })
+            .note(markup! {
+                "Compare a property of the object, or store the object in a variable first and compare that variable."
+            }),
             Issue::BothAlwaysNew => RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! { "Unexpected comparison of two newly constructed objects." },
-            ),
+            )
+            .note(markup! {
+                "Objects are compared by reference, so two newly created objects are never equal."
+            })
+            .note(markup! {
+                "Compare the values you care about, such as their properties, instead of the objects themselves."
+            }),
         })
     }
 }

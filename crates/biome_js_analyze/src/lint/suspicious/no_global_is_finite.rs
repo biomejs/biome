@@ -63,9 +63,12 @@ impl Rule for NoGlobalIsFinite {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    <Emphasis>"isFinite"</Emphasis>" is unsafe. It attempts a type coercion. Use "<Emphasis>"Number.isFinite"</Emphasis>" instead."
+                    "Use "<Emphasis>"Number.isFinite"</Emphasis>" instead of the global "<Emphasis>"isFinite"</Emphasis>"."
                 },
             )
+            .note(markup! {
+                "The global "<Emphasis>"isFinite"</Emphasis>" converts its argument to a number first, so a string such as "<Emphasis>"\"12\""</Emphasis>" is treated as a finite number."
+            })
             .note(markup! {
                 "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isFinite#description">"the MDN documentation"</Hyperlink>" for more details."
             }),

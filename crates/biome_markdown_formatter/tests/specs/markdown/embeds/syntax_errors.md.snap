@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/embeds/syntax_errors.md
+---
+
+# Input
+
+```md
+#   Syntax errors
+
+```js
+function () {}
+```
+
+```json
+{
+```
+
+```js
+const   valid = 1
+```
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+# Syntax errors
+
+```js
+function () {}
+```
+
+```json
+{
+```
+
+```js
+const valid = 1;
+```
+
+```

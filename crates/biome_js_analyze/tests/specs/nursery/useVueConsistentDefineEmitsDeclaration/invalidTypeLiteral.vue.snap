@@ -1,0 +1,222 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidTypeLiteral.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const a = defineEmits(["change", "update"]);
+
+const b = defineEmits<{
+	(e: "change", id: number): void;
+	(e: "update", value: string): void;
+}>();
+
+const c = defineEmits<{
+	change: [id: number];
+	(e: "update", value: string): void;
+}>();
+
+const d = defineEmits<(e: "change", id: number) => void>();
+
+const e = defineEmits<({ (e: "change", id: number): void })>();
+
+const f = defineEmits<{
+	change(id: number): void;
+	[name: string]: unknown[];
+}>();
+
+const g = defineEmits<{ change: [id: number] }>(["change"]);
+</script>
+
+```
+
+# Diagnostics
+```
+invalidTypeLiteral.vue:3:11 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits call declares events with an argument instead of a type.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ const a = defineEmits(["change", "update"]);
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ const b = defineEmits<{
+  
+  i A type lets TypeScript check the name and the arguments of every event that the component emits.
+  
+  i Pass the events as a type between angle brackets, for example defineEmits<{ change: [id: number] }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:6:2 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━━
+
+  × This declares events with a function signature instead of a property.
+  
+    5 │ const b = defineEmits<{
+  > 6 │ 	(e: "change", id: number): void;
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	(e: "update", value: string): void;
+    8 │ }>();
+  
+  i Declaring each event as a property is shorter: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:7:2 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━━
+
+  × This declares events with a function signature instead of a property.
+  
+    5 │ const b = defineEmits<{
+    6 │ 	(e: "change", id: number): void;
+  > 7 │ 	(e: "update", value: string): void;
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }>();
+    9 │ 
+  
+  i Declaring each event as a property is shorter: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:12:2 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━
+
+  × This declares events with a function signature instead of a property.
+  
+    10 │ const c = defineEmits<{
+    11 │ 	change: [id: number];
+  > 12 │ 	(e: "update", value: string): void;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ }>();
+    14 │ 
+  
+  i Declaring each event as a property is shorter: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:15:23 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━
+
+  × This declares events with a function signature instead of a property.
+  
+    13 │ }>();
+    14 │ 
+  > 15 │ const d = defineEmits<(e: "change", id: number) => void>();
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ const e = defineEmits<({ (e: "change", id: number): void })>();
+  
+  i Declaring each event as a property is shorter: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:17:26 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━
+
+  × This declares events with a function signature instead of a property.
+  
+    15 │ const d = defineEmits<(e: "change", id: number) => void>();
+    16 │ 
+  > 17 │ const e = defineEmits<({ (e: "change", id: number): void })>();
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ const f = defineEmits<{
+  
+  i Declaring each event as a property is shorter: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:20:2 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━
+
+  × This member of the events type isn't a property.
+  
+    19 │ const f = defineEmits<{
+  > 20 │ 	change(id: number): void;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	[name: string]: unknown[];
+    22 │ }>();
+  
+  i Declaring each event as a property keeps the events easy to read: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:21:2 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━━
+
+  × This member of the events type isn't a property.
+  
+    19 │ const f = defineEmits<{
+    20 │ 	change(id: number): void;
+  > 21 │ 	[name: string]: unknown[];
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ }>();
+    23 │ 
+  
+  i Declaring each event as a property keeps the events easy to read: the name of the property is the name of the event, and its type lists the arguments of the event.
+  
+  i Declare the event as a property, for example change: [id: number].
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeLiteral.vue:24:11 lint/nursery/useVueConsistentDefineEmitsDeclaration ━━━━━━━━━━━━━━━━━━━
+
+  × This defineEmits call declares events with both a type and an argument.
+  
+    22 │ }>();
+    23 │ 
+  > 24 │ const g = defineEmits<{ change: [id: number] }>(["change"]);
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ </script>
+    26 │ 
+  
+  i Vue doesn't accept a type and an argument in the same defineEmits call.
+  
+  i Remove the argument and keep the type between angle brackets.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

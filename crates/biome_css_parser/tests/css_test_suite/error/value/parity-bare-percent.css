@@ -1,0 +1,9 @@
+.bare {
+  width: %;
+  generic: unknown(%);
+  fallback: attr(data-progress %, %);
+  --unit: %;
+  --raw: 10 % +;
+  color: red;
+}
+.after { width: attr(data-progress %, 0%); }

@@ -1,0 +1,651 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+(a: string) => -a;
+(a: {}) => -a;
+(a: number[]) => -a;
+-'hello';
+(a: { x: number }) => -a;
+(a: unknown) => -a;
+(a: void) => -a;
+(a: boolean) => -a;
+(a: null) => -a;
+(a: undefined) => -a;
+(a: symbol) => -a;
+(a: number | string) => -a;
+(a: string & { __brand: "id" }) => -a;
+(a: () => number) => -a;
+-true;
+-null;
+-undefined;
+-[];
+-{};
+-/regex/;
+-(function () {});
+class Foo {}
+declare const foo: Foo;
+-foo;
+const text = "1";
+-text;
+<T extends string>(t: T) => -t;
+-(-"1");
+(a: number | undefined) => -a;
+(a: { x?: number }) => -a.x;
+(a: string[]) => -a[0];
+declare const boxed: Number;
+-boxed;
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:16 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ (a: string) => -a;
+      │                ^^
+    4 │ (a: {}) => -a;
+    5 │ (a: number[]) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:12 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    3 │ (a: string) => -a;
+  > 4 │ (a: {}) => -a;
+      │            ^^
+    5 │ (a: number[]) => -a;
+    6 │ -'hello';
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:18 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    3 │ (a: string) => -a;
+    4 │ (a: {}) => -a;
+  > 5 │ (a: number[]) => -a;
+      │                  ^^
+    6 │ -'hello';
+    7 │ (a: { x: number }) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    4 │ (a: {}) => -a;
+    5 │ (a: number[]) => -a;
+  > 6 │ -'hello';
+      │ ^^^^^^^^
+    7 │ (a: { x: number }) => -a;
+    8 │ (a: unknown) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:23 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    5 │ (a: number[]) => -a;
+    6 │ -'hello';
+  > 7 │ (a: { x: number }) => -a;
+      │                       ^^
+    8 │ (a: unknown) => -a;
+    9 │ (a: void) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:17 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be unknown instead of number or bigint.
+  
+     6 │ -'hello';
+     7 │ (a: { x: number }) => -a;
+   > 8 │ (a: unknown) => -a;
+       │                 ^^
+     9 │ (a: void) => -a;
+    10 │ (a: boolean) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:9:14 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be undefined instead of number or bigint.
+  
+     7 │ (a: { x: number }) => -a;
+     8 │ (a: unknown) => -a;
+   > 9 │ (a: void) => -a;
+       │              ^^
+    10 │ (a: boolean) => -a;
+    11 │ (a: null) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:17 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be boolean instead of number or bigint.
+  
+     8 │ (a: unknown) => -a;
+     9 │ (a: void) => -a;
+  > 10 │ (a: boolean) => -a;
+       │                 ^^
+    11 │ (a: null) => -a;
+    12 │ (a: undefined) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:14 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be null instead of number or bigint.
+  
+     9 │ (a: void) => -a;
+    10 │ (a: boolean) => -a;
+  > 11 │ (a: null) => -a;
+       │              ^^
+    12 │ (a: undefined) => -a;
+    13 │ (a: symbol) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:12:19 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be undefined instead of number or bigint.
+  
+    10 │ (a: boolean) => -a;
+    11 │ (a: null) => -a;
+  > 12 │ (a: undefined) => -a;
+       │                   ^^
+    13 │ (a: symbol) => -a;
+    14 │ (a: number | string) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:13:16 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be symbol instead of number or bigint.
+  
+    11 │ (a: null) => -a;
+    12 │ (a: undefined) => -a;
+  > 13 │ (a: symbol) => -a;
+       │                ^^
+    14 │ (a: number | string) => -a;
+    15 │ (a: string & { __brand: "id" }) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:25 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    12 │ (a: undefined) => -a;
+    13 │ (a: symbol) => -a;
+  > 14 │ (a: number | string) => -a;
+       │                         ^^
+    15 │ (a: string & { __brand: "id" }) => -a;
+    16 │ (a: () => number) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:36 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    13 │ (a: symbol) => -a;
+    14 │ (a: number | string) => -a;
+  > 15 │ (a: string & { __brand: "id" }) => -a;
+       │                                    ^^
+    16 │ (a: () => number) => -a;
+    17 │ -true;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:22 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be function instead of number or bigint.
+  
+    14 │ (a: number | string) => -a;
+    15 │ (a: string & { __brand: "id" }) => -a;
+  > 16 │ (a: () => number) => -a;
+       │                      ^^
+    17 │ -true;
+    18 │ -null;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be boolean instead of number or bigint.
+  
+    15 │ (a: string & { __brand: "id" }) => -a;
+    16 │ (a: () => number) => -a;
+  > 17 │ -true;
+       │ ^^^^^
+    18 │ -null;
+    19 │ -undefined;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be null instead of number or bigint.
+  
+    16 │ (a: () => number) => -a;
+    17 │ -true;
+  > 18 │ -null;
+       │ ^^^^^
+    19 │ -undefined;
+    20 │ -[];
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:19:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be undefined instead of number or bigint.
+  
+    17 │ -true;
+    18 │ -null;
+  > 19 │ -undefined;
+       │ ^^^^^^^^^^
+    20 │ -[];
+    21 │ -{};
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    18 │ -null;
+    19 │ -undefined;
+  > 20 │ -[];
+       │ ^^^
+    21 │ -{};
+    22 │ -/regex/;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:21:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    19 │ -undefined;
+    20 │ -[];
+  > 21 │ -{};
+       │ ^^^
+    22 │ -/regex/;
+    23 │ -(function () {});
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    20 │ -[];
+    21 │ -{};
+  > 22 │ -/regex/;
+       │ ^^^^^^^^
+    23 │ -(function () {});
+    24 │ class Foo {}
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:23:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be function instead of number or bigint.
+  
+    21 │ -{};
+    22 │ -/regex/;
+  > 23 │ -(function () {});
+       │ ^^^^^^^^^^^^^^^^^
+    24 │ class Foo {}
+    25 │ declare const foo: Foo;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    24 │ class Foo {}
+    25 │ declare const foo: Foo;
+  > 26 │ -foo;
+       │ ^^^^
+    27 │ const text = "1";
+    28 │ -text;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:28:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    26 │ -foo;
+    27 │ const text = "1";
+  > 28 │ -text;
+       │ ^^^^^
+    29 │ <T extends string>(t: T) => -t;
+    30 │ -(-"1");
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:29:29 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    27 │ const text = "1";
+    28 │ -text;
+  > 29 │ <T extends string>(t: T) => -t;
+       │                             ^^
+    30 │ -(-"1");
+    31 │ (a: number | undefined) => -a;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:30:3 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    28 │ -text;
+    29 │ <T extends string>(t: T) => -t;
+  > 30 │ -(-"1");
+       │   ^^^^
+    31 │ (a: number | undefined) => -a;
+    32 │ (a: { x?: number }) => -a.x;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:28 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be undefined instead of number or bigint.
+  
+    29 │ <T extends string>(t: T) => -t;
+    30 │ -(-"1");
+  > 31 │ (a: number | undefined) => -a;
+       │                            ^^
+    32 │ (a: { x?: number }) => -a.x;
+    33 │ (a: string[]) => -a[0];
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:24 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be undefined instead of number or bigint.
+  
+    30 │ -(-"1");
+    31 │ (a: number | undefined) => -a;
+  > 32 │ (a: { x?: number }) => -a.x;
+       │                        ^^^^
+    33 │ (a: string[]) => -a[0];
+    34 │ declare const boxed: Number;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:33:18 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be string instead of number or bigint.
+  
+    31 │ (a: number | undefined) => -a;
+    32 │ (a: { x?: number }) => -a.x;
+  > 33 │ (a: string[]) => -a[0];
+       │                  ^^^^^
+    34 │ declare const boxed: Number;
+    35 │ -boxed;
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:35:1 lint/nursery/noUnsafeUnaryMinus ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The operand of unary - may be object instead of number or bigint.
+  
+    33 │ (a: string[]) => -a[0];
+    34 │ declare const boxed: Number;
+  > 35 │ -boxed;
+       │ ^^^^^^
+    36 │ 
+  
+  i Unary - converts other values to a number first, which usually produces NaN or an unexpected result.
+  
+  i Convert the operand to a number explicitly, or negate a numeric value instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

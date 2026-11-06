@@ -118,6 +118,10 @@ impl Diagnostic for MigrationResultDiagnostic {
         Severity::Information
     }
 
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str("Migration results:")
+    }
+
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup! { "Migration results:" })
     }

@@ -1,0 +1,5 @@
+.parent > .child { color: red; }
+
+.parent > a:hover { color: red; }
+
+.parent .child { color: red; }

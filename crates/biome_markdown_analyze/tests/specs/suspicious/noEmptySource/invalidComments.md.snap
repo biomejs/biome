@@ -1,0 +1,29 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalidComments.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+<!-- Only comments -->
+
+```
+
+# Diagnostics
+```
+invalidComments.md:1:37 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty source is not allowed.
+  
+  > 1 │ <!-- should generate diagnostics -->
+      │                                     
+  > 2 │ 
+  > 3 │ <!-- Only comments -->
+  > 4 │ 
+      │ 
+  
+  i Empty sources can clutter the codebase and increase cognitive load; deleting empty sources can help reduce it.
+  
+
+```

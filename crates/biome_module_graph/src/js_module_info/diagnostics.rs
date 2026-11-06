@@ -31,6 +31,14 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
         DiagnosticTags::INTERNAL
     }
 
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str(
+            "Biome encountered an unusually large number of types and reached the limit of 200,000.\n\n\
+            Either you are analyzing very large files (did you make sure to exclude your build/ or dist/ folder?), or you've encountered a bug in Biome.\n\n\
+            Please follow these instructions to discover if you are accidentally analyzing large files and what to do about them in the relative guide: https://biomejs.dev/guides/investigate-slowness/",
+        )
+    }
+
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(markup! {
             "Biome encountered an unusually large number of types and reached the limit of 200,000."

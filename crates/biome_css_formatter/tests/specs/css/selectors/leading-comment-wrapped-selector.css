@@ -1,0 +1,27 @@
+/* A comment directly above the rule. */
+#CybotCookiebotDialog
+  #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+  color: red;
+}
+
+#CybotCookiebotDialog
+  #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection:hover {
+  color: blue;
+}
+
+/* A comment directly above the rule. */
+.CybotCookiebotDialog .CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+  color: red;
+}
+
+/* A comment directly above the rule. */
+div #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection > .fooooooooooo {
+  color: red;
+}
+
+@media (min-width: 100px) {
+  /* A comment directly above the rule. */
+  #CybotCookiebotDialog #CybotCookiebotDialogBodyLevelButtonLevelOptinAllowallSelection {
+    color: red;
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "useImportExtensions": {
+          "level": "error",
+          "options": {
+            "extensionMappings": {
+              "js": "ts",
+              "jsx": "ts",
+              "tsx": "ts"
+            },
+            "forceJsExtensions": false
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,7 +11,6 @@
   },
   "scripts": {
     "build": "tsc",
-    "execute": "node dist/generate-tailwind-preset.js",
     "execute:v4": "tsx src/v4/generate-tailwind-preset-v4.ts"
   },
   "devDependencies": {

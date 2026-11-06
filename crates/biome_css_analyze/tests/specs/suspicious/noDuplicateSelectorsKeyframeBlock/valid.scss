@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+@keyframes fade {
+  $stop: 50%;
+  from {}
+  to {}
+}

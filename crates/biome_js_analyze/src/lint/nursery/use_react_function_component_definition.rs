@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsFunctionBody, AnyJsStatement, JsFunctionBody, JsSyntaxToken, JsVariableDeclaration,
     JsVariableStatement, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::use_react_function_component_definition::{
     ComponentDefinitionStyle, UseReactFunctionComponentDefinitionOptions,
 };
@@ -242,54 +242,59 @@ impl Rule for UseReactFunctionComponentDefinition {
 
                 let init_expr = declarator.initializer()?.expression().ok()?;
 
-                let (async_token, star_token, type_parameters, return_type_annotation, params, body) =
-                    match &init_expr {
-                        AnyJsExpression::JsFunctionExpression(func) => {
-                            if let Some(function_id) = func.id()
-                                && function_id
-                                    .as_js_identifier_binding()?
-                                    .name_token()
-                                    .ok()?
-                                    .text_trimmed()
-                                    != id_name.text_trimmed()
-                            {
-                                return None;
+                let (
+                    async_token,
+                    star_token,
+                    type_parameters,
+                    return_type_annotation,
+                    params,
+                    body,
+                ) = match &init_expr {
+                    AnyJsExpression::JsFunctionExpression(func) => {
+                        if let Some(function_id) = func.id()
+                            && function_id
+                                .as_js_identifier_binding()?
+                                .name_token()
+                                .ok()?
+                                .text_trimmed()
+                                != id_name.text_trimmed()
+                        {
+                            return None;
+                        }
+                        (
+                            func.async_token(),
+                            func.star_token(),
+                            func.type_parameters(),
+                            func.return_type_annotation(),
+                            func.parameters().ok()?,
+                            func.body().ok()?,
+                        )
+                    }
+                    AnyJsExpression::JsArrowFunctionExpression(arrow) => {
+                        // Arrow functions with a shorthand single-param can't be directly
+                        // converted since we need JsParameters for the function declaration.
+                        let params = arrow.parameters().ok()?.as_js_parameters()?.clone();
+                        let body = arrow.body().ok()?;
+                        let func_body = match body {
+                            AnyJsFunctionBody::JsFunctionBody(block) => block,
+                            AnyJsFunctionBody::AnyJsExpression(ref expr) => {
+                                arrow_expr_body_to_function_body(expr)?
                             }
-                            (
-                                func.async_token(),
-                                func.star_token(),
-                                func.type_parameters(),
-                                func.return_type_annotation(),
-                                func.parameters().ok()?,
-                                func.body().ok()?,
-                            )
-                        }
-                        AnyJsExpression::JsArrowFunctionExpression(arrow) => {
-                            // Arrow functions with a shorthand single-param can't be directly
-                            // converted since we need JsParameters for the function declaration.
-                            let params = arrow.parameters().ok()?.as_js_parameters()?.clone();
-                            let body = arrow.body().ok()?;
-                            let func_body = match body {
-                                AnyJsFunctionBody::JsFunctionBody(block) => block,
-                                AnyJsFunctionBody::AnyJsExpression(ref expr) => {
-                                    arrow_expr_body_to_function_body(expr)?
-                                }
-                            };
-                            (
-                                arrow.async_token(),
-                                None, // arrow functions cannot be generators
-                                arrow.type_parameters(),
-                                arrow.return_type_annotation(),
-                                params,
-                                func_body,
-                            )
-                        }
-                        _ => return None,
-                    };
+                        };
+                        (
+                            arrow.async_token(),
+                            None, // arrow functions cannot be generators
+                            arrow.type_parameters(),
+                            arrow.return_type_annotation(),
+                            params,
+                            func_body,
+                        )
+                    }
+                    _ => return None,
+                };
 
                 let mut function_declaration = make::js_function_declaration(
-                    make::token(T![function])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![function]).with_trailing_space(),
                     id,
                     params,
                     body,
@@ -332,8 +337,7 @@ impl Rule for UseReactFunctionComponentDefinition {
 
                     let mut arrow_builder = make::js_arrow_function_expression(
                         AnyJsArrowFunctionParameters::JsParameters(params),
-                        make::token(T![=>])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(T![=>]).with_trailing_space(),
                         AnyJsFunctionBody::JsFunctionBody(body),
                     );
                     if let Some(t) = func_decl.async_token() {
@@ -381,8 +385,7 @@ impl Rule for UseReactFunctionComponentDefinition {
 
                     let mut arrow_builder = make::js_arrow_function_expression(
                         AnyJsArrowFunctionParameters::JsParameters(func.parameters().ok()?),
-                        make::token(T![=>])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(T![=>]).with_trailing_space(),
                         AnyJsFunctionBody::JsFunctionBody(func.body().ok()?),
                     );
                     if let Some(t) = func.async_token() {
@@ -419,8 +422,7 @@ impl Rule for UseReactFunctionComponentDefinition {
                     let body = func_decl.body().ok()?;
 
                     let mut func_expr_builder = make::js_function_expression(
-                        make::token(T![function])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(T![function]).with_trailing_space(),
                         params,
                         body,
                     );
@@ -477,8 +479,7 @@ impl Rule for UseReactFunctionComponentDefinition {
                     };
 
                     let mut func_expr_builder = make::js_function_expression(
-                        make::token(T![function])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(T![function]).with_trailing_space(),
                         params,
                         func_body,
                     );
@@ -535,7 +536,9 @@ fn expression_definition_style(expression: &AnyJsExpression) -> Option<Component
         AnyJsExpression::JsFunctionExpression(_) => {
             Some(ComponentDefinitionStyle::FunctionExpression)
         }
-        AnyJsExpression::JsArrowFunctionExpression(_) => Some(ComponentDefinitionStyle::ArrowFunction),
+        AnyJsExpression::JsArrowFunctionExpression(_) => {
+            Some(ComponentDefinitionStyle::ArrowFunction)
+        }
         AnyJsExpression::JsCallExpression(call) => {
             let callee_name = call.callee().ok()?.get_callee_member_name()?;
             let callee_member_name = callee_name.text_trimmed();
@@ -564,17 +567,13 @@ fn make_const_variable_statement(
     expr: AnyJsExpression,
 ) -> JsVariableStatement {
     let binding_pattern = AnyJsBindingPattern::AnyJsBinding(id_binding);
-    let initializer = make::js_initializer_clause(
-        make::token(T![=])
-            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        expr,
-    );
+    let initializer =
+        make::js_initializer_clause(make::token(T![=]).with_surrounding_spaces(), expr);
     let declarator = make::js_variable_declarator(binding_pattern)
         .with_initializer(initializer)
         .build();
     let declaration = make::js_variable_declaration(
-        make::token(T![const]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![const]).with_trailing_space(),
         make::js_variable_declarator_list([declarator], []),
     )
     .build();
@@ -590,18 +589,14 @@ fn arrow_expr_body_to_function_body(expr: &AnyJsExpression) -> Option<JsFunction
     } else {
         expr.clone()
     };
-    let return_stmt = make::js_return_statement(
-        make::token(T![return]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-    )
-    .with_argument(expr_to_return)
-    .with_semicolon_token(make::token(T![;]))
-    .build();
+    let return_stmt = make::js_return_statement(make::token(T![return]).with_trailing_space())
+        .with_argument(expr_to_return)
+        .with_semicolon_token(make::token(T![;]))
+        .build();
     Some(make::js_function_body(
-        make::token(T!['{'])
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T!['{']).with_trailing_space(),
         make::js_directive_list([]),
         make::js_statement_list([AnyJsStatement::from(return_stmt)]),
-        make::token(T!['}'])
-            .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T!['}']).with_leading_space(),
     ))
 }

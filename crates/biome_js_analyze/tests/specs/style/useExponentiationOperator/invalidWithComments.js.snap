@@ -35,6 +35,8 @@ invalidWithComments.js:1:14 lint/style/useExponentiationOperator  FIXABLE  ━�
     2 │ Math.pow(a, b)/* comment */;
     3 │ Math.pow(a, b)// comment
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1    │ - /*·comment·*/Math.pow(a,·b)
@@ -55,6 +57,8 @@ invalidWithComments.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━━
       │ ^^^^^^^^^^^^^^
     3 │ Math.pow(a, b)// comment
     4 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -78,6 +82,8 @@ invalidWithComments.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━━
       │ ^^^^^^^^^^^^^^
     4 │ 
     5 │ Math.pow(/**/a/**/, /**/b/**/)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -103,6 +109,8 @@ invalidWithComments.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━━
     6 │ 
     7 │ Math/**/.pow/**/(a, b)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      3  3 │   Math.pow(a, b)// comment
@@ -125,6 +133,8 @@ invalidWithComments.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━━
   > 7 │ Math/**/.pow/**/(a, b)
       │ ^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -152,6 +162,8 @@ invalidWithComments.js:10:1 lint/style/useExponentiationOperator  FIXABLE  ━�
   > 17 │     ) // 5
        │     ^
     18 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   

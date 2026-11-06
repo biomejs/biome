@@ -104,6 +104,13 @@ impl CleanedStringLiteralText<'_> {
 
 impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        // The quotes of a string with metavariables are kept, because the
+        // metavariables may contain the same quotes.
+        let range = self.token.text_trimmed_range();
+        if f.context().metavariable_ranges_in(range).next().is_some() {
+            return self.token.format().fmt(f);
+        }
+
         self.clean_text(f.options()).fmt(f)
     }
 }

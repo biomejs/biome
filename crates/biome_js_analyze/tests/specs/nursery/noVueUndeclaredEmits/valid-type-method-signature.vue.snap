@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-type-method-signature.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+const emit = defineEmits<{
+  change(id: number): void;
+}>();
+
+emit("change", 1);
+</script>
+
+```

@@ -3,10 +3,12 @@ pub mod trailing_commas;
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, CstFormatContext, DelimiterSpacing, Expand,
-    FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
-    QuoteStyle, TrailingNewline, TransformSourceMap,
+    FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TrailingNewline, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsLanguage};
 use biome_languages::JsFileSource;
@@ -130,6 +132,7 @@ impl From<TabWidth> for u8 {
 
 impl FormatContext for JsFormatContext {
     type Options = JsFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

@@ -112,9 +112,12 @@ impl Rule for UseSpreadOverApply {
             rule_category!(),
             node.range(),
             markup! {
-               <Emphasis>"apply()"</Emphasis>" is used to call a function with arguments provided as an array."
+               "Use the spread operator instead of "<Emphasis>"apply()"</Emphasis>"."
             },
-        ))
+        )
+        .note(markup! {
+            <Emphasis>"apply()"</Emphasis>" calls a function with arguments provided as an array. The spread operator does the same and is easier to read."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

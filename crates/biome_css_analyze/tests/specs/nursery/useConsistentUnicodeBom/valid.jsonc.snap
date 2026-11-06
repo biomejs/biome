@@ -1,0 +1,24 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```css
+
+```
+
+# Input
+```css
+p { color: red; }
+```
+
+# Input
+```css
+/* header */
+p { color: red; }
+```
+
+# Input
+```css
+p::before { content: "﻿"; }
+```

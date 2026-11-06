@@ -19,7 +19,6 @@ pub fn quick_test() {
         CssParserOptions::default()
             .allow_wrong_line_comments()
             .allow_css_modules()
-            .allow_metavariables()
             .allow_tailwind_directives(),
     );
     let syntax = root.syntax();

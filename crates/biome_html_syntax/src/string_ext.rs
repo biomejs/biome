@@ -8,10 +8,9 @@ impl HtmlString {
     ///
     /// ```
     /// use biome_html_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::html_string(make::html_string_literal("button")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "button");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {

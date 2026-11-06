@@ -1,17 +1,19 @@
 use biome_css_syntax::{
-    AnyCssRoot, AnyCssSelector, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
     CssGenericComponentValueList, CssIdentifier, CssLegacyFilterValue, CssMediaAtRule,
     CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule,
-    CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssExpression,
-    ScssPartialCombinatorSelector, decode_css_identifier, property_syntax::PropertySyntaxResult,
+    CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule,
+    ScssExpression, ScssPartialCombinatorSelector, decode_css_identifier,
+    property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
-    TextSize, TokenText, declare_node_union,
+    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
+    declare_node_union,
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
@@ -107,6 +109,17 @@ impl SemanticModel {
             .map(|selector| selector.specificity())
     }
 
+    /// Returns whether the document declares an SCSS `@function` named `name`.
+    ///
+    /// Sass treats `-` and `_` as the same character in function names, so
+    /// `my_function` matches `@function my-function`.
+    pub fn has_scss_function(&self, name: &str) -> bool {
+        self.data
+            .scss_function_names
+            .binary_search_by(|declared| compare_scss_function_names(declared.text(), name))
+            .is_ok()
+    }
+
     pub fn is_media_rule(&self, rule: &Rule) -> bool {
         matches!(rule.node(&self.root()), AnyRuleStart::CssMediaAtRule(_))
     }
@@ -116,7 +129,7 @@ impl SemanticModel {
         Some(Rule::new(self.data.clone(), rule))
     }
 
-    fn all_rules(&self) -> Vec<Rule> {
+    pub(crate) fn all_rules(&self) -> Vec<Rule> {
         self.data
             .all_rules
             .iter()
@@ -153,6 +166,9 @@ pub(crate) struct SemanticModelData {
     /// Each value indexes the last matching declaration in
     /// [`Self::at_property_rules`].
     pub(crate) last_at_property_by_name: FxHashMap<TokenText, usize>,
+    /// The names of the SCSS `@function` rules declared anywhere in the
+    /// document, sorted by [compare_scss_function_names].
+    pub(crate) scss_function_names: Vec<TokenText>,
     /// Map from text range to RuleId
     pub(crate) range_to_rule_id: BTreeMap<TextRange, RuleId>,
 }
@@ -191,6 +207,7 @@ impl PartialEq for SemanticModel {
                 .iter()
                 .zip(&other.data.at_property_rules)
                 .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
+            && self.data.scss_function_names == other.data.scss_function_names
             && self.data.global_custom_variables.len() == other.data.global_custom_variables.len()
             && self.data.global_custom_variables.iter().all(|(key, val)| {
                 other
@@ -207,6 +224,7 @@ impl PartialEq for SemanticModel {
 pub(crate) struct RuleData {
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<SelectorData>,
     /// The declarations within this rule.
@@ -218,15 +236,6 @@ pub(crate) struct RuleData {
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
-}
-
-impl RuleData {
-    pub(crate) fn range(&self, css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(css_root.syntax())
-            .syntax()
-            .text_trimmed_range()
-    }
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -250,14 +259,13 @@ pub struct Rule {
     pub(crate) data: Arc<SemanticModelData>,
     pub(crate) id: RuleId,
     pub(crate) node: AstPtr<AnyRuleStart>,
+    pub(crate) range: TextRange,
     /// The selectors associated with this rule.
     pub(crate) selectors: Vec<Selector>,
     /// The declarations within this rule.
     pub(crate) declarations: Vec<CssModelDeclaration>,
     /// The id of the parent rule
     pub(crate) parent_id: Option<RuleId>,
-    /// The ids of the child rules
-    pub(crate) child_ids: Vec<RuleId>,
     /// Specificity context of this rule
     /// See https://drafts.csswg.org/selectors-4/#specificity-rules
     pub(crate) specificity: Specificity,
@@ -268,7 +276,7 @@ impl PartialEq for Rule {
         self.specificity == other.specificity
             && self.id == other.id
             && self.parent_id == other.parent_id
-            && self.child_ids == other.child_ids
+            && self.child_ids() == other.child_ids()
             && self.selectors.len() == other.selectors.len()
             && self
                 .selectors
@@ -303,10 +311,10 @@ impl Rule {
             data,
             id: rule.id,
             node: rule.node.clone(),
+            range: rule.range,
             selectors,
             declarations,
             parent_id: rule.parent_id,
-            child_ids: rule.child_ids.clone(),
             specificity: rule.specificity,
         }
     }
@@ -320,10 +328,7 @@ impl Rule {
     }
 
     pub fn range(&self, _css_root: &AnyCssRoot) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.range
     }
 
     pub fn selectors(&self) -> &[Selector] {
@@ -339,7 +344,7 @@ impl Rule {
     }
 
     pub fn child_ids(&self) -> &[RuleId] {
-        &self.child_ids
+        &self.data.all_rules[self.id.index()].child_ids
     }
 
     pub fn specificity(&self) -> Specificity {
@@ -348,7 +353,7 @@ impl Rule {
 }
 
 declare_node_union! {
-    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssScopeAtRule | CssStartingStyleAtRule | CssSupportsAtRule
+    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssScopeAtRule | CssStartingStyleAtRule | CssSupportsAtRule | ScssAtRootAtRule
 }
 
 impl AnyRuleStart {
@@ -361,39 +366,13 @@ impl AnyRuleStart {
             Self::CssScopeAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssStartingStyleAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::ScssAtRootAtRule(node) => node.syntax().text_trimmed_range(),
         }
     }
 }
 
 declare_node_union! {
     pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector | ScssPartialCombinatorSelector
-}
-
-impl AnyCssSelectorLike {
-    pub fn has_nesting_selectors(&self) -> bool {
-        self.nesting_level() > 0
-    }
-
-    pub fn nesting_level(&self) -> usize {
-        match self {
-            Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
-            Self::CssComplexSelector(node) => node.nesting_level(),
-            Self::ScssPartialCombinatorSelector(node) => {
-                node.left().as_ref().map_or(0, selector_nesting_level)
-            }
-        }
-    }
-}
-
-fn selector_nesting_level(selector: &AnyCssSelector) -> usize {
-    match selector {
-        AnyCssSelector::CssCompoundSelector(node) => node.nesting_selectors().len(),
-        AnyCssSelector::CssComplexSelector(node) => node.nesting_level(),
-        AnyCssSelector::ScssPartialCombinatorSelector(node) => {
-            node.left().as_ref().map_or(0, selector_nesting_level)
-        }
-        AnyCssSelector::CssBogusSelector(_) | AnyCssSelector::CssMetavariable(_) => 0,
-    }
 }
 
 /// A resolved CSS selector represented as an ordered sequence of `(kind, text)` pairs.
@@ -588,6 +567,7 @@ impl std::fmt::Display for ResolvedSelector {
 #[derive(Debug, Clone)]
 pub(crate) struct SelectorData {
     pub(crate) node: AstPtr<AnyCssSelectorLike>,
+    pub(crate) range: TextRange,
     /// The resolved selector, accounting for nesting and `&` references.
     /// For top-level selectors this is the token sequence from the source.
     /// For nested selectors each `&` is replaced by the parent token sequence,
@@ -608,57 +588,59 @@ pub(crate) struct SelectorData {
 #[derive(Debug, Clone)]
 pub struct Selector {
     pub(crate) data: Arc<SemanticModelData>,
-    pub(crate) node: AstPtr<AnyCssSelectorLike>,
-    /// The resolved selector, accounting for nesting and `&` references.
-    /// For top-level selectors this is the token sequence from the source.
-    /// For nested selectors each `&` is replaced by the parent token sequence,
-    /// and a space-literal token is inserted when there is no `&`.
-    pub(crate) resolved: ResolvedSelector,
-    /// The specificity of the selector.
-    pub(crate) specificity: Specificity,
+    rule_id: RuleId,
+    index: usize,
 }
 
 impl Selector {
     fn new(data: Arc<SemanticModelData>, rule_id: RuleId, index: usize) -> Self {
-        let selector = &data.all_rules[rule_id.index()].selectors[index];
-        let node = selector.node.clone();
-        let resolved = selector.resolved.clone();
-        let specificity = selector.specificity;
         Self {
             data,
-            node,
-            resolved,
-            specificity,
+            rule_id,
+            index,
         }
+    }
+
+    fn selector_data(&self) -> &SelectorData {
+        &self.data.all_rules[self.rule_id.index()].selectors[self.index]
     }
 }
 
 impl PartialEq for Selector {
     fn eq(&self, other: &Self) -> bool {
-        self.specificity == other.specificity && self.resolved == other.resolved
+        self.specificity() == other.specificity() && self.resolved() == other.resolved()
     }
 }
 
 impl Selector {
     pub fn node(&self) -> AnyCssSelectorLike {
-        self.node.to_node(self.data.root().syntax())
+        self.selector_data().node.to_node(self.data.root().syntax())
     }
 
     /// Returns the resolved selector, accounting for CSS nesting and `&` references.
+    /// For top-level selectors this is the token sequence from the source.
+    /// For nested selectors each `&` is replaced by the parent token sequence,
+    /// and a space-literal token is inserted when there is no `&`.
     pub fn resolved(&self) -> &ResolvedSelector {
-        &self.resolved
+        &self.selector_data().resolved
     }
 
     pub fn range(&self) -> TextRange {
-        self.node
-            .to_node(self.data.root().syntax())
-            .syntax()
-            .text_trimmed_range()
+        self.selector_data().range
     }
 
     pub fn specificity(&self) -> Specificity {
-        self.specificity
+        self.selector_data().specificity
     }
+}
+
+/// Compares SCSS function names the way Sass does, treating `_` and `-` as
+/// the same character.
+pub(crate) fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
+    let normalize = |byte| if byte == b'_' { b'-' } else { byte };
+    left.bytes()
+        .map(normalize)
+        .cmp(right.bytes().map(normalize))
 }
 
 /// Collects the non-trivia tokens of a selector node as [`CssSyntaxToken`]s.
@@ -1059,6 +1041,8 @@ pub(crate) struct CssPropertyAtRuleData {
     pub(crate) syntax: PropertySyntaxResult,
     /// The `inherits` descriptor when its value is `true` or `false`.
     pub(crate) inherits: Option<bool>,
+    /// Whether SCSS evaluation is required to determine the `inherits` descriptor.
+    pub(crate) inherits_requires_evaluation: bool,
     /// The `initial-value` descriptor when a value node is present.
     pub(crate) initial_value: Option<CssPropertyInitialValueKind>,
     /// The absolute source range of the complete rule.
@@ -1080,26 +1064,32 @@ impl CssGlobalCustomVariableData {
 impl CssPropertyAtRuleData {
     /// Returns whether the rule's descriptors form a registration candidate.
     pub(crate) fn is_registration_candidate(&self, root: &AnyCssRoot) -> bool {
-        let Some(syntax) = self.syntax.as_valid() else {
-            return false;
-        };
-        if self.inherits.is_none() {
+        if self.inherits.is_none() && !self.inherits_requires_evaluation {
             return false;
         }
+        let syntax = match &self.syntax {
+            PropertySyntaxResult::Dynamic => return true,
+            PropertySyntaxResult::Value(syntax) => syntax,
+            PropertySyntaxResult::Missing | PropertySyntaxResult::Error(_) => return false,
+        };
         if syntax.is_universal() {
             return true;
         }
-        let Some(CssPropertyInitialValueKind::GenericComponent(initial_value)) =
-            &self.initial_value
-        else {
-            return false;
-        };
-        syntax.matches_initial_value(&initial_value.to_node(root.syntax()))
+        match &self.initial_value {
+            Some(CssPropertyInitialValueKind::GenericComponent(initial_value)) => {
+                syntax.matches_initial_value(&initial_value.to_node(root.syntax()))
+            }
+            Some(CssPropertyInitialValueKind::ScssExpression(initial_value)) => syntax
+                .matches_scss_initial_value(&initial_value.to_node(root.syntax()))
+                .unwrap_or(true),
+            _ => false,
+        }
     }
 
     fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
         self.name == other.name
             && self.inherits == other.inherits
+            && self.inherits_requires_evaluation == other.inherits_requires_evaluation
             && match (&self.initial_value, &other.initial_value) {
                 (Some(this), Some(other)) => this.semantic_eq(other, self_root, other_root),
                 (None, None) => true,

@@ -2,7 +2,7 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_diagnostics::console::fmt::{Formatter, Termcolor};
 use biome_diagnostics::console::markup;
 use biome_diagnostics::{DiagnosticExt, termcolor};
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_parser::AnyParse;
 use camino::Utf8Path;
 use std::fmt;

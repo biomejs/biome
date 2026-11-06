@@ -31,6 +31,10 @@ invalid-vue-v-for.vue:9:32 lint/correctness/noUndeclaredVariables ━━━━�
     10 │   </p>
     11 │ </template>
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -47,6 +51,10 @@ invalid-vue-v-for.vue:7:21 lint/correctness/noUndeclaredVariables ━━━━�
       │                     ^^^^^^^^^^^^
     8 │   <p v-for="({ id, meta: { label } }, index) in rows" :key="id">
     9 │     {{ label }} {{ index }} {{ missingLabel }}
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

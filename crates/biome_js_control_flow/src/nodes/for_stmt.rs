@@ -88,7 +88,7 @@ impl NodeVisitor for ForVisitor {
 
         if let Some(test) = node.test() {
             builder
-                .append_jump(true, loop_block)
+                .append_jump(!super::is_truthy_literal(&test), loop_block)
                 .with_node(test.syntax().clone());
         } else {
             builder.append_jump(false, loop_block);

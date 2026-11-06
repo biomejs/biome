@@ -1,0 +1,140 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidMixed.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query Second {
+  user {
+    id
+  }
+}
+
+type User {
+  id: ID!
+}
+
+schema {
+  query: Query
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+extend type Account {
+  id: ID!
+}
+
+fragment Fields on User {
+  id
+}
+
+directive @auth on FIELD_DEFINITION
+
+scalar Date
+
+union Result = User | Account
+
+interface Node {
+  id: ID!
+}
+
+input UserInput {
+  id: ID!
+}
+
+```
+
+# Diagnostics
+```
+invalidMixed.graphql:2:1 assist/source/useGraphqlSortedDefinitions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The definitions of this document are not sorted.
+  
+     1 │ # should generate diagnostics
+   > 2 │ query Second {
+       │ ^^^^^^^^^^^^^^
+   > 3 │   user {
+   > 4 │     id
+        ...
+  > 39 │ input UserInput {
+  > 40 │   id: ID!
+  > 41 │ }
+       │ ^
+    42 │ 
+  
+  i Safe fix: Sort the definitions.
+  
+     1    │ - #·should·generate·diagnostics
+     2    │ - query·Second·{
+     3    │ - ··user·{
+     4    │ - ····id
+     5    │ - ··}
+     6    │ - }
+     7    │ - 
+     8    │ - type·User·{
+        1 │ + extend·type·Account·{
+     9  2 │     id: ID!
+    10  3 │   }
+    11  4 │   
+    12    │ - schema·{
+    13    │ - ··query:·Query
+    14    │ - }
+        5 │ + directive·@auth·on·FIELD_DEFINITION
+        6 │ + 
+        7 │ + scalar·Date
+    15  8 │   
+    16    │ - enum·Role·{
+    17    │ - ··ADMIN
+    18    │ - ··USER
+        9 │ + fragment·Fields·on·User·{
+       10 │ + ··id
+    19 11 │   }
+    20 12 │   
+    21    │ - extend·type·Account·{
+       13 │ + interface·Node·{
+    22 14 │     id: ID!
+    23 15 │   }
+    24 16 │   
+    25    │ - fragment·Fields·on·User·{
+    26    │ - ··id
+       17 │ + union·Result·=·User·|·Account
+       18 │ + 
+       19 │ + enum·Role·{
+       20 │ + ··ADMIN
+       21 │ + ··USER
+    27 22 │   }
+    28 23 │   
+    29    │ - directive·@auth·on·FIELD_DEFINITION
+    30    │ - 
+    31    │ - scalar·Date
+    32    │ - 
+    33    │ - union·Result·=·User·|·Account
+    34    │ - 
+    35    │ - interface·Node·{
+       24 │ + #·should·generate·diagnostics
+       25 │ + query·Second·{
+       26 │ + ··user·{
+       27 │ + ····id
+       28 │ + ··}
+       29 │ + }
+       30 │ + 
+       31 │ + type·User·{
+    36 32 │     id: ID!
+    37 33 │   }
+    ····· │ 
+    39 35 │   input UserInput {
+    40 36 │     id: ID!
+    41    │ - }
+       37 │ + }
+       38 │ + 
+       39 │ + schema·{
+       40 │ + ··query:·Query
+       41 │ + }
+    42 42 │   
+  
+
+```

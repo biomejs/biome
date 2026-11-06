@@ -33,6 +33,8 @@ invalid.js:1:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
     2 │ ({ 0x1: 1 });
     3 │ ({
   
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
+  
   i Safe fix: Replace 1n with 1
   
      1    │ - ({·1n:·1·});
@@ -53,6 +55,8 @@ invalid.js:2:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
       │    ^^^
     3 │ ({
     4 │ 	0x1: 1
+  
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
   
   i Safe fix: Replace 0x1 with 1
   
@@ -76,6 +80,8 @@ invalid.js:4:2 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
       │ 	^^^
     5 │ });
     6 │ ({ 0o12: 1 });
+  
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
   
   i Safe fix: Replace 0x1 with 1
   
@@ -101,6 +107,8 @@ invalid.js:6:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
     7 │ ({ 0b1: 1 });
     8 │ ({ 0o1: 1 });
   
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
+  
   i Safe fix: Replace 0o12 with 9
   
      4  4 │   	0x1: 1
@@ -124,6 +132,8 @@ invalid.js:7:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
       │    ^^^
     8 │ ({ 0o1: 1 });
     9 │ ({ 1_0: 1 });
+  
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
   
   i Safe fix: Replace 0b1 with 1
   
@@ -149,6 +159,8 @@ invalid.js:8:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
      9 │ ({ 1_0: 1 });
     10 │ ({ 0.1e1_2: "ed" });
   
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
+  
   i Safe fix: Replace 0o1 with 1
   
      6  6 │   ({ 0o12: 1 });
@@ -172,6 +184,8 @@ invalid.js:9:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━�
        │    ^^^
     10 │ ({ 0.1e1_2: "ed" });
     11 │ ({ 11_1.11: "ee" });
+  
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
   
   i Safe fix: Replace 1_0 with 10
   
@@ -197,6 +211,8 @@ invalid.js:10:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━
     11 │ ({ 11_1.11: "ee" });
     12 │ ({ 0x1() {} });
   
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
+  
   i Safe fix: Replace 0.1e1_2 with .1e12
   
      8  8 │   ({ 0o1: 1 });
@@ -220,6 +236,8 @@ invalid.js:11:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━
        │    ^^^^^^^
     12 │ ({ 0x1() {} });
     13 │ ({ [0x1]() {} });
+  
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
   
   i Safe fix: Replace 11_1.11 with 111.11
   
@@ -245,6 +263,8 @@ invalid.js:12:4 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━
     13 │ ({ [0x1]() {} });
     14 │ ({ get 0x1() { return this.a } });
   
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
+  
   i Safe fix: Replace 0x1 with 1
   
     10 10 │   ({ 0.1e1_2: "ed" });
@@ -269,6 +289,8 @@ invalid.js:14:8 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━
     15 │ ({ set 0x1(a) { this.a = a } });
     16 │ 
   
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
+  
   i Safe fix: Replace 0x1 with 1
   
     12 12 │   ({ 0x1() {} });
@@ -291,6 +313,8 @@ invalid.js:15:8 lint/complexity/useSimpleNumberKeys  FIXABLE  ━━━━━━
   > 15 │ ({ set 0x1(a) { this.a = a } });
        │        ^^^
     16 │ 
+  
+  i A number written in this form is converted to a different string key than the literal suggests, which is confusing.
   
   i Safe fix: Replace 0x1 with 1
   

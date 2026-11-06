@@ -68,10 +68,14 @@ impl Rule for NoUnusedTemplateLiteral {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
 
-        Some(RuleDiagnostic::new(rule_category!(),node.range(), markup! {
-            "Do not use template literals if interpolation and special-character handling are not needed."
-        }
-        .to_owned() ) )
+        Some(
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! {
+                "Unnecessary template literal."
+            })
+            .note(markup! {
+                "A template literal is only needed for interpolation or special-character handling. Without them, a regular string is simpler."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

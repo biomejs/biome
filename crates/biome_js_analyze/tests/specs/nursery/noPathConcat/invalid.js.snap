@@ -1,0 +1,822 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var fullPath = __dirname + "/foo.js";
+var fullPath = __filename + "/foo.js";
+var fullPath = `${__dirname}/foo.js`;
+var fullPath = `${__filename}/foo.js`;
+var fullPath = __dirname + "/" + "foo.js";
+var fullPath = __dirname + ("/" + "foo.js");
+var fullPath = __dirname + (test ? "/foo.js" : "/bar.js");
+var fullPath = __dirname + (test ? ".js" : "/bar.js");
+var fullPath = __dirname + (extraPath || "/default.js");
+var fullPath = __dirname + (extraPath ?? "/default.js");
+var fullPath = __dirname + "\\foo.js";
+var fullPath = __filename + "\\foo.js";
+var fullPath = `${__dirname}\\foo.js`;
+var fullPath = `${__filename}\\foo.js`;
+var fullPath = __dirname + "\/foo.js";
+var fullPath = `${__dirname}\/foo.js`;
+var fullPath = __dirname + "\x2Ffoo.js";
+var fullPath = __dirname + "\u005Cfoo.js";
+var fullPath = import.meta.dirname + "/foo.js";
+var fullPath = import.meta.filename + "/foo.js";
+var fullPath = import.meta["dirname"] + "/foo.js";
+var fullPath = `${import.meta.filename}/foo.js`;
+var fullUrl = import.meta.url + "/foo.js";
+var fullUrl = import.meta["url"] + "/foo.js";
+var fullUrl = `${import.meta[`url`]}/foo.js`;
+
+var fullPath = (__dirname) + "/foo.js";
+var fullPath = (import.meta).dirname + "/foo.js";
+var fullPath = __dirname + `/foo.js`;
+var fullPath = __dirname + `${"/"}foo.js`;
+var fullPath = __dirname + (0, "/foo.js");
+var fullPath = __dirname + (extraPath = "/foo.js");
+var fullPath = `${__dirname}${"/"}foo.js`;
+var fullPath = `prefix:${__dirname}/foo.js`;
+var fullPath = tag`${__dirname}/foo.js`;
+var fullPath = `${__dirname}/foo.js:${__filename}/bar.js`;
+var fullPath = `${__dirname}.js:${__filename}/bar.js`;
+var fullUrl = `${import.meta.url}/foo.js:${__filename}/bar.js`;
+
+```
+
+# Diagnostics
+```
+invalid.js:2:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var fullPath = __dirname + "/foo.js";
+      │                ^^^^^^^^^^^^^^^^^^^^^
+    3 │ var fullPath = __filename + "/foo.js";
+    4 │ var fullPath = `${__dirname}/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var fullPath = __dirname + "/foo.js";
+  > 3 │ var fullPath = __filename + "/foo.js";
+      │                ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ var fullPath = `${__dirname}/foo.js`;
+    5 │ var fullPath = `${__filename}/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    2 │ var fullPath = __dirname + "/foo.js";
+    3 │ var fullPath = __filename + "/foo.js";
+  > 4 │ var fullPath = `${__dirname}/foo.js`;
+      │                ^^^^^^^^^^^^^^^^^^^^^
+    5 │ var fullPath = `${__filename}/foo.js`;
+    6 │ var fullPath = __dirname + "/" + "foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    3 │ var fullPath = __filename + "/foo.js";
+    4 │ var fullPath = `${__dirname}/foo.js`;
+  > 5 │ var fullPath = `${__filename}/foo.js`;
+      │                ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ var fullPath = __dirname + "/" + "foo.js";
+    7 │ var fullPath = __dirname + ("/" + "foo.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    4 │ var fullPath = `${__dirname}/foo.js`;
+    5 │ var fullPath = `${__filename}/foo.js`;
+  > 6 │ var fullPath = __dirname + "/" + "foo.js";
+      │                ^^^^^^^^^^^^^^^
+    7 │ var fullPath = __dirname + ("/" + "foo.js");
+    8 │ var fullPath = __dirname + (test ? "/foo.js" : "/bar.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    5 │ var fullPath = `${__filename}/foo.js`;
+    6 │ var fullPath = __dirname + "/" + "foo.js";
+  > 7 │ var fullPath = __dirname + ("/" + "foo.js");
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ var fullPath = __dirname + (test ? "/foo.js" : "/bar.js");
+    9 │ var fullPath = __dirname + (test ? ".js" : "/bar.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+     6 │ var fullPath = __dirname + "/" + "foo.js";
+     7 │ var fullPath = __dirname + ("/" + "foo.js");
+   > 8 │ var fullPath = __dirname + (test ? "/foo.js" : "/bar.js");
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ var fullPath = __dirname + (test ? ".js" : "/bar.js");
+    10 │ var fullPath = __dirname + (extraPath || "/default.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+     7 │ var fullPath = __dirname + ("/" + "foo.js");
+     8 │ var fullPath = __dirname + (test ? "/foo.js" : "/bar.js");
+   > 9 │ var fullPath = __dirname + (test ? ".js" : "/bar.js");
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ var fullPath = __dirname + (extraPath || "/default.js");
+    11 │ var fullPath = __dirname + (extraPath ?? "/default.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+     8 │ var fullPath = __dirname + (test ? "/foo.js" : "/bar.js");
+     9 │ var fullPath = __dirname + (test ? ".js" : "/bar.js");
+  > 10 │ var fullPath = __dirname + (extraPath || "/default.js");
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ var fullPath = __dirname + (extraPath ?? "/default.js");
+    12 │ var fullPath = __dirname + "\\foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+     9 │ var fullPath = __dirname + (test ? ".js" : "/bar.js");
+    10 │ var fullPath = __dirname + (extraPath || "/default.js");
+  > 11 │ var fullPath = __dirname + (extraPath ?? "/default.js");
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ var fullPath = __dirname + "\\foo.js";
+    13 │ var fullPath = __filename + "\\foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    10 │ var fullPath = __dirname + (extraPath || "/default.js");
+    11 │ var fullPath = __dirname + (extraPath ?? "/default.js");
+  > 12 │ var fullPath = __dirname + "\\foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    13 │ var fullPath = __filename + "\\foo.js";
+    14 │ var fullPath = `${__dirname}\\foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    11 │ var fullPath = __dirname + (extraPath ?? "/default.js");
+    12 │ var fullPath = __dirname + "\\foo.js";
+  > 13 │ var fullPath = __filename + "\\foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ var fullPath = `${__dirname}\\foo.js`;
+    15 │ var fullPath = `${__filename}\\foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    12 │ var fullPath = __dirname + "\\foo.js";
+    13 │ var fullPath = __filename + "\\foo.js";
+  > 14 │ var fullPath = `${__dirname}\\foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    15 │ var fullPath = `${__filename}\\foo.js`;
+    16 │ var fullPath = __dirname + "\/foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    13 │ var fullPath = __filename + "\\foo.js";
+    14 │ var fullPath = `${__dirname}\\foo.js`;
+  > 15 │ var fullPath = `${__filename}\\foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ var fullPath = __dirname + "\/foo.js";
+    17 │ var fullPath = `${__dirname}\/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    14 │ var fullPath = `${__dirname}\\foo.js`;
+    15 │ var fullPath = `${__filename}\\foo.js`;
+  > 16 │ var fullPath = __dirname + "\/foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    17 │ var fullPath = `${__dirname}\/foo.js`;
+    18 │ var fullPath = __dirname + "\x2Ffoo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    15 │ var fullPath = `${__filename}\\foo.js`;
+    16 │ var fullPath = __dirname + "\/foo.js";
+  > 17 │ var fullPath = `${__dirname}\/foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    18 │ var fullPath = __dirname + "\x2Ffoo.js";
+    19 │ var fullPath = __dirname + "\u005Cfoo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    16 │ var fullPath = __dirname + "\/foo.js";
+    17 │ var fullPath = `${__dirname}\/foo.js`;
+  > 18 │ var fullPath = __dirname + "\x2Ffoo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ var fullPath = __dirname + "\u005Cfoo.js";
+    20 │ var fullPath = import.meta.dirname + "/foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    17 │ var fullPath = `${__dirname}\/foo.js`;
+    18 │ var fullPath = __dirname + "\x2Ffoo.js";
+  > 19 │ var fullPath = __dirname + "\u005Cfoo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ var fullPath = import.meta.dirname + "/foo.js";
+    21 │ var fullPath = import.meta.filename + "/foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    18 │ var fullPath = __dirname + "\x2Ffoo.js";
+    19 │ var fullPath = __dirname + "\u005Cfoo.js";
+  > 20 │ var fullPath = import.meta.dirname + "/foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ var fullPath = import.meta.filename + "/foo.js";
+    22 │ var fullPath = import.meta["dirname"] + "/foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    19 │ var fullPath = __dirname + "\u005Cfoo.js";
+    20 │ var fullPath = import.meta.dirname + "/foo.js";
+  > 21 │ var fullPath = import.meta.filename + "/foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ var fullPath = import.meta["dirname"] + "/foo.js";
+    23 │ var fullPath = `${import.meta.filename}/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    20 │ var fullPath = import.meta.dirname + "/foo.js";
+    21 │ var fullPath = import.meta.filename + "/foo.js";
+  > 22 │ var fullPath = import.meta["dirname"] + "/foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ var fullPath = `${import.meta.filename}/foo.js`;
+    24 │ var fullUrl = import.meta.url + "/foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    21 │ var fullPath = import.meta.filename + "/foo.js";
+    22 │ var fullPath = import.meta["dirname"] + "/foo.js";
+  > 23 │ var fullPath = `${import.meta.filename}/foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ var fullUrl = import.meta.url + "/foo.js";
+    25 │ var fullUrl = import.meta["url"] + "/foo.js";
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:15 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is built by joining strings.
+  
+    22 │ var fullPath = import.meta["dirname"] + "/foo.js";
+    23 │ var fullPath = `${import.meta.filename}/foo.js`;
+  > 24 │ var fullUrl = import.meta.url + "/foo.js";
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ var fullUrl = import.meta["url"] + "/foo.js";
+    26 │ var fullUrl = `${import.meta[`url`]}/foo.js`;
+  
+  i import.meta.url is the URL of the current file, so text added to its end doesn't point to a file next to it.
+  
+  i Use new URL() instead, for example new URL("./foo.js", import.meta.url).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:15 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is built by joining strings.
+  
+    23 │ var fullPath = `${import.meta.filename}/foo.js`;
+    24 │ var fullUrl = import.meta.url + "/foo.js";
+  > 25 │ var fullUrl = import.meta["url"] + "/foo.js";
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ var fullUrl = `${import.meta[`url`]}/foo.js`;
+    27 │ 
+  
+  i import.meta.url is the URL of the current file, so text added to its end doesn't point to a file next to it.
+  
+  i Use new URL() instead, for example new URL("./foo.js", import.meta.url).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:15 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is built by joining strings.
+  
+    24 │ var fullUrl = import.meta.url + "/foo.js";
+    25 │ var fullUrl = import.meta["url"] + "/foo.js";
+  > 26 │ var fullUrl = `${import.meta[`url`]}/foo.js`;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ var fullPath = (__dirname) + "/foo.js";
+  
+  i import.meta.url is the URL of the current file, so text added to its end doesn't point to a file next to it.
+  
+  i Use new URL() instead, for example new URL("./foo.js", import.meta.url).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    26 │ var fullUrl = `${import.meta[`url`]}/foo.js`;
+    27 │ 
+  > 28 │ var fullPath = (__dirname) + "/foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ var fullPath = (import.meta).dirname + "/foo.js";
+    30 │ var fullPath = __dirname + `/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    28 │ var fullPath = (__dirname) + "/foo.js";
+  > 29 │ var fullPath = (import.meta).dirname + "/foo.js";
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ var fullPath = __dirname + `/foo.js`;
+    31 │ var fullPath = __dirname + `${"/"}foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    28 │ var fullPath = (__dirname) + "/foo.js";
+    29 │ var fullPath = (import.meta).dirname + "/foo.js";
+  > 30 │ var fullPath = __dirname + `/foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^
+    31 │ var fullPath = __dirname + `${"/"}foo.js`;
+    32 │ var fullPath = __dirname + (0, "/foo.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    29 │ var fullPath = (import.meta).dirname + "/foo.js";
+    30 │ var fullPath = __dirname + `/foo.js`;
+  > 31 │ var fullPath = __dirname + `${"/"}foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ var fullPath = __dirname + (0, "/foo.js");
+    33 │ var fullPath = __dirname + (extraPath = "/foo.js");
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    30 │ var fullPath = __dirname + `/foo.js`;
+    31 │ var fullPath = __dirname + `${"/"}foo.js`;
+  > 32 │ var fullPath = __dirname + (0, "/foo.js");
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ var fullPath = __dirname + (extraPath = "/foo.js");
+    34 │ var fullPath = `${__dirname}${"/"}foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    31 │ var fullPath = __dirname + `${"/"}foo.js`;
+    32 │ var fullPath = __dirname + (0, "/foo.js");
+  > 33 │ var fullPath = __dirname + (extraPath = "/foo.js");
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ var fullPath = `${__dirname}${"/"}foo.js`;
+    35 │ var fullPath = `prefix:${__dirname}/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    32 │ var fullPath = __dirname + (0, "/foo.js");
+    33 │ var fullPath = __dirname + (extraPath = "/foo.js");
+  > 34 │ var fullPath = `${__dirname}${"/"}foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ var fullPath = `prefix:${__dirname}/foo.js`;
+    36 │ var fullPath = tag`${__dirname}/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    33 │ var fullPath = __dirname + (extraPath = "/foo.js");
+    34 │ var fullPath = `${__dirname}${"/"}foo.js`;
+  > 35 │ var fullPath = `prefix:${__dirname}/foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ var fullPath = tag`${__dirname}/foo.js`;
+    37 │ var fullPath = `${__dirname}/foo.js:${__filename}/bar.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    34 │ var fullPath = `${__dirname}${"/"}foo.js`;
+    35 │ var fullPath = `prefix:${__dirname}/foo.js`;
+  > 36 │ var fullPath = tag`${__dirname}/foo.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ var fullPath = `${__dirname}/foo.js:${__filename}/bar.js`;
+    38 │ var fullPath = `${__dirname}.js:${__filename}/bar.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    35 │ var fullPath = `prefix:${__dirname}/foo.js`;
+    36 │ var fullPath = tag`${__dirname}/foo.js`;
+  > 37 │ var fullPath = `${__dirname}/foo.js:${__filename}/bar.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ var fullPath = `${__dirname}.js:${__filename}/bar.js`;
+    39 │ var fullUrl = `${import.meta.url}/foo.js:${__filename}/bar.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:16 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    36 │ var fullPath = tag`${__dirname}/foo.js`;
+    37 │ var fullPath = `${__dirname}/foo.js:${__filename}/bar.js`;
+  > 38 │ var fullPath = `${__dirname}.js:${__filename}/bar.js`;
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ var fullUrl = `${import.meta.url}/foo.js:${__filename}/bar.js`;
+    40 │ 
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:15 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is built by joining strings.
+  
+    37 │ var fullPath = `${__dirname}/foo.js:${__filename}/bar.js`;
+    38 │ var fullPath = `${__dirname}.js:${__filename}/bar.js`;
+  > 39 │ var fullUrl = `${import.meta.url}/foo.js:${__filename}/bar.js`;
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+  
+  i import.meta.url is the URL of the current file, so text added to its end doesn't point to a file next to it.
+  
+  i Use new URL() instead, for example new URL("./foo.js", import.meta.url).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -147,13 +147,21 @@ impl Rule for NoUndeclaredEnvVars {
         let node = ctx.query();
         let env_var = state.env_var_name.text();
 
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "The environment variable "<Emphasis>{env_var}</Emphasis>" is not listed as a dependency in turbo.json. Add this environment variable a task's 'env'/'passThroughEnv', or to 'globalEnv', 'globalPassThroughEnv', in your turbo.json(c) configuration to ensure correct caching behavior in Turborepo."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "The environment variable "<Emphasis>{env_var}</Emphasis>" is not listed as a dependency in turbo.json."
+                },
+            )
+            .note(markup! {
+                "Turborepo does not know that this variable affects the task. A change to it may not invalidate the cache, so stale results can be reused."
+            })
+            .note(markup! {
+                "Add the variable to the task's "<Emphasis>"env"</Emphasis>" or "<Emphasis>"passThroughEnv"</Emphasis>", or to "<Emphasis>"globalEnv"</Emphasis>" or "<Emphasis>"globalPassThroughEnv"</Emphasis>", in your turbo.json(c) configuration."
+            }),
+        )
     }
 }
 

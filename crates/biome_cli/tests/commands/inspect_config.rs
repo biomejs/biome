@@ -512,20 +512,75 @@ fn non_matching_override_keeps_base_value() {
 }
 
 #[test]
-fn path_requires_key() {
+fn resolved_configuration_with_directory_path() {
     let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "formatter": { "lineWidth": 100 } },
+  "overrides": [
+    {
+      "includes": ["src/*.js"],
+      "javascript": { "formatter": { "lineWidth": 120 } }
+    },
+    {
+      "includes": ["src/*.js"],
+      "javascript": { "formatter": { "lineWidth": 140 } }
+    }
+  ]
+}"#,
+    );
+    fs.insert("src/file.js".into(), "");
     let mut console = BufferConsole::default();
 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "--path=file.js"].as_slice()),
+        Args::from(["inspect", "config", "--path=src"].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "path_requires_key",
+        "resolved_configuration_with_directory_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn resolved_configuration_with_file_path() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "formatter": { "lineWidth": 100 } },
+  "overrides": [
+    {
+      "includes": ["src/*.js"],
+      "javascript": { "formatter": { "lineWidth": 120 } }
+    },
+    {
+      "includes": ["src/*.js"],
+      "javascript": { "formatter": { "lineWidth": 140 } }
+    }
+  ]
+}"#,
+    );
+    fs.insert("src/file.js".into(), "");
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "config", "--path=src/file.js"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "resolved_configuration_with_file_path",
         fs,
         console,
         result,

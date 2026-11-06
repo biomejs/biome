@@ -1362,70 +1362,13 @@ CssRoot {
                                 colon_token: COLON@1505..1507 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@1507..1510 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@1507..1510 "url" [] [],
                                             l_paren_token: L_PAREN@1510..1511 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1511..1516 "https" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: COLON@1516..1517 ":" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@1517..1518 "/" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@1518..1519 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1519..1526 "example" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@1526..1527 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1527..1530 "com" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@1530..1531 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1531..1536 "image" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@1536..1537 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1537..1540 "svg" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: CSS_DELIM_LITERAL@1540..1541 "?" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1541..1545 "size" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: EQ@1545..1546 "=" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1546..1551 "large" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: AMP@1551..1552 "&" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1552..1557 "theme" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: EQ@1557..1558 "=" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1558..1562 "dark" [] [],
-                                                },
-                                            ],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@1511..1562 "https://example.com/image.svg?size=large&theme=dark" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@1562..1563 ")" [] [],
                                         },
                                     ],
@@ -1444,51 +1387,13 @@ CssRoot {
                                 colon_token: COLON@1573..1575 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@1575..1578 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@1575..1578 "url" [] [],
                                             l_paren_token: L_PAREN@1578..1579 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1579..1583 "data" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: COLON@1583..1584 ":" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1584..1589 "image" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@1589..1590 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1590..1593 "svg" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: PLUS@1593..1594 "+" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1594..1597 "xml" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: COMMA@1597..1598 "," [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: PERCENT@1598..1599 "%" [] [],
-                                                },
-                                                CssUnknownDimension {
-                                                    value_token: CSS_NUMBER_LITERAL@1599..1600 "3" [] [],
-                                                    unit_token: IDENT@1600..1604 "Csvg" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: PERCENT@1604..1605 "%" [] [],
-                                                },
-                                                CssUnknownDimension {
-                                                    value_token: CSS_NUMBER_LITERAL@1605..1606 "3" [] [],
-                                                    unit_token: IDENT@1606..1607 "E" [] [],
-                                                },
-                                            ],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@1579..1607 "data:image/svg+xml,%3Csvg%3E" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@1607..1608 ")" [] [],
                                         },
                                     ],
@@ -1572,40 +1477,35 @@ CssRoot {
                                 colon_token: COLON@1700..1702 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@1702..1705 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@1702..1705 "url" [] [],
                                             l_paren_token: L_PAREN@1705..1706 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1706..1712 "images" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@1712..1713 "/" [] [],
-                                                },
-                                                ScssInterpolation {
-                                                    hash_token: HASH@1713..1714 "#" [] [],
-                                                    l_curly_token: L_CURLY@1714..1715 "{" [] [],
-                                                    value: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            ScssVariable {
-                                                                dollar_token: DOLLAR@1715..1716 "$" [] [],
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@1716..1720 "name" [] [],
-                                                                },
-                                                            },
-                                                        ],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@1706..1713 "images/" [] [],
                                                     },
-                                                    r_curly_token: R_CURLY@1720..1721 "}" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@1721..1722 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1722..1725 "png" [] [],
-                                                },
-                                            ],
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@1713..1714 "#" [] [],
+                                                        l_curly_token: L_CURLY@1714..1715 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@1715..1716 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@1716..1720 "name" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@1720..1721 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@1721..1725 ".png" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@1725..1726 ")" [] [],
                                         },
                                     ],
@@ -1658,22 +1558,13 @@ CssRoot {
                                 colon_token: COLON@1803..1805 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@1805..1808 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@1805..1808 "url" [] [],
                                             l_paren_token: L_PAREN@1808..1809 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1809..1814 "image" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@1814..1815 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1815..1818 "svg" [] [],
-                                                },
-                                            ],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@1809..1818 "image.svg" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@1818..1819 ")" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
@@ -1695,22 +1586,13 @@ CssRoot {
                                 colon_token: COLON@1842..1844 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@1844..1847 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@1844..1847 "url" [] [],
                                             l_paren_token: L_PAREN@1847..1848 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1848..1853 "image" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@1853..1854 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@1854..1857 "svg" [] [],
-                                                },
-                                            ],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@1848..1857 "image.svg" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@1857..1858 ")" [] [],
                                         },
                                         CssCustomPropertyDelimiter {
@@ -1932,46 +1814,13 @@ CssRoot {
                                 colon_token: COLON@2092..2094 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@2094..2097 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@2094..2097 "url" [] [],
                                             l_paren_token: L_PAREN@2097..2098 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2098..2103 "https" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: COLON@2103..2104 ":" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@2104..2105 "/" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@2105..2106 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2106..2113 "example" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@2113..2114 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2114..2117 "com" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@2117..2118 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2118..2123 "image" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@2123..2124 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2124..2127 "svg" [] [],
-                                                },
-                                            ],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@2098..2127 "https://example.com/image.svg" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@2127..2128 ")" [] [],
                                         },
                                     ],
@@ -2046,46 +1895,13 @@ CssRoot {
                                 colon_token: COLON@2206..2208 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyFunction {
-                                            name: CssCustomIdentifier {
-                                                value_token: IDENT@2208..2211 "url" [] [],
-                                            },
+                                        CssUrlFunction {
+                                            name: URL_KW@2208..2211 "url" [] [],
                                             l_paren_token: L_PAREN@2211..2212 "(" [] [],
-                                            components: CssCustomPropertyComponentList [
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@2212..2213 "/" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@2213..2214 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2214..2217 "cdn" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@2217..2218 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2218..2225 "example" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@2225..2226 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2226..2229 "com" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: SLASH@2229..2230 "/" [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2230..2235 "image" [] [],
-                                                },
-                                                CssCustomPropertyDelimiter {
-                                                    value: DOT@2235..2236 "." [] [],
-                                                },
-                                                CssCustomIdentifier {
-                                                    value_token: IDENT@2236..2239 "svg" [] [],
-                                                },
-                                            ],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@2212..2239 "//cdn.example.com/image.svg" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@2239..2240 ")" [] [],
                                         },
                                     ],
@@ -3637,50 +3453,13 @@ CssRoot {
                 1: COLON@1505..1507 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@1507..1563
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1507..1563
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@1507..1563
-                      0: CSS_CUSTOM_IDENTIFIER@1507..1510
-                        0: IDENT@1507..1510 "url" [] []
+                    0: CSS_URL_FUNCTION@1507..1563
+                      0: URL_KW@1507..1510 "url" [] []
                       1: L_PAREN@1510..1511 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1511..1562
-                        0: CSS_CUSTOM_IDENTIFIER@1511..1516
-                          0: IDENT@1511..1516 "https" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@1516..1517
-                          0: COLON@1516..1517 ":" [] []
-                        2: CSS_CUSTOM_PROPERTY_DELIMITER@1517..1518
-                          0: SLASH@1517..1518 "/" [] []
-                        3: CSS_CUSTOM_PROPERTY_DELIMITER@1518..1519
-                          0: SLASH@1518..1519 "/" [] []
-                        4: CSS_CUSTOM_IDENTIFIER@1519..1526
-                          0: IDENT@1519..1526 "example" [] []
-                        5: CSS_CUSTOM_PROPERTY_DELIMITER@1526..1527
-                          0: DOT@1526..1527 "." [] []
-                        6: CSS_CUSTOM_IDENTIFIER@1527..1530
-                          0: IDENT@1527..1530 "com" [] []
-                        7: CSS_CUSTOM_PROPERTY_DELIMITER@1530..1531
-                          0: SLASH@1530..1531 "/" [] []
-                        8: CSS_CUSTOM_IDENTIFIER@1531..1536
-                          0: IDENT@1531..1536 "image" [] []
-                        9: CSS_CUSTOM_PROPERTY_DELIMITER@1536..1537
-                          0: DOT@1536..1537 "." [] []
-                        10: CSS_CUSTOM_IDENTIFIER@1537..1540
-                          0: IDENT@1537..1540 "svg" [] []
-                        11: CSS_CUSTOM_PROPERTY_DELIMITER@1540..1541
-                          0: CSS_DELIM_LITERAL@1540..1541 "?" [] []
-                        12: CSS_CUSTOM_IDENTIFIER@1541..1545
-                          0: IDENT@1541..1545 "size" [] []
-                        13: CSS_CUSTOM_PROPERTY_DELIMITER@1545..1546
-                          0: EQ@1545..1546 "=" [] []
-                        14: CSS_CUSTOM_IDENTIFIER@1546..1551
-                          0: IDENT@1546..1551 "large" [] []
-                        15: CSS_CUSTOM_PROPERTY_DELIMITER@1551..1552
-                          0: AMP@1551..1552 "&" [] []
-                        16: CSS_CUSTOM_IDENTIFIER@1552..1557
-                          0: IDENT@1552..1557 "theme" [] []
-                        17: CSS_CUSTOM_PROPERTY_DELIMITER@1557..1558
-                          0: EQ@1557..1558 "=" [] []
-                        18: CSS_CUSTOM_IDENTIFIER@1558..1562
-                          0: IDENT@1558..1562 "dark" [] []
-                      3: R_PAREN@1562..1563 ")" [] []
+                      2: CSS_URL_VALUE_RAW@1511..1562
+                        0: CSS_URL_VALUE_RAW_LITERAL@1511..1562 "https://example.com/image.svg?size=large&theme=dark" [] []
+                      3: CSS_URL_MODIFIER_LIST@1562..1562
+                      4: R_PAREN@1562..1563 ")" [] []
               1: (empty)
             1: SEMICOLON@1563..1564 ";" [] []
           40: CSS_DECLARATION_WITH_SEMICOLON@1564..1609
@@ -3691,38 +3470,13 @@ CssRoot {
                 1: COLON@1573..1575 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@1575..1608
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1575..1608
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@1575..1608
-                      0: CSS_CUSTOM_IDENTIFIER@1575..1578
-                        0: IDENT@1575..1578 "url" [] []
+                    0: CSS_URL_FUNCTION@1575..1608
+                      0: URL_KW@1575..1578 "url" [] []
                       1: L_PAREN@1578..1579 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1579..1607
-                        0: CSS_CUSTOM_IDENTIFIER@1579..1583
-                          0: IDENT@1579..1583 "data" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@1583..1584
-                          0: COLON@1583..1584 ":" [] []
-                        2: CSS_CUSTOM_IDENTIFIER@1584..1589
-                          0: IDENT@1584..1589 "image" [] []
-                        3: CSS_CUSTOM_PROPERTY_DELIMITER@1589..1590
-                          0: SLASH@1589..1590 "/" [] []
-                        4: CSS_CUSTOM_IDENTIFIER@1590..1593
-                          0: IDENT@1590..1593 "svg" [] []
-                        5: CSS_CUSTOM_PROPERTY_DELIMITER@1593..1594
-                          0: PLUS@1593..1594 "+" [] []
-                        6: CSS_CUSTOM_IDENTIFIER@1594..1597
-                          0: IDENT@1594..1597 "xml" [] []
-                        7: CSS_CUSTOM_PROPERTY_DELIMITER@1597..1598
-                          0: COMMA@1597..1598 "," [] []
-                        8: CSS_CUSTOM_PROPERTY_DELIMITER@1598..1599
-                          0: PERCENT@1598..1599 "%" [] []
-                        9: CSS_UNKNOWN_DIMENSION@1599..1604
-                          0: CSS_NUMBER_LITERAL@1599..1600 "3" [] []
-                          1: IDENT@1600..1604 "Csvg" [] []
-                        10: CSS_CUSTOM_PROPERTY_DELIMITER@1604..1605
-                          0: PERCENT@1604..1605 "%" [] []
-                        11: CSS_UNKNOWN_DIMENSION@1605..1607
-                          0: CSS_NUMBER_LITERAL@1605..1606 "3" [] []
-                          1: IDENT@1606..1607 "E" [] []
-                      3: R_PAREN@1607..1608 ")" [] []
+                      2: CSS_URL_VALUE_RAW@1579..1607
+                        0: CSS_URL_VALUE_RAW_LITERAL@1579..1607 "data:image/svg+xml,%3Csvg%3E" [] []
+                      3: CSS_URL_MODIFIER_LIST@1607..1607
+                      4: R_PAREN@1607..1608 ")" [] []
               1: (empty)
             1: SEMICOLON@1608..1609 ";" [] []
           41: CSS_DECLARATION_WITH_SEMICOLON@1609..1636
@@ -3775,30 +3529,27 @@ CssRoot {
                 1: COLON@1700..1702 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@1702..1726
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1702..1726
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@1702..1726
-                      0: CSS_CUSTOM_IDENTIFIER@1702..1705
-                        0: IDENT@1702..1705 "url" [] []
+                    0: CSS_URL_FUNCTION@1702..1726
+                      0: URL_KW@1702..1705 "url" [] []
                       1: L_PAREN@1705..1706 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1706..1725
-                        0: CSS_CUSTOM_IDENTIFIER@1706..1712
-                          0: IDENT@1706..1712 "images" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@1712..1713
-                          0: SLASH@1712..1713 "/" [] []
-                        2: SCSS_INTERPOLATION@1713..1721
-                          0: HASH@1713..1714 "#" [] []
-                          1: L_CURLY@1714..1715 "{" [] []
-                          2: SCSS_EXPRESSION@1715..1720
-                            0: SCSS_EXPRESSION_ITEM_LIST@1715..1720
-                              0: SCSS_VARIABLE@1715..1720
-                                0: DOLLAR@1715..1716 "$" [] []
-                                1: CSS_IDENTIFIER@1716..1720
-                                  0: IDENT@1716..1720 "name" [] []
-                          3: R_CURLY@1720..1721 "}" [] []
-                        3: CSS_CUSTOM_PROPERTY_DELIMITER@1721..1722
-                          0: DOT@1721..1722 "." [] []
-                        4: CSS_CUSTOM_IDENTIFIER@1722..1725
-                          0: IDENT@1722..1725 "png" [] []
-                      3: R_PAREN@1725..1726 ")" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@1706..1725
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@1706..1725
+                          0: SCSS_URL_TEXT@1706..1713
+                            0: SCSS_URL_CONTENT_LITERAL@1706..1713 "images/" [] []
+                          1: SCSS_INTERPOLATION@1713..1721
+                            0: HASH@1713..1714 "#" [] []
+                            1: L_CURLY@1714..1715 "{" [] []
+                            2: SCSS_EXPRESSION@1715..1720
+                              0: SCSS_EXPRESSION_ITEM_LIST@1715..1720
+                                0: SCSS_VARIABLE@1715..1720
+                                  0: DOLLAR@1715..1716 "$" [] []
+                                  1: CSS_IDENTIFIER@1716..1720
+                                    0: IDENT@1716..1720 "name" [] []
+                            3: R_CURLY@1720..1721 "}" [] []
+                          2: SCSS_URL_TEXT@1721..1725
+                            0: SCSS_URL_CONTENT_LITERAL@1721..1725 ".png" [] []
+                      3: CSS_URL_MODIFIER_LIST@1725..1725
+                      4: R_PAREN@1725..1726 ")" [] []
               1: (empty)
             1: SEMICOLON@1726..1727 ";" [] []
           44: CSS_DECLARATION_WITH_SEMICOLON@1727..1778
@@ -3831,18 +3582,13 @@ CssRoot {
                 1: COLON@1803..1805 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@1805..1820
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1805..1820
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@1805..1819
-                      0: CSS_CUSTOM_IDENTIFIER@1805..1808
-                        0: IDENT@1805..1808 "url" [] []
+                    0: CSS_URL_FUNCTION@1805..1819
+                      0: URL_KW@1805..1808 "url" [] []
                       1: L_PAREN@1808..1809 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1809..1818
-                        0: CSS_CUSTOM_IDENTIFIER@1809..1814
-                          0: IDENT@1809..1814 "image" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@1814..1815
-                          0: DOT@1814..1815 "." [] []
-                        2: CSS_CUSTOM_IDENTIFIER@1815..1818
-                          0: IDENT@1815..1818 "svg" [] []
-                      3: R_PAREN@1818..1819 ")" [] []
+                      2: CSS_URL_VALUE_RAW@1809..1818
+                        0: CSS_URL_VALUE_RAW_LITERAL@1809..1818 "image.svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@1818..1818
+                      4: R_PAREN@1818..1819 ")" [] []
                     1: CSS_CUSTOM_PROPERTY_DELIMITER@1819..1820
                       0: CSS_DELIM_LITERAL@1819..1820 "?" [] []
               1: (empty)
@@ -3855,18 +3601,13 @@ CssRoot {
                 1: COLON@1842..1844 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@1844..1864
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1844..1864
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@1844..1858
-                      0: CSS_CUSTOM_IDENTIFIER@1844..1847
-                        0: IDENT@1844..1847 "url" [] []
+                    0: CSS_URL_FUNCTION@1844..1858
+                      0: URL_KW@1844..1847 "url" [] []
                       1: L_PAREN@1847..1848 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1848..1857
-                        0: CSS_CUSTOM_IDENTIFIER@1848..1853
-                          0: IDENT@1848..1853 "image" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@1853..1854
-                          0: DOT@1853..1854 "." [] []
-                        2: CSS_CUSTOM_IDENTIFIER@1854..1857
-                          0: IDENT@1854..1857 "svg" [] []
-                      3: R_PAREN@1857..1858 ")" [] []
+                      2: CSS_URL_VALUE_RAW@1848..1857
+                        0: CSS_URL_VALUE_RAW_LITERAL@1848..1857 "image.svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@1857..1857
+                      4: R_PAREN@1857..1858 ")" [] []
                     1: CSS_CUSTOM_PROPERTY_DELIMITER@1858..1859
                       0: SLASH@1858..1859 "/" [] []
                     2: CSS_CUSTOM_PROPERTY_DELIMITER@1859..1861
@@ -4009,34 +3750,13 @@ CssRoot {
                 1: COLON@2092..2094 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@2094..2128
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@2094..2128
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@2094..2128
-                      0: CSS_CUSTOM_IDENTIFIER@2094..2097
-                        0: IDENT@2094..2097 "url" [] []
+                    0: CSS_URL_FUNCTION@2094..2128
+                      0: URL_KW@2094..2097 "url" [] []
                       1: L_PAREN@2097..2098 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@2098..2127
-                        0: CSS_CUSTOM_IDENTIFIER@2098..2103
-                          0: IDENT@2098..2103 "https" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@2103..2104
-                          0: COLON@2103..2104 ":" [] []
-                        2: CSS_CUSTOM_PROPERTY_DELIMITER@2104..2105
-                          0: SLASH@2104..2105 "/" [] []
-                        3: CSS_CUSTOM_PROPERTY_DELIMITER@2105..2106
-                          0: SLASH@2105..2106 "/" [] []
-                        4: CSS_CUSTOM_IDENTIFIER@2106..2113
-                          0: IDENT@2106..2113 "example" [] []
-                        5: CSS_CUSTOM_PROPERTY_DELIMITER@2113..2114
-                          0: DOT@2113..2114 "." [] []
-                        6: CSS_CUSTOM_IDENTIFIER@2114..2117
-                          0: IDENT@2114..2117 "com" [] []
-                        7: CSS_CUSTOM_PROPERTY_DELIMITER@2117..2118
-                          0: SLASH@2117..2118 "/" [] []
-                        8: CSS_CUSTOM_IDENTIFIER@2118..2123
-                          0: IDENT@2118..2123 "image" [] []
-                        9: CSS_CUSTOM_PROPERTY_DELIMITER@2123..2124
-                          0: DOT@2123..2124 "." [] []
-                        10: CSS_CUSTOM_IDENTIFIER@2124..2127
-                          0: IDENT@2124..2127 "svg" [] []
-                      3: R_PAREN@2127..2128 ")" [] []
+                      2: CSS_URL_VALUE_RAW@2098..2127
+                        0: CSS_URL_VALUE_RAW_LITERAL@2098..2127 "https://example.com/image.svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@2127..2127
+                      4: R_PAREN@2127..2128 ")" [] []
               1: (empty)
             2: R_PAREN@2128..2130 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@2130..2170
@@ -4083,34 +3803,13 @@ CssRoot {
                 1: COLON@2206..2208 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@2208..2240
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@2208..2240
-                    0: CSS_CUSTOM_PROPERTY_FUNCTION@2208..2240
-                      0: CSS_CUSTOM_IDENTIFIER@2208..2211
-                        0: IDENT@2208..2211 "url" [] []
+                    0: CSS_URL_FUNCTION@2208..2240
+                      0: URL_KW@2208..2211 "url" [] []
                       1: L_PAREN@2211..2212 "(" [] []
-                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@2212..2239
-                        0: CSS_CUSTOM_PROPERTY_DELIMITER@2212..2213
-                          0: SLASH@2212..2213 "/" [] []
-                        1: CSS_CUSTOM_PROPERTY_DELIMITER@2213..2214
-                          0: SLASH@2213..2214 "/" [] []
-                        2: CSS_CUSTOM_IDENTIFIER@2214..2217
-                          0: IDENT@2214..2217 "cdn" [] []
-                        3: CSS_CUSTOM_PROPERTY_DELIMITER@2217..2218
-                          0: DOT@2217..2218 "." [] []
-                        4: CSS_CUSTOM_IDENTIFIER@2218..2225
-                          0: IDENT@2218..2225 "example" [] []
-                        5: CSS_CUSTOM_PROPERTY_DELIMITER@2225..2226
-                          0: DOT@2225..2226 "." [] []
-                        6: CSS_CUSTOM_IDENTIFIER@2226..2229
-                          0: IDENT@2226..2229 "com" [] []
-                        7: CSS_CUSTOM_PROPERTY_DELIMITER@2229..2230
-                          0: SLASH@2229..2230 "/" [] []
-                        8: CSS_CUSTOM_IDENTIFIER@2230..2235
-                          0: IDENT@2230..2235 "image" [] []
-                        9: CSS_CUSTOM_PROPERTY_DELIMITER@2235..2236
-                          0: DOT@2235..2236 "." [] []
-                        10: CSS_CUSTOM_IDENTIFIER@2236..2239
-                          0: IDENT@2236..2239 "svg" [] []
-                      3: R_PAREN@2239..2240 ")" [] []
+                      2: CSS_URL_VALUE_RAW@2212..2239
+                        0: CSS_URL_VALUE_RAW_LITERAL@2212..2239 "//cdn.example.com/image.svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@2239..2239
+                      4: R_PAREN@2239..2240 ")" [] []
               1: (empty)
             2: R_PAREN@2240..2242 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@2242..2282

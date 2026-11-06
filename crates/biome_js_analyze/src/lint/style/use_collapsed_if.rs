@@ -136,7 +136,10 @@ impl Rule for UseCollapsedIf {
             markup! {
                 "This "<Emphasis>"if"</Emphasis>" statement can be collapsed into another "<Emphasis>"if"</Emphasis>" statement."
             },
-        ))
+        )
+        .note(markup! {
+            "Nested "<Emphasis>"if"</Emphasis>" statements without an "<Emphasis>"else"</Emphasis>" can be written as one condition, which reduces nesting."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

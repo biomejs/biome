@@ -52,7 +52,7 @@ function case18() {
 ```
 invalid.js:3:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'A' is a class.
+  × The class 'A' is reassigned.
   
     1 │ function case12() {
     2 │ 	class A { }
@@ -69,13 +69,17 @@ invalid.js:3:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     3 │ 	A = 0;
     4 │ }
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:8:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'B' is a class.
+  × The class 'B' is reassigned.
   
      6 │ function case13() {
      7 │ 	class B { }
@@ -92,13 +96,17 @@ invalid.js:8:4 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     8 │ 	({B} = 0);
     9 │ }
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:13:7 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'C' is a class.
+  × The class 'C' is reassigned.
   
     11 │ function case14() {
     12 │ 	class C { }
@@ -115,13 +123,17 @@ invalid.js:13:7 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     13 │ 	({b: C = 0} = {});
     14 │ }
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:17:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'D' is a class.
+  × The class 'D' is reassigned.
   
     16 │ function case15() {
   > 17 │ 	D = 0;
@@ -138,13 +150,17 @@ invalid.js:17:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     19 │ }
     20 │ 
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:24:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'E' is a class.
+  × The class 'E' is reassigned.
   
     22 │ 	class E {
     23 │ 		b() {
@@ -161,13 +177,17 @@ invalid.js:24:4 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     23 │ 		b() {
     24 │ 			E = 0;
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:32:4 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'F' is a class.
+  × The class 'F' is reassigned.
   
     30 │ 	let F = class F {
     31 │ 		b() {
@@ -184,13 +204,17 @@ invalid.js:32:4 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     31 │ 		b() {
     32 │ 			F = 0;
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:39:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'G' is a class.
+  × The class 'G' is reassigned.
   
     37 │ function case18() {
     38 │ 	class G { }
@@ -207,13 +231,17 @@ invalid.js:39:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
     39 │ 	G = 0;
     40 │ 	G = 1;
   
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
+  
 
 ```
 
 ```
 invalid.js:40:2 lint/suspicious/noClassAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'G' is a class.
+  × The class 'G' is reassigned.
   
     38 │ 	class G { }
     39 │ 	G = 0;
@@ -229,6 +257,10 @@ invalid.js:40:2 lint/suspicious/noClassAssign ━━━━━━━━━━━�
        │ 	      ^
     39 │ 	G = 0;
     40 │ 	G = 1;
+  
+  i Reassigning a class replaces it. Code that expects the original class, such as new calls and instanceof checks, can then break.
+  
+  i Store the new value in a separate variable, or give the new class a different name.
   
 
 ```

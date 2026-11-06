@@ -30,6 +30,10 @@ invalidLoopExits.js:3:5 lint/suspicious/useGetterReturn ━━━━━━━━
     4 │     get doWhileBreak() { do { break; } while (true); },
     5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -44,6 +48,10 @@ invalidLoopExits.js:4:5 lint/suspicious/useGetterReturn ━━━━━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
     6 │     get dynamic() { while (condition) {} },
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```
@@ -60,6 +68,10 @@ invalidLoopExits.js:5:5 lint/suspicious/useGetterReturn ━━━━━━━━
     6 │     get dynamic() { while (condition) {} },
     7 │     get falsy() { do {} while (false); },
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -74,6 +86,10 @@ invalidLoopExits.js:6:5 lint/suspicious/useGetterReturn ━━━━━━━━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │     get falsy() { do {} while (false); },
     8 │     get zero() { while (0.0) {} },
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```
@@ -90,6 +106,10 @@ invalidLoopExits.js:7:5 lint/suspicious/useGetterReturn ━━━━━━━━
     8 │     get zero() { while (0.0) {} },
     9 │     get empty() { do {} while (""); },
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -105,6 +125,10 @@ invalidLoopExits.js:8:5 lint/suspicious/useGetterReturn ━━━━━━━━
      9 │     get empty() { do {} while (""); },
     10 │ };
   
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
+  
 
 ```
 
@@ -119,6 +143,10 @@ invalidLoopExits.js:9:5 lint/suspicious/useGetterReturn ━━━━━━━━
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ };
     11 │ 
+  
+  i A getter without a return statement always evaluates to undefined, so reading the property does not give the value the code intends.
+  
+  i Add a return statement that returns the value of the property.
   
 
 ```

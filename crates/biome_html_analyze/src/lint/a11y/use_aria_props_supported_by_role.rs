@@ -107,7 +107,10 @@ impl Rule for UseAriaPropsSupportedByRole {
                 },
             )
             .note(markup! {
-                "Ensure that ARIA attributes are valid for the role of the element."
+                "Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user."
+            })
+            .note(markup! {
+                "Remove the attribute, or use a role that supports it."
             }),
         )
     }

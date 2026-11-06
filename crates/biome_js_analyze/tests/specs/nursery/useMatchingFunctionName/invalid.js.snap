@@ -1,0 +1,584 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+let foo1 = function bar() {};
+var foo2 = (function bar() {});
+foo3 = function bar() {};
+foo4 &&= function bar() {};
+obj.foo5 ||= function bar() {};
+obj["foo6"] ??= function bar() {};
+obj.foo7 = function bar() {};
+obj.bar.foo8 = function bar() {};
+obj["foo9"] = function bar() {};
+(obj?.aaa).foo10 = function bar() {};
+foo11 = (0, function bar() {});
+let obj1 = { foo12: function bar() {} };
+let obj2 = { "foo13": function bar() {} };
+let obj3 = { ["foo14"]: function bar() {} };
+let obj4 = { "ᢅ": function bar() {} };
+Object.defineProperty(foo, "bar", { value: function baz() {} });
+class C1 {
+	foo15 = function bar() {};
+	"foo16" = function bar() {};
+	["foo17"] = function bar() {};
+	static foo18 = function bar() {};
+}
+(class {
+	foo19 = function bar() {};
+});
+let foo20 = async function* bar() {};
+(foo21) = function bar() {};
+((obj.foo22)) = function bar() {};
+obj.static = function bar() {};
+let obj5 = { public: function bar() {} };
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo1.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ let foo1 = function bar() {};
+      │     ^^^^^^^^^^^^^^^^^^^
+    3 │ var foo2 = (function bar() {});
+    4 │ foo3 = function bar() {};
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo2.
+  
+    1 │ /* should generate diagnostics */
+    2 │ let foo1 = function bar() {};
+  > 3 │ var foo2 = (function bar() {});
+      │     ^^^^^^^^^^^^^^^^^^^^
+    4 │ foo3 = function bar() {};
+    5 │ foo4 &&= function bar() {};
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo3.
+  
+    2 │ let foo1 = function bar() {};
+    3 │ var foo2 = (function bar() {});
+  > 4 │ foo3 = function bar() {};
+      │ ^^^^^^^^^^^^^^^^^^^
+    5 │ foo4 &&= function bar() {};
+    6 │ obj.foo5 ||= function bar() {};
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo4.
+  
+    3 │ var foo2 = (function bar() {});
+    4 │ foo3 = function bar() {};
+  > 5 │ foo4 &&= function bar() {};
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    6 │ obj.foo5 ||= function bar() {};
+    7 │ obj["foo6"] ??= function bar() {};
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo5.
+  
+    4 │ foo3 = function bar() {};
+    5 │ foo4 &&= function bar() {};
+  > 6 │ obj.foo5 ||= function bar() {};
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ obj["foo6"] ??= function bar() {};
+    8 │ obj.foo7 = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo6.
+  
+    5 │ foo4 &&= function bar() {};
+    6 │ obj.foo5 ||= function bar() {};
+  > 7 │ obj["foo6"] ??= function bar() {};
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ obj.foo7 = function bar() {};
+    9 │ obj.bar.foo8 = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo7.
+  
+     6 │ obj.foo5 ||= function bar() {};
+     7 │ obj["foo6"] ??= function bar() {};
+   > 8 │ obj.foo7 = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ obj.bar.foo8 = function bar() {};
+    10 │ obj["foo9"] = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo8.
+  
+     7 │ obj["foo6"] ??= function bar() {};
+     8 │ obj.foo7 = function bar() {};
+   > 9 │ obj.bar.foo8 = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ obj["foo9"] = function bar() {};
+    11 │ (obj?.aaa).foo10 = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo9.
+  
+     8 │ obj.foo7 = function bar() {};
+     9 │ obj.bar.foo8 = function bar() {};
+  > 10 │ obj["foo9"] = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ (obj?.aaa).foo10 = function bar() {};
+    12 │ foo11 = (0, function bar() {});
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo10.
+  
+     9 │ obj.bar.foo8 = function bar() {};
+    10 │ obj["foo9"] = function bar() {};
+  > 11 │ (obj?.aaa).foo10 = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ foo11 = (0, function bar() {});
+    13 │ let obj1 = { foo12: function bar() {} };
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo11.
+  
+    10 │ obj["foo9"] = function bar() {};
+    11 │ (obj?.aaa).foo10 = function bar() {};
+  > 12 │ foo11 = (0, function bar() {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ let obj1 = { foo12: function bar() {} };
+    14 │ let obj2 = { "foo13": function bar() {} };
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:14 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo12.
+  
+    11 │ (obj?.aaa).foo10 = function bar() {};
+    12 │ foo11 = (0, function bar() {});
+  > 13 │ let obj1 = { foo12: function bar() {} };
+       │              ^^^^^^^^^^^^^^^^^^^
+    14 │ let obj2 = { "foo13": function bar() {} };
+    15 │ let obj3 = { ["foo14"]: function bar() {} };
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:14 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo13.
+  
+    12 │ foo11 = (0, function bar() {});
+    13 │ let obj1 = { foo12: function bar() {} };
+  > 14 │ let obj2 = { "foo13": function bar() {} };
+       │              ^^^^^^^^^^^^^^^^^^^^^
+    15 │ let obj3 = { ["foo14"]: function bar() {} };
+    16 │ let obj4 = { "�": function bar() {} };
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:14 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo14.
+  
+    13 │ let obj1 = { foo12: function bar() {} };
+    14 │ let obj2 = { "foo13": function bar() {} };
+  > 15 │ let obj3 = { ["foo14"]: function bar() {} };
+       │              ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ let obj4 = { "�": function bar() {} };
+    17 │ Object.defineProperty(foo, "bar", { value: function baz() {} });
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:14 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name �.
+  
+    14 │ let obj2 = { "foo13": function bar() {} };
+    15 │ let obj3 = { ["foo14"]: function bar() {} };
+  > 16 │ let obj4 = { "�": function bar() {} };
+       │              ^^^^^^^^^^^^^^^^
+    17 │ Object.defineProperty(foo, "bar", { value: function baz() {} });
+    18 │ class C1 {
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:37 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name baz doesn't match the property name value.
+  
+    15 │ let obj3 = { ["foo14"]: function bar() {} };
+    16 │ let obj4 = { "�": function bar() {} };
+  > 17 │ Object.defineProperty(foo, "bar", { value: function baz() {} });
+       │                                     ^^^^^^^^^^^^^^^^^^^
+    18 │ class C1 {
+    19 │ 	foo15 = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:2 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo15.
+  
+    17 │ Object.defineProperty(foo, "bar", { value: function baz() {} });
+    18 │ class C1 {
+  > 19 │ 	foo15 = function bar() {};
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    20 │ 	"foo16" = function bar() {};
+    21 │ 	["foo17"] = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:2 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo16.
+  
+    18 │ class C1 {
+    19 │ 	foo15 = function bar() {};
+  > 20 │ 	"foo16" = function bar() {};
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	["foo17"] = function bar() {};
+    22 │ 	static foo18 = function bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:2 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo17.
+  
+    19 │ 	foo15 = function bar() {};
+    20 │ 	"foo16" = function bar() {};
+  > 21 │ 	["foo17"] = function bar() {};
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 	static foo18 = function bar() {};
+    23 │ }
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:2 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo18.
+  
+    20 │ 	"foo16" = function bar() {};
+    21 │ 	["foo17"] = function bar() {};
+  > 22 │ 	static foo18 = function bar() {};
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ (class {
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:2 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo19.
+  
+    23 │ }
+    24 │ (class {
+  > 25 │ 	foo19 = function bar() {};
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    26 │ });
+    27 │ let foo20 = async function* bar() {};
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:5 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo20.
+  
+    25 │ 	foo19 = function bar() {};
+    26 │ });
+  > 27 │ let foo20 = async function* bar() {};
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ (foo21) = function bar() {};
+    29 │ ((obj.foo22)) = function bar() {};
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the variable name foo21.
+  
+    26 │ });
+    27 │ let foo20 = async function* bar() {};
+  > 28 │ (foo21) = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    29 │ ((obj.foo22)) = function bar() {};
+    30 │ obj.static = function bar() {};
+  
+  i The code calls this function through the variable name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the variable so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name foo22.
+  
+    27 │ let foo20 = async function* bar() {};
+    28 │ (foo21) = function bar() {};
+  > 29 │ ((obj.foo22)) = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ obj.static = function bar() {};
+    31 │ let obj5 = { public: function bar() {} };
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name static.
+  
+    28 │ (foo21) = function bar() {};
+    29 │ ((obj.foo22)) = function bar() {};
+  > 30 │ obj.static = function bar() {};
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ let obj5 = { public: function bar() {} };
+    32 │ 
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:14 lint/nursery/useMatchingFunctionName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The function name bar doesn't match the property name public.
+  
+    29 │ ((obj.foo22)) = function bar() {};
+    30 │ obj.static = function bar() {};
+  > 31 │ let obj5 = { public: function bar() {} };
+       │              ^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+  
+  i The code calls this function through the property name, but stack traces and debugging tools show the function name. Different names make it harder to tell which function an error comes from.
+  
+  i Rename the function or the property so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -34,5 +34,7 @@ invalid-vue-script-vs-script-setup.vue:8:1 lint/suspicious/noGlobalAssign ━━
   
   i Assigning to a global variable can override essential functionality.
   
+  i Remove the assignment, or declare a local variable with a different name and assign to that instead.
+  
 
 ```

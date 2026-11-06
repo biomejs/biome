@@ -195,6 +195,10 @@ where
 
         ctx.signal_queue.extend(signals);
     }
+
+    fn visited_kinds(&self, _: Option<SyntaxKindSet<L>>) -> Option<SyntaxKindSet<L>> {
+        Some(self.query)
+    }
 }
 
 /// A batched syntax visitor that evaluates multiple plugins in a single visitor.
@@ -308,5 +312,9 @@ where
 
             ctx.signal_queue.extend(signals);
         }
+    }
+
+    fn visited_kinds(&self, _: Option<SyntaxKindSet<L>>) -> Option<SyntaxKindSet<L>> {
+        Some(self.any_query)
     }
 }

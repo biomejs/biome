@@ -89,13 +89,12 @@ impl Rule for NoAccessKey {
                 rule_category!(),
                 node.syntax().text_trimmed_range(),
                 markup! {
-                    "Avoid the "<Emphasis>"accessKey"</Emphasis>" attribute to reduce inconsistencies between \
-                    keyboard shortcuts and screen reader keyboard commands."
+                    "Avoid the "<Emphasis>"accessKey"</Emphasis>" attribute."
                 },
             ).note(
                 markup! {
                     "Assigning keyboard shortcuts using the "<Emphasis>"accessKey"</Emphasis>" attribute leads to \
-                    inconsistent keyboard actions across applications."
+                    inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands."
                 },
             )
         )

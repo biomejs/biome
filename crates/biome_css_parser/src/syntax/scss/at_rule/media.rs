@@ -5,7 +5,9 @@ use super::super::{
 use super::query_feature::parse_scss_interpolated_query_feature_from_head;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::error::AnyInParensChainParseRecovery;
-use crate::syntax::at_rule::feature::expected_any_query_feature;
+use crate::syntax::at_rule::feature::{
+    expected_any_query_feature, parse_scss_query_feature_from_head,
+};
 use crate::syntax::at_rule::media::{
     expected_any_media_in_parens, is_at_media_condition_operator,
     parse_any_media_condition_operand, parse_media_and_condition, parse_media_not_condition,
@@ -126,8 +128,12 @@ pub(crate) fn parse_scss_interpolated_media_in_parens(p: &mut CssParser) -> Pars
         parse_scss_media_condition_from_query(p, query);
         CSS_MEDIA_CONDITION_IN_PARENS
     } else {
-        parse_scss_interpolated_query_feature_from_head(p, head)
-            .or_add_diagnostic(p, expected_any_query_feature);
+        let feature = if p.state().is_in_if_media_test {
+            parse_scss_interpolated_query_feature_from_head(p, head)
+        } else {
+            parse_scss_query_feature_from_head(p, head)
+        };
+        feature.or_add_diagnostic(p, expected_any_query_feature);
         CSS_MEDIA_FEATURE_IN_PARENS
     };
 

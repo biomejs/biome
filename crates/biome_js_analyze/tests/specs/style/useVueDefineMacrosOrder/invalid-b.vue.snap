@@ -31,14 +31,14 @@ invalid-b.vue:4:7 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━�
   
   i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
   
-  i Unsafe fix: Reorder macro defineEmits.
+  i Unsafe fix: Reorder compiler macros.
   
     1 1 │   
     2   │ - const·count·=·ref(0)
-      2 │ + const·emit·=·defineEmits([])
-    3 3 │   
+    3 2 │   
     4   │ - const·emit·=·defineEmits([])/**·Hello·*/
-      4 │ + const·count·=·ref(0)/**·Hello·*/
+      3 │ + const·emit·=·defineEmits([])/**·Hello·*/
+      4 │ + const·count·=·ref(0)
     5 5 │   
   
 

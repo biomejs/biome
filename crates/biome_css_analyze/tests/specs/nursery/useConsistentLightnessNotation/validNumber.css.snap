@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validNumber.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+a { color: oklch(0.85 0.17 88); }
+a { color: oklab(0.86 0.2 154); }
+a { color: lch(85 0.17 88); }
+a { color: lab(86 0.2 154); }
+a { color: oklch(from red 0.5 c h); }
+a { color: oklch(none 0.17 88); }
+
+```

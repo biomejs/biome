@@ -29,9 +29,9 @@ impl FromStr for MaxSize {
 }
 
 impl Deserializable for MaxSize {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         NonZeroU64::deserialize(ctx, value, name).map(Self)

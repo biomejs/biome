@@ -211,6 +211,27 @@ fn doctype_with_quirk_and_system() {
 }
 
 #[test]
+fn processing_instruction_names_end_before_closing_delimiter() {
+    assert_lex! {
+        HtmlLexContext::ProcessingInstruction,
+        "<?foo a?b c=d e=\"f\"?>",
+        PI_START: 2,
+        HTML_LITERAL: 3,
+        WHITESPACE: 1,
+        HTML_LITERAL: 3,
+        WHITESPACE: 1,
+        HTML_LITERAL: 1,
+        EQ: 1,
+        HTML_LITERAL: 1,
+        WHITESPACE: 1,
+        HTML_LITERAL: 1,
+        EQ: 1,
+        HTML_STRING_LITERAL: 3,
+        PI_END: 2,
+    }
+}
+
+#[test]
 fn element_with_attributes() {
     assert_lex! {
         HtmlLexContext::InsideTag { framework: HtmlFramework::Plain },

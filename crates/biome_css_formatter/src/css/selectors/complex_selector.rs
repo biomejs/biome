@@ -2,8 +2,8 @@ use crate::comments::{CssComments, is_selector_boundary_suppressed};
 use crate::prelude::*;
 use crate::utils::comment_trivia::{FormatCommentGap, has_line_comment};
 use biome_css_syntax::{
-    AnyCssSelector, CssComplexSelector, CssComplexSelectorFields, CssLanguage, CssSyntaxKind,
-    CssSyntaxToken,
+    AnyCssSelector, CssComplexSelector, CssComplexSelectorFields, CssLanguage, CssRelativeSelector,
+    CssSyntaxKind, CssSyntaxToken,
 };
 use biome_formatter::comments::SourceComment;
 use biome_formatter::trivia::{format_dangling_comment, should_nestle_adjacent_doc_comments};
@@ -71,8 +71,8 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         let combinator = combinator?;
         let right = right?;
         let owns_chain_layout = self.layout == SelectorChainLayout::Auto;
-        let is_left_preceded_by_comment = is_left_selector_preceded_by_comment(&left);
         let comments = f.comments().clone();
+        let is_left_preceded_by_comment = has_leading_selector_comment(node, &comments);
         let layout = self.layout.resolve(node, &comments)?;
         let boundary = SelectorBoundary::new(
             &combinator,
@@ -281,12 +281,42 @@ fn format_selector(
     })
 }
 
-/// Returns whether the left compound selector starts with an attached comment.
-pub(crate) fn is_left_selector_preceded_by_comment(selector: &AnyCssSelector) -> bool {
-    selector
-        .as_css_compound_selector()
-        .and_then(|compound_selector| compound_selector.syntax().first_token())
-        .is_some_and(|token| token.has_leading_comments())
+/// Returns whether this complex selector formats a comment before its left
+/// compound selector.
+///
+/// A comment before the first selector of a rule is attached to the rule and
+/// prints outside the selector, so it doesn't count here:
+///
+/// ```css
+/// /* attached to the rule */
+/// .a .b {}
+///
+/// .a,
+/// /* formatted by `.c .d` */
+/// .c .d {}
+/// ```
+pub(crate) fn has_leading_selector_comment(
+    selector: &CssComplexSelector,
+    comments: &CssComments,
+) -> bool {
+    // Leading comments are attached to the outermost node that follows them.
+    // Inside `:has(/* c */ .a .b)` that node is the enclosing relative
+    // selector, which prints the comment within its list entry as well.
+    let is_comment_formatted_with_selector = comments.has_leading_comments(selector.syntax())
+        || selector
+            .syntax()
+            .parent()
+            .filter(|parent| CssRelativeSelector::can_cast(parent.kind()))
+            .is_some_and(|parent| comments.has_leading_comments(&parent));
+
+    is_comment_formatted_with_selector
+        && selector
+            .left()
+            .ok()
+            .as_ref()
+            .and_then(AnyCssSelector::as_css_compound_selector)
+            .and_then(|left| left.syntax().first_token())
+            .is_some_and(|token| token.has_leading_comments())
 }
 
 /// Returns whether the following list separator owns a line comment.

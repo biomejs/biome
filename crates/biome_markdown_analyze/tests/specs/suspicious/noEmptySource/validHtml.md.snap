@@ -1,0 +1,10 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: validHtml.md
+---
+# Input
+```md
+<!-- should not generate diagnostics -->
+<div></div>
+
+```

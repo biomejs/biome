@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.cjs
+---
+# Input
+```cjs
+/* should not generate diagnostics */
+
+(() => {
+	function foo() {}
+	foo();
+})();
+
+(() => {
+	if (condition) {
+		function foo() {}
+		foo();
+	}
+})();
+
+(function () { arguments = [1]; })();
+(function () { arguments++; })();
+(function () { [arguments] = [1]; })();
+
+```

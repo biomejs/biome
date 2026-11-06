@@ -1,0 +1,203 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-script-setup.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+import { computed, ref } from "vue";
+
+const count = ref(0);
+const empty = computed(() => {});
+const functionExpression = computed(function () {});
+const noElse = computed(() => {
+  if (count.value > 0) {
+    return count.value;
+  }
+});
+const emptyReturn = computed(() => {
+  return;
+});
+const accessors = computed({
+  set: (value) => {
+    count.value = value;
+  },
+  get: () => {},
+});
+const methodAccessor = computed({
+  get() {
+    count.value * 2;
+  },
+});
+const innerFunctionReturns = computed(() => {
+  const double = () => {
+    return count.value * 2;
+  };
+  double();
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup.vue:6:24 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property empty doesn't always return a value.
+  
+    5 │ const count = ref(0);
+  > 6 │ const empty = computed(() => {});
+      │                        ^^^^^^^^
+    7 │ const functionExpression = computed(function () {});
+    8 │ const noElse = computed(() => {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:7:37 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property functionExpression doesn't always return a value.
+  
+    5 │ const count = ref(0);
+    6 │ const empty = computed(() => {});
+  > 7 │ const functionExpression = computed(function () {});
+      │                                     ^^^^^^^^^^^^^^
+    8 │ const noElse = computed(() => {
+    9 │   if (count.value > 0) {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:8:25 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property noElse doesn't always return a value.
+  
+     6 │ const empty = computed(() => {});
+     7 │ const functionExpression = computed(function () {});
+   > 8 │ const noElse = computed(() => {
+       │                         ^^^^^^^
+   > 9 │   if (count.value > 0) {
+  > 10 │     return count.value;
+  > 11 │   }
+  > 12 │ });
+       │ ^
+    13 │ const emptyReturn = computed(() => {
+    14 │   return;
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:14:3 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This return statement in the computed property emptyReturn doesn't return a value.
+  
+    12 │ });
+    13 │ const emptyReturn = computed(() => {
+  > 14 │   return;
+       │   ^^^^^^^
+    15 │ });
+    16 │ const accessors = computed({
+  
+  i A return statement without a value makes the computed property undefined.
+  
+  i Return the value of the computed property from this statement.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:20:8 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property accessors doesn't always return a value.
+  
+    18 │     count.value = value;
+    19 │   },
+  > 20 │   get: () => {},
+       │        ^^^^^^^^
+    21 │ });
+    22 │ const methodAccessor = computed({
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:23:3 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property methodAccessor doesn't always return a value.
+  
+    21 │ });
+    22 │ const methodAccessor = computed({
+  > 23 │   get() {
+       │   ^^^^^^^
+  > 24 │     count.value * 2;
+  > 25 │   },
+       │   ^
+    26 │ });
+    27 │ const innerFunctionReturns = computed(() => {
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:27:39 lint/nursery/useVueComputedPropertyReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The computed property innerFunctionReturns doesn't always return a value.
+  
+    25 │   },
+    26 │ });
+  > 27 │ const innerFunctionReturns = computed(() => {
+       │                                       ^^^^^^^
+  > 28 │   const double = () => {
+  > 29 │     return count.value * 2;
+  > 30 │   };
+  > 31 │   double();
+  > 32 │ });
+       │ ^
+    33 │ </script>
+    34 │ 
+  
+  i Vue uses the value the getter returns as the value of the computed property. When the getter ends without a return statement, the computed property is undefined.
+  
+  i Make sure that every path through the getter ends with a return statement that returns a value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

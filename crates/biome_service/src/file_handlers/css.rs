@@ -36,14 +36,14 @@ use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
-use biome_db::AnyParsedSource;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    QuoteStyle, TrailingNewline,
+    DelimiterSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
-use biome_languages::css::CssEmbeddingKind;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -170,11 +170,6 @@ impl ServiceLanguage for CssLanguage {
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
-        let report_scss_exclusive_syntax = cfg!(feature = "report_scss_exclusive_syntax")
-            && file_source
-                .to_css_file_source()
-                .is_some_and(|source| matches!(source.as_embedding_kind(), CssEmbeddingKind::None));
-
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
                 .allow_wrong_line_comments
@@ -199,9 +194,7 @@ impl ServiceLanguage for CssLanguage {
                     })
                 })
                 .unwrap_or_default(),
-            grit_metavariables: false,
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
-            report_scss_exclusive_syntax,
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
@@ -542,7 +535,7 @@ fn parse(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: CssSyntaxNode = parse.syntax(&workspace_db);
@@ -556,7 +549,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -571,7 +564,7 @@ fn debug_formatter_ir(
 
 fn debug_semantic_model(
     _path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let tree: AnyCssRoot = parse.tree(&workspace_db);
@@ -601,7 +594,7 @@ fn format(
 fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
@@ -616,7 +609,7 @@ fn format_range(
 fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,
@@ -818,7 +811,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
 
     info!("CSS runs the analyzer");
     let css_services = CssAnalyzerServices {
@@ -1090,7 +1083,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 fn search(
     path: &BiomePath,
     document: &DocumentFileSource,
-    parsed: AnyParsedSource,
+    parsed: AnalyzedSource,
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
@@ -1104,7 +1097,6 @@ fn search(
 mod test {
     use super::*;
     use biome_languages::CssFileSource;
-    use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind};
 
     #[test]
     fn inherit_global_format_settings() {
@@ -1123,35 +1115,5 @@ mod test {
                 .with_line_ending(LineEnding::default())
                 .with_line_width(LineWidth::default())
         );
-    }
-
-    #[test]
-    fn resolve_parse_options_maps_scss_reporting_feature() {
-        let parse_options = CssLanguage::resolve_parse_options(
-            &OverrideSettings::default(),
-            &CssParserSettings::default(),
-            &BiomePath::new("test.css"),
-            &DocumentFileSource::Css(CssFileSource::css()),
-        );
-
-        assert_eq!(
-            parse_options.report_scss_exclusive_syntax,
-            cfg!(feature = "report_scss_exclusive_syntax")
-        );
-    }
-
-    #[test]
-    fn resolve_parse_options_disables_scss_reporting_for_embedded_css() {
-        let parse_options = CssLanguage::resolve_parse_options(
-            &OverrideSettings::default(),
-            &CssParserSettings::default(),
-            &BiomePath::new("test.html"),
-            &DocumentFileSource::Css(
-                CssFileSource::css()
-                    .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html)),
-            ),
-        );
-
-        assert!(!parse_options.report_scss_exclusive_syntax);
     }
 }

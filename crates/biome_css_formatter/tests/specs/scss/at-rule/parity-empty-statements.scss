@@ -1,0 +1,20 @@
+;;;@use "sass:math";
+$gap:math.div(6px,2);;.first{color:red};.second{width:$gap};;
+.control{value:math.$pi;width:math.div(8px,2)}
+;/*between*/; // before rule
+.comments{;color:blue;;};/*after*/;
+@media screen{;;.media{color:red};;};
+@supports (display: grid){;.supports{display:grid};;};;
+@layer sample{;.layer{color:blue};};
+@mixin emit{;;.mixin{color:red};;};@include emit;;
+@if true{;.condition{color:blue};};
+@keyframes pulse{;from{;opacity:0;;};;to{opacity:1};};
+@font-feature-values Example{;@styleset{;compact:1;;};;};
+@media print{;;;}
+@keyframes empty{;;;}
+@font-feature-values Empty{;;;}
+.nested{;;.child{color:red};@media screen{;color:blue;;};}
+// biome-ignore format: preserve the empty statement
+;
+// biome-ignore format: preserve the rule
+.preserved{color:   red};

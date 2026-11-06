@@ -46,11 +46,15 @@ Choose the least expensive query that answers the rule:
 - a service query only when the fact is owned by that service;
 - type inference only when syntax and the semantic model cannot answer the question.
 
+Most rules need only one of these. A custom `Queryable` with its own `Visitor` is for rules that carry state across the whole walk.
+
 The analyzer guide's query and service sections are canonical for available APIs.
 
 `run()` should decide whether to emit a signal. Keep action-only work in `action()` so it is not performed for every candidate node.
 
 Prefer ranges, syntax nodes, tokens, and compact enums in `State`. A `String`, `Box<str>`, or collection built from syntax text often indicates avoidable allocation; load `syntax-text-handling` before owning source text.
+
+Load `syntax-text-handling` before walking a subtree or scanning tokens in `run()`, and before writing a custom `Visitor`, which must implement `visited_kinds`.
 
 For rules matching a global identifier, prove the reference resolves to the global rather than a local shadow. Cover every relevant member of node unions and framework-specific syntax families.
 

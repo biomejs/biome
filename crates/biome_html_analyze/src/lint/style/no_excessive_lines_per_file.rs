@@ -145,6 +145,9 @@ impl Rule for NoExcessiveLinesPerFile {
                 },
             )
             .note(markup! {
+                "Long files are harder to read, navigate, and maintain."
+            })
+            .note(markup! {
                 "Consider splitting this file into smaller files."
             }),
         )

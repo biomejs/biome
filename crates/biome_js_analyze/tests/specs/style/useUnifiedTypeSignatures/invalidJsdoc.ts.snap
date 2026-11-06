@@ -67,13 +67,15 @@ declare function f10(this: number): void;
 ```
 invalidJsdoc.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     1 │ // no jsdoc is still fair game
   > 2 │ function f(bar: number): string;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ function f(baz: string): string;
     4 │ function f(whatever: any): any {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -91,7 +93,7 @@ invalidJsdoc.ts:2:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidJsdoc.ts:9:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
      7 │ /** jsdoc 1 */
      8 │ function foo(bar: number): string;
@@ -99,6 +101,8 @@ invalidJsdoc.ts:9:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ function foo(qux: boolean): string;
     11 │ function foo(whatever: any): any {}
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -116,7 +120,7 @@ invalidJsdoc.ts:9:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidJsdoc.ts:21:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     19 │ // jsdoc on implementation
     20 │ 
@@ -124,6 +128,8 @@ invalidJsdoc.ts:21:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ function bar(a: string): string;
     23 │ function bar(a: boolean): string;
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -159,7 +165,7 @@ invalidJsdoc.ts:21:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidJsdoc.ts:32:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     30 │ 	(a: string, b: number, c: number): string;
     31 │ 	/*************************** HIJKLMNOPQRS */
@@ -167,6 +173,8 @@ invalidJsdoc.ts:32:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     33 │ 	/* t u v w x y z */
     34 │ 	(a: number, b: string, c: string): string;
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -188,7 +196,7 @@ invalidJsdoc.ts:32:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidJsdoc.ts:40:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     38 │ class banana {
     39 │ 	/** bake a cake */
@@ -196,6 +204,8 @@ invalidJsdoc.ts:40:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     41 │ 	/** bake a cake */
     42 │ 	public bake(flourAmt: number): void;
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   
@@ -216,7 +226,7 @@ invalidJsdoc.ts:40:2 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
 ```
 invalidJsdoc.ts:52:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Multiple similar overload signatures are hard to read and maintain.
+  i This overload signature can be combined with a similar one.
   
     50 │ /** jsdoc 2 */
     51 │ /** jsdoc 3 */
@@ -224,6 +234,8 @@ invalidJsdoc.ts:52:1 lint/style/useUnifiedTypeSignatures  FIXABLE  ━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     53 │ /** jsdoc 1 */
     54 │ /** jsdoc 2 */
+  
+  i Multiple similar overload signatures are hard to read and maintain.
   
   i Unsafe fix: Combine overloads using a type union.
   

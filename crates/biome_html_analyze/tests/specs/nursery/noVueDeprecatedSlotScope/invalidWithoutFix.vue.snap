@@ -1,0 +1,256 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalidWithoutFix.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <LinkList>
+    <template slot-scope="{a}" slot="foo"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template slot-scope="{a}" :slot="arg"><a /></template>
+  </LinkList>
+  <LinkList>
+    <template v-for="x in xs" slot-scope="{a}">{{ a }}</template>
+  </LinkList>
+  <LinkList>
+    <template slot-scope="{a}">{{ a }}</template>
+    <div />
+  </LinkList>
+  <LinkList>
+    <template slot-scope="{a}">{{ a }}</template>
+    Some text
+  </LinkList>
+  <LinkList>
+    <template slot-scope="{a}">{{ a }}</template>
+    <template #default>Default</template>
+  </LinkList>
+  <LinkList>
+    <a v-if="ready" slot-scope="{a}" />
+  </LinkList>
+  <LinkList v-slot="outer">
+    <template slot-scope="{a}">{{ a }}</template>
+  </LinkList>
+  <div>
+    <template slot-scope="{a}">{{ a }}</template>
+  </div>
+  <component :is="list">
+    <template slot-scope="{a}">{{ a }}</template>
+  </component>
+</template>
+
+```
+
+# Diagnostics
+```
+invalidWithoutFix.vue:4:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    2 │ <template>
+    3 │   <LinkList>
+  > 4 │     <template slot-scope="{a}" slot="foo"><a /></template>
+      │               ^^^^^^^^^^^^^^^^
+    5 │   </LinkList>
+    6 │   <LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:7:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    5 │   </LinkList>
+    6 │   <LinkList>
+  > 7 │     <template slot-scope="{a}" :slot="arg"><a /></template>
+      │               ^^^^^^^^^^^^^^^^
+    8 │   </LinkList>
+    9 │   <LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:10:31 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+     8 │   </LinkList>
+     9 │   <LinkList>
+  > 10 │     <template v-for="x in xs" slot-scope="{a}">{{ a }}</template>
+       │                               ^^^^^^^^^^^^^^^^
+    11 │   </LinkList>
+    12 │   <LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:13:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    11 │   </LinkList>
+    12 │   <LinkList>
+  > 13 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    14 │     <div />
+    15 │   </LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:17:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    15 │   </LinkList>
+    16 │   <LinkList>
+  > 17 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    18 │     Some text
+    19 │   </LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:21:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    19 │   </LinkList>
+    20 │   <LinkList>
+  > 21 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    22 │     <template #default>Default</template>
+    23 │   </LinkList>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:25:21 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    23 │   </LinkList>
+    24 │   <LinkList>
+  > 25 │     <a v-if="ready" slot-scope="{a}" />
+       │                     ^^^^^^^^^^^^^^^^
+    26 │   </LinkList>
+    27 │   <LinkList v-slot="outer">
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:28:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    26 │   </LinkList>
+    27 │   <LinkList v-slot="outer">
+  > 28 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    29 │   </LinkList>
+    30 │   <div>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:31:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    29 │   </LinkList>
+    30 │   <div>
+  > 31 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    32 │   </div>
+    33 │   <component :is="list">
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidWithoutFix.vue:34:15 lint/nursery/noVueDeprecatedSlotScope ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The slot-scope attribute is deprecated.
+  
+    32 │   </div>
+    33 │   <component :is="list">
+  > 34 │     <template slot-scope="{a}">{{ a }}</template>
+       │               ^^^^^^^^^^^^^^^^
+    35 │   </component>
+    36 │ </template>
+  
+  i Vue 3 doesn't support slot-scope, so the variables it declares are never set.
+  
+  i Use the v-slot directive on a <template> element instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

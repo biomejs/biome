@@ -1,0 +1,190 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<svg>
+	<?foo bar
+	<circle cx="5" cy="5" r="4" />
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@1..4 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlProcessingInstruction {
+                    start_token: PI_START@5..9 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@9..13 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@13..16 "bar" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    end_token: missing (required),
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@16..19 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: CIRCLE_KW@19..26 "circle" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@26..28 "cx" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@28..29 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@29..33 "\"5\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@33..35 "cy" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@35..36 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@36..40 "\"5\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@40..41 "r" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@41..42 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@42..46 "\"4\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@46..47 "/" [] [],
+                    r_angle_token: R_ANGLE@47..48 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@48..50 "<" [Newline("\n")] [],
+                slash_token: SLASH@50..51 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@51..54 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@54..55 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@55..56 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..56
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..55
+    0: HTML_ELEMENT@0..55
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: SVG_KW@1..4 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..48
+        0: HTML_PROCESSING_INSTRUCTION@5..16
+          0: PI_START@5..9 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@9..13
+            0: HTML_LITERAL@9..13 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@13..16
+            0: HTML_ATTRIBUTE@13..16
+              0: HTML_ATTRIBUTE_NAME@13..16
+                0: HTML_LITERAL@13..16 "bar" [] []
+              1: (empty)
+          3: (empty)
+        1: HTML_SELF_CLOSING_ELEMENT@16..48
+          0: L_ANGLE@16..19 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@19..26
+            0: CIRCLE_KW@19..26 "circle" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@26..46
+            0: HTML_ATTRIBUTE@26..33
+              0: HTML_ATTRIBUTE_NAME@26..28
+                0: HTML_LITERAL@26..28 "cx" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@28..33
+                0: EQ@28..29 "=" [] []
+                1: HTML_STRING@29..33
+                  0: HTML_STRING_LITERAL@29..33 "\"5\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@33..40
+              0: HTML_ATTRIBUTE_NAME@33..35
+                0: HTML_LITERAL@33..35 "cy" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@35..40
+                0: EQ@35..36 "=" [] []
+                1: HTML_STRING@36..40
+                  0: HTML_STRING_LITERAL@36..40 "\"5\"" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE@40..46
+              0: HTML_ATTRIBUTE_NAME@40..41
+                0: HTML_LITERAL@40..41 "r" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@41..46
+                0: EQ@41..42 "=" [] []
+                1: HTML_STRING@42..46
+                  0: HTML_STRING_LITERAL@42..46 "\"4\"" [] [Whitespace(" ")]
+          3: SLASH@46..47 "/" [] []
+          4: R_ANGLE@47..48 ">" [] []
+      2: HTML_CLOSING_ELEMENT@48..55
+        0: L_ANGLE@48..50 "<" [Newline("\n")] []
+        1: SLASH@50..51 "/" [] []
+        2: HTML_TAG_NAME@51..54
+          0: SVG_KW@51..54 "svg" [] []
+        3: R_ANGLE@54..55 ">" [] []
+  5: EOF@55..56 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+processing_instruction_unclosed.astro:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `?>` but instead found `<`
+  
+    1 │ <svg>
+    2 │ 	<?foo bar
+  > 3 │ 	<circle cx="5" cy="5" r="4" />
+      │ 	^
+    4 │ </svg>
+    5 │ 
+  
+  i Remove <
+  
+```

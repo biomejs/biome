@@ -3,11 +3,13 @@ use biome_js_syntax::{
     AnyFunctionLike, AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression,
     AnyJsTemplateElement, JsAssignmentOperator, JsAwaitExpression, JsCaseClause,
     JsDoWhileStatement, JsElseClause, JsExportDefaultExpressionClause, JsExpressionStatement,
-    JsForInStatement, JsForOfStatement, JsInExpression, JsInstanceofExpression, JsLanguage,
-    JsLogicalOperator, JsModule, JsNewExpression, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsUnaryOperator, JsYieldArgument,
-    JsYieldExpression,
+    JsForInStatement, JsForOfStatement, JsForStatement, JsIfStatement, JsInExpression,
+    JsInstanceofExpression, JsLanguage, JsLogicalOperator, JsModule, JsNewExpression,
+    JsReturnStatement, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThrowStatement,
+    JsUnaryExpression, JsUnaryOperator, JsWhileStatement, JsWithStatement, JsYieldArgument,
+    JsYieldExpression, T,
 };
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TriviaPiece};
 
 pub(crate) mod dom;
@@ -122,6 +124,75 @@ const EXPRESSION_REPLACEMENT_SEPARATOR_PARENT_KINDS: SyntaxKindSet<JsLanguage> =
         .union(JsDoWhileStatement::KIND_SET)
         .union(JsElseClause::KIND_SET)
         .union(JsCaseClause::KIND_SET);
+
+/// Returns `true` if `expression` begins an expression statement, and the token
+/// before it doesn't end the previous statement.
+///
+/// A replacement for such an expression can't start with `(` or `-`, because
+/// automatic semicolon insertion doesn't separate the two statements. For example,
+/// replacing `x * -1` below with `-x` produces `foo - x`:
+///
+/// ```js
+/// foo
+/// x * -1
+/// ```
+///
+/// Tokens that end a statement include `;`, `{`, the `}` of a block or function
+/// body, and the `)` that closes the condition of an `if` statement or a loop.
+pub(crate) fn starts_unterminated_statement(expression: &AnyJsExpression) -> bool {
+    let Some(first_token) = expression.syntax().first_token() else {
+        return false;
+    };
+    let is_statement_start = expression
+        .syntax()
+        .ancestors()
+        .find_map(JsExpressionStatement::cast)
+        .and_then(|statement| statement.syntax().first_token())
+        .is_some_and(|token| token == first_token);
+    if !is_statement_start {
+        return false;
+    }
+    let Some(previous) = first_token.prev_token() else {
+        return false;
+    };
+    !terminates_statement(&previous)
+}
+
+const STATEMENT_TERMINATORS: TokenSet<JsSyntaxKind> =
+    token_set![T![;], T!['{'], T![:], T![else], T![do]];
+
+const CONTROL_FLOW_STATEMENT_KINDS: SyntaxKindSet<JsLanguage> = JsIfStatement::KIND_SET
+    .union(JsWhileStatement::KIND_SET)
+    .union(JsDoWhileStatement::KIND_SET)
+    .union(JsForStatement::KIND_SET)
+    .union(JsForInStatement::KIND_SET)
+    .union(JsForOfStatement::KIND_SET)
+    .union(JsWithStatement::KIND_SET);
+
+/// Returns `true` if a `(` or `-` after `token` starts a new statement instead of
+/// continuing an expression.
+fn terminates_statement(token: &JsSyntaxToken) -> bool {
+    if STATEMENT_TERMINATORS.contains(token.kind()) {
+        return true;
+    }
+    match token.kind() {
+        T![')'] => token
+            .parent()
+            .is_some_and(|parent| CONTROL_FLOW_STATEMENT_KINDS.matches(parent.kind())),
+        T!['}'] => {
+            let Some(mut parent) = token.parent() else {
+                return false;
+            };
+            if parent.kind() == JsSyntaxKind::JS_FUNCTION_BODY
+                && let Some(grand_parent) = parent.parent()
+            {
+                parent = grand_parent;
+            }
+            !AnyJsExpression::can_cast(parent.kind())
+        }
+        _ => false,
+    }
+}
 
 pub fn is_constant_condition(
     test: AnyJsExpression,

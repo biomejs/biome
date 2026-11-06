@@ -271,9 +271,15 @@ impl CssFileSource {
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         // Be careful with definition files, because `Path::extension()` only
         // returns the extension after the _last_ dot:
-        let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
+        let file_name = path
+            .file_name()
+            .ok_or(FileSourceError::MissingFileName)?
+            .to_ascii_lowercase_cow();
         if file_name.ends_with(".module.css") {
             return Self::try_from_extension("module.css");
+        }
+        if file_name.ends_with(".module.scss") {
+            return Self::try_from_extension("module.scss");
         }
 
         match path.extension() {
@@ -287,9 +293,9 @@ impl CssFileSource {
         // We assume the file extension is normalized to lowercase
         match extension {
             "css" => Ok(Self::css()),
-            #[cfg(feature = "scss")]
             "scss" => Ok(Self::scss()),
             "module.css" => Ok(Self::new_css_modules()),
+            "module.scss" => Ok(Self::scss().with_css_modules()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -303,7 +309,6 @@ impl CssFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "css" => Ok(Self::css()),
-            #[cfg(feature = "scss")]
             "scss" => Ok(Self::scss()),
             "tailwindcss" => Ok(Self::tailwind_css()),
             _ => Err(FileSourceError::UnknownLanguageId),
@@ -325,5 +330,34 @@ impl TryFrom<&Utf8Path> for CssFileSource {
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
         Self::try_from_extension(&extension.to_ascii_lowercase_cow())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::DocumentFileSource;
+
+    #[test]
+    fn module_scss_is_serialized_as_scss_modules() {
+        for path in ["style.module.scss", "STYLE.MODULE.SCSS"] {
+            let source = DocumentFileSource::from_path(Utf8Path::new(path), false)
+                .to_css_file_source()
+                .unwrap();
+
+            assert!(source.is_scss());
+            assert!(source.is_css_modules());
+
+            let serialized = serde_json::to_string(&source).unwrap();
+            assert_eq!(
+                serialized,
+                r#"{"language":"scss","variant":"cssModules","embeddingKind":"None"}"#
+            );
+
+            let deserialized: CssFileSource = serde_json::from_str(&serialized).unwrap();
+            assert_eq!(deserialized, source);
+            assert!(deserialized.is_scss());
+            assert!(deserialized.is_css_modules());
+        }
     }
 }

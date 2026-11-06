@@ -1,0 +1,810 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$asset: mark;
+
+.icon {
+  --raw: url(data:image/svg+xml,%3Csvg/%3E);
+  --literal: url($asset);
+  --literal-path: url(/icons/$asset.svg);
+  --interpolated: url(/icons/#{$asset}.svg);
+  --mixed: url($literal-#{$asset}.svg);
+  --payload-comment: url(/*payload*/#{$asset}.svg);
+  --quoted: url("#{$asset}.svg");
+  --nested: var(--fallback, url(/icons/#{$asset}.svg));
+  --function: url(var(--image));
+  --literal-expression: url($asset + ".svg");
+  color: red;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..6 "asset" [] [],
+                },
+            },
+            colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@8..12 "mark" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@12..13 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@13..16 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@16..21 "icon" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@21..22 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@22..30 "--raw" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssUrlFunction {
+                                            name: URL_KW@32..35 "url" [] [],
+                                            l_paren_token: L_PAREN@35..36 "(" [] [],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@36..65 "data:image/svg+xml,%3Csvg/%3E" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@65..66 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@66..67 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@67..79 "--literal" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssUrlFunction {
+                                            name: URL_KW@81..84 "url" [] [],
+                                            l_paren_token: L_PAREN@84..85 "(" [] [],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@85..91 "$asset" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@91..92 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@92..93 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@93..110 "--literal-path" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@110..112 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssUrlFunction {
+                                            name: URL_KW@112..115 "url" [] [],
+                                            l_paren_token: L_PAREN@115..116 "(" [] [],
+                                            value: CssUrlValueRaw {
+                                                value_token: CSS_URL_VALUE_RAW_LITERAL@116..133 "/icons/$asset.svg" [] [],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@133..134 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@134..135 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@135..152 "--interpolated" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@152..154 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssUrlFunction {
+                                            name: URL_KW@154..157 "url" [] [],
+                                            l_paren_token: L_PAREN@157..158 "(" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@158..165 "/icons/" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@165..166 "#" [] [],
+                                                        l_curly_token: L_CURLY@166..167 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@167..168 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@168..173 "asset" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@173..174 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@174..178 ".svg" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@178..179 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@179..180 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@180..190 "--mixed" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@190..192 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssUrlFunction {
+                                            name: URL_KW@192..195 "url" [] [],
+                                            l_paren_token: L_PAREN@195..196 "(" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@196..205 "$literal-" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@205..206 "#" [] [],
+                                                        l_curly_token: L_CURLY@206..207 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@207..208 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@208..213 "asset" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@213..214 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@214..218 ".svg" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@218..219 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@219..220 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@220..240 "--payload-comment" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@240..242 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssUrlFunction {
+                                            name: URL_KW@242..245 "url" [] [],
+                                            l_paren_token: L_PAREN@245..246 "(" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@246..257 "/*payload*/" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@257..258 "#" [] [],
+                                                        l_curly_token: L_CURLY@258..259 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@259..260 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@260..265 "asset" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@265..266 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@266..270 ".svg" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@270..271 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@271..272 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@272..283 "--quoted" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@283..285 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@285..288 "url" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@288..289 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                ScssInterpolatedString {
+                                                    opening_quote_token: SCSS_STRING_QUOTE@289..290 "\"" [] [],
+                                                    parts: ScssInterpolatedStringPartList [
+                                                        ScssInterpolation {
+                                                            hash_token: HASH@290..291 "#" [] [],
+                                                            l_curly_token: L_CURLY@291..292 "{" [] [],
+                                                            value: ScssExpression {
+                                                                items: ScssExpressionItemList [
+                                                                    ScssVariable {
+                                                                        dollar_token: DOLLAR@292..293 "$" [] [],
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@293..298 "asset" [] [],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                            r_curly_token: R_CURLY@298..299 "}" [] [],
+                                                        },
+                                                        ScssStringText {
+                                                            value_token: SCSS_STRING_CONTENT_LITERAL@299..303 ".svg" [] [],
+                                                        },
+                                                    ],
+                                                    closing_quote_token: SCSS_STRING_QUOTE@303..304 "\"" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@304..305 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@305..306 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@306..317 "--nested" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@317..319 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@319..322 "var" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@322..323 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@323..333 "--fallback" [] [],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: COMMA@333..335 "," [] [Whitespace(" ")],
+                                                },
+                                                CssUrlFunction {
+                                                    name: URL_KW@335..338 "url" [] [],
+                                                    l_paren_token: L_PAREN@338..339 "(" [] [],
+                                                    value: ScssInterpolatedUrlValue {
+                                                        parts: ScssInterpolatedUrlValuePartList [
+                                                            ScssUrlText {
+                                                                value_token: SCSS_URL_CONTENT_LITERAL@339..346 "/icons/" [] [],
+                                                            },
+                                                            ScssInterpolation {
+                                                                hash_token: HASH@346..347 "#" [] [],
+                                                                l_curly_token: L_CURLY@347..348 "{" [] [],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        ScssVariable {
+                                                                            dollar_token: DOLLAR@348..349 "$" [] [],
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@349..354 "asset" [] [],
+                                                                            },
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_curly_token: R_CURLY@354..355 "}" [] [],
+                                                            },
+                                                            ScssUrlText {
+                                                                value_token: SCSS_URL_CONTENT_LITERAL@355..359 ".svg" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    modifiers: CssUrlModifierList [],
+                                                    r_paren_token: R_PAREN@359..360 ")" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@360..361 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@361..362 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@362..375 "--function" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@375..377 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@377..380 "url" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@380..381 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomPropertyFunction {
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@381..384 "var" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@384..385 "(" [] [],
+                                                    components: CssCustomPropertyComponentList [
+                                                        CssCustomIdentifier {
+                                                            value_token: IDENT@385..392 "--image" [] [],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@392..393 ")" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@393..394 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@394..395 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@395..418 "--literal-expression" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@418..420 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@420..423 "url" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@423..424 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomPropertyDelimiter {
+                                                    value: DOLLAR@424..425 "$" [] [],
+                                                },
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@425..431 "asset" [] [Whitespace(" ")],
+                                                },
+                                                CssCustomPropertyDelimiter {
+                                                    value: PLUS@431..433 "+" [] [Whitespace(" ")],
+                                                },
+                                                CssString {
+                                                    value_token: CSS_STRING_LITERAL@433..439 "\".svg\"" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@439..440 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@440..441 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@441..449 "color" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@449..451 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@451..454 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@454..455 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@455..457 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@457..458 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..458
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..457
+    0: SCSS_VARIABLE_DECLARATION@0..13
+      0: SCSS_VARIABLE@0..6
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..6
+          0: IDENT@1..6 "asset" [] []
+      1: COLON@6..8 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@8..12
+        0: SCSS_EXPRESSION_ITEM_LIST@8..12
+          0: CSS_IDENTIFIER@8..12
+            0: IDENT@8..12 "mark" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@12..12
+      4: SEMICOLON@12..13 ";" [] []
+    1: CSS_QUALIFIED_RULE@13..457
+      0: CSS_SELECTOR_LIST@13..21
+        0: CSS_COMPOUND_SELECTOR@13..21
+          0: CSS_NESTED_SELECTOR_LIST@13..13
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@13..21
+            0: CSS_CLASS_SELECTOR@13..21
+              0: DOT@13..16 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@16..21
+                0: IDENT@16..21 "icon" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@21..457
+        0: L_CURLY@21..22 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@22..455
+          0: CSS_DECLARATION_WITH_SEMICOLON@22..67
+            0: CSS_DECLARATION@22..66
+              0: CSS_GENERIC_PROPERTY@22..66
+                0: CSS_DASHED_IDENTIFIER@22..30
+                  0: IDENT@22..30 "--raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@30..32 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@32..66
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@32..66
+                    0: CSS_URL_FUNCTION@32..66
+                      0: URL_KW@32..35 "url" [] []
+                      1: L_PAREN@35..36 "(" [] []
+                      2: CSS_URL_VALUE_RAW@36..65
+                        0: CSS_URL_VALUE_RAW_LITERAL@36..65 "data:image/svg+xml,%3Csvg/%3E" [] []
+                      3: CSS_URL_MODIFIER_LIST@65..65
+                      4: R_PAREN@65..66 ")" [] []
+              1: (empty)
+            1: SEMICOLON@66..67 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@67..93
+            0: CSS_DECLARATION@67..92
+              0: CSS_GENERIC_PROPERTY@67..92
+                0: CSS_DASHED_IDENTIFIER@67..79
+                  0: IDENT@67..79 "--literal" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@79..81 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@81..92
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@81..92
+                    0: CSS_URL_FUNCTION@81..92
+                      0: URL_KW@81..84 "url" [] []
+                      1: L_PAREN@84..85 "(" [] []
+                      2: CSS_URL_VALUE_RAW@85..91
+                        0: CSS_URL_VALUE_RAW_LITERAL@85..91 "$asset" [] []
+                      3: CSS_URL_MODIFIER_LIST@91..91
+                      4: R_PAREN@91..92 ")" [] []
+              1: (empty)
+            1: SEMICOLON@92..93 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@93..135
+            0: CSS_DECLARATION@93..134
+              0: CSS_GENERIC_PROPERTY@93..134
+                0: CSS_DASHED_IDENTIFIER@93..110
+                  0: IDENT@93..110 "--literal-path" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@110..112 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@112..134
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@112..134
+                    0: CSS_URL_FUNCTION@112..134
+                      0: URL_KW@112..115 "url" [] []
+                      1: L_PAREN@115..116 "(" [] []
+                      2: CSS_URL_VALUE_RAW@116..133
+                        0: CSS_URL_VALUE_RAW_LITERAL@116..133 "/icons/$asset.svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@133..133
+                      4: R_PAREN@133..134 ")" [] []
+              1: (empty)
+            1: SEMICOLON@134..135 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@135..180
+            0: CSS_DECLARATION@135..179
+              0: CSS_GENERIC_PROPERTY@135..179
+                0: CSS_DASHED_IDENTIFIER@135..152
+                  0: IDENT@135..152 "--interpolated" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@152..154 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@154..179
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@154..179
+                    0: CSS_URL_FUNCTION@154..179
+                      0: URL_KW@154..157 "url" [] []
+                      1: L_PAREN@157..158 "(" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@158..178
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@158..178
+                          0: SCSS_URL_TEXT@158..165
+                            0: SCSS_URL_CONTENT_LITERAL@158..165 "/icons/" [] []
+                          1: SCSS_INTERPOLATION@165..174
+                            0: HASH@165..166 "#" [] []
+                            1: L_CURLY@166..167 "{" [] []
+                            2: SCSS_EXPRESSION@167..173
+                              0: SCSS_EXPRESSION_ITEM_LIST@167..173
+                                0: SCSS_VARIABLE@167..173
+                                  0: DOLLAR@167..168 "$" [] []
+                                  1: CSS_IDENTIFIER@168..173
+                                    0: IDENT@168..173 "asset" [] []
+                            3: R_CURLY@173..174 "}" [] []
+                          2: SCSS_URL_TEXT@174..178
+                            0: SCSS_URL_CONTENT_LITERAL@174..178 ".svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@178..178
+                      4: R_PAREN@178..179 ")" [] []
+              1: (empty)
+            1: SEMICOLON@179..180 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@180..220
+            0: CSS_DECLARATION@180..219
+              0: CSS_GENERIC_PROPERTY@180..219
+                0: CSS_DASHED_IDENTIFIER@180..190
+                  0: IDENT@180..190 "--mixed" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@190..192 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@192..219
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@192..219
+                    0: CSS_URL_FUNCTION@192..219
+                      0: URL_KW@192..195 "url" [] []
+                      1: L_PAREN@195..196 "(" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@196..218
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@196..218
+                          0: SCSS_URL_TEXT@196..205
+                            0: SCSS_URL_CONTENT_LITERAL@196..205 "$literal-" [] []
+                          1: SCSS_INTERPOLATION@205..214
+                            0: HASH@205..206 "#" [] []
+                            1: L_CURLY@206..207 "{" [] []
+                            2: SCSS_EXPRESSION@207..213
+                              0: SCSS_EXPRESSION_ITEM_LIST@207..213
+                                0: SCSS_VARIABLE@207..213
+                                  0: DOLLAR@207..208 "$" [] []
+                                  1: CSS_IDENTIFIER@208..213
+                                    0: IDENT@208..213 "asset" [] []
+                            3: R_CURLY@213..214 "}" [] []
+                          2: SCSS_URL_TEXT@214..218
+                            0: SCSS_URL_CONTENT_LITERAL@214..218 ".svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@218..218
+                      4: R_PAREN@218..219 ")" [] []
+              1: (empty)
+            1: SEMICOLON@219..220 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@220..272
+            0: CSS_DECLARATION@220..271
+              0: CSS_GENERIC_PROPERTY@220..271
+                0: CSS_DASHED_IDENTIFIER@220..240
+                  0: IDENT@220..240 "--payload-comment" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@240..242 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@242..271
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@242..271
+                    0: CSS_URL_FUNCTION@242..271
+                      0: URL_KW@242..245 "url" [] []
+                      1: L_PAREN@245..246 "(" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@246..270
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@246..270
+                          0: SCSS_URL_TEXT@246..257
+                            0: SCSS_URL_CONTENT_LITERAL@246..257 "/*payload*/" [] []
+                          1: SCSS_INTERPOLATION@257..266
+                            0: HASH@257..258 "#" [] []
+                            1: L_CURLY@258..259 "{" [] []
+                            2: SCSS_EXPRESSION@259..265
+                              0: SCSS_EXPRESSION_ITEM_LIST@259..265
+                                0: SCSS_VARIABLE@259..265
+                                  0: DOLLAR@259..260 "$" [] []
+                                  1: CSS_IDENTIFIER@260..265
+                                    0: IDENT@260..265 "asset" [] []
+                            3: R_CURLY@265..266 "}" [] []
+                          2: SCSS_URL_TEXT@266..270
+                            0: SCSS_URL_CONTENT_LITERAL@266..270 ".svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@270..270
+                      4: R_PAREN@270..271 ")" [] []
+              1: (empty)
+            1: SEMICOLON@271..272 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@272..306
+            0: CSS_DECLARATION@272..305
+              0: CSS_GENERIC_PROPERTY@272..305
+                0: CSS_DASHED_IDENTIFIER@272..283
+                  0: IDENT@272..283 "--quoted" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@283..285 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@285..305
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@285..305
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@285..305
+                      0: CSS_CUSTOM_IDENTIFIER@285..288
+                        0: IDENT@285..288 "url" [] []
+                      1: L_PAREN@288..289 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@289..304
+                        0: SCSS_INTERPOLATED_STRING@289..304
+                          0: SCSS_STRING_QUOTE@289..290 "\"" [] []
+                          1: SCSS_INTERPOLATED_STRING_PART_LIST@290..303
+                            0: SCSS_INTERPOLATION@290..299
+                              0: HASH@290..291 "#" [] []
+                              1: L_CURLY@291..292 "{" [] []
+                              2: SCSS_EXPRESSION@292..298
+                                0: SCSS_EXPRESSION_ITEM_LIST@292..298
+                                  0: SCSS_VARIABLE@292..298
+                                    0: DOLLAR@292..293 "$" [] []
+                                    1: CSS_IDENTIFIER@293..298
+                                      0: IDENT@293..298 "asset" [] []
+                              3: R_CURLY@298..299 "}" [] []
+                            1: SCSS_STRING_TEXT@299..303
+                              0: SCSS_STRING_CONTENT_LITERAL@299..303 ".svg" [] []
+                          2: SCSS_STRING_QUOTE@303..304 "\"" [] []
+                      3: R_PAREN@304..305 ")" [] []
+              1: (empty)
+            1: SEMICOLON@305..306 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@306..362
+            0: CSS_DECLARATION@306..361
+              0: CSS_GENERIC_PROPERTY@306..361
+                0: CSS_DASHED_IDENTIFIER@306..317
+                  0: IDENT@306..317 "--nested" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@317..319 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@319..361
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@319..361
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@319..361
+                      0: CSS_CUSTOM_IDENTIFIER@319..322
+                        0: IDENT@319..322 "var" [] []
+                      1: L_PAREN@322..323 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@323..360
+                        0: CSS_CUSTOM_IDENTIFIER@323..333
+                          0: IDENT@323..333 "--fallback" [] []
+                        1: CSS_CUSTOM_PROPERTY_DELIMITER@333..335
+                          0: COMMA@333..335 "," [] [Whitespace(" ")]
+                        2: CSS_URL_FUNCTION@335..360
+                          0: URL_KW@335..338 "url" [] []
+                          1: L_PAREN@338..339 "(" [] []
+                          2: SCSS_INTERPOLATED_URL_VALUE@339..359
+                            0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@339..359
+                              0: SCSS_URL_TEXT@339..346
+                                0: SCSS_URL_CONTENT_LITERAL@339..346 "/icons/" [] []
+                              1: SCSS_INTERPOLATION@346..355
+                                0: HASH@346..347 "#" [] []
+                                1: L_CURLY@347..348 "{" [] []
+                                2: SCSS_EXPRESSION@348..354
+                                  0: SCSS_EXPRESSION_ITEM_LIST@348..354
+                                    0: SCSS_VARIABLE@348..354
+                                      0: DOLLAR@348..349 "$" [] []
+                                      1: CSS_IDENTIFIER@349..354
+                                        0: IDENT@349..354 "asset" [] []
+                                3: R_CURLY@354..355 "}" [] []
+                              2: SCSS_URL_TEXT@355..359
+                                0: SCSS_URL_CONTENT_LITERAL@355..359 ".svg" [] []
+                          3: CSS_URL_MODIFIER_LIST@359..359
+                          4: R_PAREN@359..360 ")" [] []
+                      3: R_PAREN@360..361 ")" [] []
+              1: (empty)
+            1: SEMICOLON@361..362 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@362..395
+            0: CSS_DECLARATION@362..394
+              0: CSS_GENERIC_PROPERTY@362..394
+                0: CSS_DASHED_IDENTIFIER@362..375
+                  0: IDENT@362..375 "--function" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@375..377 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@377..394
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@377..394
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@377..394
+                      0: CSS_CUSTOM_IDENTIFIER@377..380
+                        0: IDENT@377..380 "url" [] []
+                      1: L_PAREN@380..381 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@381..393
+                        0: CSS_CUSTOM_PROPERTY_FUNCTION@381..393
+                          0: CSS_CUSTOM_IDENTIFIER@381..384
+                            0: IDENT@381..384 "var" [] []
+                          1: L_PAREN@384..385 "(" [] []
+                          2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@385..392
+                            0: CSS_CUSTOM_IDENTIFIER@385..392
+                              0: IDENT@385..392 "--image" [] []
+                          3: R_PAREN@392..393 ")" [] []
+                      3: R_PAREN@393..394 ")" [] []
+              1: (empty)
+            1: SEMICOLON@394..395 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@395..441
+            0: CSS_DECLARATION@395..440
+              0: CSS_GENERIC_PROPERTY@395..440
+                0: CSS_DASHED_IDENTIFIER@395..418
+                  0: IDENT@395..418 "--literal-expression" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@418..420 ":" [] [Whitespace(" ")]
+                2: CSS_CUSTOM_PROPERTY_VALUE@420..440
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@420..440
+                    0: CSS_CUSTOM_PROPERTY_FUNCTION@420..440
+                      0: CSS_CUSTOM_IDENTIFIER@420..423
+                        0: IDENT@420..423 "url" [] []
+                      1: L_PAREN@423..424 "(" [] []
+                      2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@424..439
+                        0: CSS_CUSTOM_PROPERTY_DELIMITER@424..425
+                          0: DOLLAR@424..425 "$" [] []
+                        1: CSS_CUSTOM_IDENTIFIER@425..431
+                          0: IDENT@425..431 "asset" [] [Whitespace(" ")]
+                        2: CSS_CUSTOM_PROPERTY_DELIMITER@431..433
+                          0: PLUS@431..433 "+" [] [Whitespace(" ")]
+                        3: CSS_STRING@433..439
+                          0: CSS_STRING_LITERAL@433..439 "\".svg\"" [] []
+                      3: R_PAREN@439..440 ")" [] []
+              1: (empty)
+            1: SEMICOLON@440..441 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@441..455
+            0: CSS_DECLARATION@441..454
+              0: CSS_GENERIC_PROPERTY@441..454
+                0: CSS_IDENTIFIER@441..449
+                  0: IDENT@441..449 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@449..451 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@451..454
+                  0: SCSS_EXPRESSION_ITEM_LIST@451..454
+                    0: CSS_IDENTIFIER@451..454
+                      0: IDENT@451..454 "red" [] []
+              1: (empty)
+            1: SEMICOLON@454..455 ";" [] []
+        2: R_CURLY@455..457 "}" [Newline("\n")] []
+  2: EOF@457..458 "" [Newline("\n")] []
+
+```

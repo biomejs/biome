@@ -1,0 +1,30 @@
+# should generate diagnostics
+%YAML 1.1
+---
+- y: 1
+- Y: 2
+- yes: 3
+- Yes: 4
+- YES: 5
+- n: 6
+- N: 7
+- no: 8
+- No: 9
+- NO: 10
+- true: 11
+- True: 12
+- TRUE: 13
+- false: 14
+- False: 15
+- FALSE: 16
+- on: 17
+- On: 18
+- ON: 19
+- off: 20
+- Off: 21
+- OFF: 22
+- flow: { On: 23, OFF: 24 }
+- outer:
+    yes: 25
+- ? no
+  : 26

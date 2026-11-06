@@ -1,0 +1,15 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "vue/block-lang": [
+        "error",
+        {
+          "script": { "lang": "ts" },
+          "style": { "lang": ["scss", "css"] },
+          "i18n": { "lang": ["json", "yaml"], "allowNoLang": true }
+        }
+      ]
+    }
+  }
+}

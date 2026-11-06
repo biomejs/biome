@@ -3,10 +3,10 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextRange;
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
+use biome_tailwind_logic::no_tailwind_arbitrary_value::arbitrary_value_ranges;
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
 declare_lint_rule! {
     /// Disallow arbitrary values in Tailwind CSS utility classes.
@@ -15,6 +15,9 @@ declare_lint_rule! {
     /// (e.g. `[color:red]`) bypass Tailwind's configured theme scales. This rule reports
     /// them so teams can keep styling constrained to named utilities from their Tailwind
     /// configuration.
+    ///
+    /// Arbitrary variants, such as `[&_svg]:size-4`, and arbitrary modifiers, such as
+    /// `/[0.5]` in `bg-black/[0.5]`, are not reported.
     ///
     /// ## Examples
     ///
@@ -36,10 +39,7 @@ declare_lint_rule! {
     ///
     /// ```jsx
     /// <div className="w-4 text-red-500 bg-white" />;
-    /// ```
-    ///
-    /// ```jsx
-    /// <div className="[&:nth-child(3)]:px-2" />;
+    /// <div className="[&:nth-child(3)]:px-2 bg-black/[0.5]" />;
     /// ```
     ///
     /// ## Recognized class strings
@@ -47,11 +47,64 @@ declare_lint_rule! {
     /// This rule checks the attributes and functions recognized by the top-level
     /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
+    /// ## Options
+    ///
+    /// ### allowedCategories
+    ///
+    /// Default: `[]`
+    ///
+    /// Categories of utilities that may use arbitrary values:
+    ///
+    /// - `layout`, such as `w-[320px]`, `m-[13px]`, and `top-[3px]`
+    /// - `color`, such as `bg-[#333]`
+    /// - `typography`, such as `text-[13px]`
+    /// - `spacing`, such as `p-[13px]` and `gap-[3px]`
+    /// - `shape`, such as `rounded-[10px]` and `border-[3px]`
+    /// - `effects`, such as `shadow-[0_1px_2px_black]` and `opacity-[0.15]`
+    /// - `motion`, such as `duration-[250ms]`
+    ///
+    /// An arbitrary property belongs to the category of the CSS property it sets, so `[padding:13px]` is in `spacing`.
+    ///
+    /// ```json,options
+    /// { "options": { "allowedCategories": ["layout"] } }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <div className="w-[320px] m-[13px]" />;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// <div className="p-[13px]" />;
+    /// ```
+    ///
+    /// ### allowedClasses
+    ///
+    /// Default: `[]`
+    ///
+    /// Classes that may use arbitrary values. Write each class without variants or `!`.
+    /// An allowed class is also allowed with variants and `!`, so allowing `p-[13px]`
+    /// also allows `md:p-[13px]` and `p-[13px]!`.
+    ///
+    /// ```json,options
+    /// { "options": { "allowedClasses": ["p-[13px]"] } }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <div className="p-[13px] md:p-[13px]" />;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// <div className="p-[15px]" />;
+    /// ```
+    ///
     pub NoTailwindArbitraryValue {
         version: "2.5.7",
         name: "noTailwindArbitraryValue",
         language: "jsx",
-        sources: &[RuleSource::EslintTailwindcss("no-arbitrary-value").same()],
+        sources: &[
+            RuleSource::EslintTailwindcss("no-arbitrary-value").same(),
+            RuleSource::EslintShadcn("no-arbitrary-values").inspired(),
+        ],
         domains: &[RuleDomain::Tailwind],
         recommended: false,
     }
@@ -60,12 +113,12 @@ declare_lint_rule! {
 impl Rule for NoTailwindArbitraryValue {
     type Query = TailwindSyntax<AnyTailwindClassString>;
     type State = TextRange;
-    type Signals = Vec<TextRange>;
+    type Signals = Box<[Self::State]>;
     type Options = NoTailwindArbitraryValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
-        arbitrary_ranges(&query.tailwind_root().candidates(), TextSize::from(0))
+        arbitrary_value_ranges(&query.tailwind_root().candidates(), ctx.options())
             .into_iter()
             .filter_map(|range| host_range(query.node(), range))
             .collect()

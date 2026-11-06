@@ -9,9 +9,13 @@ impl FormatRule<AnyCssAttrType> for FormatAnyCssAttrType {
     fn fmt(&self, node: &AnyCssAttrType, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssAttrType::AnyCssAttrUnit(node) => node.format().fmt(f),
+            AnyCssAttrType::CssBogusPropertyValue(node) => node.format().fmt(f),
             AnyCssAttrType::CssNumberDeclarator(node) => node.format().fmt(f),
             AnyCssAttrType::CssRawStringDeclarator(node) => node.format().fmt(f),
             AnyCssAttrType::CssTypeFunction(node) => node.format().fmt(f),
+            AnyCssAttrType::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
+            AnyCssAttrType::ScssNamespacedVariable(node) => node.format().fmt(f),
+            AnyCssAttrType::ScssVariable(node) => node.format().fmt(f),
         }
     }
 }

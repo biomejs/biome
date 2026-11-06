@@ -703,11 +703,11 @@ parity-query-module-values.css:1:20 parse ━━━━━━━━━━━━�
   
 parity-query-module-values.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ @media (min-width: tokens.$tablet) { .a { color: red; } }
   > 2 │ @media (tokens.$tablet <= width) { .b { color: red; } }
-      │         ^^^^^^^^^^^^^^
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
     3 │ @media (30rem < width <= tokens.$tablet) { .c { color: red; } }
     4 │ @media (min-width: (tokens.$tablet)) { .d { color: red; } }
   

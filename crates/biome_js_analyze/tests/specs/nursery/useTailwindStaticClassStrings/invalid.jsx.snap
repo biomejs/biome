@@ -1,0 +1,338 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className={`bg-${color}`} />;
+<div class={"text-" + color} />;
+<div className={`${size}-4`} />;
+<div className={`hover:bg-${color}-500`} />;
+<div className={active ? `bg-${color}` : "bg-blue-500"} />;
+<div className={active && "text-" + color} />;
+<div className={["p-4", `bg-${color}`]} />;
+<div className={{ [`bg-${color}`]: active }} />;
+<div className={"bg-" + "red-500"} />;
+<div className={"p-4 " + ("bg-" + color)} />;
+<div className={(`text-${color}`)} />;
+<div className={`é-${color}`} />;
+<div className={"p-4 " + "bg-" + color} />;
+<div className={"p-4 " + classes + " bg-" + color} />;
+<div className={`bg-${active ? "red-500" : "blue-500"}`} />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className={`bg-${color}`} />;
+      │                 ^^^^^^^^^^^^^
+    3 │ <div class={"text-" + color} />;
+    4 │ <div className={`${size}-4`} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:13 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className={`bg-${color}`} />;
+  > 3 │ <div class={"text-" + color} />;
+      │             ^^^^^^^^^^^^^^^
+    4 │ <div className={`${size}-4`} />;
+    5 │ <div className={`hover:bg-${color}-500`} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    2 │ <div className={`bg-${color}`} />;
+    3 │ <div class={"text-" + color} />;
+  > 4 │ <div className={`${size}-4`} />;
+      │                 ^^^^^^^^^^^
+    5 │ <div className={`hover:bg-${color}-500`} />;
+    6 │ <div className={active ? `bg-${color}` : "bg-blue-500"} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    3 │ <div class={"text-" + color} />;
+    4 │ <div className={`${size}-4`} />;
+  > 5 │ <div className={`hover:bg-${color}-500`} />;
+      │                 ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div className={active ? `bg-${color}` : "bg-blue-500"} />;
+    7 │ <div className={active && "text-" + color} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:26 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    4 │ <div className={`${size}-4`} />;
+    5 │ <div className={`hover:bg-${color}-500`} />;
+  > 6 │ <div className={active ? `bg-${color}` : "bg-blue-500"} />;
+      │                          ^^^^^^^^^^^^^
+    7 │ <div className={active && "text-" + color} />;
+    8 │ <div className={["p-4", `bg-${color}`]} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:27 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    5 │ <div className={`hover:bg-${color}-500`} />;
+    6 │ <div className={active ? `bg-${color}` : "bg-blue-500"} />;
+  > 7 │ <div className={active && "text-" + color} />;
+      │                           ^^^^^^^^^^^^^^^
+    8 │ <div className={["p-4", `bg-${color}`]} />;
+    9 │ <div className={{ [`bg-${color}`]: active }} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:25 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+     6 │ <div className={active ? `bg-${color}` : "bg-blue-500"} />;
+     7 │ <div className={active && "text-" + color} />;
+   > 8 │ <div className={["p-4", `bg-${color}`]} />;
+       │                         ^^^^^^^^^^^^^
+     9 │ <div className={{ [`bg-${color}`]: active }} />;
+    10 │ <div className={"bg-" + "red-500"} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:20 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+     7 │ <div className={active && "text-" + color} />;
+     8 │ <div className={["p-4", `bg-${color}`]} />;
+   > 9 │ <div className={{ [`bg-${color}`]: active }} />;
+       │                    ^^^^^^^^^^^^^
+    10 │ <div className={"bg-" + "red-500"} />;
+    11 │ <div className={"p-4 " + ("bg-" + color)} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+     8 │ <div className={["p-4", `bg-${color}`]} />;
+     9 │ <div className={{ [`bg-${color}`]: active }} />;
+  > 10 │ <div className={"bg-" + "red-500"} />;
+       │                 ^^^^^^^^^^^^^^^^^
+    11 │ <div className={"p-4 " + ("bg-" + color)} />;
+    12 │ <div className={(`text-${color}`)} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+     9 │ <div className={{ [`bg-${color}`]: active }} />;
+    10 │ <div className={"bg-" + "red-500"} />;
+  > 11 │ <div className={"p-4 " + ("bg-" + color)} />;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <div className={(`text-${color}`)} />;
+    13 │ <div className={`é-${color}`} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:18 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    10 │ <div className={"bg-" + "red-500"} />;
+    11 │ <div className={"p-4 " + ("bg-" + color)} />;
+  > 12 │ <div className={(`text-${color}`)} />;
+       │                  ^^^^^^^^^^^^^^^
+    13 │ <div className={`é-${color}`} />;
+    14 │ <div className={"p-4 " + "bg-" + color} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    11 │ <div className={"p-4 " + ("bg-" + color)} />;
+    12 │ <div className={(`text-${color}`)} />;
+  > 13 │ <div className={`é-${color}`} />;
+       │                 ^^^^^^^^^^^^
+    14 │ <div className={"p-4 " + "bg-" + color} />;
+    15 │ <div className={"p-4 " + classes + " bg-" + color} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    12 │ <div className={(`text-${color}`)} />;
+    13 │ <div className={`é-${color}`} />;
+  > 14 │ <div className={"p-4 " + "bg-" + color} />;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <div className={"p-4 " + classes + " bg-" + color} />;
+    16 │ <div className={`bg-${active ? "red-500" : "blue-500"}`} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    13 │ <div className={`é-${color}`} />;
+    14 │ <div className={"p-4 " + "bg-" + color} />;
+  > 15 │ <div className={"p-4 " + classes + " bg-" + color} />;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <div className={`bg-${active ? "red-500" : "blue-500"}`} />;
+    17 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    14 │ <div className={"p-4 " + "bg-" + color} />;
+    15 │ <div className={"p-4 " + classes + " bg-" + color} />;
+  > 16 │ <div className={`bg-${active ? "red-500" : "blue-500"}`} />;
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

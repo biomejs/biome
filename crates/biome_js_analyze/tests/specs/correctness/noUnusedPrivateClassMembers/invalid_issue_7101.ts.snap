@@ -30,6 +30,8 @@ invalid_issue_7101.ts:2:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE
     3 │ 		// This constructor has two unused private properties
     4 │ 
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove private modifier
   
      1  1 │   class TSDoubleUnusedPrivateConstructor {
@@ -52,6 +54,8 @@ invalid_issue_7101.ts:2:50 lint/correctness/noUnusedPrivateClassMembers  FIXABLE
     3 │ 		// This constructor has two unused private properties
     4 │ 
   
+  i A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used.
+  
   i Unsafe fix: Remove private modifier
   
      1  1 │   class TSDoubleUnusedPrivateConstructor {
@@ -73,6 +77,8 @@ invalid_issue_7101.ts:9:23 lint/correctness/noUnusedPrivateClassMembers  FIXABLE
        │                       ^^^^^
     10 │     foo(param)
     11 │   }
+  
+  i The parameter property is never read outside of the constructor, so it does not need to be declared as a class member.
   
   i Unsafe fix: Remove private modifier
   

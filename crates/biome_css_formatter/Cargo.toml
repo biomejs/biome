@@ -40,7 +40,7 @@ biome_formatter_test = { path = "../biome_formatter_test", features = ["lang_css
 biome_fs             = { path = "../biome_fs" }
 biome_languages      = { path = "../biome_languages" }
 biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service", features = ["lang_css", "report_scss_exclusive_syntax"] }
+biome_service        = { path = "../biome_service", features = ["lang_css"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_css"] }
 camino               = { workspace = true }
 countme              = { workspace = true, features = ["enable"] }
