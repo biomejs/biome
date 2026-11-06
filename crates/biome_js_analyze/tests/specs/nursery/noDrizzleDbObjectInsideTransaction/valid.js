@@ -1,0 +1,48 @@
+/* should not generate diagnostics */
+
+import { db } from "./db";
+
+// query on the transaction object
+await db.transaction(async (tx) => {
+	await tx.insert(users).values({ name: "John" });
+});
+
+// nested transaction started on the transaction object
+await db.transaction(async (tx) => {
+	await tx.transaction(async (tx2) => {
+		await tx2.select().from(users);
+	});
+});
+
+// outside of a transaction
+await db.select().from(users);
+
+// callback parameter shadows the database object
+await db.transaction(async (db) => {
+	await db.select().from(users);
+});
+
+// local variable shadows the database object
+await db.transaction(async (tx) => {
+	const db = tx;
+	await db.select().from(users);
+});
+
+// database object used inside the transaction of another database object
+await database.transaction(async (tx) => {
+	await db.select().from(users);
+});
+
+// not a configured object name
+await orm.transaction(async (tx) => {
+	await orm.select().from(users);
+});
+
+// transaction config argument runs outside the callback
+await db.transaction(async (tx) => {}, { isolationLevel: chooseLevel(db) });
+
+// callback factory runs before the transaction starts
+await db.transaction(makeCallback(db));
+
+// not a transaction call
+await db.batch([db.select().from(users)]);

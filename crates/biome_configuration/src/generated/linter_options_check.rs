@@ -331,6 +331,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noDoubleEquals",
         TypeId::of::<biome_rule_options::no_double_equals::NoDoubleEqualsOptions>(),
     ));
+    result.push(("nursery", "noDrizzleDbObjectInsideTransaction", TypeId::of::<biome_rule_options::no_drizzle_db_object_inside_transaction::NoDrizzleDbObjectInsideTransactionOptions>()));
     result.push((
         "suspicious",
         "noDrizzleDeleteWithoutWhere",
