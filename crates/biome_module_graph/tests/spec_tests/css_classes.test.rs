@@ -342,9 +342,14 @@ fn css_class_traversal_collects_each_reachable_importer_once() {
     assert_eq!(
         traverse_import_tree_for_classes(&db, leaf)
             .iter()
-            .map(|step| step.css_path.as_str())
+            .map(|step| step.css_path.as_path())
             .collect::<Vec<_>>(),
-        ["/cycle.css", "/lazy.css", "/right.css", "/top.css"]
+        [
+            Utf8Path::new("/cycle.css"),
+            Utf8Path::new("/lazy.css"),
+            Utf8Path::new("/right.css"),
+            Utf8Path::new("/top.css"),
+        ]
     );
 }
 
