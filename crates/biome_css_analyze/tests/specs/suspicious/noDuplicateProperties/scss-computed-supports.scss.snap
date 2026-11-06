@@ -23,9 +23,18 @@ expression: scss-computed-supports.scss
 
 # Diagnostics
 ```
-scss-computed-supports.scss:12:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss-computed-supports.scss:11:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The property color is declared more than once in the same block.
+  
+     9 │ @supports ("color": green) {
+    10 │   .invalid {
+  > 11 │     color: red;
+       │     ^^^^^
+    12 │     color: blue;
+    13 │   }
+  
+  i color is declared again here.
   
     10 │   .invalid {
     11 │     color: red;
@@ -34,14 +43,7 @@ scss-computed-supports.scss:12:5 lint/suspicious/noDuplicateProperties ━━━
     13 │   }
     14 │ }
   
-  i color is already defined here.
-  
-     9 │ @supports ("color": green) {
-    10 │   .invalid {
-  > 11 │     color: red;
-       │     ^^^^^
-    12 │     color: blue;
-    13 │   }
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

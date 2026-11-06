@@ -23,16 +23,9 @@ expression: parity-compound-placeholders.scss
 
 # Diagnostics
 ```
-parity-compound-placeholders.scss:14:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━
+parity-compound-placeholders.scss:13:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".normal-target".
-  
-    13 │ .normal-target {}
-  > 14 │ .normal-target {}
-       │ ^^^^^^^^^^^^^^^^^
-    15 │ 
-  
-  i It was first defined here.
+  ! The selector list ".normal-target" is defined more than once.
   
     11 │ }
     12 │ 
@@ -41,9 +34,16 @@ parity-compound-placeholders.scss:14:1 lint/suspicious/noDuplicateSelectors ━�
     14 │ .normal-target {}
     15 │ 
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    13 │ .normal-target {}
+  > 14 │ .normal-target {}
+       │ ^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```

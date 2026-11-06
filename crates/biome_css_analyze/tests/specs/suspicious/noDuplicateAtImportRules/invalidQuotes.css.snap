@@ -11,18 +11,27 @@ expression: invalidQuotes.css
 
 # Diagnostics
 ```
-invalidQuotes.css:2:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidQuotes.css:1:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Each @import should be unique unless differing by media queries.
+  × The stylesheet "a.css" is imported more than once.
+  
+  > 1 │ @import "a.css";
+      │  ^^^^^^^^^^^^^^^
+    2 │ @import 'a.css';
+    3 │ 
+  
+  i The same stylesheet is imported again here.
   
     1 │ @import "a.css";
   > 2 │ @import 'a.css';
       │  ^^^^^^^^^^^^^^^
     3 │ 
   
+  i Each @import should be unique unless differing by media queries.
+  
   i Importing the same stylesheet more than once is redundant and can cause an extra request.
   
-  i Consider removing one of the duplicated imports.
+  i Consider removing the duplicated imports.
   
 
 ```

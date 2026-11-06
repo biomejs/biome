@@ -1,16 +1,20 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares selectors that can span multiple tokens.")]
-
-use std::collections::HashSet;
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares selectors that can span multiple tokens."
+)]
 
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssKeyframesItem, AnyCssKeyframesSelector, CssKeyframesBlock};
+use biome_css_syntax::{AnyCssKeyframesItem, CssKeyframesBlock};
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, Text};
 use biome_rule_options::no_duplicate_selectors_keyframe_block::NoDuplicateSelectorsKeyframeBlockOptions;
 use biome_string_case::StrLikeExtension;
+use std::borrow::Cow;
+
+use crate::utils::{DuplicateGroup, collect_duplicates};
 
 declare_lint_rule! {
     /// Disallow duplicate selectors within keyframe blocks.
@@ -53,47 +57,62 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateSelectorsKeyframeBlock {
     type Query = Ast<CssKeyframesBlock>;
-    type State = AnyCssKeyframesSelector;
-    type Signals = Option<Self::State>;
+    type State = DuplicateGroup<Text>;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateSelectorsKeyframeBlockOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut selector_list: HashSet<String> = HashSet::new();
+        let mut selectors = Vec::new();
         for keyframe_item in node.items() {
             match keyframe_item {
                 AnyCssKeyframesItem::CssKeyframesItem(item) => {
-                    let keyframe_selector = item.selectors().into_iter().next()?.ok()?;
-                    if !selector_list.insert(
-                        keyframe_selector
-                            .to_trimmed_text()
-                            .to_ascii_lowercase_cow()
-                            .to_string(),
-                    ) {
-                        return Some(keyframe_selector);
-                    }
+                    let Some(Ok(keyframe_selector)) = item.selectors().into_iter().next() else {
+                        break;
+                    };
+                    let text = keyframe_selector.to_trimmed_text();
+                    // Selectors are compared without case; only allocate when the text has uppercase.
+                    let key = match text.to_ascii_lowercase_cow() {
+                        Cow::Borrowed(_) => text.clone(),
+                        Cow::Owned(lowercase) => lowercase.into(),
+                    };
+                    selectors.push((key, text, keyframe_selector.range()));
                 }
                 AnyCssKeyframesItem::CssAtRule(_) => {}
                 AnyCssKeyframesItem::CssEmptyDeclaration(_) => {}
                 AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => {}
-                AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
+                AnyCssKeyframesItem::CssBogusKeyframesItem(_) => break,
             }
         }
-        None
+        collect_duplicates(selectors)
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateGroup {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The keyframe selector "<Emphasis>{name}</Emphasis>" is used more than once."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                   "The duplicate keyframe selector is overwritten by later one."
+                    "This selector is repeated here and overwrites the earlier one."
                 },
-            )
-            .note(markup! {
-                    "Consider using a different percentage value or keyword to avoid duplication"
-            }),
-        )
+            );
+        }
+
+        Some(diagnostic.note(markup! {
+            "Consider using a different percentage value or keyword to avoid duplication"
+        }))
     }
 }

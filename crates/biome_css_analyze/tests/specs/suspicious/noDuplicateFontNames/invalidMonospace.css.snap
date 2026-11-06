@@ -18,17 +18,9 @@ h { font-family: monospace, monospace, var(--fallback); }
 
 # Diagnostics
 ```
-invalidMonospace.css:2:29 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidMonospace.css:2:18 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate font names are redundant and unnecessary: monospace
-  
-    1 │ /* should generate diagnostics */
-  > 2 │ a { font-family: monospace, monospace, monospace; }
-      │                             ^^^^^^^^^
-    3 │ b { font-family: serif, monospace, monospace; }
-    4 │ c { font-family: monospace, monospace, sans-serif; }
-  
-  i This is where the duplicate font name is found:
+  × The font name monospace is used more than once in the same property.
   
     1 │ /* should generate diagnostics */
   > 2 │ a { font-family: monospace, monospace, monospace; }
@@ -36,24 +28,31 @@ invalidMonospace.css:2:29 lint/suspicious/noDuplicateFontNames ━━━━━�
     3 │ b { font-family: serif, monospace, monospace; }
     4 │ c { font-family: monospace, monospace, sans-serif; }
   
-  i Remove duplicate font names within the property.
-  
-
-```
-
-```
-invalidMonospace.css:3:36 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: monospace
+  i The font name monospace is repeated here.
   
     1 │ /* should generate diagnostics */
-    2 │ a { font-family: monospace, monospace, monospace; }
-  > 3 │ b { font-family: serif, monospace, monospace; }
-      │                                    ^^^^^^^^^
+  > 2 │ a { font-family: monospace, monospace, monospace; }
+      │                             ^^^^^^^^^
+    3 │ b { font-family: serif, monospace, monospace; }
     4 │ c { font-family: monospace, monospace, sans-serif; }
-    5 │ d { font-family: "monospace", "monospace"; }
   
-  i This is where the duplicate font name is found:
+  i The font name monospace is repeated here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { font-family: monospace, monospace, monospace; }
+      │                                        ^^^^^^^^^
+    3 │ b { font-family: serif, monospace, monospace; }
+    4 │ c { font-family: monospace, monospace, sans-serif; }
+  
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalidMonospace.css:3:25 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name monospace is used more than once in the same property.
   
     1 │ /* should generate diagnostics */
     2 │ a { font-family: monospace, monospace, monospace; }
@@ -62,24 +61,24 @@ invalidMonospace.css:3:36 lint/suspicious/noDuplicateFontNames ━━━━━�
     4 │ c { font-family: monospace, monospace, sans-serif; }
     5 │ d { font-family: "monospace", "monospace"; }
   
-  i Remove duplicate font names within the property.
+  i The font name monospace is repeated here.
   
-
-```
-
-```
-invalidMonospace.css:4:29 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: monospace
-  
+    1 │ /* should generate diagnostics */
     2 │ a { font-family: monospace, monospace, monospace; }
-    3 │ b { font-family: serif, monospace, monospace; }
-  > 4 │ c { font-family: monospace, monospace, sans-serif; }
-      │                             ^^^^^^^^^
+  > 3 │ b { font-family: serif, monospace, monospace; }
+      │                                    ^^^^^^^^^
+    4 │ c { font-family: monospace, monospace, sans-serif; }
     5 │ d { font-family: "monospace", "monospace"; }
-    6 │ e { font-family: Monospace Mono, Monospace Mono; }
   
-  i This is where the duplicate font name is found:
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalidMonospace.css:4:18 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name monospace is used more than once in the same property.
   
     2 │ a { font-family: monospace, monospace, monospace; }
     3 │ b { font-family: serif, monospace, monospace; }
@@ -88,24 +87,24 @@ invalidMonospace.css:4:29 lint/suspicious/noDuplicateFontNames ━━━━━�
     5 │ d { font-family: "monospace", "monospace"; }
     6 │ e { font-family: Monospace Mono, Monospace Mono; }
   
-  i Remove duplicate font names within the property.
+  i The font name monospace is repeated here.
   
-
-```
-
-```
-invalidMonospace.css:5:31 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: "monospace"
-  
+    2 │ a { font-family: monospace, monospace, monospace; }
     3 │ b { font-family: serif, monospace, monospace; }
-    4 │ c { font-family: monospace, monospace, sans-serif; }
-  > 5 │ d { font-family: "monospace", "monospace"; }
-      │                               ^^^^^^^^^^^
+  > 4 │ c { font-family: monospace, monospace, sans-serif; }
+      │                             ^^^^^^^^^
+    5 │ d { font-family: "monospace", "monospace"; }
     6 │ e { font-family: Monospace Mono, Monospace Mono; }
-    7 │ f { font-family: monospace, "Arial", "Arial"; }
   
-  i This is where the duplicate font name is found:
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalidMonospace.css:5:18 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name "monospace" is used more than once in the same property.
   
     3 │ b { font-family: serif, monospace, monospace; }
     4 │ c { font-family: monospace, monospace, sans-serif; }
@@ -114,24 +113,24 @@ invalidMonospace.css:5:31 lint/suspicious/noDuplicateFontNames ━━━━━�
     6 │ e { font-family: Monospace Mono, Monospace Mono; }
     7 │ f { font-family: monospace, "Arial", "Arial"; }
   
-  i Remove duplicate font names within the property.
+  i The font name "monospace" is repeated here.
   
-
-```
-
-```
-invalidMonospace.css:6:34 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: Monospace Mono
-  
+    3 │ b { font-family: serif, monospace, monospace; }
     4 │ c { font-family: monospace, monospace, sans-serif; }
-    5 │ d { font-family: "monospace", "monospace"; }
-  > 6 │ e { font-family: Monospace Mono, Monospace Mono; }
-      │                                  ^^^^^^^^^^^^^^
+  > 5 │ d { font-family: "monospace", "monospace"; }
+      │                               ^^^^^^^^^^^
+    6 │ e { font-family: Monospace Mono, Monospace Mono; }
     7 │ f { font-family: monospace, "Arial", "Arial"; }
-    8 │ g { font-family: ui-monospace, ui-monospace; }
   
-  i This is where the duplicate font name is found:
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalidMonospace.css:6:18 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name Monospace Mono is used more than once in the same property.
   
     4 │ c { font-family: monospace, monospace, sans-serif; }
     5 │ d { font-family: "monospace", "monospace"; }
@@ -140,24 +139,24 @@ invalidMonospace.css:6:34 lint/suspicious/noDuplicateFontNames ━━━━━�
     7 │ f { font-family: monospace, "Arial", "Arial"; }
     8 │ g { font-family: ui-monospace, ui-monospace; }
   
-  i Remove duplicate font names within the property.
+  i The font name Monospace Mono is repeated here.
   
-
-```
-
-```
-invalidMonospace.css:7:38 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: "Arial"
-  
+    4 │ c { font-family: monospace, monospace, sans-serif; }
     5 │ d { font-family: "monospace", "monospace"; }
-    6 │ e { font-family: Monospace Mono, Monospace Mono; }
-  > 7 │ f { font-family: monospace, "Arial", "Arial"; }
-      │                                      ^^^^^^^
+  > 6 │ e { font-family: Monospace Mono, Monospace Mono; }
+      │                                  ^^^^^^^^^^^^^^
+    7 │ f { font-family: monospace, "Arial", "Arial"; }
     8 │ g { font-family: ui-monospace, ui-monospace; }
-    9 │ h { font-family: monospace, monospace, var(--fallback); }
   
-  i This is where the duplicate font name is found:
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalidMonospace.css:7:29 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name "Arial" is used more than once in the same property.
   
     5 │ d { font-family: "monospace", "monospace"; }
     6 │ e { font-family: Monospace Mono, Monospace Mono; }
@@ -166,24 +165,24 @@ invalidMonospace.css:7:38 lint/suspicious/noDuplicateFontNames ━━━━━�
     8 │ g { font-family: ui-monospace, ui-monospace; }
     9 │ h { font-family: monospace, monospace, var(--fallback); }
   
-  i Remove duplicate font names within the property.
+  i The font name "Arial" is repeated here.
+  
+    5 │ d { font-family: "monospace", "monospace"; }
+    6 │ e { font-family: Monospace Mono, Monospace Mono; }
+  > 7 │ f { font-family: monospace, "Arial", "Arial"; }
+      │                                      ^^^^^^^
+    8 │ g { font-family: ui-monospace, ui-monospace; }
+    9 │ h { font-family: monospace, monospace, var(--fallback); }
+  
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
   
 
 ```
 
 ```
-invalidMonospace.css:8:32 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidMonospace.css:8:18 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate font names are redundant and unnecessary: ui-monospace
-  
-     6 │ e { font-family: Monospace Mono, Monospace Mono; }
-     7 │ f { font-family: monospace, "Arial", "Arial"; }
-   > 8 │ g { font-family: ui-monospace, ui-monospace; }
-       │                                ^^^^^^^^^^^^
-     9 │ h { font-family: monospace, monospace, var(--fallback); }
-    10 │ 
-  
-  i This is where the duplicate font name is found:
+  × The font name ui-monospace is used more than once in the same property.
   
      6 │ e { font-family: Monospace Mono, Monospace Mono; }
      7 │ f { font-family: monospace, "Arial", "Arial"; }
@@ -192,23 +191,24 @@ invalidMonospace.css:8:32 lint/suspicious/noDuplicateFontNames ━━━━━�
      9 │ h { font-family: monospace, monospace, var(--fallback); }
     10 │ 
   
-  i Remove duplicate font names within the property.
+  i The font name ui-monospace is repeated here.
   
-
-```
-
-```
-invalidMonospace.css:9:29 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Duplicate font names are redundant and unnecessary: monospace
-  
+     6 │ e { font-family: Monospace Mono, Monospace Mono; }
      7 │ f { font-family: monospace, "Arial", "Arial"; }
-     8 │ g { font-family: ui-monospace, ui-monospace; }
-   > 9 │ h { font-family: monospace, monospace, var(--fallback); }
-       │                             ^^^^^^^^^
+   > 8 │ g { font-family: ui-monospace, ui-monospace; }
+       │                                ^^^^^^^^^^^^
+     9 │ h { font-family: monospace, monospace, var(--fallback); }
     10 │ 
   
-  i This is where the duplicate font name is found:
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
+  
+
+```
+
+```
+invalidMonospace.css:9:18 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The font name monospace is used more than once in the same property.
   
      7 │ f { font-family: monospace, "Arial", "Arial"; }
      8 │ g { font-family: ui-monospace, ui-monospace; }
@@ -216,7 +216,15 @@ invalidMonospace.css:9:29 lint/suspicious/noDuplicateFontNames ━━━━━�
        │                  ^^^^^^^^^
     10 │ 
   
-  i Remove duplicate font names within the property.
+  i The font name monospace is repeated here.
+  
+     7 │ f { font-family: monospace, "Arial", "Arial"; }
+     8 │ g { font-family: ui-monospace, ui-monospace; }
+   > 9 │ h { font-family: monospace, monospace, var(--fallback); }
+       │                             ^^^^^^^^^
+    10 │ 
+  
+  i Duplicate font names are redundant and unnecessary. Remove them from the property.
   
 
 ```

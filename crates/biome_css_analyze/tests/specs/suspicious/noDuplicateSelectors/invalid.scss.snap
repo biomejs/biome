@@ -15,17 +15,9 @@ expression: invalid.scss
 
 # Diagnostics
 ```
-invalid.scss:6:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:3:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".navigation .link".
-  
-    4 │ }
-    5 │ 
-  > 6 │ .navigation .link {}
-      │ ^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-  
-  i It was first defined here.
+  ! The selector list ".navigation .link" is defined more than once.
   
     1 │ /* should generate diagnostics */
     2 │ .navigation {
@@ -34,9 +26,17 @@ invalid.scss:6:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     4 │ }
     5 │ 
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    4 │ }
+    5 │ 
+  > 6 │ .navigation .link {}
+      │ ^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```

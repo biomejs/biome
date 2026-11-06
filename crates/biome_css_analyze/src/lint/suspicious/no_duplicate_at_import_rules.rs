@@ -13,9 +13,11 @@ use biome_css_syntax::{
     AnyCssAtRule, AnyCssRootItem, AnyCssRule, AnyScssImportItem, CssMediaQueryList, CssRootItemList,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_duplicate_at_import_rules::NoDuplicateAtImportRulesOptions;
 use biome_string_case::StrOnlyExtension;
+
+use crate::utils::DuplicateGroup;
 
 declare_lint_rule! {
     /// Disallow duplicate `@import` rules.
@@ -69,68 +71,88 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateAtImportRules {
     type Query = Ast<CssRootItemList>;
-    type State = TextRange;
-    type Signals = Option<Self::State>;
+    type State = DuplicateGroup<Text>;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateAtImportRulesOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut imports_by_url: HashMap<String, HashSet<String>> = HashMap::new();
+        let mut imports = ImportGroups::default();
         for item in node {
             let AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) = item else {
                 continue;
             };
-            match at_rule.rule().ok()? {
+            let Ok(rule) = at_rule.rule() else {
+                continue;
+            };
+            match rule {
                 AnyCssAtRule::CssImportAtRule(import_rule) => {
-                    let url = import_rule.url().ok()?.to_trimmed_text();
-                    let media = normalized_media_queries(import_rule.media())?;
-                    if is_duplicate_import(
-                        &mut imports_by_url,
-                        normalize_import_url(url.text()),
-                        media,
-                    ) {
-                        return Some(import_rule.range());
-                    }
+                    let Ok(url) = import_rule.url() else {
+                        continue;
+                    };
+                    let Some(media) = normalized_media_queries(import_rule.media()) else {
+                        continue;
+                    };
+                    imports.add(url.to_trimmed_text(), media, import_rule.range());
                 }
                 AnyCssAtRule::ScssImportAtRule(import_rule) => {
                     for item in import_rule.imports() {
-                        let item = item.ok()?;
+                        let Ok(item) = item else {
+                            continue;
+                        };
                         let AnyScssImportItem::ScssPlainImport(import) = &item else {
                             continue;
                         };
-                        let url = import.url().ok()?.to_trimmed_text();
-                        let url = url.text().to_string();
-                        let media = normalized_media_queries(import.media())?;
-                        if is_duplicate_import(
-                            &mut imports_by_url,
-                            normalize_import_url(&url),
-                            media,
-                        ) {
-                            return Some(item.range());
-                        }
+                        let Ok(url) = import.url() else {
+                            continue;
+                        };
+                        let Some(media) = normalized_media_queries(import.media()) else {
+                            continue;
+                        };
+                        imports.add(url.to_trimmed_text(), media, item.range());
                     }
                 }
                 _ => {}
             }
         }
-        None
+        imports.into_duplicates()
     }
 
-    fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                span,
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateGroup {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The stylesheet "<Emphasis>{name}</Emphasis>" is imported more than once."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Each "<Emphasis>"@import"</Emphasis>" should be unique unless differing by media queries."
+                    "The same stylesheet is imported again here."
                 },
-            )
-            .note(markup! {
-                "Importing the same stylesheet more than once is redundant and can cause an extra request."
-            })
-            .note(markup! {
-                "Consider removing one of the duplicated imports."
-            }),
+            );
+        }
+
+        Some(
+            diagnostic
+                .note(markup! {
+                    "Each "<Emphasis>"@import"</Emphasis>" should be unique unless differing by media queries."
+                })
+                .note(markup! {
+                    "Importing the same stylesheet more than once is redundant and can cause an extra request."
+                })
+                .note(markup! {
+                    "Consider removing the duplicated imports."
+                }),
         )
     }
 }
@@ -157,19 +179,47 @@ fn normalize_import_url(url: &str) -> String {
         .replace('"', "'")
 }
 
-fn is_duplicate_import(
-    imports_by_url: &mut HashMap<String, HashSet<String>>,
-    url: String,
-    media: Vec<String>,
-) -> bool {
-    let Some(previous_media) = imports_by_url.get_mut(&url) else {
-        imports_by_url.insert(url, media.into_iter().collect());
-        return false;
-    };
+/// Imports that are not duplicates of an earlier import, with the duplicates found for each.
+#[derive(Default)]
+struct ImportGroups {
+    /// Per normalized URL: the media conditions and group index of each non-duplicate import.
+    originals_by_url: HashMap<String, Vec<(HashSet<String>, usize)>>,
+    groups: Vec<DuplicateGroup<Text>>,
+}
 
-    if media.is_empty() || previous_media.is_empty() {
-        return true;
+impl ImportGroups {
+    /// Records an import. It duplicates an earlier import of the same URL when either import is
+    /// unconditional or their media conditions overlap.
+    fn add(&mut self, url: Text, media: Vec<String>, range: TextRange) {
+        let media: HashSet<String> = media.into_iter().collect();
+        let originals = self
+            .originals_by_url
+            .entry(normalize_import_url(&url))
+            .or_default();
+        let original = originals
+            .iter()
+            .find(|(previous, _)| {
+                media.is_empty() || previous.is_empty() || !media.is_disjoint(previous)
+            })
+            .map(|&(_, group)| group);
+
+        match original {
+            Some(group) => self.groups[group].duplicates.push(range),
+            None => {
+                originals.push((media, self.groups.len()));
+                self.groups.push(DuplicateGroup {
+                    name: url,
+                    first: range,
+                    duplicates: Vec::new(),
+                });
+            }
+        }
     }
 
-    media.into_iter().any(|media| !previous_media.insert(media))
+    fn into_duplicates(self) -> Box<[DuplicateGroup<Text>]> {
+        self.groups
+            .into_iter()
+            .filter(|group| !group.duplicates.is_empty())
+            .collect()
+    }
 }

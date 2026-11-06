@@ -8,13 +8,14 @@ use biome_css_syntax::{
     ScssWhileAtRule,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
-use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
+use biome_rowan::{AstNode, SyntaxKindSet, Text, TextRange};
+use rustc_hash::{FxBuildHasher, FxHashSet};
 use std::hash::{BuildHasher, Hasher};
 
 use biome_rule_options::no_duplicate_selectors::NoDuplicateSelectorsOptions;
 
 use crate::services::semantic::Semantic;
+use crate::utils::{DuplicateGroup, collect_duplicates};
 
 const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
     .union(CssMediaAtRule::KIND_SET)
@@ -104,17 +105,6 @@ declare_lint_rule! {
     }
 }
 
-/// A single diagnostic: the duplicate rule's range and the first occurrence's range.
-#[derive(Debug)]
-pub struct DuplicateSelectorList {
-    /// Range of the rule whose selector list is a duplicate.
-    duplicate_range: TextRange,
-    /// Range of the first rule with this selector list.
-    first_range: TextRange,
-    /// Normalized selector list (for the diagnostic message).
-    normalized_list: String,
-}
-
 fn scss_selector_context(rule: &AnyRuleStart) -> Option<TextRange> {
     rule.syntax()
         .ancestors()
@@ -124,7 +114,7 @@ fn scss_selector_context(rule: &AnyRuleStart) -> Option<TextRange> {
 
 impl Rule for NoDuplicateSelectors {
     type Query = Semantic<AnyCssRoot>;
-    type State = DuplicateSelectorList;
+    type State = DuplicateGroup<Text>;
     type Signals = Box<[Self::State]>;
     type Options = NoDuplicateSelectorsOptions;
 
@@ -132,9 +122,7 @@ impl Rule for NoDuplicateSelectors {
         let model = ctx.model();
         let root = ctx.root();
 
-        // Maps (context_hash, normalized_selector_list_key) → first occurrence range.
-        let mut seen = FxHashMap::default();
-        let mut duplicates = Vec::new();
+        let mut selector_lists = Vec::new();
         let mut visited = FxHashSet::default();
 
         // Iterative DFS using an explicit stack with sentinel frames for context pop.
@@ -171,8 +159,7 @@ impl Rule for NoDuplicateSelectors {
                     }
 
                     let rule_node = rule.node(&root);
-                    let is_at_rule =
-                        INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind());
+                    let is_at_rule = INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind());
 
                     if is_at_rule {
                         let parent_hash = *context_hash_stack.last().unwrap();
@@ -203,56 +190,54 @@ impl Rule for NoDuplicateSelectors {
                             .collect();
                         normalized_selectors.sort();
 
-                        let list_key = normalized_selectors.join(", ");
+                        let list_key: Text = normalized_selectors.join(", ").into();
                         let context_hash = *context_hash_stack.last().unwrap();
                         let context_key = (
                             context_hash,
                             scss_selector_context(&rule_node),
                             list_key.clone(),
                         );
-                        let rule_range = rule.range(&root);
-
-                        match seen.get(&context_key) {
-                            Some(&first_range) => {
-                                duplicates.push(DuplicateSelectorList {
-                                    duplicate_range: rule_range,
-                                    first_range,
-                                    normalized_list: list_key,
-                                });
-                            }
-                            None => {
-                                seen.insert(context_key, rule_range);
-                            }
-                        }
+                        selector_lists.push((context_key, list_key, rule.range(&root)));
                     }
                 }
             }
         }
 
-        duplicates.into_boxed_slice()
+        collect_duplicates(selector_lists)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateGroup {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The selector list \""<Emphasis>{name}</Emphasis>"\" is defined more than once."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
+                markup! {
+                    "This rule repeats the same selector list."
+                },
+            );
+        }
+
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.duplicate_range,
-                markup! {
-                    "Duplicate selector list \""<Emphasis>{state.normalized_list.as_str()}</Emphasis>"\"."
-                },
-            )
-            .detail(
-                state.first_range,
-                markup! {
-                    "It was first defined here."
-                },
-            )
-            .note(markup! {
-                "Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain."
-            })
-            .note(markup! {
-                "Remove or merge the duplicate rule to keep the stylesheet clean."
-            }),
+            diagnostic
+                .note(markup! {
+                    "Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain."
+                })
+                .note(markup! {
+                    "Remove or merge the duplicate rules to keep the stylesheet clean."
+                }),
         )
     }
 }

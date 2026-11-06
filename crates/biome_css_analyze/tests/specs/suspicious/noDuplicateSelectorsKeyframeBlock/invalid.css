@@ -1,13 +1,85 @@
-@keyframes foo { from {} from {}}
+@keyframes foo {
+	from {}
 
-@keyframes foo { from {} FROM {}}
+	from {}
+}
 
-@keyframes foo { 0% {} 0% {}}
+@keyframes foo {
+	from {}
 
-@keyframes foo { from {} to {} to {} }
+	FROM {}
+}
 
-@keyframes foo { 0% {} 0% {} 100% {} }
+@keyframes foo {
+	0% {}
 
-@-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+	0% {}
+}
 
-@-moz-keyframes foo { 0% {} 0% {} 100% {} }
+@keyframes foo {
+	from {}
+
+	to {}
+
+	to {}
+}
+
+@keyframes foo {
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@-webkit-keyframes foo {
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@-moz-keyframes foo {
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@keyframes foo {
+	from {}
+
+	to {}
+
+	from {}
+
+	to {}
+}
+
+@keyframes foo {
+	0% {}
+
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@keyframes foo {
+	0% {}
+
+	FROM {}
+
+	from {}
+
+	0% {}
+
+	100% {}
+
+	to {}
+
+	TO {}
+}

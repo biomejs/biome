@@ -7,24 +7,76 @@ expression: invalid.scss
 /* should generate diagnostics */
 @import "theme.css";
 @import "theme.css";
+@import "theme.css";
+@import "other.css";
+@import "other.css";
 
 ```
 
 # Diagnostics
 ```
-invalid.scss:3:9 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:2:9 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Each @import should be unique unless differing by media queries.
+  × The stylesheet "theme.css" is imported more than once.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @import "theme.css";
+      │         ^^^^^^^^^^^
+    3 │ @import "theme.css";
+    4 │ @import "theme.css";
+  
+  i The same stylesheet is imported again here.
   
     1 │ /* should generate diagnostics */
     2 │ @import "theme.css";
   > 3 │ @import "theme.css";
       │         ^^^^^^^^^^^
-    4 │ 
+    4 │ @import "theme.css";
+    5 │ @import "other.css";
+  
+  i The same stylesheet is imported again here.
+  
+    2 │ @import "theme.css";
+    3 │ @import "theme.css";
+  > 4 │ @import "theme.css";
+      │         ^^^^^^^^^^^
+    5 │ @import "other.css";
+    6 │ @import "other.css";
+  
+  i Each @import should be unique unless differing by media queries.
   
   i Importing the same stylesheet more than once is redundant and can cause an extra request.
   
-  i Consider removing one of the duplicated imports.
+  i Consider removing the duplicated imports.
+  
+
+```
+
+```
+invalid.scss:5:9 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The stylesheet "other.css" is imported more than once.
+  
+    3 │ @import "theme.css";
+    4 │ @import "theme.css";
+  > 5 │ @import "other.css";
+      │         ^^^^^^^^^^^
+    6 │ @import "other.css";
+    7 │ 
+  
+  i The same stylesheet is imported again here.
+  
+    4 │ @import "theme.css";
+    5 │ @import "other.css";
+  > 6 │ @import "other.css";
+      │         ^^^^^^^^^^^
+    7 │ 
+  
+  i Each @import should be unique unless differing by media queries.
+  
+  i Importing the same stylesheet more than once is redundant and can cause an extra request.
+  
+  i Consider removing the duplicated imports.
   
 
 ```

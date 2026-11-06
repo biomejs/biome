@@ -15,9 +15,18 @@ expression: invalid_6615.css
 
 # Diagnostics
 ```
-invalid_6615.css:4:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_6615.css:3:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  × The property color is declared more than once in the same block.
+  
+    1 │ .class {
+    2 │     @mixin hover {
+  > 3 │         color: red;
+      │         ^^^^^
+    4 │         color: blue;
+    5 │     }
+  
+  i color is declared again here.
   
     2 │     @mixin hover {
     3 │         color: red;
@@ -26,14 +35,7 @@ invalid_6615.css:4:9 lint/suspicious/noDuplicateProperties ━━━━━━━
     5 │     }
     6 │ }
   
-  i color is already defined here.
-  
-    1 │ .class {
-    2 │     @mixin hover {
-  > 3 │         color: red;
-      │         ^^^^^
-    4 │         color: blue;
-    5 │     }
+  i Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

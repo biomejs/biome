@@ -4,65 +4,114 @@ expression: invalid.css
 ---
 # Input
 ```css
-@keyframes foo { from {} from {}}
+@keyframes foo {
+	from {}
 
-@keyframes foo { from {} FROM {}}
+	from {}
+}
 
-@keyframes foo { 0% {} 0% {}}
+@keyframes foo {
+	from {}
 
-@keyframes foo { from {} to {} to {} }
+	FROM {}
+}
 
-@keyframes foo { 0% {} 0% {} 100% {} }
+@keyframes foo {
+	0% {}
 
-@-webkit-keyframes foo { 0% {} 0% {} 100% {} }
+	0% {}
+}
 
-@-moz-keyframes foo { 0% {} 0% {} 100% {} }
+@keyframes foo {
+	from {}
+
+	to {}
+
+	to {}
+}
+
+@keyframes foo {
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@-webkit-keyframes foo {
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@-moz-keyframes foo {
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@keyframes foo {
+	from {}
+
+	to {}
+
+	from {}
+
+	to {}
+}
+
+@keyframes foo {
+	0% {}
+
+	0% {}
+
+	0% {}
+
+	100% {}
+}
+
+@keyframes foo {
+	0% {}
+
+	FROM {}
+
+	from {}
+
+	0% {}
+
+	100% {}
+
+	to {}
+
+	TO {}
+}
+
 ```
 
 # Diagnostics
 ```
-invalid.css:1:26 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The duplicate keyframe selector is overwritten by later one.
+  × The keyframe selector from is used more than once.
   
-  > 1 │ @keyframes foo { from {} from {}}
-      │                          ^^^^
-    2 │ 
-    3 │ @keyframes foo { from {} FROM {}}
+    1 │ @keyframes foo {
+  > 2 │ 	from {}
+      │ 	^^^^
+    3 │ 
+    4 │ 	from {}
   
-  i Consider using a different percentage value or keyword to avoid duplication
+  i This selector is repeated here and overwrites the earlier one.
   
-
-```
-
-```
-invalid.css:3:26 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The duplicate keyframe selector is overwritten by later one.
-  
-    1 │ @keyframes foo { from {} from {}}
-    2 │ 
-  > 3 │ @keyframes foo { from {} FROM {}}
-      │                          ^^^^
-    4 │ 
-    5 │ @keyframes foo { 0% {} 0% {}}
-  
-  i Consider using a different percentage value or keyword to avoid duplication
-  
-
-```
-
-```
-invalid.css:5:24 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The duplicate keyframe selector is overwritten by later one.
-  
-    3 │ @keyframes foo { from {} FROM {}}
-    4 │ 
-  > 5 │ @keyframes foo { 0% {} 0% {}}
-      │                        ^^
+    2 │ 	from {}
+    3 │ 
+  > 4 │ 	from {}
+      │ 	^^^^
+    5 │ }
     6 │ 
-    7 │ @keyframes foo { from {} to {} to {} }
   
   i Consider using a different percentage value or keyword to avoid duplication
   
@@ -70,50 +119,24 @@ invalid.css:5:24 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━�
 ```
 
 ```
-invalid.css:7:32 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The duplicate keyframe selector is overwritten by later one.
+  × The keyframe selector from is used more than once.
   
-    5 │ @keyframes foo { 0% {} 0% {}}
-    6 │ 
-  > 7 │ @keyframes foo { from {} to {} to {} }
-      │                                ^^
-    8 │ 
-    9 │ @keyframes foo { 0% {} 0% {} 100% {} }
+     7 │ @keyframes foo {
+   > 8 │ 	from {}
+       │ 	^^^^
+     9 │ 
+    10 │ 	FROM {}
   
-  i Consider using a different percentage value or keyword to avoid duplication
+  i This selector is repeated here and overwrites the earlier one.
   
-
-```
-
-```
-invalid.css:9:24 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The duplicate keyframe selector is overwritten by later one.
-  
-     7 │ @keyframes foo { from {} to {} to {} }
-     8 │ 
-   > 9 │ @keyframes foo { 0% {} 0% {} 100% {} }
-       │                        ^^
-    10 │ 
-    11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
-  
-  i Consider using a different percentage value or keyword to avoid duplication
-  
-
-```
-
-```
-invalid.css:11:32 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The duplicate keyframe selector is overwritten by later one.
-  
-     9 │ @keyframes foo { 0% {} 0% {} 100% {} }
-    10 │ 
-  > 11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
-       │                                ^^
+     8 │ 	from {}
+     9 │ 
+  > 10 │ 	FROM {}
+       │ 	^^^^
+    11 │ }
     12 │ 
-    13 │ @-moz-keyframes foo { 0% {} 0% {} 100% {} }
   
   i Consider using a different percentage value or keyword to avoid duplication
   
@@ -121,14 +144,287 @@ invalid.css:11:32 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━
 ```
 
 ```
-invalid.css:13:29 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The duplicate keyframe selector is overwritten by later one.
+  × The keyframe selector 0% is used more than once.
   
-    11 │ @-webkit-keyframes foo { 0% {} 0% {} 100% {} }
-    12 │ 
-  > 13 │ @-moz-keyframes foo { 0% {} 0% {} 100% {} }
-       │                             ^^
+    13 │ @keyframes foo {
+  > 14 │ 	0% {}
+       │ 	^^
+    15 │ 
+    16 │ 	0% {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    14 │ 	0% {}
+    15 │ 
+  > 16 │ 	0% {}
+       │ 	^^
+    17 │ }
+    18 │ 
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:22:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector to is used more than once.
+  
+    20 │ 	from {}
+    21 │ 
+  > 22 │ 	to {}
+       │ 	^^
+    23 │ 
+    24 │ 	to {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    22 │ 	to {}
+    23 │ 
+  > 24 │ 	to {}
+       │ 	^^
+    25 │ }
+    26 │ 
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:28:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector 0% is used more than once.
+  
+    27 │ @keyframes foo {
+  > 28 │ 	0% {}
+       │ 	^^
+    29 │ 
+    30 │ 	0% {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    28 │ 	0% {}
+    29 │ 
+  > 30 │ 	0% {}
+       │ 	^^
+    31 │ 
+    32 │ 	100% {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:36:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector 0% is used more than once.
+  
+    35 │ @-webkit-keyframes foo {
+  > 36 │ 	0% {}
+       │ 	^^
+    37 │ 
+    38 │ 	0% {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    36 │ 	0% {}
+    37 │ 
+  > 38 │ 	0% {}
+       │ 	^^
+    39 │ 
+    40 │ 	100% {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:44:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector 0% is used more than once.
+  
+    43 │ @-moz-keyframes foo {
+  > 44 │ 	0% {}
+       │ 	^^
+    45 │ 
+    46 │ 	0% {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    44 │ 	0% {}
+    45 │ 
+  > 46 │ 	0% {}
+       │ 	^^
+    47 │ 
+    48 │ 	100% {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:52:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector from is used more than once.
+  
+    51 │ @keyframes foo {
+  > 52 │ 	from {}
+       │ 	^^^^
+    53 │ 
+    54 │ 	to {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    54 │ 	to {}
+    55 │ 
+  > 56 │ 	from {}
+       │ 	^^^^
+    57 │ 
+    58 │ 	to {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:54:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector to is used more than once.
+  
+    52 │ 	from {}
+    53 │ 
+  > 54 │ 	to {}
+       │ 	^^
+    55 │ 
+    56 │ 	from {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    56 │ 	from {}
+    57 │ 
+  > 58 │ 	to {}
+       │ 	^^
+    59 │ }
+    60 │ 
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:62:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector 0% is used more than once.
+  
+    61 │ @keyframes foo {
+  > 62 │ 	0% {}
+       │ 	^^
+    63 │ 
+    64 │ 	0% {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    62 │ 	0% {}
+    63 │ 
+  > 64 │ 	0% {}
+       │ 	^^
+    65 │ 
+    66 │ 	0% {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    64 │ 	0% {}
+    65 │ 
+  > 66 │ 	0% {}
+       │ 	^^
+    67 │ 
+    68 │ 	100% {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:72:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector 0% is used more than once.
+  
+    71 │ @keyframes foo {
+  > 72 │ 	0% {}
+       │ 	^^
+    73 │ 
+    74 │ 	FROM {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    76 │ 	from {}
+    77 │ 
+  > 78 │ 	0% {}
+       │ 	^^
+    79 │ 
+    80 │ 	100% {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:74:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector FROM is used more than once.
+  
+    72 │ 	0% {}
+    73 │ 
+  > 74 │ 	FROM {}
+       │ 	^^^^
+    75 │ 
+    76 │ 	from {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    74 │ 	FROM {}
+    75 │ 
+  > 76 │ 	from {}
+       │ 	^^^^
+    77 │ 
+    78 │ 	0% {}
+  
+  i Consider using a different percentage value or keyword to avoid duplication
+  
+
+```
+
+```
+invalid.css:82:2 lint/suspicious/noDuplicateSelectorsKeyframeBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The keyframe selector to is used more than once.
+  
+    80 │ 	100% {}
+    81 │ 
+  > 82 │ 	to {}
+       │ 	^^
+    83 │ 
+    84 │ 	TO {}
+  
+  i This selector is repeated here and overwrites the earlier one.
+  
+    82 │ 	to {}
+    83 │ 
+  > 84 │ 	TO {}
+       │ 	^^
+    85 │ }
+    86 │ 
   
   i Consider using a different percentage value or keyword to avoid duplication
   

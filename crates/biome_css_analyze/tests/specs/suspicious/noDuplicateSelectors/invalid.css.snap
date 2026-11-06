@@ -8,119 +8,165 @@ expression: invalid.css
 
 /* 1. Basic duplicate: same selector twice in the same file */
 .foo {}
+
 .foo {}
 
 /* 2. Duplicate type selector */
-div { color: red; }
-div { color: blue; }
+div {
+	color: red;
+}
+
+div {
+	color: blue;
+}
 
 /* 3. Duplicate inside same @media block */
 @media (min-width: 600px) {
-  .bar {}
-  .bar {}
+	.bar {}
+
+	.bar {}
 }
 
 /* 4. Selector list: same list in different order counts as duplicate */
-.a, .b {}
-.b, .a {}
+.a,
+.b {}
+
+.b,
+.a {}
 
 /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
 a b {}
+
 a {
-  & b {}
+	& b {}
 }
 
 /* 6. Compound selector ordering: .a.b == .b.a */
 .a.b {}
+
 .b.a {}
 
 /* 7. Type selector case-insensitivity: DIV == div */
-DIV { color: red; }
-div { color: blue; }
+DIV {
+	color: red;
+}
+
+div {
+	color: blue;
+}
 
 /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
 .nav .link {}
+
 .nav {
-  .link {}
+	.link {}
 }
 
 /* 9. Multi-level nesting: `.x .y .z {}` == `.x { .y { .z {} } }` */
 .x .y .z {}
+
 .x {
-  .y {
-    .z {}
-  }
+	.y {
+		.z {}
+	}
 }
 
 /* 10. Nesting with ampersand and pseudo-class:
    `button:hover {}` == `button { &:hover {} }` */
 button:hover {}
+
 button {
-  &:hover {}
+	&:hover {}
 }
 
 /* 11. Nesting with ampersand and pseudo-element:
    `span::before {}` == `span { &::before {} }` */
 span::before {}
+
 span {
-  &::before {}
+	&::before {}
 }
 
 /* 12. Selector list duplicate via nesting: `.p .r, .q .r` == `.p, .q { .r {} }` */
 .p .r {}
+
 .q .r {}
-.p, .q {
-  .r {}
+
+.p,
+.q {
+	.r {}
 }
 
 /* 13. Sibling combinator via nesting: `h3 ~ p {}` == `h3 { & ~ p {} }` */
-h3 ~ p {}
+h3~p {}
+
 h3 {
-  & ~ p {}
+	&~p {}
 }
 
 /* 14. Duplicate with attribute selector */
 [type="text"] {}
+
 [type="text"] {}
 
 /* 15. Duplicate with ID and class compound selector */
 #main .content {}
+
 #main {
-  .content {}
+	.content {}
 }
 
 /* 16. Duplicate inside the same @scope block */
 @scope (.theme-dark) {
-  .card {}
-  .card {}
+	.card {}
+
+	.card {}
 }
+
+/* 17. The same selector three times is reported once with every repetition */
+.triple {}
+
+.triple {}
+
+.triple {}
+
+/* 18. Several different duplicated selectors */
+.first {}
+
+.second {}
+
+.first {}
+
+.second {}
+
+.first {}
 
 ```
 
 # Diagnostics
 ```
-invalid.css:5:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".foo".
-  
-    3 │ /* 1. Basic duplicate: same selector twice in the same file */
-    4 │ .foo {}
-  > 5 │ .foo {}
-      │ ^^^^^^^
-    6 │ 
-    7 │ /* 2. Duplicate type selector */
-  
-  i It was first defined here.
+  ! The selector list ".foo" is defined more than once.
   
     3 │ /* 1. Basic duplicate: same selector twice in the same file */
   > 4 │ .foo {}
       │ ^^^^^^^
-    5 │ .foo {}
-    6 │ 
+    5 │ 
+    6 │ .foo {}
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    4 │ .foo {}
+    5 │ 
+  > 6 │ .foo {}
+      │ ^^^^^^^
+    7 │ 
+    8 │ /* 2. Duplicate type selector */
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
@@ -128,135 +174,114 @@ invalid.css:5:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━
 ```
 invalid.css:9:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list "div".
+  ! The selector list "div" is defined more than once.
   
-     7 │ /* 2. Duplicate type selector */
-     8 │ div { color: red; }
-   > 9 │ div { color: blue; }
-       │ ^^^^^^^^^^^^^^^^^^^^
-    10 │ 
-    11 │ /* 3. Duplicate inside same @media block */
+     8 │ /* 2. Duplicate type selector */
+   > 9 │ div {
+       │ ^^^^^
+  > 10 │ 	color: red;
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ div {
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-     7 │ /* 2. Duplicate type selector */
-   > 8 │ div { color: red; }
-       │ ^^^^^^^^^^^^^^^^^^^
-     9 │ div { color: blue; }
-    10 │ 
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
-  
-
-```
-
-```
-invalid.css:14:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector list ".bar".
-  
-    12 │ @media (min-width: 600px) {
-    13 │   .bar {}
-  > 14 │   .bar {}
-       │   ^^^^^^^
-    15 │ }
+    11 │ }
+    12 │ 
+  > 13 │ div {
+       │ ^^^^^
+  > 14 │ 	color: blue;
+  > 15 │ }
+       │ ^
     16 │ 
+    17 │ /* 3. Duplicate inside same @media block */
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-    11 │ /* 3. Duplicate inside same @media block */
-    12 │ @media (min-width: 600px) {
-  > 13 │   .bar {}
-       │   ^^^^^^^
-    14 │   .bar {}
-    15 │ }
+    43 │ /* 7. Type selector case-insensitivity: DIV == div */
+  > 44 │ DIV {
+       │ ^^^^^
+  > 45 │ 	color: red;
+  > 46 │ }
+       │ ^
+    47 │ 
+    48 │ div {
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    46 │ }
+    47 │ 
+  > 48 │ div {
+       │ ^^^^^
+  > 49 │ 	color: blue;
+  > 50 │ }
+       │ ^
+    51 │ 
+    52 │ /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-invalid.css:19:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:19:2 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".a, .b".
+  ! The selector list ".bar" is defined more than once.
   
-    17 │ /* 4. Selector list: same list in different order counts as duplicate */
-    18 │ .a, .b {}
-  > 19 │ .b, .a {}
-       │ ^^^^^^^^^
+    17 │ /* 3. Duplicate inside same @media block */
+    18 │ @media (min-width: 600px) {
+  > 19 │ 	.bar {}
+       │ 	^^^^^^^
     20 │ 
-    21 │ /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
+    21 │ 	.bar {}
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-    17 │ /* 4. Selector list: same list in different order counts as duplicate */
-  > 18 │ .a, .b {}
-       │ ^^^^^^^^^
-    19 │ .b, .a {}
+    19 │ 	.bar {}
     20 │ 
+  > 21 │ 	.bar {}
+       │ 	^^^^^^^
+    22 │ }
+    23 │ 
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
-  
-
-```
-
-```
-invalid.css:24:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector list "a b".
-  
-    22 │ a b {}
-    23 │ a {
-  > 24 │   & b {}
-       │   ^^^^^^
-    25 │ }
-    26 │ 
-  
-  i It was first defined here.
-  
-    21 │ /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
-  > 22 │ a b {}
-       │ ^^^^^^
-    23 │ a {
-    24 │   & b {}
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-invalid.css:29:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:25:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".a.b".
+  ! The selector list ".a, .b" is defined more than once.
   
-    27 │ /* 6. Compound selector ordering: .a.b == .b.a */
-    28 │ .a.b {}
-  > 29 │ .b.a {}
-       │ ^^^^^^^
+    24 │ /* 4. Selector list: same list in different order counts as duplicate */
+  > 25 │ .a,
+       │ ^^^
+  > 26 │ .b {}
+       │ ^^^^^
+    27 │ 
+    28 │ .b,
+  
+  i This rule repeats the same selector list.
+  
+    26 │ .b {}
+    27 │ 
+  > 28 │ .b,
+       │ ^^^
+  > 29 │ .a {}
+       │ ^^^^^
     30 │ 
-    31 │ /* 7. Type selector case-insensitivity: DIV == div */
+    31 │ /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
   
-  i It was first defined here.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-    27 │ /* 6. Compound selector ordering: .a.b == .b.a */
-  > 28 │ .a.b {}
-       │ ^^^^^^^
-    29 │ .b.a {}
-    30 │ 
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
@@ -264,189 +289,132 @@ invalid.css:29:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
 ```
 invalid.css:32:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list "div".
+  ! The selector list "a b" is defined more than once.
   
-    31 │ /* 7. Type selector case-insensitivity: DIV == div */
-  > 32 │ DIV { color: red; }
-       │ ^^^^^^^^^^^^^^^^^^^
-    33 │ div { color: blue; }
-    34 │ 
+    31 │ /* 5. Nesting resolved: `a { & b {} }` produces `a b`, same as explicit `a b {}` */
+  > 32 │ a b {}
+       │ ^^^^^^
+    33 │ 
+    34 │ a {
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-     7 │ /* 2. Duplicate type selector */
-   > 8 │ div { color: red; }
-       │ ^^^^^^^^^^^^^^^^^^^
-     9 │ div { color: blue; }
-    10 │ 
+    34 │ a {
+  > 35 │ 	& b {}
+       │ 	^^^^^^
+    36 │ }
+    37 │ 
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
-  
-
-```
-
-```
-invalid.css:33:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector list "div".
-  
-    31 │ /* 7. Type selector case-insensitivity: DIV == div */
-    32 │ DIV { color: red; }
-  > 33 │ div { color: blue; }
-       │ ^^^^^^^^^^^^^^^^^^^^
-    34 │ 
-    35 │ /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
-  
-  i It was first defined here.
-  
-     7 │ /* 2. Duplicate type selector */
-   > 8 │ div { color: red; }
-       │ ^^^^^^^^^^^^^^^^^^^
-     9 │ div { color: blue; }
-    10 │ 
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-invalid.css:38:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:39:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".nav .link".
+  ! The selector list ".a.b" is defined more than once.
   
-    36 │ .nav .link {}
-    37 │ .nav {
-  > 38 │   .link {}
-       │   ^^^^^^^^
-    39 │ }
+    38 │ /* 6. Compound selector ordering: .a.b == .b.a */
+  > 39 │ .a.b {}
+       │ ^^^^^^^
     40 │ 
+    41 │ .b.a {}
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-    35 │ /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
-  > 36 │ .nav .link {}
+    39 │ .a.b {}
+    40 │ 
+  > 41 │ .b.a {}
+       │ ^^^^^^^
+    42 │ 
+    43 │ /* 7. Type selector case-insensitivity: DIV == div */
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:53:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list ".nav .link" is defined more than once.
+  
+    52 │ /* 8. Descendant via nesting: `.nav .link {}` == `.nav { .link {} }` */
+  > 53 │ .nav .link {}
        │ ^^^^^^^^^^^^^
-    37 │ .nav {
-    38 │   .link {}
+    54 │ 
+    55 │ .nav {
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    55 │ .nav {
+  > 56 │ 	.link {}
+       │ 	^^^^^^^^
+    57 │ }
+    58 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-invalid.css:45:5 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:60:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".x .y .z".
+  ! The selector list ".x .y .z" is defined more than once.
   
-    43 │ .x {
-    44 │   .y {
-  > 45 │     .z {}
-       │     ^^^^^
-    46 │   }
-    47 │ }
-  
-  i It was first defined here.
-  
-    41 │ /* 9. Multi-level nesting: `.x .y .z {}` == `.x { .y { .z {} } }` */
-  > 42 │ .x .y .z {}
+    59 │ /* 9. Multi-level nesting: `.x .y .z {}` == `.x { .y { .z {} } }` */
+  > 60 │ .x .y .z {}
        │ ^^^^^^^^^^^
-    43 │ .x {
-    44 │   .y {
+    61 │ 
+    62 │ .x {
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+    62 │ .x {
+    63 │ 	.y {
+  > 64 │ 		.z {}
+       │ 		^^^^^
+    65 │ 	}
+    66 │ }
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-invalid.css:53:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:70:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list "button:hover".
+  ! The selector list "button:hover" is defined more than once.
   
-    51 │ button:hover {}
-    52 │ button {
-  > 53 │   &:hover {}
-       │   ^^^^^^^^^^
-    54 │ }
-    55 │ 
-  
-  i It was first defined here.
-  
-    49 │ /* 10. Nesting with ampersand and pseudo-class:
-    50 │    `button:hover {}` == `button { &:hover {} }` */
-  > 51 │ button:hover {}
+    68 │ /* 10. Nesting with ampersand and pseudo-class:
+    69 │    `button:hover {}` == `button { &:hover {} }` */
+  > 70 │ button:hover {}
        │ ^^^^^^^^^^^^^^^
-    52 │ button {
-    53 │   &:hover {}
+    71 │ 
+    72 │ button {
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i This rule repeats the same selector list.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
-  
-
-```
-
-```
-invalid.css:60:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector list "span::before".
-  
-    58 │ span::before {}
-    59 │ span {
-  > 60 │   &::before {}
-       │   ^^^^^^^^^^^^
-    61 │ }
-    62 │ 
-  
-  i It was first defined here.
-  
-    56 │ /* 11. Nesting with ampersand and pseudo-element:
-    57 │    `span::before {}` == `span { &::before {} }` */
-  > 58 │ span::before {}
-       │ ^^^^^^^^^^^^^^^
-    59 │ span {
-    60 │   &::before {}
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
-  
-
-```
-
-```
-invalid.css:73:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector list "h3 ~ p".
-  
-    71 │ h3 ~ p {}
-    72 │ h3 {
-  > 73 │   & ~ p {}
-       │   ^^^^^^^^
+    72 │ button {
+  > 73 │ 	&:hover {}
+       │ 	^^^^^^^^^^
     74 │ }
     75 │ 
   
-  i It was first defined here.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-    70 │ /* 13. Sibling combinator via nesting: `h3 ~ p {}` == `h3 { & ~ p {} }` */
-  > 71 │ h3 ~ p {}
-       │ ^^^^^^^^^
-    72 │ h3 {
-    73 │   & ~ p {}
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
@@ -454,81 +422,232 @@ invalid.css:73:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
 ```
 invalid.css:78:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list "[type="text"]".
+  ! The selector list "span::before" is defined more than once.
   
-    76 │ /* 14. Duplicate with attribute selector */
-    77 │ [type="text"] {}
-  > 78 │ [type="text"] {}
-       │ ^^^^^^^^^^^^^^^^
+    76 │ /* 11. Nesting with ampersand and pseudo-element:
+    77 │    `span::before {}` == `span { &::before {} }` */
+  > 78 │ span::before {}
+       │ ^^^^^^^^^^^^^^^
     79 │ 
-    80 │ /* 15. Duplicate with ID and class compound selector */
+    80 │ span {
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-    76 │ /* 14. Duplicate with attribute selector */
-  > 77 │ [type="text"] {}
-       │ ^^^^^^^^^^^^^^^^
-    78 │ [type="text"] {}
-    79 │ 
+    80 │ span {
+  > 81 │ 	&::before {}
+       │ 	^^^^^^^^^^^^
+    82 │ }
+    83 │ 
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
-  
-
-```
-
-```
-invalid.css:83:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Duplicate selector list "#main .content".
-  
-    81 │ #main .content {}
-    82 │ #main {
-  > 83 │   .content {}
-       │   ^^^^^^^^^^^
-    84 │ }
-    85 │ 
-  
-  i It was first defined here.
-  
-    80 │ /* 15. Duplicate with ID and class compound selector */
-  > 81 │ #main .content {}
-       │ ^^^^^^^^^^^^^^^^^
-    82 │ #main {
-    83 │   .content {}
-  
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
-  
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
 
 ```
-invalid.css:89:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:95:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate selector list ".card".
+  ! The selector list "h3 ~ p" is defined more than once.
   
-    87 │ @scope (.theme-dark) {
-    88 │   .card {}
-  > 89 │   .card {}
-       │   ^^^^^^^^
-    90 │ }
-    91 │ 
+    94 │ /* 13. Sibling combinator via nesting: `h3 ~ p {}` == `h3 { & ~ p {} }` */
+  > 95 │ h3~p {}
+       │ ^^^^^^^
+    96 │ 
+    97 │ h3 {
   
-  i It was first defined here.
+  i This rule repeats the same selector list.
   
-    86 │ /* 16. Duplicate inside the same @scope block */
-    87 │ @scope (.theme-dark) {
-  > 88 │   .card {}
-       │   ^^^^^^^^
-    89 │   .card {}
-    90 │ }
+     97 │ h3 {
+   > 98 │ 	&~p {}
+        │ 	^^^^^^
+     99 │ }
+    100 │ 
   
-  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
-  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:102:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list "[type="text"]" is defined more than once.
+  
+    101 │ /* 14. Duplicate with attribute selector */
+  > 102 │ [type="text"] {}
+        │ ^^^^^^^^^^^^^^^^
+    103 │ 
+    104 │ [type="text"] {}
+  
+  i This rule repeats the same selector list.
+  
+    102 │ [type="text"] {}
+    103 │ 
+  > 104 │ [type="text"] {}
+        │ ^^^^^^^^^^^^^^^^
+    105 │ 
+    106 │ /* 15. Duplicate with ID and class compound selector */
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:107:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list "#main .content" is defined more than once.
+  
+    106 │ /* 15. Duplicate with ID and class compound selector */
+  > 107 │ #main .content {}
+        │ ^^^^^^^^^^^^^^^^^
+    108 │ 
+    109 │ #main {
+  
+  i This rule repeats the same selector list.
+  
+    109 │ #main {
+  > 110 │ 	.content {}
+        │ 	^^^^^^^^^^^
+    111 │ }
+    112 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:115:2 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list ".card" is defined more than once.
+  
+    113 │ /* 16. Duplicate inside the same @scope block */
+    114 │ @scope (.theme-dark) {
+  > 115 │ 	.card {}
+        │ 	^^^^^^^^
+    116 │ 
+    117 │ 	.card {}
+  
+  i This rule repeats the same selector list.
+  
+    115 │ 	.card {}
+    116 │ 
+  > 117 │ 	.card {}
+        │ 	^^^^^^^^
+    118 │ }
+    119 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:121:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list ".triple" is defined more than once.
+  
+    120 │ /* 17. The same selector three times is reported once with every repetition */
+  > 121 │ .triple {}
+        │ ^^^^^^^^^^
+    122 │ 
+    123 │ .triple {}
+  
+  i This rule repeats the same selector list.
+  
+    121 │ .triple {}
+    122 │ 
+  > 123 │ .triple {}
+        │ ^^^^^^^^^^
+    124 │ 
+    125 │ .triple {}
+  
+  i This rule repeats the same selector list.
+  
+    123 │ .triple {}
+    124 │ 
+  > 125 │ .triple {}
+        │ ^^^^^^^^^^
+    126 │ 
+    127 │ /* 18. Several different duplicated selectors */
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:128:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list ".first" is defined more than once.
+  
+    127 │ /* 18. Several different duplicated selectors */
+  > 128 │ .first {}
+        │ ^^^^^^^^^
+    129 │ 
+    130 │ .second {}
+  
+  i This rule repeats the same selector list.
+  
+    130 │ .second {}
+    131 │ 
+  > 132 │ .first {}
+        │ ^^^^^^^^^
+    133 │ 
+    134 │ .second {}
+  
+  i This rule repeats the same selector list.
+  
+    134 │ .second {}
+    135 │ 
+  > 136 │ .first {}
+        │ ^^^^^^^^^
+    137 │ 
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
+  
+
+```
+
+```
+invalid.css:130:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The selector list ".second" is defined more than once.
+  
+    128 │ .first {}
+    129 │ 
+  > 130 │ .second {}
+        │ ^^^^^^^^^^
+    131 │ 
+    132 │ .first {}
+  
+  i This rule repeats the same selector list.
+  
+    132 │ .first {}
+    133 │ 
+  > 134 │ .second {}
+        │ ^^^^^^^^^^
+    135 │ 
+    136 │ .first {}
+  
+  i Declarations in the later rules can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
+  i Remove or merge the duplicate rules to keep the stylesheet clean.
   
 
 ```
