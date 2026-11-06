@@ -3530,6 +3530,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArrayMethodsOnArgumentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArrayMethodsOnArgumentsOptions" }
+			]
+		},
+		"NoArrayMethodsOnArgumentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoArraySortForMinMaxConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8762,6 +8772,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noArrayMethodsOnArguments": {
+					"description": "Disallow calling array methods on the arguments object.\nSee https://biomejs.dev/linter/rules/no-array-methods-on-arguments",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArrayMethodsOnArgumentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noArraySortForMinMax": {
 					"description": "Disallow sorting an array only to read its smallest or largest value.\nSee https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
 					"anyOf": [
@@ -11648,6 +11665,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoArrayIndexKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoArrayMethodsOnArgumentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArrayMethodsOnArgumentsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

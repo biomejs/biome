@@ -2963,6 +2963,11 @@ export interface Nursery {
 	 */
 	noArrayForEach?: NoArrayForEachConfiguration;
 	/**
+	 * Disallow calling array methods on the arguments object.
+	 * See https://biomejs.dev/linter/rules/no-array-methods-on-arguments
+	 */
+	noArrayMethodsOnArguments?: NoArrayMethodsOnArgumentsConfiguration;
+	/**
 	 * Disallow sorting an array only to read its smallest or largest value.
 	 * See https://biomejs.dev/linter/rules/no-array-sort-for-min-max
 	 */
@@ -6477,6 +6482,9 @@ export type NoArgumentsCallerOrCalleeConfiguration =
 export type NoArrayForEachConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArrayForEachOptions;
+export type NoArrayMethodsOnArgumentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArrayMethodsOnArgumentsOptions;
 export type NoArraySortForMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoArraySortForMinMaxOptions;
@@ -9380,6 +9388,10 @@ export interface RuleWithNoArgumentsCallerOrCalleeOptions {
 export interface RuleWithNoArrayForEachOptions {
 	level: RulePlainConfiguration;
 	options?: NoArrayForEachOptions;
+}
+export interface RuleWithNoArrayMethodsOnArgumentsOptions {
+	level: RulePlainConfiguration;
+	options?: NoArrayMethodsOnArgumentsOptions;
 }
 export interface RuleWithNoArraySortForMinMaxOptions {
 	/**
@@ -12795,6 +12807,7 @@ export type UseYieldOptions = {};
 export type NoAccidentalBitwiseOperatorsOptions = {};
 export type NoArgumentsCallerOrCalleeOptions = {};
 export type NoArrayForEachOptions = {};
+export type NoArrayMethodsOnArgumentsOptions = {};
 export type NoArraySortForMinMaxOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
@@ -15000,6 +15013,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAccidentalBitwiseOperators"
 	| "lint/nursery/noArgumentsCallerOrCallee"
+	| "lint/nursery/noArrayMethodsOnArguments"
 	| "lint/nursery/noArrayForEach"
 	| "lint/nursery/noArraySortForMinMax"
 	| "lint/nursery/noAstroConflictingSetDirectives"
