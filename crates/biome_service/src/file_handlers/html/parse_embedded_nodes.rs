@@ -25,6 +25,7 @@ use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind, SvelteFi
 use biome_languages::{CssFileSource, HtmlFileSource, JsFileSource, JsonFileSource};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList};
+use std::borrow::Cow;
 
 pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedResult {
     let ParseEmbeddedParams {
@@ -1100,6 +1101,190 @@ fn merge_js_file_source(a: JsFileSource, b: JsFileSource) -> JsFileSource {
     }
 }
 
+fn html_quote_reference(source: &[u8]) -> Option<(usize, u8)> {
+    if source.starts_with(b"&quot;") || source.starts_with(b"&QUOT;") {
+        return Some((6, b'"'));
+    }
+    if source.starts_with(b"&apos;") {
+        return Some((6, b'\''));
+    }
+    if !source.starts_with(b"&#") {
+        return None;
+    }
+
+    let semicolon = source.iter().position(|byte| *byte == b';')?;
+    let (digits, radix) = if source
+        .get(2)
+        .is_some_and(|byte| matches!(byte, b'x' | b'X'))
+    {
+        (&source[3..semicolon], 16)
+    } else {
+        (&source[2..semicolon], 10)
+    };
+    let length = semicolon + 1;
+    if !(5..=7).contains(&length) {
+        return None;
+    }
+    let value = u32::from_str_radix(std::str::from_utf8(digits).ok()?, radix).ok()?;
+    match value {
+        0x22 => Some((length, b'"')),
+        0x27 => Some((length, b'\'')),
+        _ => None,
+    }
+}
+
+fn quote_hex_digits(quote: u8) -> &'static [u8; 2] {
+    match quote {
+        b'"' => b"22",
+        b'\'' => b"27",
+        _ => unreachable!(),
+    }
+}
+
+fn push_string_quote(output: &mut Vec<u8>, length: usize, quote: u8) {
+    let digits = quote_hex_digits(quote);
+    output.push(b'\\');
+    output.resize(output.len() + length - 4, b'0');
+    output.extend_from_slice(digits);
+    output.push(b' ');
+}
+
+fn push_escaped_quote(output: &mut Vec<u8>, length: usize, quote: u8) {
+    let digits = quote_hex_digits(quote);
+    match length {
+        5 => {
+            output.extend_from_slice(b"00");
+            output.extend_from_slice(digits);
+            output.push(b' ');
+        }
+        6 => {
+            output.extend_from_slice(b"0000");
+            output.extend_from_slice(digits);
+        }
+        7 => {
+            output.extend_from_slice(b"0000");
+            output.extend_from_slice(digits);
+            output.push(b' ');
+        }
+        _ => unreachable!(),
+    }
+}
+
+/// Decodes quote character references without changing the source byte length.
+///
+/// Equal-length text keeps embedded CSS ranges aligned with the host document. Padding is
+/// placed outside quoted strings, while escaped quotes use fixed-width CSS escapes.
+fn normalize_style_attribute_quotes(source: &str) -> Cow<'_, str> {
+    if !source.contains('&') {
+        return Cow::Borrowed(source);
+    }
+
+    let bytes = source.as_bytes();
+    let mut output = Vec::with_capacity(bytes.len());
+    let mut quote = None;
+    let mut in_comment = false;
+    let mut index = 0;
+
+    while index < bytes.len() {
+        if in_comment {
+            if bytes[index..].starts_with(b"*/") {
+                output.extend_from_slice(b"*/");
+                in_comment = false;
+                index += 2;
+            } else {
+                output.push(bytes[index]);
+                index += 1;
+            }
+            continue;
+        }
+
+        if let Some(delimiter) = quote {
+            match bytes[index] {
+                b'\\' => {
+                    output.push(b'\\');
+                    index += 1;
+                    if let Some((length, decoded)) = html_quote_reference(&bytes[index..]) {
+                        push_escaped_quote(&mut output, length, decoded);
+                        index += length;
+                    } else if index < bytes.len() {
+                        output.push(bytes[index]);
+                        index += 1;
+                    }
+                }
+                byte if byte == delimiter => {
+                    output.push(byte);
+                    quote = None;
+                    index += 1;
+                }
+                b'&' => {
+                    if let Some((length, decoded)) = html_quote_reference(&bytes[index..]) {
+                        if decoded == delimiter {
+                            output.push(decoded);
+                            output.resize(output.len() + length - 1, b' ');
+                            quote = None;
+                        } else {
+                            push_string_quote(&mut output, length, decoded);
+                        }
+                        index += length;
+                    } else {
+                        output.push(b'&');
+                        index += 1;
+                    }
+                }
+                byte => {
+                    output.push(byte);
+                    index += 1;
+                }
+            }
+            continue;
+        }
+
+        if bytes[index..].starts_with(b"/*") {
+            output.extend_from_slice(b"/*");
+            in_comment = true;
+            index += 2;
+            continue;
+        }
+
+        match bytes[index] {
+            b'\\' => {
+                output.push(b'\\');
+                index += 1;
+                if let Some((length, decoded)) = html_quote_reference(&bytes[index..]) {
+                    push_escaped_quote(&mut output, length, decoded);
+                    index += length;
+                } else if index < bytes.len() {
+                    output.push(bytes[index]);
+                    index += 1;
+                }
+            }
+            delimiter @ (b'"' | b'\'') => {
+                output.push(delimiter);
+                quote = Some(delimiter);
+                index += 1;
+            }
+            b'&' => {
+                if let Some((length, decoded)) = html_quote_reference(&bytes[index..]) {
+                    output.resize(output.len() + length - 1, b' ');
+                    output.push(decoded);
+                    quote = Some(decoded);
+                    index += length;
+                } else {
+                    output.push(b'&');
+                    index += 1;
+                }
+            }
+            byte => {
+                output.push(byte);
+                index += 1;
+            }
+        }
+    }
+
+    debug_assert_eq!(output.len(), source.len());
+    Cow::Owned(String::from_utf8(output).expect("style attribute source remains UTF-8"))
+}
+
 fn embedded_css_file_source(
     host_file_source: &HtmlFileSource,
     candidate: &EmbedCandidate,
@@ -1358,8 +1543,13 @@ fn parse_matched_embed(
                     options.css_modules = CssModulesKind::Classic;
                 }
             }
+            let source = if css_source.as_embedding_kind().is_html_style_attribute() {
+                normalize_style_attribute_quotes(content.text.text())
+            } else {
+                Cow::Borrowed(content.text.text())
+            };
             let parse = parse_css_with_offset_and_cache(
-                content.text.text(),
+                &source,
                 css_source,
                 content.content_offset,
                 ctx.cache,
