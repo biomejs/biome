@@ -73,7 +73,7 @@ use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
     HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
-    format_node,
+    format_node, format_node_with_verbatim_ranges,
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
@@ -825,11 +825,25 @@ fn format_embedded(
     // The HTML formatter writes a placeholder for each snippet, and the closure
     // below replaces it with the formatted code. A snippet that can't be
     // formatted keeps the HTML formatter's output.
-    let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
-        .into_iter()
-        .map(|snippet| (snippet.content_range(), snippet))
-        .collect();
-    let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
+    let preserve_failed_snippets = document_file_source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_astro());
+    let mut snippets = FxHashMap::default();
+    let mut verbatim_snippet_ranges = Vec::new();
+    for snippet in embedded_nodes {
+        let range = snippet.content_range();
+        if preserve_failed_snippets && snippet.parsed_origin().parse(&workspace_db).has_errors() {
+            verbatim_snippet_ranges.push(range);
+        } else {
+            snippets.insert(range, snippet);
+        }
+    }
+    let mut formatted = format_node_with_verbatim_ranges(
+        options,
+        &tree,
+        snippets.keys().copied().collect(),
+        verbatim_snippet_ranges,
+    )?;
     formatted.format_embedded(move |range| {
         let snippet = snippets.get(&range)?;
         let snippet_file_source = snippet.file_source(&workspace_db)?;
