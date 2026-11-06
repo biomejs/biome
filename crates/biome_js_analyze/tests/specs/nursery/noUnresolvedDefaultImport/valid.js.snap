@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import foo from "./validDefaultExport.js";
+import foo2, { bar } from "./validDefaultExport.js";
+import foo3, * as namespace from "./validDefaultExport.js";
+import named from "./validNamedDefaultExport.js";
+import reexported from "./validReexportDefault.js";
+import commonJs from "./validCommonJs.cjs";
+import unknown from "./validReexportDefaultUnresolved.js";
+import styles from "./styles.module.css";
+import missing from "./doesNotExist.js";
+import fs from "node:fs";
+import pkg from "some-package";
+import { baz } from "./validNamedExports.js";
+import * as namespace2 from "./validNamedExports.js";
+import { default as renamed } from "./validNamedExports.js";
+import "./validNamedExports.js";
+import source wasm from "./validNamedExports.js";
+
+```

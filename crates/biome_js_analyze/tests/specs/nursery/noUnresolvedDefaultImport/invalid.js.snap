@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import foo from "./validNamedExports.js";
+import foo2, { bar } from "./validNamedExports.js";
+import foo3, * as namespace from "./validNamedExports.js";
+import reexportedAll from "./validReexportAll.js";
+import brokenReexport from "./validReexportMissingDefault.js";
+import sideEffects from "./validSideEffects.js";
+import reexportedAllUnresolved from "./validReexportAllUnresolved.js";
+
+```
+
+# Diagnostics
+```
+invalid.js:2:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validNamedExports.js has no default export.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import foo from "./validNamedExports.js";
+      │        ^^^
+    3 │ import foo2, { bar } from "./validNamedExports.js";
+    4 │ import foo3, * as namespace from "./validNamedExports.js";
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validNamedExports.js has no default export.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import foo from "./validNamedExports.js";
+  > 3 │ import foo2, { bar } from "./validNamedExports.js";
+      │        ^^^^
+    4 │ import foo3, * as namespace from "./validNamedExports.js";
+    5 │ import reexportedAll from "./validReexportAll.js";
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validNamedExports.js has no default export.
+  
+    2 │ import foo from "./validNamedExports.js";
+    3 │ import foo2, { bar } from "./validNamedExports.js";
+  > 4 │ import foo3, * as namespace from "./validNamedExports.js";
+      │        ^^^^
+    5 │ import reexportedAll from "./validReexportAll.js";
+    6 │ import brokenReexport from "./validReexportMissingDefault.js";
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validReexportAll.js has no default export.
+  
+    3 │ import foo2, { bar } from "./validNamedExports.js";
+    4 │ import foo3, * as namespace from "./validNamedExports.js";
+  > 5 │ import reexportedAll from "./validReexportAll.js";
+      │        ^^^^^^^^^^^^^
+    6 │ import brokenReexport from "./validReexportMissingDefault.js";
+    7 │ import sideEffects from "./validSideEffects.js";
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validReexportMissingDefault.js has no default export.
+  
+    4 │ import foo3, * as namespace from "./validNamedExports.js";
+    5 │ import reexportedAll from "./validReexportAll.js";
+  > 6 │ import brokenReexport from "./validReexportMissingDefault.js";
+      │        ^^^^^^^^^^^^^^
+    7 │ import sideEffects from "./validSideEffects.js";
+    8 │ import reexportedAllUnresolved from "./validReexportAllUnresolved.js";
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validSideEffects.js has no default export.
+  
+    5 │ import reexportedAll from "./validReexportAll.js";
+    6 │ import brokenReexport from "./validReexportMissingDefault.js";
+  > 7 │ import sideEffects from "./validSideEffects.js";
+      │        ^^^^^^^^^^^
+    8 │ import reexportedAllUnresolved from "./validReexportAllUnresolved.js";
+    9 │ 
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:8 lint/nursery/noUnresolvedDefaultImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module ./validReexportAllUnresolved.js has no default export.
+  
+    6 │ import brokenReexport from "./validReexportMissingDefault.js";
+    7 │ import sideEffects from "./validSideEffects.js";
+  > 8 │ import reexportedAllUnresolved from "./validReexportAllUnresolved.js";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i This import fails when the code runs, or the imported value is undefined, depending on the tool that loads the code.
+  
+  i Import one of the named exports of the module instead, or add a default export to the module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
