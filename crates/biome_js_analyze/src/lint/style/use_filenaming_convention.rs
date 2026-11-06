@@ -1,5 +1,7 @@
 use crate::services::semantic::SemanticServices;
-use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleExecutionScope, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
@@ -152,6 +154,10 @@ impl Rule for UseFilenamingConvention {
     type State = FileNamingConventionState;
     type Signals = Option<Self::State>;
     type Options = UseFilenamingConventionOptions;
+
+    fn execution_scope() -> RuleExecutionScope {
+        RuleExecutionScope::HostDocument
+    }
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let file_name = ctx.file_path().file_name()?;
