@@ -327,7 +327,10 @@ fn css_class_traversal_collects_each_reachable_importer_once() {
                 "import './lazy.css'; export const load = () => import('./leaf.js');",
             ),
             ("/cycle-a.js", "import './leaf.js'; import './cycle-b.js';"),
-            ("/cycle-b.js", "import './cycle-a.js'; import './cycle.css';"),
+            (
+                "/cycle-b.js",
+                "import './cycle-a.js'; import './cycle.css';",
+            ),
             (
                 "/types.ts",
                 "import type { leaf } from './leaf.js'; import './types.css';",

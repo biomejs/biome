@@ -59,7 +59,10 @@ pub struct ImportTreeNode {
 /// module provides its linked stylesheets, the CSS files its scripts import,
 /// and the classes of its global inline styles. The global styles step is
 /// returned even when it contains no classes. A CSS module provides nothing.
-pub(crate) fn provided_css_class_steps(db: &dyn ModuleDb, importer: ModuleInfo) -> Vec<CssClassStep> {
+pub(crate) fn provided_css_class_steps(
+    db: &dyn ModuleDb,
+    importer: ModuleInfo,
+) -> Vec<CssClassStep> {
     match importer.kind(db) {
         ModuleInfoKind::Js(js_info) => js_info
             .import_paths
