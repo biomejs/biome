@@ -1,0 +1,10 @@
+---
+export const helper = () => {};
+export default interface Props {
+    title: string;
+}
+---
+<!-- should not generate diagnostics -->
+<script>
+export default function clientOnly() {}
+</script>
