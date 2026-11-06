@@ -23,6 +23,7 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
         RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useInlineScriptId"),
+        RuleFilter::Rule("nursery", "useNextScriptForGoogleAnalytics"),
         RuleFilter::Rule("performance", "noImgElement"),
         RuleFilter::Rule("performance", "noSyncScripts"),
         RuleFilter::Rule("performance", "noUnwantedPolyfillio"),

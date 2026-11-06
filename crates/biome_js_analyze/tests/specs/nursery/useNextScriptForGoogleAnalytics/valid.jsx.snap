@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+import Script from "next/script";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
+
+<GoogleAnalytics gaId="G-XYZ" />;
+
+<GoogleTagManager gtmId="GTM-XYZ" />;
+
+<Script src="https://www.googletagmanager.com/gtag/js?id=G-XYZ" strategy="lazyOnload" />;
+
+<Script id="google-analytics">
+	{`
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){window.dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'G-XYZ');
+	`}
+</Script>;
+
+<script src="https://example.com/script.js" />;
+
+<script async src={trackingScriptUrl} />;
+
+<script dangerouslySetInnerHTML={{}} />;
+
+<script
+	dangerouslySetInnerHTML={{
+		__html: `
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'G-XYZ');
+		`,
+	}}
+/>;
+
+<script dangerouslySetInnerHTML={createGoogleAnalyticsMarkup()} />;
+
+<div src="https://www.googletagmanager.com/gtag/js?id=G-XYZ" />;
+
+```
