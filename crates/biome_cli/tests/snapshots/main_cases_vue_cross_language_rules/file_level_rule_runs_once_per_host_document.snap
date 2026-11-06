@@ -1,0 +1,140 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=style/useFilenamingConvention FooBar.vue BarBaz.astro Exported.vue OnlyExpressions.vue
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "linter": { "enabled": true }
+  },
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "style": { "useFilenamingConvention": "error" }
+    }
+  }
+}
+```
+
+## `BarBaz.astro`
+
+```astro
+---
+const a = 1;
+---
+<span>{a}</span>
+<span>{a}</span>
+<span>{a}</span>
+
+```
+
+## `Exported.vue`
+
+```vue
+<template>
+  <span>{{ Exported }}</span>
+</template>
+
+<script>
+export const Exported = 1;
+</script>
+
+```
+
+## `FooBar.vue`
+
+```vue
+<script setup>
+const a = 1;
+</script>
+
+<template>
+  <span>{{ a }}</span>
+  <span>{{ a }}</span>
+  <span>{{ a }}</span>
+</template>
+
+```
+
+## `OnlyExpressions.vue`
+
+```vue
+<template>
+  <span>{{ first }}</span>
+  <span>{{ second }}</span>
+  <span>{{ third }}</span>
+</template>
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+BarBaz.astro lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+  i A consistent filename style makes files easier to find. It also avoids problems on file systems that ignore letter case.
+  
+  i The filename could be renamed to one of the following names:
+    bar-baz.astro
+    barBaz.astro
+    bar_baz.astro
+  
+
+```
+
+```block
+FooBar.vue lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+  i A consistent filename style makes files easier to find. It also avoids problems on file systems that ignore letter case.
+  
+  i The filename could be renamed to one of the following names:
+    foo-bar.vue
+    fooBar.vue
+    foo_bar.vue
+  
+
+```
+
+```block
+OnlyExpressions.vue lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+  i A consistent filename style makes files easier to find. It also avoids problems on file systems that ignore letter case.
+  
+  i The filename could be renamed to one of the following names:
+    only-expressions.vue
+    onlyExpressions.vue
+    only_expressions.vue
+  
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 3 errors.
+```
