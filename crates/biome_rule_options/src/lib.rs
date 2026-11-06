@@ -521,6 +521,7 @@ pub mod use_consistent_method_signatures;
 pub mod use_consistent_object_definitions;
 pub mod use_consistent_object_keys;
 pub mod use_consistent_test_it;
+pub mod use_consistent_tuple_labels;
 pub mod use_consistent_type_definitions;
 pub mod use_consistent_unicode_bom;
 pub mod use_const;
