@@ -465,6 +465,7 @@ define_categories! {
     "lint/nursery/useNextScriptForGoogleAnalytics": "https://biomejs.dev/linter/rules/use-next-script-for-google-analytics",
     "lint/nursery/useNullishCoalescing": "https://biomejs.dev/linter/rules/use-nullish-coalescing",
     "lint/nursery/usePackageJsonCpu": "https://biomejs.dev/linter/rules/use-package-json-cpu",
+    "lint/nursery/usePackageJsonEngines": "https://biomejs.dev/linter/rules/use-package-json-engines",
     "lint/nursery/useObjectFromEntries": "https://biomejs.dev/linter/rules/use-object-from-entries",
     "lint/nursery/usePackageJsonValidCpu": "https://biomejs.dev/linter/rules/use-package-json-valid-cpu",
     "lint/nursery/usePackageJsonValidEngines": "https://biomejs.dev/linter/rules/use-package-json-valid-engines",
