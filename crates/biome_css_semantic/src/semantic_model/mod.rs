@@ -229,6 +229,28 @@ mod tests {
     }
 
     #[test]
+    fn test_scss_custom_property_prefixes() {
+        let parse = parse_css(
+            r#".a {
+  --color-#{$name}: red;
+  --#{$name}: blue;
+  --size-/* comment */#{$name}: 1px;
+}"#,
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let prefixes: Vec<_> = model
+            .custom_property_prefixes()
+            .map(|(prefix, _)| prefix.text())
+            .collect();
+
+        assert_eq!(prefixes, ["--color-", "--", "--size-"]);
+    }
+
+    #[test]
     fn test_scss_functions() {
         let parse = parse_css(
             r#"@function rem_from_px($px) { @return $px; }

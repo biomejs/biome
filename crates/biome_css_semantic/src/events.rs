@@ -5,13 +5,14 @@ use biome_css_syntax::{
     CssPropertyAtRule, CssQualifiedRule, CssRelativeSelectorList, CssSelectorList, CssString,
     CssSyntaxKind::*,
     CssSyntaxToken, ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssFunctionAtRule,
-    ScssInterpolation, ScssUnaryExpression, ScssVariable, decode_css_identifier,
+    ScssInterpolatedDashedIdentifier, ScssInterpolation, ScssUnaryExpression, ScssVariable,
+    decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
     single_expression_item,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, Text, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -64,6 +65,12 @@ pub enum SemanticEvent {
     /// An SCSS `@function` rule
     ScssFunctionDeclaration {
         name: CssSyntaxToken,
+    },
+    /// A custom property declaration whose name is interpolated after a static prefix, such as
+    /// `--color-#{$name}: red`, which declares custom properties that start with `--color-`.
+    CustomPropertyPrefixDeclaration {
+        prefix: Text,
+        range: TextRange,
     },
 }
 
@@ -183,9 +190,19 @@ impl SemanticEventExtractor {
                                     AnyCssDashedIdentifier::CssDashedIdentifier(name),
                                 ) => CssProperty::from(name),
                                 AnyCssDeclarationName::AnyCssDashedIdentifier(
-                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
-                                )
-                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+                                    AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(name),
+                                ) => {
+                                    if let Some(prefix) = custom_property_prefix(&name) {
+                                        self.stash.push_back(
+                                            SemanticEvent::CustomPropertyPrefixDeclaration {
+                                                prefix,
+                                                range: name.syntax().text_trimmed_range(),
+                                            },
+                                        );
+                                    }
+                                    return;
+                                }
+                                AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
                                 | AnyCssDeclarationName::CssMetavariable(_) => {
                                     return;
                                 }
@@ -415,4 +432,27 @@ fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {
         PropertySyntaxErrorKind::ExpectedString,
         range,
     ))
+}
+
+/// Returns the static part of an interpolated custom property name before its first interpolation,
+/// such as `--color-` for `--color-#{$name}`, or `None` if the name isn't a custom property.
+fn custom_property_prefix(name: &ScssInterpolatedDashedIdentifier) -> Option<Text> {
+    let mut parts = name
+        .items()
+        .iter()
+        .take_while(|part| part.as_scss_interpolation().is_none());
+    let first = parts.next()?;
+    let second = parts.next();
+    let prefix: Text = if second.is_none()
+        && let Some(identifier) = first.as_css_identifier()
+    {
+        identifier.value_token().ok()?.token_text_trimmed().into()
+    } else {
+        let mut prefix = String::new();
+        for part in std::iter::once(first).chain(second).chain(parts) {
+            prefix.push_str(part.syntax().first_token()?.text_trimmed());
+        }
+        prefix.into()
+    };
+    prefix.starts_with("--").then_some(prefix)
 }

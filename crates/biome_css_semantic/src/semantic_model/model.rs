@@ -8,8 +8,8 @@ use biome_css_syntax::{
     property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
-    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
-    declare_node_union,
+    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, Text, TextRange, TextSize,
+    TokenText, declare_node_union,
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
@@ -48,6 +48,15 @@ impl SemanticModel {
 
     pub fn global_custom_variables(&self) -> GlobalCustomVariables<'_> {
         GlobalCustomVariables { data: &self.data }
+    }
+
+    /// Returns the static prefixes of interpolated custom property names, such as `--color-` for
+    /// `--color-#{$name}`, with the range of each name.
+    pub fn custom_property_prefixes(&self) -> impl Iterator<Item = (&Text, TextRange)> {
+        self.data
+            .custom_property_prefixes
+            .iter()
+            .map(|(prefix, range)| (prefix, *range))
     }
 
     /// Returns declarations that assign values to custom properties.
@@ -149,8 +158,12 @@ pub(crate) struct SemanticModelData {
     pub(crate) all_rules: Vec<RuleData>,
     /// IDs of top-level rules only
     pub(crate) top_level_rule_ids: Vec<RuleId>,
-    /// Declarations parsed outside a rule, such as declarations in a `style` attribute.
+    /// Declarations parsed outside a rule, such as declarations in a `style` attribute, an SCSS
+    /// mixin body, or an SCSS `@include` block.
     pub(crate) root_declarations: Vec<CssModelDeclarationData>,
+    /// The static prefixes of interpolated custom property names, such as `--color-` for
+    /// `--color-#{$name}`, with the range of each name.
+    pub(crate) custom_property_prefixes: Vec<(Text, TextRange)>,
     /// Custom property names declared in `:root` or by an `@property` rule.
     ///
     /// The associated data retains the `:root` declaration. `@property` data is
@@ -199,6 +212,16 @@ impl PartialEq for SemanticModel {
                 .iter()
                 .zip(&other.data.root_declarations)
                 .all(|(this, other)| this.semantic_eq(other, &self_root, &other_root))
+            && self
+                .data
+                .custom_property_prefixes
+                .iter()
+                .map(|(prefix, _)| prefix)
+                .eq(other
+                    .data
+                    .custom_property_prefixes
+                    .iter()
+                    .map(|(prefix, _)| prefix))
             && self.data.range_to_rule_id.len() == other.data.range_to_rule_id.len()
             && self.data.at_property_rules.len() == other.data.at_property_rules.len()
             && self
