@@ -146,14 +146,14 @@ const mixed1 = true || false;  // Left side makes right irrelevant
 const mixed2 = false && true;  // Left side makes right irrelevant
 const mixed3 = null ?? "default";  // Left side is always nullish
 
-// Always truthy Pick/Omit object
+// Pick/Omit object shapes can also describe primitives, so they are not flagged
 declare const pickedObj: Pick<{a: string}, "a">;
 if (pickedObj) console.log(pickedObj.a);
 
 declare const omitObj: Omit<{a: string, b: number}, "b">;
 if (omitObj) console.log();
 
-// Always truthy Readonly/Partial object
+// Readonly/Partial object shapes are not flagged either
 declare const ro: Readonly<{a: string}>;
 if (ro) console.log();
 
@@ -167,7 +167,7 @@ if (!arrNotFalsy) {  // always false, should be flagged
 }
 
 const objNotFalsy = {};
-if (!objNotFalsy) {  // always false, should be flagged
+if (!objNotFalsy) {  // the type {} can also describe primitives, so not flagged
   console.log("never runs");
 }
 
@@ -986,7 +986,7 @@ invalid.ts:141:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   > 141 │ const mixed3 = null ?? "default";  // Left side is always nullish
         │                ^^^^
     142 │ 
-    143 │ // Always truthy Pick/Omit object
+    143 │ // Pick/Omit object shapes can also describe primitives, so they are not flagged
   
   i Drop ?? and the fallback expression.
   
@@ -995,83 +995,9 @@ invalid.ts:141:16 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   > 141 │ const mixed3 = null ?? "default";  // Left side is always nullish
         │                ^^^^
     142 │ 
-    143 │ // Always truthy Pick/Omit object
+    143 │ // Pick/Omit object shapes can also describe primitives, so they are not flagged
   
   i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
-  
-
-```
-
-```
-invalid.ts:145:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    143 │ // Always truthy Pick/Omit object
-    144 │ declare const pickedObj: Pick<{a: string}, "a">;
-  > 145 │ if (pickedObj) console.log(pickedObj.a);
-        │     ^^^^^^^^^
-    146 │ 
-    147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
-  
-
-```
-
-```
-invalid.ts:148:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    147 │ declare const omitObj: Omit<{a: string, b: number}, "b">;
-  > 148 │ if (omitObj) console.log();
-        │     ^^^^^^^
-    149 │ 
-    150 │ // Always truthy Readonly/Partial object
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
-  
-
-```
-
-```
-invalid.ts:152:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    150 │ // Always truthy Readonly/Partial object
-    151 │ declare const ro: Readonly<{a: string}>;
-  > 152 │ if (ro) console.log();
-        │     ^^
-    153 │ 
-    154 │ declare const partialObj2: Partial<{a: string}>;
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
-  
-
-```
-
-```
-invalid.ts:155:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    154 │ declare const partialObj2: Partial<{a: string}>;
-  > 155 │ if (partialObj2) console.log();
-        │     ^^^^^^^^^^^
-    156 │ 
-    157 │ // Falsy detection via logical-not on always-truthy operand
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-  i Remove the condition, or check the value you meant to test.
   
 
 ```
@@ -1087,24 +1013,6 @@ invalid.ts:159:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
         │     ^^^^^^^^^^^^
     160 │   console.log("never runs");
     161 │ }
-  
-  i The value's type can never be truthy, so this check is redundant.
-  
-  i Remove the condition and the code it guards, or check the value you meant to test.
-  
-
-```
-
-```
-invalid.ts:164:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always falsy.
-  
-    163 │ const objNotFalsy = {};
-  > 164 │ if (!objNotFalsy) {  // always false, should be flagged
-        │     ^^^^^^^^^^^^
-    165 │   console.log("never runs");
-    166 │ }
   
   i The value's type can never be truthy, so this check is redundant.
   
