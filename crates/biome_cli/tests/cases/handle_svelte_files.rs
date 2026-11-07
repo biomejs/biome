@@ -374,6 +374,59 @@ fn full_support_preserves_const_tag_assignments() {
 }
 
 #[test]
+fn formats_typed_const_tags() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        br#"{ "html": { "experimentalFullSupportEnabled": true, "formatter": { "enabled": true } } }"#,
+    );
+    let path = Utf8Path::new("file.svelte");
+    fs.insert(
+        path.into(),
+        br#"<script lang="ts">
+const items = [1, 2, 3];
+</script>
+
+{#each items as item}
+    {@const doubled  :  number=item*2}
+    {@const cells:Record<string,typeof item>={value:item}}
+    {@const {value}: {value:number}=cells}
+    {@const [first]:number[]=[item]}
+    <span>{doubled}{cells.value}{value}{first}</span>
+{/each}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let (fs, lint_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=correctness/noUndeclaredVariables",
+                path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(lint_result.is_ok(), "run_cli returned {lint_result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "formats_typed_const_tags",
+        fs,
+        console,
+        result.followed_by(lint_result),
+    ));
+}
+
+#[test]
 fn formats_declaration_tags() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
