@@ -23,6 +23,11 @@ expression: invalid.tailwind.css
   --accent: blue;
 }
 
+a {
+  --tab: --value(integer);
+  --tab: --value(number);
+}
+
 ```
 
 # Diagnostics
@@ -96,6 +101,31 @@ invalid.tailwind.css:16:3 lint/suspicious/noDuplicateCustomProperties ━━━�
        │   ^^^^^^^^
     15 │   --tab: --value(integer);
     16 │   --accent: blue;
+  
+  i Remove or rename the duplicate custom property to ensure consistent styling.
+  
+
+```
+
+```
+invalid.tailwind.css:21:3 lint/suspicious/noDuplicateCustomProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    19 │ a {
+    20 │   --tab: --value(integer);
+  > 21 │   --tab: --value(number);
+       │   ^^^^^
+    22 │ }
+    23 │ 
+  
+  i --tab is already defined here.
+  
+    19 │ a {
+  > 20 │   --tab: --value(integer);
+       │   ^^^^^
+    21 │   --tab: --value(number);
+    22 │ }
   
   i Remove or rename the duplicate custom property to ensure consistent styling.
   

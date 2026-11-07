@@ -15,3 +15,8 @@
   tab-size: --value(integer);
   color: blue;
 }
+
+a {
+  tab-size: --value(integer);
+  tab-size: --value(number);
+}
