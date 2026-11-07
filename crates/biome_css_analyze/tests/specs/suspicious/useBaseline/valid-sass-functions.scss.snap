@@ -1,0 +1,25 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid-sass-functions.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@use "sass:math";
+
+$color: rgba(0, 0, 0, 0.5);
+$condition: true;
+
+@function to-rem($value) {
+  @return math.div($value, 16px) * 1rem;
+}
+
+.sass-functions {
+  width: round(to-rem(18px), 0.01rem);
+  height: round(math.div(10px, 3px) * 1%, 1%);
+  margin: abs(10px / 1px * 1%);
+  opacity: round(opacity($color) * 100, 1);
+  padding: abs(if($condition, 10px, 10%));
+}
+
+```

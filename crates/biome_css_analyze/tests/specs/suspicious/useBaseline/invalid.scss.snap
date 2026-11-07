@@ -9,6 +9,18 @@ expression: invalid.scss
   accent-color: auto;
 }
 
+$size: 1.6px;
+
+.emitted-by-sass {
+  width: abs(var(--offset));
+  height: round(up, env(safe-area-inset-top), 1px);
+  margin: abs(20% - 100px);
+  padding: mod(100vw, 7px);
+  border-width: hypot(3px, 4em);
+  inset: abs(#{$size});
+  top: round(1.6PX, 1px);
+}
+
 ```
 
 # Diagnostics
@@ -31,6 +43,166 @@ invalid.scss:3:3 lint/suspicious/useBaseline ━━━━━━━━━━━�
   i See MDN Baseline for more information.
   
   i Check caniuse.com for more information about the feature accent-color.
+  
+
+```
+
+```
+invalid.scss:9:10 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function abs isn't part of the chosen Baseline.
+  
+     8 │ .emitted-by-sass {
+   > 9 │   width: abs(var(--offset));
+       │          ^^^
+    10 │   height: round(up, env(safe-area-inset-top), 1px);
+    11 │   margin: abs(20% - 100px);
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature abs.
+  
+
+```
+
+```
+invalid.scss:10:11 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function round isn't part of the chosen Baseline.
+  
+     8 │ .emitted-by-sass {
+     9 │   width: abs(var(--offset));
+  > 10 │   height: round(up, env(safe-area-inset-top), 1px);
+       │           ^^^^^
+    11 │   margin: abs(20% - 100px);
+    12 │   padding: mod(100vw, 7px);
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature round.
+  
+
+```
+
+```
+invalid.scss:11:11 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function abs isn't part of the chosen Baseline.
+  
+     9 │   width: abs(var(--offset));
+    10 │   height: round(up, env(safe-area-inset-top), 1px);
+  > 11 │   margin: abs(20% - 100px);
+       │           ^^^
+    12 │   padding: mod(100vw, 7px);
+    13 │   border-width: hypot(3px, 4em);
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature abs.
+  
+
+```
+
+```
+invalid.scss:12:12 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function mod isn't part of the chosen Baseline.
+  
+    10 │   height: round(up, env(safe-area-inset-top), 1px);
+    11 │   margin: abs(20% - 100px);
+  > 12 │   padding: mod(100vw, 7px);
+       │            ^^^
+    13 │   border-width: hypot(3px, 4em);
+    14 │   inset: abs(#{$size});
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature mod.
+  
+
+```
+
+```
+invalid.scss:13:17 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function hypot isn't part of the chosen Baseline.
+  
+    11 │   margin: abs(20% - 100px);
+    12 │   padding: mod(100vw, 7px);
+  > 13 │   border-width: hypot(3px, 4em);
+       │                 ^^^^^
+    14 │   inset: abs(#{$size});
+    15 │   top: round(1.6PX, 1px);
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature hypot.
+  
+
+```
+
+```
+invalid.scss:14:10 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function abs isn't part of the chosen Baseline.
+  
+    12 │   padding: mod(100vw, 7px);
+    13 │   border-width: hypot(3px, 4em);
+  > 14 │   inset: abs(#{$size});
+       │          ^^^
+    15 │   top: round(1.6PX, 1px);
+    16 │ }
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature abs.
+  
+
+```
+
+```
+invalid.scss:15:8 lint/suspicious/useBaseline ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! CSS function round isn't part of the chosen Baseline.
+  
+    13 │   border-width: hypot(3px, 4em);
+    14 │   inset: abs(#{$size});
+  > 15 │   top: round(1.6PX, 1px);
+       │        ^^^^^
+    16 │ }
+    17 │ 
+  
+  i Using a feature that isn't part of the Baseline can lead to unexpected behavior in older browsers.
+  
+  i Either remove the feature, or use the @supports at-rule to gate the feature behind a browser-specific support condition.
+  
+  i See MDN Baseline for more information.
+  
+  i Check caniuse.com for more information about the feature round.
   
 
 ```
