@@ -365,3 +365,42 @@ export const gray = <div className="hover:text-slate-100/80" />;
         result,
     ));
 }
+
+#[test]
+fn nested_config_rule_reads_tailwind_stylesheet() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("nested_config_rule_reads_tailwind_stylesheet");
+
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+    fs.create_file(
+        "app/biome.json",
+        r#"{
+    "root": false,
+    "extends": "//",
+    "tailwind": { "stylesheet": "./src/styles.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "app/src/styles.css",
+        "@import \"tailwindcss\";\n@theme { --color-brand: #123456; }\n",
+    );
+    fs.create_file(
+        "app/src/b.jsx",
+        "export const sorted = <div className=\"flex bg-brand p-2\" />;\nexport const unsorted = <div className=\"bg-brand flex p-2\" />;\n",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "nested_config_rule_reads_tailwind_stylesheet",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
