@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+{ value: renamed, ...rest }: Record<string, number> = source
+
+```
+
+
+## AST
+
+```
+JsSvelteLegacyConstRoot {
+    declarator: JsVariableDeclarator {
+        id: JsObjectBindingPattern {
+            l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+            properties: JsObjectBindingPatternPropertyList [
+                JsObjectBindingPatternProperty {
+                    member: JsLiteralMemberName {
+                        value: IDENT@2..7 "value" [] [],
+                    },
+                    colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
+                    pattern: JsIdentifierBinding {
+                        name_token: IDENT@9..16 "renamed" [] [],
+                    },
+                    init: missing (optional),
+                },
+                COMMA@16..18 "," [] [Whitespace(" ")],
+                JsObjectBindingPatternRest {
+                    dotdotdot_token: DOT3@18..21 "..." [] [],
+                    binding: JsIdentifierBinding {
+                        name_token: IDENT@21..26 "rest" [] [Whitespace(" ")],
+                    },
+                },
+            ],
+            r_curly_token: R_CURLY@26..27 "}" [] [],
+        },
+        variable_annotation: TsTypeAnnotation {
+            colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+            ty: TsReferenceType {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@29..35 "Record" [] [],
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@35..36 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@36..42 "string" [] [],
+                        },
+                        COMMA@42..44 "," [] [Whitespace(" ")],
+                        TsNumberType {
+                            number_token: NUMBER_KW@44..50 "number" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@50..52 ">" [] [Whitespace(" ")],
+                },
+            },
+        },
+        initializer: JsInitializerClause {
+            eq_token: EQ@52..54 "=" [] [Whitespace(" ")],
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@54..60 "source" [] [],
+                },
+            },
+        },
+    },
+    eof_token: EOF@60..61 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_LEGACY_CONST_ROOT@0..61
+  0: JS_VARIABLE_DECLARATOR@0..60
+    0: JS_OBJECT_BINDING_PATTERN@0..27
+      0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+      1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..26
+        0: JS_OBJECT_BINDING_PATTERN_PROPERTY@2..16
+          0: JS_LITERAL_MEMBER_NAME@2..7
+            0: IDENT@2..7 "value" [] []
+          1: COLON@7..9 ":" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@9..16
+            0: IDENT@9..16 "renamed" [] []
+          3: (empty)
+        1: COMMA@16..18 "," [] [Whitespace(" ")]
+        2: JS_OBJECT_BINDING_PATTERN_REST@18..26
+          0: DOT3@18..21 "..." [] []
+          1: JS_IDENTIFIER_BINDING@21..26
+            0: IDENT@21..26 "rest" [] [Whitespace(" ")]
+      2: R_CURLY@26..27 "}" [] []
+    1: TS_TYPE_ANNOTATION@27..52
+      0: COLON@27..29 ":" [] [Whitespace(" ")]
+      1: TS_REFERENCE_TYPE@29..52
+        0: JS_REFERENCE_IDENTIFIER@29..35
+          0: IDENT@29..35 "Record" [] []
+        1: TS_TYPE_ARGUMENTS@35..52
+          0: L_ANGLE@35..36 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@36..50
+            0: TS_STRING_TYPE@36..42
+              0: STRING_KW@36..42 "string" [] []
+            1: COMMA@42..44 "," [] [Whitespace(" ")]
+            2: TS_NUMBER_TYPE@44..50
+              0: NUMBER_KW@44..50 "number" [] []
+          2: R_ANGLE@50..52 ">" [] [Whitespace(" ")]
+    2: JS_INITIALIZER_CLAUSE@52..60
+      0: EQ@52..54 "=" [] [Whitespace(" ")]
+      1: JS_IDENTIFIER_EXPRESSION@54..60
+        0: JS_REFERENCE_IDENTIFIER@54..60
+          0: IDENT@54..60 "source" [] []
+  1: EOF@60..61 "" [Newline("\n")] []
+
+```

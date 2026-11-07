@@ -1,7 +1,10 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
 use super::module::parse_module_body;
-use super::stmt::{VariableDeclarationParent, parse_statements, parse_variable_declaration};
+use super::stmt::{
+    VariableDeclarationParent, parse_statements, parse_svelte_legacy_const_declarator,
+    parse_variable_declaration,
+};
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
@@ -40,6 +43,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     // are handlers, and all other expressions are inline statements.
     if p.source_type().is_vue_event_handler() {
         return parse_vue_event_handler(p, m);
+    }
+
+    if p.source_type().is_svelte_const_block() {
+        return parse_svelte_legacy_const(p, m);
     }
 
     if p.source_type().is_svelte_declaration() {
@@ -118,6 +125,33 @@ fn parse_svelte_declaration(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SVELTE_DECLARATION_ROOT)
+}
+
+fn parse_svelte_legacy_const(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let declarator_recovery = p.start();
+    let declarator = parse_svelte_legacy_const_declarator(p)
+        .or_add_diagnostic(p, js_parse_error::expected_binding);
+
+    if !p.at(EOF) {
+        let recovery = if let Some(declarator) = declarator {
+            declarator_recovery.abandon(p);
+            declarator.undo_completion(p)
+        } else {
+            declarator_recovery
+        };
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        recovery.complete(p, JS_BOGUS);
+    } else {
+        declarator_recovery.abandon(p);
+    }
+
+    m.complete(p, JS_SVELTE_LEGACY_CONST_ROOT)
 }
 
 /// Parses template expressions like Vue {{ expr }}, Svelte { expr }, or Astro { expr }.
