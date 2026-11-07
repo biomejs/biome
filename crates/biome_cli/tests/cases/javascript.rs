@@ -2,10 +2,10 @@ use crate::TestArgs as Args;
 use camino::Utf8Path;
 
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 
-use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::{run_cli, run_cli_with_dyn_fs};
 
 #[test]
 fn should_pull_diagnostics_from_embedded_languages_when_formatting() {
@@ -297,6 +297,59 @@ const Baz = styled.div`background-color: red !important; align: center; padding:
         module_path!(),
         "should_apply_fixes_to_embedded_languages",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_reads_jsx_factory_from_tsconfig() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("lint_reads_jsx_factory_from_tsconfig");
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "javascript": {
+        "jsxRuntime": "reactClassic"
+    }
+}"#,
+    );
+    fs.create_file(
+        "tsconfig.json",
+        r#"{
+    "compilerOptions": {
+        "jsx": "react",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment"
+    }
+}"#,
+    );
+    // `h` and `Fragment` are only used by the JSX, so they are reported as
+    // unused unless the factories are read from `tsconfig.json`.
+    fs.create_file(
+        "file.jsx",
+        r#"import { h, Fragment } from "preact";
+
+export const App = () => (
+    <>
+        <div>Hello</div>
+    </>
+);
+"#,
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=correctness/noUnusedImports", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_reads_jsx_factory_from_tsconfig",
+        fs.create_mem(),
         console,
         result,
     ));
