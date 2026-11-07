@@ -1,9 +1,13 @@
 use crate::services::module_graph::CssModuleGraph;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    Rule, RuleDiagnostic, RuleDomain, RuleFramework, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_css_syntax::{CssFunction, property_syntax::custom_property_name_from_var_function};
 use biome_languages::CssFileSource;
-use biome_module_graph::{SymbolFromModuleInfo, css_property_definitions};
+use biome_module_graph::{
+    SymbolFromModuleInfo, css_property_definitions, has_unknown_framework_styles,
+};
 use biome_rowan::TextRange;
 use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPropertiesOptions;
 
@@ -46,6 +50,7 @@ declare_lint_rule! {
         language: "css",
         recommended: false,
         domains: &[RuleDomain::Project],
+        frameworks: &[RuleFramework::Astro, RuleFramework::Starlight],
     }
 }
 
@@ -66,6 +71,9 @@ impl Rule for NoUndeclaredCustomProperties {
         let property = custom_property_name_from_var_function(ctx.query())?;
         let db = ctx.db();
         let module = db.module_for_path(ctx.file_path())?;
+        if has_unknown_framework_styles(db, module) {
+            return None;
+        }
 
         let is_defined = !css_property_definitions(
             db,
